@@ -19,9 +19,17 @@ import type { Prisma } from '@/types/prisma-types';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-const normalizeWorkOrderStatus = (
-  value: string
-): Prisma.WorkOrderStatus | null => {
+type WorkOrderStatusDb =
+  | 'pendiente'
+  | 'asignada'
+  | 'aceptada'
+  | 'en_progreso'
+  | 'pausada'
+  | 'completada'
+  | 'cancelada'
+  | 'rechazada';
+
+const normalizeWorkOrderStatus = (value: string): WorkOrderStatusDb | null => {
   switch (value) {
     case 'pendiente':
     case 'asignada':
@@ -83,7 +91,7 @@ export async function GET(req: NextRequest) {
 
     if (estado) {
       // Mapear estados de UI a estados del enum
-      const estadoMap: Record<string, Prisma.WorkOrderStatus[]> = {
+      const estadoMap: Record<string, WorkOrderStatusDb[]> = {
         abierta: ['pendiente'],
         cerrada: ['asignada'],
         adjudicada: ['aceptada', 'en_progreso'],
