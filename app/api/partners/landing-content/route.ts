@@ -136,15 +136,21 @@ export async function PUT(request: NextRequest) {
 
     const body = await request.json();
     const validatedData = landingContentSchema.parse(body);
+    const sanitizedData = {
+      ...validatedData,
+      beneficios: validatedData.beneficios ?? undefined,
+      testimonios: validatedData.testimonios ?? undefined,
+      faqItems: validatedData.faqItems ?? undefined,
+    };
 
     // Upsert de contenido
     const content = await prisma.partnerLandingContent.upsert({
       where: { partnerId: partner.id },
       create: {
         partnerId: partner.id,
-        ...validatedData,
+        ...sanitizedData,
       },
-      update: validatedData,
+      update: sanitizedData,
     });
 
     return NextResponse.json({
