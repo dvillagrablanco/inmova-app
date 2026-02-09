@@ -26,14 +26,20 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
     const searchParams = req.nextUrl.searchParams;
-    const estado = searchParams.get('estado');
+    const estadoParam = searchParams.get('estado');
+    const validStatuses = ['activo', 'vencido', 'cancelado'] as const;
+    const estado = validStatuses.includes(
+      estadoParam as (typeof validStatuses)[number]
+    )
+      ? (estadoParam as (typeof validStatuses)[number])
+      : undefined;
     const days = parseInt(searchParams.get('days') || '90', 10);
 
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() + days);
 
     const where = {
-      companyId: session.user.companyId,
+      unit: { building: { companyId: session.user.companyId } },
       ...(estado ? { estado } : {}),
       fechaFin: { lte: cutoff },
     };
