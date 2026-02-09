@@ -60,7 +60,7 @@ export async function GET(
       where: { projectId: params.id },
       orderBy: [
         { fase: 'asc' },
-        { orden: 'asc' },
+        { fechaInicio: 'asc' },
       ],
     });
 
@@ -124,13 +124,6 @@ export async function POST(
       return NextResponse.json({ error: 'Obra no encontrada' }, { status: 404 });
     }
 
-    // Obtener el siguiente orden para esta fase
-    const lastOrder = await prisma.constructionWorkOrder.findFirst({
-      where: { projectId: params.id, fase: data.fase },
-      orderBy: { orden: 'desc' },
-      select: { orden: true },
-    });
-
     const workOrder = await prisma.constructionWorkOrder.create({
       data: {
         projectId: params.id,
@@ -145,7 +138,6 @@ export async function POST(
         fechaFin: new Date(data.fechaFin),
         estado: 'pendiente',
         porcentajeAvance: data.porcentajeAvance || 0,
-        orden: (lastOrder?.orden || 0) + 1,
       },
     });
 
