@@ -4,11 +4,30 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import logger, { logError } from '@/lib/logger';
 import { z } from 'zod';
+import type { UserRole } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 const CREATE_ALLOWED_ROLES = new Set(['administrador', 'gestor', 'super_admin']);
+const ROLE_ALLOWLIST: UserRole[] = [
+  'super_admin',
+  'administrador',
+  'gestor',
+  'operador',
+  'soporte',
+  'community_manager',
+  'socio_ewoorker',
+  'contratista_ewoorker',
+  'subcontratista_ewoorker',
+];
+
+function resolveUserRole(role: unknown): UserRole | null {
+  if (typeof role !== 'string') {
+    return null;
+  }
+  return ROLE_ALLOWLIST.includes(role as UserRole) ? (role as UserRole) : null;
+}
 
 const createCompanySchema = z.object({
   nombre: z.string().min(2).optional(),
@@ -263,6 +282,11 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    const roleInCompany = resolveUserRole(session.user.role);
+    if (!roleInCompany) {
+      return NextResponse.json({ error: 'Rol no autorizado' }, { status: 403 });
+    }
+
     await prisma.userCompanyAccess.upsert({
       where: {
         userId_companyId: {
@@ -273,13 +297,13 @@ export async function POST(request: NextRequest) {
       create: {
         userId: session.user.id,
         companyId: company.id,
-        roleInCompany: session.user.role,
+        roleInCompany,
         grantedBy: session.user.id,
         activo: true,
       },
       update: {
         activo: true,
-        roleInCompany: session.user.role,
+        roleInCompany,
       },
     });
 
