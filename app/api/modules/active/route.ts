@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { getActiveModulesForCompany } from '@/lib/modules-service';
 import logger, { logError } from '@/lib/logger';
+import { resolveCompanyScope } from '@/lib/company-scope';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,21 +14,20 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const { searchParams } = new URL(req.url);
-    const queryCompanyId = searchParams.get('companyId');
-    const userRole = (session.user as any).role;
-    
-    // Si es super_admin y se especifica un companyId, usar ese
-    // De lo contrario, usar el companyId de la sesión
-    let companyId = (session.user as any).companyId;
-    
-    if (queryCompanyId && userRole === 'super_admin') {
-      companyId = queryCompanyId;
-    }
-    
-    const activeModules = await getActiveModulesForCompany(companyId);
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: session.user.role as any,
+      primaryCompanyId: (session.user as any).companyId,
+      request: req,
+    });
 
-    return NextResponse.json({ activeModules, companyId });
+    if (!scope.activeCompanyId) {
+      return NextResponse.json({ activeModules: [], companyId: null });
+    }
+
+    const activeModules = await getActiveModulesForCompany(scope.activeCompanyId);
+
+    return NextResponse.json({ activeModules, companyId: scope.activeCompanyId });
   } catch (error: any) {
     logger.error('Error al obtener módulos activos:', error);
     return NextResponse.json(

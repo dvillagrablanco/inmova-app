@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { resolveCompanyScope } from '@/lib/company-scope';
 import logger, { logError } from '@/lib/logger';
 import { z } from 'zod';
 import type { UserRole } from '@prisma/client';
@@ -71,88 +72,63 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    // Obtener todas las empresas a las que tiene acceso el usuario
-    const userAccess = await prisma.userCompanyAccess.findMany({
-      where: {
-        userId: session?.user?.id,
-        activo: true,
-      },
-      include: {
-        company: {
-          select: {
-            id: true,
-            nombre: true,
-            logoUrl: true,
-            estadoCliente: true,
-            activo: true,
-            dominioPersonalizado: true,
-            tags: true,
-            parentCompanyId: true,
-            parentCompany: {
-              select: { id: true, nombre: true },
-            },
-            _count: {
-              select: { childCompanies: true },
-            },
-          },
-        },
-      },
-      orderBy: {
-        lastAccess: 'desc',
-      },
+    const role = resolveUserRole(session.user.role);
+    if (!role) {
+      return NextResponse.json({ error: 'Rol inválido' }, { status: 403 });
+    }
+
+    const scope = await resolveCompanyScope({
+      userId: session.user.id,
+      role,
+      primaryCompanyId: session.user.companyId,
+      request,
     });
 
-    // También incluir la empresa principal del usuario
-    const user = await prisma.user.findUnique({
-      where: { id: session?.user?.id},
-      include: {
-        company: {
-          select: {
-            id: true,
-            nombre: true,
-            logoUrl: true,
-            estadoCliente: true,
-            activo: true,
-            dominioPersonalizado: true,
-            tags: true,
-            parentCompanyId: true,
-            parentCompany: {
-              select: { id: true, nombre: true },
-            },
-            _count: {
-              select: { childCompanies: true },
-            },
-          },
-        },
-      },
-    });
-
-    // Crear un set de IDs de empresas para evitar duplicados
-    const companyIds = new Set(userAccess.map(access => access.companyId));
-    
-    const companies = userAccess.map(access => ({
-      ...access.company,
-      roleInCompany: access.roleInCompany,
-      isCurrent: access.companyId === session?.user?.companyId,
-      isPrimary: access.companyId === user?.companyId,
-      lastAccess: access.lastAccess,
-    }));
-
-    // Añadir la empresa principal si no está en la lista
-    if (user?.company && !companyIds.has(user.companyId)) {
-      companies.unshift({
-        ...user.company,
-        roleInCompany: user.role,
-        isCurrent: user.companyId === session?.user?.companyId,
-        isPrimary: true,
-        lastAccess: null,
+    if (scope.accessibleCompanyIds.length === 0) {
+      return NextResponse.json({
+        success: true,
+        companies: [],
+        currentCompanyId: scope.activeCompanyId,
       });
     }
 
+    const companies = await prisma.company.findMany({
+      where: {
+        id: { in: scope.accessibleCompanyIds },
+      },
+      select: {
+        id: true,
+        nombre: true,
+        logoUrl: true,
+        estadoCliente: true,
+        activo: true,
+        dominioPersonalizado: true,
+        tags: true,
+        parentCompanyId: true,
+        parentCompany: {
+          select: { id: true, nombre: true },
+        },
+        _count: {
+          select: { childCompanies: true },
+        },
+      },
+      orderBy: {
+        nombre: 'asc',
+      },
+    });
+
+    const enrichedCompanies = companies.map((company) => ({
+      ...company,
+      roleInCompany: role,
+      isCurrent: company.id === scope.activeCompanyId,
+      isPrimary: company.id === session.user.companyId,
+      hasChildren: (company as any)._count?.childCompanies > 0,
+    }));
+
     return NextResponse.json({
       success: true,
-      companies,
-      currentCompanyId: session?.user?.companyId,
+      companies: enrichedCompanies,
+      currentCompanyId: scope.activeCompanyId,
     });
   } catch (error) {
     logger.error('Error fetching user companies:', error);

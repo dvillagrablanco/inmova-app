@@ -2,10 +2,31 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { canAccessCompany } from '@/lib/company-scope';
+import type { UserRole } from '@prisma/client';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+const ROLE_ALLOWLIST: UserRole[] = [
+  'super_admin',
+  'administrador',
+  'gestor',
+  'operador',
+  'soporte',
+  'community_manager',
+  'socio_ewoorker',
+  'contratista_ewoorker',
+  'subcontratista_ewoorker',
+];
+
+function resolveUserRole(role: unknown): UserRole | null {
+  if (typeof role !== 'string') {
+    return null;
+  }
+  return ROLE_ALLOWLIST.includes(role as UserRole) ? (role as UserRole) : null;
+}
 
 /**
  * POST /api/user/switch-company
@@ -29,34 +50,40 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verificar que el usuario tiene acceso a esta empresa
+    const role = resolveUserRole(session.user.role);
+    if (!role) {
+      return NextResponse.json({ error: 'Rol inválido' }, { status: 403 });
+    }
+
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { companyId: true, role: true },
+      select: { companyId: true },
     });
 
-    // Verificar si es la empresa principal del usuario
-    const isPrimaryCompany = user?.companyId === companyId;
+    const hasAccess = await canAccessCompany({
+      userId: session.user.id,
+      role,
+      primaryCompanyId: user?.companyId,
+      companyId,
+    });
 
-    // Si no es la empresa principal, verificar en UserCompanyAccess
-    if (!isPrimaryCompany) {
-      const access = await prisma.userCompanyAccess.findUnique({
-        where: {
-          userId_companyId: {
-            userId: session.user.id,
-            companyId,
-          },
+    if (!hasAccess) {
+      return NextResponse.json(
+        { error: 'No tienes acceso a esta empresa' },
+        { status: 403 }
+      );
+    }
+
+    const accessEntry = await prisma.userCompanyAccess.findUnique({
+      where: {
+        userId_companyId: {
+          userId: session.user.id,
+          companyId,
         },
-      });
+      },
+    });
 
-      if (!access || !access.activo) {
-        return NextResponse.json(
-          { error: 'No tienes acceso a esta empresa' },
-          { status: 403 }
-        );
-      }
-
-      // Actualizar lastAccess
+    if (accessEntry) {
       await prisma.userCompanyAccess.update({
         where: {
           userId_companyId: {
@@ -70,16 +97,26 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Actualizar el companyId en la sesión del usuario
-    // Nota: Esto requiere que el usuario vuelva a iniciar sesión o se refresque la sesión
-    // Por ahora, simplemente devolvemos success y el frontend manejará el redirect
+    await prisma.user.update({
+      where: { id: session.user.id },
+      data: { companyId },
+    });
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       message: 'Empresa cambiada exitosamente',
       companyId,
       redirect: true,
     });
+
+    response.cookies.set('activeCompanyId', companyId, {
+      httpOnly: false,
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 30,
+    });
+
+    return response;
   } catch (error) {
     logger.error('Error switching company:', error);
     return NextResponse.json(

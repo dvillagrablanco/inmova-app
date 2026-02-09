@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db';
 import { requireAuth, requirePermission, forbiddenResponse, badRequestResponse } from '@/lib/permissions';
 import logger, { logError } from '@/lib/logger';
 import { tenantCreateSchema } from '@/lib/validations';
+import { resolveCompanyScope } from '@/lib/company-scope';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -10,26 +11,26 @@ export const runtime = 'nodejs';
 export async function GET(req: NextRequest) {
   try {
     const user = await requireAuth();
-    const isSuperAdmin = user.role === 'super_admin' || user.role === 'soporte';
+    const scope = await resolveCompanyScope({
+      userId: user.id,
+      role: user.role as any,
+      primaryCompanyId: user.companyId,
+      request: req,
+    });
 
     // Obtener parámetros de paginación
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
     const skip = (page - 1) * limit;
-    const filterCompanyId = searchParams.get('companyId');
-
-    // Determinar el filtro de empresa
-    const whereCompanyId = isSuperAdmin 
-      ? (filterCompanyId || undefined) 
-      : user.companyId;
-
-    // Si el usuario no es super_admin y no tiene companyId, retornar vacío
-    if (!isSuperAdmin && !user.companyId) {
+    if (!scope.activeCompanyId) {
       return NextResponse.json([]);
     }
 
-    const whereClause = whereCompanyId ? { companyId: whereCompanyId } : {};
+    const whereClause =
+      scope.scopeCompanyIds.length > 1
+        ? { companyId: { in: scope.scopeCompanyIds } }
+        : { companyId: scope.activeCompanyId };
 
     // Si no hay paginación solicitada, devolver todos (compatibilidad)
     const usePagination = searchParams.has('page') || searchParams.has('limit');
@@ -51,7 +52,7 @@ export async function GET(req: NextRequest) {
           },
         },
         orderBy: { createdAt: 'desc' },
-        take: isSuperAdmin && !whereCompanyId ? 100 : undefined, // Limitar si ve todos
+        take: scope.scopeCompanyIds.length > 1 ? 100 : undefined,
       });
       return NextResponse.json(tenants);
     }
@@ -110,6 +111,16 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const user = await requirePermission('create');
+    const scope = await resolveCompanyScope({
+      userId: user.id,
+      role: user.role as any,
+      primaryCompanyId: user.companyId,
+      request: req,
+    });
+
+    if (!scope.activeCompanyId) {
+      return NextResponse.json({ error: 'Empresa no definida' }, { status: 400 });
+    }
 
     const body = await req.json();
     
@@ -153,7 +164,7 @@ export async function POST(req: NextRequest) {
 
     const tenant = await prisma.tenant.create({
       data: {
-        companyId: user.companyId,
+        companyId: scope.activeCompanyId,
         nombreCompleto: nombreCompletoFinal,
         dni: validatedData.dni || '',
         email: validatedData.email,

@@ -10,6 +10,7 @@ import {
   invalidateUnitsCache, 
   invalidateDashboardCache 
 } from '@/lib/api-cache-helpers';
+import { resolveCompanyScope } from '@/lib/company-scope';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -21,12 +22,14 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = session.user?.companyId;
-    const userRole = session.user?.role;
-    const isSuperAdmin = userRole === 'super_admin' || userRole === 'soporte';
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: session.user.role as any,
+      primaryCompanyId: session.user?.companyId,
+      request: req,
+    });
 
-    // Si el usuario no es super_admin y no tiene companyId, retornar vacío
-    if (!isSuperAdmin && !companyId) {
+    if (!scope.activeCompanyId) {
       return NextResponse.json([]);
     }
 
@@ -35,34 +38,31 @@ export async function GET(req: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '15');
     const skip = (page - 1) * limit;
-    const filterCompanyId = searchParams.get('companyId');
-
-    // Determinar el filtro de empresa
-    const whereCompanyId = isSuperAdmin 
-      ? (filterCompanyId || undefined) 
-      : companyId;
-
     // Construir where clause
-    const whereClause = whereCompanyId ? {
-      unit: {
-        building: {
-          companyId: whereCompanyId,
-        },
-      },
-    } : {};
+    const whereClause =
+      scope.scopeCompanyIds.length > 1
+        ? {
+            unit: {
+              building: {
+                companyId: { in: scope.scopeCompanyIds },
+              },
+            },
+          }
+        : {
+            unit: {
+              building: {
+                companyId: scope.activeCompanyId,
+              },
+            },
+          };
 
     // Si no hay paginación solicitada, usar cache si tiene companyId
     const usePagination = searchParams.has('page') || searchParams.has('limit');
 
-    if (!usePagination && whereCompanyId) {
+    if (!usePagination && scope.scopeCompanyIds.length === 1) {
       // Usar datos cacheados
-      const contractsWithExpiration = await cachedContracts(whereCompanyId);
+      const contractsWithExpiration = await cachedContracts(scope.activeCompanyId);
       return NextResponse.json(contractsWithExpiration);
-    }
-
-    // Si es super_admin sin filtro y sin paginación, retornar lista vacía
-    if (isSuperAdmin && !whereCompanyId && !usePagination) {
-      return NextResponse.json([]);
     }
 
     // Paginación activada: consulta directa
@@ -159,7 +159,16 @@ export async function POST(req: NextRequest) {
     }
 
     const validatedData = validationResult.data;
-    const companyId = session.user?.companyId;
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: session.user.role as any,
+      primaryCompanyId: session.user?.companyId,
+      request: req,
+    });
+
+    if (!scope.activeCompanyId) {
+      return NextResponse.json({ error: 'Empresa no definida' }, { status: 400 });
+    }
 
     const contract = await prisma.contract.create({
       data: {
@@ -186,11 +195,9 @@ export async function POST(req: NextRequest) {
     });
 
     // Invalidar cachés relacionados
-    if (companyId) {
-      await invalidateContractsCache(companyId);
-      await invalidateUnitsCache(companyId);
-      await invalidateDashboardCache(companyId);
-    }
+    await invalidateContractsCache(scope.activeCompanyId);
+    await invalidateUnitsCache(scope.activeCompanyId);
+    await invalidateDashboardCache(scope.activeCompanyId);
 
     logger.info('Contract created successfully', { contractId: contract.id });
     return NextResponse.json(contract, { status: 201 });

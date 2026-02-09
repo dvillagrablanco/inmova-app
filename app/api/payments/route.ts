@@ -6,6 +6,7 @@ import logger, { logError } from '@/lib/logger';
 import { paymentCreateSchema } from '@/lib/validations';
 import { cachedPayments, invalidatePaymentsCache, invalidateDashboardCache } from '@/lib/api-cache-helpers';
 import { withPaymentRateLimit } from '@/lib/rate-limiting';
+import { resolveCompanyScope } from '@/lib/company-scope';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -18,8 +19,14 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = session.user?.companyId;
-    if (!companyId) {
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: session.user.role as any,
+      primaryCompanyId: session.user?.companyId,
+      request: req,
+    });
+
+    if (!scope.activeCompanyId) {
       return NextResponse.json({ error: 'CompanyId no encontrado' }, { status: 400 });
     }
 
@@ -37,7 +44,14 @@ export async function GET(req: NextRequest) {
     if (hasFilters || usePagination) {
       const where: any = {
         contract: {
-          unit: { building: { companyId } },
+          unit: {
+            building: {
+              companyId:
+                scope.scopeCompanyIds.length > 1
+                  ? { in: scope.scopeCompanyIds }
+                  : scope.activeCompanyId,
+            },
+          },
         },
       };
       if (estado) where.estado = estado;
@@ -113,7 +127,39 @@ export async function GET(req: NextRequest) {
     }
 
     // Sin filtros ni paginación, usar caché
-    const payments = await cachedPayments(companyId);
+    if (scope.scopeCompanyIds.length !== 1) {
+      const payments = await prisma.payment.findMany({
+        where: {
+          contract: {
+            unit: {
+              building: { companyId: { in: scope.scopeCompanyIds } },
+            },
+          },
+        },
+        include: {
+          contract: {
+            include: {
+              unit: {
+                include: {
+                  building: true,
+                },
+              },
+              tenant: true,
+            },
+          },
+        },
+        orderBy: { fechaVencimiento: 'desc' },
+      });
+
+      const paymentsWithNumbers = payments.map(payment => ({
+        ...payment,
+        monto: Number(payment.monto || 0),
+      }));
+
+      return NextResponse.json(paymentsWithNumbers);
+    }
+
+    const payments = await cachedPayments(scope.activeCompanyId);
     return NextResponse.json(payments);
   } catch (error) {
     logger.error('Error fetching payments:', error);
@@ -154,7 +200,16 @@ export async function POST(req: NextRequest) {
     }
 
     const validatedData = validationResult.data;
-    const companyId = session.user?.companyId;
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: session.user.role as any,
+      primaryCompanyId: session.user?.companyId,
+      request: req,
+    });
+
+    if (!scope.activeCompanyId) {
+      return NextResponse.json({ error: 'Empresa no definida' }, { status: 400 });
+    }
 
     const payment = await prisma.payment.create({
       data: {
@@ -169,10 +224,8 @@ export async function POST(req: NextRequest) {
     });
 
     // Invalidar cachés relacionados
-    if (companyId) {
-      await invalidatePaymentsCache(companyId);
-      await invalidateDashboardCache(companyId);
-    }
+    await invalidatePaymentsCache(scope.activeCompanyId);
+    await invalidateDashboardCache(scope.activeCompanyId);
 
     logger.info('Payment created successfully', { paymentId: payment.id });
     return NextResponse.json(payment, { status: 201 });

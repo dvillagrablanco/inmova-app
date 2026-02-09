@@ -9,6 +9,7 @@ import {
   invalidateDashboardCache,
   invalidateUnitsCache,
 } from '@/lib/api-cache-helpers';
+import { resolveCompanyScope } from '@/lib/company-scope';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -33,19 +34,6 @@ const unitUpdateSchema = z.object({
   tourVirtual: z.string().nullable().optional(),
 });
 
-function getCompanyScope(session: any, request: NextRequest) {
-  const userRole = session?.user?.role;
-  const companyId = session?.user?.companyId;
-  const { searchParams } = new URL(request.url);
-  const filterCompanyId = searchParams.get('companyId');
-
-  if (userRole === 'super_admin' || userRole === 'soporte') {
-    return filterCompanyId || companyId;
-  }
-
-  return companyId;
-}
-
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -56,15 +44,21 @@ export async function GET(
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = getCompanyScope(session, request);
-    if (!companyId) {
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: session.user.role as any,
+      primaryCompanyId: session.user?.companyId,
+      request,
+    });
+
+    if (!scope.activeCompanyId) {
       return NextResponse.json({ error: 'Empresa no definida' }, { status: 400 });
     }
 
     const unit = await prisma.unit.findFirst({
       where: {
         id: params.id,
-        building: { companyId },
+        building: { companyId: { in: scope.scopeCompanyIds } },
       },
       include: {
         building: {
@@ -116,8 +110,14 @@ export async function PUT(
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = getCompanyScope(session, request);
-    if (!companyId) {
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: session.user.role as any,
+      primaryCompanyId: session.user?.companyId,
+      request,
+    });
+
+    if (!scope.activeCompanyId) {
       return NextResponse.json({ error: 'Empresa no definida' }, { status: 400 });
     }
 
@@ -134,7 +134,7 @@ export async function PUT(
     const existing = await prisma.unit.findFirst({
       where: {
         id: params.id,
-        building: { companyId },
+        building: { companyId: { in: scope.scopeCompanyIds } },
       },
       select: {
         id: true,
@@ -150,7 +150,7 @@ export async function PUT(
       const targetBuilding = await prisma.building.findFirst({
         where: {
           id: parsed.data.buildingId,
-          companyId,
+          companyId: { in: scope.scopeCompanyIds },
         },
         select: { id: true },
       });
@@ -198,9 +198,9 @@ export async function PUT(
       },
     });
 
-    await invalidateUnitsCache(companyId);
-    await invalidateBuildingsCache(companyId);
-    await invalidateDashboardCache(companyId);
+    await invalidateUnitsCache(scope.activeCompanyId);
+    await invalidateBuildingsCache(scope.activeCompanyId);
+    await invalidateDashboardCache(scope.activeCompanyId);
 
     return NextResponse.json(updatedUnit);
   } catch (error) {

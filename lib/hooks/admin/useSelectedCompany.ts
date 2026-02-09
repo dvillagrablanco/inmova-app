@@ -1,12 +1,12 @@
 /**
- * Hook para gestionar la empresa seleccionada en el contexto de Super Admin
- * Permite al Super Admin seleccionar una empresa para parametrizar la gestión
+ * Hook para gestionar la empresa seleccionada
+ * Permite seleccionar la empresa activa en la app
  */
 import { useState, useEffect, useCallback } from 'react';
 import { safeLocalStorage } from '@/lib/safe-storage';
 import logger from '@/lib/logger';
 
-const STORAGE_KEY = 'superadmin_selected_company';
+const STORAGE_KEY = 'selected_company';
 
 export interface SelectedCompany {
   id: string;
