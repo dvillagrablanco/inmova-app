@@ -41,18 +41,10 @@ export async function POST(request: Request) {
 
     switch (source) {
       case 'linkedin_job':
-        if (!jobId) {
-          return NextResponse.json(
-            { error: 'Se requiere jobId para importar desde LinkedIn' },
-            { status: 400 }
-          );
-        }
-        result = await CRMLeadImporter.importFromLinkedInJob(
-          jobId,
-          session.user.companyId,
-          options || { source: 'linkedin' }
+        return NextResponse.json(
+          { error: 'Importación desde LinkedIn no disponible en este entorno' },
+          { status: 501 }
         );
-        break;
 
       case 'csv':
       case 'manual':
@@ -62,7 +54,7 @@ export async function POST(request: Request) {
         result = await CRMLeadImporter.importFromCSV(
           session.user.companyId,
           leads,
-          options || { source: 'website' }
+          options || { fuente: 'website' }
         );
         break;
 
@@ -92,10 +84,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    // Retornar queries predefinidas de LinkedIn para INMOVA
-    const queries = CRMLeadImporter.getINMOVALinkedInQueries();
-
-    return NextResponse.json({ queries });
+    return NextResponse.json({ queries: [] });
   } catch (error: any) {
     logger.error('Error getting import queries:', error);
     return NextResponse.json(
