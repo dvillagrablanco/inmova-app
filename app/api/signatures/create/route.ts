@@ -106,7 +106,6 @@ export async function POST(request: NextRequest) {
           },
         },
         tenant: true,
-        company: true,
       },
     });
 
@@ -118,7 +117,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 5. Verificar ownership
-    if (contract.companyId !== session.user.companyId) {
+    if (contract.unit?.building?.companyId !== session.user.companyId) {
       return NextResponse.json(
         { error: 'No tienes permiso para firmar este contrato' },
         { status: 403 }
@@ -126,7 +125,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 6. Verificar que el contrato no esté ya firmado
-    if (contract.estado === 'ACTIVO' || contract.estado === 'FINALIZADO') {
+    if (contract.estado === 'activo' || contract.estado === 'vencido') {
       return NextResponse.json(
         { error: 'El contrato ya está firmado' },
         { status: 400 }
