@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
     const userUsages = await prisma.couponUsage.count({
       where: {
         couponId: dbCoupon.id,
-        usuarioId: session.user.id,
+        userId: session.user.id,
       },
     });
 
@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
         await prisma.couponUsage.create({
           data: {
             couponId: dbCoupon.id,
-            usuarioId: session.user.id,
+            userId: session.user.id,
             montoOriginal: 0, // Se actualiza después
             montoDescuento: 0,
             montoFinal: 0,
