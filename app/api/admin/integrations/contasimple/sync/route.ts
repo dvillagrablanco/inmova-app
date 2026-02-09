@@ -36,7 +36,11 @@ export async function POST() {
         });
       }
 
-      const result = await inmovaContasimpleBridge.syncAllPendingInvoices();
+      const endDate = new Date();
+      const startDate = new Date(endDate);
+      startDate.setMonth(startDate.getMonth() - 3);
+
+      const result = await inmovaContasimpleBridge.syncPendingInvoices(startDate, endDate);
       
       return NextResponse.json({
         success: true,
