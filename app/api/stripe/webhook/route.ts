@@ -288,13 +288,12 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 }
 
 function getInvoiceSubscriptionId(invoice: Stripe.Invoice): string | null {
-  if (!invoice.subscription) {
+  const subscription = invoice.parent?.subscription_details?.subscription;
+  if (!subscription) {
     return null;
   }
 
-  return typeof invoice.subscription === 'string'
-    ? invoice.subscription
-    : invoice.subscription.id;
+  return typeof subscription === 'string' ? subscription : subscription.id;
 }
 
 async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
