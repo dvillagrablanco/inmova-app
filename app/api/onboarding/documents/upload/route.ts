@@ -25,6 +25,7 @@ import {
 } from '@/lib/document-import-processor-service';
 import logger from '@/lib/logger';
 import { z } from 'zod';
+import type { Prisma } from '@prisma/client';
 
 // ============================================================================
 // CONFIGURACIÓN
@@ -503,7 +504,7 @@ async function processDocumentsAsync(
             aiModel: analysis.processingMetadata.modelUsed,
             summary: analysis.summary,
             documentType: analysis.classification.specificType,
-            keyEntities: analysis.extractedFields,
+            keyEntities: analysis.extractedFields as Prisma.InputJsonValue,
             overallConfidence: analysis.classification.confidence,
             hasWarnings: analysis.warnings.length > 0,
             warnings: analysis.warnings,
