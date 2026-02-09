@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
         include: {
           building: {
             include: {
-              units: { select: { id: true, unitNumber: true, type: true, status: true } },
+              units: { select: { id: true, numero: true, tipo: true, estado: true } },
             },
           },
         },
@@ -116,7 +116,7 @@ export async function GET(request: NextRequest) {
         orderBy: { fechaReunion: 'asc' },
         take: 5,
         include: {
-          building: { select: { id: true, name: true } },
+          building: { select: { id: true, nombre: true } },
         },
       }),
       // Fondos activos
@@ -127,7 +127,7 @@ export async function GET(request: NextRequest) {
       }),
       // Actas pendientes de aprobación
       prisma.communityMinute.count({
-        where: { ...baseWhere, estado: { in: ['borrador', 'pendiente_aprobacion'] } },
+        where: { ...baseWhere, estado: 'borrador' },
       }),
     ]);
 
@@ -198,7 +198,7 @@ export async function GET(request: NextRequest) {
           tipo: r.tipo,
           fecha: r.fechaReunion,
           ubicacion: r.ubicacion,
-          edificio: r.building?.name,
+          edificio: r.building?.nombre,
         })),
       },
       graficos: {
@@ -211,7 +211,7 @@ export async function GET(request: NextRequest) {
       comunidad: comunidad ? {
         id: comunidad.id,
         nombre: comunidad.nombreComunidad,
-        edificio: comunidad.building?.name,
+        edificio: comunidad.building?.nombre,
         direccion: comunidad.direccion,
       } : null,
     });
