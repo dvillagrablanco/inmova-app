@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
       await prisma.ewoorkerLogSocio.create({
         data: {
           userId,
-          userName: session.user.nombre || "Unknown",
+          userName: session.user.name || "Unknown",
           userEmail: session.user.email || "",
           accion: "LOGIN",
           descripcion: "Intento de acceso no autorizado al panel del socio",
@@ -88,7 +88,7 @@ export async function GET(request: NextRequest) {
     await prisma.ewoorkerLogSocio.create({
       data: {
         userId,
-        userName: session.user.nombre || "Socio",
+        userName: session.user.name || "Socio",
         userEmail: session.user.email || "",
         accion: "VER_METRICAS",
         descripcion: "Acceso al dashboard de métricas",
