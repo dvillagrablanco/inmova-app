@@ -20,6 +20,25 @@ const registroSchema = z.object({
   aceptaPrivacidad: z.boolean().refine(val => val === true),
 });
 
+type TipoEmpresaDb =
+  | 'CONTRATISTA_PRINCIPAL'
+  | 'SUBCONTRATISTA_N1'
+  | 'SUBCONTRATISTA_N2'
+  | 'AUTONOMO';
+
+const mapTipoEmpresa = (tipo: string): TipoEmpresaDb => {
+  switch (tipo) {
+    case 'SUBCONTRATISTA':
+      return 'SUBCONTRATISTA_N1';
+    case 'AUTONOMO':
+      return 'AUTONOMO';
+    case 'PROMOTORA':
+    case 'CONSTRUCTORA':
+    default:
+      return 'CONTRATISTA_PRINCIPAL';
+  }
+};
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -82,7 +101,7 @@ export async function POST(request: NextRequest) {
       data: {
         companyId: company.id,
         cif: data.cif,
-        tipoEmpresa: data.tipoEmpresa,
+        tipoEmpresa: mapTipoEmpresa(data.tipoEmpresa),
         telefono: data.telefono,
         // Valores por defecto
         especialidades: [],
