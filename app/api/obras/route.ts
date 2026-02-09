@@ -223,7 +223,6 @@ export async function POST(req: NextRequest) {
         duracionMeses,
         arquitecto: data.arquitecto,
         aparejador: data.aparejador,
-        constructor: data.constructor,
         faseActual: data.faseActual,
       },
     });
