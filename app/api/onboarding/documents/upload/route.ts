@@ -44,6 +44,7 @@ const uploadOptionsSchema = z.object({
   autoApprove: z.boolean().optional().default(false),
   confidenceThreshold: z.number().min(0).max(1).optional().default(0.8),
 });
+type UploadOptions = z.infer<typeof uploadOptionsSchema>;
 
 // ============================================================================
 // POST - Subir documentos
@@ -88,7 +89,7 @@ export async function POST(request: NextRequest) {
     const files = formData.getAll('files') as File[];
     const optionsJson = formData.get('options') as string;
     
-    let options = { autoApprove: false, confidenceThreshold: 0.8 };
+    let options: UploadOptions = { autoApprove: false, confidenceThreshold: 0.8 };
     if (optionsJson) {
       try {
         const parsed = JSON.parse(optionsJson);
