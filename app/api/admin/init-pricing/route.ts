@@ -80,7 +80,8 @@ async function initializeCoupons() {
   for (const [key, campaign] of Object.entries(PROMO_CAMPAIGNS)) {
     try {
       const normalizedTargetPlan = normalizeTier(campaign.targetPlan);
-      const couponType = campaign.discountType === 'percentage' ? 'PERCENTAGE' : 'FIXED';
+      const couponType: 'PERCENTAGE' | 'FIXED' =
+        campaign.discountType === 'percentage' ? 'PERCENTAGE' : 'FIXED';
       const existingCoupon = await prisma.discountCoupon.findFirst({
         where: { codigo: campaign.code }
       });
