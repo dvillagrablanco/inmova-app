@@ -52,7 +52,7 @@ export async function GET(
         companies: {
           select: {
             id: true,
-            name: true,
+            nombre: true,
           },
           take: 10,
         },
