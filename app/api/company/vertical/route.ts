@@ -7,6 +7,34 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+type BusinessVertical =
+  | 'alquiler_tradicional'
+  | 'str_vacacional'
+  | 'coliving'
+  | 'room_rental'
+  | 'construccion'
+  | 'flipping'
+  | 'servicios_profesionales'
+  | 'comunidades'
+  | 'mixto'
+  | 'alquiler_comercial';
+
+const allowedVerticals: BusinessVertical[] = [
+  'alquiler_tradicional',
+  'str_vacacional',
+  'coliving',
+  'room_rental',
+  'construccion',
+  'flipping',
+  'servicios_profesionales',
+  'comunidades',
+  'mixto',
+  'alquiler_comercial',
+];
+
+const isBusinessVertical = (value: string): value is BusinessVertical =>
+  allowedVerticals.includes(value as BusinessVertical);
+
 /**
  * GET /api/company/vertical
  * Obtiene la vertical de negocio principal de la empresa del usuario
@@ -37,17 +65,21 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Si es mixto, retornar el primer vertical o el más usado
-    let primaryVertical = company.businessVertical;
-    
+    // Si es mixto, retornar el primer vertical válido
+    let primaryVertical: BusinessVertical | null = company.businessVertical ?? null;
+
     if (company.businessVertical === 'mixto' && company.verticals && company.verticals.length > 0) {
-      // Seleccionar el primer vertical como principal
-      primaryVertical = company.verticals[0];
+      const candidate = company.verticals.find(isBusinessVertical);
+      if (candidate) {
+        primaryVertical = candidate;
+      }
     }
 
     return NextResponse.json({
       vertical: primaryVertical,
-      allVerticals: company.verticals || [company.businessVertical],
+      allVerticals:
+        company.verticals?.filter(isBusinessVertical) ||
+        (company.businessVertical ? [company.businessVertical] : []),
     });
   } catch (error: any) {
     logger.error('[API Error]:', error);
