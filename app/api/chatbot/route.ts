@@ -80,7 +80,6 @@ export async function POST(request: NextRequest) {
 
     // 6. Generar sugerencias proactivas
     const suggestions = await generateProactiveSuggestions({
-      userId: user.id,
       companyId,
       ...context,
     });
