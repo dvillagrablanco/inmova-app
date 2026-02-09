@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
 
     if (search) {
       where.OR = [
-        { nombreEmpresa: { contains: search, mode: 'insensitive' } },
+        { company: { nombre: { contains: search, mode: 'insensitive' } } },
         { especialidades: { hasSome: [search] } },
       ];
     }
@@ -53,7 +53,6 @@ export async function GET(request: NextRequest) {
         where,
         select: {
           id: true,
-          nombreEmpresa: true,
           tipoEmpresa: true,
           especialidades: true,
           zonasOperacion: true,
@@ -63,6 +62,11 @@ export async function GET(request: NextRequest) {
           disponible: true,
           numeroTrabajadores: true,
           experienciaAnios: true,
+          company: {
+            select: {
+              nombre: true,
+            },
+          },
         },
         orderBy: [
           { valoracionMedia: 'desc' },
@@ -74,8 +78,13 @@ export async function GET(request: NextRequest) {
       prisma.ewoorkerPerfilEmpresa.count({ where }),
     ]);
 
+    const empresasFormateadas = empresas.map(({ company, ...empresa }) => ({
+      ...empresa,
+      nombreEmpresa: company?.nombre || 'Sin nombre',
+    }));
+
     return NextResponse.json({
-      empresas,
+      empresas: empresasFormateadas,
       pagination: {
         page,
         limit,
