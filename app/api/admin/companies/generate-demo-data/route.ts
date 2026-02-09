@@ -157,6 +157,15 @@ function normalizeUnitType(
   return 'vivienda';
 }
 
+function normalizeMaintenancePriority(prioridad: string): 'baja' | 'media' | 'alta' {
+  const normalized = prioridad.trim().toLowerCase();
+
+  if (normalized === 'alta') return 'alta';
+  if (normalized === 'baja') return 'baja';
+
+  return 'media';
+}
+
 /**
  * Genera los datos específicos según el escenario
  */
@@ -324,24 +333,17 @@ async function generateScenarioData(companyId: string, config: DemoScenarioConfi
   for (let i = 0; i < numIncidencias; i++) {
     const incidenciaData = DEMO_INCIDENCIAS[i];
     const unit = createdUnits[Math.floor(Math.random() * createdUnits.length)];
-    
-    // Buscar el edificio de esta unidad
-    const building = createdBuildings.find(b => 
-      createdUnits.find(u => u.id === unit.id && u.buildingId === b.id)
-    );
 
     try {
+      const prioridad = normalizeMaintenancePriority(incidenciaData.prioridad);
       const incidencia = await prisma.maintenanceRequest.create({
         data: {
-          companyId,
           unitId: unit.id,
-          buildingId: building?.id || createdBuildings[0].id,
           titulo: incidenciaData.titulo,
           descripcion: incidenciaData.descripcion,
-          categoria: incidenciaData.categoria,
-          prioridad: incidenciaData.prioridad,
-          estado: 'abierta',
-          createdAt: new Date(),
+          prioridad,
+          estado: 'pendiente',
+          isDemo: true,
         },
       });
       createdIncidencias.push(incidencia);
