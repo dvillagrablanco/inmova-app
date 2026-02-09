@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import logger from '@/lib/logger';
+import type { ConstructionPhase } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -29,7 +30,7 @@ const createProjectSchema = z.object({
 
 const updateProjectSchema = createProjectSchema.partial();
 
-const CONSTRUCTION_PHASES = new Set([
+const CONSTRUCTION_PHASES = new Set<ConstructionPhase>([
   'PLANIFICACION',
   'PERMISOS',
   'CIMENTACION',
@@ -41,15 +42,15 @@ const CONSTRUCTION_PHASES = new Set([
   'GARANTIA',
 ]);
 
-function mapPhase(value: string | undefined): string {
+function mapPhase(value: string | undefined): ConstructionPhase {
   if (!value) {
     return 'PLANIFICACION';
   }
   const upper = value.toUpperCase();
   if (CONSTRUCTION_PHASES.has(upper)) {
-    return upper;
+    return upper as ConstructionPhase;
   }
-  const statusMap: Record<string, string> = {
+  const statusMap: Record<string, ConstructionPhase> = {
     PLANIFICACION: 'PLANIFICACION',
     EN_CURSO: 'INSTALACIONES',
     PAUSADO: 'PLANIFICACION',
@@ -144,7 +145,6 @@ export async function POST(request: NextRequest) {
         duracionMeses: 0,
         faseActual: mapPhase(parsed.data.status),
         arquitecto: parsed.data.client,
-        constructor: parsed.data.contractor,
       },
     });
 
@@ -224,7 +224,6 @@ export async function PUT(request: NextRequest) {
     if (parsed.data.endDate) updateData.fechaFinPrevista = new Date(parsed.data.endDate);
     if (parsed.data.budget !== undefined) updateData.presupuestoTotal = parsed.data.budget;
     if (parsed.data.client !== undefined) updateData.arquitecto = parsed.data.client;
-    if (parsed.data.contractor !== undefined) updateData.constructor = parsed.data.contractor;
 
     await prisma.constructionProject.update({
       where: { id: existing.id },
