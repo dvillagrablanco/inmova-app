@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     // Fetch data from various tables
     const [properties, tenants, contracts, payments] = await Promise.all([
       prisma.unit.findMany({
-        where: { companyId },
+        where: { building: { companyId } },
         include: { building: true },
         take: 100
       }),
@@ -47,17 +47,17 @@ export async function GET(request: NextRequest) {
 
     // Properties section
     csvContent += '=== PROPIEDADES ===\n';
-    csvContent += 'ID,Nombre,Edificio,Estado,Renta\n';
+    csvContent += 'ID,Numero,Edificio,Estado,Renta\n';
     properties.forEach(p => {
-      csvContent += `${p.id},"${p.name}","${p.building?.name || ''}",${p.status},${p.rentAmount || 0}\n`;
+      csvContent += `${p.id},"${p.numero}","${p.building?.nombre || ''}",${p.estado},${p.rentaMensual || 0}\n`;
     });
     csvContent += '\n';
 
     // Tenants section
     csvContent += '=== INQUILINOS ===\n';
-    csvContent += 'ID,Nombre,Email,Estado\n';
+    csvContent += 'ID,Nombre,Email,Riesgo\n';
     tenants.forEach(t => {
-      csvContent += `${t.id},"${t.firstName} ${t.lastName}",${t.email},${t.status}\n`;
+      csvContent += `${t.id},"${t.nombreCompleto}",${t.email},${t.nivelRiesgo}\n`;
     });
     csvContent += '\n';
 
@@ -65,15 +65,15 @@ export async function GET(request: NextRequest) {
     csvContent += '=== CONTRATOS ===\n';
     csvContent += 'ID,Estado,Inicio,Fin,Renta\n';
     contracts.forEach(c => {
-      csvContent += `${c.id},${c.status},${c.startDate?.toISOString().split('T')[0] || ''},${c.endDate?.toISOString().split('T')[0] || ''},${c.rent || 0}\n`;
+      csvContent += `${c.id},${c.estado},${c.fechaInicio?.toISOString().split('T')[0] || ''},${c.fechaFin?.toISOString().split('T')[0] || ''},${c.rentaMensual || 0}\n`;
     });
     csvContent += '\n';
 
     // Payments section
     csvContent += '=== PAGOS ===\n';
-    csvContent += 'ID,Concepto,Monto,Estado,Fecha\n';
+    csvContent += 'ID,Periodo,Monto,Estado,Fecha\n';
     payments.forEach(p => {
-      csvContent += `${p.id},"${p.concept || ''}",${p.amount},${p.status},${p.paidDate?.toISOString().split('T')[0] || ''}\n`;
+      csvContent += `${p.id},"${p.periodo}",${p.monto},${p.estado},${p.fechaPago?.toISOString().split('T')[0] || ''}\n`;
     });
 
     // Summary
