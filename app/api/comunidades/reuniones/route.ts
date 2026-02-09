@@ -261,7 +261,9 @@ export async function POST(request: NextRequest) {
         });
       }
 
-      const notifications = Array.from(uniqueOwners.values()).map((owner) => ({
+      const notifications: Prisma.OwnerNotificationCreateManyInput[] = Array.from(
+        uniqueOwners.values()
+      ).map((owner) => ({
         ownerId: owner.id,
         companyId,
         titulo: 'Convocatoria de reunión',
