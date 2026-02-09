@@ -77,7 +77,8 @@ export async function GET(request: NextRequest) {
             'White-label opcional'
           ];
           break;
-        case 'premium':
+        case 'ENTERPRISE':
+        case 'personalizado':
           features = [
             'Todo lo de Business',
             'Desarrollo a medida',
