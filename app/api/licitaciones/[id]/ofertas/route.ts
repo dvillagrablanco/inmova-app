@@ -138,7 +138,7 @@ export async function POST(
     }
 
     // Verificar que la licitación está abierta
-    if (tender.estado !== 'presupuesto_solicitado') {
+    if (tender.estado !== 'pendiente') {
       return NextResponse.json({ 
         error: 'La licitación ya no acepta ofertas' 
       }, { status: 400 });
