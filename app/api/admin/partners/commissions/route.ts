@@ -95,13 +95,13 @@ export async function GET(request: NextRequest) {
     // Calcular estadísticas
     const stats = {
       totalPending: commissions
-        .filter((c) => c.estado === 'PENDIENTE')
+        .filter((c) => c.estado === 'PENDING')
         .reduce((sum, c) => sum + c.montoComision, 0),
       totalApproved: commissions
-        .filter((c) => c.estado === 'APROBADA')
+        .filter((c) => c.estado === 'APPROVED')
         .reduce((sum, c) => sum + c.montoComision, 0),
       totalPaid: commissions
-        .filter((c) => c.estado === 'PAGADA')
+        .filter((c) => c.estado === 'PAID')
         .reduce((sum, c) => sum + c.montoComision, 0),
       totalThisMonth: commissions
         .filter((c) => c.periodo === getCurrentPeriod())
@@ -174,22 +174,22 @@ export async function PUT(request: NextRequest) {
 
     switch (validated.action) {
       case 'approve':
-        if (commission.estado !== 'PENDIENTE') {
+        if (commission.estado !== 'PENDING') {
           return NextResponse.json(
             { error: 'Solo se pueden aprobar comisiones pendientes' },
             { status: 400 }
           );
         }
-        newEstado = 'APROBADA';
+        newEstado = 'APPROVED';
         break;
       case 'pay':
-        if (commission.estado !== 'APROBADA') {
+        if (commission.estado !== 'APPROVED') {
           return NextResponse.json(
             { error: 'Solo se pueden pagar comisiones aprobadas' },
             { status: 400 }
           );
         }
-        newEstado = 'PAGADA';
+        newEstado = 'PAID';
         fechaPago = new Date();
         break;
       case 'reject':
