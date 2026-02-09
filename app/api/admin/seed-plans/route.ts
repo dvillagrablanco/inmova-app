@@ -13,6 +13,16 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+const normalizeTier = (
+  tier: string
+): 'STARTER' | 'PROFESSIONAL' | 'BUSINESS' | 'ENTERPRISE' => {
+  const normalized = tier.trim().toLowerCase();
+  if (normalized === 'profesional' || normalized === 'professional') return 'PROFESSIONAL';
+  if (normalized === 'empresarial' || normalized === 'business') return 'BUSINESS';
+  if (normalized === 'premium' || normalized === 'enterprise') return 'ENTERPRISE';
+  return 'STARTER';
+};
+
 const PLANES_DATA = [
   // Plan interno gratuito para empresas del owner
   {
@@ -168,11 +178,23 @@ export async function GET(request: NextRequest) {
 
     // 3. Crear solo los planes que no existen (verificar por nombre)
     for (const planData of PLANES_DATA) {
+      const normalizedTier = normalizeTier(planData.tier);
+      const planPayload = {
+        ...planData,
+        tier: normalizedTier,
+        maxUsuarios: planData.maxUsuarios ?? -1,
+        maxPropiedades: planData.maxPropiedades ?? -1,
+        signaturesIncludedMonth: planData.signaturesIncludedMonth ?? -1,
+        storageIncludedGB: planData.storageIncludedGB ?? 0,
+        aiTokensIncludedMonth: planData.aiTokensIncludedMonth ?? 0,
+        smsIncludedMonth: planData.smsIncludedMonth ?? 0,
+      };
+
       if (existingNames.has(planData.nombre)) {
         skipped++;
         results.push({
           nombre: planData.nombre,
-          tier: planData.tier,
+          tier: normalizedTier,
           status: 'skipped',
           message: 'Ya existe',
         });
@@ -181,7 +203,7 @@ export async function GET(request: NextRequest) {
 
       try {
         const plan = await prisma.subscriptionPlan.create({
-          data: planData,
+          data: planPayload,
         });
 
         created++;
@@ -194,7 +216,7 @@ export async function GET(request: NextRequest) {
       } catch (error: any) {
         results.push({
           nombre: planData.nombre,
-          tier: planData.tier,
+          tier: normalizedTier,
           status: 'error',
           error: error.message,
         });
@@ -203,7 +225,7 @@ export async function GET(request: NextRequest) {
 
     // 4. Asignar plan básico a empresas sin plan
     const basicPlan = await prisma.subscriptionPlan.findFirst({
-      where: { tier: 'basico' },
+      where: { tier: 'STARTER' },
     });
 
     let companiesUpdated = 0;
