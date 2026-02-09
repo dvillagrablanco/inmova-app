@@ -44,11 +44,15 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
         perfilEmpresa: {
           select: {
             id: true,
-            nombreEmpresa: true,
             verificado: true,
             valoracionMedia: true,
             zonasOperacion: true,
             companyId: true,
+            company: {
+              select: {
+                nombre: true,
+              },
+            },
           },
         },
         asignaciones: {
@@ -92,8 +96,17 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
     }
 
+    const { company, ...perfilEmpresaBase } = trabajador.perfilEmpresa;
+    const trabajadorFormateado = {
+      ...trabajador,
+      perfilEmpresa: {
+        ...perfilEmpresaBase,
+        nombreEmpresa: company?.nombre || 'Sin nombre',
+      },
+    };
+
     return NextResponse.json({
-      trabajador,
+      trabajador: trabajadorFormateado,
       esMiTrabajador,
     });
   } catch (error: any) {
