@@ -120,10 +120,14 @@ export async function GET(request: NextRequest) {
           perfilEmpresa: {
             select: {
               id: true,
-              nombreEmpresa: true,
               verificado: true,
               valoracionMedia: true,
               zonasOperacion: true,
+              company: {
+                select: {
+                  nombre: true,
+                },
+              },
             },
           },
         },
@@ -134,8 +138,19 @@ export async function GET(request: NextRequest) {
 
       const total = await prisma.ewoorkerTrabajador.count({ where });
 
+      const trabajadoresFormateados = trabajadores.map((trabajador) => {
+        const { company, ...perfilEmpresaBase } = trabajador.perfilEmpresa;
+        return {
+          ...trabajador,
+          perfilEmpresa: {
+            ...perfilEmpresaBase,
+            nombreEmpresa: company?.nombre || 'Sin nombre',
+          },
+        };
+      });
+
       return NextResponse.json({
-        trabajadores,
+        trabajadores: trabajadoresFormateados,
         pagination: { page, limit, total, pages: Math.ceil(total / limit) },
       });
     }
