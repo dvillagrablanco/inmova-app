@@ -72,7 +72,6 @@ export async function GET(
             id: true,
             nombre: true,
             direccion: true,
-            ciudad: true,
           },
         },
         tenant: {
