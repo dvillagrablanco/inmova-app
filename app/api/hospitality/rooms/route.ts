@@ -69,7 +69,7 @@ export async function GET(req: NextRequest) {
         unit: {
           select: {
             id: true,
-            identificador: true,
+            numero: true,
             building: {
               select: { id: true, nombre: true, direccion: true },
             },
@@ -155,7 +155,7 @@ export async function POST(req: NextRequest) {
         unit: {
           select: {
             id: true,
-            identificador: true,
+            numero: true,
             building: { select: { nombre: true } },
           },
         },
