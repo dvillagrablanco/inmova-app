@@ -14,20 +14,23 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Buscar habitaciones (unidades tipo habitación o en propiedades de coliving)
-    const rooms = await prisma.unit.findMany({
+    // Buscar habitaciones (Room model)
+    const rooms = await prisma.room.findMany({
       where: {
         companyId: session.user.companyId,
-        tipo: {
-          in: ['habitacion', 'room', 'estudio'],
-        },
       },
       include: {
-        building: true,
-        tenant: true,
+        unit: {
+          include: {
+            building: true,
+          },
+        },
         contracts: {
           where: {
-            estado: 'ACTIVO',
+            estado: 'activo',
+          },
+          include: {
+            tenant: true,
           },
           take: 1,
           orderBy: {
@@ -43,15 +46,24 @@ export async function GET(request: NextRequest) {
     // Transformar los datos al formato esperado
     const formattedRooms = rooms.map((room) => ({
       id: room.id,
-      name: room.numero || 'Habitación',
-      property: room.building?.nombre || 'Sin propiedad',
-      address: room.building?.direccion || 'Sin dirección',
+      name: room.nombre || room.numero || 'Habitación',
+      property: room.unit?.building?.nombre || 'Sin propiedad',
+      address: room.unit?.building?.direccion || 'Sin dirección',
       price: room.rentaMensual || 0,
-      status: room.estado?.toLowerCase() || 'available',
-      tenant: room.tenant?.nombreCompleto || null,
+      status: room.estado === 'ocupada'
+        ? 'occupied'
+        : room.estado === 'reservada'
+          ? 'reserved'
+          : room.estado === 'mantenimiento'
+            ? 'maintenance'
+            : 'available',
+      tenant: room.contracts[0]?.tenant?.nombreCompleto || null,
       contractEnd: room.contracts[0]?.fechaFin?.toISOString() || null,
       size: room.superficie || 0,
-      amenities: room.caracteristicas || [],
+      amenities: [
+        ...(room.banoPrivado ? ['bathroom'] : []),
+        ...(room.amueblada ? ['furnished'] : []),
+      ],
     }));
 
     return NextResponse.json(formattedRooms);
@@ -70,31 +82,35 @@ export async function POST(request: NextRequest) {
 
     const data = await request.json();
 
-    // Obtener información de la propiedad padre
+    // Obtener información de la unidad padre
     const parentUnit = await prisma.unit.findUnique({
       where: { id: data.unitId },
-      include: { building: true },
+      select: { id: true },
     });
 
     if (!parentUnit) {
       return NextResponse.json({ error: 'Property not found' }, { status: 404 });
     }
 
-    const room = await prisma.unit.create({
+    const room = await prisma.room.create({
       data: {
+        companyId: session.user.companyId,
+        unitId: parentUnit.id,
         numero: data.name,
-        tipo: 'habitacion',
-        estado: 'disponible',
+        nombre: data.name,
         superficie: data.size || 0,
         rentaMensual: data.price,
-        caracteristicas: data.hasPrivateBathroom
-          ? ['bathroom', 'wifi', 'furnished']
-          : ['wifi', 'furnished'],
-        buildingId: parentUnit.buildingId,
-        companyId: session.user.companyId,
+        tipoHabitacion: 'individual',
+        banoPrivado: data.hasPrivateBathroom || false,
+        amueblada: true,
+        estado: 'disponible',
       },
       include: {
-        building: true,
+        unit: {
+          include: {
+            building: true,
+          },
+        },
       },
     });
 
