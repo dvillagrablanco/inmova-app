@@ -79,6 +79,10 @@ export async function GET(req: NextRequest) {
     if (!companyId) {
       return NextResponse.json({ error: 'Company ID no encontrado' }, { status: 400 });
     }
+    const userId = session.user.id;
+    if (!userId) {
+      return NextResponse.json({ error: 'Usuario no válido' }, { status: 400 });
+    }
 
     const { searchParams } = new URL(req.url);
     const estado = searchParams.get('estado');
@@ -264,6 +268,9 @@ export async function POST(req: NextRequest) {
         prioridad: 'media',
         fechaEstimada: new Date(data.fechaLimiteOfertas),
         presupuestoInicial: data.presupuestoMaximo, // Campo correcto del modelo
+        fotosAntes: [],
+        fotosDespues: [],
+        asignadoPor: userId,
         // Guardar metadata adicional en comentarios
         comentarios: JSON.stringify({
           requisitos: data.requisitos,
