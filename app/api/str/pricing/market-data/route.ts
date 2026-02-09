@@ -38,8 +38,7 @@ export async function GET(request: NextRequest) {
         activo: true,
       },
       select: {
-        precioBase: true,
-        precioActual: true,
+        precioPorNoche: true,
       },
     });
 
@@ -71,7 +70,7 @@ export async function GET(request: NextRequest) {
     // Si hay datos de mercado estáticos, usarlos como base
     const latestMarketData = marketDataQuery[0];
     const avgUserPrice = listings.length > 0
-      ? listings.reduce((sum, l) => sum + (l.precioActual || l.precioBase), 0) / listings.length
+      ? listings.reduce((sum, l) => sum + (l.precioPorNoche || 0), 0) / listings.length
       : 0;
 
     const avgMarketPrice = latestMarketData?.precioPromedio || avgUserPrice || 100;
