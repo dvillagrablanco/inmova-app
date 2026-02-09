@@ -24,8 +24,7 @@ export async function GET(request: NextRequest) {
       select: {
         id: true,
         titulo: true,
-        precioBase: true,
-        precioActual: true,
+        precioPorNoche: true,
         unit: {
           select: {
             numero: true,
@@ -50,7 +49,7 @@ export async function GET(request: NextRequest) {
 
     // Generar sugerencias basadas en datos reales
     const suggestions = listings.map((listing) => {
-      const currentPrice = listing.precioActual || listing.precioBase;
+      const currentPrice = listing.precioPorNoche || 0;
       
       // Calcular sugerencia basada en reglas activas
       let suggestedPrice = currentPrice;
