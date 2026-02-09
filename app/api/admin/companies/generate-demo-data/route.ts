@@ -253,7 +253,7 @@ async function generateScenarioData(companyId: string, config: DemoScenarioConfi
   );
 
   // Filtrar unidades que no sean de comunidad (precio > 0)
-  const rentableUnits = createdUnits.filter(u => u.precioAlquiler > 0);
+  const rentableUnits = createdUnits.filter((u) => u.rentaMensual > 0);
 
   for (let i = 0; i < numContratos && i < rentableUnits.length; i++) {
     const unit = rentableUnits[i];
@@ -265,6 +265,13 @@ async function generateScenarioData(companyId: string, config: DemoScenarioConfi
     const endDate = new Date(startDate);
     endDate.setFullYear(endDate.getFullYear() + 1);
 
+    const contractType =
+      config.id === 'alquiler_turistico'
+        ? 'temporal'
+        : config.id === 'comercial_oficinas'
+          ? 'comercial'
+          : 'residencial';
+
     const contract = await prisma.contract.create({
       data: {
         companyId,
@@ -272,10 +279,11 @@ async function generateScenarioData(companyId: string, config: DemoScenarioConfi
         tenantId: tenant.id,
         fechaInicio: startDate,
         fechaFin: endDate,
-        rentaMensual: unit.precioAlquiler,
-        deposito: unit.precioAlquiler * 2,
+        rentaMensual: unit.rentaMensual,
+        deposito: unit.rentaMensual * 2,
         estado: 'activo',
-        tipo: config.id === 'alquiler_turistico' ? 'temporal' : 'alquiler',
+        tipo: contractType,
+        isDemo: true,
       },
     });
     createdContracts.push(contract);
@@ -292,14 +300,16 @@ async function generateScenarioData(companyId: string, config: DemoScenarioConfi
       const paymentDate = new Date();
       paymentDate.setMonth(paymentDate.getMonth() - month);
 
+      const periodo = `${paymentDate.getFullYear()}-${String(paymentDate.getMonth() + 1).padStart(2, '0')}`;
       const payment = await prisma.payment.create({
         data: {
           contractId: contract.id,
           monto: contract.rentaMensual,
+          periodo,
           fechaVencimiento: paymentDate,
           fechaPago: paymentDate,
           estado: 'pagado',
-          concepto: `Alquiler mes ${paymentDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}`,
+          isDemo: true,
         },
       });
       createdPayments.push(payment);
