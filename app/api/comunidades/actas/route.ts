@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
         where,
         include: {
           building: {
-            select: { id: true, name: true, address: true },
+            select: { id: true, nombre: true, direccion: true },
           },
         },
         orderBy: { fecha: 'desc' },
@@ -96,8 +96,8 @@ export async function GET(request: NextRequest) {
       aprobadas: await prisma.communityMinute.count({
         where: { ...where, estado: 'aprobada' },
       }),
-      pendientesAprobacion: await prisma.communityMinute.count({
-        where: { ...where, estado: 'pendiente_aprobacion' },
+      rechazadas: await prisma.communityMinute.count({
+        where: { ...where, estado: 'rechazada' },
       }),
     };
 
@@ -172,7 +172,7 @@ export async function POST(request: NextRequest) {
       },
       include: {
         building: {
-          select: { id: true, name: true },
+          select: { id: true, nombre: true },
         },
       },
     });
