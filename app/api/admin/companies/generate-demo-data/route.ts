@@ -229,14 +229,17 @@ async function generateScenarioData(companyId: string, config: DemoScenarioConfi
   const numInquilinos = Math.min(config.datos.inquilinosBase, DEMO_TENANT_NAMES.length);
   for (let i = 0; i < numInquilinos; i++) {
     const tenantData = DEMO_TENANT_NAMES[i];
+    const telefono = `+34 6${String(10000000 + i).slice(-8)}`;
+    const fechaNacimiento = new Date(1985, i % 12, (i % 28) + 1);
     const tenant = await prisma.tenant.create({
       data: {
         companyId,
-        nombre: tenantData.nombre,
+        nombreCompleto: tenantData.nombre,
         email: `${tenantData.email}@demo.inmova.app`,
-        telefono: `+34 6${String(Math.random()).slice(2, 10)}`,
+        telefono,
         dni: tenantData.dni,
-        activo: true,
+        fechaNacimiento,
+        isDemo: true,
       },
     });
     createdTenants.push(tenant);
