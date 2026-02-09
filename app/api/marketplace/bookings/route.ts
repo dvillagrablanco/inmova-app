@@ -14,7 +14,14 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { serviceId, fechaSolicitada, notas } = body;
+    const { serviceId, tenantId, unitId, fechaSolicitada, notas } = body;
+
+    if (!serviceId || !tenantId) {
+      return NextResponse.json(
+        { error: 'serviceId y tenantId son requeridos' },
+        { status: 400 }
+      );
+    }
 
     // Verificar que el servicio existe
     const service = await prisma.marketplaceService.findUnique({
@@ -26,14 +33,23 @@ export async function POST(request: NextRequest) {
     }
 
     // Crear la reserva en la base de datos
+    const precioBase = service.precio || 0;
+    const comision = (precioBase * (service.comisionPorcentaje || 0)) / 100;
+    const precioTotal = precioBase + comision;
+    const fechaServicio = fechaSolicitada ? new Date(fechaSolicitada) : new Date();
+
     const booking = await prisma.marketplaceBooking.create({
       data: {
         serviceId,
         companyId: session.user.companyId,
+        tenantId,
+        unitId,
         estado: 'pendiente',
-        precio: service.precioBase || service.precio || 0,
-        notas,
-        fechaSolicitada: fechaSolicitada ? new Date(fechaSolicitada) : null,
+        fechaServicio,
+        precioBase,
+        comision,
+        precioTotal,
+        notasCliente: notas,
       },
     });
 
@@ -90,8 +106,10 @@ export async function GET(request: NextRequest) {
       serviceName: booking.service?.nombre || 'Servicio',
       providerName: booking.service?.provider?.nombre || 'Proveedor',
       status: booking.estado,
-      date: booking.fechaSolicitada?.toISOString().split('T')[0] || booking.createdAt.toISOString().split('T')[0],
-      amount: booking.precio || 0,
+      date:
+        booking.fechaServicio?.toISOString().split('T')[0] ||
+        booking.createdAt.toISOString().split('T')[0],
+      amount: booking.precioTotal || 0,
     }));
 
     return NextResponse.json(formattedBookings);
