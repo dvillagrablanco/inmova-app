@@ -14,6 +14,7 @@ import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
 import logger from '@/lib/logger';
+import type { BusinessVertical } from '@prisma/client';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -209,18 +210,18 @@ export async function PATCH(request: NextRequest) {
 /**
  * Mapea el perfil de cliente a la vertical de negocio
  */
-function mapClientProfileToVertical(clientProfile: string): string {
-  const mapping: Record<string, string> = {
-    propietario_individual: 'RESIDENTIAL',
-    inversor_pequeno: 'RESIDENTIAL',
-    gestor_profesional: 'PROPERTY_MANAGEMENT',
-    agencia_inmobiliaria: 'REAL_ESTATE_AGENCY',
-    administrador_fincas: 'COMMUNITY_MANAGEMENT',
-    promotor_inmobiliario: 'CONSTRUCTION',
-    empresa_coliving: 'COLIVING',
-    empresa_str: 'SHORT_TERM_RENTAL',
-    fondo_inversion: 'INSTITUTIONAL',
+function mapClientProfileToVertical(clientProfile: string): BusinessVertical {
+  const mapping: Record<string, BusinessVertical> = {
+    propietario_individual: 'alquiler_tradicional',
+    inversor_pequeno: 'alquiler_tradicional',
+    gestor_profesional: 'servicios_profesionales',
+    agencia_inmobiliaria: 'servicios_profesionales',
+    administrador_fincas: 'comunidades',
+    promotor_inmobiliario: 'construccion',
+    empresa_coliving: 'coliving',
+    empresa_str: 'str_vacacional',
+    fondo_inversion: 'mixto',
   };
-  
-  return mapping[clientProfile] || 'RESIDENTIAL';
+
+  return mapping[clientProfile] || 'alquiler_tradicional';
 }
