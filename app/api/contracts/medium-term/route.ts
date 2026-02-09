@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
           tenant: {
             select: {
               id: true,
-              nombre: true,
+              nombreCompleto: true,
               email: true,
               telefono: true,
             },
@@ -87,9 +87,19 @@ export async function GET(request: NextRequest) {
     // Obtener estadísticas
     const estadisticas = await getEstadisticasMediaEstancia(session.user.companyId);
 
+    const formattedContratos = contratos.map((contrato) => ({
+      ...contrato,
+      tenant: contrato.tenant
+        ? {
+            ...contrato.tenant,
+            nombre: contrato.tenant.nombreCompleto,
+          }
+        : null,
+    }));
+
     return NextResponse.json({
       success: true,
-      data: contratos,
+      data: formattedContratos,
       estadisticas,
       pagination: {
         page,
