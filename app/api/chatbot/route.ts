@@ -54,9 +54,9 @@ export async function POST(request: NextRequest) {
       userName: user.name || 'Usuario',
       vertical: user.vertical,
       experienceLevel: user.experienceLevel,
-      onboardingProgress: onboardingData?.progress || 0,
-      pendingTasks: onboardingData?.tasks?.filter((t: any) => t.status === 'PENDING') || [],
-      completedTasks: onboardingData?.tasks?.filter((t: any) => t.status === 'COMPLETED') || [],
+      onboardingProgress: onboardingData?.percentage ?? 0,
+      pendingTasks: onboardingData?.tasks?.filter((t: any) => t.status === 'pending') || [],
+      completedTasks: onboardingData?.tasks?.filter((t: any) => t.status === 'completed') || [],
     };
 
     // 4. Generar respuesta del chatbot
