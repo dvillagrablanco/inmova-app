@@ -30,9 +30,14 @@ const updatePropertySchema = z.object({
  * GET /api/v1/properties/[id]
  */
 export const GET = withAPIv1(
-  async (req: NextRequest, auth, { params }: { params: { id: string } }) => {
-    const property = await prisma.property.findUnique({
-      where: { id: params.id },
+  async (req: NextRequest, auth) => {
+    const propertyId = req.nextUrl.pathname.split('/').filter(Boolean).pop();
+    if (!propertyId) {
+      throw new NotFoundError('Property');
+    }
+
+    const property = await (prisma as any).property.findUnique({
+      where: { id: propertyId },
       select: {
         id: true,
         address: true,
@@ -75,13 +80,18 @@ export const GET = withAPIv1(
  * PUT /api/v1/properties/[id]
  */
 export const PUT = withAPIv1(
-  async (req: NextRequest, auth, { params }: { params: { id: string } }) => {
+  async (req: NextRequest, auth) => {
+    const propertyId = req.nextUrl.pathname.split('/').filter(Boolean).pop();
+    if (!propertyId) {
+      throw new NotFoundError('Property');
+    }
+
     const body = await req.json();
     const validated = updatePropertySchema.parse(body);
 
     // Verificar existencia y ownership
-    const existing = await prisma.property.findUnique({
-      where: { id: params.id },
+    const existing = await (prisma as any).property.findUnique({
+      where: { id: propertyId },
       select: { companyId: true },
     });
 
@@ -94,8 +104,8 @@ export const PUT = withAPIv1(
     }
 
     // Actualizar
-    const updated = await prisma.property.update({
-      where: { id: params.id },
+    const updated = await (prisma as any).property.update({
+      where: { id: propertyId },
       data: validated,
       select: {
         id: true,
@@ -129,10 +139,15 @@ export const PUT = withAPIv1(
  * DELETE /api/v1/properties/[id]
  */
 export const DELETE = withAPIv1(
-  async (req: NextRequest, auth, { params }: { params: { id: string } }) => {
+  async (req: NextRequest, auth) => {
+    const propertyId = req.nextUrl.pathname.split('/').filter(Boolean).pop();
+    if (!propertyId) {
+      throw new NotFoundError('Property');
+    }
+
     // Verificar existencia y ownership
-    const existing = await prisma.property.findUnique({
-      where: { id: params.id },
+    const existing = await (prisma as any).property.findUnique({
+      where: { id: propertyId },
       select: { companyId: true },
     });
 
@@ -145,8 +160,8 @@ export const DELETE = withAPIv1(
     }
 
     // Soft delete (actualizar status)
-    await prisma.property.update({
-      where: { id: params.id },
+    await (prisma as any).property.update({
+      where: { id: propertyId },
       data: {
         status: 'INACTIVE',
         deletedAt: new Date(),
