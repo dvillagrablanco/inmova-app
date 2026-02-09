@@ -49,9 +49,9 @@ export async function GET(request: NextRequest) {
         reviews: 0,
       } : null,
       description: service.descripcion,
-      price: service.precioBase || service.precio || 0,
+      price: service.precio ?? 0,
       priceType: service.tipoPrecio || 'fixed',
-      image: service.imagenUrl || null,
+      image: Array.isArray(service.imagenes) ? service.imagenes[0] || null : null,
       featured: service.destacado,
       tags: [],
     }));
