@@ -5,7 +5,17 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { signOut, useSession } from 'next-auth/react';
 import { useBranding } from '@/lib/hooks/useBranding';
-import { LogOut, Menu, X, ChevronDown, ChevronRight, Search, Star, Loader2 } from 'lucide-react';
+import {
+  LogOut,
+  Menu,
+  X,
+  ChevronDown,
+  ChevronRight,
+  Search,
+  Star,
+  Loader2,
+  Settings,
+} from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { usePermissions } from '@/lib/hooks/usePermissions';
