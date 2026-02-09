@@ -116,7 +116,7 @@ export async function PUT(request: NextRequest) {
     await prisma.partner.update({
       where: { id: partnerId },
       data: {
-        ultimoAcceso: new Date(),
+        ultimaVisita: new Date(),
       },
     });
 
