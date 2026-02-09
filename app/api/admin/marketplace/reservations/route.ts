@@ -64,6 +64,7 @@ export async function GET(request: NextRequest) {
       }),
       prisma.marketplaceBooking.groupBy({
         by: ['estado'],
+        orderBy: { estado: 'asc' },
         _count: { _all: true },
       }),
       prisma.marketplaceBooking.aggregate({
@@ -80,8 +81,16 @@ export async function GET(request: NextRequest) {
       }),
     ]);
 
+    const getCount = (item: (typeof statusCounts)[number]) => {
+      if (typeof item._count !== 'object' || item._count === null) {
+        return 0;
+      }
+      const countValue = (item._count as { _all?: number })._all;
+      return typeof countValue === 'number' ? countValue : 0;
+    };
+
     const countsByEstado = statusCounts.reduce<Record<string, number>>((acc, item) => {
-      acc[item.estado] = item._count._all;
+      acc[item.estado] = getCount(item);
       return acc;
     }, {});
 
