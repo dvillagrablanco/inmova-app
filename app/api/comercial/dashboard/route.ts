@@ -87,7 +87,7 @@ export async function GET(request: NextRequest) {
       prisma.commercialVisit.count({
         where: {
           commercialSpace: { companyId },
-          fecha: { gte: now },
+          fechaHora: { gte: now },
           estado: 'programada',
         },
       }),
