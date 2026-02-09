@@ -21,7 +21,20 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const estado = searchParams.get('estado');
+    const estadoParam = searchParams.get('estado');
+    const validEstados = [
+      'pendiente',
+      'asignada',
+      'aceptada',
+      'en_progreso',
+      'pausada',
+      'completada',
+      'cancelada',
+      'rechazada',
+    ] as const;
+    const estado = validEstados.includes(estadoParam as (typeof validEstados)[number])
+      ? (estadoParam as (typeof validEstados)[number])
+      : undefined;
     const pageParam = Number(searchParams.get('page') || '1');
     const limitParam = Number(searchParams.get('limit') || '20');
     const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
