@@ -175,7 +175,6 @@ export async function PUT(
             id: true,
             nombre: true,
             direccion: true,
-            ciudad: true,
           },
         },
         tenant: {
