@@ -138,15 +138,19 @@ export async function PUT(request: NextRequest) {
 
     const body = await request.json();
     const validatedData = brandingSchema.parse(body);
+    const sanitizedData = {
+      ...validatedData,
+      linksFooter: validatedData.linksFooter ?? undefined,
+    };
 
     // Upsert de branding
     const branding = await prisma.partnerBranding.upsert({
       where: { partnerId: partner.id },
       create: {
         partnerId: partner.id,
-        ...validatedData,
+        ...sanitizedData,
       },
-      update: validatedData,
+      update: sanitizedData,
     });
 
     return NextResponse.json({
