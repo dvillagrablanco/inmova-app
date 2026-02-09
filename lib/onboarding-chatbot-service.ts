@@ -361,25 +361,35 @@ export async function getChatbotHistory(userId: string, companyId: string) {
 }
 
 export async function generateChatbotResponse(
-  context: any,
   message: string,
+  context: any,
   history: any[] = []
 ) {
   // TODO: Implement chatbot response generation
+  void context;
+  void history;
   return 'Hello! How can I help you?';
 }
 
 export async function saveChatbotInteraction(
   userId: string,
-  message: string,
-  response: string,
-  metadata: any = {}
+  companyId: string,
+  payload: {
+    message: string;
+    response: string;
+    context?: any;
+  }
 ) {
   // TODO: Implement chatbot interaction saving
+  void userId;
+  void companyId;
+  void payload;
   return { success: true };
 }
 
-export async function generateProactiveSuggestions(context: any) {
+export async function generateProactiveSuggestions(userId: string, companyId: string) {
   // TODO: Implement proactive suggestions
+  void userId;
+  void companyId;
   return [];
 }
