@@ -502,7 +502,7 @@ export async function POST(request: NextRequest) {
         data: {
           companyId: session.user.companyId,
           userId: session.user.id,
-          action: 'AI_VALUATION',
+          action: 'CREATE',
           entityType: 'UNIT',
           entityId: validated.unitId || null,
           changes: JSON.stringify({
