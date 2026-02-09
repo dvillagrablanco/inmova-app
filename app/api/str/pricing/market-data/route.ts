@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
     const pricingHistory = await prisma.pricingAnalysis.findMany({
       where: {
         companyId,
-        fecha: {
+        createdAt: {
           gte: subDays(new Date(), period),
         },
       },
@@ -58,10 +58,10 @@ export async function GET(request: NextRequest) {
     // Si hay datos de pricing history, usar esos
     if (pricingHistory.length > 0) {
       const marketData = pricingHistory.map((p) => ({
-        date: p.fecha.toISOString().split('T')[0],
+        date: p.createdAt.toISOString().split('T')[0],
         myPrice: p.precioSugerido || 0,
         avgMarketPrice: p.precioMercado || 0,
-        occupancy: p.ocupacionEstimada || 0,
+        occupancy: p.probabilidadAlquiler || 0,
       }));
 
       return NextResponse.json(marketData);
