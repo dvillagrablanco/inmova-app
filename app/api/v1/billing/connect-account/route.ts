@@ -49,18 +49,18 @@ export async function GET(request: NextRequest) {
 
     const company = await prisma.company.findUnique({
       where: { id: session.user.companyId },
-      select: { stripeConnectAccountId: true },
     });
+    const stripeConnectAccountId = (company as any)?.stripeConnectAccountId;
 
-    if (!company?.stripeConnectAccountId) {
+    if (!stripeConnectAccountId) {
       return NextResponse.json({ hasAccount: false });
     }
 
-    const status = await getConnectAccountStatus(company.stripeConnectAccountId);
+    const status = await getConnectAccountStatus(stripeConnectAccountId);
 
     return NextResponse.json({
       hasAccount: true,
-      accountId: company.stripeConnectAccountId,
+      accountId: stripeConnectAccountId,
       ...status,
     });
 
