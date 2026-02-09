@@ -54,11 +54,11 @@ export async function GET(request: NextRequest) {
       // Contratos activos
       prisma.commercialLease.findMany({
         where: {
-          space: { companyId },
+          commercialSpace: { companyId },
           estado: 'activo',
         },
         include: {
-          space: {
+          commercialSpace: {
             select: { nombre: true, tipo: true },
           },
           tenant: {
@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
       // Contratos por vencer en los próximos 90 días
       prisma.commercialLease.findMany({
         where: {
-          space: { companyId },
+          commercialSpace: { companyId },
           estado: 'activo',
           fechaFin: {
             gte: now,
@@ -78,7 +78,7 @@ export async function GET(request: NextRequest) {
           },
         },
         include: {
-          space: {
+          commercialSpace: {
             select: { nombre: true },
           },
           tenant: {
@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
       // Visitas programadas
       prisma.commercialVisit.count({
         where: {
-          space: { companyId },
+          commercialSpace: { companyId },
           fecha: { gte: now },
           estado: 'programada',
         },
@@ -101,7 +101,7 @@ export async function GET(request: NextRequest) {
       // Pagos del mes actual
       prisma.commercialPayment.aggregate({
         where: {
-          lease: { space: { companyId } },
+          commercialLease: { commercialSpace: { companyId } },
           estado: 'pagado',
           fechaPago: {
             gte: startMonth,
@@ -114,7 +114,7 @@ export async function GET(request: NextRequest) {
       // Pagos pendientes
       prisma.commercialPayment.aggregate({
         where: {
-          lease: { space: { companyId } },
+          commercialLease: { commercialSpace: { companyId } },
           estado: 'pendiente',
         },
         _sum: { monto: true },
@@ -130,7 +130,7 @@ export async function GET(request: NextRequest) {
     // Mapear tipos de espacios
     const spaceTypes = espaciosPorTipo.map((grupo) => {
       const ocupados = contratosActivos.filter(
-        (c: any) => c.space?.tipo === grupo.tipo
+        (c: any) => c.commercialSpace?.tipo === grupo.tipo
       ).length;
 
       return {
@@ -144,10 +144,10 @@ export async function GET(request: NextRequest) {
     // Actividad reciente (últimos contratos y pagos)
     const ultimosContratos = await prisma.commercialLease.findMany({
       where: {
-        space: { companyId },
+        commercialSpace: { companyId },
       },
       include: {
-        space: { select: { nombre: true } },
+        commercialSpace: { select: { nombre: true } },
       },
       orderBy: { createdAt: 'desc' },
       take: 5,
@@ -156,7 +156,7 @@ export async function GET(request: NextRequest) {
     const recentActivity = ultimosContratos.map((c) => ({
       id: c.id,
       type: 'contrato',
-      text: `${c.estado === 'activo' ? 'Contrato activo' : 'Contrato'} - ${c.space?.nombre}`,
+      text: `${c.estado === 'activo' ? 'Contrato activo' : 'Contrato'} - ${c.commercialSpace?.nombre}`,
       date: c.createdAt.toISOString(),
       status: c.estado === 'activo' ? 'success' : 'info',
     }));
@@ -164,7 +164,7 @@ export async function GET(request: NextRequest) {
     // Próximos vencimientos
     const upcomingExpirations = contratosPorVencer.map((c: any) => ({
       id: c.id,
-      space: c.space?.nombre || 'Espacio',
+      space: c.commercialSpace?.nombre || 'Espacio',
       tenant: c.tenant?.nombreCompleto || 'Inquilino',
       date: c.fechaFin.toISOString().split('T')[0],
       daysLeft: Math.ceil((c.fechaFin.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)),
