@@ -512,7 +512,9 @@ async function processDocumentsAsync(
             warnings: analysis.warnings,
             hasSensitiveData: analysis.sensitiveData.hasSensitive,
             sensitiveDataTypes: analysis.sensitiveData.types,
-            suggestedActions: analysis.suggestedActions,
+            suggestedActions: JSON.parse(
+              JSON.stringify(analysis.suggestedActions)
+            ) as Prisma.InputJsonValue,
             processingTimeMs: analysis.processingMetadata.processingTimeMs,
             tokensUsed: analysis.processingMetadata.tokensUsed,
           },
