@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     const existingToken = await prisma.propertyToken.findFirst({
       where: {
         unitId: validatedData.propertyId,
-        status: { in: ['active', 'pending'] },
+        estado: { in: ['active', 'pending'] },
       },
     });
 
@@ -90,22 +90,23 @@ export async function POST(request: NextRequest) {
         companyId: session.user.companyId,
         unitId: validatedData.propertyId,
         buildingId: property.buildingId,
-        name: `${property.building.nombre} - ${property.numero}`,
-        symbol: tokenSymbol,
-        totalValue: validatedData.totalValue,
-        tokenSupply: validatedData.tokenSupply,
-        tokenPrice: validatedData.tokenPrice,
-        minInvestment: validatedData.minInvestment,
-        maxInvestment: validatedData.maxInvestment,
-        annualYieldTarget: validatedData.annualYieldTarget,
-        description: validatedData.description || '',
-        kycRequired: validatedData.legalCompliance?.kycRequired ?? true,
-        accreditedOnly: validatedData.legalCompliance?.accreditedOnly ?? false,
-        maxInvestors: validatedData.legalCompliance?.maxInvestors ?? 500,
-        jurisdictions: validatedData.legalCompliance?.jurisdictions ?? ['ES', 'EU'],
-        status: 'pending',
-        blockchain: 'polygon',
-        createdBy: session.user.id,
+        nombre: `${property.building.nombre} - ${property.numero}`,
+        simbolo: tokenSymbol,
+        tokenSymbol,
+        totalSupply: validatedData.tokenSupply,
+        tokensPorPropiedad: validatedData.tokenSupply,
+        precioPorToken: validatedData.tokenPrice,
+        valorPropiedad: validatedData.totalValue,
+        valorActual: validatedData.totalValue,
+        estado: 'pending',
+        blockchain: 'Polygon',
+        metadata: {
+          minInvestment: validatedData.minInvestment,
+          maxInvestment: validatedData.maxInvestment,
+          annualYieldTarget: validatedData.annualYieldTarget,
+          description: validatedData.description || '',
+          legalCompliance: validatedData.legalCompliance ?? null,
+        },
       },
       include: {
         unit: {
@@ -135,12 +136,12 @@ export async function POST(request: NextRequest) {
       message: 'Proceso de tokenización iniciado correctamente',
       token: {
         id: propertyToken.id,
-        name: propertyToken.name,
-        symbol: propertyToken.symbol,
-        status: propertyToken.status,
-        totalValue: propertyToken.totalValue,
-        tokenSupply: propertyToken.tokenSupply,
-        tokenPrice: propertyToken.tokenPrice,
+        name: propertyToken.nombre,
+        symbol: propertyToken.simbolo,
+        status: propertyToken.estado,
+        totalValue: propertyToken.valorPropiedad,
+        tokenSupply: propertyToken.totalSupply,
+        tokenPrice: propertyToken.precioPorToken,
       },
     }, { status: 201 });
   } catch (error: any) {
