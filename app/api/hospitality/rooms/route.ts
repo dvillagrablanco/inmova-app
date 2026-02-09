@@ -128,7 +128,7 @@ export async function POST(req: NextRequest) {
       ? data.unitId
       : (
           await prisma.unit.findFirst({
-            where: { buildingId: data.buildingId, companyId },
+            where: { buildingId: data.buildingId, building: { companyId } },
             select: { id: true },
           })
         )?.id;
