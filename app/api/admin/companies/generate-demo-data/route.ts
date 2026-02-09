@@ -128,6 +128,20 @@ export async function POST(request: NextRequest) {
   }
 }
 
+function normalizeBuildingType(tipoPropiedad: string): 'residencial' | 'mixto' | 'comercial' {
+  const normalized = tipoPropiedad.trim().toLowerCase();
+
+  if (normalized.includes('mixto')) {
+    return 'mixto';
+  }
+
+  if (normalized.includes('comercial') || normalized.includes('oficina') || normalized.includes('local')) {
+    return 'comercial';
+  }
+
+  return 'residencial';
+}
+
 /**
  * Genera los datos específicos según el escenario
  */
@@ -144,15 +158,27 @@ async function generateScenarioData(companyId: string, config: DemoScenarioConfi
 
   // 1. Crear edificios según el escenario
   for (const edificioData of config.datos.edificios) {
+    const buildingIndex = createdBuildings.length;
+    const direccionCompleta = [
+      edificioData.direccion,
+      edificioData.codigoPostal,
+      edificioData.ciudad,
+    ]
+      .filter(Boolean)
+      .join(', ');
+    const tipo = normalizeBuildingType(edificioData.tipoPropiedad);
+    const numeroUnidades = edificioData.unidades.length;
+    const anoConstructor = 2000 + (buildingIndex % 20);
+
     const building = await prisma.building.create({
       data: {
         companyId,
         nombre: edificioData.nombre,
-        direccion: edificioData.direccion,
-        ciudad: edificioData.ciudad,
-        codigoPostal: edificioData.codigoPostal,
-        tipoPropiedad: edificioData.tipoPropiedad,
-        activo: true,
+        direccion: direccionCompleta,
+        tipo,
+        anoConstructor,
+        numeroUnidades,
+        isDemo: true,
       },
     });
     createdBuildings.push(building);
