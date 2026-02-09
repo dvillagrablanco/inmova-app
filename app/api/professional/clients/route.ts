@@ -90,15 +90,15 @@ export async function GET(request: NextRequest) {
     // Calcular estadísticas
     const activeContracts = await prisma.contract.count({
       where: {
-        companyId: user.companyId,
         estado: 'activo',
+        unit: { building: { companyId: user.companyId } },
       },
     });
 
     const totalRevenue = await prisma.contract.aggregate({
       where: {
-        companyId: user.companyId,
         estado: 'activo',
+        unit: { building: { companyId: user.companyId } },
       },
       _sum: {
         rentaMensual: true,
@@ -118,7 +118,7 @@ export async function GET(request: NextRequest) {
     const pendingPayments = await prisma.payment.count({
       where: {
         contract: {
-          companyId: user.companyId,
+          unit: { building: { companyId: user.companyId } },
         },
         estado: 'pendiente',
       },
