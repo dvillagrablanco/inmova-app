@@ -8,6 +8,18 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+const parseChanges = (changes: string | null) => {
+  if (!changes) {
+    return {};
+  }
+
+  try {
+    return JSON.parse(changes);
+  } catch {
+    return { raw: changes };
+  }
+};
+
 /**
  * GET /api/admin/system-logs
  * Obtiene logs del sistema - Solo Super Admin
@@ -80,7 +92,7 @@ export async function GET(request: NextRequest) {
       userName: log.user?.name || log.user?.email || undefined,
       companyId: log.companyId || undefined,
       companyName: log.company?.nombre || undefined,
-      metadata: log.details || {},
+      metadata: parseChanges(log.changes),
     }));
 
     // Calcular estadísticas reales
