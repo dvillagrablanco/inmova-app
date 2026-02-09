@@ -27,7 +27,7 @@ export async function GET(
     const partner = await prisma.partner.findUnique({
       where: { id: params.id },
       include: {
-        clients: {
+        clientes: {
           include: {
             company: {
               select: { id: true, nombre: true, email: true },
@@ -35,7 +35,7 @@ export async function GET(
           },
           orderBy: { createdAt: 'desc' },
         },
-        commissions: {
+        comisiones: {
           orderBy: { createdAt: 'desc' },
           take: 20,
         },
@@ -65,7 +65,7 @@ export async function GET(
         activo: partner.activo,
         fechaActivacion: partner.fechaActivacion,
         createdAt: partner.createdAt,
-        clients: partner.clients.map((c) => ({
+        clients: partner.clientes.map((c) => ({
           id: c.id,
           companyId: c.companyId,
           companyName: c.company.nombre,
@@ -73,7 +73,7 @@ export async function GET(
           fechaActivacion: c.fechaActivacion,
           totalComisionGenerada: c.totalComisionGenerada,
         })),
-        commissions: partner.commissions.map((c) => ({
+        commissions: partner.comisiones.map((c) => ({
           id: c.id,
           periodo: c.periodo,
           montoBruto: c.montoBruto,
@@ -201,7 +201,7 @@ export async function DELETE(
       where: { id: params.id },
       include: {
         _count: {
-          select: { clients: true, commissions: true },
+          select: { clientes: true, comisiones: true },
         },
       },
     });
@@ -211,7 +211,7 @@ export async function DELETE(
     }
 
     // Si tiene clientes o comisiones, hacer soft delete
-    if (existing._count.clients > 0 || existing._count.commissions > 0) {
+    if (existing._count.clientes > 0 || existing._count.comisiones > 0) {
       await prisma.partner.update({
         where: { id: params.id },
         data: {
