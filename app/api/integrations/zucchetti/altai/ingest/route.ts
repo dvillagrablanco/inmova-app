@@ -60,12 +60,8 @@ export async function POST(req: NextRequest) {
 
     if (session?.user?.companyId) {
       const role = session.user.role;
-      if (
-        role !== 'ADMIN' &&
-        role !== 'SUPERADMIN' &&
-        role !== 'administrador' &&
-        role !== 'super_admin'
-      ) {
+      const allowedRoles = new Set(['administrador', 'super_admin']);
+      if (role && !allowedRoles.has(role)) {
         return NextResponse.json(
           { error: 'Solo administradores pueden ingestar asientos' },
           { status: 403 }
