@@ -136,6 +136,12 @@ export async function POST(request: NextRequest) {
     }
 
     const unitId = validated.unitId || tenant.units[0]?.id;
+    const basePrice = service.precio ?? 0;
+    const commissionRate = service.comisionPorcentaje ?? 0;
+    const comision = basePrice * (commissionRate / 100);
+    const fechaServicio = validated.fechaSolicitada
+      ? new Date(validated.fechaSolicitada)
+      : new Date();
 
     // Crear booking
     const booking = await prisma.marketplaceBooking.create({
@@ -145,9 +151,11 @@ export async function POST(request: NextRequest) {
         unitId,
         companyId: tenant.companyId,
         estado: 'pendiente',
-        precio: service.precioBase,
-        notas: validated.notas,
-        fechaSolicitada: validated.fechaSolicitada ? new Date(validated.fechaSolicitada) : null,
+        precioBase: basePrice,
+        comision,
+        precioTotal: basePrice + comision,
+        notasCliente: validated.notas,
+        fechaServicio,
       },
       include: {
         service: true,
