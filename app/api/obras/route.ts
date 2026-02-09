@@ -82,7 +82,7 @@ export async function GET(req: NextRequest) {
       where,
       include: {
         workOrders: {
-          orderBy: { orden: 'asc' },
+          orderBy: { fechaInicio: 'asc' },
         },
         building: {
           select: { id: true, nombre: true, direccion: true },
