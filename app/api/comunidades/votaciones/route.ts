@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
         where,
         include: {
           building: {
-            select: { id: true, name: true },
+            select: { id: true, nombre: true },
           },
         },
         orderBy: { createdAt: 'desc' },
@@ -94,6 +94,7 @@ export async function GET(request: NextRequest) {
       votaciones: votaciones.map(v => ({
         ...v,
         opciones: v.opciones as any[],
+        building: v.building ? { id: v.building.id, name: v.building.nombre } : null,
         participacion: v.totalElegibles > 0 
           ? Math.round((v.totalVotos / v.totalElegibles) * 100) 
           : 0,
@@ -208,11 +209,21 @@ export async function POST(request: NextRequest) {
           creadoPor: userId,
         },
         include: {
-          building: { select: { id: true, name: true } },
+          building: { select: { id: true, nombre: true } },
         },
       });
 
-      return NextResponse.json({ votacion }, { status: 201 });
+      return NextResponse.json(
+        {
+          votacion: {
+            ...votacion,
+            building: votacion.building
+              ? { id: votacion.building.id, name: votacion.building.nombre }
+              : null,
+          },
+        },
+        { status: 201 }
+      );
     }
   } catch (error: any) {
     if (error instanceof z.ZodError) {
