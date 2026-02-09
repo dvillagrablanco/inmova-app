@@ -36,7 +36,16 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const status = searchParams.get('status');
+    const statusParam = searchParams.get('status');
+    const validStatus = [
+      'pendiente',
+      'en_progreso',
+      'programado',
+      'completado',
+    ] as const;
+    const status = validStatus.includes(statusParam as (typeof validStatus)[number])
+      ? (statusParam as (typeof validStatus)[number])
+      : undefined;
     const limit = parseInt(searchParams.get('limit') || '20');
 
     // Obtener inquilino con sus unidades
