@@ -197,7 +197,7 @@ export async function POST(request: NextRequest) {
     await prisma.auditLog.create({
       data: {
         userId: session.user.id,
-        action: 'SIGNATURE_CREATED',
+        action: 'CREATE',
         entityType: 'CONTRACT',
         entityId: contract.id,
         details: {
