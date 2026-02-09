@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
         where,
         include: {
           building: {
-            select: { id: true, name: true },
+            select: { id: true, nombre: true },
           },
         },
         orderBy: [
@@ -112,7 +112,12 @@ export async function GET(request: NextRequest) {
       : 0;
 
     return NextResponse.json({
-      incidencias,
+      incidencias: incidencias.map((incidencia) => ({
+        ...incidencia,
+        building: incidencia.building
+          ? { id: incidencia.building.id, name: incidencia.building.nombre }
+          : null,
+      })),
       pagination: {
         page,
         limit,
@@ -175,11 +180,21 @@ export async function POST(request: NextRequest) {
         estado: 'abierta',
       },
       include: {
-        building: { select: { id: true, name: true } },
+        building: { select: { id: true, nombre: true } },
       },
     });
 
-    return NextResponse.json({ incidencia }, { status: 201 });
+    return NextResponse.json(
+      {
+        incidencia: {
+          ...incidencia,
+          building: incidencia.building
+            ? { id: incidencia.building.id, name: incidencia.building.nombre }
+            : null,
+        },
+      },
+      { status: 201 }
+    );
   } catch (error: any) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -233,11 +248,18 @@ export async function PATCH(request: NextRequest) {
       where: { id },
       data: updateData,
       include: {
-        building: { select: { id: true, name: true } },
+        building: { select: { id: true, nombre: true } },
       },
     });
 
-    return NextResponse.json({ incidencia });
+    return NextResponse.json({
+      incidencia: {
+        ...incidencia,
+        building: incidencia.building
+          ? { id: incidencia.building.id, name: incidencia.building.nombre }
+          : null,
+      },
+    });
   } catch (error: any) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
