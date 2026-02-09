@@ -170,22 +170,13 @@ export async function POST(request: NextRequest) {
       validated.signers as Signer[],
       signatureOptions
     );
-
-    if (!result.success) {
-      return NextResponse.json(
-        {
-          error: 'Error creando solicitud de firma',
-          message: result.error,
-        },
-        { status: 500 }
-      );
-    }
+    const signUrl = result.signers?.[0]?.signUrl;
 
     // 10. Guardar en BD
     await prisma.contract.update({
       where: { id: validated.contractId },
       data: {
-        signatureId: result.signatureId,
+        signatureId: result.id,
         signatureStatus: 'PENDING',
         signatureSentAt: new Date(),
       },
@@ -199,7 +190,7 @@ export async function POST(request: NextRequest) {
         entityType: 'CONTRACT',
         entityId: contract.id,
         details: {
-          signatureId: result.signatureId,
+          signatureId: result.id,
           signers: validated.signers.map((s) => s.email),
         },
       },
@@ -212,7 +203,7 @@ export async function POST(request: NextRequest) {
       metric: 'signatures',
       value: 1,
       metadata: {
-        signatureId: result.signatureId,
+        signatureId: result.id,
         type: signatureOptions.type || 'simple',
         contractId: validated.contractId,
       },
@@ -221,8 +212,8 @@ export async function POST(request: NextRequest) {
     // 13. Respuesta exitosa
     return NextResponse.json({
       success: true,
-      signatureId: result.signatureId,
-      signUrl: result.signUrl,
+      signatureId: result.id,
+      signUrl: signUrl || null,
       signers: result.signers,
       message: 'Solicitud de firma creada. Se han enviado emails a los firmantes.',
     });
