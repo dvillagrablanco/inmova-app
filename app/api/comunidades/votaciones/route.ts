@@ -219,15 +219,6 @@ export async function POST(request: NextRequest) {
     } else {
       // Crear nueva votación
       const validated = createVotacionSchema.parse(body);
-      const normalizedTipo = (
-        validated.tipo === 'ordinaria'
-          ? 'decision_comunidad'
-          : validated.tipo === 'extraordinaria'
-            ? 'gasto'
-            : validated.tipo === 'urgente'
-              ? 'normativa'
-              : validated.tipo
-      ) as 'decision_comunidad' | 'mejora' | 'gasto' | 'normativa' | 'otro';
 
       // Verificar que el edificio existe
       const building = await prisma.building.findFirst({

@@ -242,21 +242,6 @@ export async function POST(request: NextRequest) {
     const userId = (session.user as any).id;
     const body = await request.json();
     const validated = createIncidenciaSchema.parse(body);
-    const normalizedTipo = (
-      validated.tipo === 'ruidos'
-        ? 'ruido'
-        : validated.tipo === 'averia' || validated.tipo === 'mantenimiento'
-          ? 'averia_comun'
-          : validated.tipo
-    ) as
-      | 'ruido'
-      | 'averia_comun'
-      | 'limpieza'
-      | 'seguridad'
-      | 'convivencia'
-      | 'mascota'
-      | 'parking'
-      | 'otro';
 
     // Verificar que el edificio existe
     const building = await prisma.building.findFirst({
