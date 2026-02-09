@@ -31,11 +31,11 @@ export async function GET(request: NextRequest) {
         take: 100
       }),
       prisma.contract.findMany({
-        where: { companyId },
+        where: { unit: { building: { companyId } } },
         take: 100
       }),
       prisma.payment.findMany({
-        where: { companyId },
+        where: { contract: { unit: { building: { companyId } } } },
         take: 100
       })
     ]);
