@@ -11,7 +11,16 @@ const createVotacionSchema = z.object({
   buildingId: z.string().min(1),
   titulo: z.string().min(1),
   descripcion: z.string().min(1),
-  tipo: z.enum(['ordinaria', 'extraordinaria', 'urgente']),
+  tipo: z.enum([
+    'ordinaria',
+    'extraordinaria',
+    'urgente',
+    'decision_comunidad',
+    'mejora',
+    'gasto',
+    'normativa',
+    'otro',
+  ]),
   opciones: z.array(z.object({
     id: z.string(),
     texto: z.string(),
@@ -28,6 +37,33 @@ const votarSchema = z.object({
   propietarioId: z.string().min(1),
   coeficiente: z.number().optional(),
 });
+
+type VoteTypeDb = 'decision_comunidad' | 'mejora' | 'gasto' | 'normativa' | 'otro';
+
+const normalizeVoteType = (tipo?: string | null): VoteTypeDb | null => {
+  if (!tipo) return null;
+  const normalized = tipo.trim().toLowerCase();
+  if (normalized === 'ordinaria') return 'decision_comunidad';
+  if (normalized === 'extraordinaria') return 'normativa';
+  if (normalized === 'urgente') return 'gasto';
+  if (
+    normalized === 'decision_comunidad' ||
+    normalized === 'mejora' ||
+    normalized === 'gasto' ||
+    normalized === 'normativa' ||
+    normalized === 'otro'
+  ) {
+    return normalized as VoteTypeDb;
+  }
+  return null;
+};
+
+const mapVoteTypeToUi = (tipo: VoteTypeDb): 'ordinaria' | 'extraordinaria' | 'urgente' => {
+  if (tipo === 'decision_comunidad') return 'ordinaria';
+  if (tipo === 'mejora' || tipo === 'normativa') return 'extraordinaria';
+  if (tipo === 'gasto') return 'urgente';
+  return 'ordinaria';
+};
 
 // GET - Listar votaciones
 export async function GET(request: NextRequest) {
@@ -95,6 +131,7 @@ export async function GET(request: NextRequest) {
         ...v,
         opciones: v.opciones as any[],
         building: v.building ? { id: v.building.id, name: v.building.nombre } : null,
+        tipo: mapVoteTypeToUi(v.tipo as VoteTypeDb),
         participacion: v.totalElegibles > 0 
           ? Math.round((v.totalVotos / v.totalElegibles) * 100) 
           : 0,
@@ -193,13 +230,14 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Edificio no encontrado' }, { status: 404 });
       }
 
+      const normalizedTipo = normalizeVoteType(validated.tipo) || 'decision_comunidad';
       const votacion = await prisma.communityVote.create({
         data: {
           companyId,
           buildingId: validated.buildingId,
           titulo: validated.titulo,
           descripcion: validated.descripcion,
-          tipo: validated.tipo,
+          tipo: normalizedTipo,
           opciones: validated.opciones,
           requiereQuorum: validated.requiereQuorum,
           quorumRequerido: validated.quorumRequerido,
@@ -220,6 +258,7 @@ export async function POST(request: NextRequest) {
             building: votacion.building
               ? { id: votacion.building.id, name: votacion.building.nombre }
               : null,
+            tipo: mapVoteTypeToUi(votacion.tipo as VoteTypeDb),
           },
         },
         { status: 201 }
