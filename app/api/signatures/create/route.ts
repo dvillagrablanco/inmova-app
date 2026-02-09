@@ -196,6 +196,7 @@ export async function POST(request: NextRequest) {
     // 11. Crear registro de auditoría
     await prisma.auditLog.create({
       data: {
+        companyId: session.user.companyId,
         userId: session.user.id,
         action: 'CREATE',
         entityType: 'CONTRACT',
