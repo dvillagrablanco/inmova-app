@@ -145,9 +145,13 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
         motivoNoDisponible: true,
         perfilEmpresa: {
           select: {
-            nombreEmpresa: true,
             verificado: true,
             disponible: true,
+            company: {
+              select: {
+                nombre: true,
+              },
+            },
           },
         },
       },
@@ -179,7 +183,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       disponibleDesde: trabajador.disponibleDesde,
       disponibleHasta: trabajador.disponibleHasta,
       motivoNoDisponible: trabajador.motivoNoDisponible,
-      empresa: trabajador.perfilEmpresa.nombreEmpresa,
+      empresa: trabajador.perfilEmpresa.company?.nombre || 'Sin nombre',
       empresaVerificada: trabajador.perfilEmpresa.verificado,
     });
   } catch (error: any) {
