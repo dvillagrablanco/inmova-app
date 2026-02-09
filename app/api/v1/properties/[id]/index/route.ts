@@ -31,7 +31,7 @@ export async function POST(
     const propertyId = params.id;
 
     // Verificar ownership
-    const property = await prisma.property.findUnique({
+    const property = await (prisma as any).property.findUnique({
       where: { id: propertyId },
       select: { companyId: true },
     });
