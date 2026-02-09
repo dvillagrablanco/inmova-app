@@ -42,19 +42,14 @@ export async function GET(request: NextRequest) {
       where: {
         companyId: session.user.companyId,
         ...(tipoFilter.length > 0 && { tipo: { in: tipoFilter as any } }),
-        ...(estado && { estadoOcupacion: estado }),
+        ...(estado && { estado }),
       },
       include: {
-        leases: {
+        commercialLeases: {
           where: { estado: 'activo' },
-          include: {
-            tenant: {
-              select: {
-                id: true,
-                nombre: true,
-                email: true,
-              },
-            },
+          select: {
+            id: true,
+            arrendatarioNombre: true,
           },
           take: 1,
         },
@@ -72,7 +67,7 @@ export async function GET(request: NextRequest) {
 
     // Formatear respuesta
     const formattedSpaces = spaces.map((space) => {
-      const activeLease = space.leases[0];
+      const activeLease = space.commercialLeases[0];
       return {
         id: space.id,
         nombre: space.nombre,
@@ -83,15 +78,15 @@ export async function GET(request: NextRequest) {
         planta: space.planta,
         superficie: space.superficieConstruida,
         superficieUtil: space.superficieUtil,
-        estado: space.estadoOcupacion || (activeLease ? 'ocupada' : 'disponible'),
-        rentaMensual: space.precioAlquiler,
-        arrendatario: activeLease?.tenant?.nombre || null,
-        arrendatarioId: activeLease?.tenant?.id || null,
+        estado: activeLease ? 'ocupada' : space.estado,
+        rentaMensual: space.rentaMensualBase,
+        arrendatario: activeLease?.arrendatarioNombre || null,
+        arrendatarioId: activeLease?.id || null,
         buildingId: space.buildingId,
         buildingName: space.building?.nombre,
         caracteristicas: [
           space.aireAcondicionado && 'climatizacion',
-          space.parking && 'parking',
+          (space.plazasParking || space.plazasParkingAdicionales) && 'parking',
           space.fibraOptica && 'fibra',
           space.fachada && 'fachada',
           space.muelleCarga && 'muelle_carga',
@@ -160,6 +155,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (!precioAlquiler) {
+      return NextResponse.json(
+        { error: 'El precio de alquiler es requerido' },
+        { status: 400 }
+      );
+    }
+
+    const rentaMensualBase = Number(precioAlquiler);
+    const superficieUtilValue = superficieUtil
+      ? Number(superficieUtil)
+      : Number(superficieConstruida) * 0.9;
+
     const space = await prisma.commercialSpace.create({
       data: {
         companyId: session.user.companyId,
@@ -171,17 +178,18 @@ export async function POST(request: NextRequest) {
         provincia: provincia || ciudad,
         planta: planta ? Number(planta) : null,
         superficieConstruida: Number(superficieConstruida),
-        superficieUtil: superficieUtil ? Number(superficieUtil) : Number(superficieConstruida) * 0.9,
-        precioAlquiler: precioAlquiler ? Number(precioAlquiler) : null,
+        superficieUtil: superficieUtilValue,
+        rentaMensualBase,
+        precioM2Mensual: superficieUtilValue ? rentaMensualBase / superficieUtilValue : null,
         buildingId,
         descripcion,
         aireAcondicionado: aireAcondicionado || false,
-        parking: parking || false,
+        plazasParking: parking ? 1 : 0,
         fibraOptica: fibraOptica || false,
         fachada: fachada || false,
         muelleCarga: muelleCarga || false,
         plantaDiafana: plantaDiafana || false,
-        estadoOcupacion: 'disponible',
+        estado: 'disponible',
       },
     });
 
