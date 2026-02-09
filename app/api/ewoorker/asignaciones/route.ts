@@ -91,7 +91,11 @@ export async function GET(request: NextRequest) {
                 provincia: true,
                 perfilConstructor: {
                   select: {
-                    nombreEmpresa: true,
+                    company: {
+                      select: {
+                        nombre: true,
+                      },
+                    },
                   },
                 },
               },
@@ -149,7 +153,7 @@ export async function GET(request: NextRequest) {
         obra: {
           id: a.contrato.obra?.id || a.contrato.id,
           nombre: a.contrato.obra?.titulo || 'Obra sin nombre',
-          empresa: a.contrato.obra?.perfilConstructor?.nombreEmpresa || 'Empresa',
+          empresa: a.contrato.obra?.perfilConstructor?.company?.nombre || 'Empresa',
           direccion: a.contrato.obra
             ? `${a.contrato.obra.direccion}, ${a.contrato.obra.municipio}`
             : '',
