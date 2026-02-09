@@ -39,13 +39,17 @@ export async function GET(request: NextRequest) {
       },
     });
 
+    const listingIds = listings.map((listing) => listing.id);
+
     // Obtener reglas de pricing dinámico
-    const pricingRules = await prisma.sTRDynamicPricingRule.findMany({
-      where: {
-        companyId,
-        activo: true,
-      },
-    });
+    const pricingRules = listingIds.length
+      ? await prisma.sTRDynamicPricingRule.findMany({
+          where: {
+            listingId: { in: listingIds },
+            activo: true,
+          },
+        })
+      : [];
 
     // Generar sugerencias basadas en datos reales
     const suggestions = listings.map((listing) => {
@@ -61,27 +65,29 @@ export async function GET(request: NextRequest) {
 
       // Aplicar reglas de pricing si existen
       for (const rule of pricingRules) {
-        if (rule.tipo === 'estacionalidad') {
-          const config = rule.configuracion as any;
-          if (config?.multiplicador) {
-            suggestedPrice *= config.multiplicador;
-            factors.push({
-              name: 'Estacionalidad',
-              impact: config.multiplicador > 1.2 ? 'high' : 'medium',
-              description: `Ajuste estacional: ${((config.multiplicador - 1) * 100).toFixed(0)}%`,
-            });
-          }
+        if (rule.accionTipo === 'multiplicador') {
+          suggestedPrice *= rule.accionValor;
+          factors.push({
+            name: 'Multiplicador',
+            impact: rule.accionValor > 1.2 ? 'high' : 'medium',
+            description: `Ajuste por multiplicador: x${rule.accionValor.toFixed(2)}`,
+          });
         }
-        if (rule.tipo === 'demanda') {
-          const config = rule.configuracion as any;
-          if (config?.ajuste) {
-            suggestedPrice += config.ajuste;
-            factors.push({
-              name: 'Demanda',
-              impact: Math.abs(config.ajuste) > 20 ? 'high' : 'medium',
-              description: `Ajuste por demanda: ${config.ajuste > 0 ? '+' : ''}€${config.ajuste}`,
-            });
-          }
+        if (rule.accionTipo === 'ajuste_porcentaje') {
+          suggestedPrice *= 1 + rule.accionValor / 100;
+          factors.push({
+            name: 'Ajuste porcentual',
+            impact: Math.abs(rule.accionValor) > 20 ? 'high' : 'medium',
+            description: `Ajuste porcentual: ${rule.accionValor > 0 ? '+' : ''}${rule.accionValor}%`,
+          });
+        }
+        if (rule.accionTipo === 'precio_fijo') {
+          suggestedPrice = rule.accionValor;
+          factors.push({
+            name: 'Precio fijo',
+            impact: 'high',
+            description: `Precio fijo configurado: €${rule.accionValor}`,
+          });
         }
       }
 
