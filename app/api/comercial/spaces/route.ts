@@ -31,6 +31,10 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const categoria = searchParams.get('categoria'); // oficinas, locales, naves, coworking
     const estado = searchParams.get('estado');
+    const estadoFilter =
+      estado && ['ocupada', 'disponible', 'en_mantenimiento'].includes(estado)
+        ? (estado as 'ocupada' | 'disponible' | 'en_mantenimiento')
+        : undefined;
 
     // Construir filtro de tipos
     let tipoFilter: string[] = [];
@@ -42,7 +46,7 @@ export async function GET(request: NextRequest) {
       where: {
         companyId: session.user.companyId,
         ...(tipoFilter.length > 0 && { tipo: { in: tipoFilter as any } }),
-        ...(estado && { estado }),
+        ...(estadoFilter && { estado: estadoFilter }),
       },
       include: {
         commercialLeases: {
