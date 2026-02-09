@@ -24,7 +24,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     const obra = await prisma.ewoorkerObra.findUnique({
       where: { id: params.id },
       include: {
-        perfilEmpresa: {
+        perfilConstructor: {
           include: { company: true },
         },
       },
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       include: { company: { include: { ewoorkerPerfil: true } } },
     });
 
-    const esPropietario = user?.company?.ewoorkerPerfil?.id === obra.perfilEmpresaId;
+    const esPropietario = user?.company?.ewoorkerPerfil?.id === obra.perfilConstructorId;
     const esAdmin = ['super_admin', 'administrador'].includes(session.user.role as string);
 
     if (!esPropietario && !esAdmin) {
@@ -62,7 +62,10 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
         titulo: obra.titulo,
         especialidad: obra.especialidad,
         provincia: obra.provincia,
-        presupuestoEstimado: obra.presupuestoEstimado,
+        presupuestoEstimado:
+          obra.presupuestoMaximo && obra.presupuestoMinimo
+            ? (obra.presupuestoMaximo + obra.presupuestoMinimo) / 2
+            : obra.presupuestoMaximo ?? obra.presupuestoMinimo ?? null,
       },
       recommendations,
       priceSuggestion,
