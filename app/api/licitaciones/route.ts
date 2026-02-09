@@ -83,6 +83,10 @@ export async function GET(req: NextRequest) {
     if (!userId) {
       return NextResponse.json({ error: 'Usuario no válido' }, { status: 400 });
     }
+    const userId = session.user.id;
+    if (!userId) {
+      return NextResponse.json({ error: 'Usuario no válido' }, { status: 400 });
+    }
 
     const { searchParams } = new URL(req.url);
     const estado = searchParams.get('estado');
