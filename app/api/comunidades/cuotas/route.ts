@@ -63,10 +63,10 @@ export async function GET(request: NextRequest) {
         where,
         include: {
           building: {
-            select: { id: true, name: true },
+            select: { id: true, nombre: true },
           },
           unit: {
-            select: { id: true, unitNumber: true, type: true },
+            select: { id: true, numero: true, tipo: true },
           },
         },
         orderBy: [{ fechaVencimiento: 'desc' }, { createdAt: 'desc' }],
@@ -99,9 +99,19 @@ export async function GET(request: NextRequest) {
     ]);
 
     return NextResponse.json({
-      cuotas: cuotas.map(c => ({
-        ...c,
-        importeTotal: c.importeBase * c.coeficiente,
+      cuotas: cuotas.map((cuota) => ({
+        ...cuota,
+        building: cuota.building
+          ? { id: cuota.building.id, name: cuota.building.nombre }
+          : null,
+        unit: cuota.unit
+          ? {
+              id: cuota.unit.id,
+              unitNumber: cuota.unit.numero,
+              type: cuota.unit.tipo,
+            }
+          : null,
+        importeTotal: cuota.importeBase * cuota.coeficiente,
       })),
       pagination: {
         page,
@@ -203,12 +213,25 @@ export async function POST(request: NextRequest) {
           estado: 'pendiente',
         },
         include: {
-          unit: { select: { id: true, unitNumber: true } },
-          building: { select: { id: true, name: true } },
+          unit: { select: { id: true, numero: true } },
+          building: { select: { id: true, nombre: true } },
         },
       });
 
-      return NextResponse.json({ cuota }, { status: 201 });
+      return NextResponse.json(
+        {
+          cuota: {
+            ...cuota,
+            building: cuota.building
+              ? { id: cuota.building.id, name: cuota.building.nombre }
+              : null,
+            unit: cuota.unit
+              ? { id: cuota.unit.id, unitNumber: cuota.unit.numero }
+              : null,
+          },
+        },
+        { status: 201 }
+      );
     }
   } catch (error: any) {
     if (error instanceof z.ZodError) {
