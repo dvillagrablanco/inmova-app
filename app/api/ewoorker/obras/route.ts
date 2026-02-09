@@ -108,6 +108,9 @@ export async function POST(request: NextRequest) {
       categoria,
       subcategorias,
       especialidadesRequeridas,
+      unidadesObra,
+      tipoContrato,
+      formaPago,
       presupuestoMinimo,
       presupuestoMaximo,
       fechaInicioDeseada,
@@ -150,6 +153,13 @@ export async function POST(request: NextRequest) {
         categoria,
         subcategorias: subcategorias || [],
         especialidadesRequeridas: especialidadesRequeridas || [],
+        unidadesObra: Array.isArray(unidadesObra) ? unidadesObra : [],
+        tipoContrato: typeof tipoContrato === 'string' && tipoContrato.trim()
+          ? tipoContrato
+          : 'ALZADO',
+        formaPago: typeof formaPago === 'string' && formaPago.trim()
+          ? formaPago
+          : 'MENSUAL',
         provincia,
         municipio,
         direccion,
