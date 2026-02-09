@@ -504,7 +504,9 @@ async function processDocumentsAsync(
             aiModel: analysis.processingMetadata.modelUsed,
             summary: analysis.summary,
             documentType: analysis.classification.specificType,
-            keyEntities: analysis.extractedFields as Prisma.InputJsonValue,
+            keyEntities: JSON.parse(
+              JSON.stringify(analysis.extractedFields)
+            ) as Prisma.InputJsonValue,
             overallConfidence: analysis.classification.confidence,
             hasWarnings: analysis.warnings.length > 0,
             warnings: analysis.warnings,
