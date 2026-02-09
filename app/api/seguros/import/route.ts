@@ -6,6 +6,7 @@ import { validateFile } from '@/lib/file-validation';
 import { parseCSV } from '@/lib/import-service';
 import { S3Service } from '@/lib/s3-service';
 import logger from '@/lib/logger';
+import type { Prisma } from '@prisma/client';
 import * as XLSX from 'xlsx';
 import AdmZip from 'adm-zip';
 
@@ -249,7 +250,7 @@ export async function POST(request: NextRequest) {
 
     const errors: Array<{ row: number; message: string }> = [];
     const warnings: string[] = [];
-    const createData: Array<Record<string, any>> = [];
+    const createData: Prisma.InsuranceCreateManyInput[] = [];
 
     const seenPolicies = new Set<string>();
 
