@@ -51,15 +51,20 @@ export async function GET(
         maxValue: true,
         confidenceScore: true,
         pricePerM2: true,
-        investmentPotential: true,
         reasoning: true,
         keyFactors: true,
-        marketComparison: true,
+        estimatedROI: true,
+        comparables: true,
         recommendations: true,
         model: true,
         createdAt: true,
       },
     });
+    const mappedValuations = valuations.map((valuation) => ({
+      ...valuation,
+      investmentPotential: valuation.estimatedROI ?? null,
+      marketComparison: valuation.comparables ?? null,
+    }));
 
     // Calcular tendencia (si hay múltiples valoraciones)
     let trend = 'stable';
@@ -74,7 +79,7 @@ export async function GET(
 
     return NextResponse.json({
       success: true,
-      data: valuations,
+      data: mappedValuations,
       metadata: {
         count: valuations.length,
         trend,
