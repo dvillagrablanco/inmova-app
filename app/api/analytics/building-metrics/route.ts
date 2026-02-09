@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { generateBuildingMetrics } from '@/lib/analytics-service';
 import { prisma } from '@/lib/db';
 import logger, { logError } from '@/lib/logger';
 
@@ -105,6 +104,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const { generateBuildingMetrics } = (await import('@/lib/analytics-service')) as any;
     const metrics = await generateBuildingMetrics(buildingId);
 
     return NextResponse.json({ metrics }, { status: 201 });

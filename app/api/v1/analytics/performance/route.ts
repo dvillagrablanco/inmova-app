@@ -7,8 +7,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { getPerformanceMetrics } from '@/lib/analytics-service';
-
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
@@ -31,6 +29,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Periodo inválido' }, { status: 400 });
     }
 
+    const { getPerformanceMetrics } = (await import('@/lib/analytics-service')) as any;
     const metrics = await getPerformanceMetrics(period);
 
     return NextResponse.json({

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { generateAnalyticsSnapshot } from '@/lib/analytics-service';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -14,6 +13,7 @@ export async function POST(request: NextRequest) {
     }
 
     const companyId = session?.user?.companyId;
+    const { generateAnalyticsSnapshot } = (await import('@/lib/analytics-service')) as any;
     const snapshot = await generateAnalyticsSnapshot(companyId);
 
     return NextResponse.json({ snapshot }, { status: 201 });

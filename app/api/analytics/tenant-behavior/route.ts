@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { analyzeTenantBehavior } from '@/lib/analytics-service';
 import { prisma } from '@/lib/db';
 import logger, { logError } from '@/lib/logger';
 
@@ -92,6 +91,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const { analyzeTenantBehavior } = (await import('@/lib/analytics-service')) as any;
     const behavior = await analyzeTenantBehavior(tenantId);
 
     return NextResponse.json({ behavior }, { status: 201 });

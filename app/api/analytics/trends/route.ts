@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { getAnalyticsTrends } from '@/lib/analytics-service';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -17,6 +16,7 @@ export async function GET(request: NextRequest) {
     const months = parseInt(searchParams.get('months') || '12');
 
     const companyId = session?.user?.companyId;
+    const { getAnalyticsTrends } = (await import('@/lib/analytics-service')) as any;
     const trends = await getAnalyticsTrends(companyId, months);
 
     return NextResponse.json({ trends });

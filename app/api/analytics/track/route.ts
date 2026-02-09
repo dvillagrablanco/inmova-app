@@ -8,9 +8,8 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { trackEvent, AnalyticsEventName } from '@/lib/analytics-service';
-
 import logger from '@/lib/logger';
+type AnalyticsEventName = string;
 export async function POST(request: NextRequest) {
   try {
     // 1. Obtener sesión (opcional, permite tracking anónimo)
@@ -30,6 +29,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 4. Enviar evento
+    const { trackEvent } = (await import('@/lib/analytics-service')) as any;
     await trackEvent(eventName as AnalyticsEventName, properties || {}, userId);
 
     return NextResponse.json({ success: true });
