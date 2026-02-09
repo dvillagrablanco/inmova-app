@@ -111,9 +111,10 @@ export async function POST(request: NextRequest) {
         data: {
           userId: session.user.id,
           companyId: session.user.companyId || '',
-          userMessage: message,
-          botResponse: response.message || '',
-          context: JSON.stringify(userContext),
+          message,
+          response: response.message || '',
+          context: userContext,
+          suggestedActions: response.suggestedActions || [],
         },
       });
     } catch (dbError) {
