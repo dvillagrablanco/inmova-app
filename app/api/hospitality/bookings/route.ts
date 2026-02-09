@@ -150,7 +150,7 @@ export async function GET(req: NextRequest) {
           select: { titulo: true },
         },
       },
-      orderBy: { checkIn: 'desc' },
+      orderBy: { checkInDate: 'desc' },
       take: 100,
     });
 
