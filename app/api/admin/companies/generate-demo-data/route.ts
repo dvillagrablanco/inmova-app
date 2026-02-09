@@ -142,6 +142,21 @@ function normalizeBuildingType(tipoPropiedad: string): 'residencial' | 'mixto' |
   return 'residencial';
 }
 
+function normalizeUnitType(
+  tipo: string
+): 'vivienda' | 'local' | 'garaje' | 'trastero' | 'oficina' | 'nave_industrial' | 'coworking_space' {
+  const normalized = tipo.trim().toLowerCase();
+
+  if (normalized.includes('garaje')) return 'garaje';
+  if (normalized.includes('trastero')) return 'trastero';
+  if (normalized.includes('oficina')) return 'oficina';
+  if (normalized.includes('coworking')) return 'coworking_space';
+  if (normalized.includes('nave') || normalized.includes('industrial')) return 'nave_industrial';
+  if (normalized.includes('local') || normalized.includes('comercial')) return 'local';
+
+  return 'vivienda';
+}
+
 /**
  * Genera los datos específicos según el escenario
  */
@@ -188,6 +203,7 @@ async function generateScenarioData(companyId: string, config: DemoScenarioConfi
       const unidadData = edificioData.unidades[i];
       const floor = Math.ceil((i + 1) / 2);
       const letter = (i + 1) % 2 === 0 ? 'B' : 'A';
+      const unitType = normalizeUnitType(unidadData.tipo);
 
       const unit = await prisma.unit.create({
         data: {
@@ -195,17 +211,14 @@ async function generateScenarioData(companyId: string, config: DemoScenarioConfi
           numero: unidadData.tipo.includes('habitacion') 
             ? `H${String(i + 1).padStart(2, '0')}` 
             : `${floor}${letter}`,
-          tipo: unidadData.tipo,
+          tipo: unitType,
           planta: floor,
           superficie: unidadData.superficie,
           habitaciones: unidadData.habitaciones,
           banos: unidadData.banos,
-          precioAlquiler: unidadData.precioAlquiler,
+          rentaMensual: unidadData.precioAlquiler,
           estado: 'disponible',
-          activo: true,
-          caracteristicas: unidadData.caracteristicas 
-            ? JSON.stringify(unidadData.caracteristicas) 
-            : null,
+          isDemo: true,
         },
       });
       createdUnits.push(unit);
