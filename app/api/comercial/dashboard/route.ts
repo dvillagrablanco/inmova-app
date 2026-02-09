@@ -61,9 +61,6 @@ export async function GET(request: NextRequest) {
           commercialSpace: {
             select: { nombre: true, tipo: true },
           },
-          tenant: {
-            select: { nombreCompleto: true },
-          },
         },
       }),
 
@@ -80,9 +77,6 @@ export async function GET(request: NextRequest) {
         include: {
           commercialSpace: {
             select: { nombre: true },
-          },
-          tenant: {
-            select: { nombreCompleto: true },
           },
         },
         orderBy: { fechaFin: 'asc' },
@@ -165,7 +159,7 @@ export async function GET(request: NextRequest) {
     const upcomingExpirations = contratosPorVencer.map((c: any) => ({
       id: c.id,
       space: c.commercialSpace?.nombre || 'Espacio',
-      tenant: c.tenant?.nombreCompleto || 'Inquilino',
+      tenant: c.arrendatarioNombre || 'Inquilino',
       date: c.fechaFin.toISOString().split('T')[0],
       daysLeft: Math.ceil((c.fechaFin.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)),
     }));
