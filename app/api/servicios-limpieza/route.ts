@@ -74,7 +74,17 @@ export async function GET(req: NextRequest) {
       where,
       include: {
         listing: {
-          select: { id: true, titulo: true, direccion: true },
+          select: {
+            id: true,
+            titulo: true,
+            unit: {
+              select: {
+                building: {
+                  select: { direccion: true },
+                },
+              },
+            },
+          },
         },
         staff: {
           select: { id: true, nombre: true, telefono: true, foto: true },
@@ -98,9 +108,20 @@ export async function GET(req: NextRequest) {
       return acc;
     }, {} as Record<string, number>);
 
+    const formattedTasks = tasks.map((task) => ({
+      ...task,
+      listing: task.listing
+        ? {
+            id: task.listing.id,
+            titulo: task.listing.titulo,
+            direccion: task.listing.unit?.building?.direccion || '',
+          }
+        : null,
+    }));
+
     return NextResponse.json({
       success: true,
-      data: tasks,
+      data: formattedTasks,
       stats: {
         total: tasks.length,
         pendientes: statsMap['pendiente'] || 0,
