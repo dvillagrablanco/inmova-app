@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const subscription = await prisma.subscription.findFirst({
+    const subscription = await (prisma as any).subscription.findFirst({
       where: {
         companyId: session.user.companyId,
         status: { in: ['active', 'trialing', 'past_due'] },
