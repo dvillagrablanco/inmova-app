@@ -133,10 +133,10 @@ export async function GET(request: NextRequest) {
       );
       const now = new Date();
       const pendingPayments = tenantPayments.filter((payment) =>
-        ['pendiente', 'vencido'].includes(payment.estado)
+        ['pendiente', 'atrasado'].includes(payment.estado)
       );
       const overduePayment = pendingPayments.find(
-        (payment) => payment.estado === 'vencido' || payment.fechaVencimiento < now
+        (payment) => payment.estado === 'atrasado' || payment.fechaVencimiento < now
       );
       const nextPayment = pendingPayments[0];
 
