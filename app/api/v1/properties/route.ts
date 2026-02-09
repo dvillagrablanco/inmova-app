@@ -52,7 +52,7 @@ export const GET = withAPIv1(
     };
 
     const [properties, total] = await Promise.all([
-      prisma.property.findMany({
+      (prisma as any).property.findMany({
         where,
         skip,
         take: limit,
@@ -73,7 +73,7 @@ export const GET = withAPIv1(
           updatedAt: true,
         },
       }),
-      prisma.property.count({ where }),
+      (prisma as any).property.count({ where }),
     ]);
 
     return NextResponse.json(createPaginatedResponse(properties, total, page, limit));
@@ -95,7 +95,7 @@ export const POST = withAPIv1(
     const validated = createPropertySchema.parse(body);
 
     // Crear propiedad
-    const property = await prisma.property.create({
+    const property = await (prisma as any).property.create({
       data: {
         ...validated,
         companyId: auth.companyId!,
