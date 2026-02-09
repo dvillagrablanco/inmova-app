@@ -232,7 +232,7 @@ export async function GET(request: NextRequest) {
     try {
       await prisma.auditLog.create({
         data: {
-          action: 'ZUCCHETTI_CONNECTED',
+          action: 'UPDATE',
           entityType: 'INTEGRATION',
           entityId: company.id,
           companyId: company.id,
