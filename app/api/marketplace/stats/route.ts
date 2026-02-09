@@ -41,14 +41,14 @@ export async function GET(request: NextRequest) {
           estado: 'completada',
         },
         select: {
-          precio: true,
+          precioTotal: true,
         },
       }),
     ]);
 
     // Calcular ingresos totales
     const totalRevenue = bookingsWithRevenue.reduce(
-      (sum, booking) => sum + (booking.precio || 0),
+      (sum, booking) => sum + (booking.precioTotal || 0),
       0
     );
 
