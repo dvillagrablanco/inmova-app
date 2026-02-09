@@ -122,6 +122,9 @@ export async function POST(request: NextRequest) {
       description: `Suscripción de renta - ${contract.unit.building.nombre} - Unidad ${contract.unit.numero}`,
     });
 
+    const currentPeriodStart = subscription.items.data[0]?.current_period_start;
+    const currentPeriodEnd = subscription.items.data[0]?.current_period_end;
+
     // Save subscription to database
     await prisma.stripeSubscription.create({
       data: {
@@ -130,8 +133,12 @@ export async function POST(request: NextRequest) {
         stripeCustomerId: stripeCustomerId,
         stripePriceId: price.id,
         status: subscription.status,
-        currentPeriodStart: new Date(subscription.current_period_start * 1000),
-        currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+        currentPeriodStart: currentPeriodStart
+          ? new Date(currentPeriodStart * 1000)
+          : new Date(),
+        currentPeriodEnd: currentPeriodEnd
+          ? new Date(currentPeriodEnd * 1000)
+          : new Date(),
         cancelAtPeriodEnd: subscription.cancel_at_period_end,
       },
     });
@@ -140,7 +147,9 @@ export async function POST(request: NextRequest) {
       success: true,
       subscriptionId: subscription.id,
       status: subscription.status,
-      nextBillingDate: new Date(subscription.current_period_end * 1000),
+      nextBillingDate: currentPeriodEnd
+        ? new Date(currentPeriodEnd * 1000)
+        : new Date(),
     });
   } catch (error: unknown) {
     logger.error('Error creating subscription:', error);
