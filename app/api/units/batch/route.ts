@@ -84,8 +84,6 @@ export async function POST(req: NextRequest) {
         banos: true,
         rentaMensual: true,
         amueblado: true,
-        admiteMascotas: true,
-        tieneGaraje: true,
         imagenes: true,
         createdAt: true,
         building: {
@@ -105,6 +103,8 @@ export async function POST(req: NextRequest) {
       ...unit,
       superficie: Number(unit.superficie || 0),
       rentaMensual: Number(unit.rentaMensual || 0),
+      admiteMascotas: null,
+      tieneGaraje: null,
       building: unit.building
         ? {
             id: unit.building.id,
