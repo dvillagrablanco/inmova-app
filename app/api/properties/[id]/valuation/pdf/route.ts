@@ -30,7 +30,7 @@ export async function GET(
         building: true,
         tenant: {
           select: {
-            nombre: true,
+            nombreCompleto: true,
             email: true,
           },
         },
@@ -41,7 +41,7 @@ export async function GET(
       return NextResponse.json({ error: 'Propiedad no encontrada' }, { status: 404 });
     }
 
-    if (property.companyId !== session.user.companyId) {
+    if (property.building?.companyId !== session.user.companyId) {
       return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
     }
 
@@ -225,10 +225,6 @@ function generateValuationHTML(property: any, valuation: any, userName: string):
         <div class="value">${property.building.direccion}</div>
       </div>
       <div class="info-item">
-        <div class="label">Ciudad</div>
-        <div class="value">${property.building.ciudad}</div>
-      </div>
-      <div class="info-item">
         <div class="label">Superficie</div>
         <div class="value">${property.superficie} m²</div>
       </div>
@@ -268,7 +264,7 @@ function generateValuationHTML(property: any, valuation: any, userName: string):
       ${valuation.keyFactors.map((factor: string) => `<li>${factor}</li>`).join('')}
     </ul>
     
-    <p><strong>Potencial de Inversión:</strong> ${valuation.investmentPotential}</p>
+    <p><strong>Potencial de Inversión:</strong> ${valuation.estimatedROI ? `${valuation.estimatedROI}%` : 'N/A'}</p>
   </div>
 
   ${valuation.recommendations && valuation.recommendations.length > 0 ? `
@@ -296,11 +292,11 @@ function generateValuationHTML(property: any, valuation: any, userName: string):
       </div>
       <div class="info-item">
         <div class="label">Precio Medio Zona</div>
-        <div class="value">${(valuation.marketComparison?.avgPricePerM2 || 0).toLocaleString('es-ES')} €/m²</div>
+        <div class="value">${(valuation.avgPricePerM2 || 0).toLocaleString('es-ES')} €/m²</div>
       </div>
     </div>
     <p style="margin-top: 15px; color: #666; font-size: 14px;">
-      ${valuation.marketComparison?.analysis || 'Análisis de mercado no disponible'}
+      ${valuation.marketTrend ? `Tendencia: ${valuation.marketTrend}` : 'Análisis de mercado no disponible'}
     </p>
   </div>
 
