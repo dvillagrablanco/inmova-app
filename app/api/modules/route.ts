@@ -88,7 +88,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Rol no autorizado' }, { status: 403 });
     }
     const userVertical =
-      resolveBusinessVertical(session.user.vertical) || 'alquiler_tradicional';
+      resolveBusinessVertical(session.user.businessVertical) || 'alquiler_tradicional';
 
     // Obtener datos de módulos activos
     const activeModules = activeModuleIds.map(id => MODULES[id]).filter(Boolean);
