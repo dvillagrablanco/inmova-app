@@ -39,12 +39,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Solo admins pueden configurar integraciones
-    if (
-      session.user.role !== 'ADMIN' &&
-      session.user.role !== 'SUPERADMIN' &&
-      session.user.role !== 'administrador' &&
-      session.user.role !== 'super_admin'
-    ) {
+    const allowedRoles = new Set(['administrador', 'super_admin']);
+    if (session.user.role && !allowedRoles.has(session.user.role)) {
       return NextResponse.json(
         { error: 'Solo administradores pueden configurar integraciones' },
         { status: 403 }
