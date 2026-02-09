@@ -213,10 +213,12 @@ export async function GET() {
       _sum: { monto: true },
     });
 
-    let expensesChartData = expensesByCategory.map((cat) => ({
-      name: cat.categoria || 'Otros',
-      value: Number(cat._sum.monto) || 0,
-    }));
+    let expensesChartData: Array<{ name: string; value: number }> = expensesByCategory.map(
+      (cat) => ({
+        name: cat.categoria,
+        value: Number(cat._sum.monto) || 0,
+      })
+    );
 
     if (useAccountingExpenses) {
       const accountingExpensesByCategory = accountingTransactions.reduce(
