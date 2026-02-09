@@ -48,19 +48,14 @@ export async function GET(request: NextRequest) {
       id: garden.id,
       nombre: garden.nombre,
       ubicacion: garden.ubicacion,
-      superficie: garden.superficie,
-      numeroParcelas: garden.numeroParcelas,
-      parcelasDisponibles: garden.parcelas.filter((p) => p.estado === 'DISPONIBLE').length,
-      tipoRiego: garden.tipoRiego,
-      estado: garden.estado,
-      fechaInauguracion: garden.fechaInauguracion,
-      horario: garden.horario,
-      precioMensual: garden.precioMensual,
+      superficie: garden.metrosCuadrados,
+      numeroParcelas: garden.parcelas.length,
+      parcelasDisponibles: garden.parcelas.filter((p) => p.estado === 'disponible').length,
+      tipoRiego: garden.tipoCultivo,
+      estado: garden.activo ? 'activo' : 'inactivo',
       buildingId: garden.buildingId,
       buildingName: garden.building?.nombre,
       descripcion: garden.descripcion,
-      cultivosPermitidos: garden.cultivosPermitidos,
-      servicios: garden.servicios,
     }));
 
     return NextResponse.json(formattedGardens);
@@ -85,13 +80,8 @@ export async function POST(request: NextRequest) {
       numeroParcelas,
       tipoRiego,
       estado,
-      fechaInauguracion,
-      horario,
-      precioMensual,
       buildingId,
       descripcion,
-      cultivosPermitidos,
-      servicios,
     } = body;
 
     // Validaciones básicas
@@ -115,24 +105,44 @@ export async function POST(request: NextRequest) {
     }
 
     // Crear huerto
+    const metrosCuadrados = Number(superficie);
+    const totalParcelas = Number(numeroParcelas);
+    const activo =
+      typeof estado === 'boolean'
+        ? estado
+        : estado
+          ? String(estado).toLowerCase() !== 'inactivo'
+          : true;
+
     const garden = await prisma.urbanGarden.create({
       data: {
         companyId: session.user.companyId,
         buildingId,
         nombre,
         ubicacion,
-        superficie: Number(superficie),
-        numeroParcelas: Number(numeroParcelas),
-        tipoRiego: tipoRiego || 'GOTEO',
-        estado: estado || 'ACTIVO',
-        fechaInauguracion: fechaInauguracion ? new Date(fechaInauguracion) : new Date(),
-        horario: horario || '08:00 - 20:00',
-        precioMensual: precioMensual ? Number(precioMensual) : 0,
+        metrosCuadrados,
+        tipoCultivo: tipoRiego || 'organico',
+        activo,
         descripcion,
-        cultivosPermitidos,
-        servicios,
       },
     });
+
+    if (Number.isFinite(totalParcelas) && totalParcelas > 0) {
+      const metrosPorParcela =
+        Number.isFinite(metrosCuadrados) && totalParcelas > 0
+          ? metrosCuadrados / totalParcelas
+          : 0;
+      const parcelas = Array.from({ length: totalParcelas }, (_, index) => ({
+        gardenId: garden.id,
+        numeroParcela: `${index + 1}`,
+        metrosCuadrados: metrosPorParcela,
+        estado: 'disponible',
+      }));
+
+      await prisma.gardenPlot.createMany({
+        data: parcelas,
+      });
+    }
 
     return NextResponse.json(garden, { status: 201 });
   } catch (error: any) {
