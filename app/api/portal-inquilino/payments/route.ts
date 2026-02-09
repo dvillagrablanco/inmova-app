@@ -62,7 +62,6 @@ export async function GET(request: NextRequest) {
                   select: {
                     nombre: true,
                     direccion: true,
-                    ciudad: true,
                   },
                 },
               },
@@ -89,7 +88,6 @@ export async function GET(request: NextRequest) {
       propiedad: {
         nombre: payment.contract.unit.building.nombre,
         direccion: payment.contract.unit.building.direccion,
-        ciudad: payment.contract.unit.building.ciudad,
         unidad: payment.contract.unit.numero,
       },
     }));
