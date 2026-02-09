@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
 
     if (!result.success) {
       return NextResponse.json(
-        { error: result.error || 'Error al obtener celebraciones' },
+        { error: 'Error al obtener celebraciones' },
         { status: 500 }
       );
     }
