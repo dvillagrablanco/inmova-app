@@ -15,7 +15,7 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 const unitUpdateSchema = z.object({
-  buildingId: z.string().uuid().optional(),
+  buildingId: z.string().cuid().optional(),
   numero: z.string().min(1).max(50).optional(),
   tipo: z.enum(['vivienda', 'local', 'garaje', 'trastero']).optional(),
   estado: z.enum(['disponible', 'ocupada', 'en_mantenimiento']).optional(),

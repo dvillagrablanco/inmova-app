@@ -99,6 +99,10 @@ export async function GET(req: NextRequest) {
       };
     });
 
+    if (!usePagination) {
+      return NextResponse.json(buildingsWithMetrics);
+    }
+
     return NextResponse.json({
       data: buildingsWithMetrics,
       pagination: {
