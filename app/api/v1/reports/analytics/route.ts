@@ -10,7 +10,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { generateAnalyticsReportPDF } from '@/lib/pdf-generator-service';
-import { getUsageMetrics, getAIMetrics } from '@/lib/analytics-service';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -50,8 +49,15 @@ export async function GET(request: NextRequest) {
     }
 
     // Obtener métricas
-    const usageMetrics = await getUsageMetrics(session.user.companyId, periodParam);
-    const aiMetrics = await getAIMetrics(session.user.companyId, periodParam);
+    const analyticsService = (await import('@/lib/analytics-service')) as any;
+    const usageMetrics = await analyticsService.getUsageMetrics(
+      session.user.companyId,
+      periodParam
+    );
+    const aiMetrics = await analyticsService.getAIMetrics(
+      session.user.companyId,
+      periodParam
+    );
 
     // Combinar métricas
     const metrics = {
