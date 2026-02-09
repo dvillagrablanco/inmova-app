@@ -219,17 +219,23 @@ export async function DELETE(
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = getCompanyScope(session, request);
-    if (!companyId) {
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: session.user.role as any,
+      primaryCompanyId: session.user?.companyId,
+      request,
+    });
+
+    if (!scope.activeCompanyId) {
       return NextResponse.json({ error: 'Empresa no definida' }, { status: 400 });
     }
 
     const existing = await prisma.unit.findFirst({
       where: {
         id: params.id,
-        building: { companyId },
+        building: { companyId: { in: scope.scopeCompanyIds } },
       },
-      select: { id: true },
+      select: { id: true, building: { select: { companyId: true } } },
     });
 
     if (!existing) {
@@ -240,9 +246,10 @@ export async function DELETE(
       where: { id: existing.id },
     });
 
-    await invalidateUnitsCache(companyId);
-    await invalidateBuildingsCache(companyId);
-    await invalidateDashboardCache(companyId);
+    const targetCompanyId = existing.building?.companyId || scope.activeCompanyId;
+    await invalidateUnitsCache(targetCompanyId);
+    await invalidateBuildingsCache(targetCompanyId);
+    await invalidateDashboardCache(targetCompanyId);
 
     return NextResponse.json({ success: true });
   } catch (error) {
