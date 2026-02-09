@@ -60,15 +60,18 @@ export async function POST(request: NextRequest) {
     };
 
     // 4. Generar respuesta del chatbot
-    const botResponse = await generateChatbotResponse(message, {
-      ...context,
-      conversationHistory,
-    });
+    const botResponse = await generateChatbotResponse(
+      {
+        ...context,
+        conversationHistory,
+      },
+      message,
+      conversationHistory
+    );
 
     // 5. Guardar la interacción en BD
-    await saveChatbotInteraction(user.id, companyId, {
-      message,
-      response: botResponse,
+    await saveChatbotInteraction(user.id, message, botResponse, {
+      companyId,
       context: {
         ...context,
         historyCount: conversationHistory.length,
@@ -76,7 +79,11 @@ export async function POST(request: NextRequest) {
     });
 
     // 6. Generar sugerencias proactivas
-    const suggestions = await generateProactiveSuggestions(user.id, companyId);
+    const suggestions = await generateProactiveSuggestions({
+      userId: user.id,
+      companyId,
+      ...context,
+    });
 
     return NextResponse.json({
       response: botResponse,

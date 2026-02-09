@@ -361,8 +361,8 @@ export async function getChatbotHistory(userId: string, companyId: string) {
 }
 
 export async function generateChatbotResponse(
-  message: string,
   context: any,
+  message: string,
   history: any[] = []
 ) {
   // TODO: Implement chatbot response generation
@@ -373,23 +373,20 @@ export async function generateChatbotResponse(
 
 export async function saveChatbotInteraction(
   userId: string,
-  companyId: string,
-  payload: {
-    message: string;
-    response: string;
-    context?: any;
-  }
+  message: string,
+  response: string,
+  metadata: any = {}
 ) {
   // TODO: Implement chatbot interaction saving
   void userId;
-  void companyId;
-  void payload;
+  void message;
+  void response;
+  void metadata;
   return { success: true };
 }
 
-export async function generateProactiveSuggestions(userId: string, companyId: string) {
+export async function generateProactiveSuggestions(context: any) {
   // TODO: Implement proactive suggestions
-  void userId;
-  void companyId;
+  void context;
   return [];
 }
