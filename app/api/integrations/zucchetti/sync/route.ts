@@ -308,7 +308,7 @@ async function syncExpenses(
         const entryData = {
           entry_date:
             expense.fecha?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0],
-          description: `${expense.categoria || 'Gasto'} - ${expense.descripcion || ''} - ${expense.provider?.nombre || 'Proveedor'}`,
+          description: `${expense.categoria || 'Gasto'} - ${expense.concepto || ''} - ${expense.provider?.nombre || 'Proveedor'}`,
           reference: `EXPENSE_${expense.id}`,
           lines: [
             {
