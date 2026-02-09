@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
       where,
       include: {
         building: {
-          select: { id: true, name: true },
+          select: { id: true, nombre: true },
         },
       },
       orderBy: { createdAt: 'desc' },
@@ -82,6 +82,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       fondos: fondos.map(f => ({
         ...f,
+        building: f.building ? { id: f.building.id, name: f.building.nombre } : null,
         movimientos: f.movimientos as any[],
         porcentajeObjetivo: f.saldoObjetivo 
           ? Math.round((f.saldoActual / f.saldoObjetivo) * 100)
@@ -200,11 +201,21 @@ export async function POST(request: NextRequest) {
           activo: true,
         },
         include: {
-          building: { select: { id: true, name: true } },
+          building: { select: { id: true, nombre: true } },
         },
       });
 
-      return NextResponse.json({ fondo }, { status: 201 });
+      return NextResponse.json(
+        {
+          fondo: {
+            ...fondo,
+            building: fondo.building
+              ? { id: fondo.building.id, name: fondo.building.nombre }
+              : null,
+          },
+        },
+        { status: 201 }
+      );
     }
   } catch (error: any) {
     if (error instanceof z.ZodError) {
