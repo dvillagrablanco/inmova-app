@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
               fileType: ocrResult.fileType,
               pageCount: ocrResult.pageCount,
             }
-          : null,
+          : undefined,
         confianzaOCR: ocrResult?.confidence ?? null,
         requiereRevisionManual,
         observaciones: ocrErrorMessage
