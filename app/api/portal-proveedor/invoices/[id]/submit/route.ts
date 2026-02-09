@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import type { Prisma } from '@prisma/client';
 import { requireProviderAuth } from '@/lib/provider-auth';
 import logger from '@/lib/logger';
 
@@ -63,7 +64,7 @@ export async function POST(
       `Factura ${invoice.numeroFactura} enviada por proveedor ${auth.provider.nombre}`
     );
 
-    const notificationData = {
+    const notificationData: Prisma.NotificationUncheckedCreateInput = {
       companyId: invoice.companyId,
       tipo: 'info',
       titulo: 'Factura de proveedor enviada',
