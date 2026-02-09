@@ -93,7 +93,13 @@ export async function GET(request: NextRequest) {
     });
 
     // Calcular métricas por mes
-    const monthlyData = [];
+    const monthlyData: Array<{
+      period: string;
+      revenue: number;
+      revenueChange: number;
+      occupancy: number;
+      activeContracts: number;
+    }> = [];
     for (let i = monthsBack - 1; i >= 0; i--) {
       const monthDate = subMonths(now, i);
       const monthStart = startOfMonth(monthDate);
