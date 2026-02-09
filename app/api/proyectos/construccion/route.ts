@@ -47,7 +47,7 @@ function mapPhase(value: string | undefined): ConstructionPhase {
     return 'PLANIFICACION';
   }
   const upper = value.toUpperCase();
-  if (CONSTRUCTION_PHASES.has(upper)) {
+  if (CONSTRUCTION_PHASES.has(upper as ConstructionPhase)) {
     return upper as ConstructionPhase;
   }
   const statusMap: Record<string, ConstructionPhase> = {
