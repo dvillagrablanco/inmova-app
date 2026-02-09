@@ -173,8 +173,8 @@ export async function PUT(
         building: {
           select: {
             id: true,
-            name: true,
-            address: true,
+            nombre: true,
+            direccion: true,
           },
         },
       },
