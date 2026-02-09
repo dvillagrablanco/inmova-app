@@ -3,17 +3,19 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
+import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 const createPropietarioSchema = z.object({
   buildingId: z.string().min(1),
-  unitId: z.string().min(1),
+  unitId: z.string().min(1).optional(),
   nombre: z.string().min(1),
   apellidos: z.string().min(1),
   dni: z.string().optional(),
-  email: z.string().email().optional(),
+  email: z.string().email(),
   telefono: z.string().optional(),
   direccionCorrespondencia: z.string().optional(),
   coeficienteParticipacion: z.number().min(0).max(100).default(0),
@@ -23,6 +25,13 @@ const createPropietarioSchema = z.object({
   esTesorero: z.boolean().default(false),
   notas: z.string().optional(),
 });
+
+const splitNombreCompleto = (nombreCompleto: string) => {
+  const parts = nombreCompleto.trim().split(/\s+/);
+  const nombre = parts.shift() || '';
+  const apellidos = parts.join(' ');
+  return { nombre, apellidos };
+};
 
 // GET - Listar propietarios de una comunidad/edificio
 export async function GET(request: NextRequest) {
@@ -84,32 +93,35 @@ export async function GET(request: NextRequest) {
     const owners = await prisma.owner.findMany({
       where: {
         companyId,
-        buildings: {
-          some: { id: targetBuildingId },
-        },
+        ownerBuildings: { some: { buildingId: targetBuildingId } },
       },
       include: {
-        buildings: {
-          where: { id: targetBuildingId },
-          select: { id: true, nombre: true },
+        ownerBuildings: {
+          where: { buildingId: targetBuildingId },
+          include: {
+            building: { select: { id: true, nombre: true } },
+          },
         },
       },
     });
 
     // Formatear respuesta combinando datos
-    const propietarios = owners.map(owner => ({
-      id: owner.id,
-      nombre: owner.nombre || '',
-      apellidos: owner.apellidos || '',
-      nombreCompleto: `${owner.nombre || ''} ${owner.apellidos || ''}`.trim(),
-      dni: owner.dni,
-      email: owner.email,
-      telefono: owner.telefono,
-      direccion: owner.direccion,
-      tipo: owner.tipo,
-      activo: owner.activo,
-      createdAt: owner.createdAt,
-    }));
+    const propietarios = owners.map(owner => {
+      const { nombre, apellidos } = splitNombreCompleto(owner.nombreCompleto || '');
+      return ({
+        id: owner.id,
+        nombre,
+        apellidos,
+        nombreCompleto: owner.nombreCompleto,
+        dni: owner.dni,
+        email: owner.email,
+        telefono: owner.telefono,
+        direccion: owner.direccion,
+        tipo: 'propietario',
+        activo: owner.activo,
+        createdAt: owner.createdAt,
+      });
+    });
 
     // Calcular estadísticas
     const stats = {
@@ -167,36 +179,51 @@ export async function POST(request: NextRequest) {
     }
 
     // Crear o actualizar propietario en la tabla Owner
+    const nombreCompleto = `${validated.nombre} ${validated.apellidos}`.trim();
+    const rawPassword = crypto.randomBytes(16).toString('hex');
+    const hashedPassword = await bcrypt.hash(rawPassword, 10);
+
     const propietario = await prisma.owner.create({
       data: {
         companyId,
-        nombre: validated.nombre,
-        apellidos: validated.apellidos,
+        nombreCompleto,
         dni: validated.dni,
         email: validated.email,
         telefono: validated.telefono,
         direccion: validated.direccionCorrespondencia,
-        tipo: 'persona_fisica',
+        password: hashedPassword,
         activo: true,
-        buildings: {
-          connect: { id: validated.buildingId },
+        createdBy: (session.user as any).id,
+        ownerBuildings: {
+          create: {
+            buildingId: validated.buildingId,
+            companyId,
+          },
         },
       },
       include: {
-        buildings: {
-          select: { id: true, nombre: true },
+        ownerBuildings: {
+          include: {
+            building: { select: { id: true, nombre: true } },
+          },
         },
       },
     });
 
+    const { nombre, apellidos } = splitNombreCompleto(propietario.nombreCompleto || '');
     return NextResponse.json(
       {
         propietario: {
-          ...propietario,
-          buildings: propietario.buildings?.map((building) => ({
-            id: building.id,
-            name: building.nombre,
-          })),
+          id: propietario.id,
+          nombre,
+          apellidos,
+          nombreCompleto: propietario.nombreCompleto,
+          dni: propietario.dni,
+          email: propietario.email,
+          telefono: propietario.telefono,
+          direccion: propietario.direccion,
+          tipo: 'propietario',
+          activo: propietario.activo,
         },
       },
       { status: 201 }
