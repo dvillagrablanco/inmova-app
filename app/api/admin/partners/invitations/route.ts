@@ -47,14 +47,23 @@ export async function GET(request: NextRequest) {
       }),
       prisma.partnerInvitation.groupBy({
         by: ['estado'],
+        orderBy: { estado: 'asc' },
         _count: { _all: true },
       }),
     ]);
 
-    const total = statusCounts.reduce((sum, item) => sum + item._count._all, 0);
-    const pendientes = statusCounts.find((item) => item.estado === 'PENDING')?._count._all || 0;
-    const aceptadas = statusCounts.find((item) => item.estado === 'ACCEPTED')?._count._all || 0;
-    const expiradas = statusCounts.find((item) => item.estado === 'EXPIRED')?._count._all || 0;
+    const getCount = (item?: (typeof statusCounts)[number]) => {
+      if (!item || typeof item._count !== 'object' || item._count === null) {
+        return 0;
+      }
+      const countValue = (item._count as { _all?: number })._all;
+      return typeof countValue === 'number' ? countValue : 0;
+    };
+
+    const total = statusCounts.reduce((sum, item) => sum + getCount(item), 0);
+    const pendientes = getCount(statusCounts.find((item) => item.estado === 'PENDING'));
+    const aceptadas = getCount(statusCounts.find((item) => item.estado === 'ACCEPTED'));
+    const expiradas = getCount(statusCounts.find((item) => item.estado === 'EXPIRED'));
 
     const stats = {
       total,
