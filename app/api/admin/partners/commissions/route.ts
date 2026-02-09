@@ -169,7 +169,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Comisión no encontrada' }, { status: 404 });
     }
 
-    let newEstado: 'PENDING' | 'APPROVED' | 'PAID' | 'CANCELLED';
+    let newEstado: 'APPROVED' | 'PAID' | 'CANCELLED';
     let fechaPago: Date | null = null;
 
     switch (validated.action) {

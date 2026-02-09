@@ -99,9 +99,19 @@ export async function GET(request: NextRequest) {
     ]);
 
     return NextResponse.json({
-      cuotas: cuotas.map(c => ({
-        ...c,
-        importeTotal: c.importeBase * c.coeficiente,
+      cuotas: cuotas.map((cuota) => ({
+        ...cuota,
+        building: cuota.building
+          ? { id: cuota.building.id, name: cuota.building.nombre }
+          : null,
+        unit: cuota.unit
+          ? {
+              id: cuota.unit.id,
+              unitNumber: cuota.unit.numero,
+              type: cuota.unit.tipo,
+            }
+          : null,
+        importeTotal: cuota.importeBase * cuota.coeficiente,
       })),
       pagination: {
         page,
@@ -154,7 +164,8 @@ export async function POST(request: NextRequest) {
       const totalM2 = unidades.reduce((sum, u) => sum + (u.superficie || 0), 0);
 
       const cuotasData = unidades.map(unidad => {
-        const coeficiente = totalM2 > 0 ? (unidad.superficie || 0) / totalM2 : 1 / unidades.length;
+        const coeficiente =
+          totalM2 > 0 ? (unidad.superficie || 0) / totalM2 : 1 / unidades.length;
         return {
           companyId,
           buildingId,
@@ -208,7 +219,20 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      return NextResponse.json({ cuota }, { status: 201 });
+      return NextResponse.json(
+        {
+          cuota: {
+            ...cuota,
+            building: cuota.building
+              ? { id: cuota.building.id, name: cuota.building.nombre }
+              : null,
+            unit: cuota.unit
+              ? { id: cuota.unit.id, unitNumber: cuota.unit.numero }
+              : null,
+          },
+        },
+        { status: 201 }
+      );
     }
   } catch (error: any) {
     if (error instanceof z.ZodError) {

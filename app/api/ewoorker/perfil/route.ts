@@ -17,21 +17,37 @@ export async function GET(request: NextRequest) {
 
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
+      select: { companyId: true },
     });
 
-    if (!user) {
-      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
+    if (!user?.companyId) {
+      return NextResponse.json({ error: 'Usuario sin empresa' }, { status: 400 });
     }
 
     const perfil = await prisma.ewoorkerPerfilEmpresa.findUnique({
-      where: { userId: user.id },
+      where: { companyId: user.companyId },
+      include: {
+        company: {
+          select: {
+            nombre: true,
+            emailContacto: true,
+          },
+        },
+      },
     });
 
     if (!perfil) {
       return NextResponse.json({ error: 'Perfil no encontrado' }, { status: 404 });
     }
 
-    return NextResponse.json({ perfil });
+    const { company, ...perfilBase } = perfil;
+    const perfilFormateado = {
+      ...perfilBase,
+      nombreEmpresa: company?.nombre || 'Sin nombre',
+      emailContacto: company?.emailContacto || null,
+    };
+
+    return NextResponse.json({ perfil: perfilFormateado });
 
   } catch (error: any) {
     logger.error('[eWoorker Perfil GET Error]:', error);
@@ -62,26 +78,49 @@ export async function PUT(request: NextRequest) {
 
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
+      select: { companyId: true },
     });
 
-    if (!user) {
-      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
+    if (!user?.companyId) {
+      return NextResponse.json({ error: 'Usuario sin empresa' }, { status: 400 });
     }
 
     const body = await request.json();
     const data = updatePerfilSchema.parse(body);
 
+    const { emailContacto, ...perfilData } = data;
     const perfil = await prisma.ewoorkerPerfilEmpresa.update({
-      where: { userId: user.id },
+      where: { companyId: user.companyId },
       data: {
-        ...data,
-        web: data.web || null,
+        ...perfilData,
+        web: perfilData.web || null,
+        ...(emailContacto !== undefined
+          ? {
+              company: {
+                update: { emailContacto },
+              },
+            }
+          : {}),
+      },
+      include: {
+        company: {
+          select: {
+            nombre: true,
+            emailContacto: true,
+          },
+        },
       },
     });
 
+    const { company, ...perfilBase } = perfil;
+
     return NextResponse.json({
       success: true,
-      perfil,
+      perfil: {
+        ...perfilBase,
+        nombreEmpresa: company?.nombre || 'Sin nombre',
+        emailContacto: company?.emailContacto || null,
+      },
     });
 
   } catch (error: any) {

@@ -233,6 +233,10 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
     return;
   }
 
+  const subscriptionItem = subscription.items.data[0];
+  const currentPeriodStart = subscriptionItem?.current_period_start;
+  const currentPeriodEnd = subscriptionItem?.current_period_end;
+
   // Upsert subscription
   await prisma.stripeSubscription.upsert({
     where: { stripeSubscriptionId: subscription.id },
@@ -242,8 +246,12 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
       stripeCustomerId: subscription.customer as string,
       stripePriceId: subscription.items.data[0]?.price.id,
       status: subscription.status,
-      currentPeriodStart: new Date(subscription.current_period_start * 1000),
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      currentPeriodStart: currentPeriodStart
+        ? new Date(currentPeriodStart * 1000)
+        : new Date(),
+      currentPeriodEnd: currentPeriodEnd
+        ? new Date(currentPeriodEnd * 1000)
+        : new Date(),
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
       canceledAt: subscription.canceled_at
         ? new Date(subscription.canceled_at * 1000)
@@ -251,8 +259,12 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
     },
     update: {
       status: subscription.status,
-      currentPeriodStart: new Date(subscription.current_period_start * 1000),
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      currentPeriodStart: currentPeriodStart
+        ? new Date(currentPeriodStart * 1000)
+        : new Date(),
+      currentPeriodEnd: currentPeriodEnd
+        ? new Date(currentPeriodEnd * 1000)
+        : new Date(),
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
       canceledAt: subscription.canceled_at
         ? new Date(subscription.canceled_at * 1000)
@@ -276,13 +288,12 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 }
 
 function getInvoiceSubscriptionId(invoice: Stripe.Invoice): string | null {
-  if (!invoice.subscription) {
+  const subscription = invoice.parent?.subscription_details?.subscription;
+  if (!subscription) {
     return null;
   }
 
-  return typeof invoice.subscription === 'string'
-    ? invoice.subscription
-    : invoice.subscription.id;
+  return typeof subscription === 'string' ? subscription : subscription.id;
 }
 
 async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {

@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Obtener edificios para el cumplimiento
-    const buildings = await prisma.building.findMany({
+    const rawBuildings = await prisma.building.findMany({
       where: {
         companyId,
         ...(targetBuildingId && { id: targetBuildingId }),
@@ -61,6 +61,14 @@ export async function GET(request: NextRequest) {
         numeroUnidades: true,
       },
     });
+
+    const buildings = rawBuildings.map((building) => ({
+      id: building.id,
+      name: building.nombre,
+      address: building.direccion,
+      yearBuilt: building.anoConstructor ?? null,
+      totalUnits: building.numeroUnidades ?? null,
+    }));
 
     const buildingIds = buildings.map((building) => building.id);
     const now = new Date();
@@ -153,8 +161,8 @@ export async function GET(request: NextRequest) {
 
     // Calcular estado de cumplimiento por edificio
     const cumplimiento = buildings.map((building) => {
-      const anoConstruccion = building.anoConstructor || 2000;
-      const antiguedad = new Date().getFullYear() - anoConstruccion;
+      const añoConstruccion = building.yearBuilt ?? 2000;
+      const antiguedad = new Date().getFullYear() - añoConstruccion;
       
       // ITE obligatoria para edificios >50 años
       const requiereITE = antiguedad >= 50;

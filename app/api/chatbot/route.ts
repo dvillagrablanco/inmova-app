@@ -44,36 +44,39 @@ export async function POST(request: NextRequest) {
     // 3. Obtener contexto del usuario
     const onboardingData = user.companyId
       ? await getOnboardingProgress(user.id, user.companyId)
-      : { percentage: 0, percentageComplete: 0, tasks: [] };
-    const conversationHistory = includeHistory
-      ? await getChatbotHistory(user.id, user.companyId || '')
-      : [];
+      : null;
+    const companyId = user.companyId || '';
+    const conversationHistory =
+      includeHistory && companyId ? await getChatbotHistory(user.id, companyId) : [];
 
     const context = {
       userId: user.id,
       userName: user.name || 'Usuario',
       vertical: user.vertical,
       experienceLevel: user.experienceLevel,
-      onboardingProgress: onboardingData?.percentage ?? onboardingData?.percentageComplete ?? 0,
-      pendingTasks: onboardingData?.tasks?.filter((t: any) => t.status === 'PENDING') || [],
-      completedTasks: onboardingData?.tasks?.filter((t: any) => t.status === 'COMPLETED') || [],
+      onboardingProgress: onboardingData?.percentage ?? 0,
+      pendingTasks: onboardingData?.tasks?.filter((t: any) => t.status === 'pending') || [],
+      completedTasks: onboardingData?.tasks?.filter((t: any) => t.status === 'completed') || [],
     };
 
     // 4. Generar respuesta del chatbot
-    const botResponse = await generateChatbotResponse(
-      context,
-      message
-    );
+    const botResponse = await generateChatbotResponse(message, {
+      ...context,
+      conversationHistory,
+    });
 
     // 5. Guardar la interacción en BD
-    await saveChatbotInteraction(user.id, message, botResponse, {
-      vertical: user.vertical,
-      onboardingProgress: context.onboardingProgress,
-      historyCount: conversationHistory.length,
+    await saveChatbotInteraction(user.id, companyId, {
+      message,
+      response: botResponse,
+      context: {
+        ...context,
+        historyCount: conversationHistory.length,
+      },
     });
 
     // 6. Generar sugerencias proactivas
-    const suggestions = generateProactiveSuggestions(context);
+    const suggestions = await generateProactiveSuggestions(user.id, companyId);
 
     return NextResponse.json({
       response: botResponse,

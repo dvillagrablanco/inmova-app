@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 
 const createFondoSchema = z.object({
   buildingId: z.string().min(1),
-  tipo: z.enum(['reserva', 'obras', 'contingencia', 'mejoras', 'emergencia', 'otro']),
+  tipo: z.enum(['reserva', 'obras', 'mejoras', 'emergencia', 'contingencia', 'otro']),
   nombre: z.string().min(1),
   descripcion: z.string().optional(),
   saldoObjetivo: z.number().optional(),
@@ -24,6 +24,24 @@ const movimientoSchema = z.object({
   fecha: z.string().datetime().optional(),
   referencia: z.string().optional(),
 });
+
+type FondoTipoDb = 'reserva' | 'obras' | 'contingencia';
+
+const normalizeFondoTipo = (tipo?: string | null): FondoTipoDb | null => {
+  if (!tipo) return null;
+  const normalized = tipo.trim().toLowerCase();
+  if (normalized === 'obras' || normalized === 'mejoras') return 'obras';
+  if (normalized === 'contingencia' || normalized === 'emergencia') return 'contingencia';
+  if (normalized === 'reserva' || normalized === 'otro') return 'reserva';
+  return null;
+};
+
+const mapFondoTipoToUi = (
+  tipo: FondoTipoDb
+): 'reserva' | 'obras' | 'mejoras' | 'emergencia' | 'otro' => {
+  if (tipo === 'contingencia') return 'emergencia';
+  return tipo;
+};
 
 // GET - Listar fondos
 export async function GET(request: NextRequest) {
@@ -54,7 +72,8 @@ export async function GET(request: NextRequest) {
     // Construir filtros
     const where: any = { companyId };
     if (targetBuildingId) where.buildingId = targetBuildingId;
-    if (tipo) where.tipo = tipo;
+    const normalizedTipo = normalizeFondoTipo(tipo);
+    if (normalizedTipo) where.tipo = normalizedTipo;
     if (activo !== null && activo !== undefined) {
       where.activo = activo === 'true';
     }
@@ -82,6 +101,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       fondos: fondos.map(f => ({
         ...f,
+        tipo: mapFondoTipoToUi(f.tipo as FondoTipoDb),
+        building: f.building ? { id: f.building.id, name: f.building.nombre } : null,
         movimientos: f.movimientos as any[],
         porcentajeObjetivo: f.saldoObjetivo 
           ? Math.round((f.saldoActual / f.saldoObjetivo) * 100)
@@ -170,19 +191,15 @@ export async function POST(request: NextRequest) {
       });
 
       return NextResponse.json({
-        fondo: updated,
+        fondo: {
+          ...updated,
+          tipo: mapFondoTipoToUi(updated.tipo as FondoTipoDb),
+        },
         message: 'Movimiento registrado correctamente',
       });
     } else {
       // Crear nuevo fondo
       const validated = createFondoSchema.parse(body);
-      const normalizedTipo = (
-        validated.tipo === 'mejoras'
-          ? 'obras'
-          : validated.tipo === 'emergencia' || validated.tipo === 'otro'
-            ? 'contingencia'
-            : validated.tipo
-      ) as 'reserva' | 'obras' | 'contingencia';
 
       // Verificar que el edificio existe
       const building = await prisma.building.findFirst({
@@ -193,6 +210,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Edificio no encontrado' }, { status: 404 });
       }
 
+      const normalizedTipo = normalizeFondoTipo(validated.tipo) || 'reserva';
       const fondo = await prisma.communityFund.create({
         data: {
           companyId,
@@ -211,7 +229,18 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      return NextResponse.json({ fondo }, { status: 201 });
+      return NextResponse.json(
+        {
+          fondo: {
+            ...fondo,
+            tipo: mapFondoTipoToUi(fondo.tipo as FondoTipoDb),
+            building: fondo.building
+              ? { id: fondo.building.id, name: fondo.building.nombre }
+              : null,
+          },
+        },
+        { status: 201 }
+      );
     }
   } catch (error: any) {
     if (error instanceof z.ZodError) {

@@ -84,8 +84,6 @@ export async function POST(req: NextRequest) {
         banos: true,
         rentaMensual: true,
         amueblado: true,
-        admiteMascotas: true,
-        tieneGaraje: true,
         imagenes: true,
         createdAt: true,
         building: {
@@ -93,12 +91,8 @@ export async function POST(req: NextRequest) {
             id: true,
             nombre: true,
             direccion: true,
-            ciudad: true,
-            codigoPostal: true,
-            tieneAscensor: true,
-            tieneParking: true,
-            cercaMetro: true,
-            cercaAutobus: true,
+            ascensor: true,
+            garaje: true,
           },
         },
       },
@@ -109,6 +103,21 @@ export async function POST(req: NextRequest) {
       ...unit,
       superficie: Number(unit.superficie || 0),
       rentaMensual: Number(unit.rentaMensual || 0),
+      admiteMascotas: null,
+      tieneGaraje: null,
+      building: unit.building
+        ? {
+            id: unit.building.id,
+            nombre: unit.building.nombre,
+            direccion: unit.building.direccion,
+            ciudad: null,
+            codigoPostal: null,
+            tieneAscensor: unit.building.ascensor ?? false,
+            tieneParking: unit.building.garaje ?? false,
+            cercaMetro: false,
+            cercaAutobus: false,
+          }
+        : null,
     }));
 
     logger.info(`Batch fetch: ${transformedUnits.length}/${ids.length} units found`);

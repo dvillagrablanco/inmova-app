@@ -93,7 +93,13 @@ export async function GET(request: NextRequest) {
     });
 
     // Calcular métricas por mes
-    const monthlyData = [];
+    const monthlyData: Array<{
+      period: string;
+      revenue: number;
+      revenueChange: number;
+      occupancy: number;
+      activeContracts: number;
+    }> = [];
     for (let i = monthsBack - 1; i >= 0; i--) {
       const monthDate = subMonths(now, i);
       const monthStart = startOfMonth(monthDate);
@@ -220,7 +226,12 @@ export async function GET(request: NextRequest) {
       .sort((a, b) => b.revenue - a.revenue);
 
     // Calcular estancia media y tasa de renovación
-    const completedContracts = contracts.filter((c) => c.estado === 'finalizado' || new Date(c.fechaFin) < now);
+    const completedContracts = contracts.filter(
+      (c) =>
+        c.estado === 'vencido' ||
+        c.estado === 'cancelado' ||
+        new Date(c.fechaFin) < now
+    );
     const avgStayMonths = completedContracts.length > 0
       ? Math.round(
           completedContracts.reduce((sum, c) => {

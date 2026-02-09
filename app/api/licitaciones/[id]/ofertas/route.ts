@@ -138,7 +138,7 @@ export async function POST(
     }
 
     // Verificar que la licitación está abierta
-    if (tender.estado !== 'presupuesto_solicitado') {
+    if (tender.estado !== 'pendiente') {
       return NextResponse.json({ 
         error: 'La licitación ya no acepta ofertas' 
       }, { status: 400 });
@@ -160,6 +160,9 @@ export async function POST(
 
     // Calcular monto IVA
     const montoIva = (data.subtotal * data.iva) / 100;
+    const fechaVencimiento = data.validezOferta
+      ? new Date(Date.now() + data.validezOferta * 24 * 60 * 60 * 1000)
+      : null;
 
     // Crear la oferta
     const quote = await prisma.providerQuote.create({
@@ -174,7 +177,8 @@ export async function POST(
         iva: data.iva,
         montoIva,
         total: data.total,
-        validezDias: data.validezOferta,
+        fechaVencimiento,
+        archivos: [],
         notas: data.notas,
         estado: 'pendiente',
       },

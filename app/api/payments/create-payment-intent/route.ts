@@ -48,6 +48,13 @@ export async function POST(req: NextRequest) {
 
     const { amount, currency, description, contractId, propertyId, metadata } = validation.data;
 
+    if (!contractId) {
+      return NextResponse.json(
+        { error: 'contractId es requerido' },
+        { status: 400 }
+      );
+    }
+
     // 3. Obtener cliente Stripe
     const stripe = getStripe();
     if (!stripe) {
@@ -75,16 +82,34 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    const contract = await prisma.contract.findUnique({
+      where: { id: contractId },
+      select: { id: true },
+    });
+
+    if (!contract) {
+      return NextResponse.json(
+        { error: 'Contrato no encontrado' },
+        { status: 404 }
+      );
+    }
+
+    const now = new Date();
+    const periodo = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const fechaVencimiento = new Date(now);
+    fechaVencimiento.setDate(now.getDate() + 7);
+
     // 4. Guardar en BD
     const payment = await prisma.payment.create({
       data: {
-        amount: amount / 100, // Guardar en euros
-        currency,
-        status: 'PENDING',
+        contractId: contract.id,
+        periodo,
+        monto: amount / 100, // Guardar en euros
+        fechaVencimiento,
+        estado: 'pendiente',
         stripePaymentIntentId: paymentIntent.id,
-        userId: session.user.id,
-        contractId: contractId,
-        description: description || 'Pago de alquiler',
+        stripePaymentStatus: 'pending',
+        stripeClientSecret: paymentIntent.client_secret || undefined,
       },
     });
 

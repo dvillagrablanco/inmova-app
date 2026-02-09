@@ -20,6 +20,25 @@ const registroSchema = z.object({
   aceptaPrivacidad: z.boolean().refine(val => val === true),
 });
 
+type TipoEmpresaDb =
+  | 'CONTRATISTA_PRINCIPAL'
+  | 'SUBCONTRATISTA_N1'
+  | 'SUBCONTRATISTA_N2'
+  | 'AUTONOMO';
+
+const mapTipoEmpresa = (tipo: string): TipoEmpresaDb => {
+  switch (tipo) {
+    case 'SUBCONTRATISTA':
+      return 'SUBCONTRATISTA_N1';
+    case 'AUTONOMO':
+      return 'AUTONOMO';
+    case 'PROMOTORA':
+    case 'CONSTRUCTORA':
+    default:
+      return 'CONTRATISTA_PRINCIPAL';
+  }
+};
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -55,12 +74,13 @@ export async function POST(request: NextRequest) {
     // Crear la company primero
     const company = await prisma.company.create({
       data: {
-        name: data.nombreEmpresa,
+        nombre: data.nombreEmpresa,
         email: data.email,
-        phone: data.telefono,
-        vertical: 'EWOORKER',
-        sector: 'CONSTRUCCION',
-        taxId: data.cif,
+        telefono: data.telefono,
+        cif: data.cif,
+        contactoPrincipal: data.nombreContacto,
+        emailContacto: data.email,
+        businessVertical: 'construccion',
       },
     });
 
@@ -79,13 +99,10 @@ export async function POST(request: NextRequest) {
     // Crear perfil de empresa eWoorker
     await prisma.ewoorkerPerfilEmpresa.create({
       data: {
-        userId: user.id,
-        nombreEmpresa: data.nombreEmpresa,
+        companyId: company.id,
         cif: data.cif,
-        tipoEmpresa: data.tipoEmpresa,
-        emailContacto: data.email,
+        tipoEmpresa: mapTipoEmpresa(data.tipoEmpresa),
         telefono: data.telefono,
-        nombreResponsable: data.nombreContacto,
         // Valores por defecto
         especialidades: [],
         subespecialidades: [],
@@ -97,8 +114,8 @@ export async function POST(request: NextRequest) {
         totalReviews: 0,
         verificado: false,
         disponible: true,
-        estadoREA: 'NO_REGISTRADO',
-        estadoSeguro: 'NO_REGISTRADO',
+        estadoREA: 'PENDIENTE_VALIDACION',
+        estadoSeguro: 'PENDIENTE_VALIDACION',
       },
     });
 

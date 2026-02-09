@@ -96,11 +96,14 @@ Company: ${session.user.companyId}`;
       ? `${userContext}\n\n${validated.context}`
       : userContext;
 
-    const historyText = validated.conversationHistory
-      ?.map((item) => `${item.role === 'user' ? 'Usuario' : 'Asistente'}: ${item.content}`)
-      .join('\n');
-    const prompt = historyText
-      ? `${historyText}\n\nUsuario: ${validated.message}`
+    const historyPrompt = validated.conversationHistory?.length
+      ? validated.conversationHistory
+          .map((item) => `${item.role === 'user' ? 'Usuario' : 'Asistente'}: ${item.content}`)
+          .join('\n')
+      : '';
+
+    const prompt = historyPrompt
+      ? `${historyPrompt}\nUsuario: ${validated.message}`
       : validated.message;
 
     // 5. Llamar a Claude AI

@@ -11,7 +11,7 @@ export const runtime = 'nodejs';
 // Schema de validación para actividad CRM
 const createCRMActivitySchema = z.object({
   leadId: z.string().uuid({ message: 'ID de lead inválido' }),
-  tipo: z.enum(['llamada', 'email', 'reunion', 'visita', 'seguimiento', 'tarea', 'nota'], {
+  tipo: z.enum(['llamada', 'email', 'reunion', 'visita', 'tarea', 'seguimiento', 'nota'], {
     message: 'Tipo de actividad inválido',
   }),
   asunto: z.string().min(1, { message: 'El asunto es requerido' }),
@@ -25,6 +25,24 @@ const createCRMActivitySchema = z.object({
   proximaAccion: z.string().optional(),
   completada: z.boolean().optional(),
 });
+
+type CrmActivityTypeDb =
+  | 'llamada'
+  | 'email'
+  | 'reunion'
+  | 'visita'
+  | 'seguimiento'
+  | 'nota';
+
+const normalizeCrmActivityType = (tipo: string): CrmActivityTypeDb => {
+  if (tipo === 'tarea') return 'seguimiento';
+  return tipo as CrmActivityTypeDb;
+};
+
+const mapCrmActivityTypeToUi = (tipo: CrmActivityTypeDb): string => {
+  if (tipo === 'seguimiento') return 'tarea';
+  return tipo;
+};
 
 /**
  * GET /api/crm/activities
@@ -62,7 +80,12 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    return NextResponse.json(activities);
+    return NextResponse.json(
+      activities.map((activity) => ({
+        ...activity,
+        tipo: mapCrmActivityTypeToUi(activity.tipo as CrmActivityTypeDb),
+      }))
+    );
   } catch (error) {
     logger.error('Error al obtener actividades CRM:', error);
     return NextResponse.json({ error: 'Error al obtener actividades' }, { status: 500 });
@@ -106,13 +129,6 @@ export async function POST(request: NextRequest) {
       proximaAccion,
       completada,
     } = validationResult.data;
-    const normalizedTipo = (tipo === 'tarea' ? 'seguimiento' : tipo) as
-      | 'llamada'
-      | 'email'
-      | 'reunion'
-      | 'visita'
-      | 'seguimiento'
-      | 'nota';
 
     // Verificar que el lead existe
     const lead = await prisma.crmLead.findUnique({
@@ -125,6 +141,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Lead no encontrado' }, { status: 404 });
     }
 
+    const normalizedTipo = normalizeCrmActivityType(tipo);
     const activity = await prisma.crmActivity.create({
       data: {
         leadId,
@@ -148,7 +165,13 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json(activity, { status: 201 });
+    return NextResponse.json(
+      {
+        ...activity,
+        tipo: mapCrmActivityTypeToUi(activity.tipo as CrmActivityTypeDb),
+      },
+      { status: 201 }
+    );
   } catch (error) {
     logger.error('Error al crear actividad CRM:', error);
     return NextResponse.json({ error: 'Error al crear actividad' }, { status: 500 });

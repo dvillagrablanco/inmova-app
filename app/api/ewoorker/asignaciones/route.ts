@@ -80,8 +80,9 @@ export async function GET(request: NextRequest) {
           select: {
             id: true,
             obraId: true,
-            precioFinal: true,
+            presupuestoTotal: true,
             estado: true,
+            constructor: false,
             obra: {
               select: {
                 id: true,
@@ -91,7 +92,11 @@ export async function GET(request: NextRequest) {
                 provincia: true,
                 perfilConstructor: {
                   select: {
-                    nombreEmpresa: true,
+                    company: {
+                      select: {
+                        nombre: true,
+                      },
+                    },
                   },
                 },
               },
@@ -149,7 +154,7 @@ export async function GET(request: NextRequest) {
         obra: {
           id: a.contrato.obra?.id || a.contrato.id,
           nombre: a.contrato.obra?.titulo || 'Obra sin nombre',
-          empresa: a.contrato.obra?.perfilConstructor?.nombreEmpresa || 'Empresa',
+          empresa: a.contrato.obra?.perfilConstructor?.company?.nombre || 'Empresa',
           direccion: a.contrato.obra
             ? `${a.contrato.obra.direccion}, ${a.contrato.obra.municipio}`
             : '',
@@ -157,7 +162,9 @@ export async function GET(request: NextRequest) {
         fechaInicio: a.fechaInicio,
         fechaFin: a.fechaFin,
         estado: a.estado,
-        tarifaDiaria: a.contrato.precioFinal ? Number(a.contrato.precioFinal) / diasTotales : 0,
+        tarifaDiaria: a.contrato.presupuestoTotal
+          ? Number(a.contrato.presupuestoTotal) / diasTotales
+          : 0,
         diasTrabajados: Math.max(0, Math.min(diasTrabajados, diasTotales)),
         diasTotales: diasTotales,
         valoracion: a.valoracion,
@@ -246,6 +253,7 @@ export async function POST(request: NextRequest) {
         contrato: {
           include: {
             obra: true,
+            constructor: false,
           },
         },
       },

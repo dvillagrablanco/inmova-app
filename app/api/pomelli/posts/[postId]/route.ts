@@ -41,7 +41,7 @@ export async function GET(
       );
     }
 
-    const post = await prisma.socialPost.findUnique({
+    const post = await prisma.pomelliSocialPost.findUnique({
       where: {
         id: params.postId,
         companyId: user.companyId,
@@ -50,7 +50,7 @@ export async function GET(
         user: {
           select: {
             id: true,
-            nombre: true,
+            name: true,
             email: true,
           },
         },
@@ -81,7 +81,7 @@ export async function GET(
           const analytics = await pomelliService['client'].getPostAnalytics(post.pomelliPostId);
           
           // Actualizar analytics en DB
-          await prisma.socialPost.update({
+          await prisma.pomelliSocialPost.update({
             where: { id: post.id },
             data: {
               impressions: analytics.impressions,
@@ -138,7 +138,7 @@ export async function PATCH(
       );
     }
 
-    const post = await prisma.socialPost.findUnique({
+    const post = await prisma.pomelliSocialPost.findUnique({
       where: {
         id: params.postId,
         companyId: user.companyId,
@@ -176,7 +176,7 @@ export async function PATCH(
     }
 
     // Actualizar en DB
-    const updatedPost = await prisma.socialPost.update({
+    const updatedPost = await prisma.pomelliSocialPost.update({
       where: { id: params.postId },
       data: {
         content: content || post.content,
@@ -189,7 +189,7 @@ export async function PATCH(
         user: {
           select: {
             id: true,
-            nombre: true,
+            name: true,
             email: true,
           },
         },
@@ -238,7 +238,7 @@ export async function DELETE(
       );
     }
 
-    const post = await prisma.socialPost.findUnique({
+    const post = await prisma.pomelliSocialPost.findUnique({
       where: {
         id: params.postId,
         companyId: user.companyId,
@@ -265,7 +265,7 @@ export async function DELETE(
     }
 
     // Eliminar de DB
-    await prisma.socialPost.delete({
+    await prisma.pomelliSocialPost.delete({
       where: { id: params.postId },
     });
 

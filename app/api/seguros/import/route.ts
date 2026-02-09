@@ -6,6 +6,7 @@ import { validateFile } from '@/lib/file-validation';
 import { parseCSV } from '@/lib/import-service';
 import { S3Service } from '@/lib/s3-service';
 import logger from '@/lib/logger';
+import type { InsuranceStatus, InsuranceType, Prisma } from '@prisma/client';
 import * as XLSX from 'xlsx';
 import AdmZip from 'adm-zip';
 
@@ -90,7 +91,7 @@ function parseExcelDate(value: any): Date | null {
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
-function normalizeInsuranceType(raw: any): string {
+function normalizeInsuranceType(raw: any): InsuranceType {
   const normalized = String(raw || '').toLowerCase();
   if (normalized.includes('hogar') || normalized.includes('vivienda')) return 'hogar';
   if (normalized.includes('comunidad') || normalized.includes('edificio')) return 'comunidad';
@@ -102,7 +103,7 @@ function normalizeInsuranceType(raw: any): string {
   return 'otro';
 }
 
-function normalizeInsuranceStatus(raw: any): string {
+function normalizeInsuranceStatus(raw: any): InsuranceStatus {
   const normalized = String(raw || '').toLowerCase();
   if (normalized.includes('vencid')) return 'vencida';
   if (normalized.includes('cancel')) return 'cancelada';
@@ -249,7 +250,7 @@ export async function POST(request: NextRequest) {
 
     const errors: Array<{ row: number; message: string }> = [];
     const warnings: string[] = [];
-    const createData: Array<Record<string, any>> = [];
+    const createData: Prisma.InsuranceCreateManyInput[] = [];
 
     const seenPolicies = new Set<string>();
 

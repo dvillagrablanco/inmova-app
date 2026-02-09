@@ -26,6 +26,91 @@ const createBookingSchema = z.object({
   origen: z.string().default('directo'), // directo, booking, airbnb, etc.
 });
 
+type BookingStatusDb =
+  | 'PENDIENTE'
+  | 'CONFIRMADA'
+  | 'CHECK_IN'
+  | 'CHECK_OUT'
+  | 'CANCELADA'
+  | 'NO_SHOW';
+
+type ChannelTypeDb =
+  | 'AIRBNB'
+  | 'BOOKING'
+  | 'VRBO'
+  | 'HOMEAWAY'
+  | 'WEB_PROPIA'
+  | 'EXPEDIA'
+  | 'TRIPADVISOR'
+  | 'OTROS';
+
+const normalizeBookingStatus = (estado?: string | null): BookingStatusDb | null => {
+  if (!estado) return null;
+  const normalized = estado.trim().toLowerCase();
+  switch (normalized) {
+    case 'pendiente':
+      return 'PENDIENTE';
+    case 'confirmada':
+      return 'CONFIRMADA';
+    case 'check_in':
+    case 'checkin':
+      return 'CHECK_IN';
+    case 'check_out':
+    case 'checkout':
+      return 'CHECK_OUT';
+    case 'cancelada':
+      return 'CANCELADA';
+    case 'no_show':
+    case 'noshow':
+      return 'NO_SHOW';
+    default:
+      return null;
+  }
+};
+
+const mapBookingStatusToUi = (estado: BookingStatusDb): string => {
+  switch (estado) {
+    case 'PENDIENTE':
+      return 'pendiente';
+    case 'CONFIRMADA':
+      return 'confirmada';
+    case 'CHECK_IN':
+      return 'check_in';
+    case 'CHECK_OUT':
+      return 'check_out';
+    case 'CANCELADA':
+      return 'cancelada';
+    case 'NO_SHOW':
+      return 'no_show';
+    default:
+      return 'pendiente';
+  }
+};
+
+const mapOrigenToChannel = (origen?: string): ChannelTypeDb => {
+  const normalized = (origen || '').trim().toLowerCase();
+  switch (normalized) {
+    case 'airbnb':
+      return 'AIRBNB';
+    case 'booking':
+      return 'BOOKING';
+    case 'vrbo':
+      return 'VRBO';
+    case 'homeaway':
+      return 'HOMEAWAY';
+    case 'expedia':
+      return 'EXPEDIA';
+    case 'tripadvisor':
+      return 'TRIPADVISOR';
+    case 'directo':
+    case 'web':
+    case 'web_propia':
+      return 'WEB_PROPIA';
+    default:
+      return 'OTROS';
+  }
+};
+
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -43,6 +128,7 @@ export async function GET(req: NextRequest) {
     const estado = searchParams.get('estado');
     const fechaDesde = searchParams.get('fechaDesde');
     const fechaHasta = searchParams.get('fechaHasta');
+    const normalizedEstado = normalizeBookingStatus(estado);
 
     const { prisma } = await import('@/lib/db');
 
@@ -50,13 +136,13 @@ export async function GET(req: NextRequest) {
     const bookings = await prisma.sTRBooking.findMany({
       where: {
         companyId,
-        ...(buildingId && { buildingId }),
-        ...(estado && { estado }),
+        ...(buildingId && { listing: { unit: { buildingId } } }),
+        ...(normalizedEstado && { estado: normalizedEstado }),
         ...(fechaDesde && {
-          checkIn: { gte: new Date(fechaDesde) },
+          checkInDate: { gte: new Date(fechaDesde) },
         }),
         ...(fechaHasta && {
-          checkOut: { lte: new Date(fechaHasta) },
+          checkOutDate: { lte: new Date(fechaHasta) },
         }),
       },
       include: {
@@ -64,7 +150,7 @@ export async function GET(req: NextRequest) {
           select: { titulo: true },
         },
       },
-      orderBy: { checkIn: 'desc' },
+      orderBy: { checkInDate: 'desc' },
       take: 100,
     });
 
@@ -74,30 +160,35 @@ export async function GET(req: NextRequest) {
     
     const stats = {
       total: bookings.length,
-      confirmadas: bookings.filter(b => b.estado === 'confirmada').length,
-      pendientes: bookings.filter(b => b.estado === 'pendiente').length,
+      confirmadas: bookings.filter(b => b.estado === 'CONFIRMADA').length,
+      pendientes: bookings.filter(b => b.estado === 'PENDIENTE').length,
       checkinHoy: bookings.filter(b => {
-        const checkIn = new Date(b.checkIn);
+        const checkIn = new Date(b.checkInDate);
         checkIn.setHours(0, 0, 0, 0);
         return checkIn.getTime() === today.getTime();
       }).length,
       checkoutHoy: bookings.filter(b => {
-        const checkOut = new Date(b.checkOut);
+        const checkOut = new Date(b.checkOutDate);
         checkOut.setHours(0, 0, 0, 0);
         return checkOut.getTime() === today.getTime();
       }).length,
       ingresosMes: bookings
         .filter(b => {
-          const checkIn = new Date(b.checkIn);
+          const checkIn = new Date(b.checkInDate);
           return checkIn.getMonth() === today.getMonth() && 
                  checkIn.getFullYear() === today.getFullYear();
         })
         .reduce((sum, b) => sum + (b.precioTotal || 0), 0),
     };
 
+    const bookingsFormateadas = bookings.map((booking) => ({
+      ...booking,
+      estado: mapBookingStatusToUi(booking.estado as BookingStatusDb),
+    }));
+
     return NextResponse.json({
       success: true,
-      data: bookings,
+      data: bookingsFormateadas,
       stats,
     });
   } catch (error: any) {
@@ -130,16 +221,24 @@ export async function POST(req: NextRequest) {
 
     const data = validationResult.data;
     const { prisma } = await import('@/lib/db');
+    const checkInDate = new Date(data.checkIn);
+    const checkOutDate = new Date(data.checkOut);
+    const numNoches = Math.max(
+      1,
+      Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24))
+    );
+    const tarifaNocturna = numNoches > 0 ? data.precioTotal / numNoches : data.precioTotal;
+    const canal = mapOrigenToChannel(data.origen);
 
     // Verificar que la habitación está disponible
     const existingBooking = await prisma.sTRBooking.findFirst({
       where: {
         companyId,
-        estado: { in: ['confirmada', 'pendiente'] },
+        estado: { in: ['CONFIRMADA', 'PENDIENTE', 'CHECK_IN'] },
         OR: [
           {
-            checkIn: { lte: new Date(data.checkOut) },
-            checkOut: { gte: new Date(data.checkIn) },
+            checkInDate: { lte: checkOutDate },
+            checkOutDate: { gte: checkInDate },
           },
         ],
       },
@@ -152,23 +251,24 @@ export async function POST(req: NextRequest) {
     }
 
     // Buscar o crear un listing para este edificio
+    const unitId = data.roomId;
     let listing = await prisma.sTRListing.findFirst({
-      where: { companyId, buildingId: data.buildingId },
+      where: { companyId, unitId },
     });
 
     if (!listing) {
       listing = await prisma.sTRListing.create({
         data: {
           companyId,
-          buildingId: data.buildingId,
+          unitId,
           titulo: 'Reserva Directa',
           descripcion: 'Reservas directas del sistema',
-          tipo: 'hotel',
-          capacidad: 2,
-          habitaciones: 1,
-          banos: 1,
-          precioPorNoche: 0,
-          estado: 'activo',
+          tipoPropiedad: 'habitacion',
+          capacidadMaxima: data.numGuests,
+          numDormitorios: 1,
+          numCamas: Math.max(1, data.numGuests),
+          numBanos: 1,
+          precioPorNoche: tarifaNocturna,
         },
       });
     }
@@ -177,17 +277,19 @@ export async function POST(req: NextRequest) {
       data: {
         companyId,
         listingId: listing.id,
-        buildingId: data.buildingId,
-        guestName: data.guestName,
+        canal,
+        guestNombre: data.guestName,
         guestEmail: data.guestEmail,
-        guestPhone: data.guestPhone,
-        checkIn: new Date(data.checkIn),
-        checkOut: new Date(data.checkOut),
-        numGuests: data.numGuests,
+        guestTelefono: data.guestPhone,
+        checkInDate,
+        checkOutDate,
+        numHuespedes: data.numGuests,
+        numNoches,
         precioTotal: data.precioTotal,
-        notas: data.notas,
-        plataforma: data.origen,
-        estado: 'pendiente',
+        tarifaNocturna,
+        ingresoNeto: data.precioTotal,
+        notasEspeciales: data.notas,
+        estado: 'PENDIENTE',
       },
     });
 

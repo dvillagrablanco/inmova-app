@@ -178,7 +178,7 @@ export async function POST(request: Request) {
         null,
         'nota',
         'Lead creado',
-        `Lead creado manualmente por ${session.user.nombre || session.user.email}`,
+        `Lead creado manualmente por ${session.user.name || session.user.email}`,
         undefined,
         undefined,
         session.user.id

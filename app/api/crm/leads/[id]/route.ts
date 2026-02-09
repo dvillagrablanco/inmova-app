@@ -181,15 +181,36 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
     const validatedBody = validationResult.data;
 
+    const shouldRecalculateScoring =
+      validatedBody.email !== undefined ||
+      validatedBody.telefono !== undefined ||
+      validatedBody.empresa !== undefined ||
+      validatedBody.cargo !== undefined ||
+      validatedBody.ciudad !== undefined ||
+      validatedBody.presupuestoMensual !== undefined ||
+      validatedBody.urgencia !== undefined;
+
+    const scoringFactors = {
+      hasEmail: !!(validatedBody.email ?? existingLead.email),
+      hasTelefono: !!(validatedBody.telefono ?? existingLead.telefono),
+      hasEmpresa: !!(validatedBody.empresa ?? existingLead.empresa),
+      hasCargo: !!(validatedBody.cargo ?? existingLead.cargo),
+      hasCiudad: !!(validatedBody.ciudad ?? existingLead.ciudad),
+      hasPresupuesto: !!(validatedBody.presupuestoMensual ?? existingLead.presupuestoMensual),
+      contactosRealizados: existingLead.numeroContactos ?? 0,
+      urgencia: validatedBody.urgencia ?? existingLead.urgencia ?? undefined,
+    };
+
     // Recalcular scoring si cambian datos relevantes
-    const nuevaPuntuacion =
-      validatedBody.presupuestoMensual || validatedBody.urgencia || validatedBody.verticalesInteres
-        ? calculateLeadScoring(validatedBody)
-        : existingLead.puntuacion;
+    const nuevaPuntuacion = shouldRecalculateScoring
+      ? calculateLeadScoring(scoringFactors)
+      : existingLead.puntuacion;
+
+    const estadoActualizado = validatedBody.estado ?? existingLead.estado ?? undefined;
 
     const nuevaProbabilidad =
-      validatedBody.presupuestoMensual || validatedBody.urgencia
-        ? calculateProbabilidadCierre(validatedBody)
+      shouldRecalculateScoring || validatedBody.estado !== undefined
+        ? calculateProbabilidadCierre(nuevaPuntuacion, estadoActualizado)
         : existingLead.probabilidadCierre;
 
     const nuevaTemperatura = determinarTemperatura(nuevaPuntuacion);

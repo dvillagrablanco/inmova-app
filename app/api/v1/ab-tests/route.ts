@@ -8,8 +8,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { createABTest } from '@/lib/ab-testing-service';
-import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
 import logger from '@/lib/logger';
@@ -42,20 +40,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
     }
 
-    const tests = await prisma.aBTest.findMany({
-      include: {
-        variants: true,
-        _count: {
-          select: {
-            assignments: true,
-            events: true,
-          },
-        },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
-
-    return NextResponse.json({ tests });
+    return NextResponse.json(
+      { error: 'A/B Testing no disponible' },
+      { status: 501 }
+    );
 
   } catch (error: any) {
     logger.error('Error fetching A/B tests:', error);
@@ -77,14 +65,10 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validated = createTestSchema.parse(body);
 
-    const test = await createABTest({
-      ...validated,
-      startDate: new Date(validated.startDate),
-      endDate: validated.endDate ? new Date(validated.endDate) : undefined,
-      createdBy: session.user.id,
-    });
-
-    return NextResponse.json({ test }, { status: 201 });
+    return NextResponse.json(
+      { error: 'A/B Testing no disponible' },
+      { status: 501 }
+    );
 
   } catch (error: any) {
     if (error instanceof z.ZodError) {

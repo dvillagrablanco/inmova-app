@@ -81,9 +81,16 @@ export async function GET(request: NextRequest) {
       }),
     ]);
 
+    const getCount = (item: (typeof statusCounts)[number]) => {
+      if (typeof item._count !== 'object' || item._count === null) {
+        return 0;
+      }
+      const countValue = (item._count as { _all?: number })._all;
+      return typeof countValue === 'number' ? countValue : 0;
+    };
+
     const countsByEstado = statusCounts.reduce<Record<string, number>>((acc, item) => {
-      const count = item._count && item._count !== true ? item._count._all ?? 0 : 0;
-      acc[item.estado] = count;
+      acc[item.estado] = getCount(item);
       return acc;
     }, {});
 

@@ -60,13 +60,13 @@ export async function GET(request: NextRequest) {
 
     // Obtener publicaciones
     const [posts, total] = await Promise.all([
-      prisma.socialPost.findMany({
+      prisma.pomelliSocialPost.findMany({
         where,
         include: {
           user: {
             select: {
               id: true,
-              nombre: true,
+              name: true,
               email: true,
             },
           },
@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
         take: limit,
         skip: offset,
       }),
-      prisma.socialPost.count({ where }),
+      prisma.pomelliSocialPost.count({ where }),
     ]);
 
     return NextResponse.json({
@@ -209,7 +209,7 @@ export async function POST(request: NextRequest) {
     const socialPost = await pomelliService.createMultiPlatformPost(postData);
 
     // Guardar en base de datos
-    const savedPost = await prisma.socialPost.create({
+    const savedPost = await prisma.pomelliSocialPost.create({
       data: {
         companyId: user.companyId,
         pomelliConfigId: config.id,
@@ -219,15 +219,15 @@ export async function POST(request: NextRequest) {
         mediaUrls: mediaUrls || [],
         platforms,
         status: publishNow ? 'published' : (scheduledAt ? 'scheduled' : 'draft'),
-        scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
-        publishedAt: publishNow ? new Date() : null,
+        scheduledAt: scheduledAt ? new Date(scheduledAt) : undefined,
+        publishedAt: publishNow ? new Date() : undefined,
         pomelliPostId: socialPost.pomelliPostId,
       },
       include: {
         user: {
           select: {
             id: true,
-            nombre: true,
+            name: true,
             email: true,
           },
         },

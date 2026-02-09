@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
 
     if (!result.success) {
       return NextResponse.json(
-        { error: result.error || 'Error al obtener notificaciones' },
+        { error: 'Error al obtener notificaciones' },
         { status: 500 }
       );
     }

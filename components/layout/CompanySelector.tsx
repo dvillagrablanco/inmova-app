@@ -1,10 +1,11 @@
 'use client';
 
 /**
- * Selector de Empresa para Super Admin
- * Permite seleccionar una empresa para parametrizar la gestión de empresa
+ * Selector de Empresa
+ * Permite seleccionar la empresa activa para operar en la app
  */
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Building2, ChevronDown, X, Search, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useSelectedCompany, type SelectedCompany } from '@/lib/hooks/admin/useSelectedCompany';
@@ -17,6 +18,7 @@ interface Company {
   logoUrl?: string | null;
   estadoCliente?: string | null;
   activo: boolean;
+  hasChildren?: boolean;
 }
 
 interface CompanySelectorProps {
@@ -25,30 +27,48 @@ interface CompanySelectorProps {
 }
 
 export function CompanySelector({ className, onCompanyChange }: CompanySelectorProps) {
+  const router = useRouter();
   const { selectedCompany, selectCompany, clearSelection, isLoading: isLoadingSelection } = useSelectedCompany();
   const [isOpen, setIsOpen] = useState(false);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [isLoadingCompanies, setIsLoadingCompanies] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [currentCompanyId, setCurrentCompanyId] = useState<string | null>(null);
 
   // Cargar lista de empresas cuando se abre el selector
   useEffect(() => {
-    if (isOpen && companies.length === 0) {
+    if ((isOpen || !selectedCompany) && companies.length === 0) {
       fetchCompanies();
     }
-  }, [isOpen]);
+  }, [isOpen, selectedCompany, companies.length]);
 
   const fetchCompanies = async () => {
     try {
       setIsLoadingCompanies(true);
       setError(null);
-      const res = await fetch('/api/admin/companies');
+      const res = await fetch('/api/user/companies');
       if (!res.ok) {
         throw new Error('Error al cargar empresas');
       }
       const data = await res.json();
-      setCompanies(data.companies || []);
+      const list = Array.isArray(data.companies) ? data.companies : [];
+      setCompanies(list);
+      setCurrentCompanyId(data.currentCompanyId || null);
+
+      if (!selectedCompany && data.currentCompanyId) {
+        const current = list.find((company) => company.id === data.currentCompanyId);
+        if (current) {
+          const selected: SelectedCompany = {
+            id: current.id,
+            nombre: current.nombre,
+            logoUrl: current.logoUrl,
+            estadoCliente: current.estadoCliente,
+          };
+          selectCompany(selected);
+          onCompanyChange?.(selected);
+        }
+      }
     } catch (err) {
       logger.error('Error al cargar empresas:', err);
       setError('Error al cargar empresas');
@@ -57,7 +77,23 @@ export function CompanySelector({ className, onCompanyChange }: CompanySelectorP
     }
   };
 
-  const handleSelectCompany = (company: Company) => {
+  const handleSelectCompany = async (company: Company) => {
+    try {
+      const response = await fetch('/api/user/switch-company', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ companyId: company.id }),
+      });
+
+      if (!response.ok) {
+        throw new Error('No se pudo cambiar de empresa');
+      }
+    } catch (err) {
+      logger.error('Error al cambiar empresa:', err);
+      setError('No se pudo cambiar la empresa');
+      return;
+    }
+
     const selected: SelectedCompany = {
       id: company.id,
       nombre: company.nombre,
@@ -68,10 +104,23 @@ export function CompanySelector({ className, onCompanyChange }: CompanySelectorP
     onCompanyChange?.(selected);
     setIsOpen(false);
     setSearchQuery('');
+
+    router.refresh();
+    if (typeof window !== 'undefined') {
+      window.location.reload();
+    }
   };
 
   const handleClearSelection = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (currentCompanyId) {
+      const current = companies.find((company) => company.id === currentCompanyId);
+      if (current) {
+        void handleSelectCompany(current);
+        return;
+      }
+    }
+
     clearSelection();
     onCompanyChange?.(null);
   };

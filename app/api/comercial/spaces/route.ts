@@ -30,18 +30,17 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const categoria = searchParams.get('categoria'); // oficinas, locales, naves, coworking
-    const estado = searchParams.get('estado')?.toLowerCase() || null;
+    const estado = searchParams.get('estado');
+    const estadoFilter =
+      estado && ['ocupada', 'disponible', 'en_mantenimiento'].includes(estado)
+        ? (estado as 'ocupada' | 'disponible' | 'en_mantenimiento')
+        : undefined;
 
     // Construir filtro de tipos
     let tipoFilter: string[] = [];
     if (categoria && TIPO_MAPPING[categoria]) {
       tipoFilter = TIPO_MAPPING[categoria];
     }
-
-    const estadoFilter =
-      estado && ['ocupada', 'disponible', 'en_mantenimiento'].includes(estado)
-        ? (estado as 'ocupada' | 'disponible' | 'en_mantenimiento')
-        : undefined;
 
     const spaces = await prisma.commercialSpace.findMany({
       where: {
@@ -86,7 +85,7 @@ export async function GET(request: NextRequest) {
         estado: activeLease ? 'ocupada' : space.estado,
         rentaMensual: space.rentaMensualBase,
         arrendatario: activeLease?.arrendatarioNombre || null,
-        arrendatarioId: null,
+        arrendatarioId: activeLease?.id || null,
         buildingId: space.buildingId,
         buildingName: space.building?.nombre,
         caracteristicas: [
@@ -97,7 +96,7 @@ export async function GET(request: NextRequest) {
           space.muelleCarga && 'muelle_carga',
           space.plantaDiafana && 'diafana',
         ].filter(Boolean),
-        imagen: '/api/placeholder/400/200',
+        imagen: space.imagenes?.[0] || '/api/placeholder/400/200',
         descripcion: space.descripcion,
         createdAt: space.createdAt,
       };
@@ -162,13 +161,15 @@ export async function POST(request: NextRequest) {
 
     if (!precioAlquiler) {
       return NextResponse.json(
-        { error: 'Campo requerido: precioAlquiler' },
+        { error: 'El precio de alquiler es requerido' },
         { status: 400 }
       );
     }
 
     const rentaMensualBase = Number(precioAlquiler);
-    const superficieUtilValue = superficieUtil ? Number(superficieUtil) : Number(superficieConstruida) * 0.9;
+    const superficieUtilValue = superficieUtil
+      ? Number(superficieUtil)
+      : Number(superficieConstruida) * 0.9;
 
     const space = await prisma.commercialSpace.create({
       data: {

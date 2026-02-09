@@ -52,18 +52,18 @@ export async function GET(request: NextRequest) {
       }),
     ]);
 
-    const getCount = (estado: string) => {
-      const item = statusCounts.find((entry) => entry.estado === estado);
-      return item && item._count && item._count !== true ? item._count._all ?? 0 : 0;
+    const getCount = (item?: (typeof statusCounts)[number]) => {
+      if (!item || typeof item._count !== 'object' || item._count === null) {
+        return 0;
+      }
+      const countValue = (item._count as { _all?: number })._all;
+      return typeof countValue === 'number' ? countValue : 0;
     };
 
-    const total = statusCounts.reduce((sum, item) => {
-      const count = item._count && item._count !== true ? item._count._all ?? 0 : 0;
-      return sum + count;
-    }, 0);
-    const pendientes = getCount('PENDING');
-    const aceptadas = getCount('ACCEPTED');
-    const expiradas = getCount('EXPIRED');
+    const total = statusCounts.reduce((sum, item) => sum + getCount(item), 0);
+    const pendientes = getCount(statusCounts.find((item) => item.estado === 'PENDING'));
+    const aceptadas = getCount(statusCounts.find((item) => item.estado === 'ACCEPTED'));
+    const expiradas = getCount(statusCounts.find((item) => item.estado === 'EXPIRED'));
 
     const stats = {
       total,

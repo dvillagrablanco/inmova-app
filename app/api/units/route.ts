@@ -7,6 +7,7 @@ import { unitCreateSchema } from '@/lib/validations';
 import { cachedUnits, invalidateUnitsCache, invalidateBuildingsCache, invalidateDashboardCache } from '@/lib/api-cache-helpers';
 import { getPaginationParams, buildPaginationResponse } from '@/lib/pagination-helper';
 import { selectBuildingMinimal, selectTenantMinimal, selectContractMinimal } from '@/lib/query-optimizer';
+import { resolveCompanyScope } from '@/lib/company-scope';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -18,12 +19,14 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = session.user?.companyId;
-    const userRole = session.user?.role;
-    const isSuperAdmin = userRole === 'super_admin' || userRole === 'soporte';
-    
-    // Si no es super_admin y no tiene companyId, retornar vacío
-    if (!isSuperAdmin && !companyId) {
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: session.user.role as any,
+      primaryCompanyId: session.user?.companyId,
+      request: req,
+    });
+
+    if (!scope.activeCompanyId) {
       return NextResponse.json([]);
     }
 
@@ -31,19 +34,18 @@ export async function GET(req: NextRequest) {
     const buildingId = searchParams.get('buildingId');
     const estado = searchParams.get('estado');
     const tipo = searchParams.get('tipo');
-    const filterCompanyId = searchParams.get('companyId');
     const usePagination = searchParams.get('paginate') === 'true';
 
-    // Determinar el filtro de empresa
-    const whereCompanyId = isSuperAdmin 
-      ? (filterCompanyId || undefined) 
-      : companyId;
+    const companyFilter =
+      scope.scopeCompanyIds.length > 1
+        ? { building: { companyId: { in: scope.scopeCompanyIds } } }
+        : { building: { companyId: scope.activeCompanyId } };
 
     // Si hay filtros o se solicita paginación, no usar caché
     const hasFilters = buildingId || estado || tipo;
 
     if (hasFilters || usePagination) {
-      const where: any = whereCompanyId ? { building: { companyId: whereCompanyId } } : {};
+      const where: any = { ...companyFilter };
       if (buildingId) where.buildingId = buildingId;
       if (estado) where.estado = estado;
       // Soportar múltiples tipos separados por comas (ej: garaje,trastero)
@@ -148,13 +150,49 @@ export async function GET(req: NextRequest) {
       return NextResponse.json(transformedUnits);
     }
 
-    // Sin filtros, usar caché (compatibilidad con código existente)
-    // Para super_admin sin filtro de empresa, retornar lista vacía (debe seleccionar empresa)
-    if (!whereCompanyId) {
-      return NextResponse.json([]);
+    // Sin filtros, usar caché solo cuando hay una empresa activa
+    if (scope.scopeCompanyIds.length !== 1) {
+      const units = await prisma.unit.findMany({
+        where: companyFilter,
+        select: {
+          id: true,
+          numero: true,
+          tipo: true,
+          estado: true,
+          planta: true,
+          superficie: true,
+          habitaciones: true,
+          banos: true,
+          rentaMensual: true,
+          createdAt: true,
+          building: {
+            select: selectBuildingMinimal,
+          },
+          contracts: {
+            where: { estado: 'activo' },
+            take: 1,
+            include: {
+              tenant: {
+                select: selectTenantMinimal,
+              },
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      const transformedUnits = units.map((unit) => ({
+        ...unit,
+        superficie: Number(unit.superficie || 0),
+        rentaMensual: Number(unit.rentaMensual || 0),
+        tenant: unit.contracts?.[0]?.tenant || null,
+        contracts: undefined,
+      }));
+
+      return NextResponse.json(transformedUnits);
     }
-    
-    const units = await cachedUnits(whereCompanyId);
+
+    const units = await cachedUnits(scope.activeCompanyId);
     return NextResponse.json(units);
   } catch (error) {
     logger.error('Error fetching units:', error);
@@ -191,7 +229,16 @@ export async function POST(req: NextRequest) {
 
     const validatedData = validationResult.data;
 
-    const companyId = session.user?.companyId;
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: session.user.role as any,
+      primaryCompanyId: session.user?.companyId,
+      request: req,
+    });
+
+    if (!scope.activeCompanyId) {
+      return NextResponse.json({ error: 'Empresa no definida' }, { status: 400 });
+    }
 
     const unit = await prisma.unit.create({
       data: {
@@ -208,17 +255,15 @@ export async function POST(req: NextRequest) {
     });
 
     // Invalidar cachés relacionados
-    if (companyId) {
-      await invalidateUnitsCache(companyId);
-      await invalidateBuildingsCache(companyId);
-      await invalidateDashboardCache(companyId);
-    }
+    await invalidateUnitsCache(scope.activeCompanyId);
+    await invalidateBuildingsCache(scope.activeCompanyId);
+    await invalidateDashboardCache(scope.activeCompanyId);
 
     logger.info('Unit created successfully', { unitId: unit.id, buildingId: validatedData.buildingId });
 
     // 🚀 AUTO-PUBLICACIÓN EN REDES SOCIALES (async, no bloqueante) 
     const userId = session?.user?.id;
-    if (companyId && userId) {
+    if (scope.activeCompanyId && userId) {
       (async () => {
         try {
           const { autoPublishProperty } = await import('@/lib/social-media-service');
@@ -230,7 +275,7 @@ export async function POST(req: NextRequest) {
           });
 
           await autoPublishProperty(
-            companyId,
+            scope.activeCompanyId,
             userId,
             {
               type: 'unit',

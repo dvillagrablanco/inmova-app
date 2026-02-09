@@ -139,7 +139,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
             : null,
         estado,
         metodoPago,
-        nivelRiesgo,
+        nivelRiesgo: nivelRiesgo ?? undefined,
       },
       include: {
         contract: {

@@ -22,8 +22,51 @@ import {
   getModulesByCategory
 } from '@/lib/modules-management-system';
 import { z } from 'zod';
+import type { BusinessVertical, UserRole } from '@prisma/client';
 
 import logger from '@/lib/logger';
+
+const ROLE_ALLOWLIST: UserRole[] = [
+  'super_admin',
+  'administrador',
+  'gestor',
+  'operador',
+  'soporte',
+  'community_manager',
+  'socio_ewoorker',
+  'contratista_ewoorker',
+  'subcontratista_ewoorker',
+];
+
+const VERTICAL_ALLOWLIST: BusinessVertical[] = [
+  'alquiler_tradicional',
+  'str_vacacional',
+  'coliving',
+  'room_rental',
+  'construccion',
+  'flipping',
+  'servicios_profesionales',
+  'comunidades',
+  'mixto',
+  'alquiler_comercial',
+];
+
+function resolveUserRole(role: unknown): UserRole | null {
+  if (typeof role !== 'string') {
+    return null;
+  }
+  return ROLE_ALLOWLIST.includes(role as UserRole) ? (role as UserRole) : null;
+}
+
+function resolveBusinessVertical(vertical: unknown): BusinessVertical | null {
+  if (typeof vertical !== 'string') {
+    return null;
+  }
+  return VERTICAL_ALLOWLIST.includes(vertical as BusinessVertical)
+    ? (vertical as BusinessVertical)
+    : null;
+}
+
 // GET: Obtener información de módulos
 export async function GET(request: NextRequest) {
   try {
@@ -40,6 +83,12 @@ export async function GET(request: NextRequest) {
 
     const prefs = await getUserPreferences(session.user.id);
     const activeModuleIds = prefs.activeModules;
+    const userRole = resolveUserRole(session.user.role);
+    if (!userRole) {
+      return NextResponse.json({ error: 'Rol no autorizado' }, { status: 403 });
+    }
+    const userVertical =
+      resolveBusinessVertical(session.user.businessVertical) || 'alquiler_tradicional';
 
     // Obtener datos de módulos activos
     const activeModules = activeModuleIds.map(id => MODULES[id]).filter(Boolean);
@@ -57,8 +106,8 @@ export async function GET(request: NextRequest) {
 
       case 'available':
         const available = getAvailableModules(
-          session.user.role,
-          session.user.vertical || 'alquiler_tradicional',
+          userRole,
+          userVertical,
           activeModuleIds
         );
         response.modules = available;
@@ -66,8 +115,8 @@ export async function GET(request: NextRequest) {
 
       case 'recommended':
         const recommendedIds = getRecommendedModules(
-          session.user.role,
-          session.user.vertical || 'alquiler_tradicional',
+          userRole,
+          userVertical,
           prefs.experienceLevel
         );
         response.modules = recommendedIds.map(id => MODULES[id]).filter(Boolean);
@@ -76,8 +125,8 @@ export async function GET(request: NextRequest) {
       case 'suggested':
         const suggested = getSuggestedModules(
           activeModuleIds,
-          session.user.role,
-          session.user.vertical || 'alquiler_tradicional'
+          userRole,
+          userVertical
         );
         response.modules = suggested;
         response.message = suggested.length > 0 

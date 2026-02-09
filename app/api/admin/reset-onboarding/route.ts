@@ -76,7 +76,6 @@ export async function POST(request: NextRequest) {
 
     for (const user of targetUsers) {
       try {
-        // Resetear onboarding del usuario
         await prisma.user.update({
           where: { id: user.id },
           data: {
@@ -84,8 +83,6 @@ export async function POST(request: NextRequest) {
             hasCompletedOnboarding: false,
             onboardingCompletedAt: null,
             setupProgress: null,
-            preferredModules: [],
-            hiddenModules: [],
           },
         });
 

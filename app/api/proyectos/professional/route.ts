@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 import logger from '@/lib/logger';
+import type { ProjectType } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -67,7 +68,7 @@ const statusToUi: Record<ProfessionalStatusDb, ProfessionalStatusUi> = {
   CANCELADO: 'cancelado',
 };
 
-const serviceTypeMap: Record<string, string> = {
+const serviceTypeMap: Record<string, ProjectType> = {
   consultoria: 'CONSULTORIA',
   tasacion: 'TASACION',
   gestion: 'DIRECCION_OBRA',
@@ -89,7 +90,7 @@ function mapStatusToUi(value: ProfessionalStatusDb): ProfessionalStatusUi {
   return statusToUi[value];
 }
 
-function mapServiceType(value: string | undefined): string {
+function mapServiceType(value: string | undefined): ProjectType {
   if (!value) {
     return 'CONSULTORIA';
   }

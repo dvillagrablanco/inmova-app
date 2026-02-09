@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
       // Contratos activos
       prisma.commercialLease.findMany({
         where: {
-          companyId,
+          commercialSpace: { companyId },
           estado: 'activo',
         },
         include: {
@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
       // Contratos por vencer en los próximos 90 días
       prisma.commercialLease.findMany({
         where: {
-          companyId,
+          commercialSpace: { companyId },
           estado: 'activo',
           fechaFin: {
             gte: now,
@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
       // Visitas programadas
       prisma.commercialVisit.count({
         where: {
-          companyId,
+          commercialSpace: { companyId },
           fechaHora: { gte: now },
           estado: 'programada',
         },
@@ -95,7 +95,7 @@ export async function GET(request: NextRequest) {
       // Pagos del mes actual
       prisma.commercialPayment.aggregate({
         where: {
-          companyId,
+          commercialLease: { commercialSpace: { companyId } },
           estado: 'pagado',
           fechaPago: {
             gte: startMonth,
@@ -108,7 +108,7 @@ export async function GET(request: NextRequest) {
       // Pagos pendientes
       prisma.commercialPayment.aggregate({
         where: {
-          companyId,
+          commercialLease: { commercialSpace: { companyId } },
           estado: 'pendiente',
         },
         _sum: { importeTotal: true },
@@ -138,7 +138,7 @@ export async function GET(request: NextRequest) {
     // Actividad reciente (últimos contratos y pagos)
     const ultimosContratos = await prisma.commercialLease.findMany({
       where: {
-        companyId,
+        commercialSpace: { companyId },
       },
       include: {
         commercialSpace: { select: { nombre: true } },
@@ -190,18 +190,13 @@ export async function GET(request: NextRequest) {
 
 function getSpaceTypeName(tipo: string): string {
   const names: Record<string, string> = {
-    oficina_privada: 'Oficina privada',
-    oficina_abierta: 'Oficina abierta',
-    local_comercial: 'Local comercial',
-    local_centro_comercial: 'Local en centro comercial',
-    nave_industrial: 'Nave industrial',
-    almacen: 'Almacén',
-    coworking_hot_desk: 'Coworking hot desk',
-    coworking_dedicated: 'Coworking dedicado',
-    coworking_office: 'Coworking oficina',
-    sala_reuniones: 'Sala de reuniones',
-    showroom: 'Showroom',
-    taller: 'Taller',
+    OFICINA: 'Oficinas',
+    LOCAL: 'Locales',
+    NAVE: 'Naves Industriales',
+    COWORKING: 'Coworking',
+    ALMACEN: 'Almacenes',
+    TERRAZA: 'Terrazas',
+    PARKING: 'Parking',
   };
   return names[tipo] || tipo;
 }

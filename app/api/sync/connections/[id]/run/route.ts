@@ -51,7 +51,7 @@ export async function POST(
     await new Promise(resolve => setTimeout(resolve, 500));
     
     const endTime = Date.now();
-    const duration = endTime - startTime;
+    const duracion = endTime - startTime;
 
     // Generate random results for demo
     const registrosCreados = Math.floor(Math.random() * 10);

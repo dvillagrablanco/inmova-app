@@ -67,7 +67,7 @@ export async function GET(req: NextRequest) {
           select: { id: true, nombre: true, capacidadMaxima: true },
         },
         tenant: {
-          select: { id: true, firstName: true, lastName: true, email: true },
+          select: { id: true, nombreCompleto: true, email: true },
         },
       },
       orderBy: { fechaReserva: 'asc' },
@@ -85,7 +85,7 @@ export async function GET(req: NextRequest) {
       tenantId: b.tenantId,
       tenant: b.tenant ? {
         id: b.tenant.id,
-        name: `${b.tenant.firstName} ${b.tenant.lastName}`,
+        name: b.tenant.nombreCompleto,
         email: b.tenant.email,
       } : null,
       titulo: b.proposito || 'Reserva',
@@ -202,7 +202,7 @@ export async function POST(req: NextRequest) {
           select: { id: true, nombre: true },
         },
         tenant: {
-          select: { id: true, firstName: true, lastName: true },
+          select: { id: true, nombreCompleto: true },
         },
       },
     });
@@ -218,7 +218,7 @@ export async function POST(req: NextRequest) {
         tenantId: booking.tenantId,
         tenant: booking.tenant ? {
           id: booking.tenant.id,
-          name: `${booking.tenant.firstName} ${booking.tenant.lastName}`,
+          name: booking.tenant.nombreCompleto,
         } : null,
         fechaReserva: booking.fechaReserva,
         horaInicio: booking.horaInicio,

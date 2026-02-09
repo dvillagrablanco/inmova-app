@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import prisma from '@/lib/db';
+
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -17,6 +18,22 @@ type BusinessVertical =
   | 'comunidades'
   | 'mixto'
   | 'alquiler_comercial';
+
+const allowedVerticals: BusinessVertical[] = [
+  'alquiler_tradicional',
+  'str_vacacional',
+  'coliving',
+  'room_rental',
+  'construccion',
+  'flipping',
+  'servicios_profesionales',
+  'comunidades',
+  'mixto',
+  'alquiler_comercial',
+];
+
+const isBusinessVertical = (value: string): value is BusinessVertical =>
+  allowedVerticals.includes(value as BusinessVertical);
 
 /**
  * GET /api/company/vertical
@@ -48,24 +65,8 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Si es mixto, retornar el primer vertical o el más usado
-    let primaryVertical = company.businessVertical;
-
-    const allowedVerticals: BusinessVertical[] = [
-      'alquiler_tradicional',
-      'str_vacacional',
-      'coliving',
-      'room_rental',
-      'construccion',
-      'flipping',
-      'servicios_profesionales',
-      'comunidades',
-      'mixto',
-      'alquiler_comercial',
-    ];
-
-    const isBusinessVertical = (value: string): value is BusinessVertical =>
-      allowedVerticals.includes(value as BusinessVertical);
+    // Si es mixto, retornar el primer vertical válido
+    let primaryVertical: BusinessVertical | null = company.businessVertical ?? null;
 
     if (company.businessVertical === 'mixto' && company.verticals && company.verticals.length > 0) {
       const candidate = company.verticals.find(isBusinessVertical);

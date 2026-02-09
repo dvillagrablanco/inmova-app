@@ -230,18 +230,24 @@ export async function GET(request: NextRequest) {
 
     // Crear log de auditoría
     try {
-      await prisma.auditLog.create({
-        data: {
-          action: 'ZUCCHETTI_CONNECTED',
-          entityType: 'INTEGRATION',
-          entityId: company.id,
-          companyId: company.id,
-          details: {
-            zucchettiCompanyId: zucchettiInfo.companyId,
-            connectedAt: new Date().toISOString(),
+      const session = await getServerSession(authOptions);
+      const auditUserId = session?.user?.id;
+
+      if (auditUserId) {
+        await prisma.auditLog.create({
+          data: {
+            action: 'UPDATE',
+            entityType: 'INTEGRATION',
+            entityId: company.id,
+            companyId: company.id,
+            userId: auditUserId,
+            changes: JSON.stringify({
+              zucchettiCompanyId: zucchettiInfo.companyId,
+              connectedAt: new Date().toISOString(),
+            }),
           },
-        },
-      });
+        });
+      }
     } catch (auditError) {
       logger.warn('[Zucchetti OAuth] Error creando audit log:', auditError);
     }

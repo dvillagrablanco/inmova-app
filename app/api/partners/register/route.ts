@@ -106,18 +106,20 @@ export async function POST(request: NextRequest) {
     try {
       const { sendPartnerWelcomeEmail, sendAdminNewPartnerNotification } =
         await import('@/lib/emails/partner-emails');
+      const referralCode = partner.id.substring(0, 8).toUpperCase();
 
       await sendPartnerWelcomeEmail({
-        nombre: partner.nombre,
+        name: partner.nombre,
         email: partner.email,
-        tipo: partner.tipo,
+        type: partner.tipo,
+        referralCode,
       });
 
       await sendAdminNewPartnerNotification({
-        nombre: partner.nombre,
+        name: partner.nombre,
         email: partner.email,
-        tipo: partner.tipo,
-        razonSocial: partner.razonSocial,
+        type: partner.tipo,
+        company: partner.razonSocial,
       });
     } catch (emailError) {
       logger.error('[Partner Registration Email Error]:', emailError);

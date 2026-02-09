@@ -80,12 +80,27 @@ export async function GET(request: NextRequest) {
       serviceGroups.map((group) => [group.serviceId, group])
     );
 
+    const getGroupCount = (group?: (typeof serviceGroups)[number]) => {
+      if (!group || typeof group._count !== 'object' || group._count === null) {
+        return 0;
+      }
+      const countValue = (group._count as { _all?: number })._all;
+      return typeof countValue === 'number' ? countValue : 0;
+    };
+
+    const getGroupSum = (
+      group: (typeof serviceGroups)[number] | undefined,
+      key: 'precioTotal' | 'comision'
+    ) => {
+      if (!group || typeof group._sum !== 'object' || group._sum === null) {
+        return 0;
+      }
+      const sumValue = (group._sum as Record<string, number | null | undefined>)[key];
+      return typeof sumValue === 'number' ? sumValue : 0;
+    };
+
     const servicesData = services.map((service) => {
       const grouped = groupedByService.get(service.id);
-      const totalTransactions =
-        grouped && grouped._count && grouped._count !== true
-          ? grouped._count._all ?? 0
-          : 0;
       return {
         id: service.id,
         serviceName: service.nombre,
@@ -94,9 +109,9 @@ export async function GET(request: NextRequest) {
         providerEmail: service.provider?.email || '',
         commissionType: 'percentage',
         commissionRate: service.comisionPorcentaje,
-        totalTransactions,
-        totalRevenue: grouped?._sum?.precioTotal ?? 0,
-        totalCommissions: grouped?._sum?.comision ?? 0,
+        totalTransactions: getGroupCount(grouped),
+        totalRevenue: getGroupSum(grouped, 'precioTotal'),
+        totalCommissions: getGroupSum(grouped, 'comision'),
         status: service.activo ? 'active' : 'paused',
       };
     });

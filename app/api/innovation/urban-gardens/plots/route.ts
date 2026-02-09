@@ -42,14 +42,14 @@ export async function GET(request: NextRequest) {
         tenant: {
           select: {
             id: true,
-            nombre: true,
+            nombreCompleto: true,
             email: true,
           },
         },
       },
       orderBy: [
         { gardenId: 'asc' },
-        { numero: 'asc' },
+        { numeroParcela: 'asc' },
       ],
     });
 
@@ -58,14 +58,14 @@ export async function GET(request: NextRequest) {
       id: plot.id,
       gardenId: plot.gardenId,
       gardenName: plot.garden.nombre,
-      numero: plot.numero,
-      superficie: plot.superficie,
+      numero: plot.numeroParcela,
+      superficie: plot.metrosCuadrados,
       estado: plot.estado,
-      arrendatario: plot.tenant?.nombre,
+      arrendatario: plot.tenant?.nombreCompleto,
       arrendatarioEmail: plot.tenant?.email,
-      fechaInicio: plot.fechaInicio,
-      fechaFin: plot.fechaFin,
-      cultivoActual: plot.cultivoActual,
+      fechaInicio: plot.reservadaDesde,
+      fechaFin: plot.reservadaHasta,
+      cultivoActual: plot.cultivos ?? null,
     }));
 
     return NextResponse.json(formattedPlots);
@@ -109,13 +109,13 @@ export async function POST(request: NextRequest) {
     const plot = await prisma.gardenPlot.create({
       data: {
         gardenId,
-        numero,
-        superficie: Number(superficie),
-        estado: estado || 'DISPONIBLE',
-        cultivoActual,
+        numeroParcela: numero,
+        metrosCuadrados: Number(superficie),
+        estado: estado ? String(estado).toLowerCase() : 'disponible',
+        cultivos: cultivoActual ?? undefined,
         tenantId,
-        fechaInicio: fechaInicio ? new Date(fechaInicio) : null,
-        fechaFin: fechaFin ? new Date(fechaFin) : null,
+        reservadaDesde: fechaInicio ? new Date(fechaInicio) : null,
+        reservadaHasta: fechaFin ? new Date(fechaFin) : null,
       },
       include: {
         garden: {

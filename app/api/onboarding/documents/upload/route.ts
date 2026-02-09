@@ -25,6 +25,7 @@ import {
 } from '@/lib/document-import-processor-service';
 import logger from '@/lib/logger';
 import { z } from 'zod';
+import type { Prisma } from '@prisma/client';
 
 // ============================================================================
 // CONFIGURACIÓN
@@ -44,6 +45,7 @@ const uploadOptionsSchema = z.object({
   autoApprove: z.boolean().optional().default(false),
   confidenceThreshold: z.number().min(0).max(1).optional().default(0.8),
 });
+type UploadOptions = z.infer<typeof uploadOptionsSchema>;
 
 // ============================================================================
 // POST - Subir documentos
@@ -88,7 +90,7 @@ export async function POST(request: NextRequest) {
     const files = formData.getAll('files') as File[];
     const optionsJson = formData.get('options') as string;
     
-    let options = { autoApprove: false, confidenceThreshold: 0.8 };
+    let options: UploadOptions = { autoApprove: false, confidenceThreshold: 0.8 };
     if (optionsJson) {
       try {
         const parsed = JSON.parse(optionsJson);
@@ -502,13 +504,17 @@ async function processDocumentsAsync(
             aiModel: analysis.processingMetadata.modelUsed,
             summary: analysis.summary,
             documentType: analysis.classification.specificType,
-            keyEntities: analysis.extractedFields,
+            keyEntities: JSON.parse(
+              JSON.stringify(analysis.extractedFields)
+            ) as Prisma.InputJsonValue,
             overallConfidence: analysis.classification.confidence,
             hasWarnings: analysis.warnings.length > 0,
             warnings: analysis.warnings,
             hasSensitiveData: analysis.sensitiveData.hasSensitive,
             sensitiveDataTypes: analysis.sensitiveData.types,
-            suggestedActions: analysis.suggestedActions,
+            suggestedActions: JSON.parse(
+              JSON.stringify(analysis.suggestedActions)
+            ) as Prisma.InputJsonValue,
             processingTimeMs: analysis.processingMetadata.processingTimeMs,
             tokensUsed: analysis.processingMetadata.tokensUsed,
           },

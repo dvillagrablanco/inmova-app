@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import type { Prisma } from '@prisma/client';
 import { requireProviderAuth } from '@/lib/provider-auth';
 import logger from '@/lib/logger';
 
@@ -75,7 +76,7 @@ export async function POST(
       `Orden ${workOrderId} aceptada por proveedor ${auth.provider.nombre}`
     );
 
-    const notificationData = {
+    const notificationData: Prisma.NotificationUncheckedCreateInput = {
       companyId: workOrder.companyId,
       tipo: 'info',
       titulo: 'Orden de trabajo aceptada',

@@ -24,7 +24,6 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
           select: {
             nombre: true,
             direccion: true,
-            ciudad: true,
           },
         },
         unit: {

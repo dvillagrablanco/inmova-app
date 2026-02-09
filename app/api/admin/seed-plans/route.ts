@@ -13,6 +13,16 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+const normalizeTier = (
+  tier: string
+): 'STARTER' | 'PROFESSIONAL' | 'BUSINESS' | 'ENTERPRISE' => {
+  const normalized = tier.trim().toLowerCase();
+  if (normalized === 'profesional' || normalized === 'professional') return 'PROFESSIONAL';
+  if (normalized === 'empresarial' || normalized === 'business') return 'BUSINESS';
+  if (normalized === 'premium' || normalized === 'enterprise') return 'ENTERPRISE';
+  return 'STARTER';
+};
+
 const PLANES_DATA = [
   // Plan interno gratuito para empresas del owner
   {
@@ -135,15 +145,6 @@ const PLANES_DATA = [
   },
 ];
 
-const normalizeTier = (tier: string): 'STARTER' | 'PROFESSIONAL' | 'BUSINESS' | 'ENTERPRISE' => {
-  const normalized = tier.toLowerCase();
-  if (normalized === 'basico') return 'STARTER';
-  if (normalized === 'profesional') return 'PROFESSIONAL';
-  if (normalized === 'empresarial') return 'BUSINESS';
-  if (normalized === 'premium' || normalized === 'owner') return 'ENTERPRISE';
-  return 'STARTER';
-};
-
 export async function GET(request: NextRequest) {
   try {
     // 1. Verificar autenticación y permisos
@@ -177,23 +178,23 @@ export async function GET(request: NextRequest) {
 
     // 3. Crear solo los planes que no existen (verificar por nombre)
     for (const planData of PLANES_DATA) {
-      const { tier: rawTier, maxUsuarios, maxPropiedades, ...rest } = planData;
-      const tier = normalizeTier(rawTier);
+      const normalizedTier = normalizeTier(planData.tier);
       const planPayload = {
-        ...rest,
-        tier,
-        maxUsuarios: maxUsuarios ?? 9999,
-        maxPropiedades: maxPropiedades ?? 9999,
-        signaturesIncludedMonth: planData.signaturesIncludedMonth ?? 0,
+        ...planData,
+        tier: normalizedTier,
+        maxUsuarios: planData.maxUsuarios ?? -1,
+        maxPropiedades: planData.maxPropiedades ?? -1,
+        signaturesIncludedMonth: planData.signaturesIncludedMonth ?? -1,
         storageIncludedGB: planData.storageIncludedGB ?? 0,
         aiTokensIncludedMonth: planData.aiTokensIncludedMonth ?? 0,
         smsIncludedMonth: planData.smsIncludedMonth ?? 0,
       };
+
       if (existingNames.has(planData.nombre)) {
         skipped++;
         results.push({
           nombre: planData.nombre,
-          tier,
+          tier: normalizedTier,
           status: 'skipped',
           message: 'Ya existe',
         });
@@ -215,7 +216,7 @@ export async function GET(request: NextRequest) {
       } catch (error: any) {
         results.push({
           nombre: planData.nombre,
-          tier,
+          tier: normalizedTier,
           status: 'error',
           error: error.message,
         });

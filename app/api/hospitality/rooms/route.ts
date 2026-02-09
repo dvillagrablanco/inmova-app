@@ -27,6 +27,18 @@ const createRoomSchema = z.object({
   estado: z.enum(['disponible', 'ocupada', 'mantenimiento', 'reservada']).default('disponible'),
 });
 
+type RoomStatusDb = 'disponible' | 'ocupada' | 'mantenimiento' | 'reservada';
+
+const normalizeRoomStatus = (estado?: string | null): RoomStatusDb | null => {
+  if (!estado) return null;
+  const normalized = estado.trim().toLowerCase();
+  if (normalized === 'disponible') return 'disponible';
+  if (normalized === 'ocupada') return 'ocupada';
+  if (normalized === 'mantenimiento') return 'mantenimiento';
+  if (normalized === 'reservada') return 'reservada';
+  return null;
+};
+
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -42,6 +54,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const buildingId = searchParams.get('buildingId');
     const estado = searchParams.get('estado');
+    const normalizedEstado = normalizeRoomStatus(estado);
 
     const { prisma } = await import('@/lib/db');
 
@@ -49,18 +62,21 @@ export async function GET(req: NextRequest) {
     const rooms = await prisma.room.findMany({
       where: {
         companyId,
-        ...(buildingId && { buildingId }),
-        ...(estado && { estado }),
+        ...(buildingId && { unit: { buildingId } }),
+        ...(normalizedEstado && { estado: normalizedEstado }),
       },
       include: {
-        building: {
-          select: { id: true, nombre: true, direccion: true },
-        },
         unit: {
-          select: { id: true, identificador: true },
+          select: {
+            id: true,
+            numero: true,
+            building: {
+              select: { id: true, nombre: true, direccion: true },
+            },
+          },
         },
       },
-      orderBy: [{ buildingId: 'asc' }, { numero: 'asc' }],
+      orderBy: [{ unitId: 'asc' }, { numero: 'asc' }],
     });
 
     // Estadísticas
@@ -108,22 +124,41 @@ export async function POST(req: NextRequest) {
     const data = validationResult.data;
     const { prisma } = await import('@/lib/db');
 
+    const resolvedUnitId = data.unitId
+      ? data.unitId
+      : (
+          await prisma.unit.findFirst({
+            where: { buildingId: data.buildingId, building: { companyId } },
+            select: { id: true },
+          })
+        )?.id;
+
+    if (!resolvedUnitId) {
+      return NextResponse.json(
+        { error: 'Unit ID no encontrado para el edificio' },
+        { status: 400 }
+      );
+    }
+
     const room = await prisma.room.create({
       data: {
         companyId,
-        buildingId: data.buildingId,
-        unitId: data.unitId,
+        unitId: resolvedUnitId,
         numero: data.numero,
-        tipo: data.tipo,
-        capacidad: data.capacidad,
-        precioMensual: data.precioPorNoche, // Usamos precioMensual para precio por noche
-        amenidades: data.amenidades,
+        tipoHabitacion: data.tipo,
+        rentaMensual: data.precioPorNoche,
         descripcion: data.descripcion,
-        superficie: data.superficie,
+        superficie: data.superficie ?? 0,
         estado: data.estado,
       },
       include: {
-        building: { select: { nombre: true } },
+        unit: {
+          select: {
+            id: true,
+            numero: true,
+            building: { select: { nombre: true } },
+          },
+        },
       },
     });
 

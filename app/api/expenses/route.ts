@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth, requirePermission } from '@/lib/permissions';
 import { prisma } from '@/lib/db';
+import { resolveCompanyScope } from '@/lib/company-scope';
 import logger from '@/lib/logger';
 import { expenseCreateSchema } from '@/lib/validations';
 import { z } from 'zod';
@@ -22,6 +23,12 @@ export const runtime = 'nodejs';
 export async function GET(req: NextRequest) {
   try {
     const user = await requireAuth();
+    const scope = await resolveCompanyScope({
+      userId: user.id,
+      role: user.role as any,
+      primaryCompanyId: user.companyId,
+      request: req,
+    });
     const { searchParams } = new URL(req.url);
 
     const buildingId = searchParams.get('buildingId');
@@ -33,15 +40,15 @@ export async function GET(req: NextRequest) {
     const limit = searchParams.get('limit');
     const offset = searchParams.get('offset');
 
-    const where: any = {};
-    
-    // Filtrar por compañía mediante edificios
-    const userBuildings = await prisma.building.findMany({
-      where: { companyId: user.companyId },
-      select: { id: true },
-    });
-    const buildingIds = userBuildings.map(b => b.id);
-    where.buildingId = { in: buildingIds };
+    if (!scope.activeCompanyId) {
+      return NextResponse.json({ data: [], meta: { total: 0 } }, { status: 200 });
+    }
+
+    const where: any = {
+      building: {
+        companyId: scope.scopeCompanyIds.length > 1 ? { in: scope.scopeCompanyIds } : scope.activeCompanyId,
+      },
+    };
 
     if (buildingId) where.buildingId = buildingId;
     if (unitId) where.unitId = unitId;
@@ -114,6 +121,16 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const user = await requirePermission('create');
+    const scope = await resolveCompanyScope({
+      userId: user.id,
+      role: user.role as any,
+      primaryCompanyId: user.companyId,
+      request: req,
+    });
+
+    if (!scope.activeCompanyId) {
+      return NextResponse.json({ error: 'Empresa no definida' }, { status: 400 });
+    }
     const body = await req.json();
 
     // Validación con Zod
@@ -132,7 +149,7 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      if (building.companyId !== user.companyId) {
+      if (!scope.scopeCompanyIds.includes(building.companyId)) {
         return NextResponse.json(
           { error: 'Prohibido', message: 'No tiene acceso a este edificio' },
           { status: 403 }
@@ -154,7 +171,7 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      if (unit.building.companyId !== user.companyId) {
+      if (!scope.scopeCompanyIds.includes(unit.building.companyId)) {
         return NextResponse.json(
           { error: 'Prohibido', message: 'No tiene acceso a esta unidad' },
           { status: 403 }
@@ -175,7 +192,7 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      if (provider.companyId !== user.companyId) {
+      if (!scope.scopeCompanyIds.includes(provider.companyId)) {
         return NextResponse.json(
           { error: 'Prohibido', message: 'No tiene acceso a este proveedor' },
           { status: 403 }

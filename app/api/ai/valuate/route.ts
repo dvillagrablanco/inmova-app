@@ -474,7 +474,7 @@ export async function POST(request: NextRequest) {
           hasTerrace:
             validated.hasTerrace || validated.caracteristicas?.includes('terraza') || false,
           hasGarage:
-            validated.caracteristicas?.includes('garaje') || validated.hasParking || false,
+            propertyData.hasParking || validated.caracteristicas?.includes('garaje') || false,
           condition: mapCondition(validated.estadoConservacion || validated.condition),
           yearBuilt: validated.yearBuilt,
           avgPricePerM2: validated.avgPricePerM2 ?? normalizedValuation.pricePerM2,

@@ -144,7 +144,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // URLs dinámicas de propiedades (solo disponibles y activas)
     // Solo incluir propiedades de la primera compañía para el sitemap público
-    const units = await prismaClient.unit.findMany({
+    const units: Array<{ id: string; updatedAt: Date }> = await prismaClient.unit.findMany({
       where: {
         estado: 'disponible',
       },
@@ -166,7 +166,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }));
 
     // URLs dinámicas de edificios (solo activos)
-    const buildings = await prismaClient.building.findMany({
+    const buildings: Array<{ id: string; updatedAt: Date }> =
+      await prismaClient.building.findMany({
       where: {},
       select: {
         id: true,

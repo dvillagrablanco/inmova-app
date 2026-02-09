@@ -4,6 +4,7 @@ import { requireAuth, getUserCompany, requirePermission, forbiddenResponse, badR
 import logger, { logError } from '@/lib/logger';
 import { buildingCreateSchema } from '@/lib/validations';
 import { cachedBuildings, invalidateBuildingsCache, invalidateDashboardCache } from '@/lib/api-cache-helpers';
+import { resolveCompanyScope } from '@/lib/company-scope';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -11,44 +12,34 @@ export const runtime = 'nodejs';
 export async function GET(req: NextRequest) {
   try {
     const user = await requireAuth();
-    const companyId = user.companyId;
-    const isSuperAdmin = user.role === 'super_admin' || user.role === 'soporte';
+    const scope = await resolveCompanyScope({
+      userId: user.id,
+      role: user.role as any,
+      primaryCompanyId: user.companyId,
+      request: req,
+    });
 
     // Obtener parámetros de paginación
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
     const skip = (page - 1) * limit;
-    const filterCompanyId = searchParams.get('companyId');
-
-    // Determinar el filtro de empresa
-    // Super_admin puede ver todos o filtrar por empresa específica
-    // Usuarios normales solo ven su empresa
-    const whereCompanyId = isSuperAdmin 
-      ? (filterCompanyId || undefined) 
-      : companyId;
-
-    // Si el usuario no es super_admin y no tiene companyId, retornar vacío
-    if (!isSuperAdmin && !companyId) {
+    if (!scope.activeCompanyId) {
       return NextResponse.json([]);
     }
 
     // Si no hay paginación solicitada (página 1 con limit 10 o sin params), usar cache
     const usePagination = searchParams.has('page') || searchParams.has('limit');
     
-    if (!usePagination && whereCompanyId) {
-      // Usar datos cacheados para vista completa (por compatibilidad)
-      const buildingsWithMetrics = await cachedBuildings(whereCompanyId);
+    if (!usePagination && scope.scopeCompanyIds.length === 1) {
+      const buildingsWithMetrics = await cachedBuildings(scope.activeCompanyId);
       return NextResponse.json(buildingsWithMetrics);
     }
-    
-    // Si es super_admin sin filtro, mostrar mensaje informativo
-    if (isSuperAdmin && !whereCompanyId && !usePagination) {
-      return NextResponse.json([]);
-    }
 
-    // Paginación: consulta directa sin cache
-    const whereClause = whereCompanyId ? { companyId: whereCompanyId } : {};
+    const whereClause =
+      scope.scopeCompanyIds.length > 1
+        ? { companyId: { in: scope.scopeCompanyIds } }
+        : { companyId: scope.activeCompanyId };
     
     const [buildings, total] = await Promise.all([
       prisma.building.findMany({
@@ -108,6 +99,10 @@ export async function GET(req: NextRequest) {
       };
     });
 
+    if (!usePagination) {
+      return NextResponse.json(buildingsWithMetrics);
+    }
+
     return NextResponse.json({
       data: buildingsWithMetrics,
       pagination: {
@@ -136,7 +131,16 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const user = await requirePermission('create');
-    const companyId = user.companyId;
+    const scope = await resolveCompanyScope({
+      userId: user.id,
+      role: user.role as any,
+      primaryCompanyId: user.companyId,
+      request: req,
+    });
+
+    if (!scope.activeCompanyId) {
+      return NextResponse.json({ error: 'Empresa no definida' }, { status: 400 });
+    }
 
     const body = await req.json();
     
@@ -159,7 +163,7 @@ export async function POST(req: NextRequest) {
 
     const building = await prisma.building.create({
       data: {
-        companyId,
+        companyId: scope.activeCompanyId,
         nombre: validatedData.nombre,
         direccion: validatedData.direccion,
         tipo: (validatedData.tipo && ['residencial', 'mixto', 'comercial'].includes(validatedData.tipo)) ? validatedData.tipo as 'residencial' | 'mixto' | 'comercial' : 'residencial',
@@ -169,10 +173,10 @@ export async function POST(req: NextRequest) {
     });
 
     // Invalidar cachés relacionados
-    await invalidateBuildingsCache(companyId);
-    await invalidateDashboardCache(companyId);
+    await invalidateBuildingsCache(scope.activeCompanyId);
+    await invalidateDashboardCache(scope.activeCompanyId);
 
-    logger.info('Building created successfully', { buildingId: building.id, companyId });
+    logger.info('Building created successfully', { buildingId: building.id, companyId: scope.activeCompanyId });
 
     // 🚀 AUTO-PUBLICACIÓN EN REDES SOCIALES (async, no bloqueante)
     const userId = user.id;
@@ -180,7 +184,7 @@ export async function POST(req: NextRequest) {
       try {
         const { autoPublishProperty } = await import('@/lib/social-media-service');
         await autoPublishProperty(
-          companyId,
+          scope.activeCompanyId,
           userId,
           {
             type: 'building',

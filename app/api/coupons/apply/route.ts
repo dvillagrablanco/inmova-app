@@ -99,9 +99,10 @@ export async function POST(request: NextRequest) {
       }
 
       try {
-        const subscription = await stripeClient.subscriptions.update(subscriptionId, {
-          discounts: [{ coupon: dbCoupon.stripeCouponId }],
-        });
+        const updateParams = dbCoupon.stripePromotionCodeId
+          ? { promotion_code: dbCoupon.stripePromotionCodeId }
+          : { discounts: [{ coupon: dbCoupon.stripeCouponId }] };
+        const subscription = await stripeClient.subscriptions.update(subscriptionId, updateParams);
 
         // Registrar uso
         await prisma.couponUsage.create({

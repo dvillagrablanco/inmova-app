@@ -50,7 +50,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({
       ...garden,
       buildingName: garden.building?.nombre,
-      parcelasDisponibles: garden.parcelas.filter((p) => p.estado === 'DISPONIBLE').length,
+      parcelasDisponibles: garden.parcelas.filter((p) => p.estado === 'disponible').length,
     });
   } catch (error: any) {
     logger.error('[UrbanGarden GET] Error:', error);
@@ -84,16 +84,12 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       nombre,
       ubicacion,
       superficie,
-      numeroParcelas,
-      tipoRiego,
-      estado,
-      fechaInauguracion,
-      horario,
-      precioMensual,
       buildingId,
       descripcion,
-      cultivosPermitidos,
-      servicios,
+      tipoRiego,
+      fotos,
+      reglas,
+      activo,
     } = body;
 
     const garden = await prisma.urbanGarden.update({
@@ -101,17 +97,13 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       data: {
         nombre,
         ubicacion,
-        superficie: superficie ? Number(superficie) : undefined,
-        numeroParcelas: numeroParcelas ? Number(numeroParcelas) : undefined,
-        tipoRiego,
-        estado,
-        fechaInauguracion: fechaInauguracion ? new Date(fechaInauguracion) : undefined,
-        horario,
-        precioMensual: precioMensual ? Number(precioMensual) : undefined,
+        metrosCuadrados: superficie ? Number(superficie) : undefined,
+        tipoCultivo: tipoRiego,
         buildingId,
         descripcion,
-        cultivosPermitidos,
-        servicios,
+        fotos,
+        reglas,
+        ...(typeof activo === 'boolean' ? { activo } : {}),
       },
     });
 

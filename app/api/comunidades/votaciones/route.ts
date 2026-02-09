@@ -38,6 +38,33 @@ const votarSchema = z.object({
   coeficiente: z.number().optional(),
 });
 
+type VoteTypeDb = 'decision_comunidad' | 'mejora' | 'gasto' | 'normativa' | 'otro';
+
+const normalizeVoteType = (tipo?: string | null): VoteTypeDb | null => {
+  if (!tipo) return null;
+  const normalized = tipo.trim().toLowerCase();
+  if (normalized === 'ordinaria') return 'decision_comunidad';
+  if (normalized === 'extraordinaria') return 'normativa';
+  if (normalized === 'urgente') return 'gasto';
+  if (
+    normalized === 'decision_comunidad' ||
+    normalized === 'mejora' ||
+    normalized === 'gasto' ||
+    normalized === 'normativa' ||
+    normalized === 'otro'
+  ) {
+    return normalized as VoteTypeDb;
+  }
+  return null;
+};
+
+const mapVoteTypeToUi = (tipo: VoteTypeDb): 'ordinaria' | 'extraordinaria' | 'urgente' => {
+  if (tipo === 'decision_comunidad') return 'ordinaria';
+  if (tipo === 'mejora' || tipo === 'normativa') return 'extraordinaria';
+  if (tipo === 'gasto') return 'urgente';
+  return 'ordinaria';
+};
+
 // GET - Listar votaciones
 export async function GET(request: NextRequest) {
   try {
@@ -103,6 +130,8 @@ export async function GET(request: NextRequest) {
       votaciones: votaciones.map(v => ({
         ...v,
         opciones: v.opciones as any[],
+        building: v.building ? { id: v.building.id, name: v.building.nombre } : null,
+        tipo: mapVoteTypeToUi(v.tipo as VoteTypeDb),
         participacion: v.totalElegibles > 0 
           ? Math.round((v.totalVotos / v.totalElegibles) * 100) 
           : 0,
@@ -210,6 +239,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Edificio no encontrado' }, { status: 404 });
       }
 
+      const normalizedTipo = normalizeVoteType(validated.tipo) || 'decision_comunidad';
       const votacion = await prisma.communityVote.create({
         data: {
           companyId,
@@ -230,7 +260,18 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      return NextResponse.json({ votacion }, { status: 201 });
+      return NextResponse.json(
+        {
+          votacion: {
+            ...votacion,
+            building: votacion.building
+              ? { id: votacion.building.id, name: votacion.building.nombre }
+              : null,
+            tipo: mapVoteTypeToUi(votacion.tipo as VoteTypeDb),
+          },
+        },
+        { status: 201 }
+      );
     }
   } catch (error: any) {
     if (error instanceof z.ZodError) {

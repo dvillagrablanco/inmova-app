@@ -31,13 +31,85 @@ const createIncidenciaSchema = z.object({
 });
 
 const updateIncidenciaSchema = z.object({
-  estado: z.enum(['abierta', 'en_proceso', 'pendiente_respuesta', 'resuelta', 'cerrada']).optional(),
+  estado: z.enum([
+    'abierta',
+    'en_proceso',
+    'pendiente_respuesta',
+    'resuelta',
+    'cerrada',
+    'rechazada',
+  ]).optional(),
   prioridad: z.enum(['baja', 'media', 'alta', 'urgente']).optional(),
   asignadoA: z.string().optional(),
   solucion: z.string().optional(),
   costoEstimado: z.number().optional(),
   costoFinal: z.number().optional(),
 });
+
+type IncidentTypeDb =
+  | 'ruido'
+  | 'averia_comun'
+  | 'limpieza'
+  | 'seguridad'
+  | 'convivencia'
+  | 'mascota'
+  | 'parking'
+  | 'otro';
+
+type IncidentStatusDb =
+  | 'abierta'
+  | 'en_proceso'
+  | 'resuelta'
+  | 'cerrada'
+  | 'rechazada';
+
+const normalizeIncidentType = (tipo?: string | null): IncidentTypeDb | null => {
+  if (!tipo) return null;
+  const normalized = tipo.trim().toLowerCase();
+  if (normalized === 'averia' || normalized === 'mantenimiento' || normalized === 'averia_comun') {
+    return 'averia_comun';
+  }
+  if (normalized === 'ruidos' || normalized === 'ruido') return 'ruido';
+  if (normalized === 'limpieza') return 'limpieza';
+  if (normalized === 'seguridad') return 'seguridad';
+  if (normalized === 'convivencia') return 'convivencia';
+  if (normalized === 'mascota') return 'mascota';
+  if (normalized === 'parking') return 'parking';
+  if (normalized === 'otro') return 'otro';
+  return null;
+};
+
+const normalizeIncidentStatus = (estado?: string | null): IncidentStatusDb | null => {
+  if (!estado) return null;
+  const normalized = estado.trim().toLowerCase();
+  if (normalized === 'pendiente_respuesta') return 'en_proceso';
+  if (
+    normalized === 'abierta' ||
+    normalized === 'en_proceso' ||
+    normalized === 'resuelta' ||
+    normalized === 'cerrada' ||
+    normalized === 'rechazada'
+  ) {
+    return normalized as IncidentStatusDb;
+  }
+  return null;
+};
+
+const mapIncidentTypeToUi = (
+  tipo: IncidentTypeDb
+): 'averia' | 'mantenimiento' | 'limpieza' | 'seguridad' | 'ruidos' | 'otro' => {
+  if (tipo === 'averia_comun') return 'averia';
+  if (tipo === 'ruido') return 'ruidos';
+  if (tipo === 'limpieza' || tipo === 'seguridad') return tipo;
+  return 'otro';
+};
+
+const mapIncidentStatusToUi = (
+  estado: IncidentStatusDb
+): 'abierta' | 'en_proceso' | 'pendiente_respuesta' | 'resuelta' | 'cerrada' => {
+  if (estado === 'rechazada') return 'cerrada';
+  return estado;
+};
 
 // GET - Listar incidencias
 export async function GET(request: NextRequest) {
@@ -71,8 +143,10 @@ export async function GET(request: NextRequest) {
     // Construir filtros
     const where: any = { companyId };
     if (targetBuildingId) where.buildingId = targetBuildingId;
-    if (estado) where.estado = estado;
-    if (tipo) where.tipo = tipo;
+    const normalizedEstado = normalizeIncidentStatus(estado);
+    if (normalizedEstado) where.estado = normalizedEstado;
+    const normalizedTipo = normalizeIncidentType(tipo);
+    if (normalizedTipo) where.tipo = normalizedTipo;
     if (prioridad) where.prioridad = prioridad;
 
     const [incidencias, total] = await Promise.all([
@@ -124,7 +198,14 @@ export async function GET(request: NextRequest) {
       : 0;
 
     return NextResponse.json({
-      incidencias,
+      incidencias: incidencias.map((incidencia) => ({
+        ...incidencia,
+        tipo: mapIncidentTypeToUi(incidencia.tipo as IncidentTypeDb),
+        estado: mapIncidentStatusToUi(incidencia.estado as IncidentStatusDb),
+        building: incidencia.building
+          ? { id: incidencia.building.id, name: incidencia.building.nombre }
+          : null,
+      })),
       pagination: {
         page,
         limit,
@@ -186,6 +267,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Edificio no encontrado' }, { status: 404 });
     }
 
+    const normalizedTipo = normalizeIncidentType(validated.tipo) || 'otro';
     const incidencia = await prisma.communityIncident.create({
       data: {
         companyId,
@@ -206,7 +288,19 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({ incidencia }, { status: 201 });
+    return NextResponse.json(
+      {
+        incidencia: {
+          ...incidencia,
+          tipo: mapIncidentTypeToUi(incidencia.tipo as IncidentTypeDb),
+          estado: mapIncidentStatusToUi(incidencia.estado as IncidentStatusDb),
+          building: incidencia.building
+            ? { id: incidencia.building.id, name: incidencia.building.nombre }
+            : null,
+        },
+      },
+      { status: 201 }
+    );
   } catch (error: any) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -250,6 +344,13 @@ export async function PATCH(request: NextRequest) {
     }
 
     const updateData: any = { ...validated };
+    if (validated.estado) {
+      const normalizedEstado = normalizeIncidentStatus(validated.estado);
+      if (!normalizedEstado) {
+        return NextResponse.json({ error: 'Estado inválido' }, { status: 400 });
+      }
+      updateData.estado = normalizedEstado;
+    }
     
     // Si se marca como resuelta, registrar fecha
     if (validated.estado === 'resuelta' && existing.estado !== 'resuelta') {
@@ -264,7 +365,16 @@ export async function PATCH(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({ incidencia });
+    return NextResponse.json({
+      incidencia: {
+        ...incidencia,
+        tipo: mapIncidentTypeToUi(incidencia.tipo as IncidentTypeDb),
+        estado: mapIncidentStatusToUi(incidencia.estado as IncidentStatusDb),
+        building: incidencia.building
+          ? { id: incidencia.building.id, name: incidencia.building.nombre }
+          : null,
+      },
+    });
   } catch (error: any) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(

@@ -40,7 +40,18 @@ export async function GET(request: NextRequest) {
 
     // Verificar si tiene perfil ewoorker
     const perfil = await prisma.ewoorkerPerfilEmpresa.findUnique({
-      where: { companyId }
+      where: { companyId },
+      select: {
+        id: true,
+        tipoEmpresa: true,
+        planActual: true,
+        valoracionMedia: true,
+        company: {
+          select: {
+            nombre: true,
+          },
+        },
+      },
     });
 
     if (!perfil) {

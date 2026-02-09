@@ -25,8 +25,11 @@ export async function GET(request: NextRequest) {
       where.categoria = categoria;
     }
     
-    // Por defecto solo mostrar activas a usuarios normales
+    // Por defecto solo mostrar activas y propias a usuarios normales
     if (session.user.role !== 'super_admin') {
+      if (session.user.companyId) {
+        where.companyId = session.user.companyId;
+      }
       where.activo = true;
     } else if (activo !== null) {
       where.activo = activo === 'true';
@@ -83,8 +86,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const templateCompanyId = session.user.companyId;
+    if (!templateCompanyId) {
+      return NextResponse.json(
+        { error: 'CompanyId requerido para crear plantilla' },
+        { status: 400 }
+      );
+    }
+
     const template = await prisma.legalTemplate.create({
       data: {
+        companyId: templateCompanyId,
         nombre,
         categoria,
         descripcion,

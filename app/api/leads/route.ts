@@ -123,8 +123,8 @@ export async function POST(req: NextRequest) {
           empresa: body.empresa,
           fuente: body.fuente || 'web',
           estado: 'nuevo',
-          interes: body.interes,
-          presupuesto: body.presupuesto ? parseFloat(body.presupuesto) : null,
+          tipoNegocio: body.interes,
+          presupuestoMensual: body.presupuesto ? parseFloat(body.presupuesto) : null,
           notas: body.notas,
         },
       });

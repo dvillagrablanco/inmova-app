@@ -104,7 +104,9 @@ export async function GET(request: NextRequest) {
       fechaInicio: c.fechaInicio,
       honorariosFijos: c.honorariosFijos,
       honorariosPorcentaje: c.honorariosPorcentaje,
-      building: c.building,
+      building: c.building
+        ? { id: c.building.id, name: c.building.nombre, address: c.building.direccion }
+        : null,
       totalUnidades: c.building?.units?.length || 0,
       facturasPendientes: c.facturas?.length || 0,
       importePendiente: c.facturas?.reduce((sum, f) => sum + f.totalFactura, 0) || 0,
@@ -202,7 +204,21 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({ comunidad }, { status: 201 });
+    return NextResponse.json(
+      {
+        comunidad: {
+          ...comunidad,
+          building: comunidad.building
+            ? {
+                id: comunidad.building.id,
+                name: comunidad.building.nombre,
+                address: comunidad.building.direccion,
+              }
+            : null,
+        },
+      },
+      { status: 201 }
+    );
   } catch (error: any) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(

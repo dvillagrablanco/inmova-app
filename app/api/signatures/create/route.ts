@@ -106,7 +106,6 @@ export async function POST(request: NextRequest) {
           },
         },
         tenant: true,
-        company: true,
       },
     });
 
@@ -118,7 +117,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 5. Verificar ownership
-    if (contract.companyId !== session.user.companyId) {
+    if (contract.unit?.building?.companyId !== session.user.companyId) {
       return NextResponse.json(
         { error: 'No tienes permiso para firmar este contrato' },
         { status: 403 }
@@ -126,7 +125,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 6. Verificar que el contrato no esté ya firmado
-    if (contract.estado === 'ACTIVO' || contract.estado === 'FINALIZADO') {
+    if (contract.estado === 'activo' || contract.estado === 'vencido') {
       return NextResponse.json(
         { error: 'El contrato ya está firmado' },
         { status: 400 }
@@ -171,38 +170,42 @@ export async function POST(request: NextRequest) {
       validated.signers as Signer[],
       signatureOptions
     );
+    const signUrl = result.signers?.[0]?.signUrl;
 
-    if (!result.success) {
-      return NextResponse.json(
-        {
-          error: 'Error creando solicitud de firma',
-          message: result.error,
-        },
-        { status: 500 }
-      );
-    }
-
-    // 10. Guardar en BD
-    await prisma.contract.update({
-      where: { id: validated.contractId },
+    const signatureRecord = await prisma.contractSignature.create({
       data: {
-        signatureId: result.signatureId,
-        signatureStatus: 'PENDING',
-        signatureSentAt: new Date(),
+        companyId: session.user.companyId,
+        contractId: contract.id,
+        provider: 'SIGNATURIT',
+        externalId: result.id,
+        documentUrl: contract.contractPdfPath || fileName,
+        documentName: fileName,
+        signatories: validated.signers.map((signer) => ({
+          ...signer,
+          status: 'PENDING',
+        })),
+        status: 'PENDING',
+        signingUrl: signUrl || undefined,
+        emailSubject: subject,
+        emailMessage: message,
+        sentAt: new Date(),
+        requestedBy: session.user.id,
       },
     });
 
     // 11. Crear registro de auditoría
     await prisma.auditLog.create({
       data: {
+        companyId: session.user.companyId,
         userId: session.user.id,
-        action: 'SIGNATURE_CREATED',
+        action: 'CREATE',
         entityType: 'CONTRACT',
         entityId: contract.id,
-        details: {
-          signatureId: result.signatureId,
+        changes: JSON.stringify({
+          signatureId: signatureRecord.id,
+          externalId: result.id,
           signers: validated.signers.map((s) => s.email),
-        },
+        }),
       },
     });
 
@@ -213,7 +216,7 @@ export async function POST(request: NextRequest) {
       metric: 'signatures',
       value: 1,
       metadata: {
-        signatureId: result.signatureId,
+        signatureId: signatureRecord.id,
         type: signatureOptions.type || 'simple',
         contractId: validated.contractId,
       },
@@ -222,8 +225,8 @@ export async function POST(request: NextRequest) {
     // 13. Respuesta exitosa
     return NextResponse.json({
       success: true,
-      signatureId: result.signatureId,
-      signUrl: result.signUrl,
+      signatureId: signatureRecord.id,
+      signUrl: signatureRecord.signingUrl || null,
       signers: result.signers,
       message: 'Solicitud de firma creada. Se han enviado emails a los firmantes.',
     });

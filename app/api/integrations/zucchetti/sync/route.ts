@@ -74,7 +74,6 @@ async function syncCustomers(
     const tenants = await prisma.tenant.findMany({
       where: {
         companyId,
-        activo: true,
         ...(options.ids && { id: { in: options.ids } }),
       },
       select: {
@@ -180,7 +179,7 @@ async function syncPayments(
             },
           },
         },
-        status: 'pagado',
+        estado: 'pagado',
         ...(options.ids && { id: { in: options.ids } }),
         ...(options.dateFrom && { fechaPago: { gte: new Date(options.dateFrom) } }),
         ...(options.dateTo && { fechaPago: { lte: new Date(options.dateTo) } }),
@@ -288,10 +287,13 @@ async function syncExpenses(
     // Obtener gastos a sincronizar
     const expenses = await prisma.expense.findMany({
       where: {
-        companyId,
         ...(options.ids && { id: { in: options.ids } }),
         ...(options.dateFrom && { fecha: { gte: new Date(options.dateFrom) } }),
         ...(options.dateTo && { fecha: { lte: new Date(options.dateTo) } }),
+        OR: [
+          { building: { companyId } },
+          { unit: { building: { companyId } } },
+        ],
       },
       include: {
         provider: true,
@@ -306,7 +308,7 @@ async function syncExpenses(
         const entryData = {
           entry_date:
             expense.fecha?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0],
-          description: `${expense.categoria || 'Gasto'} - ${expense.descripcion || ''} - ${expense.provider?.nombre || 'Proveedor'}`,
+          description: `${expense.categoria || 'Gasto'} - ${expense.concepto || ''} - ${expense.provider?.nombre || 'Proveedor'}`,
           reference: `EXPENSE_${expense.id}`,
           lines: [
             {
@@ -405,7 +407,7 @@ async function syncPaymentsAltai(
             },
           },
         },
-        status: 'pagado',
+        estado: 'pagado',
         ...(options.ids && { id: { in: options.ids } }),
         ...(options.dateFrom && { fechaPago: { gte: new Date(options.dateFrom) } }),
         ...(options.dateTo && { fechaPago: { lte: new Date(options.dateTo) } }),

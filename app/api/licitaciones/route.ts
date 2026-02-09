@@ -19,6 +19,32 @@ import type { Prisma } from '@/types/prisma-types';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+type WorkOrderStatusDb =
+  | 'pendiente'
+  | 'asignada'
+  | 'aceptada'
+  | 'en_progreso'
+  | 'pausada'
+  | 'completada'
+  | 'cancelada'
+  | 'rechazada';
+
+const normalizeWorkOrderStatus = (value: string): WorkOrderStatusDb | null => {
+  switch (value) {
+    case 'pendiente':
+    case 'asignada':
+    case 'aceptada':
+    case 'en_progreso':
+    case 'pausada':
+    case 'completada':
+    case 'cancelada':
+    case 'rechazada':
+      return value;
+    default:
+      return null;
+  }
+};
+
 // ============================================================================
 // VALIDACIÓN
 // ============================================================================
@@ -53,7 +79,10 @@ export async function GET(req: NextRequest) {
     if (!companyId) {
       return NextResponse.json({ error: 'Company ID no encontrado' }, { status: 400 });
     }
-
+    const userId = session.user.id;
+    if (!userId) {
+      return NextResponse.json({ error: 'Usuario no válido' }, { status: 400 });
+    }
     const { searchParams } = new URL(req.url);
     const estado = searchParams.get('estado');
 
@@ -65,14 +94,22 @@ export async function GET(req: NextRequest) {
 
     if (estado) {
       // Mapear estados de UI a estados del enum
-      const estadoMap: Record<string, string[]> = {
-        'abierta': ['pendiente'],
-        'cerrada': ['asignada'],
-        'adjudicada': ['aceptada', 'en_progreso'],
-        'completada': ['completada'],
-        'cancelada': ['cancelada', 'rechazada'],
+      const estadoMap: Record<string, WorkOrderStatusDb[]> = {
+        abierta: ['pendiente'],
+        cerrada: ['asignada'],
+        adjudicada: ['aceptada', 'en_progreso'],
+        completada: ['completada'],
+        cancelada: ['cancelada', 'rechazada'],
       };
-      where.estado = { in: estadoMap[estado] || [estado] };
+      const mapped = estadoMap[estado];
+      if (mapped) {
+        where.estado = { in: mapped };
+      } else {
+        const normalized = normalizeWorkOrderStatus(estado);
+        if (normalized) {
+          where.estado = { in: [normalized] };
+        }
+      }
     }
 
     const tenders = await prisma.providerWorkOrder.findMany({
@@ -169,6 +206,10 @@ export async function POST(req: NextRequest) {
     if (!companyId) {
       return NextResponse.json({ error: 'Company ID no encontrado' }, { status: 400 });
     }
+    const userId = session.user.id;
+    if (!userId) {
+      return NextResponse.json({ error: 'Usuario no válido' }, { status: 400 });
+    }
 
     const body: unknown = await req.json();
     const validationResult = createTenderSchema.safeParse(body);
@@ -230,6 +271,9 @@ export async function POST(req: NextRequest) {
         prioridad: 'media',
         fechaEstimada: new Date(data.fechaLimiteOfertas),
         presupuestoInicial: data.presupuestoMaximo, // Campo correcto del modelo
+        fotosAntes: [],
+        fotosDespues: [],
+        asignadoPor: userId,
         // Guardar metadata adicional en comentarios
         comentarios: JSON.stringify({
           requisitos: data.requisitos,

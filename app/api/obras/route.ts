@@ -82,7 +82,7 @@ export async function GET(req: NextRequest) {
       where,
       include: {
         workOrders: {
-          orderBy: { orden: 'asc' },
+          orderBy: { fechaInicio: 'asc' },
         },
         building: {
           select: { id: true, nombre: true, direccion: true },
@@ -223,7 +223,6 @@ export async function POST(req: NextRequest) {
         duracionMeses,
         arquitecto: data.arquitecto,
         aparejador: data.aparejador,
-        constructor: data.constructor,
         faseActual: data.faseActual,
       },
     });

@@ -38,8 +38,7 @@ export async function GET(request: NextRequest) {
         activo: true,
       },
       select: {
-        precioBase: true,
-        precioActual: true,
+        precioPorNoche: true,
       },
     });
 
@@ -47,22 +46,22 @@ export async function GET(request: NextRequest) {
     const pricingHistory = await prisma.pricingAnalysis.findMany({
       where: {
         companyId,
-        fecha: {
+        createdAt: {
           gte: subDays(new Date(), period),
         },
       },
       orderBy: {
-        fecha: 'asc',
+        createdAt: 'asc',
       },
     });
 
     // Si hay datos de pricing history, usar esos
     if (pricingHistory.length > 0) {
       const marketData = pricingHistory.map((p) => ({
-        date: p.fecha.toISOString().split('T')[0],
+        date: p.createdAt.toISOString().split('T')[0],
         myPrice: p.precioSugerido || 0,
         avgMarketPrice: p.precioMercado || 0,
-        occupancy: p.ocupacionEstimada || 0,
+        occupancy: p.probabilidadAlquiler || 0,
       }));
 
       return NextResponse.json(marketData);
@@ -71,7 +70,7 @@ export async function GET(request: NextRequest) {
     // Si hay datos de mercado estáticos, usarlos como base
     const latestMarketData = marketDataQuery[0];
     const avgUserPrice = listings.length > 0
-      ? listings.reduce((sum, l) => sum + (l.precioActual || l.precioBase), 0) / listings.length
+      ? listings.reduce((sum, l) => sum + (l.precioPorNoche || 0), 0) / listings.length
       : 0;
 
     const avgMarketPrice = latestMarketData?.precioPromedio || avgUserPrice || 100;

@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
         onboardingCompleted: true,
         company: {
           select: {
-            vertical: true,
+            businessVertical: true,
           },
         },
       },
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
     // Contexto del usuario
     const userContext = {
       userName: user?.name || undefined,
-      vertical: user?.company?.vertical || undefined,
+      vertical: user?.company?.businessVertical || undefined,
       onboardingProgress,
       completedTasks,
     };
@@ -111,9 +111,10 @@ export async function POST(request: NextRequest) {
         data: {
           userId: session.user.id,
           companyId: session.user.companyId || '',
-          userMessage: message,
-          botResponse: response.message || '',
-          context: JSON.stringify(userContext),
+          message,
+          response: response.message || '',
+          context: userContext,
+          suggestedActions: response.suggestedActions || [],
         },
       });
     } catch (dbError) {
@@ -156,7 +157,7 @@ export async function GET(request: NextRequest) {
         name: true,
         company: {
           select: {
-            vertical: true,
+            businessVertical: true,
           },
         },
       },
@@ -164,11 +165,11 @@ export async function GET(request: NextRequest) {
 
     const welcomeMessage = getWelcomeMessage({
       userName: user?.name || undefined,
-      vertical: user?.company?.vertical || undefined,
+      vertical: user?.company?.businessVertical || undefined,
     });
 
     const quickQuestions = getQuickQuestions(
-      user?.company?.vertical || undefined
+      user?.company?.businessVertical || undefined
     );
 
     return NextResponse.json({

@@ -28,14 +28,14 @@ export async function GET(
     // Verificar que la propiedad existe y el usuario tiene acceso
     const property = await prisma.unit.findUnique({
       where: { id: propertyId },
-      select: { companyId: true },
+      select: { building: { select: { companyId: true } } },
     });
 
     if (!property) {
       return NextResponse.json({ error: 'Propiedad no encontrada' }, { status: 404 });
     }
 
-    if (property.companyId !== session.user.companyId) {
+    if (property.building?.companyId !== session.user.companyId) {
       return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
     }
 
@@ -51,15 +51,20 @@ export async function GET(
         maxValue: true,
         confidenceScore: true,
         pricePerM2: true,
-        investmentPotential: true,
         reasoning: true,
         keyFactors: true,
-        marketComparison: true,
+        estimatedROI: true,
+        comparables: true,
         recommendations: true,
         model: true,
         createdAt: true,
       },
     });
+    const mappedValuations = valuations.map((valuation) => ({
+      ...valuation,
+      investmentPotential: valuation.estimatedROI ?? null,
+      marketComparison: valuation.comparables ?? null,
+    }));
 
     // Calcular tendencia (si hay múltiples valoraciones)
     let trend = 'stable';
@@ -74,7 +79,7 @@ export async function GET(
 
     return NextResponse.json({
       success: true,
-      data: valuations,
+      data: mappedValuations,
       metadata: {
         count: valuations.length,
         trend,

@@ -128,6 +128,44 @@ export async function POST(request: NextRequest) {
   }
 }
 
+function normalizeBuildingType(tipoPropiedad: string): 'residencial' | 'mixto' | 'comercial' {
+  const normalized = tipoPropiedad.trim().toLowerCase();
+
+  if (normalized.includes('mixto')) {
+    return 'mixto';
+  }
+
+  if (normalized.includes('comercial') || normalized.includes('oficina') || normalized.includes('local')) {
+    return 'comercial';
+  }
+
+  return 'residencial';
+}
+
+function normalizeUnitType(
+  tipo: string
+): 'vivienda' | 'local' | 'garaje' | 'trastero' | 'oficina' | 'nave_industrial' | 'coworking_space' {
+  const normalized = tipo.trim().toLowerCase();
+
+  if (normalized.includes('garaje')) return 'garaje';
+  if (normalized.includes('trastero')) return 'trastero';
+  if (normalized.includes('oficina')) return 'oficina';
+  if (normalized.includes('coworking')) return 'coworking_space';
+  if (normalized.includes('nave') || normalized.includes('industrial')) return 'nave_industrial';
+  if (normalized.includes('local') || normalized.includes('comercial')) return 'local';
+
+  return 'vivienda';
+}
+
+function normalizeMaintenancePriority(prioridad: string): 'baja' | 'media' | 'alta' {
+  const normalized = prioridad.trim().toLowerCase();
+
+  if (normalized === 'alta') return 'alta';
+  if (normalized === 'baja') return 'baja';
+
+  return 'media';
+}
+
 /**
  * Genera los datos específicos según el escenario
  */
@@ -142,34 +180,28 @@ async function generateScenarioData(companyId: string, config: DemoScenarioConfi
   let createdReservas = 0;
   let createdEventos = 0;
 
-  const mapBuildingType = (tipoPropiedad: string | undefined) => {
-    const normalized = (tipoPropiedad || '').toLowerCase();
-    if (normalized.includes('comercial')) return 'comercial';
-    if (normalized.includes('mixto')) return 'mixto';
-    return 'residencial';
-  };
-
-  const mapUnitType = (tipo: string) => {
-    const normalized = (tipo || '').toLowerCase();
-    if (normalized.includes('garaje')) return 'garaje';
-    if (normalized.includes('trastero')) return 'trastero';
-    if (normalized.includes('local') || normalized.includes('oficina') || normalized.includes('nave')) {
-      return 'local';
-    }
-    return 'vivienda';
-  };
-
   // 1. Crear edificios según el escenario
-  for (let index = 0; index < config.datos.edificios.length; index++) {
-    const edificioData = config.datos.edificios[index];
+  for (const edificioData of config.datos.edificios) {
+    const buildingIndex = createdBuildings.length;
+    const direccionCompleta = [
+      edificioData.direccion,
+      edificioData.codigoPostal,
+      edificioData.ciudad,
+    ]
+      .filter(Boolean)
+      .join(', ');
+    const tipo = normalizeBuildingType(edificioData.tipoPropiedad);
+    const numeroUnidades = edificioData.unidades.length;
+    const anoConstructor = 2000 + (buildingIndex % 20);
+
     const building = await prisma.building.create({
       data: {
         companyId,
         nombre: edificioData.nombre,
-        direccion: `${edificioData.direccion}, ${edificioData.codigoPostal} ${edificioData.ciudad}`,
-        tipo: mapBuildingType(edificioData.tipoPropiedad),
-        anoConstructor: 2000 + (index % 20),
-        numeroUnidades: edificioData.unidades.length,
+        direccion: direccionCompleta,
+        tipo,
+        anoConstructor,
+        numeroUnidades,
         isDemo: true,
       },
     });
@@ -180,6 +212,7 @@ async function generateScenarioData(companyId: string, config: DemoScenarioConfi
       const unidadData = edificioData.unidades[i];
       const floor = Math.ceil((i + 1) / 2);
       const letter = (i + 1) % 2 === 0 ? 'B' : 'A';
+      const unitType = normalizeUnitType(unidadData.tipo);
 
       const unit = await prisma.unit.create({
         data: {
@@ -187,7 +220,7 @@ async function generateScenarioData(companyId: string, config: DemoScenarioConfi
           numero: unidadData.tipo.includes('habitacion') 
             ? `H${String(i + 1).padStart(2, '0')}` 
             : `${floor}${letter}`,
-          tipo: mapUnitType(unidadData.tipo),
+          tipo: unitType,
           planta: floor,
           superficie: unidadData.superficie,
           habitaciones: unidadData.habitaciones,
@@ -205,14 +238,16 @@ async function generateScenarioData(companyId: string, config: DemoScenarioConfi
   const numInquilinos = Math.min(config.datos.inquilinosBase, DEMO_TENANT_NAMES.length);
   for (let i = 0; i < numInquilinos; i++) {
     const tenantData = DEMO_TENANT_NAMES[i];
+    const telefono = `+34 6${String(10000000 + i).slice(-8)}`;
+    const fechaNacimiento = new Date(1985, i % 12, (i % 28) + 1);
     const tenant = await prisma.tenant.create({
       data: {
         companyId,
         nombreCompleto: tenantData.nombre,
         email: `${tenantData.email}@demo.inmova.app`,
-        telefono: `+34 6${String(Math.random()).slice(2, 10)}`,
+        telefono,
         dni: tenantData.dni,
-        fechaNacimiento: new Date(1985 + (i % 20), i % 12, 1),
+        fechaNacimiento,
         isDemo: true,
       },
     });
@@ -227,7 +262,7 @@ async function generateScenarioData(companyId: string, config: DemoScenarioConfi
   );
 
   // Filtrar unidades que no sean de comunidad (precio > 0)
-  const rentableUnits = createdUnits.filter(u => u.rentaMensual > 0);
+  const rentableUnits = createdUnits.filter((u) => u.rentaMensual > 0);
 
   for (let i = 0; i < numContratos && i < rentableUnits.length; i++) {
     const unit = rentableUnits[i];
@@ -239,6 +274,13 @@ async function generateScenarioData(companyId: string, config: DemoScenarioConfi
     const endDate = new Date(startDate);
     endDate.setFullYear(endDate.getFullYear() + 1);
 
+    const contractType =
+      config.id === 'alquiler_turistico'
+        ? 'temporal'
+        : config.id === 'comercial_oficinas'
+          ? 'comercial'
+          : 'residencial';
+
     const contract = await prisma.contract.create({
       data: {
         unitId: unit.id,
@@ -248,7 +290,7 @@ async function generateScenarioData(companyId: string, config: DemoScenarioConfi
         rentaMensual: unit.rentaMensual,
         deposito: unit.rentaMensual * 2,
         estado: 'activo',
-        tipo: config.id === 'comercial_oficinas' ? 'comercial' : 'residencial',
+        tipo: contractType,
         isDemo: true,
       },
     });
@@ -266,11 +308,12 @@ async function generateScenarioData(companyId: string, config: DemoScenarioConfi
       const paymentDate = new Date();
       paymentDate.setMonth(paymentDate.getMonth() - month);
 
+      const periodo = `${paymentDate.getFullYear()}-${String(paymentDate.getMonth() + 1).padStart(2, '0')}`;
       const payment = await prisma.payment.create({
         data: {
           contractId: contract.id,
           monto: contract.rentaMensual,
-          periodo: paymentDate.toISOString().slice(0, 7),
+          periodo,
           fechaVencimiento: paymentDate,
           fechaPago: paymentDate,
           estado: 'pagado',
@@ -290,12 +333,9 @@ async function generateScenarioData(companyId: string, config: DemoScenarioConfi
   for (let i = 0; i < numIncidencias; i++) {
     const incidenciaData = DEMO_INCIDENCIAS[i];
     const unit = createdUnits[Math.floor(Math.random() * createdUnits.length)];
-    const prioridadNormalizada = (incidenciaData.prioridad || '').toLowerCase();
-    const prioridad = prioridadNormalizada === 'alta' || prioridadNormalizada === 'baja'
-      ? prioridadNormalizada
-      : 'media';
-    
+
     try {
+      const prioridad = normalizeMaintenancePriority(incidenciaData.prioridad);
       const incidencia = await prisma.maintenanceRequest.create({
         data: {
           unitId: unit.id,

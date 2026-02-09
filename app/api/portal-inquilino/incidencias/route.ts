@@ -36,7 +36,16 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const status = searchParams.get('status');
+    const statusParam = searchParams.get('status');
+    const validStatus = [
+      'pendiente',
+      'en_progreso',
+      'programado',
+      'completado',
+    ] as const;
+    const status = validStatus.includes(statusParam as (typeof validStatus)[number])
+      ? (statusParam as (typeof validStatus)[number])
+      : undefined;
     const limit = parseInt(searchParams.get('limit') || '20');
 
     // Obtener inquilino con sus unidades
@@ -75,21 +84,21 @@ export async function GET(request: NextRequest) {
       success: true,
       data: incidencias.map((inc) => ({
         id: inc.id,
-        tipo: inc.tipoIncidencia || inc.descripcion.split(' ')[0],
+        tipo: inc.titulo || inc.descripcion.split(' ')[0],
         descripcion: inc.descripcion,
         urgencia: inc.prioridad || 'media',
         estado: inc.estado,
         ubicacion: `${inc.unit?.numero} - ${inc.unit?.building?.nombre}`,
         fechaCreacion: inc.createdAt,
-        fechaResolucion: inc.fechaResolucion,
+        fechaResolucion: inc.fechaCompletada,
         proveedor: inc.provider
           ? {
               id: inc.provider.id,
-              nombre: inc.provider.nombre || inc.provider.nombreEmpresa,
+              nombre: inc.provider.nombre,
             }
           : null,
-        presupuesto: inc.presupuestoEstimado,
-        fotos: inc.fotosPaths || [],
+        presupuesto: inc.costoEstimado,
+        fotos: inc.fotosProblem || [],
       })),
     });
   } catch (error: any) {
@@ -147,16 +156,17 @@ export async function POST(request: NextRequest) {
     }
 
     // Crear incidencia
+    const normalizedPriority =
+      classification.urgencia === 'urgente' ? 'alta' : classification.urgencia;
+
     const incidencia = await prisma.maintenanceRequest.create({
       data: {
         unitId,
+        titulo: classification.tipo,
         descripcion: validated.descripcion,
-        tipoIncidencia: classification.tipo,
-        prioridad: classification.urgencia,
+        prioridad: normalizedPriority,
         estado: 'pendiente',
-        solicitadaPorInquilino: true,
-        fotosPaths: validated.fotos || [],
-        ubicacionExacta: validated.ubicacion,
+        fotosProblem: validated.fotos || [],
       },
       include: {
         unit: {

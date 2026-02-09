@@ -424,7 +424,7 @@ async function analyzeDocumentWithVision(
         content: [
           contentBlock,
           {
-            type: 'text',
+            type: 'text' as const,
             text: prompt,
           },
         ],

@@ -43,18 +43,38 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Partner no encontrado' }, { status: 404 });
     }
 
+    let service = null;
+    if (validatedData.servicioId) {
+      service = await prisma.partnerService.findFirst({
+        where: { id: validatedData.servicioId, partnerId: partner.id },
+        select: { id: true },
+      });
+    }
+
+    if (!service) {
+      service = await prisma.partnerService.findFirst({
+        where: { partnerId: partner.id },
+        select: { id: true },
+      });
+    }
+
+    if (!service) {
+      return NextResponse.json(
+        { error: 'Servicio no disponible para este partner' },
+        { status: 400 }
+      );
+    }
+
     // Crear el lead
     const lead = await prisma.partnerServiceLead.create({
       data: {
-        partnerId: partner.id,
+        serviceId: service.id,
         nombre: validatedData.nombre,
         email: validatedData.email,
         telefono: validatedData.telefono || null,
         mensaje: validatedData.mensaje || null,
         origen: validatedData.origen,
-        servicioId: validatedData.servicioId || null,
-        estado: 'NUEVO',
-        fechaContacto: new Date(),
+        estado: 'nuevo',
       },
     });
 

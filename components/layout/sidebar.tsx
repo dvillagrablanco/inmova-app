@@ -5,7 +5,17 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { signOut, useSession } from 'next-auth/react';
 import { useBranding } from '@/lib/hooks/useBranding';
-import { LogOut, Menu, X, ChevronDown, ChevronRight, Search, Star, Loader2 } from 'lucide-react';
+import {
+  LogOut,
+  Menu,
+  X,
+  ChevronDown,
+  ChevronRight,
+  Search,
+  Star,
+  Loader2,
+  Settings,
+} from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { usePermissions } from '@/lib/hooks/usePermissions';
@@ -197,10 +207,10 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
     loadActiveModules();
   }, []);
 
-  // Cargar módulos de la empresa seleccionada (Solo para Super Admin)
+  // Cargar módulos de la empresa seleccionada
   useEffect(() => {
     async function loadSelectedCompanyModules() {
-      if (!selectedCompany || role !== 'super_admin') {
+      if (!selectedCompany) {
         setSelectedCompanyModules([]);
         return;
       }
@@ -312,7 +322,6 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
     // usar los módulos de la empresa seleccionada
     const modulesToCheck =
       useSelectedCompanyModules &&
-      role === 'super_admin' &&
       selectedCompany &&
       Array.isArray(selectedCompanyModules) &&
       selectedCompanyModules.length > 0
@@ -358,8 +367,8 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
   // Filtrar items por rol y módulos activos
   const filteredDashboardItems = filterItems(dashboardNavItems);
 
-  // Verticales de Negocio - Usar módulos de empresa seleccionada si hay una (Super Admin)
-  const useCompanyModules = role === 'super_admin' && !!selectedCompany;
+  // Verticales de Negocio - Usar módulos de empresa seleccionada si hay una
+  const useCompanyModules = !!selectedCompany;
   const filteredAlquilerResidencialItems = filterItems(alquilerResidencialItems, useCompanyModules);
   const filteredStrItems = filterItems(strNavItems, useCompanyModules);
   const filteredCoLivingItems = filterItems(coLivingNavItems, useCompanyModules);
@@ -772,6 +781,31 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
             )}
 
             {/* ============================================================== */}
+            {/* SELECTOR DE EMPRESA (Siempre visible) */}
+            {/* ============================================================== */}
+            <div className="px-2 py-3 mb-2 border-t border-gray-800">
+              <h3 className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">
+                🏢 Empresa activa
+              </h3>
+              <p className="text-[9px] text-gray-500 mt-1">
+                Cambia la empresa para operar
+              </p>
+            </div>
+
+            <div className="mb-4 px-2">
+              <CompanySelector
+                onCompanyChange={(company) => {
+                  if (company) {
+                    setExpandedSections((prev) => ({
+                      ...prev,
+                      administradorEmpresa: true,
+                    }));
+                  }
+                }}
+              />
+            </div>
+
+            {/* ============================================================== */}
             {/* SELECTOR DE EMPRESA Y GESTIÓN (Para Super Admin) */}
             {/* ============================================================== */}
             {role === 'super_admin' && filteredAdministradorEmpresaItems.length > 0 && (
@@ -781,23 +815,8 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                     🏢 Gestión de Empresas
                   </h3>
                   <p className="text-[9px] text-gray-500 mt-1">
-                    Selecciona una empresa para configurar
+                    Configuración avanzada por empresa
                   </p>
-                </div>
-
-                {/* Selector de Empresa */}
-                <div className="mb-4 px-2">
-                  <CompanySelector
-                    onCompanyChange={(company) => {
-                      // Auto-expandir la sección cuando se selecciona empresa
-                      if (company) {
-                        setExpandedSections((prev) => ({
-                          ...prev,
-                          administradorEmpresa: true,
-                        }));
-                      }
-                    }}
-                  />
                 </div>
 
                 {/* Gestión de Empresa - Solo visible cuando hay empresa seleccionada */}
@@ -831,7 +850,6 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                   </div>
                 )}
 
-                {/* Mensaje cuando no hay empresa seleccionada */}
                 {!selectedCompany && (
                   <div className="mx-2 mb-4 p-3 bg-gray-800/50 rounded-lg border border-dashed border-gray-700">
                     <p className="text-xs text-gray-400 text-center">

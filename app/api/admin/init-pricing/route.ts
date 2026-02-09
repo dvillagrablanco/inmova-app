@@ -20,19 +20,29 @@ export const runtime = 'nodejs';
 const MAIN_COMPANY_ID = 'sistema';
 const CREATED_BY = 'sistema';
 
+const normalizeTier = (
+  tier: string
+): 'STARTER' | 'PROFESSIONAL' | 'BUSINESS' | 'ENTERPRISE' => {
+  const normalized = tier.toUpperCase();
+  if (normalized === 'PROFESSIONAL') return 'PROFESSIONAL';
+  if (normalized === 'BUSINESS') return 'BUSINESS';
+  if (normalized === 'ENTERPRISE') return 'ENTERPRISE';
+  return 'STARTER';
+};
+
 async function initializePlans() {
   const results = [];
   
   for (const [key, plan] of Object.entries(PRICING_PLANS)) {
     try {
-      const tier = plan.tier.toUpperCase() as 'STARTER' | 'PROFESSIONAL' | 'BUSINESS' | 'ENTERPRISE';
+      const normalizedTier = normalizeTier(plan.tier);
       const existingPlan = await prisma.subscriptionPlan.findFirst({
-        where: { tier }
+        where: { tier: normalizedTier }
       });
 
       const planData = {
         nombre: plan.name,
-        tier,
+        tier: normalizedTier,
         descripcion: plan.description,
         precioMensual: plan.monthlyPrice,
         maxUsuarios: typeof plan.maxUsers === 'number' ? plan.maxUsers : 999,
@@ -69,12 +79,13 @@ async function initializeCoupons() {
   
   for (const [key, campaign] of Object.entries(PROMO_CAMPAIGNS)) {
     try {
+      const normalizedTargetPlan = normalizeTier(campaign.targetPlan);
+      const couponType: 'PERCENTAGE' | 'FIXED' =
+        campaign.discountType === 'percentage' ? 'PERCENTAGE' : 'FIXED';
       const existingCoupon = await prisma.discountCoupon.findFirst({
         where: { codigo: campaign.code }
       });
 
-      const couponType: 'PERCENTAGE' | 'FIXED' =
-        campaign.discountType === 'percentage' ? 'PERCENTAGE' : 'FIXED';
       const couponData = {
         companyId: MAIN_COMPANY_ID,
         codigo: campaign.code,
@@ -89,7 +100,7 @@ async function initializeCoupons() {
         fechaExpiracion: campaign.validUntil,
         aplicaATodos: true,
         unidadesPermitidas: [],
-        planesPermitidos: [campaign.targetPlan],
+        planesPermitidos: [normalizedTargetPlan],
         estado: 'activo' as const,
         activo: true,
         creadoPor: CREATED_BY,
