@@ -156,7 +156,6 @@ export async function GET(request: NextRequest) {
       select: {
         primaAnual: true,
         primaMensual: true,
-        prima: true,
       },
     });
 
@@ -164,7 +163,6 @@ export async function GET(request: NextRequest) {
       const annual =
         insurance.primaAnual ??
         (insurance.primaMensual ? insurance.primaMensual * 12 : null) ??
-        insurance.prima ??
         0;
       return sum + annual;
     }, 0);
