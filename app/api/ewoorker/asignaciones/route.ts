@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
           select: {
             id: true,
             obraId: true,
-            precioFinal: true,
+            presupuestoTotal: true,
             estado: true,
             obra: {
               select: {
@@ -161,7 +161,9 @@ export async function GET(request: NextRequest) {
         fechaInicio: a.fechaInicio,
         fechaFin: a.fechaFin,
         estado: a.estado,
-        tarifaDiaria: a.contrato.precioFinal ? Number(a.contrato.precioFinal) / diasTotales : 0,
+        tarifaDiaria: a.contrato.presupuestoTotal
+          ? Number(a.contrato.presupuestoTotal) / diasTotales
+          : 0,
         diasTrabajados: Math.max(0, Math.min(diasTrabajados, diasTotales)),
         diasTotales: diasTotales,
         valoracion: a.valoracion,
