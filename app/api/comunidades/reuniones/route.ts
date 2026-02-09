@@ -59,10 +59,13 @@ export async function GET(request: NextRequest) {
 
     const sessionUser = session.user as { companyId?: string | null };
     const companyId = sessionUser.companyId;
+    if (!companyId) {
+      return NextResponse.json({ error: 'Empresa no válida' }, { status: 400 });
+    }
 
     // Obtener buildingId si se proporciona comunidadId
     let targetBuildingId = buildingId;
-    if (comunidadId && !buildingId) {
+    if (typeof comunidadId === 'string' && !buildingId) {
       const comunidad = await prisma.communityManagement.findFirst({
         where: { id: comunidadId, companyId },
         select: { buildingId: true },
@@ -85,7 +88,7 @@ export async function GET(request: NextRequest) {
         where,
         include: {
           building: {
-            select: { id: true, name: true },
+            select: { id: true, nombre: true },
           },
         },
         orderBy: { fechaReunion: proximas ? 'asc' : 'desc' },
@@ -119,16 +122,21 @@ export async function GET(request: NextRequest) {
       },
       orderBy: { fechaReunion: 'asc' },
       include: {
-        building: { select: { id: true, name: true } },
+        building: { select: { id: true, nombre: true } },
       },
     });
 
+    const mapMeeting = (reunion: typeof reuniones[number]) => ({
+      ...reunion,
+      acuerdos: Array.isArray(reunion.acuerdos) ? reunion.acuerdos : [],
+      asistentes: Array.isArray(reunion.asistentes) ? reunion.asistentes : [],
+      building: reunion.building
+        ? { id: reunion.building.id, name: reunion.building.nombre }
+        : null,
+    });
+
     return NextResponse.json({
-      reuniones: reuniones.map((reunion) => ({
-        ...reunion,
-        acuerdos: Array.isArray(reunion.acuerdos) ? reunion.acuerdos : [],
-        asistentes: Array.isArray(reunion.asistentes) ? reunion.asistentes : [],
-      })),
+      reuniones: reuniones.map(mapMeeting),
       pagination: {
         page,
         limit,
@@ -141,7 +149,7 @@ export async function GET(request: NextRequest) {
         realizadas,
         canceladas,
       },
-      proximaReunion,
+      proximaReunion: proximaReunion ? mapMeeting(proximaReunion) : null,
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error desconocido';
@@ -193,7 +201,7 @@ export async function POST(request: NextRequest) {
         organizadoPor: userId,
       },
       include: {
-        building: { select: { id: true, name: true } },
+        building: { select: { id: true, nombre: true } },
       },
     });
 
@@ -267,7 +275,17 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({ reunion }, { status: 201 });
+    return NextResponse.json(
+      {
+        reunion: {
+          ...reunion,
+          building: reunion.building
+            ? { id: reunion.building.id, name: reunion.building.nombre }
+            : null,
+        },
+      },
+      { status: 201 }
+    );
   } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -319,11 +337,18 @@ export async function PATCH(request: NextRequest) {
       where: { id },
       data: validated,
       include: {
-        building: { select: { id: true, name: true } },
+        building: { select: { id: true, nombre: true } },
       },
     });
 
-    return NextResponse.json({ reunion });
+    return NextResponse.json({
+      reunion: {
+        ...reunion,
+        building: reunion.building
+          ? { id: reunion.building.id, name: reunion.building.nombre }
+          : null,
+      },
+    });
   } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
