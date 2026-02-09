@@ -96,10 +96,19 @@ Company: ${session.user.companyId}`;
       ? `${userContext}\n\n${validated.context}`
       : userContext;
 
+    const historyPrompt = validated.conversationHistory?.length
+      ? validated.conversationHistory
+          .map((item) => `${item.role === 'user' ? 'Usuario' : 'Asistente'}: ${item.content}`)
+          .join('\n')
+      : '';
+
+    const prompt = historyPrompt
+      ? `${historyPrompt}\nUsuario: ${validated.message}`
+      : validated.message;
+
     // 5. Llamar a Claude AI
-    const response = await ClaudeAIService.chat(validated.message, {
-      conversationHistory: validated.conversationHistory,
-      context: fullContext,
+    const response = await ClaudeAIService.chat(prompt, {
+      systemPrompt: fullContext,
     });
 
     // 6. Tracking de uso (Control de costos)
