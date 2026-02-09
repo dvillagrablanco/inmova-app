@@ -200,11 +200,11 @@ export async function POST(request: NextRequest) {
         action: 'CREATE',
         entityType: 'CONTRACT',
         entityId: contract.id,
-        details: {
+        changes: JSON.stringify({
           signatureId: signatureRecord.id,
           externalId: result.id,
           signers: validated.signers.map((s) => s.email),
-        },
+        }),
       },
     });
 
