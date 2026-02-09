@@ -5,6 +5,32 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { generateDemoData, hasDemoData } from '@/lib/demo-data-generator';
 import logger from '@/lib/logger';
+import type { BusinessVertical } from '@/lib/onboarding-tours';
+
+const DEMO_VERTICALS = new Set<BusinessVertical>([
+  'alquiler_tradicional',
+  'str_vacacional',
+  'coliving',
+  'room_rental',
+  'construccion',
+  'flipping',
+  'servicios_profesionales',
+  'comunidades',
+  'mixto',
+]);
+
+function normalizeVertical(vertical: string | null | undefined): BusinessVertical | null {
+  if (!vertical) {
+    return null;
+  }
+  if (DEMO_VERTICALS.has(vertical as BusinessVertical)) {
+    return vertical as BusinessVertical;
+  }
+  if (vertical === 'alquiler_comercial') {
+    return 'alquiler_tradicional';
+  }
+  return null;
+}
 
 // POST: Generar datos demo para el usuario
 export async function POST(request: NextRequest) {
@@ -22,7 +48,7 @@ export async function POST(request: NextRequest) {
       select: { businessVertical: true },
     });
 
-    const businessVertical = user?.businessVertical;
+    const businessVertical = normalizeVertical(user?.businessVertical);
 
     if (!businessVertical) {
       return NextResponse.json(
