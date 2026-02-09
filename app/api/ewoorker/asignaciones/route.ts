@@ -253,6 +253,7 @@ export async function POST(request: NextRequest) {
         contrato: {
           include: {
             obra: true,
+            constructor: false,
           },
         },
       },
