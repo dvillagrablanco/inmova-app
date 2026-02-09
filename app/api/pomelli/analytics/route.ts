@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Obtener estadísticas agregadas
-    const posts = await prisma.socialPost.findMany({
+    const posts = await prisma.pomelliSocialPost.findMany({
       where,
       select: {
         impressions: true,
