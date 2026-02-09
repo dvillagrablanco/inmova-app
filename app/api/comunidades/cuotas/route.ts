@@ -157,14 +157,15 @@ export async function POST(request: NextRequest) {
           buildingId,
           building: { companyId },
         },
-        select: { id: true, squareMeters: true },
+        select: { id: true, superficie: true },
       });
 
       // Calcular coeficiente basado en metros cuadrados
-      const totalM2 = unidades.reduce((sum, u) => sum + (u.squareMeters || 0), 0);
+      const totalM2 = unidades.reduce((sum, u) => sum + (u.superficie || 0), 0);
 
       const cuotasData = unidades.map(unidad => {
-        const coeficiente = totalM2 > 0 ? (unidad.squareMeters || 0) / totalM2 : 1 / unidades.length;
+        const coeficiente =
+          totalM2 > 0 ? (unidad.superficie || 0) / totalM2 : 1 / unidades.length;
         return {
           companyId,
           buildingId,
