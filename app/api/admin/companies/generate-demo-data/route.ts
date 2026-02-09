@@ -274,7 +274,6 @@ async function generateScenarioData(companyId: string, config: DemoScenarioConfi
 
     const contract = await prisma.contract.create({
       data: {
-        companyId,
         unitId: unit.id,
         tenantId: tenant.id,
         fechaInicio: startDate,
