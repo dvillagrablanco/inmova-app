@@ -236,10 +236,10 @@ export async function GET(request: NextRequest) {
           entityType: 'INTEGRATION',
           entityId: company.id,
           companyId: company.id,
-          details: {
+          changes: JSON.stringify({
             zucchettiCompanyId: zucchettiInfo.companyId,
             connectedAt: new Date().toISOString(),
-          },
+          }),
         },
       });
     } catch (auditError) {
