@@ -37,9 +37,7 @@ export async function GET(
           select: {
             nombre: true,
             direccion: true,
-            ciudad: true,
-            codigoPostal: true,
-            barrio: true,
+            companyId: true,
           },
         },
       },
@@ -53,7 +51,7 @@ export async function GET(
     }
 
     // Verificar acceso (ownership)
-    if (property.companyId !== session.user.companyId) {
+    if (property.building?.companyId !== session.user.companyId) {
       return NextResponse.json(
         { error: 'Acceso denegado' },
         { status: 403 }
@@ -95,7 +93,7 @@ export async function GET(
     // Buscar propiedades similares en la BD
     const similarProperties = await prisma.unit.findMany({
       where: {
-        companyId: session.user.companyId,
+        building: { companyId: session.user.companyId },
         id: { not: propertyId },
         buildingId: property.buildingId,
         superficie: {
@@ -139,9 +137,21 @@ export async function GET(
 
     // 5. Guardar valoración en BD (histórico)
     try {
+      const rooms = property.habitaciones ?? 0;
+      const bathrooms = property.banos ?? 0;
+      const postalCode = propertyData.postalCode || '00000';
+
       await prisma.propertyValuation.create({
         data: {
           unitId: propertyId,
+          companyId: session.user.companyId,
+          address: propertyData.address,
+          postalCode,
+          city,
+          squareMeters: propertyData.squareMeters,
+          rooms,
+          bathrooms,
+          condition: 'GOOD',
           estimatedValue: valuation.estimatedValue,
           minValue: valuation.minValue,
           maxValue: valuation.maxValue,
@@ -149,11 +159,10 @@ export async function GET(
           pricePerM2: valuation.pricePerM2,
           reasoning: valuation.reasoning,
           keyFactors: valuation.keyFactors,
-          marketComparison: valuation.marketComparison,
-          investmentPotential: valuation.investmentPotential,
+          comparables: marketData.similarProperties || [],
           recommendations: valuation.recommendations,
           model: 'claude-3.5-sonnet',
-          companyId: session.user.companyId,
+          requestedBy: session.user.id,
         },
       });
     } catch (dbError) {
@@ -166,7 +175,7 @@ export async function GET(
       data: valuation,
       metadata: {
         propertyId,
-        address: `${property.building.direccion}, ${property.building.ciudad}`,
+        address: `${property.building.direccion}, ${city}`,
         squareMeters: property.superficie,
         marketData: {
           avgPricePerM2: marketData.avgPricePerM2,
