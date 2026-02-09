@@ -43,12 +43,12 @@ export async function GET(
             units: {
               select: {
                 id: true,
-                unitNumber: true,
-                type: true,
-                status: true,
-                squareMeters: true,
+                numero: true,
+                tipo: true,
+                estado: true,
+                superficie: true,
                 contracts: {
-                  where: { status: 'activo' },
+                  where: { estado: 'activo' },
                   include: {
                     tenant: {
                       select: {
