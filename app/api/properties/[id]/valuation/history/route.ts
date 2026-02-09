@@ -28,14 +28,14 @@ export async function GET(
     // Verificar que la propiedad existe y el usuario tiene acceso
     const property = await prisma.unit.findUnique({
       where: { id: propertyId },
-      select: { companyId: true },
+      select: { building: { select: { companyId: true } } },
     });
 
     if (!property) {
       return NextResponse.json({ error: 'Propiedad no encontrada' }, { status: 404 });
     }
 
-    if (property.companyId !== session.user.companyId) {
+    if (property.building?.companyId !== session.user.companyId) {
       return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
     }
 
