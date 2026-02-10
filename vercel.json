@@ -12,6 +12,10 @@
     {
       "path": "/api/cron/check-coupons",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/sync-altai",
+      "schedule": "0 6 * * *"
     }
   ],
   "headers": [
