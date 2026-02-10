@@ -783,16 +783,13 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
             {/* ============================================================== */}
             {/* SELECTOR DE EMPRESA (Siempre visible) */}
             {/* ============================================================== */}
-            <div className="px-2 py-3 mb-2 border-t border-gray-800">
-              <h3 className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">
-                🏢 Empresa activa
+            <div className="px-2 pt-3 pb-1 mb-1 border-t border-gray-800">
+              <h3 className="text-[10px] font-bold text-violet-400 uppercase tracking-wider">
+                🏢 Sociedad
               </h3>
-              <p className="text-[9px] text-gray-500 mt-1">
-                Cambia la empresa para operar
-              </p>
             </div>
 
-            <div className="mb-4 px-2">
+            <div className="mb-4 px-1">
               <CompanySelector
                 onCompanyChange={(company) => {
                   if (company) {
