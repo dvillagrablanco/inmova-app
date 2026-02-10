@@ -2,7 +2,8 @@ import type { UserRole } from '@prisma/client';
 import type { NextRequest } from 'next/server';
 import { prisma } from '@/lib/db';
 
-const ADMIN_ROLES = new Set<UserRole>(['super_admin', 'administrador', 'soporte']);
+// Solo super_admin y soporte ven TODAS las empresas de la plataforma
+const PLATFORM_ROLES = new Set<UserRole>(['super_admin', 'soporte']);
 
 function getRequestedCompanyId(request: NextRequest | null | undefined): string | null {
   if (!request) return null;
@@ -29,20 +30,16 @@ async function getAccessibleCompanyIds(
   role: UserRole,
   primaryCompanyId: string | null | undefined
 ): Promise<string[]> {
-  if (ADMIN_ROLES.has(role)) {
+  // Solo super_admin y soporte ven TODAS las empresas
+  if (PLATFORM_ROLES.has(role)) {
     const companies = await prisma.company.findMany({
       select: { id: true },
     });
     return companies.map((company) => company.id);
   }
 
-  if (role === 'gestor' && primaryCompanyId) {
-    const childCompanies = await getChildCompanyIds(primaryCompanyId);
-    if (childCompanies.length > 0) {
-      return childCompanies;
-    }
-  }
-
+  // Para administrador, gestor y otros roles:
+  // Recopilar empresas del userCompanyAccess + primaryCompany + hijas de las que tienen acceso
   const accessEntries = await prisma.userCompanyAccess.findMany({
     where: {
       userId,
@@ -54,6 +51,15 @@ async function getAccessibleCompanyIds(
   const ids = new Set(accessEntries.map((entry) => entry.companyId));
   if (primaryCompanyId) {
     ids.add(primaryCompanyId);
+  }
+
+  // Para administrador y gestor: incluir también las empresas hijas
+  if (role === 'administrador' || role === 'gestor') {
+    const parentIds = Array.from(ids);
+    for (const parentId of parentIds) {
+      const childIds = await getChildCompanyIds(parentId);
+      childIds.forEach((id) => ids.add(id));
+    }
   }
 
   return Array.from(ids);
