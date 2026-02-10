@@ -97,7 +97,7 @@ export default function PortalProveedorPage() {
       title: 'Reseñas',
       description: 'Ver valoraciones',
       icon: Star,
-      href: '/portal-proveedor/reseñas',
+      href: '/portal-proveedor/resenas',
       color: 'text-yellow-600',
       bgColor: 'bg-yellow-50',
     },

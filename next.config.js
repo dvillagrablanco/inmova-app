@@ -184,6 +184,16 @@ const nextConfig = {
       { source: '/dashboard-adaptive', destination: '/dashboard', permanent: true },
       { source: '/dashboard/adaptive', destination: '/dashboard', permanent: true },
 
+      // ── Links rotos encontrados en auditoría → redirects ──
+      { source: '/contacto', destination: '/landing/contacto', permanent: true },
+      { source: '/privacy', destination: '/legal/privacidad', permanent: true },
+      { source: '/terms', destination: '/legal/terminos', permanent: true },
+      { source: '/landing/ventajas', destination: '/landing', permanent: true },
+      { source: '/webhook', destination: '/admin/webhooks', permanent: true },
+      { source: '/docs/examples', destination: '/developers/samples', permanent: true },
+      { source: '/docs/guides', destination: '/docs', permanent: true },
+      { source: '/developers/tutorials', destination: '/developers', permanent: true },
+
       // ── Páginas desactivadas (redirigen a vertical más cercano) ──
       { source: '/viajes-corporativos', destination: '/str', permanent: true },
       { source: '/viajes-corporativos/:path*', destination: '/str', permanent: true },
