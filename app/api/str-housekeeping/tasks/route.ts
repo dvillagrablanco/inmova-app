@@ -22,8 +22,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Empresa no definida' }, { status: 400 });
     }
     // Inyectar companyId resuelto en session para compatibilidad
-    (session.user as any).companyId = __resolvedCompanyId;, { status: 401 });
-    }
+    (session.user as any).companyId = __resolvedCompanyId;
 
     const { searchParams } = new URL(req.url);
     const listingId = searchParams.get('listingId');

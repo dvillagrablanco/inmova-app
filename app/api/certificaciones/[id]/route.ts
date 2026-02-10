@@ -24,8 +24,7 @@ export async function GET(
       return NextResponse.json({ error: 'Empresa no definida' }, { status: 400 });
     }
     // Inyectar companyId resuelto en session para compatibilidad
-    (session.user as any).companyId = __resolvedCompanyId;, { status: 401 });
-    }
+    (session.user as any).companyId = __resolvedCompanyId;
 
     const certificado = await prisma.energyCertificate.findFirst({
       where: {

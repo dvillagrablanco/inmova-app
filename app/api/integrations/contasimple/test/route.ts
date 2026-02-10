@@ -33,8 +33,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Empresa no definida' }, { status: 400 });
     }
     // Inyectar companyId resuelto en session para compatibilidad
-    (session.user as any).companyId = __resolvedCompanyId;, { status: 401 });
-    }
+    (session.user as any).companyId = __resolvedCompanyId;
 
     if (session.user.role !== 'administrador' && session.user.role !== 'super_admin') {
       return NextResponse.json(

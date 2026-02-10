@@ -601,8 +601,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Empresa no definida' }, { status: 400 });
     }
     // Inyectar companyId resuelto en session para compatibilidad
-    (session.user as any).companyId = __resolvedCompanyId;, { status: 401 });
-    }
+    (session.user as any).companyId = __resolvedCompanyId;
 
     const companyId = session.user.companyId;
     const authMode = getZucchettiAuthMode();

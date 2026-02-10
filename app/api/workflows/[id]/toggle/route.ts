@@ -27,8 +27,7 @@ export async function POST(
       return NextResponse.json({ error: 'Empresa no definida' }, { status: 400 });
     }
     // Inyectar companyId resuelto en session para compatibilidad
-    (session.user as any).companyId = __resolvedCompanyId;, { status: 401 });
-    }
+    (session.user as any).companyId = __resolvedCompanyId;
 
     // Verificar que el workflow existe y pertenece a la empresa
     const workflow = await prisma.workflow.findFirst({

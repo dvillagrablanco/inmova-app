@@ -19,8 +19,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Empresa no definida' }, { status: 400 });
     }
     // Inyectar companyId resuelto en session para compatibilidad
-    (session.user as any).companyId = __resolvedCompanyId;, { status: 401 });
-    }
+    (session.user as any).companyId = __resolvedCompanyId;
     const stats = await ViajesCorporativosService.getStats(session.user.companyId);
     return NextResponse.json({ success: true, data: stats });
   } catch (error: any) {

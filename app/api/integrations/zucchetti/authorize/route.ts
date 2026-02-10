@@ -45,8 +45,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Empresa no definida' }, { status: 400 });
     }
     // Inyectar companyId resuelto en session para compatibilidad
-    (session.user as any).companyId = __resolvedCompanyId;, { status: 401 });
-    }
+    (session.user as any).companyId = __resolvedCompanyId;
 
     // Solo admins pueden configurar integraciones
     const allowedRoles = new Set(['administrador', 'super_admin']);
