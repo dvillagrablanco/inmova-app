@@ -179,29 +179,48 @@ export async function POST(request: NextRequest) {
     // SINCRONIZACIÓN CON STRIPE
     // ════════════════════════════════════════════════════════════════
 
-    // Sincronizar plan con Stripe si no tiene precio
     let stripePriceId: string | undefined;
 
-    // Buscar precio en Stripe
-    const stripeIds = await stripeService.syncPlanToStripe({
-      id: plan.id,
-      nombre: plan.nombre,
-      descripcion: plan.descripcion,
-      precioMensual: plan.precioMensual,
-      precioAnual: plan.precioMensual * 10,
-      tier: plan.tier,
-    });
-
-    if (!stripeIds) {
-      return NextResponse.json(
-        { error: 'Error sincronizando con Stripe' },
-        { status: 500 }
-      );
+    // Intentar usar Stripe IDs almacenados en BD primero
+    const planWithStripe = plan as any;
+    if (validated.interval === 'annual' && planWithStripe.stripePriceIdAnnual) {
+      stripePriceId = planWithStripe.stripePriceIdAnnual;
+    } else if (planWithStripe.stripePriceIdMonthly) {
+      stripePriceId = planWithStripe.stripePriceIdMonthly;
     }
 
-    stripePriceId = validated.interval === 'annual' 
-      ? stripeIds.priceIdAnnual || stripeIds.priceIdMonthly
-      : stripeIds.priceIdMonthly;
+    // Si no hay IDs de Stripe, sincronizar on-the-fly
+    if (!stripePriceId) {
+      const stripeIds = await stripeService.syncPlanToStripe({
+        id: plan.id,
+        nombre: plan.nombre,
+        descripcion: plan.descripcion,
+        precioMensual: plan.precioMensual,
+        precioAnual: (plan as any).precioAnual || plan.precioMensual * 10,
+        tier: plan.tier,
+      });
+
+      if (!stripeIds) {
+        return NextResponse.json(
+          { error: 'Error sincronizando con Stripe' },
+          { status: 500 }
+        );
+      }
+
+      // Guardar IDs para futuras solicitudes
+      await prisma.subscriptionPlan.update({
+        where: { id: plan.id },
+        data: {
+          stripeProductId: stripeIds.productId,
+          stripePriceIdMonthly: stripeIds.priceIdMonthly,
+          stripePriceIdAnnual: stripeIds.priceIdAnnual,
+        },
+      });
+
+      stripePriceId = validated.interval === 'annual'
+        ? stripeIds.priceIdAnnual || stripeIds.priceIdMonthly
+        : stripeIds.priceIdMonthly;
+    }
 
     // Crear o recuperar cliente de Stripe
     const customerId = await stripeService.getOrCreateCustomer({

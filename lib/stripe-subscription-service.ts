@@ -540,12 +540,13 @@ export async function syncAllToStripe(): Promise<{
       });
 
       if (stripeIds) {
-        // Actualizar IDs en BD
+        // Actualizar IDs de Stripe en BD
         await prisma.subscriptionPlan.update({
           where: { id: plan.id },
           data: {
-            // stripePriceIdMonthly: stripeIds.priceIdMonthly,
-            // stripePriceIdAnnual: stripeIds.priceIdAnnual,
+            stripeProductId: stripeIds.productId,
+            stripePriceIdMonthly: stripeIds.priceIdMonthly,
+            stripePriceIdAnnual: stripeIds.priceIdAnnual,
           },
         });
         result.plans.synced++;
