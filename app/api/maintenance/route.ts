@@ -14,7 +14,9 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = session.user?.companyId;
+    // Resolver companyId con soporte multi-empresa
+    const cookieCompanyId = req.cookies.get('activeCompanyId')?.value;
+    const companyId = cookieCompanyId || session.user?.companyId;
     if (!companyId) {
       return NextResponse.json({ error: 'CompanyId no encontrado' }, { status: 400 });
     }
