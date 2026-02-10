@@ -31,8 +31,14 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
+    // Soportar selector de empresa
+    const { searchParams } = new URL(req.url);
+    const queryCompanyId = searchParams.get('companyId');
+    const cookieCompanyId = req.cookies.get('activeCompanyId')?.value;
+    const activeCompanyId = queryCompanyId || cookieCompanyId || session.user.companyId;
+
     const company = await prisma.company.findUnique({
-      where: { id: session.user.companyId },
+      where: { id: activeCompanyId },
       select: {
         id: true,
         zucchettiEnabled: true,
