@@ -14,12 +14,19 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.companyId) {
+    if (!session?.user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const scope = await resolveAccountingScope(request, session.user as any);
-    const companyIds = scope?.companyIds || [session.user.companyId];
+    // Usar cookie activeCompanyId como fallback si session.user.companyId está desactualizado
+    const cookieCompanyId = request.cookies.get('activeCompanyId')?.value;
+    const effectiveCompanyId = cookieCompanyId || session.user.companyId;
+    if (!effectiveCompanyId) {
+      return NextResponse.json({ error: 'No hay empresa seleccionada' }, { status: 400 });
+    }
+
+    const scope = await resolveAccountingScope(request, { ...session.user, companyId: effectiveCompanyId } as any);
+    const companyIds = scope?.companyIds || [effectiveCompanyId];
 
     // Fetch data from various tables
     const [properties, tenants, contracts, payments] = await Promise.all([

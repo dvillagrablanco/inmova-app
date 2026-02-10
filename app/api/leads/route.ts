@@ -16,7 +16,9 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const companyId = session.user.companyId;
+    // Resolver companyId con soporte multi-empresa
+    const cookieCompanyId = req.cookies.get('activeCompanyId')?.value;
+    const companyId = cookieCompanyId || session.user.companyId;
     const isSuperAdmin = session.user.role === 'super_admin' || session.user.role === 'soporte';
 
     // Si no es super_admin y no tiene companyId, retornar vacío

@@ -7,6 +7,7 @@
  */
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { Building2, ChevronDown, Search, Loader2, Check, Crown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useSelectedCompany, type SelectedCompany } from '@/lib/hooks/admin/useSelectedCompany';
@@ -42,6 +43,7 @@ const COMPANY_COLORS = [
 
 export function CompanySelector({ className, onCompanyChange }: CompanySelectorProps) {
   const router = useRouter();
+  const { update: updateSession } = useSession();
   const { selectedCompany, selectCompany, clearSelection, isLoading: isLoadingSelection } = useSelectedCompany();
   const [isOpen, setIsOpen] = useState(false);
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -125,6 +127,13 @@ export function CompanySelector({ className, onCompanyChange }: CompanySelectorP
     onCompanyChange?.(selected);
     setIsOpen(false);
     setSearchQuery('');
+
+    // Forzar refresh de la sesión NextAuth para que el JWT obtenga el nuevo companyId
+    try {
+      await updateSession();
+    } catch {
+      // Si falla el update de sesión, el reload lo corregirá
+    }
 
     router.refresh();
     if (typeof window !== 'undefined') {

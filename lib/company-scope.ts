@@ -113,3 +113,20 @@ export async function canAccessCompany(params: {
   const accessibleCompanyIds = await getAccessibleCompanyIds(userId, role, primaryCompanyId);
   return accessibleCompanyIds.includes(companyId);
 }
+
+/**
+ * Helper rápido para APIs que solo necesitan el companyId activo.
+ * Prioridad: cookie activeCompanyId > session.user.companyId
+ * Usar esto en APIs que aún no migraron a resolveCompanyScope completo.
+ */
+export function getActiveCompanyId(
+  request: NextRequest,
+  sessionCompanyId: string | null | undefined
+): string | null {
+  const cookieCompanyId = request.cookies.get('activeCompanyId')?.value;
+  const headerCompanyId = request.headers.get('x-company-id');
+  const { searchParams } = new URL(request.url);
+  const queryCompanyId = searchParams.get('companyId');
+  
+  return queryCompanyId || headerCompanyId || cookieCompanyId || sessionCompanyId || null;
+}

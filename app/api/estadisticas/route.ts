@@ -15,12 +15,23 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session?.user?.companyId) {
+    if (!session?.user) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const scope = await resolveAccountingScope(request, session.user as any);
-    const companyIds = scope?.companyIds || [session.user.companyId];
+    // Usar cookie activeCompanyId como fallback para multi-empresa
+    const cookieCompanyId = request.cookies.get('activeCompanyId')?.value;
+    const effectiveUser = {
+      ...session.user,
+      companyId: cookieCompanyId || session.user.companyId,
+    };
+
+    if (!effectiveUser.companyId) {
+      return NextResponse.json({ error: 'Empresa no definida' }, { status: 400 });
+    }
+
+    const scope = await resolveAccountingScope(request, effectiveUser as any);
+    const companyIds = scope?.companyIds || [effectiveUser.companyId];
 
     // Obtener datos reales de edificios y unidades
     const buildings = await prisma.building.findMany({

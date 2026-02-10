@@ -10,7 +10,7 @@ export const runtime = 'nodejs';
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.companyId) {
+    if (!session?.user) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
@@ -21,9 +21,15 @@ export async function GET(request: NextRequest) {
     const queryCompanyId = searchParams.get('companyId');
     const userRole = (session.user as any).role;
 
-    const sessionCompanyId = (session.user as any).companyId;
+    // Resolver companyId con soporte multi-empresa
+    const cookieCompanyId = request.cookies.get('activeCompanyId')?.value;
+    const sessionCompanyId = cookieCompanyId || (session.user as any).companyId;
     const companyId =
       queryCompanyId && userRole === 'super_admin' ? queryCompanyId : sessionCompanyId;
+    
+    if (!companyId) {
+      return NextResponse.json({ error: 'Empresa no definida' }, { status: 400 });
+    }
 
     const seguros = await prisma.insurance.findMany({
       where: {

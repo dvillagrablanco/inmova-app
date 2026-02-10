@@ -43,15 +43,26 @@ export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session?.user?.companyId) {
+    if (!session?.user) {
       return NextResponse.json(
         { error: 'No autenticado' },
         { status: 401 }
       );
     }
+
+    // Resolver companyId con soporte multi-empresa (cookie > session)
+    const cookieCompanyId = req.cookies.get('activeCompanyId')?.value;
+    const companyId = cookieCompanyId || session.user.companyId;
+    
+    if (!companyId) {
+      return NextResponse.json(
+        { error: 'Empresa no definida' },
+        { status: 400 }
+      );
+    }
     
     const company = await prisma.company.findUnique({
-      where: { id: session.user.companyId },
+      where: { id: companyId },
       select: {
         businessVertical: true,
         verticals: true, // Array de verticales si es mixto

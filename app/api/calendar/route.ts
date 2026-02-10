@@ -15,8 +15,18 @@ export const runtime = 'nodejs';
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.companyId) {
+    if (!session?.user) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+    }
+
+    // Resolver companyId con soporte multi-empresa
+    const cookieCompanyId = request.cookies.get('activeCompanyId')?.value;
+    if (!cookieCompanyId && !session.user.companyId) {
+      return NextResponse.json({ error: 'Empresa no definida' }, { status: 400 });
+    }
+    // Inyectar companyId correcto en session para que los servicios downstream lo usen
+    if (cookieCompanyId) {
+      (session.user as any).companyId = cookieCompanyId;
     }
 
     const { searchParams } = new URL(request.url);

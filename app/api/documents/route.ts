@@ -15,13 +15,21 @@ export async function GET(req: NextRequest) {
   }
 
   const { searchParams } = new URL(req.url);
+
+  // Resolver companyId con soporte multi-empresa (cookie > query > session)
   const queryCompanyId = searchParams.get('companyId');
+  const cookieCompanyId = req.cookies.get('activeCompanyId')?.value;
   const userRole = (session.user as any).role;
   const sessionCompanyId = session.user.companyId;
-  const companyId =
-    queryCompanyId && (userRole === 'super_admin' || userRole === 'soporte')
-      ? queryCompanyId
-      : sessionCompanyId;
+  
+  // Prioridad: queryParam (super_admin) > cookie (switch-company) > session
+  let companyId: string | null = null;
+  if (queryCompanyId && (userRole === 'super_admin' || userRole === 'soporte')) {
+    companyId = queryCompanyId;
+  } else {
+    companyId = cookieCompanyId || sessionCompanyId;
+  }
+  
   if (!companyId) {
     return NextResponse.json({ error: 'Empresa no válida' }, { status: 400 });
   }
