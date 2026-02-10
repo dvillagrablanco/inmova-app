@@ -139,6 +139,62 @@ const nextConfig = {
     ];
   },
 
+  // ═══════════════════════════════════════════════════════════════
+  // REDIRECTS: Consolidación de rutas duplicadas por vertical
+  // Ruta canónica = destino. Rutas legacy/duplicadas = source.
+  // ═══════════════════════════════════════════════════════════════
+  async redirects() {
+    return [
+      // ── CONSTRUCCIÓN: /construccion es la ruta canónica ──
+      { source: '/construction', destination: '/construccion', permanent: true },
+      { source: '/construction/projects', destination: '/construccion/proyectos', permanent: true },
+      { source: '/construction/gantt', destination: '/construccion/gantt', permanent: true },
+      { source: '/construction/quality-control', destination: '/construccion/calidad', permanent: true },
+      { source: '/obras', destination: '/construccion/proyectos', permanent: true },
+      { source: '/licitaciones', destination: '/construccion/proyectos', permanent: true },
+      { source: '/real-estate-developer', destination: '/construccion', permanent: true },
+      { source: '/real-estate-developer/:path*', destination: '/construccion', permanent: true },
+
+      // ── STR / VACACIONAL: /str es la ruta canónica ──
+      { source: '/turismo-alquiler', destination: '/str', permanent: true },
+      { source: '/hospitality', destination: '/str', permanent: true },
+
+      // ── COLIVING: /coliving es la ruta canónica ──
+      { source: '/room-rental', destination: '/coliving/propiedades', permanent: true },
+      { source: '/student-housing', destination: '/coliving', permanent: true },
+      { source: '/student-housing/:path*', destination: '/coliving', permanent: true },
+
+      // ── COMERCIAL: /comercial es la ruta canónica ──
+      { source: '/espacios-coworking', destination: '/comercial/coworking', permanent: true },
+      { source: '/salas-reuniones', destination: '/comercial/coworking', permanent: true },
+      { source: '/retail', destination: '/comercial/locales', permanent: true },
+      { source: '/workspace', destination: '/comercial/coworking', permanent: true },
+      { source: '/workspace/:path*', destination: '/comercial/coworking', permanent: true },
+      { source: '/alquiler-comercial', destination: '/comercial', permanent: true },
+
+      // ── COMUNIDADES: /comunidades es la ruta canónica ──
+      { source: '/community', destination: '/comunidades', permanent: true },
+      { source: '/comunidad', destination: '/comunidades', permanent: true },
+      { source: '/comunidad-social', destination: '/comunidades', permanent: true },
+
+      // ── FLIPPING: /flipping es la ruta canónica ──
+      { source: '/proyectos-renovacion', destination: '/flipping/projects', permanent: true },
+
+      // ── DASHBOARD: consolidar duplicados ──
+      { source: '/dashboard-adaptive', destination: '/dashboard', permanent: true },
+      { source: '/dashboard/adaptive', destination: '/dashboard', permanent: true },
+
+      // ── Páginas desactivadas (redirigen a vertical más cercano) ──
+      { source: '/viajes-corporativos', destination: '/str', permanent: true },
+      { source: '/viajes-corporativos/:path*', destination: '/str', permanent: true },
+      { source: '/warehouse', destination: '/comercial/naves', permanent: true },
+      { source: '/warehouse/:path*', destination: '/comercial/naves', permanent: true },
+      { source: '/subastas', destination: '/dashboard', permanent: true },
+      { source: '/microtransacciones', destination: '/dashboard', permanent: true },
+      { source: '/puntos-carga', destination: '/dashboard', permanent: true },
+    ];
+  },
+
   // Compression
   compress: true,
 
