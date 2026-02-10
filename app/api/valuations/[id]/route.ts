@@ -29,7 +29,8 @@ export async function GET(
         );
       }
 
-      const companyId = session.user.companyId;
+      const cookieCompanyId = req.cookies.get('activeCompanyId')?.value;
+    const companyId = cookieCompanyId || session.user.companyId;
       if (!companyId) {
         return NextResponse.json(
           { error: 'Company ID no encontrado' },

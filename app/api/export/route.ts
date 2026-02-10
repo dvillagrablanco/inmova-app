@@ -38,7 +38,8 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = session.user.companyId;
+    const cookieCompanyId = request.cookies.get('activeCompanyId')?.value;
+    const companyId = cookieCompanyId || session.user.companyId;
     if (!companyId) {
       return NextResponse.json({ error: 'Empresa no encontrada' }, { status: 400 });
     }

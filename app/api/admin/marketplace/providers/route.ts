@@ -111,7 +111,8 @@ export async function POST(request: NextRequest) {
     const body: unknown = await request.json();
     const validated = providerSchema.parse(body);
 
-    const companyId = session.user.companyId;
+    const cookieCompanyId = request.cookies.get('activeCompanyId')?.value;
+    const companyId = cookieCompanyId || session.user.companyId;
     if (!companyId) {
       return NextResponse.json({ error: 'Empresa no válida' }, { status: 400 });
     }

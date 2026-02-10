@@ -61,7 +61,8 @@ export async function POST(req: NextRequest) {
       }
 
       const userId = session.user.id;
-      const companyId = session.user.companyId;
+      const cookieCompanyId = req.cookies.get('activeCompanyId')?.value;
+    const companyId = cookieCompanyId || session.user.companyId;
 
       if (!userId || !companyId) {
         return NextResponse.json(

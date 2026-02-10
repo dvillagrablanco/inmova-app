@@ -47,7 +47,8 @@ export async function GET(request: NextRequest) {
     }
 
     const prisma = getPrismaClient();
-    const companyId = session.user.companyId;
+    const cookieCompanyId = request.cookies.get('activeCompanyId')?.value;
+    const companyId = cookieCompanyId || session.user.companyId;
     const userId = session.user.id;
     if (!companyId) {
       return NextResponse.json({ error: 'Empresa no configurada' }, { status: 400 });

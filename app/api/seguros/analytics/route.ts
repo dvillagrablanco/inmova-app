@@ -74,8 +74,18 @@ function buildMonthSeries(now: Date): ClaimsByMonthItem[] {
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.companyId) {
+    if (!session?.user) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+    }
+
+    // Resolver companyId con soporte multi-empresa (cookie > JWT)
+    const cookieCompanyId = request.cookies.get('activeCompanyId')?.value;
+    const __resolvedCompanyId = cookieCompanyId || session.user.companyId;
+    if (!__resolvedCompanyId) {
+      return NextResponse.json({ error: 'Empresa no definida' }, { status: 400 });
+    }
+    // Inyectar companyId resuelto en session para compatibilidad
+    (session.user as any).companyId = __resolvedCompanyId;, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);

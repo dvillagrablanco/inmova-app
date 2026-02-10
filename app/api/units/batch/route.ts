@@ -37,7 +37,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const companyId = session.user.companyId;
+    const cookieCompanyId = req.cookies.get('activeCompanyId')?.value;
+    const companyId = cookieCompanyId || session.user.companyId;
     const userRole = session.user.role;
     const isSuperAdmin = userRole === 'super_admin' || userRole === 'soporte';
 
