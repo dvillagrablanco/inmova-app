@@ -226,7 +226,7 @@ async function main() {
       processedFiles: 1,
       successfulFiles: 1,
       failedFiles: 0,
-      status: 'completed',
+      status: 'approved',
       progress: 100,
       autoApprove: true,
       extractedEntities: {
