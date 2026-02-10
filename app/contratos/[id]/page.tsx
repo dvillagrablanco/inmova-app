@@ -80,8 +80,9 @@ interface Contract {
   };
   tenant?: {
     id: string;
-    nombre: string;
-    apellido: string;
+    nombreCompleto: string;
+    nombre?: string;
+    apellido?: string;
     email: string;
     telefono?: string;
     dni?: string;
@@ -428,7 +429,7 @@ export default function ContractDetailPage() {
                       <div>
                         <p className="text-sm text-muted-foreground">Nombre</p>
                         <p className="font-medium">
-                          {contract.tenant.nombre} {contract.tenant.apellido}
+                          {contract.tenant.nombreCompleto || `${contract.tenant.nombre || ''} ${contract.tenant.apellido || ''}`.trim() || 'Sin nombre'}
                         </p>
                       </div>
                       <div>

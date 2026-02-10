@@ -55,14 +55,29 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       include: {
         unit: {
           include: {
-            building: true,
+            building: {
+              select: {
+                id: true,
+                nombre: true,
+                direccion: true,
+                tipo: true,
+              },
+            },
           },
         },
-        tenant: true,
+        tenant: {
+          select: {
+            id: true,
+            nombreCompleto: true,
+            email: true,
+            telefono: true,
+            dni: true,
+          },
+        },
         payments: {
           orderBy: { fechaVencimiento: 'desc' },
+          take: 50,
         },
-        stripeSubscription: true,
       },
     });
 
