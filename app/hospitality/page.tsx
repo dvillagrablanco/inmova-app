@@ -113,14 +113,7 @@ interface BookingStats {
 }
 
 // Amenidades disponibles
-const AMENIDADES = [
-  { id: 'wifi', icon: Wifi, label: 'WiFi' },
-  { id: 'tv', icon: Tv, label: 'TV' },
-  { id: 'minibar', icon: Coffee, label: 'Minibar' },
-  { id: 'jacuzzi', icon: Bath, label: 'Jacuzzi' },
-  { id: 'balcon', icon: Eye, label: 'Balcón' },
-  { id: 'aire', icon: Star, label: 'A/C' },
-];
+const AMENIDADES = [];
 
 // Tipos de habitación
 const TIPOS_HABITACION = [

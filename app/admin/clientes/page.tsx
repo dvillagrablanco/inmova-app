@@ -129,71 +129,7 @@ export default function ClientesAdminPage() {
   });
 
   // Escenarios de demo disponibles
-  const DEMO_SCENARIOS = [
-    { 
-      id: 'gestor_residencial', 
-      nombre: 'Gestor de Alquileres', 
-      descripcion: 'Gestores profesionales con múltiples edificios y contratos',
-      icon: Building2,
-      color: 'blue'
-    },
-    { 
-      id: 'propietario_particular', 
-      nombre: 'Propietario Particular', 
-      descripcion: 'Propietarios con 1-5 propiedades',
-      icon: Home,
-      color: 'green'
-    },
-    { 
-      id: 'agencia_inmobiliaria', 
-      nombre: 'Agencia Inmobiliaria', 
-      descripcion: 'Agencia con CRM, leads y cartera de propiedades',
-      icon: Briefcase,
-      color: 'purple'
-    },
-    { 
-      id: 'coliving', 
-      nombre: 'Operador Coliving', 
-      descripcion: 'Espacios coliving con habitaciones y comunidad',
-      icon: Users,
-      color: 'pink'
-    },
-    { 
-      id: 'alquiler_turistico', 
-      nombre: 'Alquiler Turístico', 
-      descripcion: 'Apartamentos turísticos con reservas y calendario',
-      icon: Plane,
-      color: 'orange'
-    },
-    { 
-      id: 'comercial_oficinas', 
-      nombre: 'Locales y Oficinas', 
-      descripcion: 'Espacios comerciales y oficinas',
-      icon: Store,
-      color: 'slate'
-    },
-    { 
-      id: 'comunidad_propietarios', 
-      nombre: 'Comunidad de Propietarios', 
-      descripcion: 'Administración de fincas y comunidades',
-      icon: Building2,
-      color: 'teal'
-    },
-    { 
-      id: 'inversor_inmobiliario', 
-      nombre: 'Inversor Inmobiliario', 
-      descripcion: 'Portfolio diversificado con análisis de rentabilidad',
-      icon: TrendingUp,
-      color: 'emerald'
-    },
-    { 
-      id: 'completo', 
-      nombre: 'Demo Completa', 
-      descripcion: 'Todos los módulos y tipos de propiedades',
-      icon: Sparkles,
-      color: 'indigo'
-    },
-  ];
+  const DEMO_SCENARIOS = [];
   
   // Filter for demo companies
   const [showDemoOnly, setShowDemoOnly] = useState<boolean | null>(null); // null = all, true = demo only, false = real only

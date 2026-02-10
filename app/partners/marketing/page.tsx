@@ -32,35 +32,7 @@ import { toast } from 'sonner';
 const PARTNER_LINK = 'https://inmovaapp.com/?ref=PARTNER123';
 const REFERRAL_CODE = 'PARTNER123';
 
-const CAMPAIGNS = [
-  {
-    id: '1',
-    nombre: 'Campaña Q1 2026',
-    tipo: 'email',
-    estado: 'activa',
-    clicks: 1250,
-    conversiones: 45,
-    iniciada: '2026-01-01',
-  },
-  {
-    id: '2',
-    nombre: 'Landing Inmobiliarias',
-    tipo: 'landing',
-    estado: 'activa',
-    clicks: 890,
-    conversiones: 32,
-    iniciada: '2025-12-15',
-  },
-  {
-    id: '3',
-    nombre: 'Redes Sociales Diciembre',
-    tipo: 'social',
-    estado: 'finalizada',
-    clicks: 2340,
-    conversiones: 89,
-    iniciada: '2025-12-01',
-  },
-];
+const CAMPAIGNS = [];
 
 const EMAIL_TEMPLATES = [
   {

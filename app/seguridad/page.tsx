@@ -56,22 +56,7 @@ export default function SeguridadPage() {
     newPassword: '',
     confirmPassword: '',
   });
-  const [activeSessions] = useState<Session[]>([
-    {
-      id: '1',
-      device: 'Chrome en Windows',
-      location: 'Madrid, España',
-      lastActive: 'Activo ahora',
-      current: true,
-    },
-    {
-      id: '2',
-      device: 'Safari en iPhone',
-      location: 'Madrid, España',
-      lastActive: 'Hace 2 horas',
-      current: false,
-    },
-  ]);
+  const [activeSessions] = useState<Session[]>([]);
 
   useEffect(() => {
     if (status === 'unauthenticated') {

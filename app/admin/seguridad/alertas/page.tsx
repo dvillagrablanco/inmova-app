@@ -55,38 +55,7 @@ export default function SecurityAlertsPage() {
   const loadData = async () => {
     try {
       // Alertas de ejemplo
-      const sampleAlerts: SecurityAlert[] = [
-        {
-          id: '1',
-          type: 'login_failed',
-          severity: 'medium',
-          title: 'Múltiples intentos de login fallidos',
-          description: '5 intentos fallidos desde la IP 192.168.1.100 en los últimos 10 minutos',
-          timestamp: new Date().toISOString(),
-          status: 'new',
-          metadata: { ip: '192.168.1.100', attempts: 5, user: 'admin@test.com' },
-        },
-        {
-          id: '2',
-          type: 'suspicious_activity',
-          severity: 'high',
-          title: 'Acceso desde ubicación inusual',
-          description: 'Inicio de sesión detectado desde un nuevo país (India) para el usuario test@company.com',
-          timestamp: new Date(Date.now() - 30 * 60000).toISOString(),
-          status: 'acknowledged',
-          metadata: { country: 'India', city: 'Mumbai' },
-        },
-        {
-          id: '3',
-          type: 'ip_blocked',
-          severity: 'low',
-          title: 'IP bloqueada automáticamente',
-          description: 'La IP 10.0.0.55 ha sido bloqueada por exceder el límite de rate limiting',
-          timestamp: new Date(Date.now() - 2 * 60 * 60000).toISOString(),
-          status: 'resolved',
-          metadata: { ip: '10.0.0.55', reason: 'rate_limit_exceeded' },
-        },
-      ];
+      const sampleAlerts: SecurityAlert[] = [];
 
       const defaultConfigs: AlertConfig[] = [
         {

@@ -121,15 +121,7 @@ export default function FirmaDigitalPage() {
     diasRecordatorio: '3',
   });
 
-  const [firmantes, setFirmantes] = useState<Firmante[]>([
-    {
-      nombre: '',
-      email: '',
-      telefono: '',
-      rol: 'inquilino',
-      orden: 1,
-    },
-  ]);
+  const [firmantes, setFirmantes] = useState<Firmante[]>([]);
 
   useEffect(() => {
     fetchDocumentos();
