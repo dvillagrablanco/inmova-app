@@ -266,6 +266,7 @@ enum DocumentType {
   ite
   seguro
   factura
+  contabilidad
   otro
 }
 

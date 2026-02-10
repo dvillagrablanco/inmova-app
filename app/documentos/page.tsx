@@ -49,6 +49,7 @@ import {
   Search,
   Eye,
   Shield,
+  ExternalLink,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePermissions } from '@/lib/hooks/usePermissions';
@@ -65,11 +66,14 @@ interface Document {
   nombre: string;
   tipo: string;
   cloudStoragePath: string;
+  descripcion?: string | null;
+  tags?: string[];
   fechaSubida: string;
   fechaVencimiento: string | null;
   tenant?: { nombreCompleto: string };
   unit?: { numero: string };
   building?: { nombre: string };
+  folder?: { nombre: string; color: string | null };
 }
 
 export default function DocumentosPage() {
@@ -219,6 +223,7 @@ export default function DocumentosPage() {
       ite: 'bg-orange-500',
       seguro: 'bg-red-500',
       factura: 'bg-indigo-500',
+      contabilidad: 'bg-cyan-500',
       otro: 'bg-gray-500',
     };
     return colors[tipo] || 'bg-gray-500';
@@ -233,6 +238,7 @@ export default function DocumentosPage() {
       ite: 'ITE',
       seguro: 'Seguro',
       factura: 'Factura',
+      contabilidad: 'Contabilidad',
       otro: 'Otro',
     };
     return labels[tipo] || tipo;
@@ -254,6 +260,7 @@ export default function DocumentosPage() {
         inspeccion: 'Inspección',
         seguro: 'Seguro',
         factura: 'Factura',
+        contabilidad: 'Contabilidad',
         otro: 'Otro',
       };
       filters.push({ id: 'tipo', label: 'Tipo', value: tipoLabels[filterTipo] || filterTipo });
@@ -414,6 +421,7 @@ export default function DocumentosPage() {
         <SelectItem value="ite">ITE</SelectItem>
         <SelectItem value="seguro">Seguro</SelectItem>
         <SelectItem value="factura">Factura</SelectItem>
+        <SelectItem value="contabilidad">Contabilidad</SelectItem>
         <SelectItem value="otro">Otro</SelectItem>
         </SelectContent>
         </Select>
@@ -525,6 +533,7 @@ export default function DocumentosPage() {
         <SelectItem value="ite">ITE</SelectItem>
         <SelectItem value="seguro">Seguro</SelectItem>
         <SelectItem value="factura">Factura</SelectItem>
+        <SelectItem value="contabilidad">Contabilidad</SelectItem>
         <SelectItem value="otro">Otro</SelectItem>
         </SelectContent>
         </Select>
@@ -586,7 +595,11 @@ export default function DocumentosPage() {
         {/* Icono */}
         <div className="flex-shrink-0">
         <div className="p-3 bg-primary/10 rounded-lg">
-        <FileText className="h-6 w-6 text-primary" />
+        {doc.cloudStoragePath?.startsWith('https://') ? (
+          <ExternalLink className="h-6 w-6 text-primary" />
+        ) : (
+          <FileText className="h-6 w-6 text-primary" />
+        )}
         </div>
         </div>
 
@@ -596,9 +609,21 @@ export default function DocumentosPage() {
         <h3 className="text-lg font-semibold break-words flex-1">
         {doc.nombre}
         </h3>
+        <div className="flex gap-1 flex-wrap">
+        {doc.cloudStoragePath?.startsWith('https://drive.google.com') && (
+          <Badge variant="outline" className="text-blue-600 border-blue-300 bg-blue-50">
+            Google Drive
+          </Badge>
+        )}
+        {doc.cloudStoragePath?.startsWith('https://docs.google.com') && (
+          <Badge variant="outline" className="text-green-600 border-green-300 bg-green-50">
+            Google Docs
+          </Badge>
+        )}
         <Badge className={getTipoBadgeColor(doc.tipo)}>
         {getTipoLabel(doc.tipo)}
         </Badge>
+        </div>
         </div>
 
         {/* Entidad relacionada */}
