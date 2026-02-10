@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { resolveAccountingScope } from '@/lib/accounting-scope';
 import { endOfMonth, startOfMonth } from 'date-fns';
 import logger from '@/lib/logger';
 
@@ -15,8 +16,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const companyId = (session.user as any).companyId;
-    if (!companyId) {
+    const scope = await resolveAccountingScope(request, session.user as any);
+    if (!scope) {
       return NextResponse.json({ error: 'Sin empresa asociada' }, { status: 403 });
     }
 
@@ -29,7 +30,7 @@ export async function GET(request: NextRequest) {
 
     const transactions = await prisma.accountingTransaction.findMany({
       where: {
-        companyId,
+        companyId: { in: scope.companyIds },
         fecha: { gte: fechaInicio, lte: fechaFin },
       },
       select: {
@@ -62,6 +63,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       data: {
         periodo: periodo || `${baseDate.getFullYear()}-${String(baseDate.getMonth() + 1).padStart(2, '0')}`,
+        isConsolidated: scope.isConsolidated,
         ingresos: {
           total: ingresosTotal,
           categorias: ingresosCategorias,
@@ -80,9 +82,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     logger.error('[Accounting Profit Loss] Error:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener P&G' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener P&G' }, { status: 500 });
   }
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { resolveAccountingScope } from '@/lib/accounting-scope';
 import { startOfMonth, endOfMonth, subMonths, format } from 'date-fns';
 
 import logger from '@/lib/logger';
@@ -15,10 +16,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const companyId = (session.user as any).companyId;
-    if (!companyId) {
+    const scope = await resolveAccountingScope(request, session.user as any);
+    if (!scope) {
       return NextResponse.json({ error: 'Sin empresa asociada' }, { status: 403 });
     }
+    // Compatibilidad: usar scope.companyIds para queries multi-empresa
+    const companyId = scope.activeCompanyId;
+    const companyIds = scope.companyIds;
 
     const now = new Date();
     const monthStart = startOfMonth(now);
@@ -31,7 +35,7 @@ export async function GET(request: NextRequest) {
       where: {
         unit: {
           building: {
-            companyId,
+            companyId: { in: companyIds },
           },
         },
         estado: 'activo',
@@ -49,7 +53,7 @@ export async function GET(request: NextRequest) {
         contract: {
           unit: {
             building: {
-              companyId,
+              companyId: { in: companyIds },
             },
           },
         },
@@ -70,7 +74,7 @@ export async function GET(request: NextRequest) {
         contract: {
           unit: {
             building: {
-              companyId,
+              companyId: { in: companyIds },
             },
           },
         },
@@ -90,7 +94,7 @@ export async function GET(request: NextRequest) {
         contract: {
           unit: {
             building: {
-              companyId,
+              companyId: { in: companyIds },
             },
           },
         },
@@ -111,7 +115,7 @@ export async function GET(request: NextRequest) {
       // Intentar obtener gastos si el modelo existe
       const expenses = await (prisma as any).expense?.findMany({
         where: {
-          building: { companyId },
+          building: { companyId: { in: companyIds } },
           fecha: {
             gte: monthStart,
             lte: monthEnd,
@@ -131,7 +135,7 @@ export async function GET(request: NextRequest) {
     // Contabilidad agregada del mes (fallback)
     const accountingTransactions = await prisma.accountingTransaction.findMany({
       where: {
-        companyId,
+        companyId: { in: companyIds },
         fecha: { gte: monthStart, lte: monthEnd },
       },
       select: {
@@ -179,7 +183,7 @@ export async function GET(request: NextRequest) {
       .count({
         where: {
           tenant: {
-            companyId,
+            companyId: { in: companyIds },
           },
           estado: 'conectado',
         },
@@ -190,7 +194,7 @@ export async function GET(request: NextRequest) {
     const monthlyInvoices = await (prisma as any).invoice
       ?.count({
         where: {
-          companyId,
+          companyId: { in: companyIds },
           fechaEmision: {
             gte: monthStart,
             lte: monthEnd,
@@ -205,7 +209,7 @@ export async function GET(request: NextRequest) {
       const properties = await prisma.unit.findMany({
         where: {
           building: {
-            companyId,
+            companyId: { in: companyIds },
             isDemo: false,
           },
           isDemo: false,
@@ -227,7 +231,7 @@ export async function GET(request: NextRequest) {
     let latestPeriod = null;
     try {
       const latest = await prisma.accountingTransaction.findFirst({
-        where: { companyId },
+        where: { companyId: { in: companyIds } },
         orderBy: { fecha: 'desc' },
         select: { fecha: true },
       });
@@ -236,7 +240,7 @@ export async function GET(request: NextRequest) {
         const latestStart = startOfMonth(latest.fecha);
         const latestEnd = endOfMonth(latest.fecha);
         const latestTransactions = await prisma.accountingTransaction.findMany({
-          where: { companyId, fecha: { gte: latestStart, lte: latestEnd } },
+          where: { companyId: { in: companyIds }, fecha: { gte: latestStart, lte: latestEnd } },
           select: { tipo: true, monto: true },
         });
 

@@ -231,7 +231,13 @@ export default function ContabilidadPage() {
         const data = await latestRes.json();
         setLatestPeriod(data.data || null);
 
+        // Si el periodo actual no tiene datos y hay un periodo con datos, cambiar automáticamente
         if (data.data?.periodo && data.data.periodo !== periodo) {
+          // Si no hay datos en el periodo seleccionado, auto-navegar al último con datos
+          if (!profitLossData?.ingresos?.total && !profitLossData?.gastos?.total) {
+            setPeriodo(data.data.periodo);
+          }
+
           const latestPLRes = await fetch(
             `/api/accounting/profit-loss?periodo=${data.data.periodo}`
           );
