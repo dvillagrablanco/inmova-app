@@ -1,10 +1,10 @@
 /**
  * API Route: Importar documentos externos (Google Drive, URLs)
  * POST /api/documents/external-import
- * 
+ *
  * Permite registrar documentos externos (Google Drive, Dropbox, etc.)
  * en el sistema documental de Inmova sin necesidad de subir el archivo.
- * 
+ *
  * El documento se almacena como referencia (enlace) y es accesible
  * desde el gestor documental, seguros, contratos y contabilidad.
  */
@@ -23,8 +23,15 @@ export const runtime = 'nodejs';
 const externalDocumentSchema = z.object({
   nombre: z.string().min(1, 'Nombre requerido').max(500),
   tipo: z.enum([
-    'contrato', 'dni', 'nomina', 'certificado_energetico',
-    'ite', 'seguro', 'factura', 'contabilidad', 'otro'
+    'contrato',
+    'dni',
+    'nomina',
+    'certificado_energetico',
+    'ite',
+    'seguro',
+    'factura',
+    'contabilidad',
+    'otro',
   ]),
   url: z.string().url('URL inválida'),
   descripcion: z.string().optional(),
@@ -134,12 +141,15 @@ export async function POST(req: NextRequest) {
 
         if (existing) {
           // Actualizar metadatos
+          const mergedTags = Array.from(
+            new Set([...existing.tags, ...doc.tags, 'google-drive', 'importado'])
+          );
           await prisma.document.update({
             where: { id: existing.id },
             data: {
               nombre: doc.nombre,
               descripcion: doc.descripcion,
-              tags: [...new Set([...existing.tags, ...doc.tags, 'google-drive', 'importado'])],
+              tags: mergedTags,
             },
           });
 
@@ -152,7 +162,7 @@ export async function POST(req: NextRequest) {
         }
 
         // Crear documento con enlace externo
-        const allTags = [...new Set([...doc.tags, 'google-drive', 'importado'])];
+        const allTags = Array.from(new Set([...doc.tags, 'google-drive', 'importado']));
 
         const document = await prisma.document.create({
           data: {
@@ -166,9 +176,7 @@ export async function POST(req: NextRequest) {
             unitId: doc.unitId || undefined,
             buildingId: doc.buildingId || undefined,
             contractId: doc.contractId || undefined,
-            fechaVencimiento: doc.fechaVencimiento
-              ? new Date(doc.fechaVencimiento)
-              : undefined,
+            fechaVencimiento: doc.fechaVencimiento ? new Date(doc.fechaVencimiento) : undefined,
           },
         });
 
@@ -225,16 +233,19 @@ export async function POST(req: NextRequest) {
     const updated = results.filter((r) => r.status === 'updated').length;
     const errors = results.filter((r) => r.status === 'error').length;
 
-    return NextResponse.json({
-      success: true,
-      summary: {
-        total: results.length,
-        created,
-        updated,
-        errors,
+    return NextResponse.json(
+      {
+        success: true,
+        summary: {
+          total: results.length,
+          created,
+          updated,
+          errors,
+        },
+        results,
       },
-      results,
-    }, { status: 201 });
+      { status: 201 }
+    );
   } catch (error: any) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -250,10 +261,7 @@ export async function POST(req: NextRequest) {
     }
 
     logger.error('Error en importación externa:', error);
-    return NextResponse.json(
-      { error: 'Error al importar documentos externos' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al importar documentos externos' }, { status: 500 });
   }
 }
 
@@ -305,9 +313,6 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     logger.error('Error listando documentos externos:', error);
-    return NextResponse.json(
-      { error: 'Error al listar documentos externos' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al listar documentos externos' }, { status: 500 });
   }
 }
