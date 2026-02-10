@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { resolveAccountingScope } from '@/lib/accounting-scope';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,25 +18,26 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = session.user.companyId;
+    const scope = await resolveAccountingScope(request, session.user as any);
+    const companyIds = scope?.companyIds || [session.user.companyId];
 
     // Fetch data from various tables
     const [properties, tenants, contracts, payments] = await Promise.all([
       prisma.unit.findMany({
-        where: { building: { companyId } },
+        where: { building: { companyId: { in: companyIds } } },
         include: { building: true },
         take: 100
       }),
       prisma.tenant.findMany({
-        where: { companyId },
+        where: { companyId: { in: companyIds } },
         take: 100
       }),
       prisma.contract.findMany({
-        where: { unit: { building: { companyId } } },
+        where: { unit: { building: { companyId: { in: companyIds } } } },
         take: 100
       }),
       prisma.payment.findMany({
-        where: { contract: { unit: { building: { companyId } } } },
+        where: { contract: { unit: { building: { companyId: { in: companyIds } } } } },
         take: 100
       })
     ]);
@@ -43,7 +45,7 @@ export async function GET(request: NextRequest) {
     // Create CSV content
     let csvContent = 'INFORME DE DATOS - INMOVA APP\n';
     csvContent += `Fecha de generación: ${new Date().toISOString()}\n`;
-    csvContent += `Empresa ID: ${companyId}\n\n`;
+    csvContent += `Empresa: ${scope?.activeCompanyId || 'N/A'}\n\n`;
 
     // Properties section
     csvContent += '=== PROPIEDADES ===\n';

@@ -2,15 +2,16 @@
  * API de Estadísticas - Datos reales de la base de datos
  */
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { resolveAccountingScope } from '@/lib/accounting-scope';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
@@ -18,11 +19,12 @@ export async function GET() {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const companyId = session.user.companyId;
+    const scope = await resolveAccountingScope(request, session.user as any);
+    const companyIds = scope?.companyIds || [session.user.companyId];
 
     // Obtener datos reales de edificios y unidades
     const buildings = await prisma.building.findMany({
-      where: { companyId, isDemo: false },
+      where: { companyId: { in: companyIds }, isDemo: false },
       include: {
         units: {
           select: {
@@ -88,7 +90,7 @@ export async function GET() {
 
     const payments = await prisma.payment.findMany({
       where: {
-        contract: { unit: { building: { companyId } } },
+        contract: { unit: { building: { companyId: { in: companyIds } } } },
         fechaPago: { gte: sixMonthsAgo },
         estado: 'pagado',
       },

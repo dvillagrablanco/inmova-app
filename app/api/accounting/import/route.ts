@@ -242,8 +242,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Archivo no proporcionado' }, { status: 400 });
     }
 
+    // Soportar selector de empresa para todos los roles admin
+    const cookieCompanyId = request.cookies.get('activeCompanyId')?.value;
     const companyId =
-      role === 'super_admin' || role === 'soporte' ? requestedCompanyId : session.user.companyId;
+      requestedCompanyId || cookieCompanyId || session.user.companyId;
 
     if (!companyId) {
       return NextResponse.json({ error: 'Empresa no válida' }, { status: 400 });
