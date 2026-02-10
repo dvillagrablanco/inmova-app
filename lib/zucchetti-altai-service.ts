@@ -136,8 +136,10 @@ export function getAltaiConfig(): AltaiConfig {
     timeoutMs: Number(process.env.ZUCCHETTI_ALTAI_TIMEOUT_MS || DEFAULT_TIMEOUT_MS),
     includeCompanyCode: process.env.ZUCCHETTI_ALTAI_INCLUDE_COMPANY_CODE !== 'false',
     entryWrapperKey: process.env.ZUCCHETTI_ALTAI_ENTRY_WRAPPER || undefined,
-    loginField: process.env.ZUCCHETTI_ALTAI_LOGIN_FIELD || 'login',
-    passwordField: process.env.ZUCCHETTI_ALTAI_PASSWORD_FIELD || 'password',
+    // Altai (wsaltaifacturas) espera por defecto: { "Username": "...", "Password": "..." }
+    // Mantener overrides vía env para entornos que difieran.
+    loginField: process.env.ZUCCHETTI_ALTAI_LOGIN_FIELD || 'Username',
+    passwordField: process.env.ZUCCHETTI_ALTAI_PASSWORD_FIELD || 'Password',
     companyField: process.env.ZUCCHETTI_ALTAI_COMPANY_FIELD || 'companyCode',
   };
 }

@@ -45,6 +45,19 @@ ZUCCHETTI_ALTAI_ENTRIES_URL=https://wsaltaifacturas.altai.es/api/accounting/entr
 ZUCCHETTI_ALTAI_INGEST_TOKEN=token_seguro
 ```
 
+### ✅ Test rápido (Altai Auth)
+
+Altai expone un endpoint de autenticación que retorna un **JWT** (string) para usar como `Authorization: Bearer <token>`.
+
+> Importante: el body esperado es `Username` y `Password` (no `login` / `password`).
+
+```bash
+curl -X POST "https://wsaltaifacturas.altai.es/api/login/authenticate" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{"Username":"TU_LOGIN","Password":"TU_PASSWORD"}'
+```
+
 > Nota: Si no se conoce el endpoint de asientos, configura
 > `ZUCCHETTI_ALTAI_ENTRIES_URL` cuando el técnico lo confirme.
 
