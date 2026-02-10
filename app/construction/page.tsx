@@ -23,6 +23,7 @@ import {
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 // logger (winston) es server-only; usamos console en client components
 
 interface ConstructionProject {
@@ -139,7 +140,8 @@ export default function ConstructionPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <AuthenticatedLayout>
+      <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
@@ -336,5 +338,6 @@ export default function ConstructionPage() {
         </TabsContent>
       </Tabs>
     </div>
+    </AuthenticatedLayout>
   );
 }

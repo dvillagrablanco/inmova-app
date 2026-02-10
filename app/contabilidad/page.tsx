@@ -27,6 +27,7 @@ import { Line, Bar, Pie } from 'react-chartjs-2';
 import logger, { logError } from '@/lib/logger';
 import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
 import {
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
@@ -496,7 +497,8 @@ export default function ContabilidadPage() {
   }
 
   return (
-    <div className="ml-0 lg:ml-64 container mx-auto p-6 space-y-6">
+    <AuthenticatedLayout>
+    <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Dashboard Financiero</h1>
@@ -1309,5 +1311,6 @@ export default function ContabilidadPage() {
         position="bottom-right"
       />
     </div>
+    </AuthenticatedLayout>
   );
 }
