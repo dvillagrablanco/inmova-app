@@ -595,7 +595,7 @@ async function sendRenewalEmail(contract: any, alert: RenewalAlert): Promise<voi
 
   // Enviar el email
   await sendEmail({
-    to: contract.unit.building.company.emailContacto!,
+    to: contract.unit.building.company.emailContacto || contract.unit.building.company.email || 'admin@inmova.app',
     subject,
     html: htmlContent
   });

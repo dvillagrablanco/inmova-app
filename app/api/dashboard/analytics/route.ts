@@ -127,8 +127,8 @@ export async function GET() {
     return NextResponse.json(analyticsData);
   } catch (error: any) {
     logger.error('Error fetching analytics:', error);
-    if (error.message === 'No autorizado') {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    if (error.message === 'No autorizado' || error.message === 'No autenticado') {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
     return NextResponse.json(
       { error: 'Error al obtener analytics' },

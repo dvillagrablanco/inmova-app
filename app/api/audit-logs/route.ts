@@ -51,8 +51,8 @@ export async function GET(req: NextRequest) {
     });
   } catch (error: any) {
     logger.error('Error fetching audit logs:', error);
-    if (error.message === 'No autorizado') {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    if (error.message === 'No autorizado' || error.message === 'No autenticado' || error.message === 'Usuario inactivo') {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
     return NextResponse.json(
       { error: 'Error al obtener historial' },
