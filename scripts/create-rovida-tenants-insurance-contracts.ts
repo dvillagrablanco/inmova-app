@@ -233,7 +233,6 @@ async function main() {
           telefono: '+34 000 000 000',
           dni: uniqueDni,
           fechaNacimiento: new Date('1980-01-01'),
-          activo: true,
           notas: `Subcuenta contable: ${t.subcuenta}. Grupo: ${t.grupo}. Tipo: ${t.tipo}`,
         },
       });
