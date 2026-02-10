@@ -207,23 +207,42 @@ async function main() {
   let tenantsSkipped = 0;
 
   for (const t of TENANTS_DATA) {
+    // Usar subcuenta como base para campos únicos
+    const emailBase = t.nombre.toLowerCase().replace(/[^a-z0-9]/g, '.').replace(/\.+/g, '.').substring(0, 40);
+    const uniqueEmail = `${emailBase}.${t.subcuenta.slice(-4)}@rovida-tenant.local`;
+    const uniqueDni = `ROV-${t.subcuenta.slice(-6)}`;
+
     const existing = await prisma.tenant.findFirst({
-      where: { companyId: rovida.id, nombreCompleto: t.nombre },
+      where: {
+        companyId: rovida.id,
+        OR: [
+          { nombreCompleto: t.nombre },
+          { email: uniqueEmail },
+          { dni: uniqueDni },
+        ],
+      },
     });
     if (existing) { tenantsSkipped++; continue; }
 
-    await prisma.tenant.create({
-      data: {
-        companyId: rovida.id,
-        nombreCompleto: t.nombre,
-        email: `${t.subcuenta}@rovida-tenant.local`,
-        telefono: '',
-        dni: '',
-        activo: true,
-        notas: `Subcuenta contable: ${t.subcuenta}. Grupo: ${t.grupo}. Tipo: ${t.tipo}`,
-      },
-    });
-    tenantsCreated++;
+    try {
+      await prisma.tenant.create({
+        data: {
+          companyId: rovida.id,
+          nombreCompleto: t.nombre,
+          email: uniqueEmail,
+          telefono: '+34 000 000 000',
+          dni: uniqueDni,
+          fechaNacimiento: new Date('1980-01-01'),
+          activo: true,
+          notas: `Subcuenta contable: ${t.subcuenta}. Grupo: ${t.grupo}. Tipo: ${t.tipo}`,
+        },
+      });
+      tenantsCreated++;
+    } catch (err: any) {
+      // Unique constraint violation - skip
+      if (err.code === 'P2002') { tenantsSkipped++; }
+      else { console.error(`  Error creando ${t.nombre}: ${err.message}`); }
+    }
   }
   console.log(`  Creados: ${tenantsCreated}, Existentes: ${tenantsSkipped}`);
 
@@ -236,24 +255,31 @@ async function main() {
     const building = buildings.find(b => b.nombre.includes(ins.buildingRef) || ins.buildingRef.includes(b.nombre.split(' ')[0]));
 
     const existing = await prisma.insurance.findFirst({
-      where: { companyId: rovida.id, poliza: ins.poliza },
+      where: { companyId: rovida.id, numeroPoliza: ins.poliza },
     });
     if (existing) { insuranceSkipped++; continue; }
 
-    await prisma.insurance.create({
-      data: {
-        companyId: rovida.id,
-        buildingId: building?.id || undefined,
-        tipo: ins.tipo,
-        aseguradora: ins.aseguradora,
-        poliza: ins.poliza,
-        primaAnual: ins.primaAnual,
-        estado: 'activa',
-        fechaInicio: new Date(ins.fechaInicio),
-        fechaVencimiento: new Date(ins.fechaVencimiento),
-      },
-    });
-    insuranceCreated++;
+    try {
+      await prisma.insurance.create({
+        data: {
+          companyId: rovida.id,
+          buildingId: building?.id || undefined,
+          tipo: ins.tipo,
+          aseguradora: ins.aseguradora,
+          numeroPoliza: ins.poliza,
+          nombreAsegurado: 'Rovida S.L.',
+          primaAnual: ins.primaAnual,
+          estado: 'activa',
+          fechaInicio: new Date(ins.fechaInicio),
+          fechaVencimiento: new Date(ins.fechaVencimiento),
+          notas: `Edificio: ${ins.buildingRef}. Datos extraídos de subcuentas 625x del Plan Contable.`,
+        },
+      });
+      insuranceCreated++;
+    } catch (err: any) {
+      if (err.code === 'P2002') { insuranceSkipped++; }
+      else { console.error(`  Error creando seguro ${ins.poliza}: ${err.message}`); }
+    }
   }
   console.log(`  Creados: ${insuranceCreated}, Existentes: ${insuranceSkipped}`);
 
@@ -307,27 +333,32 @@ async function main() {
 
     if (!unit) continue;
 
-    const rentaMensual = unit.numero.toLowerCase().includes('garaje') || unit.numero.toLowerCase().includes('plaza')
-      ? 120
-      : unit.numero.toLowerCase().includes('local')
-        ? 2500
-        : unit.numero.toLowerCase().includes('nave')
-          ? 1000
-          : 700;
+    const isGaraje = unit.numero.toLowerCase().includes('garaje') || unit.numero.toLowerCase().includes('plaza');
+    const isLocal = unit.numero.toLowerCase().includes('local');
+    const isNave = unit.numero.toLowerCase().includes('nave');
+    const isOficina = unit.numero.toLowerCase().includes('oficina') || unit.numero.toLowerCase().includes('bl.');
 
-    await prisma.contract.create({
-      data: {
-        unitId: unit.id,
-        tenantId: tenant.id,
-        fechaInicio: new Date('2025-01-01'),
-        fechaFin: new Date('2025-12-31'),
-        rentaMensual,
-        deposito: rentaMensual,
-        estado: 'activo',
-        tipo: 'alquiler',
-      },
-    });
-    contractsCreated++;
+    const rentaMensual = isGaraje ? 120 : isLocal ? 2500 : isNave ? 1000 : isOficina ? 1500 : 700;
+    const contractType = (isGaraje || isLocal || isNave || isOficina) ? 'comercial' : 'residencial';
+
+    try {
+      await prisma.contract.create({
+        data: {
+          unitId: unit.id,
+          tenantId: tenant.id,
+          fechaInicio: new Date('2025-01-01'),
+          fechaFin: new Date('2025-12-31'),
+          rentaMensual,
+          deposito: rentaMensual,
+          estado: 'activo',
+          tipo: contractType as any,
+        },
+      });
+      contractsCreated++;
+    } catch (err: any) {
+      if (err.code === 'P2002') { contractsSkipped++; }
+      else { console.error(`  Error creando contrato ${tenant.nombreCompleto}: ${err.message}`); }
+    }
   }
   console.log(`  Creados: ${contractsCreated}, Existentes: ${contractsSkipped}`);
 
