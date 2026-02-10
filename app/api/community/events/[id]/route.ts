@@ -57,6 +57,7 @@ export async function GET(
       comments
     });
   } catch (error: any) {
+    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) { return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 }); }
     return NextResponse.json({ error: error.message }, { status: 401 });
   }
 }
@@ -98,6 +99,7 @@ export async function PATCH(
     
     return NextResponse.json({ success: true, updated: event.count });
   } catch (error: any) {
+    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) { return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 }); }
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 }
@@ -124,6 +126,7 @@ export async function DELETE(
     
     return NextResponse.json({ success: true });
   } catch (error: any) {
+    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) { return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 }); }
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 }

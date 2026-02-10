@@ -58,6 +58,7 @@ export async function POST(
       message: isWaitlist ? 'Añadido a lista de espera' : 'Inscripción confirmada'
     }, { status: 201 });
   } catch (error: any) {
+    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) { return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 }); }
     if (error.code === 'P2002') {
       return NextResponse.json({ error: 'Ya estás inscrito en este evento' }, { status: 400 });
     }
@@ -98,6 +99,7 @@ export async function DELETE(
     
     return NextResponse.json({ success: true });
   } catch (error: any) {
+    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) { return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 }); }
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 }

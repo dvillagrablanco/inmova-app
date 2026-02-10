@@ -94,6 +94,7 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error: any) {
+    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) { return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 }); }
     const errorMessage = error?.message || 'Error desconocido';
     const errorStack = error?.stack || '';
     logger.error('Error fetching tenants:', { message: errorMessage, stack: errorStack.slice(0, 500) });
@@ -176,6 +177,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(tenant, { status: 201 });
   } catch (error: any) {
+    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) { return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 }); }
     logger.error('Error creating tenant:', error);
     if (error.message?.includes('permiso')) {
       return forbiddenResponse(error.message);

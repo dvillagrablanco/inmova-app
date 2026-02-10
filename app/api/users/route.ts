@@ -56,6 +56,7 @@ export async function GET() {
 
     return NextResponse.json(usersWithoutPasswords);
   } catch (error: any) {
+    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) { return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 }); }
     logger.error('Error fetching users:', error);
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });
@@ -138,6 +139,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(userWithoutPassword, { status: 201 });
   } catch (error: any) {
+    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) { return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 }); }
     logger.error('Error creating user:', error);
     if (error.message?.includes('permiso')) {
       return forbiddenResponse(error.message);

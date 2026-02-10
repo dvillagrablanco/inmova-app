@@ -75,6 +75,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       ...response,
     });
   } catch (error: any) {
+    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) { return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 }); }
     logError(new Error(error.message || 'Error obteniendo métricas de rendimiento'), { context: 'GET /api/providers/performance/[id]' });
 
     if (error.message === 'No autenticado') {

@@ -114,6 +114,7 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error: any) {
+    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) { return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 }); }
     const errorMessage = error?.message || 'Error desconocido';
     const errorStack = error?.stack || '';
     logger.error('Error fetching buildings:', { message: errorMessage, stack: errorStack.slice(0, 500) });
@@ -204,6 +205,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(building, { status: 201 });
   } catch (error: any) {
+    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) { return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 }); }
     logError(error, { context: 'Error creating building' });
     if (error.message?.includes('permiso')) {
       return forbiddenResponse(error.message);

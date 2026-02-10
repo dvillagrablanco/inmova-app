@@ -34,6 +34,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(reports);
   } catch (error: any) {
+    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) { return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 }); }
     logger.error('Error al obtener reportes programados:', error);
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });
@@ -103,6 +104,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(report, { status: 201 });
   } catch (error: any) {
+    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) { return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 }); }
     logger.error('Error al crear reporte programado:', error);
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });

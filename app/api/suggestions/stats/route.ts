@@ -61,6 +61,10 @@ export async function GET(request: NextRequest) {
       recientes,
     });
   } catch (error: any) {
+    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) { return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 }); }
+    if (error.message === 'No autenticado' || error.message === 'No autorizado' || error.message === 'Usuario inactivo') {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+    }
     logger.error('Error al obtener estadísticas:', error);
     return NextResponse.json(
       { error: error.message || 'Error al obtener estadísticas' },

@@ -57,6 +57,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
     return NextResponse.json(report);
   } catch (error: any) {
+    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) { return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 }); }
     logger.error('Error al actualizar reporte programado:', error);
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });
@@ -105,6 +106,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
 
     return NextResponse.json({ message: 'Reporte eliminado correctamente' });
   } catch (error: any) {
+    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) { return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 }); }
     logger.error('Error al eliminar reporte programado:', error);
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });
@@ -152,6 +154,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
 
     return NextResponse.json({ message: 'Reporte enviado correctamente' });
   } catch (error: any) {
+    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) { return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 }); }
     logger.error('Error al enviar reporte programado:', error);
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });

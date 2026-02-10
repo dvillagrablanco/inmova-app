@@ -76,6 +76,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error: any) {
+    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) { return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 }); }
     logger.error('Error al obtener logs de notificaciones:', error);
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });
@@ -141,6 +142,7 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   } catch (error: any) {
+    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) { return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 }); }
     logger.error('Error al obtener estadísticas de notificaciones:', error);
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });

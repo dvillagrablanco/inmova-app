@@ -142,17 +142,29 @@ export async function getCurrentUser() {
 }
 
 /**
+ * Error de autenticación con código HTTP para que los catch lo detecten
+ */
+export class AuthError extends Error {
+  statusCode: number;
+  constructor(message: string, statusCode = 401) {
+    super(message);
+    this.name = 'AuthError';
+    this.statusCode = statusCode;
+  }
+}
+
+/**
  * Middleware para proteger APIs - verifica autenticación y devuelve usuario
  */
 export async function requireAuth() {
   const user = await getCurrentUser();
   
   if (!user) {
-    throw new Error('No autenticado');
+    throw new AuthError('No autenticado', 401);
   }
 
   if (!user.activo) {
-    throw new Error('Usuario inactivo');
+    throw new AuthError('Usuario inactivo', 403);
   }
 
   return user;

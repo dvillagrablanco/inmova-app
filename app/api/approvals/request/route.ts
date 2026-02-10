@@ -71,6 +71,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(approval);
   } catch (error: any) {
+    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) { return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 }); }
     logger.error('Error creando solicitud de aprobación:', error);
     return NextResponse.json(
       { error: error.message || 'Error creando solicitud de aprobación' },

@@ -60,6 +60,7 @@ export async function GET(request: NextRequest) {
       seasonPricing,
     });
   } catch (error: any) {
+    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) { return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 }); }
     return NextResponse.json({ error: error.message }, { status: 401 });
   }
 }
@@ -102,6 +103,7 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json(channelPricing, { status: 201 });
   } catch (error: any) {
+    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) { return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 }); }
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 }

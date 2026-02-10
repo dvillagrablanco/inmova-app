@@ -77,6 +77,7 @@ export async function POST(request: NextRequest) {
       access,
     });
   } catch (error: any) {
+    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) { return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 }); }
     logger.error('Error al cambiar de empresa:', error);
     
     if (error instanceof z.ZodError) {

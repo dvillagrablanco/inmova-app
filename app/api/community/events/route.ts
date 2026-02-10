@@ -42,6 +42,7 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json(events);
   } catch (error: any) {
+    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) { return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 }); }
     return NextResponse.json({ error: error.message }, { status: 401 });
   }
 }
@@ -80,6 +81,7 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json(event, { status: 201 });
   } catch (error: any) {
+    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) { return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 }); }
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 }

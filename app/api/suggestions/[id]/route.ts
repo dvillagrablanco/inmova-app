@@ -63,6 +63,7 @@ export async function GET(
 
     return NextResponse.json(suggestion);
   } catch (error: any) {
+    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) { return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 }); }
     logger.error('Error al obtener sugerencia:', error);
     return NextResponse.json(
       { error: error.message || 'Error al obtener sugerencia' },
@@ -146,6 +147,7 @@ export async function PATCH(
 
     return NextResponse.json(updatedSuggestion);
   } catch (error: any) {
+    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) { return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 }); }
     logger.error('Error al actualizar sugerencia:', error);
     
     if (error instanceof z.ZodError) {
@@ -185,6 +187,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Sugerencia eliminada correctamente' });
   } catch (error: any) {
+    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) { return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 }); }
     logger.error('Error al eliminar sugerencia:', error);
     return NextResponse.json(
       { error: error.message || 'Error al eliminar sugerencia' },
