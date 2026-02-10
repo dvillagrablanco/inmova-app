@@ -8,10 +8,7 @@ import { deleteFile } from '@/lib/s3';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
@@ -21,7 +18,7 @@ export async function GET(
     const { searchParams } = new URL(req.url);
     const queryCompanyId = searchParams.get('companyId');
     const userRole = (session.user as any).role;
-    const sessionCompanyId = session.user.companyId;
+    const sessionCompanyId = req.cookies.get('activeCompanyId')?.value || session.user.companyId;
     const companyId =
       queryCompanyId && (userRole === 'super_admin' || userRole === 'soporte')
         ? queryCompanyId
@@ -61,10 +58,7 @@ export async function GET(
   }
 }
 
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
@@ -74,7 +68,7 @@ export async function DELETE(
     const { searchParams } = new URL(req.url);
     const queryCompanyId = searchParams.get('companyId');
     const userRole = (session.user as any).role;
-    const sessionCompanyId = session.user.companyId;
+    const sessionCompanyId = req.cookies.get('activeCompanyId')?.value || session.user.companyId;
     const companyId =
       queryCompanyId && (userRole === 'super_admin' || userRole === 'soporte')
         ? queryCompanyId
