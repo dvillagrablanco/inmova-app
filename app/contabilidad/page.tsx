@@ -506,10 +506,35 @@ export default function ContabilidadPage() {
           </p>
         </div>
         <div className="flex gap-3">
+          <Button
+            onClick={async () => {
+              try {
+                setLoading(true);
+                const res = await fetch('/api/accounting/refresh-from-source', { method: 'POST' });
+                if (res.ok) {
+                  const data = await res.json();
+                  toast.success(`Contabilidad actualizada: ${data.summary?.transaccionesCreadas || 0} transacciones (${data.summary?.periodoDesde} → ${data.summary?.periodoHasta})`);
+                  loadFinancialData();
+                } else {
+                  const err = await res.json().catch(() => ({}));
+                  toast.error(err.error || 'Error al refrescar contabilidad');
+                }
+              } catch {
+                toast.error('Error de conexión');
+              } finally {
+                setLoading(false);
+              }
+            }}
+            variant="outline"
+            disabled={loading}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Actualizar Contabilidad
+          </Button>
           {zucchettiStatus?.configured && (
             <Button onClick={handleSyncZucchetti} variant="outline" disabled={loading}>
               <FileText className="h-4 w-4 mr-2" />
-              Sincronizar con Zucchetti
+              Sincronizar con Altai
             </Button>
           )}
           <Button onClick={loadFinancialData} variant="outline" disabled={loading}>
