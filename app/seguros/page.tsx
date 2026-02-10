@@ -172,6 +172,7 @@ export default function SegurosPage() {
     imported: number;
     failed: number;
   } | null>(null);
+  const [externalDocs, setExternalDocs] = useState<any[]>([]);
 
   // Filtros
   const [searchTerm, setSearchTerm] = useState('');
@@ -188,8 +189,27 @@ export default function SegurosPage() {
   useEffect(() => {
     if (status === 'authenticated') {
       fetchSeguros();
+      loadExternalInsuranceDocs();
     }
   }, [status]);
+
+  const loadExternalInsuranceDocs = async () => {
+    try {
+      const query = companyId ? `?companyId=${companyId}&tipo=seguro` : '?tipo=seguro';
+      const res = await fetch(`/api/documents${query}`);
+      if (res.ok) {
+        const data = await res.json();
+        const external = (Array.isArray(data) ? data : []).filter(
+          (doc: any) =>
+            doc.cloudStoragePath?.startsWith('https://') &&
+            (doc.tags?.includes('seguros') || doc.tipo === 'seguro')
+        );
+        setExternalDocs(external);
+      }
+    } catch (error) {
+      console.error('Error cargando docs externos seguros:', error);
+    }
+  };
 
   useEffect(() => {
     applyFilters();
@@ -555,6 +575,47 @@ export default function SegurosPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Documentación de Seguros Externa (Google Drive) */}
+        {externalDocs.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <FileText className="h-5 w-5 text-red-600" />
+                Documentación de Seguros
+              </CardTitle>
+              <CardDescription>
+                Pólizas y documentos de seguros enlazados desde Google Drive
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {externalDocs.map((doc: any) => (
+                  <div
+                    key={doc.id}
+                    className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer flex items-center gap-3"
+                    onClick={() => window.open(doc.cloudStoragePath, '_blank')}
+                  >
+                    <div className="p-2 bg-red-50 rounded-lg flex-shrink-0">
+                      <Shield className="h-5 w-5 text-red-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium text-sm truncate">{doc.nombre}</h4>
+                      {doc.descripcion && (
+                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                          {doc.descripcion}
+                        </p>
+                      )}
+                      <Badge variant="outline" className="text-xs mt-2 text-blue-600 border-blue-300 bg-blue-50">
+                        Google Drive
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Filters */}
         <Card>

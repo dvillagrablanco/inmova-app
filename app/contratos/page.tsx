@@ -87,6 +87,7 @@ function ContratosPageContent() {
   const [activeFilters, setActiveFilters] = useState<
     Array<{ id: string; label: string; value: string }>
   >([]);
+  const [externalDocs, setExternalDocs] = useState<any[]>([]);
 
   // Delete confirmation dialog state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -124,8 +125,26 @@ function ContratosPageContent() {
 
     if (status === 'authenticated') {
       fetchContracts();
+      loadExternalContractDocs();
     }
   }, [status]);
+
+  const loadExternalContractDocs = async () => {
+    try {
+      const res = await fetch('/api/documents?tipo=contrato');
+      if (res.ok) {
+        const data = await res.json();
+        const external = (Array.isArray(data) ? data : []).filter(
+          (doc: any) =>
+            doc.cloudStoragePath?.startsWith('https://') &&
+            (doc.tags?.includes('contratos') || doc.tipo === 'contrato')
+        );
+        setExternalDocs(external);
+      }
+    } catch (error) {
+      logger.error('Error cargando docs externos contratos:', error);
+    }
+  };
 
   const handleDeleteClick = (contract: Contract) => {
     setContractToDelete(contract);
@@ -388,6 +407,47 @@ function ContratosPageContent() {
         </CardContent>
       </Card>
         </div>
+
+        {/* Documentación de Contratos Externa (Google Drive) */}
+        {externalDocs.length > 0 && (
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <FileText className="h-5 w-5 text-green-600" />
+                Documentación de Contratos
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Contratos y documentación legal enlazados desde Google Drive
+              </p>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {externalDocs.map((doc: any) => (
+                  <div
+                    key={doc.id}
+                    className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer flex items-center gap-3"
+                    onClick={() => window.open(doc.cloudStoragePath, '_blank')}
+                  >
+                    <div className="p-2 bg-green-50 rounded-lg flex-shrink-0">
+                      <FileText className="h-5 w-5 text-green-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium text-sm truncate">{doc.nombre}</h4>
+                      {doc.descripcion && (
+                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                          {doc.descripcion}
+                        </p>
+                      )}
+                      <Badge variant="outline" className="text-xs mt-2 text-blue-600 border-blue-300 bg-blue-50">
+                        Google Drive
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Contracts List */}
         <div className="grid gap-4">

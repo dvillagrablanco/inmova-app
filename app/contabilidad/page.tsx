@@ -77,6 +77,8 @@ export default function ContabilidadPage() {
     imported: number;
     failed: number;
   } | null>(null);
+  const [externalDocs, setExternalDocs] = useState<any[]>([]);
+  const [loadingDocs, setLoadingDocs] = useState(false);
 
   useEffect(() => {
     if (session?.user?.companyId) {
@@ -87,8 +89,29 @@ export default function ContabilidadPage() {
       loadHoldedStatus();
       loadA3Status();
       loadAlegraStatus();
+      loadExternalDocs();
     }
   }, [session, periodo]);
+
+  const loadExternalDocs = async () => {
+    try {
+      setLoadingDocs(true);
+      const res = await fetch('/api/documents?tipo=contabilidad');
+      if (res.ok) {
+        const data = await res.json();
+        const external = (Array.isArray(data) ? data : []).filter(
+          (doc: any) =>
+            doc.cloudStoragePath?.startsWith('https://') &&
+            (doc.tags?.includes('contabilidad') || doc.tipo === 'contabilidad')
+        );
+        setExternalDocs(external);
+      }
+    } catch (error) {
+      logger.error('Error cargando docs externos contabilidad:', error);
+    } finally {
+      setLoadingDocs(false);
+    }
+  };
 
   const loadZucchettiStatus = async () => {
     try {
@@ -550,6 +573,54 @@ export default function ContabilidadPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Documentación Contable Externa (Google Drive) */}
+      {externalDocs.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-blue-600" />
+              Documentación Contable
+            </CardTitle>
+            <CardDescription>
+              Documentos contables enlazados desde Google Drive
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {externalDocs.map((doc: any) => (
+                <div
+                  key={doc.id}
+                  className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+                  onClick={() => window.open(doc.cloudStoragePath, '_blank')}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-blue-50 rounded-lg flex-shrink-0">
+                      <FileText className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium text-sm truncate">{doc.nombre}</h4>
+                      {doc.descripcion && (
+                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                          {doc.descripcion}
+                        </p>
+                      )}
+                      <div className="flex gap-1 mt-2 flex-wrap">
+                        <Badge variant="outline" className="text-xs text-blue-600 border-blue-300 bg-blue-50">
+                          Google Drive
+                        </Badge>
+                        <Badge variant="outline" className="text-xs">
+                          Contabilidad
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* KPIs Principales */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
