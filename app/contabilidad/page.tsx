@@ -25,6 +25,7 @@ import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { Line, Bar, Pie } from 'react-chartjs-2';
 import logger, { logError } from '@/lib/logger';
+import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -1269,6 +1270,13 @@ export default function ContabilidadPage() {
           <p className="text-muted-foreground">Aquí se mostrarán los ratios financieros</p>
         </TabsContent>
       </Tabs>
+
+      {/* Asistente IA de Documentos Contables */}
+      <AIDocumentAssistant 
+        context="contabilidad"
+        variant="floating"
+        position="bottom-right"
+      />
     </div>
   );
 }

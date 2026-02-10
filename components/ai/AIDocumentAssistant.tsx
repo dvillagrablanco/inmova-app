@@ -100,6 +100,7 @@ interface AIDocumentAssistantProps {
     | 'documentos'
     | 'facturas'
     | 'proveedores'
+    | 'contabilidad'
     | 'general';
   /** Callback cuando se completa el análisis de un documento */
   onAnalysisComplete?: (analysis: DocumentAnalysis, file: File) => void;
@@ -155,6 +156,7 @@ const contextCategories: Record<string, string[]> = {
   ],
   facturas: ['factura', 'recibo_pago'],
   proveedores: ['factura', 'contrato', 'licencia'],
+  contabilidad: ['factura', 'recibo_pago', 'otro'],
   general: ['otro'],
 };
 
