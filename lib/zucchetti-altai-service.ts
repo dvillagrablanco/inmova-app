@@ -136,9 +136,9 @@ export function getAltaiConfig(): AltaiConfig {
     timeoutMs: Number(process.env.ZUCCHETTI_ALTAI_TIMEOUT_MS || DEFAULT_TIMEOUT_MS),
     includeCompanyCode: process.env.ZUCCHETTI_ALTAI_INCLUDE_COMPANY_CODE !== 'false',
     entryWrapperKey: process.env.ZUCCHETTI_ALTAI_ENTRY_WRAPPER || undefined,
-    loginField: process.env.ZUCCHETTI_ALTAI_LOGIN_FIELD || 'login',
+    loginField: process.env.ZUCCHETTI_ALTAI_LOGIN_FIELD || 'username',
     passwordField: process.env.ZUCCHETTI_ALTAI_PASSWORD_FIELD || 'password',
-    companyField: process.env.ZUCCHETTI_ALTAI_COMPANY_FIELD || 'companyCode',
+    companyField: process.env.ZUCCHETTI_ALTAI_COMPANY_FIELD || 'company',
   };
 }
 
@@ -194,6 +194,67 @@ export async function authenticateAltai(): Promise<AltaiTokenResult> {
   return tokenResult;
 }
 
+/**
+ * Obtiene credenciales Altai específicas para una empresa.
+ * El patrón es: login=Prueba{CODE}, password=Prueba{CODE}@, company={CODE}
+ * donde CODE es el zucchettiCompanyId de la empresa.
+ */
+function getCompanyAltaiCredentials(companyCode: string): {
+  login: string;
+  password: string;
+  companyCode: string;
+} | null {
+  if (!companyCode) return null;
+  
+  // Patrón de credenciales del grupo Vidaro: Prueba{CODE} / Prueba{CODE}@
+  return {
+    login: `Prueba${companyCode}`,
+    password: `Prueba${companyCode}@`,
+    companyCode,
+  };
+}
+
+export async function authenticateAltaiForCompany(companyCode: string): Promise<AltaiTokenResult> {
+  const creds = getCompanyAltaiCredentials(companyCode);
+  if (!creds) {
+    throw new Error(`No se pudieron resolver credenciales Altai para código: ${companyCode}`);
+  }
+
+  const config = getAltaiConfig();
+  const authUrl = config.authUrl || resolveUrl(config.apiUrl, config.authPath);
+  if (!authUrl) {
+    throw new Error('URL de autenticación Altai no configurada');
+  }
+
+  const payload = {
+    [config.loginField]: creds.login,
+    [config.passwordField]: creds.password,
+    [config.companyField]: creds.companyCode,
+  };
+
+  const response = await fetch(authUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify(payload),
+    signal: AbortSignal.timeout(config.timeoutMs),
+  });
+
+  const rawText = await response.text();
+  const parsed = parseJsonSafely(rawText) ?? rawText;
+
+  if (!response.ok) {
+    logger.error('[Altai] Error autenticando empresa:', { companyCode, status: response.status });
+    throw new Error(`Altai auth error ${response.status} para ${companyCode}`);
+  }
+
+  const tokenResult = extractTokenFromResponse(parsed);
+  if (!tokenResult) {
+    throw new Error('Token Altai no encontrado en respuesta');
+  }
+
+  return tokenResult;
+}
+
 export async function getAltaiAccessToken(
   companyId: string,
   options?: { forceRefresh?: boolean }
@@ -221,7 +282,12 @@ export async function getAltaiAccessToken(
       }
     }
 
-    const tokenResult = await authenticateAltai();
+    // Autenticar con credenciales específicas de la empresa si tiene companyCode
+    const companyCode = company?.zucchettiCompanyId;
+    const tokenResult = companyCode
+      ? await authenticateAltaiForCompany(companyCode)
+      : await authenticateAltai();
+
     const ttlSeconds = Number(
       process.env.ZUCCHETTI_ALTAI_TOKEN_TTL_SECONDS || DEFAULT_TOKEN_TTL_SECONDS
     );
@@ -236,7 +302,7 @@ export async function getAltaiAccessToken(
         zucchettiAccessToken: encryptZucchettiToken(tokenResult.accessToken),
         zucchettiRefreshToken: null,
         zucchettiTokenExpiry: expiresAt,
-        zucchettiCompanyId: company?.zucchettiCompanyId || config.companyCode,
+        zucchettiCompanyId: companyCode || config.companyCode,
         zucchettiLastSync: new Date(),
       },
     });
