@@ -449,7 +449,7 @@ const strNavItems = [
 const coLivingNavItems = [
   {
     name: 'Habitaciones',
-    href: '/room-rental',
+    href: '/coliving/propiedades',
     icon: Home,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
@@ -486,17 +486,17 @@ const coLivingNavItems = [
 ];
 
 // 2.4 CONSTRUCCIÓN (antes BUILD-TO-RENT)
-// Incluye ewoorker como subplataforma marketplace
+// Rutas canónicas bajo /construccion/
 const buildToRentNavItems = [
   {
     name: 'Proyectos',
-    href: '/construction/projects',
+    href: '/construccion/proyectos',
     icon: HardHat,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
     name: 'Control de Calidad',
-    href: '/construction/quality-control',
+    href: '/construccion/calidad',
     icon: CheckSquare,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
@@ -549,9 +549,7 @@ const flippingNavItems = [
   },
 ];
 
-// 2.5.1 CONSTRUCCIÓN
-// Gestión de proyectos de construcción, reformas y rehabilitaciones
-// AMPLIADO: Incluye Gantt, licitaciones, obras y proyectos de renovación
+// 2.5.1 CONSTRUCCIÓN - Rutas canónicas bajo /construccion/
 const construccionNavItems = [
   {
     name: 'Dashboard',
@@ -566,39 +564,15 @@ const construccionNavItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
-    name: 'Diagrama Gantt',
-    href: '/construction/gantt',
-    icon: BarChart2,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Obras',
-    href: '/obras',
-    icon: Building2,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Licitaciones',
-    href: '/licitaciones',
-    icon: FileText,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Proyectos Renovación',
-    href: '/proyectos-renovacion',
-    icon: Wrench,
+    name: 'Control de Calidad',
+    href: '/construccion/calidad',
+    icon: CheckSquare,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
     name: 'Órdenes de Trabajo',
     href: '/ordenes-trabajo',
     icon: ClipboardList,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Control de Calidad',
-    href: '/construction/quality-control',
-    icon: CheckSquare,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
 ];
@@ -703,10 +677,10 @@ const comercialNavItems = [
 ];
 
 // 2.6.1 ALQUILER COMERCIAL (Oficinas, Locales, Naves, Coworking)
-// AMPLIADO: Incluye garajes, salas reuniones, retail, hospitality
+// Rutas canónicas bajo /comercial/
 const alquilerComercialNavItems = [
   {
-    name: 'Dashboard Comercial',
+    name: 'Dashboard',
     href: '/comercial',
     icon: Building2,
     roles: ['super_admin', 'administrador', 'gestor'],
@@ -717,32 +691,22 @@ const alquilerComercialNavItems = [
     href: '/comercial/oficinas',
     icon: Building2,
     roles: ['super_admin', 'administrador', 'gestor'],
-    dataTour: 'tour-comercial-oficinas',
   },
   {
     name: 'Locales',
     href: '/comercial/locales',
     icon: Star,
     roles: ['super_admin', 'administrador', 'gestor'],
-    dataTour: 'tour-comercial-locales',
   },
   {
     name: 'Naves Industriales',
     href: '/comercial/naves',
     icon: Package,
     roles: ['super_admin', 'administrador', 'gestor'],
-    dataTour: 'tour-comercial-naves',
   },
   {
     name: 'Coworking',
     href: '/comercial/coworking',
-    icon: Users2,
-    roles: ['super_admin', 'administrador', 'gestor'],
-    dataTour: 'tour-comercial-coworking',
-  },
-  {
-    name: 'Espacios Coworking',
-    href: '/espacios-coworking',
     icon: Users2,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
@@ -753,33 +717,33 @@ const alquilerComercialNavItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
-    name: 'Salas de Reuniones',
-    href: '/salas-reuniones',
-    icon: Users2,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Retail',
-    href: '/retail',
-    icon: ShoppingBag,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Hospitality',
-    href: '/hospitality',
-    icon: Hotel,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Contratos Comerciales',
+    name: 'Contratos',
     href: '/comercial/contratos',
     icon: FileText,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
-    name: 'Leads Comerciales',
+    name: 'Leads',
     href: '/comercial/leads',
     icon: UserPlus,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Pagos',
+    href: '/comercial/pagos',
+    icon: Euro,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Visitas',
+    href: '/comercial/visitas',
+    icon: CalendarCheck,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Analíticas',
+    href: '/comercial/analytics',
+    icon: BarChart2,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
 ];
