@@ -69,10 +69,17 @@ export default function FlippingTimelinePage() {
   const loadProject = async () => {
     try {
       setLoading(true);
-      // TODO: Cargar proyecto real desde API
-      const mockProject: Project = {
+      const response = await fetch('/api/proyectos/flipping');
+      if (response.ok) {
+        const data = await response.json();
+        const projects = data.projects || [];
+        if (projects.length > 0) {
+          setProject(projects[0]);
+        }
+      }
+      /* Data structure reference: {
         id: 'proj_1',
-        name: 'Reforma Integral - C/ Mayor 45',
+        name: 'Reforma Integral',
         startDate: '2025-01-15',
         expectedEndDate: '2025-05-15',
         tasks: [
@@ -217,7 +224,7 @@ export default function FlippingTimelinePage() {
           },
         ],
       };
-      setProject(mockProject);
+      */ // End of data structure reference
     } catch (error) {
       toast.error('Error al cargar el proyecto');
     } finally {

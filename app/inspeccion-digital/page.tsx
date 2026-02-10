@@ -35,12 +35,7 @@ export default function InspeccionDigitalPage() {
   const [filterTipo, setFilterTipo] = useState<string>('all');
   const [showNewDialog, setShowNewDialog] = useState(false);
 
-  const [inspecciones, setInspecciones] = useState<Inspeccion[]>([
-    { id: 'i1', propiedad: 'Edificio Centro', unidad: '3A', tipo: 'salida', fecha: '2025-01-20', inspector: 'Carlos García', estado: 'completada', puntuacion: 85, fotos: 24, incidencias: 3 },
-    { id: 'i2', propiedad: 'Residencial Playa', unidad: '2B', tipo: 'entrada', fecha: '2025-01-25', inspector: 'María López', estado: 'programada' },
-    { id: 'i3', propiedad: 'Apartamentos Norte', unidad: '1C', tipo: 'periodica', fecha: '2025-01-22', inspector: 'Juan Martínez', estado: 'en_proceso', fotos: 12 },
-    { id: 'i4', propiedad: 'Piso Centro', unidad: '4D', tipo: 'salida', fecha: '2025-01-18', inspector: 'Ana Ruiz', estado: 'completada', puntuacion: 92, fotos: 18, incidencias: 1 },
-  ]);
+  const [inspecciones, setInspecciones] = useState<Inspeccion[]>([]);
 
   useEffect(() => {
     if (status === 'authenticated') setLoading(false);

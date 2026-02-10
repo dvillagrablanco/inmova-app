@@ -19,39 +19,7 @@ import {
 
 export default function HousekeepingPage() {
   const router = useRouter();
-  const [tasks, setTasks] = useState([
-    {
-      id: '1',
-      property: 'Apartamento Malasaña',
-      date: '2024-12-06',
-      time: '11:00',
-      status: 'pendiente',
-      priority: 'alta',
-      estimatedTime: 90,
-      cleaner: 'María García',
-    },
-    {
-      id: '2',
-      property: 'Loft Retiro',
-      date: '2024-12-06',
-      time: '14:00',
-      status: 'en_progreso',
-      priority: 'media',
-      estimatedTime: 75,
-      cleaner: 'Ana López',
-      progress: 60,
-    },
-    {
-      id: '3',
-      property: 'Piso Salamanca',
-      date: '2024-12-07',
-      time: '10:00',
-      status: 'pendiente',
-      priority: 'media',
-      estimatedTime: 120,
-      cleaner: 'María García',
-    },
-  ]);
+  const [tasks, setTasks] = useState([]);
 
   const getStatusColor = (status: string) => {
     switch (status) {

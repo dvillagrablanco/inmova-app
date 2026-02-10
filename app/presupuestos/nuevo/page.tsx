@@ -20,9 +20,7 @@ interface LineItem {
 
 export default function NuevoPresupuestoPage() {
   const router = useRouter();
-  const [items, setItems] = useState<LineItem[]>([
-    { id: '1', concepto: '', cantidad: 1, precioUnitario: 0 },
-  ]);
+  const [items, setItems] = useState<LineItem[]>([]);
 
   const addItem = () => {
     setItems([...items, { id: Date.now().toString(), concepto: '', cantidad: 1, precioUnitario: 0 }]);

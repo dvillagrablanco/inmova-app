@@ -38,40 +38,7 @@ interface Inspection {
 
 export default function ConstruccionCalidadPage() {
   const router = useRouter();
-  const [inspections] = useState<Inspection[]>([
-    {
-      id: 'i1',
-      phase: 'Cimentación',
-      date: '2025-04-10',
-      inspector: 'Ing. Carlos Méndez',
-      status: 'passed',
-      score: 95,
-      checklist: [
-        { item: 'Excavación según planos', status: 'ok' },
-        { item: 'Armado de acero correcto', status: 'ok' },
-        { item: 'Calidad del hormigón', status: 'ok' },
-        { item: 'Impermeabilización', status: 'ok' },
-      ],
-      photos: 12,
-      report: 'Fase ejecutada correctamente según especificaciones',
-    },
-    {
-      id: 'i2',
-      phase: 'Estructura - Planta 1',
-      date: '2025-05-15',
-      inspector: 'Arq. María López',
-      status: 'conditional',
-      score: 78,
-      checklist: [
-        { item: 'Pilares según plano', status: 'ok' },
-        { item: 'Forjado nivel correcto', status: 'warning', notes: 'Desnivel de 2mm en zona oeste' },
-        { item: 'Juntas de dilatación', status: 'ok' },
-        { item: 'Prueba de carga', status: 'fail', notes: 'Pendiente realizar' },
-      ],
-      photos: 18,
-      report: 'Aprobado condicionalmente. Corregir desnivel y realizar prueba de carga.',
-    },
-  ]);
+  const [inspections] = useState<Inspection[]>([]);
 
   const getStatusBadge = (status: string) => {
     const config: Record<string, { color: string; label: string; icon: any }> = {

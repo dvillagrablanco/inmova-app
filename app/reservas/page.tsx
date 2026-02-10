@@ -41,12 +41,7 @@ export default function ReservasPage() {
   const [filterEstado, setFilterEstado] = useState<string>('all');
   const [showNewDialog, setShowNewDialog] = useState(false);
 
-  const [reservas, setReservas] = useState<Reserva[]>([
-    { id: 'r1', propiedad: 'Apartamento Playa', unidad: 'A1', cliente: 'Pierre Dubois', email: 'pierre@email.com', telefono: '+33 6 12 34 56 78', fechaEntrada: '2025-01-25', fechaSalida: '2025-01-30', noches: 5, precioPorNoche: 120, total: 600, estado: 'confirmada', plataforma: 'Airbnb' },
-    { id: 'r2', propiedad: 'Estudio Centro', unidad: 'E2', cliente: 'María García', email: 'maria@email.com', telefono: '+34 612 345 678', fechaEntrada: '2025-01-28', fechaSalida: '2025-02-02', noches: 5, precioPorNoche: 85, total: 425, estado: 'pendiente', plataforma: 'Booking' },
-    { id: 'r3', propiedad: 'Casa Rural', unidad: 'CR1', cliente: 'John Smith', email: 'john@email.com', telefono: '+44 7911 123456', fechaEntrada: '2025-02-01', fechaSalida: '2025-02-08', noches: 7, precioPorNoche: 150, total: 1050, estado: 'confirmada' },
-    { id: 'r4', propiedad: 'Apartamento Playa', unidad: 'A2', cliente: 'Anna Müller', email: 'anna@email.com', telefono: '+49 170 1234567', fechaEntrada: '2025-01-20', fechaSalida: '2025-01-23', noches: 3, precioPorNoche: 120, total: 360, estado: 'completada', plataforma: 'Airbnb' },
-  ]);
+  const [reservas, setReservas] = useState<Reserva[]>([]);
 
   useEffect(() => {
     if (status === 'authenticated') setLoading(false);

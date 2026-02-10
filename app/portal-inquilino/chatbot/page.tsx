@@ -81,14 +81,7 @@ Allí encontrarás:
 };
 
 export default function PortalInquilinoChatbotPage() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      role: 'assistant',
-      content: '¡Hola! Soy tu asistente virtual de Inmova. 🏠\n\nEstoy aquí para ayudarte con cualquier duda sobre tu alquiler, pagos, mantenimiento o contrato.\n\n¿En qué puedo ayudarte hoy?',
-      timestamp: new Date(),
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);

@@ -103,8 +103,7 @@ interface Budget {
   notas?: string;
 }
 
-// Mock data - en producción vendría de la API
-const mockBudgets: Budget[] = [];
+const initialBudgets: Budget[] = [];
 
 export default function PresupuestosPage() {
   const { data: session, status } = useSession();

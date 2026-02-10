@@ -19,32 +19,7 @@ import {
 
 export default function LegalCompliancePage() {
   const router = useRouter();
-  const [licenses, setLicenses] = useState([
-    {
-      id: '1',
-      property: 'Apartamento Malasaña',
-      licenseNumber: 'VT-12345-A',
-      expiryDate: '2025-06-15',
-      status: 'vigente',
-      daysUntilExpiry: 192,
-    },
-    {
-      id: '2',
-      property: 'Loft Retiro',
-      licenseNumber: 'VT-67890-B',
-      expiryDate: '2025-01-10',
-      status: 'proximo_vencimiento',
-      daysUntilExpiry: 35,
-    },
-    {
-      id: '3',
-      property: 'Piso Salamanca',
-      licenseNumber: 'Pendiente',
-      expiryDate: null,
-      status: 'sin_licencia',
-      daysUntilExpiry: null,
-    },
-  ]);
+  const [licenses, setLicenses] = useState([]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
