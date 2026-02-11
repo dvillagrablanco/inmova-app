@@ -53,12 +53,19 @@ async function main() {
         estadoCliente: 'activo',
         colorPrimario: '#1a365d',
         colorSecundario: '#2563eb',
-        notasAdmin: 'Sociedad holding matriz del grupo Vidaro.',
+        notasAdmin: 'Sociedad holding. Contabilidad 2025: 1.262 asientos, €253M. 2026 (Ene-Feb): 45 asientos, €135K. 1.766 subcuentas, 460+ instrumentos financieros. Carteras: CACEIS, Inversis, Pictet, Banca March, Bankinter. Participadas: Rovida, Disfasa, Viroda, Facundo, Girasoles, Incofasa, PDV Gesfasa.',
       },
     });
-    console.log(`   ✅ Vidaro Inversiones creada (ID: ${vidaro.id})`);
+    console.log(`   Vidaro Inversiones creada (ID: ${vidaro.id})`);
   } else {
-    console.log(`   ✅ Vidaro Inversiones encontrada (ID: ${vidaro.id}, nombre: ${vidaro.nombre})`);
+    // Actualizar notasAdmin con datos contables reales
+    await prisma.company.update({
+      where: { id: vidaro.id },
+      data: {
+        notasAdmin: 'Sociedad holding. Contabilidad 2025: 1.262 asientos, €253M. 2026 (Ene-Feb): 45 asientos, €135K. 1.766 subcuentas, 460+ instrumentos financieros. Carteras: CACEIS, Inversis, Pictet, Banca March, Bankinter. Participadas: Rovida, Disfasa, Viroda, Facundo, Girasoles, Incofasa, PDV Gesfasa.',
+      },
+    });
+    console.log(`   Vidaro Inversiones encontrada y actualizada (ID: ${vidaro.id}, nombre: ${vidaro.nombre})`);
   }
 
   // Rovida (filial)
@@ -87,19 +94,20 @@ async function main() {
         colorPrimario: '#16a34a',
         colorSecundario: '#22c55e',
         parentCompanyId: vidaro.id,
-        notasAdmin: 'Filial de Vidaro Inversiones.',
+        notasAdmin: 'Gestión inmobiliaria patrimonial. 17 inmuebles. Contabilidad 2025: 2.808 asientos, €46.2M. 2026 (Ene-Feb): 401 asientos, €724K. 243+ inquilinos. Top: Piamonte €644K/año, Espronceda €131K, Barquillo €93K.',
       },
     });
-    console.log(`   ✅ Rovida creada (ID: ${rovida.id})`);
+    console.log(`   Rovida creada (ID: ${rovida.id})`);
   } else {
-    // Asegurar que tiene parent correcto
-    if (rovida.parentCompanyId !== vidaro.id) {
-      await prisma.company.update({
-        where: { id: rovida.id },
-        data: { parentCompanyId: vidaro.id },
-      });
-    }
-    console.log(`   ✅ Rovida encontrada (ID: ${rovida.id}, nombre: ${rovida.nombre})`);
+    // Asegurar que tiene parent correcto y actualizar notas
+    await prisma.company.update({
+      where: { id: rovida.id },
+      data: {
+        parentCompanyId: vidaro.id,
+        notasAdmin: 'Gestión inmobiliaria patrimonial. 17 inmuebles. Contabilidad 2025: 2.808 asientos, €46.2M. 2026 (Ene-Feb): 401 asientos, €724K. 243+ inquilinos. Top: Piamonte €644K/año, Espronceda €131K, Barquillo €93K.',
+      },
+    });
+    console.log(`   Rovida encontrada y actualizada (ID: ${rovida.id}, nombre: ${rovida.nombre})`);
   }
 
   // Viroda (filial)
@@ -127,18 +135,19 @@ async function main() {
         colorPrimario: '#dc2626',
         colorSecundario: '#ef4444',
         parentCompanyId: vidaro.id,
-        notasAdmin: 'Filial de Vidaro Inversiones.',
+        notasAdmin: 'Inversiones inmobiliarias residenciales. Portfolio: Manuel Silvela 5 (14 unidades, Madrid), Reina 15 Residencial (10 viviendas, Madrid), Candelaria Mora 12-14 (6 viviendas, Madrid). Renta mensual Silvela: €33.6K.',
       },
     });
-    console.log(`   ✅ Viroda Inversiones creada (ID: ${viroda.id})`);
+    console.log(`   Viroda Inversiones creada (ID: ${viroda.id})`);
   } else {
-    if (viroda.parentCompanyId !== vidaro.id) {
-      await prisma.company.update({
-        where: { id: viroda.id },
-        data: { parentCompanyId: vidaro.id },
-      });
-    }
-    console.log(`   ✅ Viroda Inversiones encontrada (ID: ${viroda.id}, nombre: ${viroda.nombre})`);
+    await prisma.company.update({
+      where: { id: viroda.id },
+      data: {
+        parentCompanyId: vidaro.id,
+        notasAdmin: 'Inversiones inmobiliarias residenciales. Portfolio: Manuel Silvela 5 (14 unidades, Madrid), Reina 15 Residencial (10 viviendas, Madrid), Candelaria Mora 12-14 (6 viviendas, Madrid). Renta mensual Silvela: €33.6K.',
+      },
+    });
+    console.log(`   Viroda Inversiones encontrada y actualizada (ID: ${viroda.id}, nombre: ${viroda.nombre})`);
   }
 
   // 2. Buscar o crear el usuario

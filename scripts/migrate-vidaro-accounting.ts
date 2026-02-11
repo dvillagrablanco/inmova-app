@@ -17,7 +17,9 @@ async function main() {
     
     const vidaro = await prisma.company.upsert({
       where: { id: 'vidaro-inversiones' },
-      update: {},
+      update: {
+        notasAdmin: 'Sociedad holding. Contabilidad 2025: 1.262 asientos, €253M. Contabilidad 2026 (Ene-Feb): 45 asientos, €135K. 1.766 subcuentas. Carteras: CACEIS, Inversis, Pictet, Banca March, Bankinter. Participadas: Rovida, Disfasa, Viroda, Facundo, Girasoles, Incofasa, PDV Gesfasa.',
+      },
       create: {
         id: 'vidaro-inversiones',
         nombre: 'Vidaro Inversiones S.L.',
@@ -34,7 +36,9 @@ async function main() {
 
     const rovida = await prisma.company.upsert({
       where: { id: 'rovida-gestion' },
-      update: {},
+      update: {
+        notasAdmin: 'Gestión inmobiliaria patrimonial. 17 inmuebles en Madrid, Palencia, Valladolid, Benidorm, Marbella. Contabilidad 2025: 2.808 asientos, €46.2M. 2026 (Ene-Feb): 401 asientos, €724K. 1.571 subcuentas. 243+ inquilinos. Top: Piamonte €644K/año, Espronceda €131K, Barquillo €93K, Reina €77K.',
+      },
       create: {
         id: 'rovida-gestion',
         nombre: 'Rovida Gestión S.L.',
@@ -51,7 +55,9 @@ async function main() {
 
     const viroda = await prisma.company.upsert({
       where: { id: 'viroda-inversiones' },
-      update: {},
+      update: {
+        notasAdmin: 'Inversiones inmobiliarias residenciales. Portfolio: Manuel Silvela 5 (14 unidades, Madrid), Reina 15 Residencial (10 viviendas, Madrid), Candelaria Mora 12-14 (6 viviendas, Madrid). Renta mensual Silvela: €33.6K.',
+      },
       create: {
         id: 'viroda-inversiones',
         nombre: 'VIRODA INVERSIONES S.L.U.',
@@ -71,59 +77,59 @@ async function main() {
     // ================================================================================
     console.log('🏢 Paso 2: Creando edificios de ROVIDA...');
     
-    // Edificio Piamonte 23
+    // Edificio Piamonte 23 - Ingreso anual 2025: €644.443 (subcuenta 7520015001)
     const piamonte = await prisma.building.upsert({
       where: { id: 'piamonte-23' },
-      update: {},
+      update: { tipo: 'mixto', numeroUnidades: 1 },
       create: {
         id: 'piamonte-23',
         nombre: 'Edificio Piamonte 23',
-        direccion: 'Calle Piamonte 23, Madrid',
-        tipo: 'residencial',
-        anoConstructor: 1980,
+        direccion: 'C/ Piamonte, 23, Madrid',
+        tipo: 'mixto',
+        anoConstructor: 1970,
         numeroUnidades: 1,
         companyId: rovida.id,
         ascensor: true,
         garaje: false
       }
     });
-    console.log(`  ✓ Piamonte 23 (ID: ${piamonte.id})`);
+    console.log(`  ✓ Piamonte 23 - Edificio completo, inquilino Impulsa Hub Sur €57.827/mes (ID: ${piamonte.id})`);
 
-    // Espronceda 32 - Garajes
+    // Espronceda 32 - 115 plazas garaje, sótanos -2 y -3. Ingreso anual 2025: €130.629
     const espronceda = await prisma.building.upsert({
       where: { id: 'espronceda-32' },
-      update: {},
+      update: { numeroUnidades: 115 },
       create: {
         id: 'espronceda-32',
         nombre: 'Garajes Espronceda 32',
-        direccion: 'Calle Espronceda 32, Madrid',
+        direccion: 'C/ Espronceda, 32, Madrid',
         tipo: 'comercial',
-        anoConstructor: 1990,
-        numeroUnidades: 50,
+        anoConstructor: 1975,
+        numeroUnidades: 115,
         companyId: rovida.id,
         ascensor: false,
         garaje: true
       }
     });
-    console.log(`  ✓ Espronceda 32 - Garajes (ID: ${espronceda.id})`);
+    console.log(`  ✓ Espronceda 32 - 115 garajes, ingreso anual €130.629 (ID: ${espronceda.id})`);
 
-    // Reina 15 - Locales (Rovida)
+    // Reina 15 - Locales (Rovida). Finca 13182 €51.413/año + Finca 13184 €25.746/año
     const reinaRovida = await prisma.building.upsert({
       where: { id: 'reina-15-rovida' },
-      update: {},
+      update: { numeroUnidades: 2 },
       create: {
         id: 'reina-15-rovida',
-        nombre: 'Locales Comerciales Reina 15',
-        direccion: 'Calle Reina 15, Madrid',
+        nombre: 'Locales Reina 15',
+        direccion: 'C/ Reina, 15, Madrid',
         tipo: 'comercial',
-        anoConstructor: 1975,
-        numeroUnidades: 3,
+        anoConstructor: 1965,
+        numeroUnidades: 2,
         companyId: rovida.id,
-        ascensor: true,
+        ascensor: false,
         garaje: false
       }
     });
-    console.log(`  ✓ Reina 15 - Locales (ID: ${reinaRovida.id})`);
+    console.log(`  ✓ Reina 15 - 2 locales, ingreso anual €77.159 (ID: ${reinaRovida.id})`);
 
     // ================================================================================
     // 3. CREAR EDIFICIOS - VIRODA
@@ -380,18 +386,21 @@ async function main() {
     // ================================================================================
     // FIN
     // ================================================================================
-    console.log('\n✅ Migración completada exitosamente!');
-    console.log('\n📊 RESUMEN:');
-    console.log(`  • Empresas: 3 (Vidaro, Rovida, Viroda)`);
-    console.log(`  • Edificios: 6`);
-    console.log(`  • Unidades creadas: ${silvelaUnits.length + reinaVirodaUnits.length + candelariaUnits.length}`);
-    console.log(`  • Inquilinos: ${tenants.length}`);
-    console.log(`  • Proveedores: ${providers.length}`);
-    console.log(`\n💡 Próximos pasos:`);
-    console.log(`  1. Revisar los datos cargados en el panel de administración`);
-    console.log(`  2. Crear contratos para las unidades ocupadas`);
-    console.log(`  3. Registrar pagos históricos de los inquilinos`);
-    console.log(`  4. Configurar recordatorios de pagos`);
+    console.log('\n Migración completada.');
+    console.log('\n RESUMEN:');
+    console.log(`  Empresas: 3 (Vidaro, Rovida, Viroda)`);
+    console.log(`  Edificios Rovida: 17 inmuebles (Espronceda 115 garajes, Piamonte edificio, Barquillo 3 locales, etc.)`);
+    console.log(`  Edificios Viroda: 3 (Silvela 14 uds, Reina 15 10 uds, Candelaria 6 uds)`);
+    console.log(`  Unidades Viroda: ${silvelaUnits.length + reinaVirodaUnits.length + candelariaUnits.length}`);
+    console.log(`  Inquilinos Viroda: ${tenants.length}`);
+    console.log(`  Proveedores: ${providers.length}`);
+    console.log(`\n Datos contables disponibles (data/):`);
+    console.log(`  Rovida: data/rovida/diario_general_2025.xlsx + 2026.xlsx + indice_subcuentas.xlsx`);
+    console.log(`  Vidaro: data/vidaro/diario_general_2025.xlsx + 2026.xlsx + indice_subcuentas.xlsx`);
+    console.log(`\n Importar contabilidad:`);
+    console.log(`  npx tsx scripts/import-rovida-contabilidad.ts`);
+    console.log(`  npx tsx scripts/import-vidaro-contabilidad.ts`);
+    console.log(`  npx tsx scripts/import-rovida-plan-cuentas.ts`);
 
   } catch (error) {
     console.error('❌ Error durante la migración:', error);

@@ -4,9 +4,11 @@
  * Re-importa la contabilidad desde las fuentes originales (Google Sheets).
  * Descarga el spreadsheet actualizado y reimporta los asientos.
  * 
- * Fuentes configuradas:
- * - Rovida: https://docs.google.com/spreadsheets/d/1uRerjVupuKFKpkATavimTElFbI9DG_b8
- * - Viroda: https://docs.google.com/spreadsheets/d/1WRWB6PvIXnyF3f8lSi5AWCqQXXYlHy1L
+ * Fuentes configuradas (actualizado Feb 2026):
+ * - Rovida 2025: https://docs.google.com/spreadsheets/d/12ebrL4-F4lIbjJaGCPCTpem9L8Yx9_mw
+ * - Rovida 2026: https://docs.google.com/spreadsheets/d/1Ce3XvAkboTl4-_-wLuOmXiMmI_A7pwCV
+ * - Vidaro 2025: https://docs.google.com/spreadsheets/d/15WLyWpjzt3S5goW0a4sRgLW6tFkzbe6l
+ * - Vidaro 2026: https://docs.google.com/spreadsheets/d/13erHSefePWM7kRglnzjbj8r0_oxckZIj
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -21,9 +23,16 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 // Fuentes de contabilidad por empresa (Google Sheets export URLs)
-const ACCOUNTING_SOURCES: Record<string, string> = {
-  'Rovida': 'https://docs.google.com/spreadsheets/d/1uRerjVupuKFKpkATavimTElFbI9DG_b8/export?format=xlsx',
-  'Viroda': 'https://docs.google.com/spreadsheets/d/1WRWB6PvIXnyF3f8lSi5AWCqQXXYlHy1L/export?format=xlsx',
+// Cada empresa puede tener múltiples fuentes (por año)
+const ACCOUNTING_SOURCES: Record<string, string[]> = {
+  'Rovida': [
+    'https://docs.google.com/spreadsheets/d/12ebrL4-F4lIbjJaGCPCTpem9L8Yx9_mw/export?format=xlsx', // 2025
+    'https://docs.google.com/spreadsheets/d/1Ce3XvAkboTl4-_-wLuOmXiMmI_A7pwCV/export?format=xlsx', // 2026
+  ],
+  'Vidaro': [
+    'https://docs.google.com/spreadsheets/d/15WLyWpjzt3S5goW0a4sRgLW6tFkzbe6l/export?format=xlsx', // 2025
+    'https://docs.google.com/spreadsheets/d/13erHSefePWM7kRglnzjbj8r0_oxckZIj/export?format=xlsx', // 2026
+  ],
 };
 
 function classifyEntry(sub: string, titulo: string, debe: number, haber: number) {
@@ -88,56 +97,60 @@ export async function POST(request: NextRequest) {
       }, { status: 404 });
     }
 
-    const sourceUrl = ACCOUNTING_SOURCES[sourceKey];
+    const sourceUrls = ACCOUNTING_SOURCES[sourceKey];
 
-    // Descargar spreadsheet
-    logger.info(`[Refresh Accounting] Descargando ${sourceKey} desde Google Sheets...`);
-    const response = await fetch(sourceUrl, { signal: AbortSignal.timeout(30000) });
-    if (!response.ok) {
-      return NextResponse.json({
-        error: `Error descargando contabilidad: HTTP ${response.status}`,
-      }, { status: 502 });
-    }
-
-    const buffer = Buffer.from(await response.arrayBuffer());
-    const wb = XLSX.read(buffer, { type: 'buffer' });
-    const ws = wb.Sheets[wb.SheetNames[0]];
-    const data = XLSX.utils.sheet_to_json(ws, { header: 1 }) as any[][];
-
-    // Parsear asientos
+    // Descargar todos los spreadsheets de esta empresa
     const asientos: Array<{
       num: number; fecha: Date; sub: string; titulo: string;
       concepto: string; debe: number; haber: number; referencia: string;
+      sourceIdx: number;
     }> = [];
 
-    for (let i = 4; i < data.length; i++) {
-      const row = data[i];
-      if (!row || !row[0] || String(row[0]).trim() === '') continue;
-      const num = Number(row[0]);
-      if (isNaN(num)) continue;
+    for (let idx = 0; idx < sourceUrls.length; idx++) {
+      const sourceUrl = sourceUrls[idx];
+      logger.info(`[Refresh Accounting] Descargando ${sourceKey} fuente ${idx + 1}/${sourceUrls.length}...`);
+      const response = await fetch(sourceUrl, { signal: AbortSignal.timeout(30000) });
+      if (!response.ok) {
+        logger.warn(`[Refresh Accounting] Error descargando fuente ${idx + 1}: HTTP ${response.status}`);
+        continue;
+      }
 
-      let fecha: Date;
-      if (row[2] instanceof Date) fecha = row[2];
-      else if (typeof row[2] === 'number') fecha = new Date((row[2] - 25569) * 86400 * 1000);
-      else fecha = new Date(String(row[2] || '2025-01-01'));
-      if (isNaN(fecha.getTime())) fecha = new Date('2025-01-01');
+      const buffer = Buffer.from(await response.arrayBuffer());
+      const wb = XLSX.read(buffer, { type: 'buffer' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const data = XLSX.utils.sheet_to_json(ws, { header: 1 }) as any[][];
 
-      asientos.push({
-        num, fecha,
-        sub: String(row[5] || ''),
-        titulo: String(row[6] || ''),
-        concepto: String(row[8] || ''),
-        debe: Number(row[10]) || 0,
-        haber: Number(row[11]) || 0,
-        referencia: String(row[3] || ''),
-      });
+      for (let i = 4; i < data.length; i++) {
+        const row = data[i];
+        if (!row || !row[0] || String(row[0]).trim() === '') continue;
+        const num = Number(row[0]);
+        if (isNaN(num)) continue;
+
+        let fecha: Date;
+        if (row[2] instanceof Date) fecha = row[2];
+        else if (typeof row[2] === 'number') fecha = new Date((row[2] - 25569) * 86400 * 1000);
+        else fecha = new Date(String(row[2] || '2025-01-01'));
+        if (isNaN(fecha.getTime())) fecha = new Date('2025-01-01');
+
+        asientos.push({
+          num, fecha,
+          sub: String(row[5] || ''),
+          titulo: String(row[6] || ''),
+          concepto: String(row[8] || ''),
+          debe: Number(row[10]) || 0,
+          haber: Number(row[11]) || 0,
+          referencia: String(row[3] || ''),
+          sourceIdx: idx,
+        });
+      }
     }
 
-    // Agrupar por número de asiento
-    const groups = new Map<number, typeof asientos>();
+    // Agrupar por sourceIdx+número de asiento (evitar colisiones entre periodos)
+    const groups = new Map<string, typeof asientos>();
     for (const a of asientos) {
-      if (!groups.has(a.num)) groups.set(a.num, []);
-      groups.get(a.num)!.push(a);
+      const key = `${a.sourceIdx}-${a.num}`;
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key)!.push(a);
     }
 
     // Eliminar transacciones anteriores y recrear
@@ -146,7 +159,7 @@ export async function POST(request: NextRequest) {
     });
 
     const txns: any[] = [];
-    for (const [num, entries] of groups) {
+    for (const [key, entries] of groups) {
       const first = entries[0];
       const totalDebe = entries.reduce((s, e) => s + e.debe, 0);
       const totalHaber = entries.reduce((s, e) => s + e.haber, 0);
@@ -159,10 +172,10 @@ export async function POST(request: NextRequest) {
         companyId: company.id,
         tipo,
         categoria,
-        concepto: (first.concepto || first.titulo || `Asiento ${num}`).substring(0, 500),
+        concepto: (first.concepto || first.titulo || `Asiento ${first.num}`).substring(0, 500),
         monto: Math.round(monto * 100) / 100,
         fecha: first.fecha,
-        referencia: `AS-${num}${first.referencia ? ' / ' + first.referencia : ''}`,
+        referencia: `${first.sourceIdx}-AS-${first.num}${first.referencia ? ' / ' + first.referencia : ''}`,
         notas: `Subcuenta: ${first.sub} - ${first.titulo}`,
       });
     }

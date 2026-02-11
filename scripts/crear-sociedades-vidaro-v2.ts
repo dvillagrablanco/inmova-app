@@ -21,9 +21,9 @@ async function main() {
       id: 'vidaro-inversiones',
       nombre: 'Vidaro Inversiones S.L.',
       cif: 'B-PENDIENTE',
-      direccion: 'Pendiente de confirmación',
+      direccion: 'Av. Europa, 34, Bl.B, 1ºIz, Madrid',
       telefono: '+34 XXX XXX XXX',
-      email: 'info@vidaro.es',
+      email: 'info@vidaroinversiones.com',
       ciudad: 'Madrid',
       pais: 'España',
       codigoPostal: '28XXX',
@@ -32,7 +32,7 @@ async function main() {
       estadoCliente: 'activo',
       contactoPrincipal: 'Pendiente de asignar',
       emailContacto: 'contacto@vidaro.es',
-      notasAdmin: 'Sociedad holding matriz del grupo Vidaro. Gestiona inversiones en participadas (Rovida y Viroda). Periodo contable 2025: Ene-Oct. Total Debe/Haber: 451M€. 981 asientos contables.',
+      notasAdmin: 'Sociedad holding matriz del grupo Vidaro. Gestiona carteras de inversión (CACEIS, Inversis, Pictet, Banca March, Bankinter) y participaciones en Rovida, Disfasa, Viroda, Facundo, Girasoles, Incofasa, PDV Gesfasa. Periodo 2025: Ene-Dic, 5.829 líneas, 1.262 asientos, €253M Debe/Haber. Periodo 2026: Ene-Feb, 205 líneas, 45 asientos, €135K. Plan de Cuentas: 1.766 subcuentas, 460+ instrumentos financieros. Principales ingresos 2025: beneficios CACEIS €844K, Inversis €776K, Pictet €583K. Facturación intragrupo (ARC): Rovida €16.4K, Disfasa €9.4K, Viroda €4.2K. 3 consejeros (Rosa Elena, Vicente Facundo, David Villagrá) con asignación €124K/año c/u.',
       activo: true,
       parentCompanyId: null
     }
@@ -54,7 +54,7 @@ async function main() {
       id: 'rovida-sl',
       nombre: 'Rovida S.L.',
       cif: 'B-PENDIENTE',
-      direccion: 'Pendiente de confirmación',
+      direccion: 'Av. Europa, 34, Bl.B, 1ºIz, Madrid / C/ Menéndez Pelayo, 15, Palencia',
       telefono: '+34 XXX XXX XXX',
       email: 'info@rovida.es',
       ciudad: 'Madrid',
@@ -65,7 +65,7 @@ async function main() {
       estadoCliente: 'activo',
       contactoPrincipal: 'Pendiente de asignar',
       emailContacto: 'contacto@rovida.es',
-      notasAdmin: 'Sociedad filial de Vidaro Inversiones. Gestión inmobiliaria y actividad comercial. Periodo contable 2025: Ene-Oct. Total Debe/Haber: 70.9M€. 2,198 asientos contables. Incluye propiedades en Benidorm.',
+      notasAdmin: 'Sociedad filial de Vidaro Inversiones. Gestión inmobiliaria patrimonial. Periodo 2025 completo: Ene-Dic, 13.861 líneas, 2.808 asientos, €46.2M Debe/Haber. Periodo 2026: Ene-Feb, 1.363 líneas, 401 asientos, €724K. Plan de Cuentas: 1.571 subcuentas. 17 inmuebles: Espronceda 32 (115 garajes, Madrid), Piamonte 23 (edificio completo, Madrid), Barquillo 30 (3 locales, Madrid), Reina 15 (2 locales, Madrid), Prado 10 (local+sótano, Madrid), H.Tejada 6 (56 garajes, Madrid), Av.Europa 34 (oficinas, Madrid), Cuba 48-52 (3 naves, Palencia), M.Pelayo 17 (21 garajes, Palencia), M.Pelayo 15 (local, Palencia), Constitución 8 (8 módulos, Valladolid), Constitución 5 (4 garajes, Valladolid), Metal 4 (nave, Valladolid), Gemelos 20/II/IV (19 aptos, Benidorm), El Tomillar (casa, Marbella), Grijota (terreno, Palencia), Magaz (garajes, Palencia). 243+ inquilinos. Top ingresos 2025: Piamonte €644K, Espronceda €131K, Barquillo €93K, Reina €77K. 3 nuevos inquilinos 2026: BOCA PRADO S.L. (Prado 10, €12K/mes), TORRENTE GARCÍA, PANERA RUIZ.',
       activo: true,
       parentCompanyId: vidaro.id
     }
@@ -87,7 +87,7 @@ async function main() {
       id: 'viroda-inversiones',
       nombre: 'VIRODA INVERSIONES S.L.U.',
       cif: 'B-PENDIENTE',
-      direccion: 'Pendiente de confirmación',
+      direccion: 'C/ Manuel Silvela, 5, Madrid',
       telefono: '+34 XXX XXX XXX',
       email: 'info@viroda.es',
       ciudad: 'Madrid',
@@ -98,7 +98,7 @@ async function main() {
       estadoCliente: 'activo',
       contactoPrincipal: 'Pendiente de asignar',
       emailContacto: 'contacto@viroda.es',
-      notasAdmin: 'Sociedad unipersonal filial de Vidaro. Especializada en inversiones inmobiliarias. Portfolio: 5 edificios (M.Silvela 5, H.Tejada 6, C.Mora, Reina 15, M.Pelayo). Modelo Room Rental. Renta mensual: 93,394€. Renta anual proyectada: 1.12M€. Total Debe/Haber: 72.5M€. 2,531 asientos contables.',
+      notasAdmin: 'Sociedad unipersonal filial de Vidaro. Especializada en inversiones inmobiliarias residenciales. Portfolio: Manuel Silvela 5 (14 unidades: local + 13 viviendas, Madrid), Reina 15 Residencial (10 viviendas, Madrid), Candelaria Mora 12-14 (6 viviendas, Madrid). Modelo Room Rental + alquiler residencial. Renta mensual total: ~€33.6K (Silvela €33.6K). Nota: contabilidad de Viroda no disponible en archivos actuales; datos de referencia de migrate-vidaro-accounting.ts.',
       activo: true,
       parentCompanyId: vidaro.id
     }
