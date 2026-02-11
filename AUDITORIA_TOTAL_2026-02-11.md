@@ -500,5 +500,32 @@ Dependencias de Storybook 10.x presentes. Verificar que los stories esten actual
 
 ---
 
+---
+
+## CHANGELOG DE FIXES APLICADOS
+
+### 11 Feb 2026 - Ronda 1 (commit audit + fixes criticos)
+- [x] Reporte de auditoria generado (AUDITORIA_TOTAL_2026-02-11.md)
+- [x] Signup: validacion Zod + rate limiting aplicados
+- [x] Upload: validacion MIME real con file-type
+- [x] Impersonate: lazy Prisma + validacion companyId
+- [x] VirtualTourViewer + plantillas-email: sanitizacion XSS con DOMPurify
+- [x] vercel.json: header HSTS agregado
+- [x] next.config.js: documentado ignoreBuildErrors como deuda tecnica
+
+### 11 Feb 2026 - Ronda 2 (hallazgos pendientes)
+- [x] Rate limiting migrado a Redis con fallback a memoria (lib/rate-limiting.ts)
+- [x] 22 rutas API: runtime='nodejs' agregado para evitar Edge Runtime
+- [x] 31 rutas criticas migradas a lazy Prisma loading (auth, stripe, webhooks, users, tenants)
+- [x] Testing unificado: Vitest como framework principal (package.json)
+- [x] 6 archivos lib/: tipos migrados de @prisma/client a @/types/prisma-types
+
+### Pendiente (requiere correccion de errores TS previo)
+- [ ] ignoreBuildErrors: false (necesita fix de errores TypeScript existentes)
+- [ ] ignoreDuringBuilds: false (necesita fix de warnings ESLint)
+- [ ] ~250+ rutas API restantes: migrar a lazy Prisma loading
+- [ ] Dividir schema.prisma en multi-file (15700 lineas)
+
 *Auditoria generada automaticamente el 11 de Febrero de 2026*
+*Actualizada con fixes aplicados*
 *Basada en las reglas definidas en `.cursorrules`*
