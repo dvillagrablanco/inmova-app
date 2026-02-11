@@ -1,75 +1,192 @@
 /**
- * Rate Limiting Middleware
- * Implementa rate limiting global para todas las APIs
+ * Rate Limiting Middleware - Hibrido Redis/Memoria
+ * 
+ * Usa Redis cuando esta disponible (produccion con PM2 cluster)
+ * para compartir limites entre workers. Fallback a Map en memoria
+ * cuando Redis no esta configurado.
+ * 
+ * AUDITORIA 2026-02-11: Migrado de in-memory puro a Redis+fallback
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import logger from '@/lib/logger';
 
-// Configuración de rate limits por endpoint
+// Configuracion de rate limits por endpoint
 interface RateLimitConfig {
   interval: number; // Ventana de tiempo en ms
-  uniqueTokenPerInterval: number; // Máximo de requests permitidos
+  uniqueTokenPerInterval: number; // Maximo de requests permitidos
 }
 
-// Rate limits por tipo de operación - SEGURIDAD BALANCEADA
+// Rate limits por tipo de operacion - SEGURIDAD BALANCEADA
 export const RATE_LIMITS = {
   // Auth endpoints - estricto para prevenir brute force
   auth: {
     interval: 5 * 60 * 1000, // 5 minutos
-    uniqueTokenPerInterval: 10, // ✅ 10 intentos cada 5 minutos (anti brute-force)
+    uniqueTokenPerInterval: 10,
   },
   // Payment endpoints - moderado
   payment: {
     interval: 60 * 1000,
-    uniqueTokenPerInterval: 50, // ✅ 50 requests por minuto
+    uniqueTokenPerInterval: 50,
   },
   // API general - balanceado
   api: {
     interval: 60 * 1000,
-    uniqueTokenPerInterval: 100, // ✅ 100 requests por minuto
+    uniqueTokenPerInterval: 100,
   },
   // Lectura - permisivo pero razonable
   read: {
     interval: 60 * 1000,
-    uniqueTokenPerInterval: 200, // ✅ 200 requests por minuto
+    uniqueTokenPerInterval: 200,
   },
-  // Admin - permisivo para operaciones legítimas
+  // Admin - permisivo para operaciones legitimas
   admin: {
     interval: 60 * 1000,
-    uniqueTokenPerInterval: 500, // ✅ 500 requests por minuto (suficiente para admin)
+    uniqueTokenPerInterval: 500,
   },
 } as const;
 
-// Cache simple para almacenar contadores de rate limit (usando Map nativo)
+// ============================================================
+// BACKEND: Redis (produccion) con fallback a Map (desarrollo)
+// ============================================================
+
+// Fallback in-memory cache
 const tokenCache = new Map<string, { timestamps: number[]; lastCleanup: number }>();
 
-// Limpiar entradas antiguas cada 5 minutos para evitar memory leaks
-setInterval(
-  () => {
-    const now = Date.now();
-    const maxAge = 10 * 60 * 1000; // 10 minutos
-
-    for (const [key, value] of tokenCache.entries()) {
-      if (now - value.lastCleanup > maxAge) {
-        tokenCache.delete(key);
+// Limpiar entradas antiguas cada 5 minutos
+if (typeof setInterval !== 'undefined') {
+  setInterval(
+    () => {
+      const now = Date.now();
+      const maxAge = 10 * 60 * 1000;
+      for (const [key, value] of tokenCache.entries()) {
+        if (now - value.lastCleanup > maxAge) {
+          tokenCache.delete(key);
+        }
       }
-    }
-  },
-  5 * 60 * 1000
-);
+    },
+    5 * 60 * 1000
+  );
+}
 
 /**
- * Obtiene el identificador único del cliente (IP o user ID)
+ * Intenta obtener Redis client (lazy, no falla si no disponible)
+ */
+async function getRedis(): Promise<any | null> {
+  try {
+    const { getRedisClient } = await import('@/lib/redis');
+    const client = getRedisClient();
+    if (client) {
+      await client.ping();
+      return client;
+    }
+  } catch {
+    // Redis no disponible, usar fallback
+  }
+  return null;
+}
+
+/**
+ * Rate limit check via Redis (distribuido, compatible con cluster PM2)
+ */
+async function checkRateLimitRedis(
+  redis: any,
+  identifier: string,
+  config: RateLimitConfig
+): Promise<{ success: boolean; remaining: number; reset: number }> {
+  const key = `ratelimit:${identifier}`;
+  const windowSec = Math.ceil(config.interval / 1000);
+
+  try {
+    // INCR atomico + TTL
+    const current = await redis.incr(key);
+
+    if (current === 1) {
+      // Primera request en esta ventana, setear TTL
+      await redis.expire(key, windowSec);
+    }
+
+    const ttl = await redis.ttl(key);
+
+    if (current > config.uniqueTokenPerInterval) {
+      return {
+        success: false,
+        remaining: 0,
+        reset: ttl > 0 ? ttl : windowSec,
+      };
+    }
+
+    return {
+      success: true,
+      remaining: config.uniqueTokenPerInterval - current,
+      reset: ttl > 0 ? ttl : windowSec,
+    };
+  } catch (error) {
+    logger.warn('[RateLimit] Redis error, fallback a memoria:', error);
+    // Fallback a memoria si Redis falla
+    return checkRateLimitMemory(identifier, config);
+  }
+}
+
+/**
+ * Rate limit check via memoria (fallback)
+ */
+function checkRateLimitMemory(
+  identifier: string,
+  config: RateLimitConfig
+): { success: boolean; remaining: number; reset: number } {
+  const now = Date.now();
+  const record = tokenCache.get(identifier) || { timestamps: [], lastCleanup: now };
+
+  const validTimestamps = record.timestamps.filter(
+    (timestamp) => now - timestamp < config.interval
+  );
+
+  if (validTimestamps.length >= config.uniqueTokenPerInterval) {
+    const oldestTimestamp = Math.min(...validTimestamps);
+    const reset = oldestTimestamp + config.interval;
+    return {
+      success: false,
+      remaining: 0,
+      reset: Math.ceil((reset - now) / 1000),
+    };
+  }
+
+  validTimestamps.push(now);
+  tokenCache.set(identifier, { timestamps: validTimestamps, lastCleanup: now });
+
+  return {
+    success: true,
+    remaining: config.uniqueTokenPerInterval - validTimestamps.length,
+    reset: Math.ceil(config.interval / 1000),
+  };
+}
+
+/**
+ * Check rate limit (auto-selecciona Redis o memoria)
+ */
+export async function checkRateLimit(
+  identifier: string,
+  config: RateLimitConfig
+): Promise<{ success: boolean; remaining: number; reset: number }> {
+  const redis = await getRedis();
+  if (redis) {
+    return checkRateLimitRedis(redis, identifier, config);
+  }
+  return checkRateLimitMemory(identifier, config);
+}
+
+/**
+ * Obtiene el identificador unico del cliente (IP o user ID)
  */
 function getClientIdentifier(request: NextRequest): string {
-  // Priorizar user ID si está autenticado
   const userId = request.headers.get('x-user-id');
   if (userId) return `user:${userId}`;
 
-  // Usar IP como fallback
   const forwardedFor = request.headers.get('x-forwarded-for');
   const realIp = request.headers.get('x-real-ip');
-  const ip = forwardedFor?.split(',')[0] || realIp || 'unknown';
+  const cfIp = request.headers.get('cf-connecting-ip');
+  const ip = cfIp || forwardedFor?.split(',')[0]?.trim() || realIp || 'unknown';
 
   return `ip:${ip}`;
 }
@@ -78,11 +195,10 @@ function getClientIdentifier(request: NextRequest): string {
  * Determina el tipo de rate limit basado en la ruta
  */
 function getRateLimitType(pathname: string, method?: string): keyof typeof RATE_LIMITS {
-  // Admin endpoints - más permisivo
   if (pathname.startsWith('/admin/') || pathname.startsWith('/api/admin/')) {
     return 'admin';
   }
-  if (pathname.includes('/auth') || pathname.includes('/login') || pathname.includes('/register')) {
+  if (pathname.includes('/auth') || pathname.includes('/login') || pathname.includes('/register') || pathname.includes('/signup')) {
     return 'auth';
   }
   if (
@@ -99,48 +215,9 @@ function getRateLimitType(pathname: string, method?: string): keyof typeof RATE_
 }
 
 /**
- * Verifica si el cliente ha excedido el rate limit
- */
-export function checkRateLimit(
-  identifier: string,
-  config: RateLimitConfig
-): { success: boolean; remaining: number; reset: number } {
-  const now = Date.now();
-  const record = tokenCache.get(identifier) || { timestamps: [], lastCleanup: now };
-
-  // Filtrar timestamps que están dentro de la ventana de tiempo
-  const validTimestamps = record.timestamps.filter(
-    (timestamp) => now - timestamp < config.interval
-  );
-
-  // Verificar si excede el límite
-  if (validTimestamps.length >= config.uniqueTokenPerInterval) {
-    const oldestTimestamp = Math.min(...validTimestamps);
-    const reset = oldestTimestamp + config.interval;
-
-    return {
-      success: false,
-      remaining: 0,
-      reset: Math.ceil((reset - now) / 1000), // Segundos hasta reset
-    };
-  }
-
-  // Agregar el nuevo timestamp
-  validTimestamps.push(now);
-  tokenCache.set(identifier, { timestamps: validTimestamps, lastCleanup: now });
-
-  return {
-    success: true,
-    remaining: config.uniqueTokenPerInterval - validTimestamps.length,
-    reset: Math.ceil(config.interval / 1000),
-  };
-}
-
-/**
  * Middleware de rate limiting
  */
 export async function rateLimitMiddleware(request: NextRequest): Promise<NextResponse | null> {
-  // Excluir rutas estáticas y de salud
   const { pathname } = request.nextUrl;
   if (
     pathname.startsWith('/_next') ||
@@ -148,23 +225,21 @@ export async function rateLimitMiddleware(request: NextRequest): Promise<NextRes
     pathname === '/api/health' ||
     pathname.startsWith('/public')
   ) {
-    return null; // No aplicar rate limiting
+    return null;
   }
 
   const identifier = getClientIdentifier(request);
   const limitType = getRateLimitType(pathname, request.method);
   const config = RATE_LIMITS[limitType];
 
-  const result = checkRateLimit(identifier, config);
+  const result = await checkRateLimit(`${limitType}:${identifier}`, config);
 
-  // Agregar headers de rate limit en todas las respuestas
   const headers = new Headers();
   headers.set('X-RateLimit-Limit', config.uniqueTokenPerInterval.toString());
   headers.set('X-RateLimit-Remaining', result.remaining.toString());
   headers.set('X-RateLimit-Reset', result.reset.toString());
 
   if (!result.success) {
-    // Rate limit excedido
     return NextResponse.json(
       {
         error: 'Too many requests',
@@ -178,8 +253,6 @@ export async function rateLimitMiddleware(request: NextRequest): Promise<NextRes
     );
   }
 
-  // Rate limit OK - continuar con la petición
-  // Los headers se agregarán en el response final
   return null;
 }
 
@@ -194,7 +267,7 @@ export async function withRateLimit(
   const identifier = getClientIdentifier(request);
   const config = customConfig || RATE_LIMITS.api;
 
-  const result = checkRateLimit(identifier, config);
+  const result = await checkRateLimit(`api:${identifier}`, config);
 
   if (!result.success) {
     return NextResponse.json(
@@ -214,10 +287,8 @@ export async function withRateLimit(
     );
   }
 
-  // Ejecutar el handler
   const response = await handler();
 
-  // Agregar headers de rate limit
   response.headers.set('X-RateLimit-Limit', config.uniqueTokenPerInterval.toString());
   response.headers.set('X-RateLimit-Remaining', result.remaining.toString());
   response.headers.set('X-RateLimit-Reset', result.reset.toString());
@@ -226,7 +297,7 @@ export async function withRateLimit(
 }
 
 /**
- * Rate limiting específico para autenticación (más restrictivo)
+ * Rate limiting especifico para autenticacion (mas restrictivo)
  */
 export async function withAuthRateLimit(
   request: NextRequest,
@@ -236,7 +307,7 @@ export async function withAuthRateLimit(
 }
 
 /**
- * Rate limiting específico para pagos (restrictivo)
+ * Rate limiting especifico para pagos (restrictivo)
  */
 export async function withPaymentRateLimit(
   request: NextRequest,
@@ -246,21 +317,23 @@ export async function withPaymentRateLimit(
 }
 
 /**
- * Limpiar cache de rate limit (útil para testing)
+ * Limpiar cache de rate limit (util para testing)
  */
 export function clearRateLimitCache(): void {
   tokenCache.clear();
 }
 
 /**
- * Obtener estadísticas de rate limiting
+ * Obtener estadisticas de rate limiting
  */
 export function getRateLimitStats(): {
   cacheSize: number;
   maxSize: number;
+  backend: string;
 } {
   return {
     cacheSize: tokenCache.size,
-    maxSize: 500, // Límite soft, se limpia automáticamente
+    maxSize: 500,
+    backend: process.env.REDIS_URL || process.env.REDIS_HOST ? 'redis+memory-fallback' : 'memory-only',
   };
 }
