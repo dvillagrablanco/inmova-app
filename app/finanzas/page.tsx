@@ -89,6 +89,15 @@ const financeModules: FinanceModule[] = [
     available: true,
   },
   {
+    id: 'importar-banco',
+    title: 'Importar Extracto Bancario',
+    description: 'Sube ficheros Norma 43 de Bankinter u otro banco. Coste: gratis',
+    icon: <CreditCard className="h-6 w-6" />,
+    href: '/banco/importar',
+    badge: 'Gratis',
+    available: true,
+  },
+  {
     id: 'open-banking',
     title: 'Open Banking',
     description: 'Conecta tus cuentas bancarias para sincronizacion automatica',
