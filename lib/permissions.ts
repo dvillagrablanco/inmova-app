@@ -1,4 +1,4 @@
-import type { UserRole } from '@prisma/client';
+import type { UserRole } from '@/types/prisma-types';
 import { getServerSession } from 'next-auth';
 import { authOptions } from './auth-options';
 import { prisma } from './db';

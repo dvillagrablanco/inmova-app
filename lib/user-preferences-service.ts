@@ -8,7 +8,8 @@
 
 import prisma from './db';
 import { getDefaultActiveModules, validateModuleDependencies, MODULES } from './modules-management-system';
-import type { UserRole, BusinessVertical } from '@prisma/client';
+import type { UserRole } from '@/types/prisma-types';
+import type { BusinessVertical } from '@/types/prisma-types';
 
 import logger from '@/lib/logger';
 

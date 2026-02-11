@@ -3,7 +3,8 @@
  * Permite activar/desactivar módulos según experiencia y necesidades
  */
 
-import type { UserRole, BusinessVertical } from '@prisma/client';
+import type { UserRole } from '@/types/prisma-types';
+import type { BusinessVertical } from '@/types/prisma-types';
 
 export interface Module {
   id: string;

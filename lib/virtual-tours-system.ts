@@ -3,7 +3,8 @@
  * Tours interactivos paso a paso adaptados por rol, vertical y experiencia
  */
 
-import type { UserRole, BusinessVertical } from '@prisma/client';
+import type { UserRole } from '@/types/prisma-types';
+import type { BusinessVertical } from '@/types/prisma-types';
 
 export type TourStepType = 'tooltip' | 'modal' | 'spotlight' | 'video' | 'interactive';
 export type TourTrigger = 'auto' | 'manual' | 'ondemand';

@@ -1,4 +1,4 @@
-import type { UserRole } from '@prisma/client';
+import type { UserRole } from '@/types/prisma-types';
 import type { NextRequest } from 'next/server';
 import { prisma } from '@/lib/db';
 

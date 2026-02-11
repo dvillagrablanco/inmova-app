@@ -5,7 +5,7 @@
  * - Nivel de experiencia (principiante, intermedio, avanzado)
  */
 
-import type { UserRole } from '@prisma/client';
+import type { UserRole } from '@/types/prisma-types';
 
 export type ExperienceLevel = 'principiante' | 'intermedio' | 'avanzado';
 
