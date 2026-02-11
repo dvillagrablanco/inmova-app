@@ -8,6 +8,7 @@ import type { Prisma } from '@/types/prisma-types';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const createReunionSchema = z.object({
   buildingId: z.string().min(1),

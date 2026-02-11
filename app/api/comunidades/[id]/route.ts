@@ -6,6 +6,7 @@ import { z } from 'zod';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const updateComunidadSchema = z.object({
   nombreComunidad: z.string().min(1).optional(),

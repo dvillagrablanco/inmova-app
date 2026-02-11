@@ -15,6 +15,7 @@ import logger from '@/lib/logger';
 import type { Prisma } from '@/types/prisma-types';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const updateSchema = z.object({
   tenantId: z.string().min(1),
