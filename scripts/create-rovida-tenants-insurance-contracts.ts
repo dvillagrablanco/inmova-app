@@ -2,9 +2,13 @@
  * Script: Alta de inquilinos, seguros y contratos de Rovida S.L.
  * 
  * Datos extraídos de:
- * - Contabilidad: subcuentas 43x (clientes/inquilinos), 180x (fianzas), 625x (seguros)
+ * - Contabilidad 2025 (Ene-Dic): subcuentas 43x (clientes/inquilinos), 180x (fianzas), 625x (seguros)
+ * - Contabilidad 2026 (Ene-Feb): 3 nuevos inquilinos (BOCA PRADO, TORRENTE GARCÍA, PANERA RUIZ)
  * - Contratos Google Drive: estructura de carpetas
  * - Seguros Google Drive: carpeta pólizas
+ * 
+ * Archivos fuente: data/rovida/diario_general_2025.xlsx + data/rovida/diario_general_2026.xlsx
+ * Última actualización: Feb 2026
  * 
  * Uso: npx tsx scripts/create-rovida-tenants-insurance-contracts.ts
  */
@@ -135,6 +139,13 @@ const TENANTS_DATA: Array<{
   { nombre: 'Daniel Alejandro Obando Moreno', tipo: 'persona', subcuenta: '4300002122', grupo: 'espronceda' },
   { nombre: 'María de los Llanos Martínez Trenado', tipo: 'persona', subcuenta: '4300002123', grupo: 'espronceda' },
   { nombre: 'JR CONSULTING BUSINESS Y ADMINISTRATION SL', tipo: 'empresa', subcuenta: '4300002173', grupo: 'espronceda' },
+  // ── NUEVOS INQUILINOS 2026 ──
+  { nombre: 'BOCA PRADO S. L.', tipo: 'empresa', subcuenta: '4300000075', grupo: 'locales_oficinas' },
+  { nombre: 'MARÍA GABRIELA TORRENTE GARCÍA DE LA MATA', tipo: 'persona', subcuenta: '4300000078', grupo: 'espronceda' },
+  { nombre: 'ENRIQUE PANERA RUIZ DE AGUIRRE', tipo: 'persona', subcuenta: '4300000079', grupo: 'espronceda' },
+  { nombre: 'VANESSA IZQUIERDO GARCÍA', tipo: 'persona', subcuenta: '4300000074', grupo: 'espronceda' },
+  { nombre: 'VANESSA ELOLA COTO', tipo: 'persona', subcuenta: '4300000076', grupo: 'espronceda' },
+  { nombre: 'LAZARD ASESORES FINANCIEROS', tipo: 'empresa', subcuenta: '4300000073', grupo: 'hernandez_tejada' },
   // ── GARAJES PALENCIA / VALLADOLID ──
   { nombre: 'Roberto Provedo Pisano', tipo: 'persona', subcuenta: '4300003000', grupo: 'palencia_valladolid' },
   { nombre: 'Mercedes Carmen Bolívar Prieto', tipo: 'persona', subcuenta: '4300003001', grupo: 'palencia_valladolid' },

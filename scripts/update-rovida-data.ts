@@ -7,6 +7,10 @@
  * 3. Actualizar rentas mensuales reales según contabilidad
  * 4. Crear contratos con rentas reales
  * 5. Añadir inquilinos faltantes del análisis contable
+ * 6. Nuevos inquilinos 2026: BOCA PRADO S.L., TORRENTE GARCÍA, PANERA RUIZ
+ * 7. Actualizar rentas con datos 2025 completo + 2026 parcial (Ene-Feb)
+ * 
+ * Datos actualizados: Feb 2026 (Diarios Generales 2025 completo + 2026 Ene-Feb)
  * 
  * Uso: npx tsx scripts/update-rovida-data.ts
  */
@@ -17,12 +21,15 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 const prisma = new PrismaClient();
 
-// Mapeos inquilino → edificio → unidad extraídos de la contabilidad
+// Mapeos inquilino → edificio → unidad extraídos de la contabilidad 2025+2026
 const TENANT_UNIT_MAPPINGS = [
-  // Edificio Piamonte 23
+  // ── Edificio Piamonte 23 (Madrid) ──
+  // Renta anual 2025: €644.443 / Renta mensual: ~€57.827 (dato contable confirmado 2026)
   { nombre: 'Impulsa Hub Sur, S.L.', edificio: 'Edificio Piamonte 23', unidad: 'Edificio completo', rentaMensual: 57827, tipo: 'comercial' },
   
-  // Garajes Espronceda 32 (muestra de plazas identificadas)
+  // ── Garajes Espronceda 32 (Madrid) ──
+  // Ingreso anual 2025: €130.629 (subcuenta 7520004005)
+  // Ingreso Ene-Feb 2026: €22.605
   { nombre: 'IDEEMATEC SPAIN S.L', edificio: 'Garajes Espronceda 32', unidad: 'Plaza 63', rentaMensual: 200, tipo: 'comercial' },
   { nombre: 'Iciar Nieto San Juan', edificio: 'Garajes Espronceda 32', unidad: 'Plaza 22', rentaMensual: 200, tipo: 'comercial' },
   { nombre: 'Maria Eugenia Pascual Guardia', edificio: 'Garajes Espronceda 32', unidad: 'Plaza 76', rentaMensual: 153, tipo: 'comercial' },
@@ -44,26 +51,54 @@ const TENANT_UNIT_MAPPINGS = [
   { nombre: 'Jean Lahoud Rodriguez', edificio: 'Garajes Espronceda 32', unidad: 'Plaza 11', rentaMensual: 300, tipo: 'comercial' },
   { nombre: 'Natalia Zumarraga Eguidazu', edificio: 'Garajes Espronceda 32', unidad: 'Plaza 72', rentaMensual: 150, tipo: 'comercial' },
   { nombre: 'Emilio Alberto Linares-Rivas Balius', edificio: 'Garajes Espronceda 32', unidad: 'Plaza 66', rentaMensual: 159, tipo: 'comercial' },
+  // Nuevo inquilino 2026 - garaje Espronceda
+  { nombre: 'VANESSA IZQUIERDO GARCÍA', edificio: 'Garajes Espronceda 32', unidad: 'Plaza 74', rentaMensual: 140, tipo: 'comercial' },
   
-  // Inmueble Constitución 8 - Módulos
+  // ── Inmueble Constitución 8 (Valladolid) - Módulos/Locales ──
+  // Ingreso anual 2025: €50.290 (subcuenta 7520004010)
+  // Ingreso Ene-Feb 2026: €8.543
   { nombre: 'Red Hospitalaria Recoletas S.L', edificio: 'Inmueble Constitución 8', unidad: 'Módulo 1', rentaMensual: 612, tipo: 'comercial' },
   { nombre: 'Maria Luisa Garcia-Nieto Alonso', edificio: 'Inmueble Constitución 8', unidad: 'Módulo 2-3', rentaMensual: 875, tipo: 'comercial' },
   { nombre: 'Proximia Havas S.L.U', edificio: 'Inmueble Constitución 8', unidad: 'Módulo 7', rentaMensual: 788, tipo: 'comercial' },
   { nombre: 'Ticmoveo SL', edificio: 'Inmueble Constitución 8', unidad: 'Módulo 4', rentaMensual: 411, tipo: 'comercial' },
   
-  // Locales Barquillo 30
+  // ── Locales Barquillo 30 (Madrid) ──
+  // Ingreso anual 2025: €92.592 (subcuenta 7520013001)
+  // Ingreso Ene-Feb 2026: €19.685
   { nombre: 'PROJECTS BC 2016 SL', edificio: 'Locales Barquillo 30', unidad: 'Local 2', rentaMensual: 8942, tipo: 'comercial' },
   { nombre: 'NOMMAD SHOWROOM SL', edificio: 'Locales Barquillo 30', unidad: 'Local 1', rentaMensual: 7490, tipo: 'comercial' },
   
-  // Oficinas Av Europa 34
+  // ── Locales Reina 15 (Madrid) ──
+  // Ingreso anual 2025: Local 13182 = €51.413 + Local 13184 = €25.746 (subcuentas 7520014001/02)
+  // Ingreso Ene-Feb 2026: €8.482 + €4.247
+  { nombre: 'The Stage Ventures S.L', edificio: 'Locales Reina 15', unidad: 'Local 1 (Grande)', rentaMensual: 4247, tipo: 'comercial' },
+  { nombre: 'DOMUS CAPITAL SL', edificio: 'Locales Reina 15', unidad: 'Local 2 (Pequeño)', rentaMensual: 2178, tipo: 'comercial' },
+  
+  // ── Oficinas Av Europa 34 (Madrid) ──
+  // Ingreso anual 2025: Netservices=€36.002 + Disfasa=€31.025 + Vidaro=€10.697 (subcuentas 7520004000/01/03)
+  // Ingreso Ene-Feb 2026: €6.061 + €4.759 + €1.445
   { nombre: 'Disfasa, S.A.', edificio: 'Oficinas Av Europa 34', unidad: 'Bl.B 1ºIz', rentaMensual: 2664, tipo: 'comercial' },
   { nombre: 'Netservices Travel Assitance SLNE', edificio: 'Oficinas Av Europa 34', unidad: 'Bl.B 1ºIz', rentaMensual: 3557, tipo: 'comercial' },
   
-  // Naves Cuba
+  // ── Naves Cuba 48-50-52 (Palencia) ──
+  // Ingreso anual 2025: €36.129 (subcuenta 7520004006)
+  // Ingreso Ene-Feb 2026: €16.000
   { nombre: 'HIPER CH DISTRIBUCION SL', edificio: 'Naves Avda Cuba 48-50-52', unidad: 'Nave 48', rentaMensual: 7338, tipo: 'comercial' },
   
-  // Local Menéndez Pelayo 15
+  // ── Local Menéndez Pelayo 15 (Palencia) ──
+  // Ingreso anual 2025: €10.842 (subcuenta 7520004014)
+  // Ingreso Ene-Feb 2026: €2.387
   { nombre: 'Vidaro Inversiones S.L.', edificio: 'Local Menéndez Pelayo 15', unidad: 'Local y Sótano', rentaMensual: 1090, tipo: 'comercial' },
+  
+  // ── NUEVO 2026: Bajo y Sótano Prado 10 (Madrid) ──
+  // Ingreso 2025: €3.097 (subcuenta 7520017000) - solo 1 factura parcial
+  // Ingreso Ene-Feb 2026: €24.000 - inquilino nuevo BOCA PRADO S.L.
+  { nombre: 'BOCA PRADO S. L.', edificio: 'Locales Barquillo 30', unidad: 'Local 3', rentaMensual: 12000, tipo: 'comercial' },
+  
+  // ── Garajes Hernández de Tejada 6 (Madrid) ──
+  // Ingreso anual 2025: €2.410 (subcuenta 7520016000)
+  // Ingreso Ene-Feb 2026: €3.165
+  { nombre: 'LAZARD ASESORES FINANCIEROS', edificio: 'Garajes Hernández de Tejada 6', unidad: 'Plaza 01', rentaMensual: 290, tipo: 'comercial' },
 ];
 
 async function main() {
@@ -217,12 +252,22 @@ async function main() {
   const occupiedUnits = await prisma.unit.count({ where: { building: { companyId: rovida.id }, estado: 'ocupada' } });
 
   console.log('\n====================================================================');
-  console.log('  ROVIDA S.L. - DATOS ACTUALIZADOS');
+  console.log('  ROVIDA S.L. - DATOS ACTUALIZADOS (Feb 2026)');
   console.log('====================================================================');
   console.log(`  Edificios: ${finalBuildings}`);
   console.log(`  Unidades: ${finalUnits} (${occupiedUnits} ocupadas)`);
   console.log(`  Inquilinos: ${finalTenants}`);
   console.log(`  Contratos: ${finalContracts}`);
+  console.log('');
+  console.log('  Fuentes de datos:');
+  console.log('    - Diario General 2025 (Ene-Dic): 13.861 líneas, 2.808 asientos');
+  console.log('    - Diario General 2026 (Ene-Feb): 1.363 líneas, 401 asientos');
+  console.log('    - Total Debe/Haber 2025: €46.2M');
+  console.log('    - Total Debe/Haber 2026: €724K');
+  console.log('  Novedades 2026:');
+  console.log('    - Nuevo inquilino: BOCA PRADO S.L. (Prado 10, Madrid)');
+  console.log('    - Nuevo inquilino: MARÍA GABRIELA TORRENTE GARCÍA DE LA MATA');
+  console.log('    - Nuevo inquilino: ENRIQUE PANERA RUIZ DE AGUIRRE');
   console.log('====================================================================');
 
   await prisma.$disconnect();
