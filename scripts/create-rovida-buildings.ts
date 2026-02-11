@@ -164,29 +164,33 @@ const BUILDINGS: BuildingDef[] = [
     garaje: true,
     etiquetas: ['garajes', 'palencia', 'menendez-pelayo'],
     units: [
-      // Plazas sótano -1: 13,16,18,19,20,26,27,28,29,30,31,32,33,34,35,36,38,84(118),85(119)
-      { numero: 'Plaza 13', tipo: 'garaje', superficie: 12, rentaMensual: 60, planta: -1 },
-      { numero: 'Plaza 16', tipo: 'garaje', superficie: 12, rentaMensual: 60, planta: -1 },
-      { numero: 'Plaza 18', tipo: 'garaje', superficie: 12, rentaMensual: 60, planta: -1 },
-      { numero: 'Plaza 19', tipo: 'garaje', superficie: 12, rentaMensual: 60, planta: -1 },
-      { numero: 'Plaza 20', tipo: 'garaje', superficie: 12, rentaMensual: 60, planta: -1 },
-      { numero: 'Plaza 26', tipo: 'garaje', superficie: 12, rentaMensual: 60, planta: -1 },
-      { numero: 'Plaza 27', tipo: 'garaje', superficie: 12, rentaMensual: 60, planta: -1 },
-      { numero: 'Plaza 28', tipo: 'garaje', superficie: 12, rentaMensual: 60, planta: -1 },
-      { numero: 'Plaza 29', tipo: 'garaje', superficie: 12, rentaMensual: 60, planta: -1 },
-      { numero: 'Plaza 30', tipo: 'garaje', superficie: 12, rentaMensual: 60, planta: -1 },
-      { numero: 'Plaza 31', tipo: 'garaje', superficie: 12, rentaMensual: 60, planta: -1 },
-      { numero: 'Plaza 32', tipo: 'garaje', superficie: 12, rentaMensual: 60, planta: -1 },
-      { numero: 'Plaza 33', tipo: 'garaje', superficie: 12, rentaMensual: 60, planta: -1 },
-      { numero: 'Plaza 34', tipo: 'garaje', superficie: 12, rentaMensual: 60, planta: -1 },
-      { numero: 'Plaza 35', tipo: 'garaje', superficie: 12, rentaMensual: 60, planta: -1 },
-      { numero: 'Plaza 36', tipo: 'garaje', superficie: 12, rentaMensual: 60, planta: -1 },
-      { numero: 'Plaza 38', tipo: 'garaje', superficie: 12, rentaMensual: 60, planta: -1 },
-      { numero: 'Plaza 84 (118)', tipo: 'garaje', superficie: 12, rentaMensual: 60, planta: -1 },
-      { numero: 'Plaza 85 (119)', tipo: 'garaje', superficie: 12, rentaMensual: 60, planta: -1 },
+      // Rentas reales de contabilidad 2025 (subcuentas 7520009001-021)
+      // Sót-1: plazas 18,20,26,27,28,31,38,85(119) = €545/año = €45/mes
+      // Sót-1: plazas 34,36 = €496/año = €41/mes
+      // Sót-1: plaza 31 = €595/año = €50/mes
+      // Sót-2: plazas 76,81 = €496/año = €41/mes
+      { numero: 'Plaza 13', tipo: 'garaje', superficie: 12, rentaMensual: 45, planta: -1 },
+      { numero: 'Plaza 16', tipo: 'garaje', superficie: 12, rentaMensual: 45, planta: -1 },
+      { numero: 'Plaza 18', tipo: 'garaje', superficie: 12, rentaMensual: 45, planta: -1 },  // €545/año
+      { numero: 'Plaza 19', tipo: 'garaje', superficie: 12, rentaMensual: 45, planta: -1 },
+      { numero: 'Plaza 20', tipo: 'garaje', superficie: 12, rentaMensual: 45, planta: -1 },  // €545/año
+      { numero: 'Plaza 26', tipo: 'garaje', superficie: 12, rentaMensual: 45, planta: -1 },  // €545/año
+      { numero: 'Plaza 27', tipo: 'garaje', superficie: 12, rentaMensual: 45, planta: -1 },  // €545/año
+      { numero: 'Plaza 28', tipo: 'garaje', superficie: 12, rentaMensual: 45, planta: -1 },  // €545/año
+      { numero: 'Plaza 29', tipo: 'garaje', superficie: 12, rentaMensual: 45, planta: -1 },
+      { numero: 'Plaza 30', tipo: 'garaje', superficie: 12, rentaMensual: 45, planta: -1 },
+      { numero: 'Plaza 31', tipo: 'garaje', superficie: 12, rentaMensual: 50, planta: -1 },  // €595/año
+      { numero: 'Plaza 32', tipo: 'garaje', superficie: 12, rentaMensual: 45, planta: -1 },
+      { numero: 'Plaza 33', tipo: 'garaje', superficie: 12, rentaMensual: 45, planta: -1 },
+      { numero: 'Plaza 34', tipo: 'garaje', superficie: 12, rentaMensual: 41, planta: -1 },  // €496/año
+      { numero: 'Plaza 35', tipo: 'garaje', superficie: 12, rentaMensual: 45, planta: -1 },
+      { numero: 'Plaza 36', tipo: 'garaje', superficie: 12, rentaMensual: 41, planta: -1 },  // €496/año
+      { numero: 'Plaza 38', tipo: 'garaje', superficie: 12, rentaMensual: 45, planta: -1 },  // €545/año
+      { numero: 'Plaza 84 (118)', tipo: 'garaje', superficie: 12, rentaMensual: 45, planta: -1 },
+      { numero: 'Plaza 85 (119)', tipo: 'garaje', superficie: 12, rentaMensual: 45, planta: -1 }, // €545/año
       // Plazas sótano -2: 76, 81
-      { numero: 'Plaza 76', tipo: 'garaje', superficie: 12, rentaMensual: 60, planta: -2 },
-      { numero: 'Plaza 81', tipo: 'garaje', superficie: 12, rentaMensual: 60, planta: -2 },
+      { numero: 'Plaza 76', tipo: 'garaje', superficie: 12, rentaMensual: 41, planta: -2 },  // €496/año
+      { numero: 'Plaza 81', tipo: 'garaje', superficie: 12, rentaMensual: 41, planta: -2 },  // €496/año
     ],
   },
   {
@@ -266,17 +270,18 @@ const BUILDINGS: BuildingDef[] = [
     ascensor: true,
     garaje: false,
     etiquetas: ['apartamentos', 'benidorm', 'gemelos-20'],
+    // Rentas reales de contabilidad 2025 (subcuentas 7520003001-010): €10.700/año c/u = €892/mes
     units: [
-      { numero: 'Pl.01 Lt.C', tipo: 'vivienda', superficie: 50, rentaMensual: 700, planta: 1 },
-      { numero: 'Pl.02 Lt.C', tipo: 'vivienda', superficie: 50, rentaMensual: 700, planta: 2 },
-      { numero: 'Pl.03 Lt.C', tipo: 'vivienda', superficie: 50, rentaMensual: 700, planta: 3 },
-      { numero: 'Pl.03 Lt.D', tipo: 'vivienda', superficie: 50, rentaMensual: 700, planta: 3 },
-      { numero: 'Pl.16 Lt.D', tipo: 'vivienda', superficie: 50, rentaMensual: 750, planta: 16 },
-      { numero: 'Pl.17 Lt.D', tipo: 'vivienda', superficie: 50, rentaMensual: 750, planta: 17 },
-      { numero: 'Pl.19 Lt.C', tipo: 'vivienda', superficie: 50, rentaMensual: 750, planta: 19 },
-      { numero: 'Pl.20 Lt.D', tipo: 'vivienda', superficie: 50, rentaMensual: 750, planta: 20 },
-      { numero: 'Pl.24 Lt.D', tipo: 'vivienda', superficie: 50, rentaMensual: 800, planta: 24 },
-      { numero: 'Pl.25 Lt.D', tipo: 'vivienda', superficie: 50, rentaMensual: 800, planta: 25 },
+      { numero: 'Pl.01 Lt.C', tipo: 'vivienda', superficie: 50, rentaMensual: 892, planta: 1 },  // €10.700/año
+      { numero: 'Pl.02 Lt.C', tipo: 'vivienda', superficie: 50, rentaMensual: 892, planta: 2 },  // €10.700/año
+      { numero: 'Pl.03 Lt.C', tipo: 'vivienda', superficie: 50, rentaMensual: 892, planta: 3 },  // €10.700/año
+      { numero: 'Pl.03 Lt.D', tipo: 'vivienda', superficie: 50, rentaMensual: 892, planta: 3 },  // €10.700/año
+      { numero: 'Pl.16 Lt.D', tipo: 'vivienda', superficie: 50, rentaMensual: 892, planta: 16 }, // €10.700/año
+      { numero: 'Pl.17 Lt.D', tipo: 'vivienda', superficie: 50, rentaMensual: 892, planta: 17 }, // €10.700/año
+      { numero: 'Pl.19 Lt.C', tipo: 'vivienda', superficie: 50, rentaMensual: 905, planta: 19 }, // €10.859/año
+      { numero: 'Pl.20 Lt.D', tipo: 'vivienda', superficie: 50, rentaMensual: 892, planta: 20 }, // €10.700/año
+      { numero: 'Pl.24 Lt.D', tipo: 'vivienda', superficie: 50, rentaMensual: 892, planta: 24 }, // €10.700/año
+      { numero: 'Pl.25 Lt.D', tipo: 'vivienda', superficie: 50, rentaMensual: 892, planta: 25 }, // €10.700/año
     ],
   },
   {
@@ -288,14 +293,15 @@ const BUILDINGS: BuildingDef[] = [
     garaje: true,
     etiquetas: ['apartamentos', 'benidorm', 'gemelos-ii'],
     units: [
-      { numero: 'Pl.1 Lt.D', tipo: 'vivienda', superficie: 50, rentaMensual: 700, planta: 1 },
-      { numero: 'Pl.1 Lt.E', tipo: 'vivienda', superficie: 50, rentaMensual: 700, planta: 1 },
-      { numero: 'Pl.3 Lt.B', tipo: 'vivienda', superficie: 50, rentaMensual: 700, planta: 3 },
-      { numero: 'Pl.3 Lt.E', tipo: 'vivienda', superficie: 50, rentaMensual: 700, planta: 3 },
-      { numero: 'Pl.20 Lt.B', tipo: 'vivienda', superficie: 50, rentaMensual: 800, planta: 20 },
-      { numero: 'Pl.20 Lt.C', tipo: 'vivienda', superficie: 50, rentaMensual: 800, planta: 20 },
-      { numero: 'Garaje Pl.-1 Nº10', tipo: 'garaje', superficie: 12, rentaMensual: 80, planta: -1 },
-      { numero: 'Garaje Pl.-1 Nº11', tipo: 'garaje', superficie: 12, rentaMensual: 80, planta: -1 },
+      // Subcuentas 7520003011-019: ~€833-834/mes c/u. Garajes: €29/mes
+      { numero: 'Pl.1 Lt.D', tipo: 'vivienda', superficie: 50, rentaMensual: 834, planta: 1 },  // €10.012/año
+      { numero: 'Pl.1 Lt.E', tipo: 'vivienda', superficie: 50, rentaMensual: 833, planta: 1 },  // €10.000/año
+      { numero: 'Pl.3 Lt.B', tipo: 'vivienda', superficie: 50, rentaMensual: 833, planta: 3 },  // €10.000/año
+      { numero: 'Pl.3 Lt.E', tipo: 'vivienda', superficie: 50, rentaMensual: 833, planta: 3 },  // €10.000/año
+      { numero: 'Pl.20 Lt.B', tipo: 'vivienda', superficie: 50, rentaMensual: 833, planta: 20 }, // €10.000/año
+      { numero: 'Pl.20 Lt.C', tipo: 'vivienda', superficie: 50, rentaMensual: 833, planta: 20 }, // €10.000/año
+      { numero: 'Garaje Pl.-1 Nº10', tipo: 'garaje', superficie: 12, rentaMensual: 29, planta: -1 }, // €350/año
+      { numero: 'Garaje Pl.-1 Nº11', tipo: 'garaje', superficie: 12, rentaMensual: 29, planta: -1 }, // €350/año
     ],
   },
   {
@@ -307,7 +313,7 @@ const BUILDINGS: BuildingDef[] = [
     garaje: false,
     etiquetas: ['apartamentos', 'benidorm', 'gemelos-iv'],
     units: [
-      { numero: 'Pl.17 Lt.C', tipo: 'vivienda', superficie: 50, rentaMensual: 750, planta: 17 },
+      { numero: 'Pl.17 Lt.C', tipo: 'vivienda', superficie: 50, rentaMensual: 892, planta: 17 }, // €10.700/año
     ],
   },
 

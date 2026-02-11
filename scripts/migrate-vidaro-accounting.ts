@@ -136,80 +136,119 @@ async function main() {
     // ================================================================================
     console.log('\n🏢 Paso 3: Creando edificios de VIRODA...');
     
-    // Manuel Silvela 5
+    // Manuel Silvela 5 - 15 unidades (local + bajo + 13 viviendas). Ingreso anual 2025: €421K
     const silvela = await prisma.building.upsert({
       where: { id: 'silvela-5' },
-      update: {},
+      update: { numeroUnidades: 15 },
       create: {
         id: 'silvela-5',
         nombre: 'Manuel Silvela 5',
-        direccion: 'Calle Manuel Silvela 5, Madrid',
-        tipo: 'residencial',
+        direccion: 'C/ Manuel Silvela, 5, Madrid',
+        tipo: 'mixto',
         anoConstructor: 1970,
+        numeroUnidades: 15,
+        companyId: viroda.id,
+        ascensor: true,
+        garaje: false
+      }
+    });
+    console.log(`  ✓ Manuel Silvela 5 - 15 unidades, ingreso €421K/año (ID: ${silvela.id})`);
+
+    // Reina 15 (Viroda) - 15 unidades residenciales (1ºA-D, 2ºA-D, 3ºA-D, 4ºA-C). Ingreso 2025: €300K
+    const reinaViroda = await prisma.building.upsert({
+      where: { id: 'reina-15-viroda' },
+      update: { numeroUnidades: 15 },
+      create: {
+        id: 'reina-15-viroda',
+        nombre: 'Reina 15 - Residencial',
+        direccion: 'C/ Reina, 15, Madrid',
+        tipo: 'residencial',
+        anoConstructor: 1975,
+        numeroUnidades: 15,
+        companyId: viroda.id,
+        ascensor: true,
+        garaje: false
+      }
+    });
+    console.log(`  ✓ Reina 15 - 15 viviendas, ingreso €300K/año (ID: ${reinaViroda.id})`);
+
+    // Candelaria Mora 12-14 - 14 unidades (1ºA-E, 2ºA-C, 3ºA-C, 4ºA-C, incl. 2 duplex). Ingreso 2025: €150K
+    const candelaria = await prisma.building.upsert({
+      where: { id: 'candelaria-12-14' },
+      update: { numeroUnidades: 14 },
+      create: {
+        id: 'candelaria-12-14',
+        nombre: 'Candelaria Mora 12-14',
+        direccion: 'C/ Candelaria Mora, 12-14, Madrid',
+        tipo: 'residencial',
+        anoConstructor: 1985,
         numeroUnidades: 14,
         companyId: viroda.id,
         ascensor: true,
         garaje: false
       }
     });
-    console.log(`  ✓ Manuel Silvela 5 (ID: ${silvela.id})`);
+    console.log(`  ✓ Candelaria Mora 12-14 - 14 viviendas (ID: ${candelaria.id})`);
 
-    // Reina 15 (Viroda)
-    const reinaViroda = await prisma.building.upsert({
-      where: { id: 'reina-15-viroda' },
+    // Hernández de Tejada 6 - 12 viviendas (1ºA-C, 2ºA-C, 3ºA-C, 4ºA-C) + garajes a Rovida. Ingreso 2025: €17K+
+    const tejadaViroda = await prisma.building.upsert({
+      where: { id: 'tejada-6-viroda' },
       update: {},
       create: {
-        id: 'reina-15-viroda',
-        nombre: 'Reina 15 - Residencial',
-        direccion: 'Calle Reina 15, Madrid',
+        id: 'tejada-6-viroda',
+        nombre: 'Hernández de Tejada 6',
+        direccion: 'C/ Hernández de Tejada, 6, Madrid',
         tipo: 'residencial',
-        anoConstructor: 1975,
-        numeroUnidades: 10,
+        anoConstructor: 1980,
+        numeroUnidades: 12,
         companyId: viroda.id,
         ascensor: true,
-        garaje: false
+        garaje: true
       }
     });
-    console.log(`  ✓ Reina 15 - Residencial (ID: ${reinaViroda.id})`);
+    console.log(`  ✓ Hernández de Tejada 6 - 12 viviendas + garajes (ID: ${tejadaViroda.id})`);
 
-    // Candelaria Mora 12-14
-    const candelaria = await prisma.building.upsert({
-      where: { id: 'candelaria-12-14' },
+    // Menéndez Pelayo 15 - 2 viviendas (4ºDcha, 5ºÁtico). Ingreso 2025: €18K
+    const pelayoViroda = await prisma.building.upsert({
+      where: { id: 'pelayo-15-viroda' },
       update: {},
       create: {
-        id: 'candelaria-12-14',
-        nombre: 'Candelaria Mora 12-14',
-        direccion: 'Calle Candelaria Mora 12-14, Madrid',
+        id: 'pelayo-15-viroda',
+        nombre: 'Menéndez Pelayo 15 - Viviendas',
+        direccion: 'C/ Menéndez Pelayo, 15, Palencia',
         tipo: 'residencial',
         anoConstructor: 1985,
-        numeroUnidades: 6,
+        numeroUnidades: 2,
         companyId: viroda.id,
         ascensor: true,
         garaje: false
       }
     });
-    console.log(`  ✓ Candelaria Mora 12-14 (ID: ${candelaria.id})\n`);
+    console.log(`  ✓ Menéndez Pelayo 15 - 2 viviendas Palencia (ID: ${pelayoViroda.id})\n`);
 
     // ================================================================================
     // 4. CREAR UNIDADES - MANUEL SILVELA 5
     // ================================================================================
     console.log('🏠 Paso 4: Creando unidades en Manuel Silvela 5...');
     
+    // Rentas mensuales calculadas desde contabilidad 2025 (ingreso anual / 12)
+    // Subcuentas 7520000001-7520000015
     const silvelaUnits = [
-      { id: 'silvela-local', numero: 'Local', planta: 0, rentaMensual: 5412.99, superficie: 150, tipo: 'local' as const, habitaciones: 0, banos: 1 },
-      { id: 'silvela-1a', numero: '1ºA', planta: 1, rentaMensual: 2000, superficie: 80, tipo: 'vivienda' as const, habitaciones: 2, banos: 1 },
-      { id: 'silvela-1b', numero: '1ºB', planta: 1, rentaMensual: 1371, superficie: 70, tipo: 'vivienda' as const, habitaciones: 2, banos: 1 },
-      { id: 'silvela-2a', numero: '2ºA', planta: 2, rentaMensual: 2133, superficie: 85, tipo: 'vivienda' as const, habitaciones: 3, banos: 1 },
-      { id: 'silvela-2b', numero: '2ºB', planta: 2, rentaMensual: 1707, superficie: 75, tipo: 'vivienda' as const, habitaciones: 2, banos: 1 },
-      { id: 'silvela-3a', numero: '3ºA', planta: 3, rentaMensual: 1950, superficie: 80, tipo: 'vivienda' as const, habitaciones: 2, banos: 1 },
-      { id: 'silvela-3b', numero: '3ºB', planta: 3, rentaMensual: 1996, superficie: 80, tipo: 'vivienda' as const, habitaciones: 2, banos: 1 },
-      { id: 'silvela-4a', numero: '4ºA', planta: 4, rentaMensual: 3468, superficie: 95, tipo: 'vivienda' as const, habitaciones: 3, banos: 2 },
-      { id: 'silvela-4b', numero: '4ºB', planta: 4, rentaMensual: 2075, superficie: 80, tipo: 'vivienda' as const, habitaciones: 2, banos: 1 },
-      { id: 'silvela-5a', numero: '5ºA', planta: 5, rentaMensual: 3639, superficie: 100, tipo: 'vivienda' as const, habitaciones: 3, banos: 2 },
-      { id: 'silvela-5b', numero: '5ºB', planta: 5, rentaMensual: 1689, superficie: 75, tipo: 'vivienda' as const, habitaciones: 2, banos: 1 },
-      { id: 'silvela-6a', numero: '6ºA', planta: 6, rentaMensual: 1791, superficie: 80, tipo: 'vivienda' as const, habitaciones: 2, banos: 1 },
-      { id: 'silvela-6b', numero: '6ºB', planta: 6, rentaMensual: 1444, superficie: 70, tipo: 'vivienda' as const, habitaciones: 2, banos: 1 },
-      { id: 'silvela-6c', numero: '6ºC', planta: 6, rentaMensual: 2948, superficie: 90, tipo: 'vivienda' as const, habitaciones: 3, banos: 1 }
+      { id: 'silvela-local', numero: 'Local', planta: 0, rentaMensual: 5451, superficie: 150, tipo: 'local' as const, habitaciones: 0, banos: 1 }, // €65.409/año
+      { id: 'silvela-bajo', numero: 'Bajo', planta: 0, rentaMensual: 909, superficie: 60, tipo: 'local' as const, habitaciones: 0, banos: 0 }, // €10.902/año
+      { id: 'silvela-1a', numero: '1ºA', planta: 1, rentaMensual: 2310, superficie: 80, tipo: 'vivienda' as const, habitaciones: 2, banos: 1 }, // €27.716/año
+      { id: 'silvela-1b', numero: '1ºB', planta: 1, rentaMensual: 1371, superficie: 70, tipo: 'vivienda' as const, habitaciones: 2, banos: 1 }, // €16.451/año
+      { id: 'silvela-2a', numero: '2ºA', planta: 2, rentaMensual: 2138, superficie: 85, tipo: 'vivienda' as const, habitaciones: 3, banos: 1 }, // €25.657/año
+      { id: 'silvela-2b', numero: '2ºB', planta: 2, rentaMensual: 1707, superficie: 75, tipo: 'vivienda' as const, habitaciones: 2, banos: 1 }, // €20.489/año
+      { id: 'silvela-3a', numero: '3ºA', planta: 3, rentaMensual: 2113, superficie: 80, tipo: 'vivienda' as const, habitaciones: 2, banos: 1 }, // €25.350/año
+      { id: 'silvela-3b', numero: '3ºB', planta: 3, rentaMensual: 2069, superficie: 80, tipo: 'vivienda' as const, habitaciones: 2, banos: 1 }, // €24.826/año
+      { id: 'silvela-4a', numero: '4ºA', planta: 4, rentaMensual: 3475, superficie: 95, tipo: 'vivienda' as const, habitaciones: 3, banos: 2 }, // €41.702/año
+      { id: 'silvela-4b', numero: '4ºB', planta: 4, rentaMensual: 2129, superficie: 80, tipo: 'vivienda' as const, habitaciones: 2, banos: 1 }, // €25.546/año
+      { id: 'silvela-5a', numero: '5ºA', planta: 5, rentaMensual: 3553, superficie: 100, tipo: 'vivienda' as const, habitaciones: 3, banos: 2 }, // €42.637/año
+      { id: 'silvela-5b', numero: '5ºB', planta: 5, rentaMensual: 1689, superficie: 75, tipo: 'vivienda' as const, habitaciones: 2, banos: 1 }, // €20.265/año
+      { id: 'silvela-6a', numero: '6ºA', planta: 6, rentaMensual: 1804, superficie: 80, tipo: 'vivienda' as const, habitaciones: 2, banos: 1 }, // €21.648/año
+      { id: 'silvela-6b', numero: '6ºB', planta: 6, rentaMensual: 1447, superficie: 70, tipo: 'vivienda' as const, habitaciones: 2, banos: 1 }, // €17.369/año
+      { id: 'silvela-6c', numero: '6ºC', planta: 6, rentaMensual: 2965, superficie: 90, tipo: 'vivienda' as const, habitaciones: 3, banos: 1 }, // €35.575/año
     ];
 
     for (const unitData of silvelaUnits) {
@@ -237,17 +276,24 @@ async function main() {
     // ================================================================================
     console.log('🏠 Paso 5: Creando unidades en Reina 15 (Viroda)...');
     
+    // 15 unidades según fianzas (1800004001-015) e ingresos (7520004001-015)
+    // Rentas de contabilidad 2025 (anual / 12)
     const reinaVirodaUnits = [
-      { id: 'reina-vir-1a', numero: '1ºA', planta: 1, rentaMensual: 1322, superficie: 70 },
-      { id: 'reina-vir-1b', numero: '1ºB', planta: 1, rentaMensual: 1272, superficie: 70 },
-      { id: 'reina-vir-2a', numero: '2ºA', planta: 2, rentaMensual: 2236, superficie: 85 },
-      { id: 'reina-vir-2b', numero: '2ºB', planta: 2, rentaMensual: 1955, superficie: 80 },
-      { id: 'reina-vir-2d', numero: '2ºD', planta: 2, rentaMensual: 1985, superficie: 80 },
-      { id: 'reina-vir-3a', numero: '3ºA', planta: 3, rentaMensual: 2987, superficie: 90 },
-      { id: 'reina-vir-3b', numero: '3ºB', planta: 3, rentaMensual: 1985, superficie: 80 },
-      { id: 'reina-vir-3d', numero: '3ºD', planta: 3, rentaMensual: 1421, superficie: 75 },
-      { id: 'reina-vir-4a', numero: '4ºA', planta: 4, rentaMensual: 3403, superficie: 95 },
-      { id: 'reina-vir-4b', numero: '4ºB', planta: 4, rentaMensual: 2269, superficie: 85 }
+      { id: 'reina-vir-1a', numero: '1ºA', planta: 1, rentaMensual: 1101, superficie: 70 },  // €13.215/año
+      { id: 'reina-vir-1b', numero: '1ºB', planta: 1, rentaMensual: 1060, superficie: 70 },  // €12.723/año
+      { id: 'reina-vir-1c', numero: '1ºC', planta: 1, rentaMensual: 804, superficie: 65 },   // €9.646/año
+      { id: 'reina-vir-1d', numero: '1ºD', planta: 1, rentaMensual: 961, superficie: 65 },   // €11.534/año
+      { id: 'reina-vir-2a', numero: '2ºA', planta: 2, rentaMensual: 2293, superficie: 85 },  // €27.519/año
+      { id: 'reina-vir-2b', numero: '2ºB', planta: 2, rentaMensual: 2059, superficie: 80 },  // €24.707/año
+      { id: 'reina-vir-2c', numero: '2ºC', planta: 2, rentaMensual: 692, superficie: 60 },   // €8.310/año
+      { id: 'reina-vir-2d', numero: '2ºD', planta: 2, rentaMensual: 1985, superficie: 80 },  // €23.816/año
+      { id: 'reina-vir-3a', numero: '3ºA', planta: 3, rentaMensual: 2928, superficie: 90 },  // €35.133/año
+      { id: 'reina-vir-3b', numero: '3ºB', planta: 3, rentaMensual: 2100, superficie: 80 },  // €25.196/año
+      { id: 'reina-vir-3c', numero: '3ºC', planta: 3, rentaMensual: 1191, superficie: 70 },  // €14.295/año
+      { id: 'reina-vir-3d', numero: '3ºD', planta: 3, rentaMensual: 1421, superficie: 75 },  // €17.052/año
+      { id: 'reina-vir-4a', numero: '4ºA', planta: 4, rentaMensual: 3517, superficie: 95 },  // €42.198/año
+      { id: 'reina-vir-4b', numero: '4ºB', planta: 4, rentaMensual: 2327, superficie: 85 },  // €27.918/año
+      { id: 'reina-vir-4c', numero: '4ºC', planta: 4, rentaMensual: 1700, superficie: 75 },  // €20.398/año (est.)
     ];
 
     for (const unitData of reinaVirodaUnits) {
@@ -275,13 +321,23 @@ async function main() {
     // ================================================================================
     console.log('🏠 Paso 6: Creando unidades en Candelaria Mora 12-14...');
     
+    // 14 unidades según fianzas (1800002001-014) e ingresos (7520003000-014)
+    // Rentas de contabilidad 2025 (anual / 12)
     const candelariaUnits = [
-      { id: 'candelaria-1b', numero: '1ºB', planta: 1, rentaMensual: 1405, superficie: 70 },
-      { id: 'candelaria-1d', numero: '1ºD', planta: 1, rentaMensual: 1385, superficie: 70 },
-      { id: 'candelaria-2a', numero: '2ºA', planta: 2, rentaMensual: 1378, superficie: 70 },
-      { id: 'candelaria-3a', numero: '3ºA', planta: 3, rentaMensual: 1342, superficie: 70 },
-      { id: 'candelaria-4a', numero: '4ºA', planta: 4, rentaMensual: 1274, superficie: 70 },
-      { id: 'candelaria-4b', numero: '4ºB', planta: 4, rentaMensual: 1420, superficie: 70 }
+      { id: 'candelaria-1a', numero: '1ºA', planta: 1, rentaMensual: 840, superficie: 70 },   // €10.085/año
+      { id: 'candelaria-1b', numero: '1ºB', planta: 1, rentaMensual: 952, superficie: 70 },   // €11.424/año (Edif)
+      { id: 'candelaria-1c', numero: '1ºC', planta: 1, rentaMensual: 902, superficie: 70 },   // €10.827/año
+      { id: 'candelaria-1d', numero: '1ºD-duplex', planta: 1, rentaMensual: 1385, superficie: 100 }, // duplex
+      { id: 'candelaria-1e', numero: '1ºE-duplex', planta: 1, rentaMensual: 810, superficie: 100 },  // €9.716/año
+      { id: 'candelaria-2a', numero: '2ºA', planta: 2, rentaMensual: 1165, superficie: 70 },  // €13.975/año
+      { id: 'candelaria-2b', numero: '2ºB', planta: 2, rentaMensual: 900, superficie: 70 },   // €10.800/año
+      { id: 'candelaria-2c', numero: '2ºC', planta: 2, rentaMensual: 849, superficie: 70 },   // €10.187/año
+      { id: 'candelaria-3a', numero: '3ºA', planta: 3, rentaMensual: 1342, superficie: 70 },  // €16.098/año (est.)
+      { id: 'candelaria-3b', numero: '3ºB', planta: 3, rentaMensual: 1165, superficie: 70 },  // €13.975/año
+      { id: 'candelaria-3c', numero: '3ºC', planta: 3, rentaMensual: 915, superficie: 70 },   // €10.978/año
+      { id: 'candelaria-4a', numero: '4ºA', planta: 4, rentaMensual: 1274, superficie: 70 },  // €15.288/año (est.)
+      { id: 'candelaria-4b', numero: '4ºB', planta: 4, rentaMensual: 1420, superficie: 70 },  // €17.040/año (est.)
+      { id: 'candelaria-4c', numero: '4ºC', planta: 4, rentaMensual: 850, superficie: 70 },   // €10.200/año
     ];
 
     for (const unitData of candelariaUnits) {
@@ -390,8 +446,8 @@ async function main() {
     console.log('\n RESUMEN:');
     console.log(`  Empresas: 3 (Vidaro, Rovida, Viroda)`);
     console.log(`  Edificios Rovida: 17 inmuebles (Espronceda 115 garajes, Piamonte edificio, Barquillo 3 locales, etc.)`);
-    console.log(`  Edificios Viroda: 3 (Silvela 14 uds, Reina 15 10 uds, Candelaria 6 uds)`);
-    console.log(`  Unidades Viroda: ${silvelaUnits.length + reinaVirodaUnits.length + candelariaUnits.length}`);
+    console.log(`  Edificios Viroda: 5 (Silvela ${silvelaUnits.length} uds, Reina ${reinaVirodaUnits.length} uds, Candelaria ${candelariaUnits.length} uds, H.Tejada 12 viv, M.Pelayo 2 viv)`);
+    console.log(`  Unidades Viroda: ${silvelaUnits.length + reinaVirodaUnits.length + candelariaUnits.length + 14}`);
     console.log(`  Inquilinos Viroda: ${tenants.length}`);
     console.log(`  Proveedores: ${providers.length}`);
     console.log(`\n Datos contables disponibles (data/):`);
