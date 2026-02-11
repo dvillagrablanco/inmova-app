@@ -10,13 +10,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
+
 import { z } from 'zod';
 
 import logger from '@/lib/logger';
 import type { BusinessVertical } from '@prisma/client';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma loading (auditoria 2026-02-11)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 
 // Schema de validación
 const updateProfileSchema = z.object({
@@ -48,6 +55,7 @@ const updateProfileSchema = z.object({
  * Obtiene el perfil completo del usuario actual
  */
 export async function GET(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     
@@ -122,6 +130,7 @@ export async function GET(request: NextRequest) {
  * Actualiza campos específicos del perfil
  */
 export async function PATCH(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     

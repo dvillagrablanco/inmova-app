@@ -8,7 +8,7 @@
  * Body: { userId: string, token: string, isBackupCode?: boolean }
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+
 import {
   verifyTOTPToken,
   verifyBackupCode,
@@ -19,7 +19,15 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Lazy Prisma loading (auditoria 2026-02-11)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
+
 export async function POST(req: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const body = await req.json();
     const { userId, token, isBackupCode = false } = body;

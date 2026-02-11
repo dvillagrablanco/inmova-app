@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
-import { prisma } from '@/lib/db';
+
 import logger from '@/lib/logger';
 import { sendEmail } from '@/lib/email-config';
 import { buildResetLink, generateResetToken, hashResetToken } from '@/lib/password-reset';
@@ -9,11 +9,19 @@ import { buildResetLink, generateResetToken, hashResetToken } from '@/lib/passwo
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Lazy Prisma loading (auditoria 2026-02-11)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
+
 const forgotPasswordSchema = z.object({
   email: z.string().email(),
 });
 
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const body: unknown = await request.json();
     const parsed = forgotPasswordSchema.safeParse(body);

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+
 import {
   requireAuth,
   forbiddenResponse,
@@ -12,7 +12,15 @@ import logger, { logError } from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Lazy Prisma loading (auditoria 2026-02-11)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
+
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+  const prisma = await getPrisma();
   try {
     const user = await requireAuth();
 
@@ -48,6 +56,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 }
 
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+  const prisma = await getPrisma();
   try {
     const user = await requireAuth();
 
@@ -110,6 +119,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+  const prisma = await getPrisma();
   try {
     const user = await requireAuth();
 

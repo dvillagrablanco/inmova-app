@@ -2,12 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import bcrypt from 'bcryptjs';
 
-import { prisma } from '@/lib/db';
+
 import logger from '@/lib/logger';
 import { hashResetToken } from '@/lib/password-reset';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma loading (auditoria 2026-02-11)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 
 const resetPasswordSchema = z.object({
   token: z.string().min(10),
@@ -15,6 +22,7 @@ const resetPasswordSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const body: unknown = await request.json();
     const parsed = resetPasswordSchema.safeParse(body);

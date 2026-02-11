@@ -1,14 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { getStripe, formatAmountFromStripe, STRIPE_WEBHOOK_SECRET } from '@/lib/stripe-config';
-import { prisma } from '@/lib/db';
+
 import Stripe from 'stripe';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Lazy Prisma loading (auditoria 2026-02-11)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
+
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   // Check if Stripe is configured
   const stripe = getStripe();
   if (!stripe) {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+
 import {
   requireAuth,
   requirePermission,
@@ -12,6 +12,13 @@ import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma loading (auditoria 2026-02-11)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 
 // Schema de validación para crear usuario
 const createUserSchema = z.object({
@@ -26,6 +33,7 @@ const createUserSchema = z.object({
 });
 
 export async function GET() {
+  const prisma = await getPrisma();
   try {
     const user = await requireAuth();
 
@@ -66,6 +74,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const user = await requireAuth();
 

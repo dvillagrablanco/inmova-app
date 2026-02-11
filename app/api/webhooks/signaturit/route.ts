@@ -14,12 +14,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import * as SignaturitService from '@/lib/signaturit-service';
 import { SignatureStatus } from '@/lib/signaturit-service';
-import { prisma } from '@/lib/db';
+
 import * as S3Service from '@/lib/aws-s3-service';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma loading (auditoria 2026-02-11)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 
 /**
  * POST /api/webhooks/signaturit
@@ -37,6 +44,7 @@ export const runtime = 'nodejs';
  * }
  */
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     // 1. Obtener body raw para verificar firma
     const bodyText = await request.text();

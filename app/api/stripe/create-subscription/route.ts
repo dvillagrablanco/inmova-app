@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
+
 import { getStripe, formatAmountForStripe } from '@/lib/stripe-config';
 import { getOrCreateStripeCustomer } from '@/lib/stripe-customer';
 import logger from '@/lib/logger';
@@ -10,12 +10,20 @@ import { z } from 'zod';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Lazy Prisma loading (auditoria 2026-02-11)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
+
 // Schema de validación para crear suscripción
 const createSubscriptionSchema = z.object({
   contractId: z.string().uuid({ message: 'ID de contrato inválido' }),
 });
 
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     // Check if Stripe is configured
     const stripe = getStripe();

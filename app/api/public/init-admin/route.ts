@@ -4,12 +4,19 @@
  */
 
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+
 import bcrypt from 'bcryptjs';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma loading (auditoria 2026-02-11)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 
 // Verificar que tenemos DATABASE_URL
 if (!process.env.DATABASE_URL) {
@@ -17,6 +24,7 @@ if (!process.env.DATABASE_URL) {
 }
 
 export async function GET(request: Request) {
+  const prisma = await getPrisma();
   // 🔒 PROTECCIÓN: Solo disponible en desarrollo
   if (process.env.NODE_ENV === 'production') {
     return NextResponse.json(

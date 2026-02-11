@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+
 import bcrypt from 'bcryptjs';
 import logger from '@/lib/logger';
 import { generateOwnerToken, setOwnerAuthCookie } from '@/lib/owner-auth';
@@ -7,8 +7,16 @@ import { generateOwnerToken, setOwnerAuthCookie } from '@/lib/owner-auth';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Lazy Prisma loading (auditoria 2026-02-11)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
+
 // POST /api/auth-propietario/login - Login para propietarios
 export async function POST(req: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const { email, password } = await req.json();
 

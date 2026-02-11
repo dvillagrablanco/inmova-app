@@ -1,13 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+
 import bcrypt from 'bcryptjs';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Lazy Prisma loading (auditoria 2026-02-11)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
+
 // POST /api/auth-proveedor/register - Registro de proveedores
 export async function POST(req: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const { 
       nombre, 
