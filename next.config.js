@@ -48,11 +48,14 @@ const nextConfig = {
   },
 
   // Build configuration
+  // AUDITORIA 2026-02-11: ignoreBuildErrors y ignoreDuringBuilds deberian ser false
+  // para detectar errores de tipo y lint en produccion. Cambiar progresivamente
+  // despues de corregir errores existentes. Ver AUDITORIA_TOTAL_2026-02-11.md
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: true, // TODO: Cambiar a false (hallazgo critico de auditoria)
   },
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: true, // TODO: Cambiar a false (hallazgo critico de auditoria)
   },
 
   // Image optimization - Optimizado para producción
