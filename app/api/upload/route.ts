@@ -73,36 +73,57 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 4. Convertir Files a Buffers y validar tipo MIME real
-    const ALLOWED_MIMES = [
+    // 4. Convertir Files a Buffers y validar tipo MIME + magic bytes
+    const ALLOWED_MIMES = new Set([
       'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
       'application/pdf',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // docx
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // xlsx
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       'text/csv',
-    ];
-    
+    ]);
+
+    const ALLOWED_EXTENSIONS = new Set([
+      '.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg',
+      '.pdf', '.docx', '.xlsx', '.csv',
+    ]);
+
+    // Magic bytes para validacion basica de tipo real
+    const MAGIC_BYTES: Record<string, number[]> = {
+      'image/jpeg': [0xFF, 0xD8, 0xFF],
+      'image/png': [0x89, 0x50, 0x4E, 0x47],
+      'image/gif': [0x47, 0x49, 0x46],
+      'image/webp': [0x52, 0x49, 0x46, 0x46], // RIFF
+      'application/pdf': [0x25, 0x50, 0x44, 0x46], // %PDF
+    };
+
+    function validateMagicBytes(buffer: Buffer, claimedMime: string): boolean {
+      const expected = MAGIC_BYTES[claimedMime];
+      if (!expected) return true; // No magic bytes check para este tipo
+      if (buffer.length < expected.length) return false;
+      return expected.every((byte, i) => buffer[i] === byte);
+    }
+
     const fileBuffers = await Promise.all(
       files.map(async (file) => {
         const buffer = Buffer.from(await file.arrayBuffer());
-        
-        // Validar tipo MIME real (no confiar solo en file.type del cliente)
-        try {
-          const { fileTypeFromBuffer } = await import('file-type');
-          if (fileTypeFromBuffer) {
-            const detected = await fileTypeFromBuffer(buffer);
-            if (detected && !ALLOWED_MIMES.includes(detected.mime)) {
-              throw new Error(`Tipo de archivo no permitido: ${detected.mime}`);
-            }
-          }
-        } catch (mimeError: any) {
-          // Si file-type no esta disponible, usar el MIME del cliente como fallback
-          if (mimeError.message?.includes('no permitido')) {
-            throw mimeError;
-          }
-          logger.warn('[Upload] file-type check skipped:', mimeError.message);
+        const ext = '.' + (file.name.split('.').pop()?.toLowerCase() || '');
+
+        // Validar extension
+        if (!ALLOWED_EXTENSIONS.has(ext)) {
+          throw new Error(`Extension no permitida: ${ext}`);
         }
-        
+
+        // Validar MIME del cliente
+        if (file.type && !ALLOWED_MIMES.has(file.type)) {
+          throw new Error(`Tipo MIME no permitido: ${file.type}`);
+        }
+
+        // Validar magic bytes (firma real del archivo)
+        if (file.type && !validateMagicBytes(buffer, file.type)) {
+          logger.warn(`[Upload] Magic bytes mismatch: claimed ${file.type}, file: ${file.name}`);
+          throw new Error(`El contenido del archivo no coincide con el tipo declarado: ${file.type}`);
+        }
+
         return {
           buffer,
           originalName: file.name,
