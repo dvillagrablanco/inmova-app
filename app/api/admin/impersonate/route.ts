@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
-import logger, { logError } from '@/lib/logger';
+import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -31,12 +30,16 @@ export async function POST(request: NextRequest) {
 
     const { companyId } = await request.json();
 
-    if (!companyId) {
+    if (!companyId || typeof companyId !== 'string') {
       return NextResponse.json(
-        { error: 'companyId es requerido' },
+        { error: 'companyId es requerido y debe ser un string valido' },
         { status: 400 }
       );
     }
+
+    // Lazy load Prisma
+    const { getPrismaClient } = await import('@/lib/db');
+    const prisma = getPrismaClient();
 
     // Verificar que la empresa existe
     const company = await prisma.company.findUnique({

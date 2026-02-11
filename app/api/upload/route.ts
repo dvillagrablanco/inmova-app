@@ -73,14 +73,43 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 4. Convertir Files a Buffers
+    // 4. Convertir Files a Buffers y validar tipo MIME real
+    const ALLOWED_MIMES = [
+      'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
+      'application/pdf',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // docx
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // xlsx
+      'text/csv',
+    ];
+    
     const fileBuffers = await Promise.all(
-      files.map(async (file) => ({
-        buffer: Buffer.from(await file.arrayBuffer()),
-        originalName: file.name,
-        mimeType: file.type,
-        size: file.size,
-      }))
+      files.map(async (file) => {
+        const buffer = Buffer.from(await file.arrayBuffer());
+        
+        // Validar tipo MIME real (no confiar solo en file.type del cliente)
+        try {
+          const { fileTypeFromBuffer } = await import('file-type');
+          if (fileTypeFromBuffer) {
+            const detected = await fileTypeFromBuffer(buffer);
+            if (detected && !ALLOWED_MIMES.includes(detected.mime)) {
+              throw new Error(`Tipo de archivo no permitido: ${detected.mime}`);
+            }
+          }
+        } catch (mimeError: any) {
+          // Si file-type no esta disponible, usar el MIME del cliente como fallback
+          if (mimeError.message?.includes('no permitido')) {
+            throw mimeError;
+          }
+          logger.warn('[Upload] file-type check skipped:', mimeError.message);
+        }
+        
+        return {
+          buffer,
+          originalName: file.name,
+          mimeType: file.type,
+          size: file.size,
+        };
+      })
     );
 
     // 5. Verificar límite de storage

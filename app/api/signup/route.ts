@@ -1,36 +1,78 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import { prisma } from '@/lib/db';
-import logger, { logError } from '@/lib/logger';
+import logger from '@/lib/logger';
 import { initializeOnboardingTasks } from '@/lib/onboarding-service';
 import { scheduleOnboardingEmailSequence } from '@/lib/onboarding-email-service';
 import { scheduleOnboardingEmails } from '@/lib/email-triggers-service';
+import { z } from 'zod';
+import { withAuthRateLimit } from '@/lib/rate-limiting';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Schema de validacion Zod para signup
+const signupSchema = z.object({
+  email: z.string().email('Email invalido').max(255).toLowerCase().trim(),
+  password: z.string()
+    .min(8, 'La contrasena debe tener al menos 8 caracteres')
+    .max(128, 'La contrasena no puede exceder 128 caracteres')
+    .regex(/[A-Z]/, 'Debe contener al menos una mayuscula')
+    .regex(/[a-z]/, 'Debe contener al menos una minuscula')
+    .regex(/[0-9]/, 'Debe contener al menos un numero'),
+  name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres').max(100).trim(),
+  role: z.enum(['administrador', 'gestor', 'operador']).optional().default('gestor'),
+  businessVertical: z.enum([
+    'alquiler_tradicional', 'str_vacacional', 'coliving',
+    'room_rental', 'construccion', 'flipping',
+    'servicios_profesionales', 'comunidades', 'mixto'
+  ]).optional().default('alquiler_tradicional'),
+  recoveryEmail: z.string().email().optional().nullable(),
+  experienceLevel: z.enum(['principiante', 'intermedio', 'avanzado']).optional().default('intermedio'),
+  techSavviness: z.enum(['bajo', 'medio', 'alto']).optional().default('medio'),
+  portfolioSize: z.enum(['size_1_5', 'size_6_20', 'size_21_100', 'size_100_plus']).optional().default('size_1_5'),
+});
+
 export async function POST(req: NextRequest) {
+  // Rate limiting para prevenir spam de registro
+  return withAuthRateLimit(req, async () => {
+    return handleSignup(req);
+  });
+}
+
+async function handleSignup(req: NextRequest) {
   try {
     const body = await req.json();
-    const { 
-      email, 
-      password, 
-      name, 
-      role, 
-      businessVertical,
-      recoveryEmail, // Email alternativo para recuperación de contraseña
-      // Zero-Touch Onboarding fields
-      experienceLevel,
-      techSavviness,
-      portfolioSize
-    } = body;
 
-    if (!email || !password || !name) {
+    // Validar con Zod
+    const parseResult = signupSchema.safeParse(body);
+    if (!parseResult.success) {
       return NextResponse.json(
-        { error: 'Faltan campos requeridos' },
+        { 
+          error: 'Datos invalidos',
+          details: parseResult.error.errors.map(e => ({
+            field: e.path.join('.'),
+            message: e.message,
+          })),
+        },
         { status: 400 }
       );
     }
+
+    const {
+      email,
+      password,
+      name,
+      role: userRole,
+      businessVertical: userVertical,
+      recoveryEmail,
+      experienceLevel: userExperienceLevel,
+      techSavviness: userTechSavviness,
+      portfolioSize: userPortfolioSize,
+    } = parseResult.data;
+
+    // Lazy load Prisma
+    const { getPrismaClient } = await import('@/lib/db');
+    const prisma = getPrismaClient();
 
     const existingUser = await prisma.user.findUnique({
       where: { email },
@@ -38,50 +80,10 @@ export async function POST(req: NextRequest) {
 
     if (existingUser) {
       return NextResponse.json(
-        { error: 'El email ya está registrado' },
+        { error: 'El email ya esta registrado' },
         { status: 400 }
       );
     }
-
-    // Validar que el role sea un valor válido del enum UserRole
-    const validRoles: any[] = ['administrador', 'gestor', 'operador'];
-    const userRole: any = role && validRoles.includes(role as any) 
-      ? (role as any) 
-      : 'gestor';
-
-    // Validar que el businessVertical sea un valor válido del enum BusinessVertical
-    const validVerticals: any[] = [
-      'alquiler_tradicional', 
-      'str_vacacional', 
-      'coliving',
-      'room_rental', 
-      'construccion', 
-      'flipping', 
-      'servicios_profesionales',
-      'comunidades', 
-      'mixto'
-    ];
-    const userVertical: any | undefined = businessVertical && validVerticals.includes(businessVertical as any) 
-      ? (businessVertical as any) 
-      : 'alquiler_tradicional'; // Default a tradicional si no se proporciona
-
-    // Validar experienceLevel
-    const validExperienceLevels: any[] = ['principiante', 'intermedio', 'avanzado'];
-    const userExperienceLevel: any | undefined = experienceLevel && validExperienceLevels.includes(experienceLevel as any)
-      ? (experienceLevel as any)
-      : 'intermedio'; // Default a intermedio
-
-    // Validar techSavviness
-    const validTechSavviness: any[] = ['bajo', 'medio', 'alto'];
-    const userTechSavviness: any | undefined = techSavviness && validTechSavviness.includes(techSavviness as any)
-      ? (techSavviness as any)
-      : 'medio'; // Default a medio
-
-    // Validar portfolioSize
-    const validPortfolioSizes: any[] = ['size_1_5', 'size_6_20', 'size_21_100', 'size_100_plus'];
-    const userPortfolioSize: any | undefined = portfolioSize && validPortfolioSizes.includes(portfolioSize as any)
-      ? (portfolioSize as any)
-      : 'size_1_5'; // Default a 1-5
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -92,7 +94,7 @@ export async function POST(req: NextRequest) {
         data: {
           nombre: 'INMOVA',
           cif: 'B12345678',
-          direccion: 'Madrid, España',
+          direccion: 'Madrid, Espana',
           telefono: '+34 912 345 678',
           email: 'info@inmova.com',
         },
@@ -107,15 +109,14 @@ export async function POST(req: NextRequest) {
         email,
         password: hashedPassword,
         name,
-        role: userRole,
+        role: userRole as any,
         companyId: company.id,
-        businessVertical: userVertical,
-        recoveryEmail: validRecoveryEmail, // Email de recuperación
-        // Zero-Touch Onboarding fields
-        experienceLevel: userExperienceLevel,
-        techSavviness: userTechSavviness,
-        portfolioSize: userPortfolioSize,
-        uiMode: 'standard', // Por defecto standard
+        businessVertical: userVertical as any,
+        recoveryEmail: validRecoveryEmail,
+        experienceLevel: userExperienceLevel as any,
+        techSavviness: userTechSavviness as any,
+        portfolioSize: userPortfolioSize as any,
+        uiMode: 'standard',
         onboardingCompleted: false,
       },
     });
@@ -168,4 +169,4 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
-}
+} // handleSignup
