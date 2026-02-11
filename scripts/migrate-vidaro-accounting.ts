@@ -56,7 +56,7 @@ async function main() {
     const viroda = await prisma.company.upsert({
       where: { id: 'viroda-inversiones' },
       update: {
-        notasAdmin: 'Inversiones inmobiliarias residenciales. Portfolio: Manuel Silvela 5 (14 unidades, Madrid), Reina 15 Residencial (10 viviendas, Madrid), Candelaria Mora 12-14 (6 viviendas, Madrid). Renta mensual Silvela: €33.6K.',
+        notasAdmin: 'Inversiones inmobiliarias residenciales. 2025: 3.169 asientos, €37.7M. 2026: 450 asientos, €463K. 101 inquilinos. Silvela 5 (14 uds, local €65K/año), Reina 15 (10 viv, top 4ºA €42K), Candelaria Mora (6 viv), H.Tejada 6 (garajes a Rovida), M.Pelayo (2 viv). Renta anual ~€600K. Top: Pilates Lab €79K, Batista €57K.',
       },
       create: {
         id: 'viroda-inversiones',
@@ -400,6 +400,7 @@ async function main() {
     console.log(`\n Importar contabilidad:`);
     console.log(`  npx tsx scripts/import-rovida-contabilidad.ts`);
     console.log(`  npx tsx scripts/import-vidaro-contabilidad.ts`);
+    console.log(`  npx tsx scripts/import-viroda-contabilidad.ts`);
     console.log(`  npx tsx scripts/import-rovida-plan-cuentas.ts`);
 
   } catch (error) {

@@ -135,7 +135,7 @@ async function main() {
         colorPrimario: '#dc2626',
         colorSecundario: '#ef4444',
         parentCompanyId: vidaro.id,
-        notasAdmin: 'Inversiones inmobiliarias residenciales. Portfolio: Manuel Silvela 5 (14 unidades, Madrid), Reina 15 Residencial (10 viviendas, Madrid), Candelaria Mora 12-14 (6 viviendas, Madrid). Renta mensual Silvela: €33.6K.',
+        notasAdmin: 'Inversiones inmobiliarias residenciales. 2025: 3.169 asientos, €37.7M. 2026: 450 asientos, €463K. 101 inquilinos. Silvela 5 (14 uds), Reina 15 (10 viv), Candelaria Mora (6 viv), H.Tejada 6 (garajes), M.Pelayo (2 viv). Renta anual ~€600K.',
       },
     });
     console.log(`   Viroda Inversiones creada (ID: ${viroda.id})`);
@@ -144,7 +144,7 @@ async function main() {
       where: { id: viroda.id },
       data: {
         parentCompanyId: vidaro.id,
-        notasAdmin: 'Inversiones inmobiliarias residenciales. Portfolio: Manuel Silvela 5 (14 unidades, Madrid), Reina 15 Residencial (10 viviendas, Madrid), Candelaria Mora 12-14 (6 viviendas, Madrid). Renta mensual Silvela: €33.6K.',
+        notasAdmin: 'Inversiones inmobiliarias residenciales. 2025: 3.169 asientos, €37.7M. 2026: 450 asientos, €463K. 101 inquilinos. Silvela 5 (14 uds), Reina 15 (10 viv), Candelaria Mora (6 viv), H.Tejada 6 (garajes), M.Pelayo (2 viv). Renta anual ~€600K.',
       },
     });
     console.log(`   Viroda Inversiones encontrada y actualizada (ID: ${viroda.id}, nombre: ${viroda.nombre})`);

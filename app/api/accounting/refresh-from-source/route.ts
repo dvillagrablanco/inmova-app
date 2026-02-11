@@ -9,6 +9,8 @@
  * - Rovida 2026: https://docs.google.com/spreadsheets/d/1Ce3XvAkboTl4-_-wLuOmXiMmI_A7pwCV
  * - Vidaro 2025: https://docs.google.com/spreadsheets/d/15WLyWpjzt3S5goW0a4sRgLW6tFkzbe6l
  * - Vidaro 2026: https://docs.google.com/spreadsheets/d/13erHSefePWM7kRglnzjbj8r0_oxckZIj
+ * - Viroda 2025: https://docs.google.com/spreadsheets/d/1_0Kjx5ziPI93s--dPdNmIiJC_TbAufgb
+ * - Viroda 2026: https://docs.google.com/spreadsheets/d/1lgwUOote2mBoXoJjVx6FGE3rrpaVYQY6
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -32,6 +34,10 @@ const ACCOUNTING_SOURCES: Record<string, string[]> = {
   'Vidaro': [
     'https://docs.google.com/spreadsheets/d/15WLyWpjzt3S5goW0a4sRgLW6tFkzbe6l/export?format=xlsx', // 2025
     'https://docs.google.com/spreadsheets/d/13erHSefePWM7kRglnzjbj8r0_oxckZIj/export?format=xlsx', // 2026
+  ],
+  'Viroda': [
+    'https://docs.google.com/spreadsheets/d/1_0Kjx5ziPI93s--dPdNmIiJC_TbAufgb/export?format=xlsx', // 2025
+    'https://docs.google.com/spreadsheets/d/1lgwUOote2mBoXoJjVx6FGE3rrpaVYQY6/export?format=xlsx', // 2026
   ],
 };
 

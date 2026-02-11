@@ -98,7 +98,7 @@ async function main() {
       estadoCliente: 'activo',
       contactoPrincipal: 'Pendiente de asignar',
       emailContacto: 'contacto@viroda.es',
-      notasAdmin: 'Sociedad unipersonal filial de Vidaro. Especializada en inversiones inmobiliarias residenciales. Portfolio: Manuel Silvela 5 (14 unidades: local + 13 viviendas, Madrid), Reina 15 Residencial (10 viviendas, Madrid), Candelaria Mora 12-14 (6 viviendas, Madrid). Modelo Room Rental + alquiler residencial. Renta mensual total: ~€33.6K (Silvela €33.6K). Nota: contabilidad de Viroda no disponible en archivos actuales; datos de referencia de migrate-vidaro-accounting.ts.',
+      notasAdmin: 'Sociedad unipersonal filial de Vidaro. Inversiones inmobiliarias residenciales. Contabilidad 2025: 14.884 líneas, 3.169 asientos, €37.7M. 2026 (Ene-Feb): 1.420 líneas, 450 asientos, €463K. 1.534 subcuentas. 101 inquilinos activos. Portfolio: Manuel Silvela 5 (local €65K/año + 13 viviendas, top: 5ºA €42.6K, 4ºA €41.7K), Reina 15 (10 viviendas, top: 4ºA €42.2K, 3ºA €35.1K), Candelaria Mora 12-14 (6 viviendas), Hernández de Tejada 6 (garajes a Rovida), Menéndez Pelayo (2 viviendas, Palencia). Renta anual ~€600K. Top inquilinos: Pilates Lab €79K, Batista €57K, Abou-Jaoude €42K.',
       activo: true,
       parentCompanyId: vidaro.id
     }
