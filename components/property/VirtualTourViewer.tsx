@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Eye, ExternalLink, Loader2 } from 'lucide-react';
+import { sanitizeHtml } from '@/lib/sanitize';
 
 interface VirtualTourViewerProps {
   propertyId: string;
@@ -104,8 +105,14 @@ export function VirtualTourViewer({ propertyId, autoload = true }: VirtualTourVi
       <CardContent>
         <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-gray-100">
           {tour.embedCode ? (
-            // Embed code custom
-            <div dangerouslySetInnerHTML={{ __html: tour.embedCode }} />
+            // Embed code custom - sanitizado para prevenir XSS
+            <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(tour.embedCode, {
+              allowedTags: ['iframe', 'div', 'script'],
+              allowedAttributes: { 
+                iframe: ['src', 'width', 'height', 'frameborder', 'allow', 'allowfullscreen', 'style', 'class'],
+                div: ['style', 'class', 'id'],
+              },
+            }) }} />
           ) : tour.tipo === 'MATTERPORT' ? (
             // Matterport iframe
             <iframe

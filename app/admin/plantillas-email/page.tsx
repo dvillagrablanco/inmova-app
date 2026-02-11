@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { sanitizeHtml } from '@/lib/sanitize';
 import {
   Dialog,
   DialogContent,
@@ -725,7 +726,16 @@ export default function PlantillasEmailPage() {
             <div className="py-4">
               <div className="border rounded-lg p-4 bg-white">
                 <div
-                  dangerouslySetInnerHTML={{ __html: previewTemplate?.contenidoHtml || '' }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(previewTemplate?.contenidoHtml || '', {
+                    allowedTags: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'br', 'hr', 'div', 'span', 
+                      'strong', 'b', 'em', 'i', 'u', 'a', 'img', 'ul', 'ol', 'li', 'table', 'thead', 
+                      'tbody', 'tr', 'th', 'td', 'blockquote', 'pre', 'code'],
+                    allowedAttributes: {
+                      a: ['href', 'title', 'target', 'rel'],
+                      img: ['src', 'alt', 'width', 'height', 'style'],
+                      '*': ['style', 'class'],
+                    },
+                  }) }}
                   className="prose max-w-none"
                 />
               </div>
