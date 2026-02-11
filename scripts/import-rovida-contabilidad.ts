@@ -10,6 +10,9 @@
  * Archivos fuente:
  *   - data/rovida/diario_general_2025.xlsx (Ene-Dic 2025, ~13.800 líneas, ~2.800 asientos)
  *   - data/rovida/diario_general_2026.xlsx (Ene-Feb 2026, ~1.360 líneas, ~400 asientos)
+ *   - data/rovida/indice_subcuentas.xlsx (Plan de Cuentas, 1.571 subcuentas)
+ * 
+ * Ver también: scripts/import-rovida-plan-cuentas.ts para importar el Índice de Subcuentas
  * 
  * Uso: npx tsx scripts/import-rovida-contabilidad.ts
  */

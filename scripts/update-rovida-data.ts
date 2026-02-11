@@ -91,9 +91,11 @@ const TENANT_UNIT_MAPPINGS = [
   { nombre: 'Vidaro Inversiones S.L.', edificio: 'Local Menéndez Pelayo 15', unidad: 'Local y Sótano', rentaMensual: 1090, tipo: 'comercial' },
   
   // ── NUEVO 2026: Bajo y Sótano Prado 10 (Madrid) ──
-  // Ingreso 2025: €3.097 (subcuenta 7520017000) - solo 1 factura parcial
+  // Subcuenta ingreso: 7520017000 (Ingr. Arrend. Bajo y sótano C/Prado, 10, Madrid)
+  // Subcuenta amortización: 6811017000 (Dotac. Amort. Local y Sótano C/Prado, 10 Madrid)
+  // Ingreso 2025: €3.097 (solo 1 factura parcial)
   // Ingreso Ene-Feb 2026: €24.000 - inquilino nuevo BOCA PRADO S.L.
-  { nombre: 'BOCA PRADO S. L.', edificio: 'Locales Barquillo 30', unidad: 'Local 3', rentaMensual: 12000, tipo: 'comercial' },
+  { nombre: 'BOCA PRADO S. L.', edificio: 'Local Prado 10', unidad: 'Bajo y Sótano', rentaMensual: 12000, tipo: 'comercial' },
   
   // ── Garajes Hernández de Tejada 6 (Madrid) ──
   // Ingreso anual 2025: €2.410 (subcuenta 7520016000)

@@ -4,12 +4,12 @@
  * Datos extraídos del Diario General de Contabilidad (subcuentas 211x)
  * y de la estructura de carpetas de Contratos en Google Drive.
  * 
- * Edificios identificados:
- * 1. Garajes C/ Espronceda, 32 - Madrid (115 plazas)
- * 2. Garajes C/ Hernández de Tejada, 6 - Madrid (56 plazas)
+ * Edificios identificados (del Diario General + Índice de Subcuentas):
+ * 1. Garajes C/ Espronceda, 32 - Madrid (115 plazas, sótanos -2 y -3)
+ * 2. Garajes C/ Hernández de Tejada, 6 - Madrid (56 plazas, sótanos -1 y -2)
  * 3. Garajes C/ Menéndez Pelayo, 17 - Palencia (21 plazas registradas)
  * 4. Local C/ Barquillo, 30 - Madrid (3 locales)
- * 5. Locales C/ Reina, 15 - Madrid (2 locales)
+ * 5. Locales C/ Reina, 15 - Madrid (2 locales: finca 13182 + finca 13184)
  * 6. Local y Sótano C/ Menéndez Pelayo, 15 - Palencia
  * 7. Edificio C/ Piamonte, 23 - Madrid
  * 8. Naves Avda Cuba, 48-50-52 - Palencia (3 naves)
@@ -21,6 +21,9 @@
  * 14. Oficinas Av Europa, 34 Bl.B 1ºIz - Madrid
  * 15. Terreno rústico Grijota (5 Ha)
  * 16. Garajes Urb. Castillo Magaz
+ * 17. Local y Sótano C/ Prado, 10 - Madrid (añadido Feb 2026)
+ * 
+ * Fuentes: Diarios Generales 2025+2026, Índice de Subcuentas Rovida S.L.
  * 
  * Uso: npx tsx scripts/create-rovida-buildings.ts
  */
@@ -343,6 +346,22 @@ const BUILDINGS: BuildingDef[] = [
     etiquetas: ['terreno', 'palencia', 'grijota', 'rustico'],
     units: [
       { numero: 'Parcela 5Ha', tipo: 'nave_industrial', superficie: 50000, rentaMensual: 0, planta: 0 },
+    ],
+  },
+
+  // ─── MADRID (añadido Feb 2026 - del Índice de Subcuentas) ───
+  {
+    nombre: 'Local Prado 10',
+    direccion: 'C/ Prado, 10, Madrid',
+    tipo: 'comercial',
+    anoConstructor: 1970,
+    ascensor: false,
+    garaje: false,
+    etiquetas: ['local', 'madrid', 'prado'],
+    units: [
+      // Subcuenta 7520017000: Ingr. Arrend. Bajo y sótano C/Prado, 10, Madrid
+      // Inquilino 2026: BOCA PRADO S.L. (subcuenta 4300000075) - €12.000/mes
+      { numero: 'Bajo y Sótano', tipo: 'local', superficie: 250, rentaMensual: 12000, planta: 0 },
     ],
   },
 ];
