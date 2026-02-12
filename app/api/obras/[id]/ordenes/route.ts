@@ -14,6 +14,11 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 // Fases del enum ConstructionPhase en Prisma
 const CONSTRUCTION_PHASES = ['PLANIFICACION', 'PERMISOS', 'CIMENTACION', 'ESTRUCTURA', 'CERRAMIENTOS', 'INSTALACIONES', 'ACABADOS', 'ENTREGA', 'GARANTIA'] as const;
 
@@ -45,7 +50,7 @@ export async function GET(
       return NextResponse.json({ error: 'Company ID no encontrado' }, { status: 400 });
     }
 
-    const { prisma } = await import('@/lib/db');
+    const prisma = await getPrisma();
 
     // Verificar que el proyecto existe
     const project = await prisma.constructionProject.findFirst({
@@ -113,7 +118,7 @@ export async function POST(
     }
 
     const data = validationResult.data;
-    const { prisma } = await import('@/lib/db');
+    const prisma = await getPrisma();
 
     // Verificar que el proyecto existe
     const project = await prisma.constructionProject.findFirst({

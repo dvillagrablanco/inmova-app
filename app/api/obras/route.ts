@@ -14,6 +14,12 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Lazy Prisma
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 // ============================================================================
 // VALIDACIÓN
 // ============================================================================
@@ -71,7 +77,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const fase = searchParams.get('fase') || searchParams.get('estado'); // Soportar ambos parámetros
 
-    const { prisma } = await import('@/lib/db');
+    const prisma = await getPrisma();
 
     const where: any = { companyId };
     if (fase) {
@@ -195,7 +201,7 @@ export async function POST(req: NextRequest) {
     }
 
     const data = validationResult.data;
-    const { prisma } = await import('@/lib/db');
+    const prisma = await getPrisma();
 
     // Calcular duración en meses si no se proporciona
     const fechaIni = new Date(data.fechaInicio);
