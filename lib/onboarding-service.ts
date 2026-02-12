@@ -4,7 +4,7 @@
  */
 
 import { prisma } from '@/lib/db';
-import type { BusinessVertical, OnboardingTaskStatus, OnboardingTaskType, UserRole } from '@prisma/client';
+import type { BusinessVertical, OnboardingTaskStatus, OnboardingTaskType, UserRole } from '@/types/prisma-types';
 import { sendOnboardingEmail } from '@/lib/onboarding-email-service';
 import { createWebhookEvent } from '@/lib/webhook-service';
 import { 

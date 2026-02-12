@@ -8,7 +8,7 @@
  * - uiMode: simple, standard, advanced
  */
 
-import { ExperienceLevel, TechSavviness, PortfolioSize, UIMode } from '@prisma/client';
+import { ExperienceLevel, TechSavviness, PortfolioSize, UIMode } from '@/types/prisma-types';
 
 export interface UserProfile {
   experienceLevel?: ExperienceLevel;

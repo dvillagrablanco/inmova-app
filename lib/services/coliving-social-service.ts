@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/db';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@/types/prisma-types';
 
 import logger from '@/lib/logger';
 export interface ColivingProfileInput {

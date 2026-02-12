@@ -11,7 +11,7 @@
  */
 
 import { prisma } from './db';
-import { ValoracionMetodo, ValoracionFinalidad } from '@prisma/client';
+import { ValoracionMetodo, ValoracionFinalidad } from '@/types/prisma-types';
 
 interface DatosPropiedad {
   unitId?: string;

@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from './query-keys';
-import type { Payment } from '@prisma/client';
+import type { Payment } from '@/types/prisma-types';
 
 interface PaymentFilters {
   status?: string;

@@ -8,7 +8,7 @@
  * que calculan métricas o estadísticas.
  */
 
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@/types/prisma-types';
 
 /**
  * Filtro base para excluir empresas de prueba/demo

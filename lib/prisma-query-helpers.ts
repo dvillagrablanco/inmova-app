@@ -12,7 +12,7 @@
  */
 
 import { prisma } from './db';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@/types/prisma-types';
 
 // ========================
 // TYPES & INTERFACES

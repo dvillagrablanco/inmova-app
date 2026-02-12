@@ -11,12 +11,8 @@
  */
 
 import { prisma } from './db';
-import {
-  TipoArrendamiento,
-  MotivoTemporalidad,
-  EstadoInventario,
-  ContractStatus,
-} from '@prisma/client';
+import { ContractStatus } from '@/types/prisma-types';
+import { TipoArrendamiento, MotivoTemporalidad, EstadoInventario } from '@/types/prisma-types';
 import {
   differenceInDays,
   differenceInMonths,

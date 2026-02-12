@@ -5,7 +5,7 @@
  * - Agregaciones optimizadas
  */
 
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@/types/prisma-types';
 import { prisma } from './db';
 
 /**

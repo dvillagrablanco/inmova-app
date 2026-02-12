@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@/types/prisma-types';
 import { prisma } from '@/lib/db';
 import { Engine } from 'node-rules-engine';
 

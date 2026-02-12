@@ -16,7 +16,7 @@
  * - Almacenamiento en CRM
  */
 
-import type { CompanySize, CRMLeadSource } from '@prisma/client';
+import type { CompanySize, CRMLeadSource } from '@/types/prisma-types';
 import { prisma } from '@/lib/db';
 import puppeteer, { type Browser, type Page } from 'puppeteer';
 

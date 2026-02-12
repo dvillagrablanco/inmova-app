@@ -16,11 +16,8 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 import logger from '@/lib/logger';
-import { 
-  DocumentImportCategory, 
-  ExtractedDataType,
-  DocumentImportStatus 
-} from '@prisma/client';
+import { ExtractedDataType } from '@/types/prisma-types';
+import { DocumentImportCategory, DocumentImportStatus } from '@/types/prisma-types';
 
 // ============================================================================
 // CONFIGURACIÓN

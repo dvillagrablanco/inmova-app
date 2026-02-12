@@ -10,7 +10,7 @@
  */
 
 import { prisma } from './db';
-import { SMSTipo, SMSEstado } from '@prisma/client';
+import { SMSTipo, SMSEstado } from '@/types/prisma-types';
 import twilio from 'twilio';
 import logger, { logError } from '@/lib/logger';
 

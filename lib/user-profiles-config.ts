@@ -9,7 +9,7 @@
  * - Vertical de negocio
  */
 
-import { UserRole, ExperienceLevel, TechSavviness, BusinessVertical, PortfolioSize } from '@prisma/client';
+import { UserRole, ExperienceLevel, TechSavviness, BusinessVertical, PortfolioSize } from '@/types/prisma-types';
 
 export interface UserProfile {
   role: UserRole;

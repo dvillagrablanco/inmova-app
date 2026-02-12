@@ -5,7 +5,7 @@
  */
 
 import { prisma } from './db';
-import { RoomPayment } from '@prisma/client';
+import { RoomPayment } from '@/types/prisma-types';
 import { addMonths, differenceInDays, format, startOfMonth, endOfMonth } from 'date-fns';
 import { es } from 'date-fns/locale';
 

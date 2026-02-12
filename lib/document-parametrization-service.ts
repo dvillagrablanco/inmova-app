@@ -10,7 +10,7 @@
 
 import { prisma } from '@/lib/db';
 import logger from '@/lib/logger';
-import { ExtractedDataType } from '@prisma/client';
+import { ExtractedDataType } from '@/types/prisma-types';
 
 // ============================================================================
 // TIPOS

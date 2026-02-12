@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { Building } from '@prisma/client';
+import type { Building } from '@/types/prisma-types';
 
 /**
  * Hook para obtener lista de edificios

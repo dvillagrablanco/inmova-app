@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from './query-keys';
-import type { Contract } from '@prisma/client';
+import type { Contract } from '@/types/prisma-types';
 
 interface ContractFilters {
   status?: string;

@@ -3,7 +3,7 @@
  * Provides helpers for optimizing Prisma queries
  */
 
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@/types/prisma-types';
 
 /**
  * Common field selections for optimized queries

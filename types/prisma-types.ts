@@ -128,6 +128,49 @@ export type {
   // Match types (Coliving)
   ColivingMatch,
 
+  // Tenant types
+  Tenant,
+
+  // Building types
+  Building,
+  Unit,
+
+  // Business types
+  BusinessVertical,
+  ExperienceLevel,
+  TechSavviness,
+  PortfolioSize,
+
+  // Onboarding types
+  OnboardingTaskStatus,
+  OnboardingTaskType,
+
+  // Valuation types
+  ValoracionMetodo,
+  ValoracionFinalidad,
+
+  // Publication types
+  PublicacionEstado,
+
+  // SMS types (enums)
+  SMSTipo,
+  SMSEstado,
+
+  // Document analysis types
+  ExtractedDataType,
+
+  // Room rental types
+  RoomPayment,
+
+  // Medium-term rental types
+  TipoArrendamiento,
+  MotivoTemporalidad,
+  EstadoInventario,
+
+  // Document import types
+  DocumentImportCategory,
+  DocumentImportStatus,
+
   // Prisma utility types
   Prisma,
 } from '@prisma/client';

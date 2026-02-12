@@ -8,7 +8,7 @@
  * @since Semana 2, Tarea 2.4
  */
 
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@/types/prisma-types';
 import logger from './logger';
 
 // Umbrales de performance
