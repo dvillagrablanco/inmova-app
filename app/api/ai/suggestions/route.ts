@@ -63,10 +63,10 @@ async function generateSuggestions({
   userId,
   context,
 }: {
-  const prisma = await getPrisma();
   userId: string;
   context?: Record<string, unknown>;
 }) {
+  const prisma = await getPrisma();
   const prisma = await getPrisma();
   const user = await prisma.user.findUnique({
     where: { id: userId },
