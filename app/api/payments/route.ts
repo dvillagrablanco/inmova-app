@@ -133,6 +133,8 @@ export async function GET(req: NextRequest) {
     }
 
     // Sin filtros ni paginación, usar caché
+    let paymentsResult: any[] = [];
+    
     if (scope.scopeCompanyIds.length !== 1) {
       const payments = await prisma.payment.findMany({
         where: {
@@ -157,16 +159,59 @@ export async function GET(req: NextRequest) {
         orderBy: { fechaVencimiento: 'desc' },
       });
 
-      const paymentsWithNumbers = payments.map(payment => ({
+      paymentsResult = payments.map(payment => ({
         ...payment,
         monto: Number(payment.monto || 0),
       }));
-
-      return NextResponse.json(paymentsWithNumbers);
+    } else {
+      paymentsResult = await cachedPayments(scope.activeCompanyId);
     }
 
-    const payments = await cachedPayments(scope.activeCompanyId);
-    return NextResponse.json(payments);
+    // Si no hay pagos operativos, hacer fallback a AccountingTransaction (ingresos contables)
+    if (paymentsResult.length === 0 && scope.activeCompanyId) {
+      const companyFilter = scope.scopeCompanyIds.length > 1 
+        ? { in: scope.scopeCompanyIds } 
+        : scope.activeCompanyId;
+
+      const accountingIncome = await prisma.accountingTransaction.findMany({
+        where: {
+          companyId: companyFilter,
+          tipo: 'ingreso',
+        },
+        orderBy: { fecha: 'desc' },
+        take: 50,
+      });
+
+      if (accountingIncome.length > 0) {
+        const mapped = accountingIncome.map((tx: any) => ({
+          id: tx.id,
+          monto: Number(tx.monto || 0),
+          estado: 'pagado',
+          fechaPago: tx.fecha?.toISOString() || null,
+          fechaVencimiento: tx.fecha?.toISOString() || new Date().toISOString(),
+          periodo: tx.fecha ? new Date(tx.fecha).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' }) : '',
+          metodoPago: 'contabilidad',
+          notas: tx.notas || tx.referencia || '',
+          contract: {
+            tenant: {
+              nombreCompleto: tx.concepto || 'Ingreso contable',
+            },
+            unit: {
+              numero: tx.categoria || '',
+              building: {
+                nombre: tx.categoria?.replace(/^ingreso_renta_?/, '').replace(/_/g, ' ') || 'Contabilidad',
+              },
+            },
+          },
+          source: 'accounting',
+        }));
+
+        logger.info(`Pagos/ingresos contables (fallback): ${mapped.length}`, { companyId: scope.activeCompanyId });
+        return NextResponse.json(mapped);
+      }
+    }
+
+    return NextResponse.json(paymentsResult);
   } catch (error) {
     logger.error('Error fetching payments:', error);
     return NextResponse.json({ error: 'Error al obtener pagos' }, { status: 500 });
