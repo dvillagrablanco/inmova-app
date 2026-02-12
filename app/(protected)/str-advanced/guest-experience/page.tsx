@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -12,6 +12,21 @@ import { Star, Book, MessageCircle, AlertCircle, ThumbsUp, Mail, Gift } from 'lu
 export default function GuestExperiencePage() {
   const router = useRouter();
   const [reviews, setReviews] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const res = await fetch('/api/str-advanced/guest-experience');
+        if (res.ok) {
+          const json = await res.json();
+          setReviews(json.data || []);
+        }
+      } catch (error) {
+        console.error('Error loading guest reviews:', error);
+      }
+    };
+    fetchReviews();
+  }, []);
 
   return (
     <AuthenticatedLayout>

@@ -7,30 +7,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { addDays } from 'date-fns';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-interface ScheduledEvent {
-  id: string;
-  titulo: string;
-  tipo: 'visita' | 'mantenimiento' | 'reunion' | 'contrato' | 'otro';
-  fecha: Date;
-  hora: string;
-  duracion: number;
-  descripcion?: string;
-  propiedad?: string;
-  asignado?: string;
-  completado: boolean;
-}
-
-function generateEvents(): ScheduledEvent[] {
-  // TODO: Obtener eventos desde la base de datos
-  return [];
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
 }
 
 export async function GET() {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     
@@ -41,11 +28,33 @@ export async function GET() {
       );
     }
 
-    const events = generateEvents();
+    const companyId = (session.user as any)?.companyId;
+    if (!companyId) {
+      return NextResponse.json({ success: true, data: [] });
+    }
+
+    const events = await prisma.calendarEvent.findMany({
+      where: { companyId },
+      orderBy: { fechaInicio: 'asc' },
+      take: 50,
+    });
+
+    const mapped = events.map((e: any) => ({
+      id: e.id,
+      titulo: e.titulo,
+      tipo: e.tipo || 'otro',
+      fecha: e.fechaInicio,
+      hora: e.fechaInicio ? new Date(e.fechaInicio).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '',
+      duracion: e.duracionMinutos || 30,
+      descripcion: e.descripcion || '',
+      propiedad: e.ubicacion || '',
+      asignado: e.asignadoA || '',
+      completado: e.estado === 'completado',
+    }));
 
     return NextResponse.json({
       success: true,
-      data: events,
+      data: mapped,
     });
   } catch (error) {
     console.error('[API Error] Planificación:', error);
@@ -57,40 +66,48 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     
     if (!session) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+    }
+
+    const companyId = (session.user as any)?.companyId;
+    if (!companyId) {
+      return NextResponse.json({ error: 'Sin empresa' }, { status: 403 });
     }
 
     const body = await request.json();
     
-    const newEvent: ScheduledEvent = {
-      id: `evt-${Date.now()}`,
-      titulo: body.titulo,
-      tipo: body.tipo || 'otro',
-      fecha: new Date(body.fecha),
-      hora: body.hora,
-      duracion: body.duracion || 30,
-      descripcion: body.descripcion,
-      propiedad: body.propiedad,
-      asignado: body.asignado,
-      completado: false,
-    };
+    const event = await prisma.calendarEvent.create({
+      data: {
+        companyId,
+        titulo: body.titulo || 'Nuevo evento',
+        tipo: body.tipo || 'otro',
+        fechaInicio: new Date(body.fecha || Date.now()),
+        duracionMinutos: body.duracion || 30,
+        descripcion: body.descripcion || '',
+        ubicacion: body.propiedad || '',
+        asignadoA: body.asignado || '',
+        estado: 'pendiente',
+        creadorId: (session.user as any).id,
+      },
+    });
 
     return NextResponse.json({
       success: true,
-      data: newEvent,
+      data: {
+        id: event.id,
+        titulo: event.titulo,
+        tipo: event.tipo,
+        fecha: event.fechaInicio,
+        completado: false,
+      },
     }, { status: 201 });
   } catch (error) {
     console.error('[API Error] Create Event:', error);
-    return NextResponse.json(
-      { error: 'Error creando evento' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error creando evento' }, { status: 500 });
   }
 }

@@ -38,9 +38,9 @@ export default function PortalInquilinoPage() {
     try {
       setLoading(true);
       const [profileRes, pagosRes, incidenciasRes, docsRes] = await Promise.all([
-        fetch('/api/portal-inquilino/profile'),
+        fetch('/api/portal-inquilino/perfil'),
         fetch('/api/portal-inquilino/payments'),
-        fetch('/api/portal-inquilino/incidents'),
+        fetch('/api/portal-inquilino/incidencias'),
         fetch('/api/portal-inquilino/documents'),
       ]);
 

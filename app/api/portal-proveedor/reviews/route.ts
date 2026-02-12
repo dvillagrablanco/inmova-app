@@ -5,30 +5,18 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-interface Review {
-  id: string;
-  clienteNombre: string;
-  servicio: string;
-  puntuacion: number;
-  comentario: string;
-  fecha: string;
-  respondida: boolean;
-  respuesta?: string;
-  fechaRespuesta?: string;
-  util: number;
-  noUtil: number;
-}
-
-function generateReviews(): Review[] {
-  // TODO: Obtener reseñas desde la base de datos
-  return [];
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
 }
 
 export async function GET() {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     
@@ -36,24 +24,52 @@ export async function GET() {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const reviews = generateReviews();
-    const ratingDistribution = [
-      { stars: 5, count: 45 },
-      { stars: 4, count: 28 },
-      { stars: 3, count: 12 },
-      { stars: 2, count: 3 },
-      { stars: 1, count: 2 },
-    ];
+    const userEmail = session.user?.email;
+    if (!userEmail) {
+      return NextResponse.json({ success: true, data: { reviews: [], ratingDistribution: [] } });
+    }
+
+    // Buscar reviews del proveedor por email del usuario
+    const reviews = await prisma.review.findMany({
+      where: {
+        OR: [
+          { entityId: userEmail },
+          { company: { users: { some: { email: userEmail } } } },
+        ],
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 50,
+    });
+
+    const mapped = reviews.map((r: any) => ({
+      id: r.id,
+      clienteNombre: r.authorName || 'Anónimo',
+      servicio: r.title || '',
+      puntuacion: r.rating || 0,
+      comentario: r.comment || '',
+      fecha: r.createdAt?.toISOString().split('T')[0] || '',
+      respondida: !!r.response,
+      respuesta: r.response || undefined,
+      fechaRespuesta: r.respondedAt?.toISOString().split('T')[0] || undefined,
+      util: r.helpfulCount || 0,
+      noUtil: r.notHelpfulCount || 0,
+    }));
+
+    // Calcular distribución de ratings
+    const ratingDistribution = [5, 4, 3, 2, 1].map(stars => ({
+      stars,
+      count: mapped.filter(r => r.puntuacion === stars).length,
+    }));
 
     return NextResponse.json({
       success: true,
       data: {
-        reviews,
+        reviews: mapped,
         ratingDistribution,
       },
     });
   } catch (error) {
-    console.error('[API Error] Reviews:', error);
+    logger.error('[API Error] Reviews:', error);
     return NextResponse.json({ error: 'Error obteniendo reseñas' }, { status: 500 });
   }
 }

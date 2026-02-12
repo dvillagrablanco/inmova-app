@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -20,6 +20,21 @@ import {
 export default function LegalCompliancePage() {
   const router = useRouter();
   const [licenses, setLicenses] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchLicenses = async () => {
+      try {
+        const res = await fetch('/api/str-advanced/legal');
+        if (res.ok) {
+          const json = await res.json();
+          setLicenses(json.data || []);
+        }
+      } catch (error) {
+        console.error('Error loading licenses:', error);
+      }
+    };
+    fetchLicenses();
+  }, []);
 
   const getStatusBadge = (status: string) => {
     switch (status) {

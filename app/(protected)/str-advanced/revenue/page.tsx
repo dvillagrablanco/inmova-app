@@ -37,6 +37,25 @@ export default function RevenueManagementPage() {
 
   const [strategies, setStrategies] = useState<any[]>([]);
 
+  useEffect(() => {
+    const fetchRevenue = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch('/api/str-advanced/revenue');
+        if (res.ok) {
+          const json = await res.json();
+          if (json.revenueData) setRevenueData(json.revenueData);
+          if (json.strategies) setStrategies(json.strategies);
+        }
+      } catch (error) {
+        console.error('Error loading revenue data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (status === 'authenticated') fetchRevenue();
+  }, [status]);
+
   return (
     <AuthenticatedLayout>
           <div className="max-w-7xl mx-auto">

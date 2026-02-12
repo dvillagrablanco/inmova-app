@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -20,6 +20,21 @@ import {
 export default function HousekeepingPage() {
   const router = useRouter();
   const [tasks, setTasks] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        const res = await fetch('/api/str-advanced/housekeeping');
+        if (res.ok) {
+          const json = await res.json();
+          setTasks(json.data || []);
+        }
+      } catch (error) {
+        console.error('Error loading housekeeping tasks:', error);
+      }
+    };
+    fetchTasks();
+  }, []);
 
   const getStatusColor = (status: string) => {
     switch (status) {

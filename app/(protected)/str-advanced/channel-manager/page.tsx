@@ -18,6 +18,21 @@ export default function ChannelManagerPage() {
   const [loading, setLoading] = useState(false);
   const [channels, setChannels] = useState<any[]>([]);
 
+  useEffect(() => {
+    const fetchChannels = async () => {
+      try {
+        const res = await fetch('/api/str-advanced/channel-manager');
+        if (res.ok) {
+          const json = await res.json();
+          setChannels(json.data || []);
+        }
+      } catch (error) {
+        console.error('Error loading channels:', error);
+      }
+    };
+    if (status === 'authenticated') fetchChannels();
+  }, [status]);
+
   const syncChannel = async (channelId: string) => {
     try {
       setLoading(true);
