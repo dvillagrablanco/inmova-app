@@ -118,8 +118,6 @@ export default function AnalyticsPage() {
     {
       title: 'Ingresos Mensuales',
       value: `€${stats?.monthlyIncome?.toLocaleString() || 0}`,
-      change: '+12%',
-      trend: 'up',
       icon: DollarSign,
       color: 'text-green-500',
       bgColor: 'bg-green-50',
@@ -127,8 +125,6 @@ export default function AnalyticsPage() {
     {
       title: 'Tasa de Ocupación',
       value: `${stats?.occupancyRate || 0}%`,
-      change: '+5%',
-      trend: 'up',
       icon: Percent,
       color: 'text-blue-500',
       bgColor: 'bg-blue-50',

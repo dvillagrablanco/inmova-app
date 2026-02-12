@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -34,31 +35,67 @@ import {
   XCircle,
 } from 'lucide-react';
 
-// KPIs principales (sin datos iniciales)
-const kpis = [
-  { label: 'Facturación Total', value: '€0', change: '-', trend: 'up' as const, icon: DollarSign, color: 'text-green-600' },
-  { label: 'Operaciones Cerradas', value: '0', change: '-', trend: 'up' as const, icon: Building2, color: 'text-blue-600' },
-  { label: 'Tasa de Conversión', value: '0%', change: '-', trend: 'up' as const, icon: Target, color: 'text-purple-600' },
-  { label: 'Ticket Medio', value: '€0', change: '-', trend: 'up' as const, icon: TrendingUp, color: 'text-amber-600' },
-];
-
-// Arrays vacíos - se llenarán con datos reales
-const rendimientoMensual: Array<{ mes: string; operaciones: number; comisiones: number }> = [];
-
-const tiposOperacion: Array<{ tipo: string; cantidad: number; porcentaje: number; color: string }> = [];
-
-const objetivos = [
-  { nombre: 'Facturación Q2', actual: 0, objetivo: 100000, unidad: '€' },
-  { nombre: 'Operaciones Mes', actual: 0, objetivo: 20, unidad: '' },
-  { nombre: 'Nuevos Agentes', actual: 0, objetivo: 5, unidad: '' },
-  { nombre: 'Tasa Retención', actual: 0, objetivo: 95, unidad: '%' },
-];
-
-const metricasAgentes: Array<{ nombre: string; operaciones: number; conversion: number; comisiones: number; leads: number; status: string }> = [];
+interface DashboardData {
+  kpis: {
+    facturacion: number;
+    operaciones: number;
+    conversionRate: number;
+    ticketMedio: number;
+    totalAgents: number;
+    activeAgents: number;
+  };
+  metricasAgentes: Array<{
+    nombre: string;
+    operaciones: number;
+    conversion: number;
+    comisiones: number;
+    leads: number;
+    status: string;
+  }>;
+  objetivos: Array<{
+    nombre: string;
+    actual: number;
+    objetivo: number;
+    unidad: string;
+  }>;
+}
 
 export default function RedAgentesDashboardPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [periodo, setPeriodo] = useState('mes');
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<DashboardData | null>(null);
+
+  useEffect(() => {
+    if (status === 'unauthenticated') router.push('/login');
+    else if (status === 'authenticated') fetchData();
+  }, [status, periodo]);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(`/api/red-agentes/dashboard?periodo=${periodo}`);
+      if (res.ok) {
+        setData(await res.json());
+      }
+    } catch (error) {
+      console.error('Error loading agent dashboard:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const kpis = data?.kpis;
+  const metricasAgentes = data?.metricasAgentes || [];
+  const objetivos = data?.objetivos || [];
+
+  const kpiCards = [
+    { label: 'Facturación Total', value: kpis ? `€${kpis.facturacion.toLocaleString('es-ES')}` : '€0', icon: DollarSign, color: 'text-green-600' },
+    { label: 'Operaciones Cerradas', value: String(kpis?.operaciones || 0), icon: Building2, color: 'text-blue-600' },
+    { label: 'Tasa de Conversión', value: `${kpis?.conversionRate || 0}%`, icon: Target, color: 'text-purple-600' },
+    { label: 'Ticket Medio', value: kpis ? `€${kpis.ticketMedio.toLocaleString('es-ES')}` : '€0', icon: TrendingUp, color: 'text-amber-600' },
+  ];
 
   return (
     <AuthenticatedLayout>
@@ -97,86 +134,17 @@ export default function RedAgentesDashboardPage() {
 
         {/* KPIs principales */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {kpis.map((kpi, index) => (
+          {kpiCards.map((kpi, index) => (
             <Card key={index}>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-2">
                   <kpi.icon className={`h-5 w-5 ${kpi.color}`} />
-                  <Badge variant={kpi.trend === 'up' ? 'default' : 'destructive'} className="text-xs">
-                    {kpi.trend === 'up' ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
-                    {kpi.change}
-                  </Badge>
                 </div>
                 <p className="text-2xl font-bold">{kpi.value}</p>
                 <p className="text-sm text-muted-foreground">{kpi.label}</p>
               </CardContent>
             </Card>
           ))}
-        </div>
-
-        {/* Gráficos y métricas */}
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Evolución mensual */}
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5" />
-                Evolución Mensual
-              </CardTitle>
-              <CardDescription>Operaciones y comisiones por mes</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {rendimientoMensual.map((mes, index) => (
-                  <div key={index} className="flex items-center gap-4">
-                    <div className="w-12 text-sm font-medium">{mes.mes}</div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <div 
-                          className="h-6 bg-gradient-to-r from-blue-500 to-blue-600 rounded"
-                          style={{ width: `${(mes.operaciones / 30) * 100}%` }}
-                        />
-                        <span className="text-sm font-medium">{mes.operaciones} ops</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div 
-                          className="h-4 bg-gradient-to-r from-green-500 to-green-600 rounded opacity-70"
-                          style={{ width: `${(mes.comisiones / 200000) * 100}%` }}
-                        />
-                        <span className="text-xs text-muted-foreground">€{(mes.comisiones/1000).toFixed(0)}K</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Distribución por tipo */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <PieChart className="h-5 w-5" />
-                Por Tipo de Operación
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {tiposOperacion.map((tipo, index) => (
-                  <div key={index} className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="font-medium">{tipo.tipo}</span>
-                      <span>{tipo.cantidad} ({tipo.porcentaje}%)</span>
-                    </div>
-                    <Progress value={tipo.porcentaje} className={tipo.color} />
-                  </div>
-                ))}
-              </div>
-              <div className="mt-6 pt-4 border-t">
-                <p className="text-sm text-muted-foreground">Total: 23 operaciones</p>
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
         {/* Objetivos */}
@@ -191,7 +159,7 @@ export default function RedAgentesDashboardPage() {
           <CardContent>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               {objetivos.map((obj, index) => {
-                const progreso = (obj.actual / obj.objetivo) * 100;
+                const progreso = obj.objetivo > 0 ? (obj.actual / obj.objetivo) * 100 : 0;
                 return (
                   <div key={index} className="space-y-2">
                     <div className="flex items-center justify-between">
@@ -222,41 +190,48 @@ export default function RedAgentesDashboardPage() {
             <CardDescription>Comparativa de métricas individuales</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-3 px-4 font-medium">Agente</th>
-                    <th className="text-center py-3 px-4 font-medium">Operaciones</th>
-                    <th className="text-center py-3 px-4 font-medium">Conversión</th>
-                    <th className="text-center py-3 px-4 font-medium">Comisiones</th>
-                    <th className="text-center py-3 px-4 font-medium">Leads</th>
-                    <th className="text-center py-3 px-4 font-medium">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {metricasAgentes.map((agente, index) => (
-                    <tr key={index} className="border-b hover:bg-muted/50">
-                      <td className="py-3 px-4 font-medium">{agente.nombre}</td>
-                      <td className="text-center py-3 px-4">{agente.operaciones}</td>
-                      <td className="text-center py-3 px-4">{agente.conversion}%</td>
-                      <td className="text-center py-3 px-4 text-green-600 font-semibold">€{agente.comisiones.toLocaleString()}</td>
-                      <td className="text-center py-3 px-4">{agente.leads}</td>
-                      <td className="text-center py-3 px-4">
-                        <Badge variant={
-                          agente.status === 'excellent' ? 'default' :
-                          agente.status === 'good' ? 'secondary' : 'outline'
-                        }>
-                          {agente.status === 'excellent' && <Award className="h-3 w-3 mr-1" />}
-                          {agente.status === 'excellent' ? 'Excelente' :
-                           agente.status === 'good' ? 'Bueno' : 'Regular'}
-                        </Badge>
-                      </td>
+            {metricasAgentes.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>No hay agentes registrados</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left py-3 px-4 font-medium">Agente</th>
+                      <th className="text-center py-3 px-4 font-medium">Operaciones</th>
+                      <th className="text-center py-3 px-4 font-medium">Conversión</th>
+                      <th className="text-center py-3 px-4 font-medium">Comisiones</th>
+                      <th className="text-center py-3 px-4 font-medium">Leads</th>
+                      <th className="text-center py-3 px-4 font-medium">Status</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {metricasAgentes.map((agente, index) => (
+                      <tr key={index} className="border-b hover:bg-muted/50">
+                        <td className="py-3 px-4 font-medium">{agente.nombre}</td>
+                        <td className="text-center py-3 px-4">{agente.operaciones}</td>
+                        <td className="text-center py-3 px-4">{agente.conversion}%</td>
+                        <td className="text-center py-3 px-4 text-green-600 font-semibold">€{agente.comisiones.toLocaleString()}</td>
+                        <td className="text-center py-3 px-4">{agente.leads}</td>
+                        <td className="text-center py-3 px-4">
+                          <Badge variant={
+                            agente.status === 'excellent' ? 'default' :
+                            agente.status === 'good' ? 'secondary' : 'outline'
+                          }>
+                            {agente.status === 'excellent' && <Award className="h-3 w-3 mr-1" />}
+                            {agente.status === 'excellent' ? 'Excelente' :
+                             agente.status === 'good' ? 'Bueno' : 'Regular'}
+                          </Badge>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
