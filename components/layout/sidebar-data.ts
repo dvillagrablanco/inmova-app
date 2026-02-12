@@ -58,6 +58,7 @@ import {
   Calculator,
   MapPin,
   Crown,
+  ArrowRightLeft,
 } from 'lucide-react';
 
 export interface SubItem {
@@ -130,6 +131,15 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/admin/usuarios': 'usuarios',
   '/admin/modulos': 'configuracion',
   '/admin/sales-team': 'admin_sales_team',
+  '/finanzas': 'finanzas',
+  '/finanzas/conciliacion': 'finanzas',
+  '/contabilidad': 'finanzas',
+  '/contabilidad/integraciones': 'finanzas',
+  '/reportes/financieros': 'finanzas',
+  '/open-banking': 'finanzas',
+  '/facturacion': 'finanzas',
+  '/presupuestos': 'finanzas',
+  '/estadisticas': 'finanzas',
   '/analytics': 'analytics',
   '/valoracion-ia': 'valoracion_ia',
   '/str/listings': 'str_listings',
@@ -1119,6 +1129,18 @@ const finanzasNavItems = [
     name: 'Facturación',
     href: '/facturacion',
     icon: FileText,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Conciliación Bancaria',
+    href: '/finanzas/conciliacion',
+    icon: ArrowRightLeft,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Reportes Financieros',
+    href: '/reportes/financieros',
+    icon: BarChart2,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
