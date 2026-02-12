@@ -56,6 +56,9 @@ export default function ContabilidadPage() {
   const { data: session } = useSession() || {};
   const [periodo, setPeriodo] = useState(format(new Date(), 'yyyy-MM'));
   const [loading, setLoading] = useState(true);
+  
+  // Obtener companyId de la cookie o session para pasarlo a las APIs
+  const companyId = (session?.user as any)?.companyId || '';
 
   // Estados para diferentes secciones
   const [analyticsData, setAnalyticsData] = useState<any>(null);
@@ -190,43 +193,46 @@ export default function ContabilidadPage() {
     try {
       setLoading(true);
 
+      // Pasar companyId para que las APIs resuelvan la empresa correcta
+      const cParam = companyId ? `&companyId=${companyId}` : '';
+
       // Cargar contabilidad analítica
-      const analyticsRes = await fetch(`/api/accounting/analytics?periodo=${periodo}`);
+      const analyticsRes = await fetch(`/api/accounting/analytics?periodo=${periodo}${cParam}`);
       if (analyticsRes.ok) {
         const data = await analyticsRes.json();
         setAnalyticsData(data.data);
       }
 
       // Cargar centros de coste
-      const costCentersRes = await fetch(`/api/accounting/cost-centers?periodo=${periodo}`);
+      const costCentersRes = await fetch(`/api/accounting/cost-centers?periodo=${periodo}${cParam}`);
       if (costCentersRes.ok) {
         const data = await costCentersRes.json();
         setCostCentersData(data.data || []);
       }
 
       // Cargar información fiscal
-      const taxRes = await fetch(`/api/accounting/tax-summary?periodo=${periodo}`);
+      const taxRes = await fetch(`/api/accounting/tax-summary?periodo=${periodo}${cParam}`);
       if (taxRes.ok) {
         const data = await taxRes.json();
         setTaxData(data.data);
       }
 
       // Cargar cuenta de pérdidas y ganancias
-      const profitLossRes = await fetch(`/api/accounting/profit-loss?periodo=${periodo}`);
+      const profitLossRes = await fetch(`/api/accounting/profit-loss?periodo=${periodo}${cParam}`);
       if (profitLossRes.ok) {
         const data = await profitLossRes.json();
         setProfitLossData(data.data);
       }
 
       // Cargar ratios financieros
-      const ratiosRes = await fetch(`/api/accounting/ratios?periodo=${periodo}`);
+      const ratiosRes = await fetch(`/api/accounting/ratios?periodo=${periodo}${cParam}`);
       if (ratiosRes.ok) {
         const data = await ratiosRes.json();
         setRatiosData(data.data);
       }
 
       // Último período con datos contables
-      const latestRes = await fetch('/api/accounting/latest-period');
+      const latestRes = await fetch(`/api/accounting/latest-period?${companyId ? `companyId=${companyId}` : ''}`);
       if (latestRes.ok) {
         const data = await latestRes.json();
         setLatestPeriod(data.data || null);
@@ -239,7 +245,7 @@ export default function ContabilidadPage() {
           }
 
           const latestPLRes = await fetch(
-            `/api/accounting/profit-loss?periodo=${data.data.periodo}`
+            `/api/accounting/profit-loss?periodo=${data.data.periodo}${cParam}`
           );
           if (latestPLRes.ok) {
             const latestData = await latestPLRes.json();

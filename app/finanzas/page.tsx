@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { useSelectedCompany } from '@/lib/hooks/admin/useSelectedCompany';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -181,6 +182,7 @@ function SummarySkeleton() {
 export default function FinanzasPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { selectedCompany } = useSelectedCompany();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [financialSummary, setFinancialSummary] = useState<FinancialSummary>({
@@ -200,11 +202,21 @@ export default function FinanzasPage() {
     rentabilidad: '0',
   });
   const [latestPeriod, setLatestPeriod] = useState<LatestPeriodSummary | null>(null);
+  const [empresaActiva, setEmpresaActiva] = useState<string | null>(null);
   const currentPeriodLabel = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
 
   const fetchFinancialData = async () => {
     try {
-      const response = await fetch('/api/finanzas/summary');
+      // Pasar companyId explícitamente si hay empresa seleccionada
+      const params = new URLSearchParams();
+      if (selectedCompany?.id) {
+        params.set('companyId', selectedCompany.id);
+      }
+      const url = params.toString() 
+        ? `/api/finanzas/summary?${params.toString()}` 
+        : '/api/finanzas/summary';
+      
+      const response = await fetch(url);
       if (response.ok) {
         const data = await response.json();
         setFinancialSummary(data.summary || financialSummary);
@@ -223,7 +235,7 @@ export default function FinanzasPage() {
     if (status === 'authenticated') {
       fetchFinancialData();
     }
-  }, [status]);
+  }, [status, selectedCompany?.id]);
 
   const handleRefresh = () => {
     setRefreshing(true);
