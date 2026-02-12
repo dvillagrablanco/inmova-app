@@ -9,6 +9,9 @@ export const dynamic = 'force-dynamic';
  */
 
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -47,56 +50,58 @@ interface StatCard {
   color: string;
 }
 
-// Los stats se calculan dinámicamente desde la API
 interface SummaryData {
   totalBuildings: number;
   totalUnits: number;
   occupiedUnits: number;
   occupancyRate: number;
   totalIncome: number;
+  totalExpenses: number;
 }
 
-// Datos cargados desde API /api/estadisticas
+interface KPIsData {
+  avgPaymentDays: number;
+  contractRenewalRate: number;
+  roi: number;
+}
 
 export default function EstadisticasPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState('6m');
-  const [monthlyData, setMonthlyData] = useState<{mes: string; ingresos: number; ocupacion: number}[]>([]);
+  const [monthlyData, setMonthlyData] = useState<{mes: string; ingresos: number; gastos: number; ocupacion: number}[]>([]);
   const [propertyTypes, setPropertyTypes] = useState<{tipo: string; count: number; ocupacion: number; ingresos: number}[]>([]);
   const [topProperties, setTopProperties] = useState<{nombre: string; unidades: number; ocupacion: number; ingresos: number}[]>([]);
   const [summary, setSummary] = useState<SummaryData>({
-    totalBuildings: 0,
-    totalUnits: 0,
-    occupiedUnits: 0,
-    occupancyRate: 0,
-    totalIncome: 0,
+    totalBuildings: 0, totalUnits: 0, occupiedUnits: 0, occupancyRate: 0, totalIncome: 0, totalExpenses: 0,
   });
+  const [kpis, setKpis] = useState<KPIsData>({ avgPaymentDays: 0, contractRenewalRate: 0, roi: 0 });
 
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const response = await fetch('/api/estadisticas');
-        if (response.ok) {
-          const result = await response.json();
-          setMonthlyData(result.data?.monthlyData || []);
-          setPropertyTypes(result.data?.propertyTypes || []);
-          setTopProperties(result.data?.topProperties || []);
-          setSummary(result.data?.summary || {
-            totalBuildings: 0,
-            totalUnits: 0,
-            occupiedUnits: 0,
-            occupancyRate: 0,
-            totalIncome: 0,
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching statistics:', error);
-      } finally {
-        setLoading(false);
+    if (status === 'unauthenticated') router.push('/login');
+    else if (status === 'authenticated') fetchStats();
+  }, [status]);
+
+  const fetchStats = async () => {
+    try {
+      const response = await fetch('/api/estadisticas');
+      if (response.ok) {
+        const result = await response.json();
+        setMonthlyData(result.data?.monthlyData || []);
+        setPropertyTypes(result.data?.propertyTypes || []);
+        setTopProperties(result.data?.topProperties || []);
+        setSummary(result.data?.summary || {
+          totalBuildings: 0, totalUnits: 0, occupiedUnits: 0, occupancyRate: 0, totalIncome: 0, totalExpenses: 0,
+        });
+        setKpis(result.data?.kpis || { avgPaymentDays: 0, contractRenewalRate: 0, roi: 0 });
       }
-    };
-    fetchStats();
-  }, []);
+    } catch (error) {
+      console.error('Error fetching statistics:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
   
   // Generar stats cards dinámicos
   const STATS: StatCard[] = [
@@ -139,6 +144,7 @@ export default function EstadisticasPage() {
   };
 
   return (
+    <AuthenticatedLayout>
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -334,7 +340,7 @@ export default function EstadisticasPage() {
               <Clock className="h-8 w-8 text-blue-600" />
               <div>
                 <p className="text-sm text-muted-foreground">Tiempo medio de pago</p>
-                <p className="text-2xl font-bold">3.2 días</p>
+                <p className="text-2xl font-bold">{kpis.avgPaymentDays > 0 ? `${kpis.avgPaymentDays} días` : '-'}</p>
               </div>
             </div>
           </CardContent>
@@ -346,7 +352,7 @@ export default function EstadisticasPage() {
               <FileText className="h-8 w-8 text-green-600" />
               <div>
                 <p className="text-sm text-muted-foreground">Contratos renovados</p>
-                <p className="text-2xl font-bold">87%</p>
+                <p className="text-2xl font-bold">{kpis.contractRenewalRate > 0 ? `${kpis.contractRenewalRate}%` : '-'}</p>
               </div>
             </div>
           </CardContent>
@@ -355,10 +361,10 @@ export default function EstadisticasPage() {
         <Card className="bg-purple-50 dark:bg-purple-900/20">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <Users className="h-8 w-8 text-purple-600" />
+              <Euro className="h-8 w-8 text-purple-600" />
               <div>
-                <p className="text-sm text-muted-foreground">NPS Inquilinos</p>
-                <p className="text-2xl font-bold">72</p>
+                <p className="text-sm text-muted-foreground">Gastos totales</p>
+                <p className="text-2xl font-bold">€{summary.totalExpenses.toLocaleString('es-ES')}</p>
               </div>
             </div>
           </CardContent>
@@ -370,12 +376,13 @@ export default function EstadisticasPage() {
               <TrendingUp className="h-8 w-8 text-orange-600" />
               <div>
                 <p className="text-sm text-muted-foreground">ROI Medio</p>
-                <p className="text-2xl font-bold">6.8%</p>
+                <p className="text-2xl font-bold">{kpis.roi > 0 ? `${kpis.roi}%` : '-'}</p>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
     </div>
+    </AuthenticatedLayout>
   );
 }
