@@ -20,9 +20,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    // Solo super_admin puede acceder
+    // Solo admin puede acceder
     const userRole = (session.user as any)?.role;
-    if (userRole !== 'super_admin') {
+    if (!['super_admin', 'administrador', 'gestor', 'soporte'].includes(userRole)) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
     }
 

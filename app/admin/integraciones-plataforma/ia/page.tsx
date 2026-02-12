@@ -32,10 +32,10 @@ export default function IAPlataformaPage() {
     if (status === 'unauthenticated') {
       router.push('/login');
     }
-    const allowedRoles = ['super_admin', 'SUPER_ADMIN', 'superadmin', 'admin', 'ADMIN'];
-    const userRole = session?.user?.role?.toLowerCase();
-    if (status === 'authenticated' && userRole && !allowedRoles.map(r => r.toLowerCase()).includes(userRole)) {
-      router.push('/unauthorized');
+    const allowedRoles = ['super_admin', 'administrador', 'gestor', 'admin', 'soporte'];
+    const userRole = (session?.user as any)?.role?.toLowerCase();
+    if (status === 'authenticated' && userRole && !allowedRoles.includes(userRole)) {
+      router.push('/dashboard');
     }
   }, [status, session, router]);
 
