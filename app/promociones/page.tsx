@@ -467,7 +467,7 @@ export default function PromocionesPage() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="porcentaje">Porcentaje</SelectItem>
-                      <SelectItem value="monto_fijo">Monto fijo</SelectItem>
+                      <SelectItem value="monto_fijo">Importe fijo</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -531,7 +531,7 @@ export default function PromocionesPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="montoMinimo">Monto minimo (opcional)</Label>
+                  <Label htmlFor="montoMinimo">Importe minimo (opcional)</Label>
                   <Input
                     id="montoMinimo"
                     type="number"
@@ -585,7 +585,7 @@ export default function PromocionesPage() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="porcentaje">Porcentaje</SelectItem>
-                      <SelectItem value="monto_fijo">Monto fijo</SelectItem>
+                      <SelectItem value="monto_fijo">Importe fijo</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

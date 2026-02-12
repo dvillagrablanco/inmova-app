@@ -104,11 +104,11 @@ export default function PaymentsDashboard() {
       'Inquilino',
       'Edificio',
       'Unidad',
-      'Monto',
+      'Importe',
       'Estado',
       'Estado Stripe',
       'Comisión Stripe',
-      'Monto Neto',
+      'Importe Neto',
       'Fecha Pago',
     ];
 

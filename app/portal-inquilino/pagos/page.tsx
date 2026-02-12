@@ -254,7 +254,7 @@ export default function TenantPaymentsPage() {
                   <p className="font-semibold">{selectedPayment.periodo}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-gray-600">Monto</p>
+                  <p className="text-sm text-gray-600">Importe</p>
                   <p className="text-2xl font-bold">€{selectedPayment.monto.toFixed(2)}</p>
                 </div>
               </div>

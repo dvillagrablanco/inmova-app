@@ -313,7 +313,7 @@ export default function WarrantyManagementPage() {
                 <DollarSign className="h-8 w-8 text-emerald-600" />
                 <div>
                   <p className="text-2xl font-bold">€{(stats?.montoTotal || 0).toLocaleString()}</p>
-                  <p className="text-xs text-muted-foreground">Monto total</p>
+                  <p className="text-xs text-muted-foreground">Importe total</p>
                 </div>
               </div>
             </CardContent>
@@ -370,7 +370,7 @@ export default function WarrantyManagementPage() {
                       <TableRow>
                         <TableHead>Inquilino / Unidad</TableHead>
                         <TableHead>Tipo</TableHead>
-                        <TableHead>Monto</TableHead>
+                        <TableHead>Importe</TableHead>
                         <TableHead>Inicio</TableHead>
                         <TableHead>Vencimiento</TableHead>
                         <TableHead>Estado</TableHead>
@@ -463,7 +463,7 @@ export default function WarrantyManagementPage() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Monto (€) *</Label>
+                <Label>Importe (€) *</Label>
                 <Input
                   type="number"
                   min="0"

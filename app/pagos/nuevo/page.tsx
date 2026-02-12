@@ -204,9 +204,9 @@ export default function NuevoPagoPage() {
                   />
                 </div>
 
-                {/* Monto */}
+                {/* Importe */}
                 <div className="space-y-2">
-                  <Label htmlFor="monto">Monto (€) *</Label>
+                  <Label htmlFor="monto">Importe (€) *</Label>
                   <Input
                     id="monto"
                     name="monto"

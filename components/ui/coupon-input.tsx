@@ -172,7 +172,7 @@ export function CouponInput({
           </div>
           <div className="flex items-start gap-2 text-xs text-gray-600">
             <AlertCircle className="h-3 w-3 mt-0.5 flex-shrink-0" />
-            <p>Ingresa el código promocional para aplicar el descuento al monto total</p>
+            <p>Ingresa el código promocional para aplicar el descuento al importe total</p>
           </div>
         </div>
       </CardContent>

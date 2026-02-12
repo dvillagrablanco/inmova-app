@@ -143,7 +143,7 @@ export function StripeCheckoutForm({
       {/* Resumen del pago */}
       <div className="bg-gray-50 rounded-lg p-4 space-y-2">
         <div className="flex justify-between items-center">
-          <span className="text-sm text-gray-600">Monto:</span>
+          <span className="text-sm text-gray-600">Importe:</span>
           <span className="text-lg font-semibold">
             {(amount / 100).toFixed(2)} {currency.toUpperCase()}
           </span>

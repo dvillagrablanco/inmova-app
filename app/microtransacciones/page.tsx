@@ -456,7 +456,7 @@ export default function MicrotransaccionesPage() {
                     <TableHead>Tipo</TableHead>
                     <TableHead>Concepto</TableHead>
                     <TableHead>Fecha</TableHead>
-                    <TableHead className="text-right">Monto</TableHead>
+                    <TableHead className="text-right">Importe</TableHead>
                     <TableHead className="text-right">Saldo</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -577,7 +577,7 @@ export default function MicrotransaccionesPage() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Monto (€)</Label>
+              <Label>Importe (€)</Label>
               <Input
                 type="number"
                 min="0"

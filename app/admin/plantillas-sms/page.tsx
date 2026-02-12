@@ -79,7 +79,7 @@ const variablesDisponibles = [
   { nombre: '{{nombre}}', descripcion: 'Nombre completo del inquilino', ejemplo: 'Juan Pérez' },
   { nombre: '{{unidad}}', descripcion: 'Número de unidad', ejemplo: '3A' },
   { nombre: '{{edificio}}', descripcion: 'Nombre del edificio', ejemplo: 'Edificio Central' },
-  { nombre: '{{monto}}', descripcion: 'Monto económico', ejemplo: '850,00€' },
+  { nombre: '{{monto}}', descripcion: 'Importe económico', ejemplo: '850,00€' },
   { nombre: '{{fecha}}', descripcion: 'Fecha formateada', ejemplo: '15/12/2024' },
   { nombre: '{{email}}', descripcion: 'Email del inquilino', ejemplo: 'juan@email.com' },
   { nombre: '{{telefono}}', descripcion: 'Teléfono del inquilino', ejemplo: '+34 600 123 456' },

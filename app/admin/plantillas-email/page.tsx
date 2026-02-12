@@ -81,7 +81,7 @@ const variablesDisponibles = [
   { nombre: '{{empresa}}', descripcion: 'Nombre de la empresa' },
   { nombre: '{{propiedad}}', descripcion: 'Dirección de la propiedad' },
   { nombre: '{{unidad}}', descripcion: 'Número de unidad' },
-  { nombre: '{{monto}}', descripcion: 'Monto económico' },
+  { nombre: '{{monto}}', descripcion: 'Importe económico' },
   { nombre: '{{fecha}}', descripcion: 'Fecha' },
   { nombre: '{{enlace}}', descripcion: 'Enlace de acción' },
 ];

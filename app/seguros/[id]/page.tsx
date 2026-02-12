@@ -562,7 +562,7 @@ export default function InsuranceDetailPage() {
                         <TableHead>Nº Siniestro</TableHead>
                         <TableHead>Tipo</TableHead>
                         <TableHead>Fecha</TableHead>
-                        <TableHead>Monto</TableHead>
+                        <TableHead>Importe</TableHead>
                         <TableHead>Estado</TableHead>
                         <TableHead className="text-right">Acciones</TableHead>
                       </TableRow>
@@ -673,7 +673,7 @@ export default function InsuranceDetailPage() {
               </div>
 
               <div className="space-y-2">
-                <Label>Monto Estimado (€) *</Label>
+                <Label>Importe Estimado (€) *</Label>
                 <Input
                   type="number"
                   value={claimAmount}

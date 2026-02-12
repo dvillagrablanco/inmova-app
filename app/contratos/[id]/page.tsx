@@ -503,7 +503,7 @@ export default function ContractDetailPage() {
                     <TableHeader>
                       <TableRow>
                         <TableHead>Concepto</TableHead>
-                        <TableHead>Monto</TableHead>
+                        <TableHead>Importe</TableHead>
                         <TableHead>Vencimiento</TableHead>
                         <TableHead>Fecha Pago</TableHead>
                         <TableHead>Estado</TableHead>

@@ -411,7 +411,7 @@ export default function CuponesPage() {
                       </div>
                     </div>
                     <div>
-                      <Label htmlFor="montoMinimo">Monto Mínimo de Compra</Label>
+                      <Label htmlFor="montoMinimo">Importe Mínimo de Compra</Label>
                       <div className="relative">
                         <Input
                           id="montoMinimo"

@@ -461,7 +461,7 @@ export default function GastosPage() {
                         </Select>
                       </div>
                       <div>
-                        <Label htmlFor="monto">Monto (€) *</Label>
+                        <Label htmlFor="monto">Importe (€) *</Label>
                         <Input
                           id="monto"
                           type="number"
@@ -543,7 +543,7 @@ export default function GastosPage() {
                     </Select>
                   </div>
                   <div>
-                    <Label htmlFor="edit-monto">Monto (€) *</Label>
+                    <Label htmlFor="edit-monto">Importe (€) *</Label>
                     <Input
                       id="edit-monto"
                       type="number"
@@ -774,7 +774,7 @@ export default function GastosPage() {
                             </div>
                           )}
 
-                          {/* Fecha y Monto */}
+                          {/* Fecha y Importe */}
                           <div className="grid grid-cols-2 gap-3 text-sm">
                             <div className="space-y-1">
                               <div className="text-muted-foreground flex items-center gap-1">

@@ -371,7 +371,7 @@ function RecordatoriosPage() {
                       <Textarea
                         value={form.mensajePlantilla}
                         onChange={(e) => setForm({ ...form, mensajePlantilla: e.target.value })}
-                        placeholder="Mensaje del recordatorio (puedes usar variables como {{nombre}}, {{monto}}, {{fecha}})"
+                        placeholder="Mensaje del recordatorio (puedes usar variables como {{nombre}}, {{}}, {{fecha}})"
                         rows={4}
                         required
                       />

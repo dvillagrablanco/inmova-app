@@ -430,7 +430,7 @@ export default function PartnerDashboardPage() {
                       <TableRow>
                         <TableHead>Período</TableHead>
                         <TableHead>Concepto</TableHead>
-                        <TableHead>Monto</TableHead>
+                        <TableHead>Importe</TableHead>
                         <TableHead>Estado</TableHead>
                       </TableRow>
                     </TableHeader>

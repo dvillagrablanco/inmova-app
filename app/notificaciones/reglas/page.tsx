@@ -590,7 +590,7 @@ export default function NotificationRulesPage() {
                 id="mensaje"
                 value={formData.mensaje}
                 onChange={(e) => setFormData({ ...formData, mensaje: e.target.value })}
-                placeholder="Escribe el mensaje de la notificación. Puedes usar variables como {nombre_inquilino}, {monto}, {fecha_vencimiento}"
+                placeholder="Escribe el mensaje de la notificación. Puedes usar variables como {nombre_inquilino}, {}, {fecha_vencimiento}"
                 rows={4}
               />
               <p className="text-xs text-muted-foreground mt-1">

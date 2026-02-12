@@ -211,7 +211,7 @@ export default function RedAgentesComisionesPage() {
                       <tr className="border-b">
                         <th className="text-left py-3 px-4 font-medium">Agente</th>
                         <th className="text-left py-3 px-4 font-medium">Concepto</th>
-                        <th className="text-right py-3 px-4 font-medium">Monto</th>
+                        <th className="text-right py-3 px-4 font-medium">Importe</th>
                         <th className="text-center py-3 px-4 font-medium">Fecha</th>
                         <th className="text-center py-3 px-4 font-medium">Estado</th>
                       </tr>

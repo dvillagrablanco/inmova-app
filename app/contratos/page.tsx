@@ -514,7 +514,7 @@ function ContratosPageContent() {
         </div>
         </div>
         <div className="space-y-1">
-        <p className="text-xs text-muted-foreground">Monto Mensual</p>
+        <p className="text-xs text-muted-foreground">Importe Mensual</p>
                         <p className="text-base sm:text-lg font-bold text-green-600">
                         €{Number(contract.rentaMensual || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>

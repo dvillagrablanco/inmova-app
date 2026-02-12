@@ -205,7 +205,7 @@ export default function PartnerCommissionsPage() {
                     <div className="hidden md:grid grid-cols-6 gap-4 pb-3 border-b font-medium text-sm text-gray-600">
                       <div>Periodo</div>
                       <div>Cliente</div>
-                      <div className="text-right">Monto Bruto</div>
+                      <div className="text-right">Importe Bruto</div>
                       <div className="text-right">% Comisión</div>
                       <div className="text-right">Tu Comisión</div>
                       <div className="text-center">Estado</div>
@@ -246,7 +246,7 @@ export default function PartnerCommissionsPage() {
                               <p className="font-medium text-gray-900">
                                 €{com.montoBruto.toFixed(2)}
                               </p>
-                              <p className="text-xs text-gray-500">Monto bruto</p>
+                              <p className="text-xs text-gray-500">Importe bruto</p>
                             </div>
 
                             {/* Porcentaje */}

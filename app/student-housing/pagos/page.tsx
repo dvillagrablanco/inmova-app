@@ -269,7 +269,7 @@ export default function StudentHousingPagosPage() {
                   <TableHead>Residente</TableHead>
                   <TableHead>Habitación</TableHead>
                   <TableHead>Concepto</TableHead>
-                  <TableHead className="text-right">Monto</TableHead>
+                  <TableHead className="text-right">Importe</TableHead>
                   <TableHead>Vencimiento</TableHead>
                   <TableHead>Estado</TableHead>
                   <TableHead className="text-right">Acciones</TableHead>
@@ -316,7 +316,7 @@ export default function StudentHousingPagosPage() {
                                   <p className="font-medium">{pago.habitacion}</p>
                                 </div>
                                 <div>
-                                  <p className="text-muted-foreground">Monto</p>
+                                  <p className="text-muted-foreground">Importe</p>
                                   <p className="font-medium text-lg">€{pago.monto}</p>
                                 </div>
                                 <div>

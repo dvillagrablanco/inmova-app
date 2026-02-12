@@ -334,7 +334,7 @@ export default function NuevoContratoPage() {
                         <div className="space-y-2">
                           <div className="flex items-center gap-2">
                             <Label htmlFor="rentaMensual">Renta Mensual (€) *</Label>
-                            <InfoTooltip content="Monto mensual que el inquilino debe pagar. Este valor se usará para generar automáticamente los pagos recurrentes." />
+                            <InfoTooltip content="Importe mensual que el inquilino debe pagar. Este valor se usará para generar automáticamente los pagos recurrentes." />
                           </div>
                           <Input
                             id="rentaMensual"

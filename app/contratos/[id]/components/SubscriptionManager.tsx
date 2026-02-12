@@ -149,7 +149,7 @@ export default function SubscriptionManager({
 
             <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
               <div>
-                <p className="text-sm text-gray-600">Monto mensual</p>
+                <p className="text-sm text-gray-600">Importe mensual</p>
                 <p className="text-2xl font-bold">€{rentaMensual.toFixed(2)}</p>
               </div>
               <Button
@@ -184,7 +184,7 @@ export default function SubscriptionManager({
               {getStatusBadge(subscription.status)}
             </div>
             <div className="text-right">
-              <p className="text-sm text-gray-600">Monto mensual</p>
+              <p className="text-sm text-gray-600">Importe mensual</p>
               <p className="text-2xl font-bold">€{rentaMensual.toFixed(2)}</p>
             </div>
           </div>
