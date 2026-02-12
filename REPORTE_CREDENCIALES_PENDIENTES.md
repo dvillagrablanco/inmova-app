@@ -14,8 +14,8 @@ Se conecto al servidor por SSH y se realizaron 3 pases de busqueda:
 3. Busqueda en instalaciones antiguas (`/opt/inmova/`, `/opt/inmova-app.old.*/`)
 
 **Health check**: OK  
-**Variables activas**: 90  
-**Credenciales pendientes**: 8 (marcadas con `# PENDIENTE`)
+**Variables activas**: 92  
+**Credenciales pendientes**: 6 (marcadas con `# PENDIENTE`)
 
 ---
 
@@ -110,10 +110,10 @@ Con Bankinter Open Banking (Redsys PSD2) operativo en sandbox, la sincronizacion
 |---|---|
 | **Integraciones operativas** | 18 |
 | **Credenciales pendientes ALTA** | 1 (Stripe LIVE secret key - truncada en git filter-branch) |
-| **Credenciales pendientes MEDIA** | 3 (SendGrid, Contasimple x2, Bizum merchant ID) |
-| **Credenciales pendientes BAJA** | 4 (Zucchetti x2, Redes sociales) |
-| **Total pendientes** | 8 |
-| **Porcentaje operativo** | **90/98 vars = 92%** |
+| **Credenciales pendientes MEDIA** | 1 (SendGrid) |
+| **Credenciales pendientes BAJA** | 4 (Bizum merchant ID, Zucchetti x2, Redes sociales) |
+| **Total pendientes** | 6 |
+| **Porcentaje operativo** | **92/98 vars = 94%** |
 
 ---
 
@@ -136,10 +136,12 @@ Credenciales que estaban en scripts de deploy del servidor y se reintegraron al 
 | `DOCUSIGN_USER_ID` (corregido) | `scripts/configure-docusign-complete.py` | Corregido de 5f857d75 a 6db6e1e7 |
 | `TWILIO_ACCOUNT_SID` | `/root/inmova-credentials-backup/CREDENCIALES_COMPLETAS_LATEST.txt` | Recuperada y aplicada [34 chars] |
 | `TWILIO_AUTH_TOKEN` | `/root/inmova-credentials-backup/CREDENCIALES_COMPLETAS_LATEST.txt` | Recuperada y aplicada [32 chars] |
+| `CONTASIMPLE_AUTH_KEY` | `docs/legacy/INTEGRACION_CONTASIMPLE_COMPLETADA.md` | Recuperada: 4aed1d54316045bd8e8819310a2abb94 |
+| `INMOVA_CONTASIMPLE_AUTH_KEY` | Misma key (cuenta unica Contasimple) | Aplicada |
 
 ## 6. ARCHIVOS MODIFICADOS
 
-1. `/opt/inmova-app/.env.production` - Consolidado con 90 variables activas
+1. `/opt/inmova-app/.env.production` - Consolidado con 92 variables activas
 2. `/opt/inmova-app/.env.local` - Sincronizado con .env.production
 3. `.env.example` - Template completo con todas las integraciones
 4. `REPORTE_CREDENCIALES_PENDIENTES.md` - Este documento
@@ -150,7 +152,7 @@ Credenciales que estaban en scripts de deploy del servidor y se reintegraron al 
 **Fecha**: 12 de febrero de 2026  
 **Health check**: OK  
 **PM2**: 2 workers online  
-**Integraciones operativas**: 24/35
+**Integraciones operativas**: 25/35
 
 ### Nota sobre credenciales pendientes
 
@@ -169,7 +171,7 @@ Las 8 credenciales restantes se buscaron exhaustivamente en:
 **Resultado**:
 - **Stripe**: La `sk_live_51Sf0V7...` fue eliminada con git filter-branch y la `sk_test_` actual es invalida. El usuario debe ir a https://dashboard.stripe.com/apikeys y copiar las claves actuales (tanto test como live).
 - **SendGrid**: Solo existen placeholders (`SG.TU_API_KEY_AQUI`, `SG...`). Nunca hubo key real. Crear cuenta en https://app.sendgrid.com/
-- **Contasimple**: Solo existen placeholders (`cs_auth_tu-key-aqui`, `...`). Nunca hubo key real. Contratar en https://contasimple.com/
+- **Contasimple**: RECUPERADA de `docs/legacy/INTEGRACION_CONTASIMPLE_COMPLETADA.md` (key: `4aed1d54316045bd8e8819310a2abb94`). Aplicada al servidor.
 - **Bizum merchant ID**: Solicitar al banco via Redsys
 - **Zucchetti**: Contratar ERP y obtener credenciales OAuth
 - **Redes Sociales**: Registrar apps en cada plataforma
