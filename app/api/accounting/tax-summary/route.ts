@@ -42,11 +42,16 @@ export async function GET(request: NextRequest) {
       select: { tipo: true, categoria: true, monto: true },
     });
 
-    let ingresos = 0, gastos = 0, impuestos = 0;
+    let ingresos = 0,
+      gastos = 0,
+      impuestos = 0;
     for (const t of transactions) {
       if (t.tipo === 'ingreso') ingresos += t.monto;
       else gastos += t.monto;
-      if (t.categoria === 'gasto_impuesto') impuestos += t.monto;
+      // Incluir todas las categorías de impuestos
+      if (t.categoria === 'gasto_impuesto' || t.categoria === 'gasto_impuesto_sociedades') {
+        impuestos += t.monto;
+      }
     }
 
     const baseImponible = ingresos - gastos + impuestos;
@@ -58,7 +63,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       data: {
-        periodo: periodo || `${baseDate.getFullYear()}-${String(baseDate.getMonth() + 1).padStart(2, '0')}`,
+        periodo:
+          periodo ||
+          `${baseDate.getFullYear()}-${String(baseDate.getMonth() + 1).padStart(2, '0')}`,
         isConsolidated: scope.isConsolidated,
         baseImponible: Math.round(baseImponible * 100) / 100,
         iva: {

@@ -42,19 +42,24 @@ export async function GET(request: NextRequest) {
       select: { tipo: true, categoria: true, monto: true },
     });
 
-    let ingresos = 0, gastos = 0;
-    let gastosMantenimiento = 0, gastosAdministracion = 0, gastosServicios = 0;
+    let ingresos = 0,
+      gastos = 0;
+    let gastosMantenimiento = 0,
+      gastosAdministracion = 0,
+      gastosServicios = 0;
     let ingresoRenta = 0;
 
     for (const t of transactions) {
       if (t.tipo === 'ingreso') {
         ingresos += t.monto;
-        if (t.categoria === 'ingreso_renta') ingresoRenta += t.monto;
+        // Capturar todas las subcategorías de renta (ingreso_renta, ingreso_renta_garaje, etc.)
+        if (t.categoria.startsWith('ingreso_renta')) ingresoRenta += t.monto;
       } else {
         gastos += t.monto;
         if (t.categoria === 'gasto_mantenimiento') gastosMantenimiento += t.monto;
         if (t.categoria === 'gasto_administracion') gastosAdministracion += t.monto;
-        if (t.categoria === 'gasto_servicio') gastosServicios += t.monto;
+        if (t.categoria === 'gasto_servicio' || t.categoria === 'gasto_suministros')
+          gastosServicios += t.monto;
       }
     }
 
@@ -73,7 +78,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       data: {
-        periodo: periodo || `${baseDate.getFullYear()}-${String(baseDate.getMonth() + 1).padStart(2, '0')}`,
+        periodo:
+          periodo ||
+          `${baseDate.getFullYear()}-${String(baseDate.getMonth() + 1).padStart(2, '0')}`,
         isConsolidated: scope.isConsolidated,
         ratios: {
           margenNeto: Math.round(margenNeto * 100) / 100,

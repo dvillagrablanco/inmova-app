@@ -35,8 +35,7 @@ interface FinancialReport {
 
 const periodSchema = z.enum(['month', 'quarter', 'year']);
 
-async function getPeriodRange(period: Period) {
-  const prisma = await getPrisma();
+function getPeriodRange(period: Period) {
   const now = new Date();
   let start: Date;
 
@@ -63,14 +62,12 @@ async function getPeriodRange(period: Period) {
   return { start, end, previousStart, previousEnd };
 }
 
-async function roundTo(value: number, decimals: number) {
-  const prisma = await getPrisma();
+function roundTo(value: number, decimals: number) {
   const factor = 10 ** decimals;
   return Math.round(value * factor) / factor;
 }
 
-async function getErrorMessage(error: unknown) {
-  const prisma = await getPrisma();
+function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : 'Error desconocido';
 }
 
