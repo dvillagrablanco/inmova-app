@@ -202,8 +202,7 @@ export default function FinanzasPage() {
     rentabilidad: '0',
   });
   const [latestPeriod, setLatestPeriod] = useState<LatestPeriodSummary | null>(null);
-  const [empresaActiva, setEmpresaActiva] = useState<string | null>(null);
-  const currentPeriodLabel = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+  const [meta, setMeta] = useState<any>(null);
 
   const fetchFinancialData = async () => {
     try {
@@ -222,6 +221,7 @@ export default function FinanzasPage() {
         setFinancialSummary(data.summary || financialSummary);
         setModuleStats(data.moduleStats || moduleStats);
         setLatestPeriod(data.latestPeriod || null);
+        setMeta(data.meta || null);
       }
     } catch (error) {
       console.error('Error fetching financial data:', error);
@@ -311,6 +311,29 @@ export default function FinanzasPage() {
           </div>
         </div>
 
+        {/* Periodo mostrado */}
+        {!loading && latestPeriod && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span>Periodo: <strong>{latestPeriod.periodo}</strong></span>
+            {!latestPeriod.isCurrentMonth && (
+              <Badge variant="outline" className="text-amber-600 border-amber-300">
+                Ultimo periodo con datos
+              </Badge>
+            )}
+            {meta?.dataSource && (
+              <Badge variant="secondary">
+                Fuente: {meta.dataSource === 'contabilidad' ? 'Contabilidad' : meta.dataSource === 'banco' ? 'Banco' : meta.dataSource === 'pagos' ? 'Pagos' : 'Sin datos'}
+              </Badge>
+            )}
+            {meta?.totalAccountingRecords > 0 && (
+              <span className="text-xs">{meta.totalAccountingRecords.toLocaleString('es-ES')} registros contables</span>
+            )}
+            {meta?.totalBankRecords > 0 && (
+              <span className="text-xs">{meta.totalBankRecords.toLocaleString('es-ES')} mov. bancarios</span>
+            )}
+          </div>
+        )}
+
         {/* Resumen financiero */}
         {loading ? (
           <SummarySkeleton />
@@ -320,7 +343,7 @@ export default function FinanzasPage() {
               <CardContent className="pt-4">
                 <div className="flex items-center gap-2 text-muted-foreground mb-1">
                   <Wallet className="h-4 w-4" />
-                  <span className="text-xs">Saldo Total</span>
+                  <span className="text-xs">Saldo Periodo</span>
                 </div>
                 <p className="text-xl font-bold">
                   {financialSummary.totalBalance.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
@@ -331,34 +354,22 @@ export default function FinanzasPage() {
               <CardContent className="pt-4">
                 <div className="flex items-center gap-2 text-green-600 mb-1">
                   <TrendingUp className="h-4 w-4" />
-                  <span className="text-xs">Ingresos (mes)</span>
+                  <span className="text-xs">Ingresos</span>
                 </div>
                 <p className="text-xl font-bold text-green-600">
                   +{financialSummary.monthlyIncome.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
                 </p>
-                {latestPeriod && latestPeriod.periodo !== currentPeriodLabel && (
-                  <p className="text-xs text-muted-foreground">
-                    Último con datos ({latestPeriod.periodo}):{' '}
-                    +{latestPeriod.ingresos.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
-                  </p>
-                )}
               </CardContent>
             </Card>
             <Card>
               <CardContent className="pt-4">
                 <div className="flex items-center gap-2 text-red-600 mb-1">
                   <LineChart className="h-4 w-4" />
-                  <span className="text-xs">Gastos (mes)</span>
+                  <span className="text-xs">Gastos</span>
                 </div>
                 <p className="text-xl font-bold text-red-600">
                   -{financialSummary.monthlyExpenses.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
                 </p>
-                {latestPeriod && latestPeriod.periodo !== currentPeriodLabel && (
-                  <p className="text-xs text-muted-foreground">
-                    Último con datos ({latestPeriod.periodo}):{' '}
-                    -{latestPeriod.gastos.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
-                  </p>
-                )}
               </CardContent>
             </Card>
             <Card>
