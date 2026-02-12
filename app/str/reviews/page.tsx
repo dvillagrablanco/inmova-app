@@ -57,79 +57,11 @@ export default function STRReviewsPage() {
   const loadReviews = async () => {
     try {
       setLoading(true);
-      
-      setReviews([
-        {
-          id: 'r1',
-          propertyId: 'p1',
-          propertyName: 'Ático Centro - C/ Mayor 45',
-          guestName: 'Sarah Johnson',
-          channel: 'Airbnb',
-          rating: 5,
-          comment: 'Amazing apartment in the heart of the city! Everything was perfect, clean and exactly as described. The host was very helpful and responsive. Highly recommend!',
-          date: '2025-12-20',
-          responded: true,
-          response: 'Thank you Sarah! It was a pleasure hosting you. Welcome back anytime!',
-          categories: {
-            cleanliness: 5,
-            communication: 5,
-            location: 5,
-            value: 5,
-          },
-        },
-        {
-          id: 'r2',
-          propertyId: 'p2',
-          propertyName: 'Casa Chalet - Urbanización Las Lomas',
-          guestName: 'Michael Chen',
-          channel: 'Booking.com',
-          rating: 4,
-          comment: 'Great place for a family vacation. The pool was amazing and kids loved it. Only minor issue was the WiFi was a bit slow.',
-          date: '2025-12-18',
-          responded: false,
-          categories: {
-            cleanliness: 5,
-            communication: 4,
-            location: 4,
-            value: 4,
-          },
-        },
-        {
-          id: 'r3',
-          propertyId: 'p1',
-          propertyName: 'Ático Centro - C/ Mayor 45',
-          guestName: 'Emma Wilson',
-          channel: 'VRBO',
-          rating: 3,
-          comment: 'The apartment was nice but there was some street noise at night. Location is great though.',
-          date: '2025-12-15',
-          responded: true,
-          response: 'Thank you for your feedback Emma. We are installing better soundproofing to improve this. Hope to see you again!',
-          categories: {
-            cleanliness: 4,
-            communication: 4,
-            location: 5,
-            value: 3,
-          },
-        },
-        {
-          id: 'r4',
-          propertyId: 'p3',
-          propertyName: 'Apartamento Playa',
-          guestName: 'Carlos Ruiz',
-          channel: 'Airbnb',
-          rating: 5,
-          comment: 'Increíble! Vistas al mar espectaculares. Todo impecable. Volveremos seguro.',
-          date: '2025-12-12',
-          responded: false,
-          categories: {
-            cleanliness: 5,
-            communication: 5,
-            location: 5,
-            value: 5,
-          },
-        },
-      ]);
+      const res = await fetch('/api/str/reviews');
+      if (res.ok) {
+        const data = await res.json();
+        setReviews(Array.isArray(data) ? data : data.data || []);
+      }
 
     } catch (error) {
       toast.error('Error al cargar reviews');
