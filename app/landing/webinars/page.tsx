@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -49,68 +49,22 @@ export default function WebinarsPage() {
   const [loading, setLoading] = useState(false);
   const [selectedWebinar, setSelectedWebinar] = useState<string>('');
 
-  const webinars = [
-    {
-      id: 'house-flipping-roi',
-      titulo: 'House Flipping: Cálculo de ROI en Tiempo Real',
-      descripcion:
-        'Aprende a evaluar proyectos de flipping con datos reales y evita inversiones poco rentables.',
-      fecha: 'Martes 15 Enero 2025',
-      hora: '18:00 - 19:00 CET',
-      instructor: 'Javier Pérez',
-      cargo: 'Inversor Full-Time con +20 proyectos completados',
-      icon: Hammer,
-      color: 'from-orange-600 to-amber-600',
-      bgColor: 'from-orange-50 to-amber-50',
-      temas: [
-        'Cómo calcular el ROI real de un proyecto de flipping',
-        'Errores comunes al estimar costes de reforma',
-        'Demo en vivo del módulo de House Flipping de INMOVA',
-        'Casos reales: proyectos exitosos y fracasos evitables',
-        'Q&A con participantes',
-      ],
-    },
-    {
-      id: 'coliving-prorrateo',
-      titulo: 'Coliving: Prorrateo de Suministros y Gestión de Convivencia',
-      descripcion:
-        'Descubre cómo automatizar el reparto de gastos y gestionar múltiples inquilinos sin conflictos.',
-      fecha: 'Jueves 17 Enero 2025',
-      hora: '19:00 - 20:00 CET',
-      instructor: 'Mónica Sánchez',
-      cargo: 'Propietaria de 3 Colivings en Valencia y Madrid',
-      icon: Users,
-      color: 'from-cyan-600 to-blue-600',
-      bgColor: 'from-cyan-50 to-blue-50',
-      temas: [
-        'Sistemas de prorrateo: ¿cuál elegir para tu coliving?',
-        'Cómo evitar discusiones por facturas de suministros',
-        'Gestión de normas de convivencia digitales',
-        'Demo del módulo de Coliving Avanzado de INMOVA',
-        'Estrategias de ocupación y rentabilidad',
-      ],
-    },
-    {
-      id: 'multi-vertical-mastery',
-      titulo: 'Multi-Vertical Mastery: Gestiona 7 Modelos de Negocio',
-      descripcion:
-        'Para gestores que manejan alquiler tradicional, STR, obras y más simultáneamente.',
-      fecha: 'Martes 22 Enero 2025',
-      hora: '18:30 - 20:00 CET',
-      instructor: 'Carlos Martínez',
-      cargo: 'Fundador de INMOVA',
-      icon: Building2,
-      color: 'from-indigo-600 to-violet-600',
-      bgColor: 'from-indigo-50 to-violet-50',
-      temas: [
-        'Por qué la multi-verticalidad es el futuro del PropTech',
-        'Cómo integrar alquiler tradicional + STR + flipping en un solo sistema',
-        'Caso de estudio: Agencia que gestía 200 unidades con 5 modelos de negocio',
-        'Tour completo por los 88 módulos de INMOVA',
-        'Oferta especial exclusiva para asistentes',
-      ],
-    },
-  ];
+  const [webinars, setWebinars] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchWebinars = async () => {
+      try {
+        const res = await fetch('/api/webinars');
+        if (res.ok) {
+          const data = await res.json();
+          setWebinars(Array.isArray(data) ? data : data.data || []);
+        }
+      } catch (error) {
+        console.error('Error loading webinars:', error);
+      }
+    };
+    fetchWebinars();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent, webinarId: string) => {
     e.preventDefault();

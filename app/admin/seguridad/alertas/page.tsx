@@ -54,75 +54,19 @@ export default function SecurityAlertsPage() {
 
   const loadData = async () => {
     try {
-      // Alertas de ejemplo
-      const sampleAlerts: SecurityAlert[] = [
-        {
-          id: '1',
-          type: 'login_failed',
-          severity: 'medium',
-          title: 'Múltiples intentos de login fallidos',
-          description: '5 intentos fallidos desde la IP 192.168.1.100 en los últimos 10 minutos',
-          timestamp: new Date().toISOString(),
-          status: 'new',
-          metadata: { ip: '192.168.1.100', attempts: 5, user: 'admin@test.com' },
-        },
-        {
-          id: '2',
-          type: 'suspicious_activity',
-          severity: 'high',
-          title: 'Acceso desde ubicación inusual',
-          description: 'Inicio de sesión detectado desde un nuevo país (India) para el usuario test@company.com',
-          timestamp: new Date(Date.now() - 30 * 60000).toISOString(),
-          status: 'acknowledged',
-          metadata: { country: 'India', city: 'Mumbai' },
-        },
-        {
-          id: '3',
-          type: 'ip_blocked',
-          severity: 'low',
-          title: 'IP bloqueada automáticamente',
-          description: 'La IP 10.0.0.55 ha sido bloqueada por exceder el límite de rate limiting',
-          timestamp: new Date(Date.now() - 2 * 60 * 60000).toISOString(),
-          status: 'resolved',
-          metadata: { ip: '10.0.0.55', reason: 'rate_limit_exceeded' },
-        },
-      ];
+      const [alertsRes, configsRes] = await Promise.all([
+        fetch('/api/admin/security-alerts'),
+        fetch('/api/admin/security-alerts?type=config'),
+      ]);
 
-      const defaultConfigs: AlertConfig[] = [
-        {
-          id: 'login_failed',
-          name: 'Intentos de login fallidos',
-          description: 'Alerta cuando un usuario falla múltiples intentos de login',
-          enabled: true,
-          threshold: 5,
-          channels: ['email'],
-        },
-        {
-          id: 'suspicious_location',
-          name: 'Ubicación sospechosa',
-          description: 'Alerta cuando se detecta login desde un país nuevo',
-          enabled: true,
-          channels: ['email', 'slack'],
-        },
-        {
-          id: 'brute_force',
-          name: 'Ataque de fuerza bruta',
-          description: 'Detecta patrones de ataque de fuerza bruta',
-          enabled: true,
-          threshold: 10,
-          channels: ['email', 'sms', 'slack'],
-        },
-        {
-          id: 'data_export',
-          name: 'Exportación masiva de datos',
-          description: 'Alerta cuando se exporta una cantidad inusual de datos',
-          enabled: false,
-          channels: ['email'],
-        },
-      ];
-
-      setAlerts(sampleAlerts);
-      setConfigs(defaultConfigs);
+      if (alertsRes.ok) {
+        const data = await alertsRes.json();
+        setAlerts(Array.isArray(data) ? data : data.data || []);
+      }
+      if (configsRes.ok) {
+        const data = await configsRes.json();
+        setConfigs(Array.isArray(data) ? data : data.configs || []);
+      }
     } catch (error) {
       toast.error('Error al cargar datos de seguridad');
     } finally {

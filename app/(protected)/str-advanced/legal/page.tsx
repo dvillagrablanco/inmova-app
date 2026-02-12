@@ -19,32 +19,7 @@ import {
 
 export default function LegalCompliancePage() {
   const router = useRouter();
-  const [licenses, setLicenses] = useState([
-    {
-      id: '1',
-      property: 'Apartamento Malasaña',
-      licenseNumber: 'VT-12345-A',
-      expiryDate: '2025-06-15',
-      status: 'vigente',
-      daysUntilExpiry: 192,
-    },
-    {
-      id: '2',
-      property: 'Loft Retiro',
-      licenseNumber: 'VT-67890-B',
-      expiryDate: '2025-01-10',
-      status: 'proximo_vencimiento',
-      daysUntilExpiry: 35,
-    },
-    {
-      id: '3',
-      property: 'Piso Salamanca',
-      licenseNumber: 'Pendiente',
-      expiryDate: null,
-      status: 'sin_licencia',
-      daysUntilExpiry: null,
-    },
-  ]);
+  const [licenses, setLicenses] = useState<any[]>([]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -81,10 +56,19 @@ export default function LegalCompliancePage() {
                   <CardTitle className="text-sm font-medium">Cumplimiento Global</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold">92%</div>
-                  <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                    <div className="bg-green-500 h-2 rounded-full" style={{ width: '92%' }} />
-                  </div>
+                  {(() => {
+                    const total = licenses.length;
+                    const withLicense = licenses.filter(l => l.status === 'vigente').length;
+                    const pct = total > 0 ? Math.round((withLicense / total) * 100) : 0;
+                    return (
+                      <>
+                        <div className="text-3xl font-bold">{pct}%</div>
+                        <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                          <div className="bg-green-500 h-2 rounded-full" style={{ width: `${pct}%` }} />
+                        </div>
+                      </>
+                    );
+                  })()}
                 </CardContent>
               </Card>
               <Card>
@@ -92,7 +76,7 @@ export default function LegalCompliancePage() {
                   <CardTitle className="text-sm font-medium">Con Licencia</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold">11/12</div>
+                  <div className="text-3xl font-bold">{licenses.filter(l => l.status === 'vigente').length}/{licenses.length}</div>
                 </CardContent>
               </Card>
               <Card>
@@ -100,7 +84,7 @@ export default function LegalCompliancePage() {
                   <CardTitle className="text-sm font-medium">Próximas a Vencer</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-destructive">1</div>
+                  <div className="text-3xl font-bold text-destructive">{licenses.filter(l => l.status === 'proximo_vencimiento').length}</div>
                 </CardContent>
               </Card>
               <Card>
@@ -108,7 +92,7 @@ export default function LegalCompliancePage() {
                   <CardTitle className="text-sm font-medium">Partes Pendientes</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold">2</div>
+                  <div className="text-3xl font-bold">{licenses.filter(l => l.status === 'sin_licencia').length}</div>
                 </CardContent>
               </Card>
             </div>

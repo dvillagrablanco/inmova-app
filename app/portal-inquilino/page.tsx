@@ -22,36 +22,50 @@ export default function PortalInquilinoPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [showIncidenciaDialog, setShowIncidenciaDialog] = useState(false);
+  const [inquilino, setInquilino] = useState<any>(null);
+  const [pagos, setPagos] = useState<any[]>([]);
+  const [incidencias, setIncidencias] = useState<any[]>([]);
+  const [documentos, setDocumentos] = useState<any[]>([]);
 
   useEffect(() => {
-    if (status === 'authenticated') setLoading(false);
-    else if (status === 'unauthenticated') router.push('/login');
+    if (status === 'unauthenticated') router.push('/login');
+    else if (status === 'authenticated') {
+      fetchTenantData();
+    }
   }, [status, router]);
 
-  const inquilino = {
-    nombre: 'María García López',
-    email: 'maria.garcia@email.com',
-    telefono: '+34 612 345 678',
-    propiedad: 'Piso C/ Mayor 45, 3ºA',
-    propietario: 'Inmobiliaria Centro S.L.',
-    contrato: { inicio: '2024-06-01', fin: '2025-05-31', renta: 950, deposito: 1900 },
+  const fetchTenantData = async () => {
+    try {
+      setLoading(true);
+      const [profileRes, pagosRes, incidenciasRes, docsRes] = await Promise.all([
+        fetch('/api/portal-inquilino/profile'),
+        fetch('/api/portal-inquilino/payments'),
+        fetch('/api/portal-inquilino/incidents'),
+        fetch('/api/portal-inquilino/documents'),
+      ]);
+
+      if (profileRes.ok) {
+        const data = await profileRes.json();
+        setInquilino(data);
+      }
+      if (pagosRes.ok) {
+        const data = await pagosRes.json();
+        setPagos(Array.isArray(data) ? data : data.data || []);
+      }
+      if (incidenciasRes.ok) {
+        const data = await incidenciasRes.json();
+        setIncidencias(Array.isArray(data) ? data : data.data || []);
+      }
+      if (docsRes.ok) {
+        const data = await docsRes.json();
+        setDocumentos(Array.isArray(data) ? data : data.data || []);
+      }
+    } catch (error) {
+      console.error('Error loading tenant data:', error);
+    } finally {
+      setLoading(false);
+    }
   };
-
-  const pagos = [
-    { mes: 'Enero 2025', monto: 950, estado: 'pagado', fecha: '2025-01-05' },
-    { mes: 'Febrero 2025', monto: 950, estado: 'pendiente', vence: '2025-02-05' },
-  ];
-
-  const incidencias = [
-    { id: 1, titulo: 'Grifo del baño gotea', estado: 'en_proceso', fecha: '2025-01-18' },
-    { id: 2, titulo: 'Calefacción no funciona bien', estado: 'resuelta', fecha: '2025-01-10' },
-  ];
-
-  const documentos = [
-    { nombre: 'Contrato de arrendamiento', tipo: 'PDF', fecha: '2024-06-01' },
-    { nombre: 'Inventario inicial', tipo: 'PDF', fecha: '2024-06-01' },
-    { nombre: 'Recibos 2024', tipo: 'ZIP', fecha: '2024-12-31' },
-  ];
 
   if (loading) {
     return <AuthenticatedLayout><div className="flex items-center justify-center min-h-[60vh]"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div></AuthenticatedLayout>;
@@ -69,13 +83,19 @@ export default function PortalInquilinoPage() {
         {/* Bienvenida */}
         <Card className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
           <CardHeader>
-            <CardTitle className="text-2xl">Bienvenido, {inquilino.nombre.split(' ')[0]}</CardTitle>
-            <CardDescription className="text-white/80">{inquilino.propiedad}</CardDescription>
+            <CardTitle className="text-2xl">Bienvenido{inquilino?.nombre ? `, ${inquilino.nombre.split(' ')[0]}` : ''}</CardTitle>
+            <CardDescription className="text-white/80">{inquilino?.propiedad || 'Portal del Inquilino'}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-6">
-              <div><p className="text-white/70 text-sm">Próximo pago</p><p className="text-xl font-bold">€{inquilino.contrato.renta}</p><p className="text-white/70 text-sm">Vence: 5 Feb 2025</p></div>
-              <div><p className="text-white/70 text-sm">Contrato hasta</p><p className="text-xl font-bold">{new Date(inquilino.contrato.fin).toLocaleDateString('es-ES')}</p></div>
+              {inquilino?.contrato ? (
+                <>
+                  <div><p className="text-white/70 text-sm">Próximo pago</p><p className="text-xl font-bold">€{inquilino.contrato.renta || 0}</p></div>
+                  <div><p className="text-white/70 text-sm">Contrato hasta</p><p className="text-xl font-bold">{inquilino.contrato.fin ? new Date(inquilino.contrato.fin).toLocaleDateString('es-ES') : '-'}</p></div>
+                </>
+              ) : (
+                <p className="text-white/80">No hay contrato activo</p>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -93,7 +113,9 @@ export default function PortalInquilinoPage() {
               <CardHeader><CardTitle>Historial de Pagos</CardTitle></CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {pagos.map((pago, idx) => (
+                  {pagos.length === 0 ? (
+                    <p className="text-center text-muted-foreground py-8">No hay pagos registrados</p>
+                  ) : pagos.map((pago, idx) => (
                     <div key={idx} className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
                       <div><p className="font-medium">{pago.mes}</p><p className="text-sm text-muted-foreground">{pago.estado === 'pagado' ? `Pagado: ${pago.fecha}` : `Vence: ${pago.vence}`}</p></div>
                       <div className="flex items-center gap-3">
@@ -116,7 +138,9 @@ export default function PortalInquilinoPage() {
               <CardHeader><CardTitle>Mis Incidencias</CardTitle></CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {incidencias.map((inc) => (
+                  {incidencias.length === 0 ? (
+                    <p className="text-center text-muted-foreground py-8">No hay incidencias registradas</p>
+                  ) : incidencias.map((inc) => (
                     <div key={inc.id} className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
                       <div><p className="font-medium">{inc.titulo}</p><p className="text-sm text-muted-foreground">Reportada: {inc.fecha}</p></div>
                       <Badge className={inc.estado === 'resuelta' ? 'bg-green-500' : 'bg-blue-500'}>{inc.estado === 'resuelta' ? 'Resuelta' : 'En Proceso'}</Badge>
@@ -132,7 +156,9 @@ export default function PortalInquilinoPage() {
               <CardHeader><CardTitle>Mis Documentos</CardTitle></CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {documentos.map((doc, idx) => (
+                  {documentos.length === 0 ? (
+                    <p className="text-center text-muted-foreground py-8">No hay documentos disponibles</p>
+                  ) : documentos.map((doc, idx) => (
                     <div key={idx} className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
                       <div className="flex items-center gap-3"><FileText className="h-5 w-5 text-muted-foreground" /><div><p className="font-medium">{doc.nombre}</p><p className="text-sm text-muted-foreground">{doc.tipo} • {doc.fecha}</p></div></div>
                       <Button variant="outline" size="sm"><Download className="h-4 w-4 mr-2" />Descargar</Button>
@@ -149,11 +175,13 @@ export default function PortalInquilinoPage() {
               <CardContent>
                 <div className="space-y-4">
                   <div className="p-4 bg-muted/50 rounded-lg">
-                    <p className="font-medium">{inquilino.propietario}</p>
-                    <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1"><Mail className="h-4 w-4" />contacto@inmobiliaria.com</span>
-                      <span className="flex items-center gap-1"><Phone className="h-4 w-4" />+34 900 123 456</span>
-                    </div>
+                    <p className="font-medium">{inquilino?.propietario || 'Propietario'}</p>
+                    {inquilino?.contactoPropietario && (
+                      <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                        {inquilino.contactoPropietario.email && <span className="flex items-center gap-1"><Mail className="h-4 w-4" />{inquilino.contactoPropietario.email}</span>}
+                        {inquilino.contactoPropietario.telefono && <span className="flex items-center gap-1"><Phone className="h-4 w-4" />{inquilino.contactoPropietario.telefono}</span>}
+                      </div>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label>Mensaje</Label>

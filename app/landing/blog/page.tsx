@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -7,34 +8,22 @@ import { Badge } from '@/components/ui/badge';
 import { Building2, Calendar, User } from 'lucide-react';
 
 export default function BlogPage() {
-  const posts = [
-    {
-      slug: 'tendencias-proptech-2026',
-      title: '7 Tendencias PropTech que Transformarán el Sector en 2026',
-      excerpt:
-        'Descubre las tecnologías emergentes que están revolucionando la gestión inmobiliaria.',
-      author: 'Equipo INMOVA',
-      date: '15 Enero 2026',
-      category: 'Tendencias',
-    },
-    {
-      slug: 'ia-gestion-propiedades',
-      title: 'Cómo la IA Está Cambiando la Gestión de Propiedades',
-      excerpt:
-        'La inteligencia artificial permite optimizar operaciones y aumentar el ROI hasta un 25%.',
-      author: 'María González',
-      date: '10 Enero 2026',
-      category: 'Tecnología',
-    },
-    {
-      slug: 'guia-coliving-espana-2026',
-      title: 'Guía Completa de Coliving en España 2026',
-      excerpt: 'Todo lo que necesitas saber para gestionar espacios de coliving de forma profesional.',
-      author: 'Carlos Ruiz',
-      date: '5 Enero 2026',
-      category: 'Guía Práctica',
-    },
-  ];
+  const [posts, setPosts] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const res = await fetch('/api/blog/posts');
+        if (res.ok) {
+          const data = await res.json();
+          setPosts(Array.isArray(data) ? data : data.data || []);
+        }
+      } catch (error) {
+        console.error('Error loading blog posts:', error);
+      }
+    };
+    fetchPosts();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">

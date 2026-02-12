@@ -19,39 +19,7 @@ import {
 
 export default function HousekeepingPage() {
   const router = useRouter();
-  const [tasks, setTasks] = useState([
-    {
-      id: '1',
-      property: 'Apartamento Malasaña',
-      date: '2024-12-06',
-      time: '11:00',
-      status: 'pendiente',
-      priority: 'alta',
-      estimatedTime: 90,
-      cleaner: 'María García',
-    },
-    {
-      id: '2',
-      property: 'Loft Retiro',
-      date: '2024-12-06',
-      time: '14:00',
-      status: 'en_progreso',
-      priority: 'media',
-      estimatedTime: 75,
-      cleaner: 'Ana López',
-      progress: 60,
-    },
-    {
-      id: '3',
-      property: 'Piso Salamanca',
-      date: '2024-12-07',
-      time: '10:00',
-      status: 'pendiente',
-      priority: 'media',
-      estimatedTime: 120,
-      cleaner: 'María García',
-    },
-  ]);
+  const [tasks, setTasks] = useState<any[]>([]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -101,7 +69,7 @@ export default function HousekeepingPage() {
                   <CardTitle className="text-sm font-medium">Pendientes Hoy</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold">3</div>
+                  <div className="text-3xl font-bold">{tasks.filter(t => t.status === 'pendiente').length}</div>
                 </CardContent>
               </Card>
               <Card>
@@ -109,7 +77,7 @@ export default function HousekeepingPage() {
                   <CardTitle className="text-sm font-medium">En Progreso</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold">1</div>
+                  <div className="text-3xl font-bold">{tasks.filter(t => t.status === 'en_progreso').length}</div>
                 </CardContent>
               </Card>
               <Card>
@@ -117,7 +85,7 @@ export default function HousekeepingPage() {
                   <CardTitle className="text-sm font-medium">Completadas</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold">8</div>
+                  <div className="text-3xl font-bold">{tasks.filter(t => t.status === 'completada').length}</div>
                 </CardContent>
               </Card>
               <Card>
@@ -125,7 +93,7 @@ export default function HousekeepingPage() {
                   <CardTitle className="text-sm font-medium">Tiempo Promedio</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold">85min</div>
+                  <div className="text-3xl font-bold">{tasks.length > 0 ? Math.round(tasks.reduce((a, t) => a + (t.estimatedTime || 0), 0) / tasks.length) : 0}min</div>
                 </CardContent>
               </Card>
             </div>

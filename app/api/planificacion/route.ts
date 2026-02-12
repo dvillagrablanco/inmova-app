@@ -26,62 +26,8 @@ interface ScheduledEvent {
 }
 
 function generateEvents(): ScheduledEvent[] {
-  return [
-    {
-      id: '1',
-      titulo: 'Visita propiedad Centro',
-      tipo: 'visita',
-      fecha: new Date(),
-      hora: '10:00',
-      duracion: 30,
-      propiedad: 'Apartamento Centro',
-      asignado: 'María García',
-      completado: false,
-    },
-    {
-      id: '2',
-      titulo: 'Reparación fontanería',
-      tipo: 'mantenimiento',
-      fecha: new Date(),
-      hora: '14:00',
-      duracion: 60,
-      propiedad: 'Torre Marina #204',
-      asignado: 'Técnico Juan',
-      completado: false,
-    },
-    {
-      id: '3',
-      titulo: 'Firma contrato nuevo inquilino',
-      tipo: 'contrato',
-      fecha: addDays(new Date(), 1),
-      hora: '11:00',
-      duracion: 45,
-      propiedad: 'Estudio Plaza',
-      asignado: 'Carlos López',
-      completado: false,
-    },
-    {
-      id: '4',
-      titulo: 'Reunión propietarios',
-      tipo: 'reunion',
-      fecha: addDays(new Date(), 2),
-      hora: '17:00',
-      duracion: 90,
-      descripcion: 'Revisión trimestral',
-      completado: false,
-    },
-    {
-      id: '5',
-      titulo: 'Inspección anual',
-      tipo: 'visita',
-      fecha: addDays(new Date(), 3),
-      hora: '09:00',
-      duracion: 120,
-      propiedad: 'Centro Empresarial',
-      asignado: 'Ana Martínez',
-      completado: false,
-    },
-  ];
+  // TODO: Obtener eventos desde la base de datos
+  return [];
 }
 
 export async function GET() {

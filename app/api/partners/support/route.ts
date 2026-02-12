@@ -21,37 +21,9 @@ interface Ticket {
   ultimaActualizacion: Date;
 }
 
-// Generar tickets de ejemplo
+// TODO: Obtener tickets desde la base de datos
 function generateTickets(): Ticket[] {
-  return [
-    {
-      id: 'TK-001',
-      asunto: 'Consulta sobre integración API',
-      categoria: 'tecnico',
-      estado: 'en_progreso',
-      prioridad: 'alta',
-      fechaCreacion: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-      ultimaActualizacion: new Date(Date.now() - 6 * 60 * 60 * 1000),
-    },
-    {
-      id: 'TK-002',
-      asunto: 'Problema con comisiones de diciembre',
-      categoria: 'facturacion',
-      estado: 'abierto',
-      prioridad: 'media',
-      fechaCreacion: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-      ultimaActualizacion: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-    },
-    {
-      id: 'TK-003',
-      asunto: 'Solicitud de materiales personalizados',
-      categoria: 'marketing',
-      estado: 'resuelto',
-      prioridad: 'baja',
-      fechaCreacion: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-      ultimaActualizacion: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-    },
-  ];
+  return [];
 }
 
 export async function GET() {

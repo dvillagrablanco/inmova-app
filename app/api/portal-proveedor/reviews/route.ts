@@ -24,56 +24,8 @@ interface Review {
 }
 
 function generateReviews(): Review[] {
-  return [
-    {
-      id: '1',
-      clienteNombre: 'María G.',
-      servicio: 'Reparación de fontanería',
-      puntuacion: 5,
-      comentario: 'Excelente trabajo. El técnico llegó puntual y resolvió el problema rápidamente.',
-      fecha: '2026-01-15',
-      respondida: true,
-      respuesta: '¡Muchas gracias por tu valoración!',
-      fechaRespuesta: '2026-01-16',
-      util: 5,
-      noUtil: 0,
-    },
-    {
-      id: '2',
-      clienteNombre: 'Carlos R.',
-      servicio: 'Instalación eléctrica',
-      puntuacion: 4,
-      comentario: 'Buen servicio en general. El trabajo quedó bien pero tardó un poco más de lo esperado.',
-      fecha: '2026-01-12',
-      respondida: false,
-      util: 3,
-      noUtil: 1,
-    },
-    {
-      id: '3',
-      clienteNombre: 'Ana M.',
-      servicio: 'Mantenimiento general',
-      puntuacion: 5,
-      comentario: 'Muy contentos con el servicio. Lo recomiendo totalmente.',
-      fecha: '2026-01-08',
-      respondida: true,
-      respuesta: 'Gracias Ana, es un placer trabajar con clientes como tú.',
-      fechaRespuesta: '2026-01-09',
-      util: 8,
-      noUtil: 0,
-    },
-    {
-      id: '4',
-      clienteNombre: 'Pedro L.',
-      servicio: 'Pintura',
-      puntuacion: 3,
-      comentario: 'El resultado final está bien pero hubo algunos retrasos.',
-      fecha: '2026-01-05',
-      respondida: false,
-      util: 2,
-      noUtil: 2,
-    },
-  ];
+  // TODO: Obtener reseñas desde la base de datos
+  return [];
 }
 
 export async function GET() {

@@ -11,14 +11,8 @@ export async function GET() {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    // Datos de empleados desde BD o sistema HR
-    const employees = [
-      { id: 'emp1', nombre: 'Carlos Martínez', departamento: 'Ventas' },
-      { id: 'emp2', nombre: 'Laura García', departamento: 'Marketing' },
-      { id: 'emp3', nombre: 'Miguel Torres', departamento: 'Dirección' },
-      { id: 'emp4', nombre: 'Ana Sánchez', departamento: 'Operaciones' },
-      { id: 'emp5', nombre: 'Pedro López', departamento: 'IT' },
-    ];
+    // TODO: Obtener empleados desde BD o sistema HR integrado
+    const employees: any[] = [];
 
     return NextResponse.json({ data: employees });
   } catch (error) {

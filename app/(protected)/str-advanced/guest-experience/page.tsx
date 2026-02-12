@@ -11,32 +11,7 @@ import { Star, Book, MessageCircle, AlertCircle, ThumbsUp, Mail, Gift } from 'lu
 
 export default function GuestExperiencePage() {
   const router = useRouter();
-  const [reviews, setReviews] = useState([
-    {
-      id: '1',
-      guest: 'John Doe',
-      property: 'Apartamento Malasaña',
-      rating: 5,
-      date: '2024-12-01',
-      comment: 'Excelente estancia, muy limpio y bien ubicado',
-    },
-    {
-      id: '2',
-      guest: 'Jane Smith',
-      property: 'Loft Retiro',
-      rating: 4,
-      date: '2024-12-03',
-      comment: 'Muy bueno, solo pequeños detalles a mejorar',
-    },
-    {
-      id: '3',
-      guest: 'Mike Johnson',
-      property: 'Piso Salamanca',
-      rating: 5,
-      date: '2024-12-05',
-      comment: 'Perfecto, sin duda volveremos',
-    },
-  ]);
+  const [reviews, setReviews] = useState<any[]>([]);
 
   return (
     <AuthenticatedLayout>
@@ -59,7 +34,7 @@ export default function GuestExperiencePage() {
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center gap-2">
-                    <div className="text-3xl font-bold">4.8</div>
+                    <div className="text-3xl font-bold">{reviews.length > 0 ? (reviews.reduce((a, r) => a + (r.rating || 0), 0) / reviews.length).toFixed(1) : '0'}</div>
                     <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
                   </div>
                 </CardContent>
@@ -69,7 +44,7 @@ export default function GuestExperiencePage() {
                   <CardTitle className="text-sm font-medium">Total Reseñas</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold">127</div>
+                  <div className="text-3xl font-bold">{reviews.length}</div>
                 </CardContent>
               </Card>
               <Card>
@@ -77,7 +52,7 @@ export default function GuestExperiencePage() {
                   <CardTitle className="text-sm font-medium">Guías Digitales</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold">12</div>
+                  <div className="text-3xl font-bold">0</div>
                 </CardContent>
               </Card>
               <Card>
@@ -85,7 +60,7 @@ export default function GuestExperiencePage() {
                   <CardTitle className="text-sm font-medium">Respuesta Promedio</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold">15min</div>
+                  <div className="text-3xl font-bold">-</div>
                 </CardContent>
               </Card>
             </div>
