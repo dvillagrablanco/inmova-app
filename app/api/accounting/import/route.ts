@@ -205,11 +205,12 @@ function normalizeCategory(
   return 'gasto_otro';
 }
 
-function normalizeAmount(
+async function normalizeAmount(
   amount: number | null,
   debit: number | null,
   credit: number | null
 ): number | null {
+  const prisma = await getPrisma();
   if (debit && credit && debit > 0 && credit > 0) {
     return Math.abs(credit - debit);
   }

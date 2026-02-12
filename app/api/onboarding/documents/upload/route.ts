@@ -319,6 +319,7 @@ export async function POST(request: NextRequest) {
  * Crea un registro de DocumentImport y sube el archivo a S3
  */
 async function createDocumentImport(
+  const prisma = await getPrisma();
   batchId: string,
   companyId: string,
   filename: string,

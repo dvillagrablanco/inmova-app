@@ -26,7 +26,8 @@ async function getPrisma() {
 }
 
 // Verificar token de cron (seguridad)
-function verifyCronAuth(request: NextRequest): boolean {
+async function verifyCronAuth(request: NextRequest): boolean {
+  const prisma = await getPrisma();
   const cronSecret = process.env.CRON_SECRET;
   if (!cronSecret) return true; // Sin secret configurado, permitir
 

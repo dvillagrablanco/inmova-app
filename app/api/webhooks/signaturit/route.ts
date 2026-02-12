@@ -128,6 +128,7 @@ export async function POST(request: NextRequest) {
  * El documento está listo para ser firmado
  */
 async function handleSignatureReady(contract: any, data: any) {
+  const prisma = await getPrisma();
   try {
     await prisma.contract.update({
       where: { id: contract.id },
@@ -157,6 +158,7 @@ async function handleSignatureReady(contract: any, data: any) {
  * Todos los firmantes han firmado el documento
  */
 async function handleSignatureCompleted(contract: any, data: any) {
+  const prisma = await getPrisma();
   try {
     // 1. Actualizar estado del contrato
     await prisma.contract.update({
@@ -259,6 +261,7 @@ async function handleSignatureCompleted(contract: any, data: any) {
  * Un firmante ha rechazado el documento
  */
 async function handleSignatureDeclined(contract: any, data: any) {
+  const prisma = await getPrisma();
   try {
     await prisma.contract.update({
       where: { id: contract.id },
@@ -295,6 +298,7 @@ async function handleSignatureDeclined(contract: any, data: any) {
  * La firma ha expirado sin completarse
  */
 async function handleSignatureExpired(contract: any, data: any) {
+  const prisma = await getPrisma();
   try {
     await prisma.contract.update({
       where: { id: contract.id },
@@ -328,6 +332,7 @@ async function handleSignatureExpired(contract: any, data: any) {
  * La firma ha sido cancelada
  */
 async function handleSignatureCanceled(contract: any, data: any) {
+  const prisma = await getPrisma();
   try {
     await prisma.contract.update({
       where: { id: contract.id },

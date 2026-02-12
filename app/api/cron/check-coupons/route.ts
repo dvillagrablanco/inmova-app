@@ -35,6 +35,7 @@ const ALERT_CONFIGS: AlertConfig[] = [
 ];
 
 async function sendEmailAlert(subject: string, html: string) {
+  const prisma = await getPrisma();
   try {
     const nodemailer = await import('nodemailer');
     

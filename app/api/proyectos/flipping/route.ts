@@ -73,7 +73,8 @@ const statusToUi: Record<ProjectStatusDb, ProjectStatusUi> = {
   CANCELADO: 'cancelado',
 };
 
-function mapStatusToDb(value: string | undefined): ProjectStatusDb {
+async function mapStatusToDb(value: string | undefined): ProjectStatusDb {
+  const prisma = await getPrisma();
   if (!value) {
     return 'PROSPECTO';
   }
@@ -81,7 +82,8 @@ function mapStatusToDb(value: string | undefined): ProjectStatusDb {
   return statusToDb[normalized] || 'PROSPECTO';
 }
 
-function mapStatusToUi(value: ProjectStatusDb): ProjectStatusUi {
+async function mapStatusToUi(value: ProjectStatusDb): ProjectStatusUi {
+  const prisma = await getPrisma();
   return statusToUi[value];
 }
 

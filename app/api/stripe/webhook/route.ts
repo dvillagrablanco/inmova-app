@@ -145,6 +145,7 @@ async function handlePaymentIntentSucceeded(
   stripe: Stripe,
   paymentIntent: Stripe.PaymentIntent
 ) {
+  const prisma = await getPrisma();
   const paymentId = paymentIntent.metadata.paymentId;
 
   if (!paymentId) {
@@ -198,6 +199,7 @@ async function handlePaymentIntentSucceeded(
 }
 
 async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
+  const prisma = await getPrisma();
   const paymentId = paymentIntent.metadata.paymentId;
 
   if (!paymentId) {
@@ -216,6 +218,7 @@ async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
 }
 
 async function handlePaymentIntentCanceled(paymentIntent: Stripe.PaymentIntent) {
+  const prisma = await getPrisma();
   const paymentId = paymentIntent.metadata.paymentId;
 
   if (!paymentId) {
@@ -234,6 +237,7 @@ async function handlePaymentIntentCanceled(paymentIntent: Stripe.PaymentIntent) 
 }
 
 async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
+  const prisma = await getPrisma();
   const contractId = subscription.metadata.contractId;
 
   if (!contractId) {
@@ -284,6 +288,7 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
+  const prisma = await getPrisma();
   await prisma.stripeSubscription.updateMany({
     where: { stripeSubscriptionId: subscription.id },
     data: {
@@ -295,7 +300,8 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   logger.info(`Subscription ${subscription.id} deleted`);
 }
 
-function getInvoiceSubscriptionId(invoice: Stripe.Invoice): string | null {
+async function getInvoiceSubscriptionId(invoice: Stripe.Invoice): string | null {
+  const prisma = await getPrisma();
   const subscription = invoice.parent?.subscription_details?.subscription;
   if (!subscription) {
     return null;
@@ -305,6 +311,7 @@ function getInvoiceSubscriptionId(invoice: Stripe.Invoice): string | null {
 }
 
 async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
+  const prisma = await getPrisma();
   const subscriptionId = getInvoiceSubscriptionId(invoice);
 
   if (!subscriptionId) {
@@ -350,6 +357,7 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
 }
 
 async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
+  const prisma = await getPrisma();
   const subscriptionId = getInvoiceSubscriptionId(invoice);
 
   if (!subscriptionId) {

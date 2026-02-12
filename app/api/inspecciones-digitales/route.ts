@@ -38,18 +38,21 @@ const createSchema = z.object({
   descripcion: z.string().optional(),
 });
 
-function normalizeTipo(tipo: string): InspeccionTipo {
+async function normalizeTipo(tipo: string): InspeccionTipo {
+  const prisma = await getPrisma();
   if (tipo === 'entrada' || tipo === 'salida') return tipo;
   return 'periodica';
 }
 
-function normalizeEstado(estado: string): InspeccionEstado {
+async function normalizeEstado(estado: string): InspeccionEstado {
+  const prisma = await getPrisma();
   if (estado === 'completada') return 'completada';
   if (estado === 'programada') return 'programada';
   return 'en_proceso';
 }
 
-function getErrorMessage(error: unknown) {
+async function getErrorMessage(error: unknown) {
+  const prisma = await getPrisma();
   return error instanceof Error ? error.message : 'Error desconocido';
 }
 

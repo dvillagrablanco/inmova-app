@@ -47,7 +47,8 @@ const CONSTRUCTION_PHASES = new Set<ConstructionPhase>([
   'GARANTIA',
 ]);
 
-function mapPhase(value: string | undefined): ConstructionPhase {
+async function mapPhase(value: string | undefined): ConstructionPhase {
+  const prisma = await getPrisma();
   if (!value) {
     return 'PLANIFICACION';
   }

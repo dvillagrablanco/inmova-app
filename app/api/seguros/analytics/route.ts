@@ -34,14 +34,16 @@ interface ClaimsByMonthItem {
   amount: number;
 }
 
-function getErrorMessage(error: unknown): string {
+async function getErrorMessage(error: unknown): string {
+  const prisma = await getPrisma();
   if (error instanceof Error) {
     return error.message;
   }
   return 'Error desconocido';
 }
 
-function getPeriodStart(period: Period, now: Date): Date | null {
+async function getPeriodStart(period: Period, now: Date): Date | null {
+  const prisma = await getPrisma();
   switch (period) {
     case 'month':
       return new Date(now.getFullYear(), now.getMonth(), 1);
@@ -58,7 +60,8 @@ function getPeriodStart(period: Period, now: Date): Date | null {
   }
 }
 
-function buildMonthSeries(now: Date): ClaimsByMonthItem[] {
+async function buildMonthSeries(now: Date): ClaimsByMonthItem[] {
+  const prisma = await getPrisma();
   const series: ClaimsByMonthItem[] = [];
   for (let i = 11; i >= 0; i -= 1) {
     const date = new Date(now.getFullYear(), now.getMonth() - i, 1);

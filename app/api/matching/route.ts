@@ -23,7 +23,8 @@ const updateSchema = z.object({
   status: z.enum(['SUGGESTED', 'VIEWED', 'CONTACTED', 'RENTED', 'REJECTED']),
 });
 
-function getErrorMessage(error: unknown) {
+async function getErrorMessage(error: unknown) {
+  const prisma = await getPrisma();
   return error instanceof Error ? error.message : 'Error desconocido';
 }
 

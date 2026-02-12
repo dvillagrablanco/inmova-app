@@ -36,6 +36,7 @@ const getCompanyContext = async (
   role?: string | null,
   companyId?: string | null
 ) => {
+  const prisma = await getPrisma();
   if (companyId) {
     return { role, companyId };
   }
@@ -54,6 +55,7 @@ const getCompanyContext = async (
 };
 
 const resolvePdfBuffer = async (pdfPath: string): Promise<Buffer> => {
+  const prisma = await getPrisma();
   if (pdfPath.startsWith('http://') || pdfPath.startsWith('https://')) {
     const response = await fetch(pdfPath);
     if (!response.ok) {

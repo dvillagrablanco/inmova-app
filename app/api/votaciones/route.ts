@@ -37,7 +37,8 @@ const createVoteSchema = z.object({
   totalVotantes: z.number().min(0).optional(),
 });
 
-function normalizeOptions(value: unknown): VoteOption[] {
+async function normalizeOptions(value: unknown): VoteOption[] {
+  const prisma = await getPrisma();
   if (!Array.isArray(value)) {
     return [];
   }

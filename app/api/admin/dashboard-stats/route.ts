@@ -46,6 +46,7 @@ async function getFromCache<T>(key: string): Promise<T | null> {
 }
 
 async function setCache(key: string, data: any, ttl: number): Promise<void> {
+  const prisma = await getPrisma();
   try {
     const redis = getRedisClient();
     if (!redis) return;

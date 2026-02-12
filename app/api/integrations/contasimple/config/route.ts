@@ -29,7 +29,8 @@ async function getPrisma() {
 const ENCRYPTION_KEY = process.env.CONTASIMPLE_ENCRYPTION_KEY || 'default-key-change-in-production-32b';
 const ALGORITHM = 'aes-256-cbc';
 
-function encrypt(text: string): string {
+async function encrypt(text: string): string {
+  const prisma = await getPrisma();
   const iv = crypto.randomBytes(16);
   const key = Buffer.from(ENCRYPTION_KEY.padEnd(32, '0').slice(0, 32));
   const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
@@ -38,7 +39,8 @@ function encrypt(text: string): string {
   return iv.toString('hex') + ':' + encrypted;
 }
 
-function decrypt(text: string): string {
+async function decrypt(text: string): string {
+  const prisma = await getPrisma();
   const parts = text.split(':');
   const iv = Buffer.from(parts[0], 'hex');
   const encrypted = parts[1];

@@ -25,7 +25,8 @@ interface OperationalReport {
   detalleContratosPorVencer: ContractExpiryDetail[];
 }
 
-function getErrorMessage(error: unknown) {
+async function getErrorMessage(error: unknown) {
+  const prisma = await getPrisma();
   return error instanceof Error ? error.message : 'Error desconocido';
 }
 

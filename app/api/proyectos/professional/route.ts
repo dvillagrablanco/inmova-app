@@ -83,7 +83,8 @@ const serviceTypeMap: Record<string, ProjectType> = {
   otro: 'CONSULTORIA',
 };
 
-function mapStatusToDb(value: string | undefined): ProfessionalStatusDb {
+async function mapStatusToDb(value: string | undefined): ProfessionalStatusDb {
+  const prisma = await getPrisma();
   if (!value) {
     return 'PROPUESTA';
   }
@@ -91,11 +92,13 @@ function mapStatusToDb(value: string | undefined): ProfessionalStatusDb {
   return statusToDb[normalized] || 'PROPUESTA';
 }
 
-function mapStatusToUi(value: ProfessionalStatusDb): ProfessionalStatusUi {
+async function mapStatusToUi(value: ProfessionalStatusDb): ProfessionalStatusUi {
+  const prisma = await getPrisma();
   return statusToUi[value];
 }
 
-function mapServiceType(value: string | undefined): ProjectType {
+async function mapServiceType(value: string | undefined): ProjectType {
+  const prisma = await getPrisma();
   if (!value) {
     return 'CONSULTORIA';
   }

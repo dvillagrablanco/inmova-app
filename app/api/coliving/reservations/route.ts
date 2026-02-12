@@ -17,7 +17,8 @@ type SessionUser = {
   companyId?: string;
 };
 
-function mapReservationStatus(status: string): string {
+async function mapReservationStatus(status: string): string {
+  const prisma = await getPrisma();
   switch (status) {
     case 'pendiente':
       return 'pendiente';

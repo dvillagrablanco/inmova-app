@@ -37,7 +37,8 @@ const updateVoteSchema = z.object({
   estado: z.enum(['activa', 'cerrada', 'cancelada']).optional(),
 });
 
-function normalizeOptions(value: unknown): VoteOption[] {
+async function normalizeOptions(value: unknown): VoteOption[] {
+  const prisma = await getPrisma();
   if (!Array.isArray(value)) {
     return [];
   }

@@ -32,7 +32,8 @@ const applySchema = z.object({
 
 // Singleton de Stripe
 let stripe: Stripe | null = null;
-function getStripe(): Stripe | null {
+async function getStripe(): Stripe | null {
+  const prisma = await getPrisma();
   if (!process.env.STRIPE_SECRET_KEY) return null;
   if (!stripe) {
     stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {

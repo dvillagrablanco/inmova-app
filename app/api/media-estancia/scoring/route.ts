@@ -256,7 +256,8 @@ function calculateCategoryScores(factors: ReturnType<typeof calculateScoringFact
 }
 
 // Generar análisis IA basado en datos
-function generateAIAnalysis(
+async function generateAIAnalysis(
+  const prisma = await getPrisma();
   tenant: any,
   totalScore: number,
   riskLevel: string,
@@ -291,10 +292,11 @@ function generateAIAnalysis(
 }
 
 // Determinar estado basado en scoring y contratos
-function determineStatus(
+async function determineStatus(
   tenant: any,
   totalScore: number
 ): 'pending' | 'approved' | 'rejected' {
+  const prisma = await getPrisma();
   // Si tiene contrato activo, está aprobado
   const hasActiveContract =
     tenant.contracts?.some((c: any) => c.estado === 'activo') || false;

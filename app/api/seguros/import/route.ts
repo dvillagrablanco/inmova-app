@@ -64,7 +64,8 @@ function getValue(record: Record<string, any>, aliases: string[]): any {
   return undefined;
 }
 
-function parseNumber(value: any): number | null {
+async function parseNumber(value: any): number | null {
+  const prisma = await getPrisma();
   if (value === null || value === undefined) return null;
   if (typeof value === 'number') return value;
   const raw = String(value).trim();
@@ -74,7 +75,8 @@ function parseNumber(value: any): number | null {
   return Number.isNaN(parsed) ? null : parsed;
 }
 
-function parseBoolean(value: any): boolean | null {
+async function parseBoolean(value: any): boolean | null {
+  const prisma = await getPrisma();
   if (value === null || value === undefined) return null;
   if (typeof value === 'boolean') return value;
   const raw = String(value).trim().toLowerCase();
@@ -83,7 +85,8 @@ function parseBoolean(value: any): boolean | null {
   return null;
 }
 
-function parseExcelDate(value: any): Date | null {
+async function parseExcelDate(value: any): Date | null {
+  const prisma = await getPrisma();
   if (!value) return null;
   if (value instanceof Date) return value;
   if (typeof value === 'number') {
@@ -96,7 +99,8 @@ function parseExcelDate(value: any): Date | null {
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
-function normalizeInsuranceType(raw: any): InsuranceType {
+async function normalizeInsuranceType(raw: any): InsuranceType {
+  const prisma = await getPrisma();
   const normalized = String(raw || '').toLowerCase();
   if (normalized.includes('hogar') || normalized.includes('vivienda')) return 'hogar';
   if (normalized.includes('comunidad') || normalized.includes('edificio')) return 'comunidad';
@@ -108,7 +112,8 @@ function normalizeInsuranceType(raw: any): InsuranceType {
   return 'otro';
 }
 
-function normalizeInsuranceStatus(raw: any): InsuranceStatus {
+async function normalizeInsuranceStatus(raw: any): InsuranceStatus {
+  const prisma = await getPrisma();
   const normalized = String(raw || '').toLowerCase();
   if (normalized.includes('vencid')) return 'vencida';
   if (normalized.includes('cancel')) return 'cancelada';
@@ -117,7 +122,8 @@ function normalizeInsuranceStatus(raw: any): InsuranceStatus {
   return 'activa';
 }
 
-function parseSheet(buffer: Buffer, sheetName?: string): any[] {
+async function parseSheet(buffer: Buffer, sheetName?: string): any[] {
+  const prisma = await getPrisma();
   const workbook = XLSX.read(buffer, { type: 'buffer', cellDates: true });
   const targetSheet = sheetName || workbook.SheetNames[0];
   const sheet = workbook.Sheets[targetSheet];

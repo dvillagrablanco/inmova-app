@@ -89,7 +89,8 @@ const reservaEstadoToBookingStatus: Record<ReservaEstado, BookingStatus> = {
   cancelada: 'CANCELADA',
 };
 
-function getErrorMessage(error: unknown) {
+async function getErrorMessage(error: unknown) {
+  const prisma = await getPrisma();
   return error instanceof Error ? error.message : 'Error desconocido';
 }
 

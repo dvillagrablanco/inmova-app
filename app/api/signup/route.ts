@@ -40,6 +40,7 @@ export async function POST(req: NextRequest) {
 }
 
 async function handleSignup(req: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const body = await req.json();
 

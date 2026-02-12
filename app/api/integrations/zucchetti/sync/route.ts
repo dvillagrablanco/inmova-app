@@ -65,6 +65,7 @@ async function syncCustomers(
   companyId: string,
   accessToken: string,
   options: { ids?: string[]; dryRun?: boolean }
+  const prisma = await getPrisma();
 ): Promise<SyncResult> {
   const result: SyncResult = {
     type: 'customers',
@@ -164,6 +165,7 @@ async function syncPayments(
   companyId: string,
   accessToken: string,
   options: { ids?: string[]; dateFrom?: string; dateTo?: string; dryRun?: boolean }
+  const prisma = await getPrisma();
 ): Promise<SyncResult> {
   const result: SyncResult = {
     type: 'payments',
@@ -279,6 +281,7 @@ async function syncExpenses(
   companyId: string,
   accessToken: string,
   options: { ids?: string[]; dateFrom?: string; dateTo?: string; dryRun?: boolean }
+  const prisma = await getPrisma();
 ): Promise<SyncResult> {
   const result: SyncResult = {
     type: 'expenses',
@@ -378,6 +381,7 @@ async function syncExpenses(
  * Sincroniza inquilinos a Altai (no soportado actualmente)
  */
 async function syncCustomersAltai(): Promise<SyncResult> {
+  const prisma = await getPrisma();
   return {
     type: 'customers',
     synced: 0,
@@ -393,6 +397,7 @@ async function syncCustomersAltai(): Promise<SyncResult> {
 async function syncPaymentsAltai(
   companyId: string,
   options: { ids?: string[]; dateFrom?: string; dateTo?: string; dryRun?: boolean }
+  const prisma = await getPrisma();
 ): Promise<SyncResult> {
   const result: SyncResult = {
     type: 'payments',
@@ -494,6 +499,7 @@ async function syncPaymentsAltai(
 async function syncExpensesAltai(
   companyId: string,
   options: { ids?: string[]; dateFrom?: string; dateTo?: string; dryRun?: boolean }
+  const prisma = await getPrisma();
 ): Promise<SyncResult> {
   const result: SyncResult = {
     type: 'expenses',
@@ -578,6 +584,7 @@ async function syncExpensesAltai(
  * Sincroniza facturas a Altai (pendiente de especificación)
  */
 async function syncInvoicesAltai(): Promise<SyncResult> {
+  const prisma = await getPrisma();
   return {
     type: 'invoices',
     synced: 0,

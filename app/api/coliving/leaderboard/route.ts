@@ -17,7 +17,8 @@ type SessionUser = {
   companyId?: string;
 };
 
-function parseStringArray(value: unknown): string[] {
+async function parseStringArray(value: unknown): string[] {
+  const prisma = await getPrisma();
   if (!Array.isArray(value)) {
     return [];
   }

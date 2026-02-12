@@ -46,7 +46,8 @@ const ACCOUNTING_SOURCES: Record<string, string[]> = {
   ],
 };
 
-function classifyEntry(sub: string, titulo: string, debe: number, haber: number) {
+async function classifyEntry(sub: string, titulo: string, debe: number, haber: number) {
+  const prisma = await getPrisma();
   let tipo: 'ingreso' | 'gasto' = 'gasto';
   let cat = 'gasto_otro';
   if (sub.startsWith('7')) {

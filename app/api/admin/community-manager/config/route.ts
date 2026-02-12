@@ -44,6 +44,7 @@ const getCompanyContext = async (
   role?: string | null,
   companyId?: string | null
 ) => {
+  const prisma = await getPrisma();
   if (role && companyId) {
     return { role, companyId };
   }

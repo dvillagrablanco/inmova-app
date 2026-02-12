@@ -541,6 +541,7 @@ async function handleSubscriptionEvent(event: Stripe.Event) {
  * Maneja eventos de suscripción de add-ons
  */
 async function handleAddOnSubscription(event: Stripe.Event, subscription: Stripe.Subscription) {
+  const prisma = await getPrisma();
   const addOnId = subscription.metadata?.addOnId;
   const companyId = subscription.metadata?.companyId;
 
@@ -608,6 +609,7 @@ async function handleAddOnSubscription(event: Stripe.Event, subscription: Stripe
  * Maneja eventos de suscripción a planes
  */
 async function handlePlanSubscription(event: Stripe.Event, subscription: Stripe.Subscription) {
+  const prisma = await getPrisma();
   const planId = subscription.metadata?.planId;
   const companyId = subscription.metadata?.companyId;
 

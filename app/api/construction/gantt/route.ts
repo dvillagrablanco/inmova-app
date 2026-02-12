@@ -74,21 +74,24 @@ const PHASE_LABELS: Record<PhaseKey, string> = {
   GARANTIA: 'Garantía',
 };
 
-function getErrorMessage(error: unknown): string {
+async function getErrorMessage(error: unknown): string {
+  const prisma = await getPrisma();
   if (error instanceof Error) {
     return error.message;
   }
   return 'Error desconocido';
 }
 
-function toDateString(date: Date | null): string | null {
+async function toDateString(date: Date | null): string | null {
+  const prisma = await getPrisma();
   if (!date) {
     return null;
   }
   return date.toISOString().split('T')[0];
 }
 
-function average(values: number[]): number {
+async function average(values: number[]): number {
+  const prisma = await getPrisma();
   if (values.length === 0) {
     return 0;
   }
@@ -96,7 +99,8 @@ function average(values: number[]): number {
   return sum / values.length;
 }
 
-function getMinDate(dates: Date[]): Date | null {
+async function getMinDate(dates: Date[]): Date | null {
+  const prisma = await getPrisma();
   if (dates.length === 0) {
     return null;
   }
@@ -104,7 +108,8 @@ function getMinDate(dates: Date[]): Date | null {
   return new Date(minValue);
 }
 
-function getMaxDate(dates: Date[]): Date | null {
+async function getMaxDate(dates: Date[]): Date | null {
+  const prisma = await getPrisma();
   if (dates.length === 0) {
     return null;
   }
@@ -112,7 +117,8 @@ function getMaxDate(dates: Date[]): Date | null {
   return new Date(maxValue);
 }
 
-function getPhaseStatus(progress: number, endDate: Date | null, hasTasks: boolean): PhaseStatus {
+async function getPhaseStatus(progress: number, endDate: Date | null, hasTasks: boolean): PhaseStatus {
+  const prisma = await getPrisma();
   if (!hasTasks) {
     return 'not_started';
   }

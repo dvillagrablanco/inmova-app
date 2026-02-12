@@ -46,14 +46,16 @@ const RENOVATION_CATEGORIES = new Set<RenovationCategory>([
   'OTROS',
 ]);
 
-function mapStatusToCompletion(status: string | undefined, progress: number): boolean {
+async function mapStatusToCompletion(status: string | undefined, progress: number): boolean {
+  const prisma = await getPrisma();
   if (status === 'completada') {
     return true;
   }
   return progress >= 100;
 }
 
-function normalizeCategory(value: string | undefined): RenovationCategory {
+async function normalizeCategory(value: string | undefined): RenovationCategory {
+  const prisma = await getPrisma();
   if (!value) {
     return 'OTROS';
   }

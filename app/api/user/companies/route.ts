@@ -28,7 +28,8 @@ const ROLE_ALLOWLIST: UserRole[] = [
   'subcontratista_ewoorker',
 ];
 
-function resolveUserRole(role: unknown): UserRole | null {
+async function resolveUserRole(role: unknown): UserRole | null {
+  const prisma = await getPrisma();
   if (typeof role !== 'string') {
     return null;
   }
