@@ -20,7 +20,7 @@ type PartnerTokenPayload = {
   email?: string;
 };
 
-function verifyToken(request: NextRequest) {
+async function verifyToken(request: NextRequest) {
   const prisma = await getPrisma();
   if (!JWT_SECRET) {
     return null;
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verificar autenticación
-    const decoded = verifyToken(request);
+    const decoded = await verifyToken(request);
     if (!decoded || !decoded.partnerId) {
       return NextResponse.json(
         { error: 'No autorizado' },

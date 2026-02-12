@@ -52,7 +52,6 @@ const ALERTS_RATE_LIMIT = {
 };
 
 function getCacheKey(companyId: string) {
-  const prisma = await getPrisma();
   return `${CACHE_KEY_PREFIX}${companyId}`;
 }
 

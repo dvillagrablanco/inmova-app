@@ -12,7 +12,7 @@ async function getPrisma() {
 }
 const JWT_SECRET = process.env.NEXTAUTH_SECRET;
 // Función para verificar el token
-function verifyToken(request: NextRequest) {
+async function verifyToken(request: NextRequest) {
   const prisma = await getPrisma();
   if (!JWT_SECRET) {
     return null;
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Verificar autenticación
-    const decoded = verifyToken(request);
+    const decoded = await verifyToken(request);
     if (!decoded || !decoded.partnerId) {
       return NextResponse.json(
         { error: 'No autorizado' },
