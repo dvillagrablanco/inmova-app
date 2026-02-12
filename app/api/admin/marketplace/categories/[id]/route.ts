@@ -25,6 +25,7 @@ const slugify = (value: string) =>
     .replace(/(^-|-$)/g, '');
 
 const resolveCategoryName = async (slugOrName: string): Promise<string | null> => {
+  const prisma = await getPrisma();
   const categories = await prisma.marketplaceService.findMany({
     select: { categoria: true },
     distinct: ['categoria'],
