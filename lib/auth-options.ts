@@ -176,14 +176,56 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user) {
         token.id = user.id;
         token.role = (user as any).role;
         token.companyId = (user as any).companyId;
         token.companyName = (user as any).companyName;
         token.userType = (user as any).userType;
+        token.companyRefreshedAt = Date.now();
       }
+
+      // Refrescar companyId desde la BD periódicamente (cada 60 segundos)
+      // para que switch-company surta efecto sin re-login
+      const REFRESH_INTERVAL_MS = 60 * 1000; // 60 segundos
+      const lastRefresh = (token.companyRefreshedAt as number) || 0;
+      const needsRefresh = Date.now() - lastRefresh > REFRESH_INTERVAL_MS;
+
+      if (needsRefresh && token.id && (token.userType === 'user' || !token.userType)) {
+        try {
+          const prisma = getPrismaClient();
+          if (prisma) {
+            const freshUser = await prisma.user.findUnique({
+              where: { id: token.id as string },
+              select: { companyId: true, role: true },
+            });
+            if (freshUser) {
+              // Solo actualizar si cambió (evitar queries innecesarias de company)
+              if (freshUser.companyId !== token.companyId) {
+                token.companyId = freshUser.companyId;
+                // Obtener nombre de la nueva empresa
+                try {
+                  const company = await prisma.company.findUnique({
+                    where: { id: freshUser.companyId },
+                    select: { nombre: true },
+                  });
+                  token.companyName = company?.nombre || 'Sin Empresa';
+                } catch {
+                  // No bloquear el flujo si falla obtener el nombre
+                }
+              }
+              // Sincronizar también el role por si cambió
+              token.role = freshUser.role;
+            }
+            token.companyRefreshedAt = Date.now();
+          }
+        } catch (error) {
+          // No bloquear el flujo de autenticación por errores de refresh
+          logger.warn('[NextAuth] Error refreshing user data in JWT:', error instanceof Error ? error.message : error);
+        }
+      }
+
       return token;
     },
     async session({ session, token }) {

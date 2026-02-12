@@ -32,7 +32,8 @@ export async function POST(request: Request) {
     }
 
     const userId = session.user.id;
-    const companyId = session.user.companyId;
+    const cookieCompanyId = request.cookies.get('activeCompanyId')?.value;
+    const companyId = cookieCompanyId || session.user.companyId;
 
     // Saltar tarea
     await skipOnboardingTask(userId, companyId, taskId);

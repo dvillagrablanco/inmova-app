@@ -24,8 +24,15 @@ const TIPO_MAPPING: Record<string, string[]> = {
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.companyId) {
+    if (!session?.user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    // Resolver companyId con soporte multi-empresa
+    const cookieCompanyId = request.cookies.get('activeCompanyId')?.value;
+    const companyId = cookieCompanyId || session.user.companyId;
+    if (!companyId) {
+      return NextResponse.json({ error: 'Empresa no definida' }, { status: 400 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -44,7 +51,7 @@ export async function GET(request: NextRequest) {
 
     const spaces = await prisma.commercialSpace.findMany({
       where: {
-        companyId: session.user.companyId,
+        companyId,
         ...(tipoFilter.length > 0 && { tipo: { in: tipoFilter as any } }),
         ...(estadoFilter && { estado: estadoFilter }),
       },
@@ -124,8 +131,14 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.companyId) {
+    if (!session?.user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    const cookieCompanyId = request.cookies.get('activeCompanyId')?.value;
+    const activeCompanyId = cookieCompanyId || session.user.companyId;
+    if (!activeCompanyId) {
+      return NextResponse.json({ error: 'Empresa no definida' }, { status: 400 });
     }
 
     const body = await request.json();
@@ -173,7 +186,7 @@ export async function POST(request: NextRequest) {
 
     const space = await prisma.commercialSpace.create({
       data: {
-        companyId: session.user.companyId,
+        companyId: activeCompanyId,
         nombre,
         tipo,
         direccion,

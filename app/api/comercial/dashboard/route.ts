@@ -11,11 +11,16 @@ export const runtime = 'nodejs';
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.companyId) {
+    if (!session?.user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = session.user.companyId;
+    // Resolver companyId con soporte multi-empresa
+    const cookieCompanyId = request.cookies.get('activeCompanyId')?.value;
+    const companyId = cookieCompanyId || session.user.companyId;
+    if (!companyId) {
+      return NextResponse.json({ error: 'Empresa no definida' }, { status: 400 });
+    }
     const now = new Date();
     const startMonth = startOfMonth(now);
     const endMonth = endOfMonth(now);

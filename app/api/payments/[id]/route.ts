@@ -259,7 +259,9 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = session.user?.companyId;
+    // Resolver companyId con soporte multi-empresa
+    const cookieCompanyId = req.cookies.get('activeCompanyId')?.value;
+    const companyId = cookieCompanyId || session.user?.companyId;
 
     await prisma.payment.delete({
       where: { id: params.id },

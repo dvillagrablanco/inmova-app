@@ -61,6 +61,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
                 nombre: true,
                 direccion: true,
                 tipo: true,
+                companyId: true,
               },
             },
           },
@@ -85,6 +86,16 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       return NextResponse.json({ error: 'Contrato no encontrado' }, { status: 404 });
     }
 
+    // Verificar que el contrato pertenece a la empresa del usuario (seguridad)
+    const cookieCompanyId = req.cookies.get('activeCompanyId')?.value;
+    const userCompanyId = cookieCompanyId || session.user.companyId;
+    const contractCompanyId = contract.unit?.building?.companyId;
+    const userRole = (session.user as any).role;
+    
+    if (contractCompanyId && userCompanyId && contractCompanyId !== userCompanyId && userRole !== 'super_admin' && userRole !== 'soporte') {
+      return NextResponse.json({ error: 'No tienes acceso a este contrato' }, { status: 403 });
+    }
+
     return NextResponse.json(contract);
   } catch (error) {
     logger.error('Error fetching contract:', error);
@@ -99,7 +110,9 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = session.user?.companyId;
+    // Resolver companyId con soporte multi-empresa
+    const cookieCompanyId = req.cookies.get('activeCompanyId')?.value;
+    const companyId = cookieCompanyId || session.user?.companyId;
     const body = await req.json();
 
     // Validación con Zod
@@ -149,7 +162,25 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = session.user?.companyId;
+    // Resolver companyId con soporte multi-empresa
+    const cookieCompanyId = req.cookies.get('activeCompanyId')?.value;
+    const companyId = cookieCompanyId || session.user?.companyId;
+
+    // Verificar ownership antes de eliminar
+    const existing = await prisma.contract.findUnique({
+      where: { id: params.id },
+      select: { unit: { select: { building: { select: { companyId: true } } } } },
+    });
+    
+    if (!existing) {
+      return NextResponse.json({ error: 'Contrato no encontrado' }, { status: 404 });
+    }
+    
+    const contractCompanyId = existing.unit?.building?.companyId;
+    const userRole = (session.user as any).role;
+    if (contractCompanyId && companyId && contractCompanyId !== companyId && userRole !== 'super_admin') {
+      return NextResponse.json({ error: 'No tienes acceso a este contrato' }, { status: 403 });
+    }
 
     await prisma.contract.delete({
       where: { id: params.id },

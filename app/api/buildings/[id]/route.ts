@@ -53,6 +53,14 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       return NextResponse.json({ error: 'Edificio no encontrado' }, { status: 404 });
     }
 
+    // Verificar que el edificio pertenece a la empresa del usuario
+    const cookieCompanyId = req.cookies.get('activeCompanyId')?.value;
+    const userCompanyId = cookieCompanyId || session.user.companyId;
+    const userRole = (session.user as any).role;
+    if (building.companyId && userCompanyId && building.companyId !== userCompanyId && userRole !== 'super_admin' && userRole !== 'soporte') {
+      return NextResponse.json({ error: 'No tienes acceso a este edificio' }, { status: 403 });
+    }
+
     return NextResponse.json(building);
   } catch (error) {
     logger.error('Error fetching building:', error);
@@ -67,7 +75,9 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = session.user?.companyId;
+    // Resolver companyId con soporte multi-empresa
+    const cookieCompanyId = req.cookies.get('activeCompanyId')?.value;
+    const companyId = cookieCompanyId || session.user?.companyId;
     const body = await req.json();
 
     // Validación con Zod
@@ -115,7 +125,22 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = session.user?.companyId;
+    // Resolver companyId con soporte multi-empresa
+    const cookieCompanyId = req.cookies.get('activeCompanyId')?.value;
+    const companyId = cookieCompanyId || session.user?.companyId;
+
+    // Verificar ownership antes de eliminar
+    const existing = await prisma.building.findUnique({
+      where: { id: params.id },
+      select: { companyId: true },
+    });
+    if (!existing) {
+      return NextResponse.json({ error: 'Edificio no encontrado' }, { status: 404 });
+    }
+    const userRole = (session.user as any).role;
+    if (existing.companyId !== companyId && userRole !== 'super_admin') {
+      return NextResponse.json({ error: 'No tienes acceso a este edificio' }, { status: 403 });
+    }
 
     await prisma.building.delete({
       where: { id: params.id },

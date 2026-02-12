@@ -65,7 +65,8 @@ export async function POST(request: NextRequest) {
     }
 
     const userId = session.user.id;
-    const companyId = session.user.companyId;
+    const cookieCompanyId = request.cookies.get('activeCompanyId')?.value;
+    const companyId = cookieCompanyId || session.user.companyId;
 
     // 2. Obtener datos de la empresa para validación
     const company = await prisma.company.findUnique({

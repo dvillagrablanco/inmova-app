@@ -74,8 +74,15 @@ function getErrorMessage(error: unknown) {
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.companyId) {
+    if (!session?.user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    // Resolver companyId con soporte multi-empresa
+    const cookieCompanyId = request.cookies.get('activeCompanyId')?.value;
+    const companyId = cookieCompanyId || session.user.companyId;
+    if (!companyId) {
+      return NextResponse.json({ error: 'Empresa no definida' }, { status: 400 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -83,7 +90,6 @@ export async function GET(request: NextRequest) {
     const period: Period = parsedPeriod.success ? parsedPeriod.data : 'month';
     const { start, end, previousStart, previousEnd } = getPeriodRange(period);
     const prisma = getPrismaClient();
-    const companyId = session.user.companyId;
 
     const paymentBaseWhere: Prisma.PaymentWhereInput = {
       isDemo: false,

@@ -23,7 +23,8 @@ export async function GET(request: Request) {
     }
 
     const userId = session.user.id;
-    const companyId = session.user.companyId;
+    const cookieCompanyId = request.cookies.get('activeCompanyId')?.value;
+    const companyId = cookieCompanyId || session.user.companyId;
 
     // Obtener progreso
     const progress = await getOnboardingProgress(userId, companyId);
