@@ -2,7 +2,13 @@
  * Script para sincronizar planes y add-ons con Stripe LIVE
  * Ejecutar: npx tsx scripts/sync-stripe-products.ts
  */
-import 'dotenv/config';
+import * as dotenv from 'dotenv';
+import * as path from 'path';
+// Load .env.production first, then .env.local as fallback
+dotenv.config({ path: path.resolve(process.cwd(), '.env.production') });
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
+dotenv.config();
+
 import Stripe from 'stripe';
 import { PrismaClient } from '@prisma/client';
 
