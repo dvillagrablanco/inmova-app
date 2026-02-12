@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -502,7 +503,8 @@ export default function ContabilidadPage() {
   }
 
   return (
-    <div className="ml-0 lg:ml-64 container mx-auto p-6 space-y-6">
+    <AuthenticatedLayout>
+    <div className="container mx-auto py-6 px-4 max-w-7xl space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Dashboard Financiero</h1>
@@ -1315,5 +1317,6 @@ export default function ContabilidadPage() {
         position="bottom-right"
       />
     </div>
+    </AuthenticatedLayout>
   );
 }

@@ -179,26 +179,44 @@ export async function POST(request: NextRequest) {
       const monto = Math.max(totalDebe, totalHaber);
       if (monto === 0) continue;
 
-      const { tipo, categoria } = classifyEntry(first.sub, first.titulo, totalDebe, totalHaber);
+      // Buscar subcuenta de PyG (grupo 6 o 7) en todos los apuntes
+      const pygEntry = entries.find(e => String(e.sub).startsWith('7'))
+                    || entries.find(e => String(e.sub).startsWith('6'))
+                    || first;
+      const { tipo, categoria } = await classifyEntry(pygEntry.sub, pygEntry.titulo, totalDebe, totalHaber);
 
       txns.push({
         companyId: company.id,
         tipo,
         categoria,
-        concepto: (first.concepto || first.titulo || `Asiento ${first.num}`).substring(0, 500),
+        concepto: (first.concepto || pygEntry.titulo || first.titulo || `Asiento ${first.num}`).substring(0, 500),
         monto: Math.round(monto * 100) / 100,
         fecha: first.fecha,
         referencia: `${first.sourceIdx}-AS-${first.num}${first.referencia ? ' / ' + first.referencia : ''}`,
-        notas: `Subcuenta: ${first.sub} - ${first.titulo}`,
+        notas: `Subcuenta: ${pygEntry.sub} - ${pygEntry.titulo}`,
       });
     }
 
-    // Insertar en batches
+    // Insertar en batches con error handling
     let created = 0;
+    let errors = 0;
     for (let i = 0; i < txns.length; i += 100) {
       const batch = txns.slice(i, i + 100);
-      await prisma.accountingTransaction.createMany({ data: batch });
-      created += batch.length;
+      try {
+        await prisma.accountingTransaction.createMany({ data: batch });
+        created += batch.length;
+      } catch (batchErr: any) {
+        logger.warn(`[Refresh Accounting] Error en batch ${i}: ${batchErr.message?.substring(0, 200)}`);
+        // Try one by one
+        for (const tx of batch) {
+          try {
+            await prisma.accountingTransaction.create({ data: tx });
+            created++;
+          } catch {
+            errors++;
+          }
+        }
+      }
     }
 
     // Obtener rango de fechas
