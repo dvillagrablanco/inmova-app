@@ -10,17 +10,23 @@ import {
   incidentEscalationService, 
   paymentReminderService 
 } from '@/lib/automation-service-simple';
-import { prisma } from '@/lib/db';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 
 // Token de seguridad para proteger este endpoint
 const AUTOMATION_TOKEN = process.env.AUTOMATION_TOKEN || 'inmova_automation_2024';
 
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     // Verificar token de autorización
     const authHeader = request.headers.get('authorization');
@@ -116,6 +122,7 @@ export async function POST(request: NextRequest) {
 
 // También permitir GET para ejecución manual (solo con token)
 export async function GET(request: NextRequest) {
+  const prisma = await getPrisma();
   const { searchParams } = new URL(request.url);
   const token = searchParams.get('token');
 

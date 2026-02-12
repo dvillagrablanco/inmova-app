@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
 import { validateFile } from '@/lib/file-validation';
 import { parseCSV } from '@/lib/import-service';
 import { S3Service } from '@/lib/s3-service';
@@ -12,6 +11,12 @@ import AdmZip from 'adm-zip';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 const ADMIN_ROLES = new Set(['ADMIN', 'SUPERADMIN', 'administrador', 'super_admin', 'soporte']);
 
@@ -121,6 +126,7 @@ function parseSheet(buffer: Buffer, sheetName?: string): any[] {
 }
 
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {

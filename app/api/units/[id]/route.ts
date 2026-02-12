@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
 import logger from '@/lib/logger';
 import { z } from 'zod';
 import {
@@ -13,6 +12,12 @@ import { resolveCompanyScope } from '@/lib/company-scope';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 const unitUpdateSchema = z.object({
   buildingId: z.string().cuid().optional(),
@@ -38,6 +43,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
@@ -104,6 +110,7 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
@@ -213,6 +220,7 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session) {

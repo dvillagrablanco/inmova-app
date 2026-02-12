@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
 import { checkRoomAvailability } from '@/lib/room-rental-service';
 import logger, { logError } from '@/lib/logger';
 import {
@@ -15,11 +14,18 @@ import {
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 /**
  * GET /api/room-rental/rooms/[id]
  * Obtiene una habitación específica con detalles completos
  */
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
@@ -100,6 +106,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
  * Actualiza una habitación
  */
 export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
@@ -200,6 +207,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
  * Elimina una habitación (solo si no tiene contratos activos)
  */
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (

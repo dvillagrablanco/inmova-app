@@ -1,13 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
 import { requireProviderAuth } from '@/lib/provider-auth';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 // GET /api/portal-proveedor/availability - Obtener disponibilidad del proveedor
 export async function GET(req: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const auth = await requireProviderAuth(req);
     if (!auth.authenticated || !auth.provider) {
@@ -38,6 +44,7 @@ export async function GET(req: NextRequest) {
 
 // POST /api/portal-proveedor/availability - Crear período de disponibilidad
 export async function POST(req: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const auth = await requireProviderAuth(req);
     if (!auth.authenticated || !auth.provider) {

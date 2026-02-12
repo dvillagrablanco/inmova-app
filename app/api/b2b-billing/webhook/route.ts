@@ -4,13 +4,18 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
 import { registerInvoicePayment } from '@/lib/b2b-billing-service';
 import Stripe from 'stripe';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 // Initialize Stripe only if API key is available
 const getStripe = () => {
@@ -26,6 +31,7 @@ const getStripe = () => {
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
 
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     // Check if Stripe is configured
     const stripe = getStripe();
@@ -98,6 +104,7 @@ export async function POST(request: NextRequest) {
  * Manejar pago exitoso
  */
 async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
+  const prisma = await getPrisma();
   const stripe = getStripe();
   if (!stripe) {
     logger.error('Stripe no está configurado en handlePaymentSuccess');
@@ -160,6 +167,7 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
  * Manejar pago fallido
  */
 async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
+  const prisma = await getPrisma();
   const { invoiceId } = paymentIntent.metadata;
 
   if (!invoiceId) {
@@ -187,6 +195,7 @@ async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
  * Manejar facturas de suscripción de Stripe
  */
 async function handleStripeInvoiceSuccess(stripeInvoice: Stripe.Invoice) {
+  const prisma = await getPrisma();
   // Si usamos Stripe Billing para suscripciones recurrentes
   // Este handler sincronizaría las facturas de Stripe con nuestro sistema
   

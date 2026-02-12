@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
 import { sendEmail } from '@/lib/email-config';
 import logger from '@/lib/logger';
 import { addDays, format } from 'date-fns';
@@ -9,10 +8,17 @@ import { authorizeCronRequest } from '@/lib/cron-auth';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 /**
  * Procesa y notifica sobre tareas de mantenimiento preventivo próximas
  */
 async function processPreventiveMaintenance() {
+  const prisma = await getPrisma();
   const today = new Date();
   const next7Days = addDays(today, 7);
   const next3Days = addDays(today, 3);
@@ -176,6 +182,7 @@ async function processPreventiveMaintenance() {
  * Este endpoint debe ser llamado por un servicio de cron externo (diariamente)
  */
 export async function GET(request: NextRequest) {
+  const prisma = await getPrisma();
   // Cron auth guard (auditoria V2)
   const cronAuth = await authorizeCronRequest(request as any);
   if (!cronAuth.authorized) {
@@ -223,6 +230,7 @@ export async function GET(request: NextRequest) {
  * Alternativa con método POST
  */
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   // Cron auth guard (auditoria V2)
   const cronAuth = await authorizeCronRequest(request as any);
   if (!cronAuth.authorized) {

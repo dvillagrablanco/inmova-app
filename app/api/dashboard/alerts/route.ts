@@ -6,7 +6,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
 import { addDays, differenceInDays, startOfDay } from 'date-fns';
 import logger, { logError } from '@/lib/logger';
 import { getRedisClient } from '@/lib/redis';
@@ -14,6 +13,12 @@ import { withRateLimit } from '@/lib/rate-limiting';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 interface Alert {
   id: string;
@@ -47,6 +52,7 @@ const ALERTS_RATE_LIMIT = {
 };
 
 function getCacheKey(companyId: string) {
+  const prisma = await getPrisma();
   return `${CACHE_KEY_PREFIX}${companyId}`;
 }
 
@@ -72,6 +78,7 @@ async function setCachedAlerts(key: string, payload: AlertsResponse): Promise<vo
 }
 
 export async function GET(request: NextRequest) {
+  const prisma = await getPrisma();
   return withRateLimit(
     request,
     async () => {

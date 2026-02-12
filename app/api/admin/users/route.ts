@@ -1,15 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 // GET /api/admin/users - Lista usuarios (solo super_admin)
 export async function GET(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     
@@ -79,6 +85,7 @@ export async function GET(request: NextRequest) {
 
 // POST /api/admin/users - Crear usuario (solo super_admin)
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     

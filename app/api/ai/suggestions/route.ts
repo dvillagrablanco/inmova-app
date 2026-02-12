@@ -1,13 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
 import logger, { logError } from '@/lib/logger';
 import { withRateLimit } from '@/lib/rate-limiting';
 import { getRedisClient } from '@/lib/redis';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 const SUGGESTIONS_RATE_LIMIT = {
   interval: 60 * 1000,
@@ -18,10 +23,12 @@ const SUGGESTIONS_CACHE_PREFIX = 'ai:suggestions:';
 const SUGGESTIONS_TIMEOUT_MS = 12000;
 
 function getCacheKey(userId: string) {
+  const prisma = await getPrisma();
   return `${SUGGESTIONS_CACHE_PREFIX}${userId}`;
 }
 
 async function getCachedSuggestions(userId: string) {
+  const prisma = await getPrisma();
   try {
     const redis = getRedisClient();
     if (!redis) return null;
@@ -33,6 +40,7 @@ async function getCachedSuggestions(userId: string) {
 }
 
 async function setCachedSuggestions(userId: string, payload: unknown) {
+  const prisma = await getPrisma();
   try {
     const redis = getRedisClient();
     if (!redis) return;
@@ -47,6 +55,7 @@ async function setCachedSuggestions(userId: string, payload: unknown) {
 }
 
 function isSuggestionsAIConfigured() {
+  const prisma = await getPrisma();
   return !!process.env.ABACUSAI_API_KEY;
 }
 
@@ -57,6 +66,7 @@ async function generateSuggestions({
   userId: string;
   context?: Record<string, unknown>;
 }) {
+  const prisma = await getPrisma();
   const user = await prisma.user.findUnique({
     where: { id: userId },
   });
@@ -180,6 +190,7 @@ Genera sugerencias relevantes para ayudar al usuario.`;
  * API para generar sugerencias proactivas usando IA
  */
 export async function GET(request: NextRequest) {
+  const prisma = await getPrisma();
   return withRateLimit(
     request,
     async () => {
@@ -224,6 +235,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   return withRateLimit(
     request,
     async () => {

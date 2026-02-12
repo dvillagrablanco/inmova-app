@@ -5,11 +5,16 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 interface WebVitalsPayload {
   name: string;
@@ -21,6 +26,7 @@ interface WebVitalsPayload {
 }
 
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const data: WebVitalsPayload = await request.json();
 
@@ -69,6 +75,7 @@ export async function POST(request: NextRequest) {
 
 // GET para obtener estadísticas
 export async function GET(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const { searchParams } = new URL(request.url);
     const metric = searchParams.get('metric');

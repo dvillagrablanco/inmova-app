@@ -1,14 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
-
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 // GET - Obtener plantillas legales (accesible para todos los usuarios autenticados)
 export async function GET(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -52,6 +57,7 @@ export async function GET(request: NextRequest) {
 
 // POST - Crear nueva plantilla (solo admin/gestor)
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {

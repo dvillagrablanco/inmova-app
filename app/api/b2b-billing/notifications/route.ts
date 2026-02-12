@@ -6,7 +6,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
 import { 
   sendPaymentReminders, 
   markOverdueInvoices 
@@ -19,10 +18,17 @@ import logger, { logError } from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 /**
  * POST: Ejecutar acciones de notificación
  */
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -97,6 +103,7 @@ export async function POST(request: NextRequest) {
  * Enviar recordatorio de pago para una factura específica
  */
 async function sendInvoiceReminder(invoiceId: string, customMessage?: string) {
+  const prisma = await getPrisma();
   const invoice = await prisma.b2BInvoice.findUnique({
     where: { id: invoiceId },
     include: {
@@ -210,6 +217,7 @@ async function sendInvoiceReminder(invoiceId: string, customMessage?: string) {
  * Enviar resúmenes mensuales a todas las empresas
  */
 async function sendMonthlySummaries() {
+  const prisma = await getPrisma();
   const companies = await prisma.company.findMany({
     where: {
       activo: true,

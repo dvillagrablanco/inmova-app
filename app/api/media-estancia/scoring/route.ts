@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
-
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 // Mapeo de nivel de riesgo de BD a UI
 const riskLevelMap: Record<string, 'low' | 'medium' | 'high'> = {
@@ -258,6 +262,7 @@ function generateAIAnalysis(
   riskLevel: string,
   factors: ReturnType<typeof calculateScoringFactors>
 ) {
+  const prisma = await getPrisma();
   const positiveFactors = factors.filter((f) => f.status === 'positive');
   const negativeFactors = factors.filter((f) => f.status === 'negative');
 
@@ -309,6 +314,7 @@ function determineStatus(
 }
 
 export async function GET(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -427,6 +433,7 @@ export async function GET(request: NextRequest) {
 
 // POST para actualizar el scoring manualmente o aprobar/rechazar
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {

@@ -1,11 +1,16 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authTenantOptions } from '@/lib/auth-tenant-options';
-import { prisma } from '@/lib/db';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 /**
  * Portal Inquilino - Dashboard Optimizado
@@ -19,6 +24,7 @@ export const runtime = 'nodejs';
  * Mejora: De ~1400ms a ~210ms (-85%)
  */
 export async function GET(request: Request) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authTenantOptions);
     

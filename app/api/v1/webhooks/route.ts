@@ -7,11 +7,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAPIv1 } from '@/lib/api-v1/middleware';
 import { generateWebhookSecret } from '@/lib/webhook-dispatcher';
-import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 const createWebhookSchema = z.object({
   url: z.string().url(),

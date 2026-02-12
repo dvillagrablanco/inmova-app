@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
 import { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 /**
  * GET /api/portal-proveedor/invoices/[id]
@@ -13,6 +18,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const prisma = await getPrisma();
   try {
     const providerId = request.headers.get('x-provider-id');
 
@@ -92,6 +98,7 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const prisma = await getPrisma();
   try {
     const providerId = request.headers.get('x-provider-id');
 

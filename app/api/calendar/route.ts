@@ -1,18 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
 import { obtenerEventosCalendario } from '@/lib/calendar-service';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 /**
  * GET /api/calendar
  * Obtiene eventos del calendario con filtros opcionales
  */
 export async function GET(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
@@ -74,6 +80,7 @@ export async function GET(request: NextRequest) {
  * Crea un nuevo evento en el calendario
  */
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {

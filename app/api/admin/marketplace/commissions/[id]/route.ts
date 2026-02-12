@@ -6,10 +6,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { z } from 'zod';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 type ServiceCommissionStatus = 'active' | 'paused' | 'pending';
 
@@ -26,6 +31,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== 'super_admin') {
@@ -68,6 +74,7 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== 'super_admin') {
@@ -121,6 +128,7 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== 'super_admin') {
@@ -167,6 +175,7 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== 'super_admin') {

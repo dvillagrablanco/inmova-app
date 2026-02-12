@@ -13,7 +13,6 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import * as ClaudeAIService from '@/lib/claude-ai-service';
 import { PropertyData } from '@/lib/claude-ai-service';
-import { prisma } from '@/lib/db';
 import { z } from 'zod';
 import { checkAILimit, createLimitExceededResponse, logUsageWarning } from '@/lib/usage-limits';
 import { trackUsage } from '@/lib/usage-tracking-service';
@@ -23,6 +22,12 @@ import Anthropic from '@anthropic-ai/sdk';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 // Helper para mapear estado de conservación
 function mapCondition(estado?: string): 'NEW' | 'GOOD' | 'NEEDS_RENOVATION' {
@@ -294,6 +299,7 @@ const valuateSchema = z.object({
  * }
  */
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     // 1. Verificar autenticación
     const session = await getServerSession(authOptions);
@@ -581,6 +587,7 @@ export async function POST(request: NextRequest) {
  * Obtiene valoraciones anteriores de una propiedad
  */
 export async function GET(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session) {

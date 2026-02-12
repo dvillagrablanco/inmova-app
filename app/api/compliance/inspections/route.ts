@@ -6,10 +6,14 @@ import {
   getITECalendar,
   CreateITEParams,
 } from '@/lib/services/compliance-service';
-import { prisma } from '@/lib/db';
-
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 
 /**
@@ -24,6 +28,7 @@ export const runtime = 'nodejs';
  */
 
 export async function GET(req: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -63,6 +68,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {

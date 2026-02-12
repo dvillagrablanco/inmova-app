@@ -3,11 +3,16 @@ import { getServerSession } from 'next-auth';
 import { z } from 'zod';
 
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 type SessionUser = {
   id?: string;
@@ -29,6 +34,7 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     const user = session?.user as SessionUser | undefined;
@@ -94,6 +100,7 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     const user = session?.user as SessionUser | undefined;

@@ -14,7 +14,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
 import { z } from 'zod';
 import logger from '@/lib/logger';
 import { getZucchettiTokens, refreshZucchettiToken } from '../callback/route';
@@ -26,6 +25,12 @@ import {
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 const ZUCCHETTI_API_URL = process.env.ZUCCHETTI_API_URL || 'https://api.zucchetti.it/v1';
 
@@ -587,6 +592,7 @@ async function syncInvoicesAltai(): Promise<SyncResult> {
 // ═══════════════════════════════════════════════════════════════
 
 export async function POST(req: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
 
@@ -765,6 +771,7 @@ export async function POST(req: NextRequest) {
 // ═══════════════════════════════════════════════════════════════
 
 export async function GET(req: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
 

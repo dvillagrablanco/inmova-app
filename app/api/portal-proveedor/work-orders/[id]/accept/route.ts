@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
 import type { Prisma } from '@prisma/client';
 import { requireProviderAuth } from '@/lib/provider-auth';
 import logger from '@/lib/logger';
@@ -7,11 +6,18 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 // POST /api/portal-proveedor/work-orders/[id]/accept - Aceptar orden de trabajo
 export async function POST(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const prisma = await getPrisma();
   try {
     // Verificar autenticación
     const auth = await requireProviderAuth(req);

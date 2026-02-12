@@ -1,16 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/permissions';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 /**
  * GET /api/notification-logs
  * Obtiene el historial de notificaciones enviadas
  */
 export async function GET(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const user = await requireAuth();
     const { searchParams } = new URL(request.url);
@@ -93,6 +99,7 @@ export async function GET(request: NextRequest) {
  * Obtiene estadísticas de notificaciones
  */
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const user = await requireAuth();
     const { searchParams } = new URL(request.url);

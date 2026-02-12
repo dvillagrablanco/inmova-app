@@ -3,15 +3,21 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import logger from '@/lib/logger';
 import crypto from 'crypto';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 
 
 // Generar token de recuperación
 export async function POST(req: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const { email } = await req.json();
 
@@ -67,6 +73,7 @@ export async function POST(req: NextRequest) {
 
 // Restablecer contraseña con token
 export async function PUT(req: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const { token, newPassword } = await req.json();
 

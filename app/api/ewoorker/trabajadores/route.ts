@@ -4,10 +4,15 @@ export const runtime = 'nodejs';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
 import logger from '@/lib/logger';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 // Schema de validación para crear trabajador
 const createTrabajadorSchema = z.object({
   nombre: z.string().min(2, 'Nombre requerido'),
@@ -35,6 +40,7 @@ const createTrabajadorSchema = z.object({
  * O busca trabajadores disponibles para subcontratar
  */
 export async function GET(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -165,6 +171,7 @@ export async function GET(request: NextRequest) {
  * Crea un nuevo trabajador en la empresa del usuario
  */
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {

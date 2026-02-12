@@ -1,13 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthenticatedOwner } from '@/lib/owner-auth';
-import { prisma } from '@/lib/db';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 // GET /api/owner-notifications - Obtener notificaciones del propietario autenticado
 export async function GET(req: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const owner = await getAuthenticatedOwner();
 
@@ -44,6 +50,7 @@ export async function GET(req: NextRequest) {
 
 // PATCH /api/owner-notifications - Marcar notificación como leída
 export async function PATCH(req: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const owner = await getAuthenticatedOwner();
 

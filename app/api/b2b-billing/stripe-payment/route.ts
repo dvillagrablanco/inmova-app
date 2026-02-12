@@ -6,13 +6,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
 import { registerInvoicePayment } from '@/lib/b2b-billing-service';
 import Stripe from 'stripe';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 // Initialize Stripe only if API key is available
 const getStripe = () => {
@@ -29,6 +34,7 @@ const getStripe = () => {
  * POST: Crear Payment Intent para una factura
  */
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     // Check if Stripe is configured
     const stripe = getStripe();
@@ -145,6 +151,7 @@ export async function POST(request: NextRequest) {
  * PUT: Confirmar pago exitoso (webhook o manual)
  */
 export async function PUT(request: NextRequest) {
+  const prisma = await getPrisma();
   const stripe = getStripe();
   if (!stripe) {
     return NextResponse.json(

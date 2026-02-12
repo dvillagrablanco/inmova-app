@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/permissions';
 import { z } from 'zod';
 import { getServerSession } from 'next-auth';
@@ -9,6 +8,12 @@ import logger, { logError } from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 
 const switchCompanySchema = z.object({
   companyId: z.string(),
@@ -16,6 +21,7 @@ const switchCompanySchema = z.object({
 
 // POST - Cambiar de empresa (para usuarios de soporte)
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const user = await requireAuth();
     const body = await request.json();

@@ -11,7 +11,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
 import {
   analyzeDocument,
   isAIConfigured,
@@ -22,6 +21,12 @@ import { withRateLimit } from '@/lib/rate-limiting';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 const DOCUMENT_ANALYSIS_RATE_LIMIT = {
   interval: 60 * 1000,
@@ -919,6 +924,7 @@ function basicAnalysis(filename: string, fileType: string) {
 }
 
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   return withRateLimit(
     request,
     async () => {

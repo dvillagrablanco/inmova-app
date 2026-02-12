@@ -1,12 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 // Roles permitidos para gestionar planes
 const ADMIN_ROLES = ['super_admin', 'administrador'];
@@ -44,6 +49,7 @@ const planSchema = z.object({
  * Obtiene todos los planes de suscripción
  */
 export async function GET(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     
@@ -112,6 +118,7 @@ export async function GET(request: NextRequest) {
  * Crea un nuevo plan de suscripción
  */
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     

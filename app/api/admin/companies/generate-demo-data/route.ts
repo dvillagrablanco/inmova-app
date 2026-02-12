@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
 import { z } from 'zod';
 import logger from '@/lib/logger';
 import { 
@@ -14,6 +13,12 @@ import {
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 const requestSchema = z.object({
   companyId: z.string().min(1),
@@ -35,6 +40,7 @@ const requestSchema = z.object({
  * Genera datos de ejemplo personalizados según el escenario seleccionado
  */
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
 
@@ -170,6 +176,7 @@ function normalizeMaintenancePriority(prioridad: string): 'baja' | 'media' | 'al
  * Genera los datos específicos según el escenario
  */
 async function generateScenarioData(companyId: string, config: DemoScenarioConfig) {
+  const prisma = await getPrisma();
   const createdBuildings: any[] = [];
   const createdUnits: any[] = [];
   const createdTenants: any[] = [];

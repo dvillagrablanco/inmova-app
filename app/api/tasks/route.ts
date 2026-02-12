@@ -7,7 +7,6 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth, requirePermission } from '@/lib/permissions';
-import { prisma } from '@/lib/db';
 import logger from '@/lib/logger';
 import { taskCreateSchema } from '@/lib/validations';
 import { z } from 'zod';
@@ -15,11 +14,18 @@ import { z } from 'zod';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 /**
  * GET /api/tasks
  * Obtiene todas las tareas con filtros opcionales
  */
 export async function GET(req: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const user = await requireAuth();
     const { searchParams } = new URL(req.url);
@@ -94,6 +100,7 @@ export async function GET(req: NextRequest) {
  * Crea una nueva tarea con validación Zod
  */
 export async function POST(req: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const user = await requirePermission('create');
     const body = await req.json();

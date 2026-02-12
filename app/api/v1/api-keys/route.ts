@@ -8,12 +8,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { generateApiKey, parseScopes } from '@/lib/api-v1/auth';
-import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 const createApiKeySchema = z.object({
   name: z.string().min(3).max(100),
@@ -28,6 +33,7 @@ const createApiKeySchema = z.object({
  * Lista las API keys de la empresa (sin mostrar el key completo)
  */
 export async function GET(req: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
 
@@ -76,6 +82,7 @@ export async function GET(req: NextRequest) {
  * Crear una nueva API key
  */
 export async function POST(req: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
 

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
 import { checkRoomAvailability, generateColivingRulesTemplate } from '@/lib/room-rental-service';
 import logger, { logError } from '@/lib/logger';
 import { 
@@ -15,11 +14,18 @@ import {
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 /**
  * GET /api/room-rental/contracts
  * Obtiene todos los contratos de habitaciones
  */
 export async function GET(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {
@@ -88,6 +94,7 @@ export async function GET(request: NextRequest) {
  * Crea un nuevo contrato de habitación
  */
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {

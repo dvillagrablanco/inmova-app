@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
 import { resolveCompanyScope } from '@/lib/company-scope';
 import logger, { logError } from '@/lib/logger';
 import { z } from 'zod';
@@ -9,6 +8,12 @@ import type { UserRole } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 const CREATE_ALLOWED_ROLES = new Set(['administrador', 'gestor', 'super_admin']);
 const ROLE_ALLOWLIST: UserRole[] = [
@@ -41,6 +46,7 @@ const createCompanySchema = z.object({
 });
 
 async function userHasCompanyAccess(userId: string, companyId: string) {
+  const prisma = await getPrisma();
   const access = await prisma.userCompanyAccess.findUnique({
     where: {
       userId_companyId: {
@@ -65,6 +71,7 @@ async function userHasCompanyAccess(userId: string, companyId: string) {
  * Obtiene todas las empresas a las que tiene acceso el usuario actual
  */
 export async function GET(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     
@@ -144,6 +151,7 @@ export async function GET(request: NextRequest) {
  * Crea una nueva empresa para el usuario actual
  */
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
 

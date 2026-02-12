@@ -2,14 +2,20 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
 import { requireAuth, forbiddenResponse, notFoundResponse } from '@/lib/permissions';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 // POST - Inscribirse a un evento
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const prisma = await getPrisma();
   try {
     const user = await requireAuth();
     const { id: eventId } = params;
@@ -71,6 +77,7 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const prisma = await getPrisma();
   try {
     const user = await requireAuth();
     const { id: eventId } = params;

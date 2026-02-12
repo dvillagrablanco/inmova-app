@@ -1,14 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authTenantOptions } from '@/lib/auth-tenant-options';
-import { prisma } from '@/lib/db';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 // GET - Obtener el estado del onboarding
 export async function GET(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authTenantOptions);
 
@@ -51,6 +57,7 @@ export async function GET(request: NextRequest) {
 
 // POST - Completar el onboarding
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authTenantOptions);
 
@@ -99,6 +106,7 @@ export async function POST(request: NextRequest) {
 
 // PATCH - Actualizar el progreso del onboarding
 export async function PATCH(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authTenantOptions);
 

@@ -4,11 +4,16 @@ import { z } from 'zod';
 import bcrypt from 'bcryptjs';
 
 import { authTenantOptions } from '@/lib/auth-tenant-options';
-import { prisma } from '@/lib/db';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 const changePasswordSchema = z.object({
   currentPassword: z.string().min(1),
@@ -20,6 +25,7 @@ type TenantSessionUser = {
 };
 
 export async function POST(request: Request) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authTenantOptions);
     const user = session?.user as TenantSessionUser | undefined;

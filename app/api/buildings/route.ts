@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
 import { requireAuth, getUserCompany, requirePermission, forbiddenResponse, badRequestResponse } from '@/lib/permissions';
 import logger, { logError } from '@/lib/logger';
 import { buildingCreateSchema } from '@/lib/validations';
@@ -9,7 +8,14 @@ import { resolveCompanyScope } from '@/lib/company-scope';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 export async function GET(req: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const user = await requireAuth();
     const scope = await resolveCompanyScope({
@@ -130,6 +136,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const user = await requirePermission('create');
     const scope = await resolveCompanyScope({

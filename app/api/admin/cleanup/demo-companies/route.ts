@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
-
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 // Patrones que indican empresas demo/test/fake
 const DEMO_PATTERNS = [
@@ -22,6 +26,7 @@ const DEMO_PATTERNS = [
 
 // GET - Listar empresas que parecen demo/test
 export async function GET() {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user || session.user.role !== 'super_admin') {
@@ -74,6 +79,7 @@ export async function GET() {
 
 // DELETE - Eliminar empresas demo/test
 export async function DELETE(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user || session.user.role !== 'super_admin') {

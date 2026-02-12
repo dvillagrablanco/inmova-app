@@ -6,13 +6,18 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth, requirePermission } from '@/lib/permissions';
-import { prisma } from '@/lib/db';
 import logger from '@/lib/logger';
 import { taskUpdateSchema } from '@/lib/validations';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 /**
  * GET /api/tasks/[id]
@@ -22,6 +27,7 @@ export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const prisma = await getPrisma();
   try {
     const user = await requireAuth();
 
@@ -80,6 +86,7 @@ export async function PUT(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const prisma = await getPrisma();
   try {
     const user = await requirePermission('update');
     const body = await req.json();
@@ -190,6 +197,7 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const prisma = await getPrisma();
   try {
     const user = await requirePermission('delete');
 

@@ -8,7 +8,6 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
 import {
   getAltaiAccessToken,
   getAltaiConfig,
@@ -19,6 +18,12 @@ import { authorizeCronRequest } from '@/lib/cron-auth';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 // Verificar token de cron (seguridad)
 function verifyCronAuth(request: NextRequest): boolean {
@@ -32,6 +37,7 @@ function verifyCronAuth(request: NextRequest): boolean {
 }
 
 export async function GET(request: NextRequest) {
+  const prisma = await getPrisma();
   // Cron auth guard (auditoria V2)
   const cronAuth = await authorizeCronRequest(request as any);
   if (!cronAuth.authorized) {

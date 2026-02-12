@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/permissions';
 import { createNotification } from '@/lib/notification-generator';
 import logger, { logError } from '@/lib/logger';
@@ -7,11 +6,18 @@ import logger, { logError } from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 /**
  * PUT /api/approvals/[id]
  * Aprueba o rechaza una solicitud de aprobación
  */
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
+  const prisma = await getPrisma();
   try {
     const user = await requireAuth();
 
@@ -135,6 +141,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
  * Cancela una solicitud de aprobación (solo el solicitante)
  */
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+  const prisma = await getPrisma();
   try {
     const user = await requireAuth();
     const { id } = params;

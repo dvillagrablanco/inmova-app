@@ -15,7 +15,6 @@ export const runtime = 'nodejs';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
 import { uploadDocument } from '@/lib/document-service';
 import { 
   processFile, 
@@ -26,6 +25,12 @@ import {
 import logger from '@/lib/logger';
 import { z } from 'zod';
 import type { Prisma } from '@prisma/client';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 // ============================================================================
 // CONFIGURACIÓN
@@ -52,6 +57,7 @@ type UploadOptions = z.infer<typeof uploadOptionsSchema>;
 // ============================================================================
 
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   const startTime = Date.now();
 
   try {
@@ -381,6 +387,7 @@ async function processDocumentsAsync(
   batchId: string,
   company: { id: string; nombre: string; cif: string | null; direccion: string | null }
 ) {
+  const prisma = await getPrisma();
   try {
     // Importar servicios de IA
     const { processFile } = await import('@/lib/document-import-processor-service');

@@ -8,11 +8,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAPIv1 } from '@/lib/api-v1/middleware';
 import { NotFoundError, ForbiddenError } from '@/lib/api-v1/errors';
-import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 const updatePropertySchema = z.object({
   address: z.string().min(5).optional(),

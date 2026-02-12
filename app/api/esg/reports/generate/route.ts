@@ -6,10 +6,16 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import logger from '@/lib/logger';
 import PDFDocument from 'pdfkit';
-import { prisma } from '@/lib/db';
 import { endOfMonth, startOfMonth, subMonths, format } from 'date-fns';
 
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.companyId) {

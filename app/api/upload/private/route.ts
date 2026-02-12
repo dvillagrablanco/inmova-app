@@ -9,12 +9,17 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { z } from 'zod';
-import { prisma } from '@/lib/db';
 import * as LocalStorage from '@/lib/local-storage';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 // Configuración de AWS S3
 const AWS_REGION = process.env.AWS_REGION || 'eu-west-1';
@@ -77,6 +82,7 @@ const ALLOWED_MIME_TYPES = [
 ];
 
 export async function POST(req: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const storageMode = getStorageMode();
 

@@ -16,13 +16,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
 import { resolveAccountingScope } from '@/lib/accounting-scope';
 import * as XLSX from 'xlsx';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 // Fuentes de contabilidad por empresa (Google Sheets export URLs)
 // Cada empresa puede tener múltiples fuentes (por año)
@@ -42,6 +47,7 @@ const ACCOUNTING_SOURCES: Record<string, string[]> = {
 };
 
 function classifyEntry(sub: string, titulo: string, debe: number, haber: number) {
+  const prisma = await getPrisma();
   let tipo: 'ingreso' | 'gasto' = 'gasto';
   let cat = 'gasto_otro';
   if (sub.startsWith('7')) {
@@ -64,6 +70,7 @@ function classifyEntry(sub: string, titulo: string, debe: number, haber: number)
 }
 
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {

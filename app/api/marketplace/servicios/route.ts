@@ -6,15 +6,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 // GET: Listar servicios
 export async function GET(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
@@ -104,6 +110,7 @@ const bookingSchema = z.object({
 
 // POST: Crear reserva/solicitud de servicio
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     const tenantId = session?.user?.tenantId || request.headers.get('x-tenant-id');

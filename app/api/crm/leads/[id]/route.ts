@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
 import {
   calculateLeadScoring,
   calculateProbabilidadCierre,
@@ -12,6 +11,12 @@ import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 // Schema de validación para actualizar lead CRM
 const leadUpdateSchema = z.object({
@@ -73,6 +78,7 @@ const leadUpdateSchema = z.object({
 
 // GET - Obtener un lead específico
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -139,6 +145,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
 // PUT - Actualizar un lead
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -274,6 +281,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
 // DELETE - Eliminar un lead
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {

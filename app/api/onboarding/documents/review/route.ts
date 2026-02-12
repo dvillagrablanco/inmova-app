@@ -13,9 +13,14 @@ export const runtime = 'nodejs';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
 import logger from '@/lib/logger';
 import { z } from 'zod';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 // ============================================================================
 // VALIDACIÓN
@@ -40,6 +45,7 @@ const bulkReviewSchema = z.object({
 // ============================================================================
 
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id || !session?.user?.companyId) {
@@ -90,6 +96,7 @@ async function handleIndividualReview(
   userId: string,
   companyId: string
 ) {
+  const prisma = await getPrisma();
   if (data.dataId) {
     // Revisar un dato específico
     const extractedData = await prisma.extractedDocumentData.findFirst({
@@ -202,6 +209,7 @@ async function handleBulkReview(
   userId: string,
   companyId: string
 ) {
+  const prisma = await getPrisma();
   // Verificar que el batch pertenece a la empresa
   const batch = await prisma.documentImportBatch.findFirst({
     where: {

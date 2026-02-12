@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import logger, { logError } from '@/lib/logger';
@@ -12,6 +11,12 @@ import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 // Schema de validación para actualizar contrato
 const contractUpdateSchema = z.object({
@@ -44,6 +49,7 @@ const contractUpdateSchema = z.object({
 });
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
@@ -93,6 +99,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 }
 
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
@@ -143,6 +150,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session) {

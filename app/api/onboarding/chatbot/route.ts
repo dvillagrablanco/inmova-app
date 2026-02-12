@@ -17,14 +17,19 @@ import {
   getQuickQuestions,
   ChatMessage,
 } from '@/lib/onboarding-chatbot-service';
-import { prisma } from '@/lib/db';
-
 import logger from '@/lib/logger';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 /**
  * POST /api/onboarding/chatbot
  * Procesa un mensaje del usuario y devuelve la respuesta del chatbot
  */
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
 
@@ -140,6 +145,7 @@ export async function POST(request: NextRequest) {
  * Obtiene el mensaje de bienvenida y preguntas rápidas
  */
 export async function GET(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
 

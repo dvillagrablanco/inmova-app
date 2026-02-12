@@ -8,13 +8,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
 import { ewoorkerReferral } from '@/lib/ewoorker-referral-service';
 import { z } from 'zod';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 const sendInvitationSchema = z.object({
   email: z.string().email(),
@@ -25,6 +30,7 @@ const sendInvitationSchema = z.object({
  * GET: Obtener estadísticas de referidos
  */
 export async function GET() {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -56,6 +62,7 @@ export async function GET() {
  * POST: Generar código o enviar invitación
  */
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {

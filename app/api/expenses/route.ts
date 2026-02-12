@@ -7,7 +7,6 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth, requirePermission } from '@/lib/permissions';
-import { prisma } from '@/lib/db';
 import { resolveCompanyScope } from '@/lib/company-scope';
 import logger from '@/lib/logger';
 import { expenseCreateSchema } from '@/lib/validations';
@@ -16,11 +15,18 @@ import { z } from 'zod';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 /**
  * GET /api/expenses
  * Obtiene gastos con filtros opcionales
  */
 export async function GET(req: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const user = await requireAuth();
     const scope = await resolveCompanyScope({
@@ -119,6 +125,7 @@ export async function GET(req: NextRequest) {
  * Crea un nuevo gasto con validación Zod
  */
 export async function POST(req: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const user = await requirePermission('create');
     const scope = await resolveCompanyScope({

@@ -1,15 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import logger from '@/lib/logger';
-import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 const JWT_SECRET = process.env.NEXTAUTH_SECRET;
 // POST /api/partners/login - Login de Partner
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const { email, password } = await request.json();
 

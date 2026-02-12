@@ -6,17 +6,23 @@ import {
   updateBrandingConfig,
   BrandingConfigData,
 } from '@/lib/branding-service';
-import { prisma } from '@/lib/db';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 /**
  * GET /api/branding
  * Obtiene la configuración de branding de la empresa del usuario
  */
 export async function GET(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
 
@@ -48,6 +54,7 @@ export async function GET(request: NextRequest) {
  * Solo administradores
  */
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
 

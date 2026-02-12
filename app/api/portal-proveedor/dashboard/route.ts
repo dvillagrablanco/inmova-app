@@ -1,12 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 // GET /api/portal-proveedor/dashboard - Dashboard del proveedor
 export async function GET(req: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const { searchParams } = new URL(req.url);
     const providerId = searchParams.get('providerId');

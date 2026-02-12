@@ -15,8 +15,6 @@ import logger from '@/lib/logger';
 import { exchangeCodeForToken } from '@/lib/redsys-psd2-service';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
-
 // Importar el storage de PKCE del endpoint authorize
 import { pkceStorage } from '../authorize/route';
 
@@ -24,8 +22,15 @@ import { pkceStorage } from '../authorize/route';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 
 export async function GET(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const searchParams = request.nextUrl.searchParams;
     const code = searchParams.get('code');

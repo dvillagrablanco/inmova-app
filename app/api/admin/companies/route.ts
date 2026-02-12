@@ -1,12 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
 import { z } from 'zod';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 // Roles permitidos para acceso admin
 const SUPER_ADMIN_ROLES = ['super_admin'];
@@ -24,6 +29,7 @@ const querySchema = z.object({
 
 // GET /api/admin/companies - Lista empresas con paginación y filtros (solo super_admin)
 export async function GET(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     
@@ -164,6 +170,7 @@ export async function GET(request: NextRequest) {
 
 // POST /api/admin/companies - Crea nueva empresa (solo super_admin)
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     

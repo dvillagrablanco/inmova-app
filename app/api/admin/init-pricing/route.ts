@@ -10,12 +10,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
 import { PRICING_PLANS, PROMO_CAMPAIGNS } from '@/lib/pricing-config';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 const MAIN_COMPANY_ID = 'sistema';
 const CREATED_BY = 'sistema';
@@ -31,6 +36,7 @@ const normalizeTier = (
 };
 
 async function initializePlans() {
+  const prisma = await getPrisma();
   const results = [];
   
   for (const [key, plan] of Object.entries(PRICING_PLANS)) {
@@ -75,6 +81,7 @@ async function initializePlans() {
 }
 
 async function initializeCoupons() {
+  const prisma = await getPrisma();
   const results = [];
   
   for (const [key, campaign] of Object.entries(PROMO_CAMPAIGNS)) {
@@ -128,6 +135,7 @@ async function initializeCoupons() {
 }
 
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     

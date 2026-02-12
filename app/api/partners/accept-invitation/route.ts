@@ -1,13 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import logger from '@/lib/logger';
-import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 // POST /api/partners/accept-invitation - Aceptar invitación y crear empresa
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const { token, userData } = await request.json();
     if (!token) {
@@ -137,6 +143,7 @@ export async function POST(request: NextRequest) {
 }
 // GET /api/partners/accept-invitation?token=xxx - Verificar invitación
 export async function GET(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const { searchParams } = new URL(request.url);
     const token = searchParams.get('token');

@@ -1,16 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/permissions';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 /**
  * GET /api/notification-templates
  * Obtiene todas las plantillas de notificación (globales y de la empresa)
  */
 export async function GET(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const user = await requireAuth();
 
@@ -48,6 +54,7 @@ export async function GET(request: NextRequest) {
  * Crea una nueva plantilla de notificación personalizada
  */
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const user = await requireAuth();
     const body = await request.json();

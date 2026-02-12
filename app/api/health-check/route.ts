@@ -4,12 +4,17 @@
  */
 
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
-
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 export async function GET() {
+  const prisma = await getPrisma();
   const checks: any = {
     timestamp: new Date().toISOString(),
     status: 'unknown',

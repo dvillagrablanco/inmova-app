@@ -14,13 +14,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { syncCouponToStripe, syncAllCouponsToStripe, validateStripeCoupon } from '@/lib/stripe-coupon-service';
-import { prisma } from '@/lib/db';
-
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     // Verificar autenticación y permisos
     const session = await getServerSession(authOptions);
@@ -93,6 +98,7 @@ export async function POST(request: NextRequest) {
  * - Obtiene el estado de sincronización de cupones
  */
 export async function GET(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user || session.user.role !== 'super_admin') {

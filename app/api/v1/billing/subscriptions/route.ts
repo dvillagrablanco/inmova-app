@@ -9,12 +9,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { createSubscription, SUBSCRIPTION_PLANS } from '@/lib/stripe-connect-service';
-import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 const createSubscriptionSchema = z.object({
   planId: z.enum(['STARTER', 'PROFESSIONAL', 'ENTERPRISE']),
@@ -22,6 +27,7 @@ const createSubscriptionSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
@@ -60,6 +66,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session) {

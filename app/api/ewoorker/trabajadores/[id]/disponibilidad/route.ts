@@ -4,10 +4,15 @@ export const runtime = 'nodejs';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
 import logger from '@/lib/logger';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 // Schema de validación para cambiar disponibilidad
 const disponibilidadSchema = z.object({
   disponible: z.boolean(),
@@ -26,6 +31,7 @@ const disponibilidadSchema = z.object({
  * - Establecer período de disponibilidad
  */
 export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -127,6 +133,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
  * Obtiene el estado de disponibilidad actual
  */
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {

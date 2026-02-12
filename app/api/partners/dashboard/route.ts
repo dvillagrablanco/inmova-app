@@ -1,13 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import logger from '@/lib/logger';
-import { prisma } from '@/lib/db';
 import jwt from 'jsonwebtoken';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 const JWT_SECRET = process.env.NEXTAUTH_SECRET;
 // Función para verificar el token
 function verifyToken(request: NextRequest) {
+  const prisma = await getPrisma();
   if (!JWT_SECRET) {
     return null;
   }
@@ -24,6 +30,7 @@ function verifyToken(request: NextRequest) {
 }
 // GET /api/partners/dashboard - Dashboard con métricas del Partner
 export async function GET(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     if (!JWT_SECRET) {
       logger.error('NEXTAUTH_SECRET no configurado');

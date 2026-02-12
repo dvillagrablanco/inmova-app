@@ -4,10 +4,15 @@ export const runtime = 'nodejs';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
 import logger from '@/lib/logger';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 // Schema de validación para actualizar trabajador
 const updateTrabajadorSchema = z.object({
   nombre: z.string().min(2).optional(),
@@ -32,6 +37,7 @@ const updateTrabajadorSchema = z.object({
  * Obtiene un trabajador específico
  */
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -121,6 +127,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
  * Actualiza un trabajador
  */
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -191,6 +198,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
  * Desactiva un trabajador (soft delete)
  */
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {

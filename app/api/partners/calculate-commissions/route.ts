@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import logger from '@/lib/logger';
-import { prisma } from '@/lib/db';
-
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 // Función para obtener la comisión según el número de clientes
 function getCommissionRate(clientCount: number): number {
@@ -36,6 +40,7 @@ function getErrorMessage(error: unknown): string {
 
 // POST /api/partners/calculate-commissions - Calcular comisiones mensuales (CRON)
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const authHeader = request.headers.get('authorization');
     const cronSecret = process.env.CRON_SECRET;
@@ -151,6 +156,7 @@ export async function POST(request: NextRequest) {
 }
 // GET /api/partners/calculate-commissions - Obtener información del último cálculo
 export async function GET(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const now = new Date();
     const periodoActual = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;

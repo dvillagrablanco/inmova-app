@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/permissions';
 import logger from '@/lib/logger';
 import { cacheGetOrSet, CacheTTL } from '@/lib/cache';
@@ -7,6 +6,12 @@ import { paymentFilterWithCompany, expenseFilterWithCompany } from '@/lib/demo-d
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 /**
  * OPTIMIZADO - Semana 2: Query Optimization
@@ -20,6 +25,7 @@ export const runtime = 'nodejs';
  * - Mejora de 500ms → 50ms con caché, 500ms → 200ms sin caché
  */
 export async function GET() {
+  const prisma = await getPrisma();
   try {
     const user = await requireAuth();
     const companyId = user.companyId;

@@ -7,14 +7,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { tenantGamification } from '@/lib/tenant-gamification-service';
-import { prisma } from '@/lib/db';
-
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 // GET: Obtener perfil de gamificación
 export async function GET(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     // Verificar autenticación del inquilino
     const session = await getServerSession(authOptions);
@@ -41,6 +46,7 @@ export async function GET(request: NextRequest) {
 
 // POST: Registrar login diario
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     const tenantId = session?.user?.tenantId || request.headers.get('x-tenant-id');

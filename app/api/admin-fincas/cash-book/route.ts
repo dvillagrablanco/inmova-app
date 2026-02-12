@@ -2,15 +2,20 @@ import { NextRequest, NextResponse } from 'next/server';
 import logger from '@/lib/logger';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
-
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 /**
  * GET /api/admin-fincas/cash-book
  * Obtiene movimientos del libro de caja
  */
 export async function GET(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     
@@ -86,6 +91,7 @@ export async function GET(request: NextRequest) {
  * Crea un nuevo movimiento en el libro de caja
  */
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     

@@ -1,15 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 /**
  * GET /api/portal-propietario/documents
  * Obtiene los documentos del propietario
  */
 export async function GET(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     // Get owner session (assuming we have owner authentication)
     const ownerId = request.headers.get('x-owner-id');

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
 import { z } from 'zod';
 import { isSuperAdmin } from '@/lib/admin-roles';
 import { subDays } from 'date-fns';
@@ -9,6 +8,12 @@ import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 // Pasos de onboarding estándar
 const ONBOARDING_STEPS = [
@@ -33,6 +38,7 @@ const querySchema = z.object({
  * Obtiene el estado de onboarding de todas las empresas
  */
 export async function GET(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     
@@ -259,6 +265,7 @@ export async function GET(request: NextRequest) {
  * Actualiza el estado de onboarding de una empresa (notas, agente asignado, etc.)
  */
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     

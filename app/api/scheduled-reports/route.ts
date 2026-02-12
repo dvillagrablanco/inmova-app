@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
 import { requireAuth, requirePermission } from '@/lib/permissions';
 import { sendScheduledReport } from '@/lib/report-service';
 import logger, { logError } from '@/lib/logger';
@@ -7,11 +6,18 @@ import logger, { logError } from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 /**
  * GET /api/scheduled-reports
  * Obtiene todos los reportes programados de la empresa
  */
 export async function GET(request: Request) {
+  const prisma = await getPrisma();
   try {
     const user = await requireAuth();
 
@@ -48,6 +54,7 @@ export async function GET(request: Request) {
  * Crea un nuevo reporte programado
  */
 export async function POST(request: Request) {
+  const prisma = await getPrisma();
   try {
     const user = await requireAuth();
 

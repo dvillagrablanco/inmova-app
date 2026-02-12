@@ -2,10 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import logger from '@/lib/logger';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
-
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 interface Params {
   params: Promise<{ id: string }>;
 }
@@ -14,6 +18,7 @@ interface Params {
  * Obtiene detalles de una comunidad específica
  */
 export async function GET(request: NextRequest, { params }: Params) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     
@@ -65,6 +70,7 @@ export async function GET(request: NextRequest, { params }: Params) {
  * Actualiza una comunidad
  */
 export async function PATCH(request: NextRequest, { params }: Params) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     

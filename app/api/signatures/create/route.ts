@@ -13,7 +13,6 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import * as SignaturitService from '@/lib/signaturit-service';
 import { Signer, SignatureType } from '@/lib/signaturit-service';
-import { prisma } from '@/lib/db';
 import { z } from 'zod';
 import { checkUsageLimit, createLimitExceededResponse, logUsageWarning } from '@/lib/usage-limits';
 import { trackUsage } from '@/lib/usage-tracking-service';
@@ -21,6 +20,12 @@ import { trackUsage } from '@/lib/usage-tracking-service';
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 // Schema de validación
 const createSignatureSchema = z.object({
@@ -62,6 +67,7 @@ const createSignatureSchema = z.object({
  * }
  */
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     // 1. Verificar autenticación
     const session = await getServerSession(authOptions);

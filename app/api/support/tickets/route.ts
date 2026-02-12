@@ -5,14 +5,20 @@ import {
   createSupportTicket,
   type TicketCategory
 } from '@/lib/intelligent-support-service';
-import { prisma } from '@/lib/db';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 
 export async function GET(request: Request) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -56,6 +62,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {

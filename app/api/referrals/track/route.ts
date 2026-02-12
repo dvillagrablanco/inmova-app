@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 const trackSchema = z.object({
   codigoReferido: z.string(),
@@ -16,6 +21,7 @@ const trackSchema = z.object({
  * Se llama cuando un partner refiere un nuevo cliente
  */
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const body = await request.json();
     const validated = trackSchema.parse(body);
@@ -61,6 +67,7 @@ export async function POST(request: NextRequest) {
  * Se llama desde el proceso de registro de nuevas companies
  */
 export async function PUT(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const body = await request.json();
     const { partnerId, companyId, codigoReferido, origenInvitacion } = body;

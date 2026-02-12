@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/permissions';
 import { sendScheduledReport } from '@/lib/report-service';
 import logger, { logError } from '@/lib/logger';
@@ -7,11 +6,18 @@ import logger, { logError } from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 /**
  * PUT /api/scheduled-reports/[id]
  * Actualiza un reporte programado
  */
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
+  const prisma = await getPrisma();
   try {
     const user = await requireAuth();
 
@@ -71,6 +77,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
  * Elimina un reporte programado
  */
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+  const prisma = await getPrisma();
   try {
     const user = await requireAuth();
 
@@ -120,6 +127,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
  * Envía un reporte programado inmediatamente (para pruebas)
  */
 export async function POST(request: Request, { params }: { params: { id: string } }) {
+  const prisma = await getPrisma();
   try {
     const user = await requireAuth();
 

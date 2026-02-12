@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/permissions';
 import { z } from 'zod';
 import logger, { logError } from '@/lib/logger';
@@ -7,6 +6,12 @@ import { sendEmail } from '@/lib/email-service';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 
 const createSuggestionSchema = z.object({
@@ -21,6 +26,7 @@ const createSuggestionSchema = z.object({
 
 // GET - Obtener todas las sugerencias (super_admin o soporte)
 export async function GET(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const user = await requireAuth();
     const { searchParams } = new URL(request.url);
@@ -100,6 +106,7 @@ export async function GET(request: NextRequest) {
 
 // POST - Crear una nueva sugerencia
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const user = await requireAuth();
     const body = await request.json();
