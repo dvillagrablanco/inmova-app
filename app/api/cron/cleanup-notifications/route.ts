@@ -8,12 +8,12 @@ export const dynamic = 'force-dynamic';
  * 0 2 * * * (a las 2 AM todos los días)
  */
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { cleanupExpiredNotifications } from '@/lib/notification-service';
 
 import logger from '@/lib/logger';
 import { authorizeCronRequest } from '@/lib/cron-auth';
-export async function GET() {
+export async function GET(request: NextRequest) {
   // Cron auth guard (auditoria V2)
   const cronAuth = await authorizeCronRequest(request as any);
   if (!cronAuth.authorized) {
