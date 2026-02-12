@@ -1,3 +1,4 @@
+import { CLAUDE_MODEL_FAST, CLAUDE_MODEL_PRIMARY } from '@/lib/ai-model-config';
 /**
  * Servicio de Vapi para Inmova
  * Gestión de agentes de voz IA
@@ -80,7 +81,7 @@ export class VapiService {
       // Modelo de lenguaje (Claude)
       model: {
         provider: 'anthropic',
-        model: 'claude-3-5-sonnet-20241022',
+        model: CLAUDE_MODEL_PRIMARY,
         temperature: 0.7,
         maxTokens: 500,
         systemPrompt: agentConfig.systemPrompt,

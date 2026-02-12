@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
+import { CLAUDE_MODEL_FAST } from './ai-model-config';
 
 import logger from '@/lib/logger';
 const anthropic = new Anthropic({
@@ -69,7 +70,7 @@ export class AIValuationService {
 
     try {
       const message = await anthropic.messages.create({
-        model: 'claude-3-haiku-20240307',
+        model: CLAUDE_MODEL_FAST,
         max_tokens: 2048,
         temperature: 0.3, // Baja temperatura para respuestas más consistentes
         messages: [
@@ -281,7 +282,7 @@ Responde en JSON:
 
     try {
       const message = await anthropic.messages.create({
-        model: 'claude-3-haiku-20240307',
+        model: CLAUDE_MODEL_FAST,
         max_tokens: 1024,
         messages: [{ role: 'user', content: prompt }],
       });

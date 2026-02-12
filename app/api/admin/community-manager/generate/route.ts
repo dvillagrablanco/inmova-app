@@ -1,3 +1,4 @@
+import { CLAUDE_MODEL_FAST, CLAUDE_MODEL_PRIMARY } from '@/lib/ai-model-config';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
@@ -53,7 +54,7 @@ Reglas:
           : `Crea un post atractivo sobre gestión inmobiliaria para ${platforms?.join(' y ') || 'redes sociales'}`;
 
         const message = await anthropic.messages.create({
-          model: 'claude-3-haiku-20240307',
+          model: CLAUDE_MODEL_FAST,
           max_tokens: 500,
           messages: [
             { role: 'user', content: userPrompt }

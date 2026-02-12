@@ -1,3 +1,4 @@
+import { CLAUDE_MODEL_FAST, CLAUDE_MODEL_PRIMARY } from '@/lib/ai-model-config';
 /**
  * SCORING Y VERIFICACIÓN DE INQUILINOS TEMPORALES
  * 
@@ -511,7 +512,7 @@ Proporciona un análisis breve (3-4 párrafos) con:
 Sé objetivo y constructivo.`;
 
   const message = await anthropic.messages.create({
-    model: 'claude-3-haiku-20240307',
+    model: CLAUDE_MODEL_FAST,
     max_tokens: 1024,
     messages: [{ role: 'user', content: prompt }],
   });

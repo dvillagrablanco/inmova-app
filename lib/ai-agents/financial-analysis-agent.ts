@@ -1,3 +1,4 @@
+import { CLAUDE_MODEL_FAST, CLAUDE_MODEL_PRIMARY } from '@/lib/ai-model-config';
 /**
  * Agente de Análisis Financiero
  * 
@@ -944,7 +945,7 @@ Métricas clave a monitorear:
 - Tasa de ocupación vs óptima`,
   capabilities,
   tools,
-  model: 'claude-3-haiku-20240307',
+  model: CLAUDE_MODEL_FAST,
   temperature: 0.5, // Más bajo para análisis más precisos
   maxTokens: 4096,
   enabled: true

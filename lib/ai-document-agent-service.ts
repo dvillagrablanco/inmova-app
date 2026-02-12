@@ -24,7 +24,8 @@ import { DocumentImportCategory, DocumentImportStatus } from '@/types/prisma-typ
 // ============================================================================
 
 const CLAUDE_API_KEY = process.env.ANTHROPIC_API_KEY || '';
-const DEFAULT_MODEL = 'claude-3-haiku-20240307';
+import { CLAUDE_MODEL_FAST } from './ai-model-config';
+const DEFAULT_MODEL = CLAUDE_MODEL_FAST;
 const MAX_TOKENS = 4096;
 
 // Lazy initialization para evitar errores en tests/SSR
@@ -753,7 +754,7 @@ export async function analyzeImageDocument(
       });
 
       return await getAnthropicClient().messages.create({
-        model: 'claude-3-haiku-20240307',
+        model: DEFAULT_MODEL,
         max_tokens: 2048,
         messages: [
           {
@@ -845,7 +846,7 @@ export async function analyzeImageDocument(
           processingMetadata: {
             tokensUsed: response.usage?.input_tokens || 0,
             processingTimeMs,
-            modelUsed: 'claude-3-haiku-20240307',
+            modelUsed: DEFAULT_MODEL,
           },
         };
       }

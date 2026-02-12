@@ -1,3 +1,4 @@
+import { CLAUDE_MODEL_FAST, CLAUDE_MODEL_PRIMARY } from '@/lib/ai-model-config';
 /**
  * Configuración de Vapi para Inmova
  * Agentes de Voz IA para el sector inmobiliario
@@ -35,7 +36,7 @@ export const VAPI_CONFIG = {
   // Configuración del modelo de lenguaje
   model: {
     provider: 'anthropic',
-    model: 'claude-3-5-sonnet-20241022',
+    model: CLAUDE_MODEL_PRIMARY,
     temperature: 0.7,
     maxTokens: 500,
   },

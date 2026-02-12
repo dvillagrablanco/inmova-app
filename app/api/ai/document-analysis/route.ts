@@ -1,3 +1,4 @@
+import { CLAUDE_MODEL_FAST, CLAUDE_MODEL_PRIMARY } from '@/lib/ai-model-config';
 /**
  * API Route: Análisis de Documentos con IA
  *
@@ -421,7 +422,7 @@ async function analyzeDocumentWithVision(
   // Usar claude-3-haiku para imágenes (rápido y confiable)
   console.error('[Vision Analysis] 🤖 Llamando a Claude API...');
   const response = await client.messages.create({
-    model: 'claude-3-haiku-20240307',
+    model: CLAUDE_MODEL_FAST,
     max_tokens: 4096,
     messages: [
       {

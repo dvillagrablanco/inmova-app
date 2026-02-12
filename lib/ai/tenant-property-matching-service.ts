@@ -1,3 +1,4 @@
+import { CLAUDE_MODEL_FAST, CLAUDE_MODEL_PRIMARY } from '@/lib/ai-model-config';
 /**
  * SERVICIO DE MATCHING INQUILINO-PROPIEDAD PARA MEDIA ESTANCIA
  * 
@@ -519,7 +520,7 @@ Se encontraron ${matches.length} propiedades en total.
 Proporciona un breve resumen (máximo 150 palabras) explicando por qué esta propiedad es el mejor match y qué debería considerar el inquilino. Responde en español de forma profesional y amigable.`;
 
     const message = await anthropic.messages.create({
-      model: 'claude-3-haiku-20240307',
+      model: CLAUDE_MODEL_FAST,
       max_tokens: 300,
       messages: [
         { role: 'user', content: prompt },

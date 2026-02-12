@@ -14,6 +14,7 @@
 
 import { prisma } from './db';
 import { Anthropic } from '@anthropic-ai/sdk';
+import { CLAUDE_MODEL_FAST } from './ai-model-config';
 import logger from './logger';
 import { redis } from './redis';
 
@@ -145,7 +146,7 @@ Responde en JSON:
 }`;
 
     const message = await anthropic.messages.create({
-      model: 'claude-3-haiku-20240307',
+      model: CLAUDE_MODEL_FAST,
       max_tokens: 1024,
       messages: [{ role: 'user', content: prompt }],
     });
@@ -234,7 +235,7 @@ Responde en JSON array:
 ]`;
 
     const message = await anthropic.messages.create({
-      model: 'claude-3-haiku-20240307',
+      model: CLAUDE_MODEL_FAST,
       max_tokens: 2048,
       messages: [{ role: 'user', content: prompt }],
     });
@@ -319,7 +320,7 @@ Responde en JSON:
 }`;
 
     const message = await anthropic.messages.create({
-      model: 'claude-3-haiku-20240307',
+      model: CLAUDE_MODEL_FAST,
       max_tokens: 1024,
       messages: [{ role: 'user', content: prompt }],
     });

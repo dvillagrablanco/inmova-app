@@ -20,8 +20,10 @@ const anthropic = new Anthropic({
   apiKey: CLAUDE_API_KEY,
 });
 
-const DEFAULT_MODEL = 'claude-3-haiku-20240307';
-const DEFAULT_MAX_TOKENS = 2048;
+import { CLAUDE_MODEL_FAST, CLAUDE_DEFAULT_MAX_TOKENS } from './ai-model-config';
+
+const DEFAULT_MODEL = CLAUDE_MODEL_FAST;
+const DEFAULT_MAX_TOKENS = CLAUDE_DEFAULT_MAX_TOKENS;
 
 /**
  * Datos de una propiedad para valoración

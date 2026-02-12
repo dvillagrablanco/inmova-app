@@ -1,3 +1,4 @@
+import { CLAUDE_MODEL_FAST, CLAUDE_MODEL_PRIMARY } from '@/lib/ai-model-config';
 /**
  * API: Estado del Sistema de Agentes de IA
  * 
@@ -46,7 +47,7 @@ export async function GET(request: NextRequest) {
             'anthropic-version': '2023-06-01',
           },
           body: JSON.stringify({
-            model: 'claude-3-haiku-20240307',
+            model: CLAUDE_MODEL_FAST,
             max_tokens: 10,
             messages: [{ role: 'user', content: 'test' }]
           })

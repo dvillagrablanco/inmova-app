@@ -20,7 +20,8 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || '',
 });
 
-const CLAUDE_MODEL = 'claude-3-haiku-20240307';
+import { CLAUDE_MODEL_FAST } from './ai-model-config';
+const CLAUDE_MODEL = CLAUDE_MODEL_FAST;
 
 // ============================================================================
 // TIPOS

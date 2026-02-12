@@ -15,6 +15,7 @@
 import { prisma } from './db';
 import logger from './logger';
 import Anthropic from '@anthropic-ai/sdk';
+import { CLAUDE_MODEL_FAST } from './ai-model-config';
 
 // ============================================================================
 // TIPOS
@@ -564,7 +565,7 @@ Responde SOLO con una lista de IDs de empresa en orden de preferencia, separados
 Ejemplo: id1,id2,id3,id4,id5`;
 
       const message = await this.anthropic.messages.create({
-        model: 'claude-3-haiku-20240307', // Usar modelo rápido para ranking
+        model: CLAUDE_MODEL_FAST, // Usar modelo rápido para ranking
         max_tokens: 256,
         messages: [{ role: 'user', content: prompt }],
       });

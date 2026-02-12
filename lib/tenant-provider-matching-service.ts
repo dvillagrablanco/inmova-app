@@ -3,6 +3,7 @@
  * Usa Claude AI para encontrar el mejor proveedor según la incidencia
  */
 import { prisma } from '@/lib/db';
+import { CLAUDE_MODEL_FAST } from './ai-model-config';
 import Anthropic from '@anthropic-ai/sdk';
 
 import logger from '@/lib/logger';
@@ -182,7 +183,7 @@ Criterios de urgencia:
 
     try {
       const message = await this.anthropic.messages.create({
-        model: 'claude-3-haiku-20240307',
+        model: CLAUDE_MODEL_FAST,
         max_tokens: 256,
         messages: [{ role: 'user', content: prompt }],
       });
@@ -327,7 +328,7 @@ Analiza y responde SOLO con JSON válido:
 
     try {
       const message = await this.anthropic.messages.create({
-        model: 'claude-3-haiku-20240307',
+        model: CLAUDE_MODEL_FAST,
         max_tokens: 512,
         messages: [{ role: 'user', content: prompt }],
       });

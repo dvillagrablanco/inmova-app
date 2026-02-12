@@ -1,3 +1,4 @@
+import { CLAUDE_MODEL_FAST, CLAUDE_MODEL_PRIMARY } from '@/lib/ai-model-config';
 /**
  * Agente de Atención al Cliente
  * 
@@ -783,7 +784,7 @@ Cuándo escalar:
 - Usuario insatisfecho después de múltiples intentos`,
   capabilities,
   tools,
-  model: 'claude-3-haiku-20240307',
+  model: CLAUDE_MODEL_FAST,
   temperature: 0.7, // Más alto para respuestas más naturales y empáticas
   maxTokens: 4096,
   enabled: true

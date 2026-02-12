@@ -1,3 +1,4 @@
+import { CLAUDE_MODEL_FAST, CLAUDE_MODEL_PRIMARY } from '@/lib/ai-model-config';
 /**
  * Agente de Gestión Comercial
  * 
@@ -889,7 +890,7 @@ Métricas clave:
 - ROI de campañas`,
   capabilities,
   tools,
-  model: 'claude-3-haiku-20240307',
+  model: CLAUDE_MODEL_FAST,
   temperature: 0.65,
   maxTokens: 4096,
   enabled: true
