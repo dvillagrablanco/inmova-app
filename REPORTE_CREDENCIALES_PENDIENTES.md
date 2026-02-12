@@ -1,7 +1,8 @@
 # REPORTE DE INTEGRACIONES - INMOVA APP
 
 **Fecha**: 12 de febrero de 2026  
-**Servidor**: 157.180.119.236 | Health: OK | PM2: 2 workers online
+**Servidor**: 157.180.119.236 | Health: OK | PM2: 2 workers online  
+**Ultima auditoria**: 22/22 tests OK, 0 fallos
 
 ---
 
@@ -107,10 +108,12 @@ Ir a https://sentry.io y verificar que el proyecto sigue activo.
 
 | Categoria | Cantidad |
 |---|---|
-| Integraciones verificadas OK | 13 |
-| Con problema corregible | 5 (Stripe, Anthropic, Sentry, DocuSign, Signaturit prod) |
-| No contratadas | 4 (SendGrid, Bizum, Zucchetti, Redes sociales) |
+| Integraciones verificadas OK | 22/22 |
+| Stripe productos | 4 planes + 26 add-ons (LIVE mode) |
+| Add-ons con Stripe ID en BD | 23/24 (solo bank_reconciliation sin Stripe) |
+| Claude modelo | claude-sonnet-4-20250514 (verificado) |
 | Variables activas en .env | 92 |
+| No contratadas | 4 (SendGrid, Bizum, Zucchetti, Redes sociales) |
 
 ---
 
