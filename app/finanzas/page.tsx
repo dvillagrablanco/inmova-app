@@ -113,7 +113,7 @@ const financeModules: FinanceModule[] = [
     title: 'Facturacion',
     description: 'Emite y gestiona facturas, recibos y documentos fiscales',
     icon: <Receipt className="h-6 w-6" />,
-    href: '/facturas',
+    href: '/contabilidad',
     statsKey: 'monthlyInvoices',
     statsLabel: 'Este mes',
     statsTrend: 'up',
@@ -447,9 +447,9 @@ export default function FinanzasPage() {
                 <ArrowRightLeft className="h-4 w-4 mr-2" />
                 Conciliar movimientos
               </Button>
-              <Button variant="outline" onClick={() => router.push('/facturas/nueva')}>
+              <Button variant="outline" onClick={() => router.push('/contabilidad')}>
                 <FileText className="h-4 w-4 mr-2" />
-                Nueva factura
+                Ver contabilidad
               </Button>
               <Button variant="outline" onClick={() => router.push('/pagos')}>
                 <Euro className="h-4 w-4 mr-2" />
