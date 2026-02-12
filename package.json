@@ -210,6 +210,7 @@
     "next-themes": "0.3.0",
     "node-rules-engine": "^0.1.2",
     "nodemailer": "^7.0.11",
+    "nordigen-node": "^1.4.1",
     "openai": "^6.15.0",
     "otpauth": "^9.4.1",
     "papaparse": "^5.5.3",

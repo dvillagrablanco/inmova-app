@@ -127,6 +127,10 @@ export async function GET(request: NextRequest) {
             configured: !!process.env.PLAID_CLIENT_ID && !!process.env.PLAID_SECRET,
             status: (process.env.PLAID_CLIENT_ID && process.env.PLAID_SECRET) ? 'configured' : 'missing',
           },
+          nordigen: {
+            configured: !!process.env.NORDIGEN_SECRET_ID && !!process.env.NORDIGEN_SECRET_KEY,
+            status: (process.env.NORDIGEN_SECRET_ID && process.env.NORDIGEN_SECRET_KEY) ? 'configured' : 'missing',
+          },
         };
 
         const total = Object.keys(checks).length;
