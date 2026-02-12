@@ -11,7 +11,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
+import { getPrismaClient } from '@/lib/db';
 import logger from '@/lib/logger';
+
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -69,15 +71,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
+    const prisma = getPrismaClient();
+
     // Contar planes y add-ons sincronizados
     const planesTotal = await prisma.subscriptionPlan.count({ where: { activo: true } });
     const addonsTotal = await prisma.addOn.count({ where: { activo: true } });
 
     // Contar con Stripe IDs
-    const planesSynced = await prisma.subscriptionPlan.count({
-      where: { activo: true },
-      // stripePriceIdMonthly no está en el modelo todavía
-    });
+    const planesSynced = planesTotal; // TODO: add stripePriceIdMonthly to schema
 
     const addonsSynced = await prisma.addOn.count({
       where: {
