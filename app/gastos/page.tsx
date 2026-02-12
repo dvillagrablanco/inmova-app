@@ -231,6 +231,7 @@ export default function GastosPage() {
 
   const getCategoriaLabel = (categoria: string) => {
     const labels: Record<string, string> = {
+      // Categorías operativas (tabla Expense)
       mantenimiento: 'Mantenimiento',
       servicios: 'Servicios',
       impuestos: 'Impuestos',
@@ -239,12 +240,27 @@ export default function GastosPage() {
       marketing: 'Marketing',
       legal: 'Legal',
       otro: 'Otro',
+      // Categorías contables (tabla AccountingTransaction)
+      gasto_seguro: 'Seguros',
+      gasto_impuesto: 'Impuestos',
+      gasto_mantenimiento: 'Mantenimiento',
+      gasto_comunidad: 'Comunidad',
+      gasto_servicio: 'Servicios/Suministros',
+      gasto_administracion: 'Administración',
+      gasto_financiero: 'Gasto Financiero',
+      gasto_amortizacion: 'Amortización',
+      gasto_personal: 'Personal',
+      gasto_otro: 'Otros Gastos',
+      gasto_profesional: 'Servicios Profesionales',
+      gasto_reparacion: 'Reparaciones',
+      gasto_suministro: 'Suministros',
     };
-    return labels[categoria] || categoria;
+    return labels[categoria] || categoria.replace(/^gasto_/, '').replace(/_/g, ' ').replace(/^\w/, c => c.toUpperCase());
   };
 
   const getCategoriaBadgeColor = (categoria: string) => {
     const colors: Record<string, string> = {
+      // Categorías operativas
       mantenimiento: 'bg-blue-500 text-white hover:bg-blue-600',
       servicios: 'bg-green-500 text-white hover:bg-green-600',
       impuestos: 'bg-red-500 text-white hover:bg-red-600',
@@ -253,8 +269,22 @@ export default function GastosPage() {
       marketing: 'bg-pink-500 text-white hover:bg-pink-600',
       legal: 'bg-indigo-500 text-white hover:bg-indigo-600',
       otro: 'bg-gray-500 text-white hover:bg-gray-600',
+      // Categorías contables
+      gasto_seguro: 'bg-purple-500 text-white hover:bg-purple-600',
+      gasto_impuesto: 'bg-red-500 text-white hover:bg-red-600',
+      gasto_mantenimiento: 'bg-blue-500 text-white hover:bg-blue-600',
+      gasto_comunidad: 'bg-teal-500 text-white hover:bg-teal-600',
+      gasto_servicio: 'bg-green-500 text-white hover:bg-green-600',
+      gasto_administracion: 'bg-amber-500 text-white hover:bg-amber-600',
+      gasto_financiero: 'bg-rose-500 text-white hover:bg-rose-600',
+      gasto_amortizacion: 'bg-slate-500 text-white hover:bg-slate-600',
+      gasto_personal: 'bg-orange-500 text-white hover:bg-orange-600',
+      gasto_otro: 'bg-gray-500 text-white hover:bg-gray-600',
+      gasto_profesional: 'bg-cyan-500 text-white hover:bg-cyan-600',
+      gasto_reparacion: 'bg-blue-400 text-white hover:bg-blue-500',
+      gasto_suministro: 'bg-emerald-500 text-white hover:bg-emerald-600',
     };
-    return colors[categoria] || 'bg-muted';
+    return colors[categoria] || 'bg-muted text-muted-foreground';
   };
 
   // Actualizar filtros activos
@@ -311,6 +341,12 @@ export default function GastosPage() {
     });
   }, [expenses, searchTerm, filterCategoria]);
 
+  // Categorías dinámicas extraídas de los datos reales
+  const uniqueCategories = useMemo(() => {
+    const cats = new Set(expenses.map(e => e.categoria).filter(Boolean));
+    return Array.from(cats).sort();
+  }, [expenses]);
+
   // Estadísticas
   const stats = useMemo(() => {
     const totalGastos = expenses.reduce((sum, e) => sum + e.monto, 0);
@@ -330,7 +366,7 @@ export default function GastosPage() {
       totalMonto: totalGastos,
       esteMes: gastosEsteMes,
       mantenimiento: expenses
-        .filter((e) => e.categoria === 'mantenimiento')
+        .filter((e) => e.categoria === 'mantenimiento' || e.categoria === 'gasto_mantenimiento')
         .reduce((sum, e) => sum + e.monto, 0),
     };
   }, [expenses]);
@@ -628,14 +664,22 @@ export default function GastosPage() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Todas las categorías</SelectItem>
-                      <SelectItem value="mantenimiento">Mantenimiento</SelectItem>
-                      <SelectItem value="servicios">Servicios</SelectItem>
-                      <SelectItem value="impuestos">Impuestos</SelectItem>
-                      <SelectItem value="seguros">Seguros</SelectItem>
-                      <SelectItem value="personal">Personal</SelectItem>
-                      <SelectItem value="marketing">Marketing</SelectItem>
-                      <SelectItem value="legal">Legal</SelectItem>
-                      <SelectItem value="otro">Otro</SelectItem>
+                      {uniqueCategories.length > 0 ? (
+                        uniqueCategories.map(cat => (
+                          <SelectItem key={cat} value={cat}>{getCategoriaLabel(cat)}</SelectItem>
+                        ))
+                      ) : (
+                        <>
+                          <SelectItem value="mantenimiento">Mantenimiento</SelectItem>
+                          <SelectItem value="servicios">Servicios</SelectItem>
+                          <SelectItem value="impuestos">Impuestos</SelectItem>
+                          <SelectItem value="seguros">Seguros</SelectItem>
+                          <SelectItem value="personal">Personal</SelectItem>
+                          <SelectItem value="marketing">Marketing</SelectItem>
+                          <SelectItem value="legal">Legal</SelectItem>
+                          <SelectItem value="otro">Otro</SelectItem>
+                        </>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>

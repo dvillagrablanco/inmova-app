@@ -86,13 +86,68 @@ export async function GET(req: NextRequest) {
       prisma.expense.count({ where }),
     ]);
 
-    logger.info(`Gastos obtenidos: ${expenses.length} de ${total}`, { userId: user.id });
-    
     // Convertir valores Decimal a números
     const expensesWithNumbers = expenses.map(expense => ({
       ...expense,
       monto: Number(expense.monto || 0),
+      source: 'expense' as const,
     }));
+
+    // Si no hay gastos operativos, hacer fallback a AccountingTransaction (gastos contables)
+    if (expensesWithNumbers.length === 0 && scope.activeCompanyId) {
+      const accountingWhere: any = {
+        companyId: scope.scopeCompanyIds.length > 1 ? { in: scope.scopeCompanyIds } : scope.activeCompanyId,
+        tipo: 'gasto',
+      };
+
+      if (categoria) {
+        accountingWhere.categoria = { contains: categoria, mode: 'insensitive' };
+      }
+      if (fechaDesde || fechaHasta) {
+        accountingWhere.fecha = {};
+        if (fechaDesde) accountingWhere.fecha.gte = new Date(fechaDesde);
+        if (fechaHasta) accountingWhere.fecha.lte = new Date(fechaHasta);
+      }
+
+      const [accountingExpenses, accountingTotal] = await Promise.all([
+        prisma.accountingTransaction.findMany({
+          where: accountingWhere,
+          orderBy: { fecha: 'desc' },
+          take: take || 50,
+          skip,
+        }),
+        prisma.accountingTransaction.count({ where: accountingWhere }),
+      ]);
+
+      if (accountingExpenses.length > 0) {
+        const mappedAccounting = accountingExpenses.map((tx: any) => ({
+          id: tx.id,
+          concepto: tx.concepto || 'Gasto contable',
+          categoria: tx.categoria || 'gasto_otro',
+          monto: Number(tx.monto || 0),
+          fecha: tx.fecha,
+          notas: tx.notas || tx.referencia || '',
+          building: null,
+          unit: null,
+          provider: null,
+          source: 'accounting' as const,
+        }));
+
+        logger.info(`Gastos contables (fallback): ${mappedAccounting.length} de ${accountingTotal}`, { userId: user.id });
+
+        return NextResponse.json({
+          data: mappedAccounting,
+          meta: {
+            total: accountingTotal,
+            limit: take,
+            offset: skip,
+            source: 'accounting',
+          },
+        }, { status: 200 });
+      }
+    }
+
+    logger.info(`Gastos obtenidos: ${expensesWithNumbers.length} de ${total}`, { userId: user.id });
     
     return NextResponse.json({
       data: expensesWithNumbers,
@@ -100,6 +155,7 @@ export async function GET(req: NextRequest) {
         total,
         limit: take,
         offset: skip,
+        source: 'expense',
       },
     }, { status: 200 });
     
