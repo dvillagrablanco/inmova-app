@@ -184,13 +184,11 @@ export async function GET(request: NextRequest) {
     const reconciliationRate =
       expectedMonthlyRent > 0 ? Math.round((monthlyIncome / expectedMonthlyRent) * 100) : 0;
 
-    // Contar integraciones bancarias conectadas
+    // Contar integraciones bancarias conectadas (por companyId directo, no por tenant)
     const bankConnections = await prisma.bankConnection
       .count({
         where: {
-          tenant: {
-            companyId: { in: companyIds },
-          },
+          companyId: { in: companyIds },
           estado: 'conectado',
         },
       })
@@ -209,7 +207,7 @@ export async function GET(request: NextRequest) {
       })
       .catch(() => 0);
 
-    // Calcular rentabilidad (si hay datos de propiedades)
+    // Calcular rentabilidad real basada en ingresos anualizados vs renta mensual esperada
     let rentabilidad = 0;
     try {
       const properties = await prisma.unit.findMany({
@@ -225,12 +223,93 @@ export async function GET(request: NextRequest) {
         },
       });
       const totalRent = properties.reduce((sum, p) => sum + p.rentaMensual, 0);
-      if (totalRent > 0) {
-        // Rentabilidad anualizada aproximada (usando ingresos anuales estimados)
-        rentabilidad = 6 + Math.random() * 2; // Placeholder - calcular con datos reales de valoración
+      if (totalRent > 0 && monthlyIncome > 0) {
+        // Rentabilidad anualizada: (ingresos mensuales * 12) / (renta esperada mensual * 12) * 100
+        rentabilidad = (monthlyIncome / totalRent) * 100;
+        // Cap between 0-100
+        rentabilidad = Math.min(Math.max(rentabilidad, 0), 100);
+      } else if (totalRent > 0) {
+        // Si no hay ingresos del mes pero hay renta esperada, calcular usando contabilidad
+        const yearStart = new Date(now.getFullYear(), 0, 1);
+        const yearlyIncome = await prisma.accountingTransaction.aggregate({
+          where: {
+            companyId: { in: companyIds },
+            tipo: 'ingreso',
+            fecha: { gte: yearStart, lte: now },
+          },
+          _sum: { monto: true },
+        });
+        const annualizedIncome = yearlyIncome._sum.monto || 0;
+        const monthsElapsed = now.getMonth() + 1;
+        const avgMonthlyIncome = annualizedIncome / monthsElapsed;
+        if (avgMonthlyIncome > 0) {
+          rentabilidad = (avgMonthlyIncome / totalRent) * 100;
+          rentabilidad = Math.min(Math.max(rentabilidad, 0), 100);
+        }
       }
     } catch {
       // Ignorar errores
+    }
+
+    // Estadísticas de movimientos bancarios (BankTransaction) para conciliación real
+    let bankTxPending = 0;
+    let bankTxTotal = 0;
+    let bankTxIncome = 0;
+    let bankTxExpense = 0;
+    try {
+      const [pendingTx, totalTx, bankIncome, bankExpense] = await Promise.all([
+        prisma.bankTransaction.count({
+          where: { companyId: { in: companyIds }, estado: 'pendiente_revision' },
+        }),
+        prisma.bankTransaction.count({
+          where: { companyId: { in: companyIds } },
+        }),
+        prisma.bankTransaction.aggregate({
+          where: {
+            companyId: { in: companyIds },
+            monto: { gt: 0 },
+            fecha: { gte: monthStart, lte: monthEnd },
+          },
+          _sum: { monto: true },
+        }),
+        prisma.bankTransaction.aggregate({
+          where: {
+            companyId: { in: companyIds },
+            monto: { lt: 0 },
+            fecha: { gte: monthStart, lte: monthEnd },
+          },
+          _sum: { monto: true },
+        }),
+      ]);
+      bankTxPending = pendingTx;
+      bankTxTotal = totalTx;
+      bankTxIncome = bankIncome._sum.monto || 0;
+      bankTxExpense = Math.abs(bankExpense._sum.monto || 0);
+    } catch {
+      // BankTransaction puede no existir o no tener datos
+    }
+
+    // Si no hay ingresos de Payment ni AccountingTransaction, usar BankTransaction
+    if (monthlyIncome === 0 && bankTxIncome > 0) {
+      monthlyIncome = bankTxIncome;
+    }
+    if (monthlyExpenses === 0 && bankTxExpense > 0) {
+      monthlyExpenses = bankTxExpense;
+    }
+
+    // Contar integraciones contables reales conectadas
+    let accountingIntegrations = 0;
+    try {
+      // Contar si hay AccountingTransactions (indica integración contable)
+      const hasAccounting = await prisma.accountingTransaction.count({
+        where: { companyId: { in: companyIds } },
+        take: 1,
+      });
+      if (hasAccounting > 0) accountingIntegrations++;
+      // Contar si hay BankTransactions (indica integración bancaria)
+      if (bankTxTotal > 0) accountingIntegrations++;
+    } catch {
+      accountingIntegrations = 0;
     }
 
     // Último período con datos contables
@@ -271,6 +350,21 @@ export async function GET(request: NextRequest) {
       latestPeriod = null;
     }
 
+    // Tasa de conciliación bancaria real (si hay movimientos bancarios)
+    let bankReconciliationRate = 0;
+    if (bankTxTotal > 0) {
+      const conciliadosTx = await prisma.bankTransaction
+        .count({
+          where: { companyId: { in: companyIds }, estado: 'conciliado' },
+        })
+        .catch(() => 0);
+      bankReconciliationRate = Math.round((conciliadosTx / bankTxTotal) * 100);
+    }
+
+    // Usar tasa de conciliación bancaria si hay datos bancarios, sino la de pagos
+    const effectiveReconciliationRate =
+      bankTxTotal > 0 ? bankReconciliationRate : Math.min(reconciliationRate, 100);
+
     return NextResponse.json({
       summary: {
         totalBalance: monthlyIncome - monthlyExpenses,
@@ -278,15 +372,22 @@ export async function GET(request: NextRequest) {
         monthlyExpenses,
         pendingPayments: totalPendingAmount,
         overduePayments: totalOverdueAmount,
-        reconciliationRate: Math.min(reconciliationRate, 100),
+        reconciliationRate: effectiveReconciliationRate,
       },
       moduleStats: {
-        pendingReconciliation: pendingPayments.length,
+        pendingReconciliation: bankTxPending > 0 ? bankTxPending : pendingPayments.length,
         bankConnections,
         pendingCollections: totalPendingAmount,
         monthlyInvoices: monthlyInvoices || 0,
-        accountingIntegrations: 1, // Placeholder
+        accountingIntegrations,
         rentabilidad: rentabilidad.toFixed(1),
+      },
+      bankStats: {
+        totalMovimientos: bankTxTotal,
+        pendientes: bankTxPending,
+        ingresosMes: bankTxIncome,
+        gastosMes: bankTxExpense,
+        tasaConciliacion: bankReconciliationRate,
       },
       latestPeriod,
       comparison: {

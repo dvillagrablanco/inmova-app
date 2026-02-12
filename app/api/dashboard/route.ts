@@ -261,35 +261,65 @@ export async function GET(request: NextRequest) {
       }));
     }
 
-    // Ingresos históricos (últimos 6 meses)
+    // Ingresos históricos (últimos 6 meses) - cascada: Payment → Accounting → Bank
+    // Pre-fetch bank transactions for the period
+    let bankTransactionsHistorical: Array<{ monto: number; fecha: Date }> = [];
+    try {
+      bankTransactionsHistorical = await prisma.bankTransaction.findMany({
+        where: {
+          companyId: companyFilter,
+          monto: { gt: 0 },
+          fecha: { gte: startOfMonth(subMonths(currentMonth, 5)), lte: endDate },
+        },
+        select: { monto: true, fecha: true },
+      });
+    } catch {
+      // Ignore
+    }
+
     const monthlyIncome: Array<{ mes: string; ingresos: number }> = [];
     for (let i = 5; i >= 0; i--) {
       const monthDate = subMonths(currentMonth, i);
-      const monthStart = startOfMonth(monthDate);
-      const monthEnd = endOfMonth(monthDate);
+      const mStart = startOfMonth(monthDate);
+      const mEnd = endOfMonth(monthDate);
 
       let ingresosMes = 0;
+
+      // 1. Try accounting transactions
       if (useAccountingIncome) {
         ingresosMes = accountingTransactions.reduce((sum, transaction) => {
           if (
             transaction.tipo === 'ingreso' &&
-            transaction.fecha >= monthStart &&
-            transaction.fecha <= monthEnd
+            transaction.fecha >= mStart &&
+            transaction.fecha <= mEnd
           ) {
             return sum + transaction.monto;
           }
           return sum;
         }, 0);
-      } else {
+      }
+
+      // 2. If no accounting data, try payments
+      if (ingresosMes === 0 && !useAccountingIncome) {
         const monthPayments = await prisma.payment.aggregate({
           where: {
             contract: { unit: { building: { companyId } } },
-            fechaVencimiento: { gte: monthStart, lte: monthEnd },
+            fechaVencimiento: { gte: mStart, lte: mEnd },
             estado: 'pagado',
           },
           _sum: { monto: true },
         });
         ingresosMes = Number(monthPayments._sum.monto) || 0;
+      }
+
+      // 3. If still no data, try bank transactions
+      if (ingresosMes === 0 && bankTransactionsHistorical.length > 0) {
+        ingresosMes = bankTransactionsHistorical.reduce((sum, tx) => {
+          if (tx.fecha >= mStart && tx.fecha <= mEnd) {
+            return sum + tx.monto;
+          }
+          return sum;
+        }, 0);
       }
 
       monthlyIncome.push({
@@ -298,11 +328,51 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Cálculos de KPIs
-    const ingresosTotalesMensuales = useAccountingIncome
-      ? accountingMonthTotals.ingresos
-      : fallbackIngresos;
-    const gastosTotales = useAccountingExpenses ? accountingMonthTotals.gastos : fallbackGastos;
+    // Integrar BankTransaction como fuente adicional de datos financieros
+    let bankTxIncome = 0;
+    let bankTxExpense = 0;
+    try {
+      const [bankIncome, bankExpense] = await Promise.all([
+        prisma.bankTransaction.aggregate({
+          where: {
+            companyId: companyFilter,
+            monto: { gt: 0 },
+            fecha: { gte: startDate, lte: endDate },
+          },
+          _sum: { monto: true },
+        }),
+        prisma.bankTransaction.aggregate({
+          where: {
+            companyId: companyFilter,
+            monto: { lt: 0 },
+            fecha: { gte: startDate, lte: endDate },
+          },
+          _sum: { monto: true },
+        }),
+      ]);
+      bankTxIncome = bankIncome._sum.monto || 0;
+      bankTxExpense = Math.abs(bankExpense._sum.monto || 0);
+    } catch {
+      // BankTransaction puede no tener datos
+    }
+
+    // Cálculos de KPIs - cascada: Payment → AccountingTransaction → BankTransaction
+    let ingresosTotalesMensuales = fallbackIngresos;
+    if (ingresosTotalesMensuales === 0 && accountingMonthTotals.ingresos > 0) {
+      ingresosTotalesMensuales = accountingMonthTotals.ingresos;
+    }
+    if (ingresosTotalesMensuales === 0 && bankTxIncome > 0) {
+      ingresosTotalesMensuales = bankTxIncome;
+    }
+
+    let gastosTotales = fallbackGastos;
+    if (gastosTotales === 0 && accountingMonthTotals.gastos > 0) {
+      gastosTotales = accountingMonthTotals.gastos;
+    }
+    if (gastosTotales === 0 && bankTxExpense > 0) {
+      gastosTotales = bankTxExpense;
+    }
+
     const ingresosNetos = ingresosTotalesMensuales - gastosTotales;
     const margenNeto =
       ingresosTotalesMensuales > 0 ? (ingresosNetos / ingresosTotalesMensuales) * 100 : 0;
@@ -368,7 +438,9 @@ export async function GET(request: NextRequest) {
       esEmpresaPrueba: company?.esEmpresaPrueba || false,
     });
   } catch (error: any) {
-    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) { return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 }); }
+    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) {
+      return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 });
+    }
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }
