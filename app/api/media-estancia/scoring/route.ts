@@ -257,12 +257,12 @@ function calculateCategoryScores(factors: ReturnType<typeof calculateScoringFact
 
 // Generar análisis IA basado en datos
 async function generateAIAnalysis(
-  const prisma = await getPrisma();
   tenant: any,
   totalScore: number,
   riskLevel: string,
   factors: ReturnType<typeof calculateScoringFactors>
 ) {
+  const prisma = await getPrisma();
   const positiveFactors = factors.filter((f) => f.status === 'positive');
   const negativeFactors = factors.filter((f) => f.status === 'negative');
 

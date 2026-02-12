@@ -319,7 +319,6 @@ export async function POST(request: NextRequest) {
  * Crea un registro de DocumentImport y sube el archivo a S3
  */
 async function createDocumentImport(
-  const prisma = await getPrisma();
   batchId: string,
   companyId: string,
   filename: string,
@@ -328,6 +327,7 @@ async function createDocumentImport(
   checksum: string,
   buffer: Buffer
 ): Promise<{ id: string; s3Key: string }> {
+  const prisma = await getPrisma();
   // Generar S3 key
   const timestamp = Date.now();
   const random = Math.random().toString(36).substring(7);

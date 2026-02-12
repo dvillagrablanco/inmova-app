@@ -60,10 +60,10 @@ async function isSuggestionsAIConfigured() {
 }
 
 async function generateSuggestions({
-  const prisma = await getPrisma();
   userId,
   context,
 }: {
+  const prisma = await getPrisma();
   userId: string;
   context?: Record<string, unknown>;
 }) {
