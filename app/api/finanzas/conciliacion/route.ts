@@ -3,71 +3,28 @@
  * 
  * Endpoints para gestión de cuentas bancarias, transacciones y facturas.
  * Soporta filtrado por sociedad (companyId) y datos reales de BankTransaction.
+ * Usa resolveAccountingScope para soporte multi-empresa (holdings/filiales).
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import { resolveAccountingScope } from '@/lib/accounting-scope';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-// Tipos para la respuesta
-interface BankAccountResponse {
-  id: string;
-  bankName: string;
-  accountNumber: string;
-  iban: string;
-  balance: number;
-  currency: string;
-  lastSync: string;
-  status: 'connected' | 'pending' | 'error';
-  companyId: string;
-  companyName: string;
-}
-
-interface BankTransactionResponse {
-  id: string;
-  accountId: string;
-  date: string;
-  valueDate: string;
-  description: string;
-  reference?: string;
-  amount: number;
-  balance: number;
-  type: 'income' | 'expense';
-  category?: string;
-  subcategory?: string;
-  reconciliationStatus: 'pending' | 'matched' | 'manual' | 'unmatched';
-  matchedDocumentId?: string;
-  matchedDocumentType?: 'invoice' | 'receipt' | 'payment';
-  matchConfidence?: number;
-  beneficiary?: string;
-  creditorName?: string;
-  debtorName?: string;
-  transactionType?: string;
-  companyId: string;
-}
-
-interface InvoiceResponse {
-  id: string;
-  number: string;
-  date: string;
-  dueDate: string;
-  tenant?: string;
-  concept: string;
-  property?: string;
-  amount: number;
-  status: 'pending' | 'paid' | 'overdue';
-  reconciled: boolean;
-  matchedTransactionId?: string;
+// Lazy Prisma
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
 }
 
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session) {
+    if (!session?.user) {
       return NextResponse.json(
         { error: 'No autenticado' },
         { status: 401 }
@@ -76,43 +33,55 @@ export async function GET(request: NextRequest) {
 
     // Parse query params
     const { searchParams } = new URL(request.url);
-    const companyId = searchParams.get('companyId');
+    const filterCompanyId = searchParams.get('companyId'); // Specific company filter from UI
     const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '100');
-    const status = searchParams.get('status'); // pending, matched, manual
-    const type = searchParams.get('type'); // income, expense
+    const limit = parseInt(searchParams.get('limit') || '50');
+    const statusParam = searchParams.get('status');
+    const typeParam = searchParams.get('type');
     const search = searchParams.get('search');
     const dateFrom = searchParams.get('dateFrom');
     const dateTo = searchParams.get('dateTo');
 
-    // Lazy load Prisma
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
+    const prisma = await getPrisma();
 
-    // Build where clause for transactions
-    const txWhere: any = {};
-    
-    if (companyId) {
-      txWhere.companyId = companyId;
-    } else if ((session.user as any)?.companyId) {
-      txWhere.companyId = (session.user as any).companyId;
+    // Resolve accounting scope (supports holdings, multi-company, session fallback)
+    const scope = await resolveAccountingScope(request, session.user as any);
+    if (!scope) {
+      return NextResponse.json(
+        { error: 'Sin empresa asociada' },
+        { status: 403 }
+      );
     }
 
-    if (status) {
+    // Determine which companyIds to query
+    // If a specific company is selected in the filter, use only that one (if authorized)
+    let queryCompanyIds: string[];
+    if (filterCompanyId && scope.companyIds.includes(filterCompanyId)) {
+      queryCompanyIds = [filterCompanyId];
+    } else {
+      queryCompanyIds = scope.companyIds;
+    }
+
+    // Build where clause for transactions
+    const txWhere: any = {
+      companyId: { in: queryCompanyIds },
+    };
+
+    if (statusParam) {
       const statusMap: Record<string, string> = {
         'pending': 'pendiente_revision',
         'matched': 'conciliado',
         'manual': 'conciliado',
         'unmatched': 'descartado',
       };
-      if (statusMap[status]) {
-        txWhere.estado = statusMap[status];
+      if (statusMap[statusParam]) {
+        txWhere.estado = statusMap[statusParam];
       }
     }
 
-    if (type === 'income') {
+    if (typeParam === 'income') {
       txWhere.monto = { gt: 0 };
-    } else if (type === 'expense') {
+    } else if (typeParam === 'expense') {
       txWhere.monto = { lt: 0 };
     }
 
@@ -123,6 +92,7 @@ export async function GET(request: NextRequest) {
         { referencia: { contains: search, mode: 'insensitive' } },
         { creditorName: { contains: search, mode: 'insensitive' } },
         { debtorName: { contains: search, mode: 'insensitive' } },
+        { categoria: { contains: search, mode: 'insensitive' } },
       ];
     }
 
@@ -132,16 +102,11 @@ export async function GET(request: NextRequest) {
       if (dateTo) txWhere.fecha.lte = new Date(dateTo);
     }
 
-    // Fetch bank connections (accounts)
-    const connectionWhere: any = {};
-    if (companyId) {
-      connectionWhere.companyId = companyId;
-    } else if ((session.user as any)?.companyId) {
-      connectionWhere.companyId = (session.user as any).companyId;
-    }
-
+    // Fetch bank connections (accounts) - restricted to accessible companies
     const connections = await prisma.bankConnection.findMany({
-      where: connectionWhere,
+      where: {
+        companyId: { in: queryCompanyIds },
+      },
       include: {
         company: { select: { id: true, nombre: true } },
         _count: { select: { transactions: true } },
@@ -149,8 +114,8 @@ export async function GET(request: NextRequest) {
       orderBy: { ultimaSync: 'desc' },
     });
 
-    // Map connections to account response format
-    const accounts: BankAccountResponse[] = connections.map(conn => {
+    // Map connections to response, including IBAN and transaction count
+    const accounts = connections.map(conn => {
       const statusMap: Record<string, 'connected' | 'pending' | 'error'> = {
         'conectado': 'connected',
         'desconectado': 'pending',
@@ -158,21 +123,28 @@ export async function GET(request: NextRequest) {
         'renovacion_requerida': 'pending',
       };
 
+      // Format IBAN for display (show real IBAN if stored in proveedorItemId)
+      const fullIban = conn.proveedorItemId || '';
+      const displayIban = fullIban.length >= 20
+        ? `${fullIban.slice(0, 4)} **** **** ${fullIban.slice(-4)}`
+        : conn.ultimosDigitos ? `****${conn.ultimosDigitos}` : '';
+
       return {
         id: conn.id,
         bankName: conn.nombreBanco || conn.proveedor || 'Banco',
         accountNumber: conn.ultimosDigitos ? `****${conn.ultimosDigitos}` : '****0000',
-        iban: `****${conn.ultimosDigitos || '0000'}`,
-        balance: 0, // Will be calculated from transactions
+        iban: displayIban,
+        balance: 0,
         currency: conn.moneda || 'EUR',
         lastSync: conn.ultimaSync?.toISOString() || new Date().toISOString(),
         status: statusMap[conn.estado] || 'pending',
         companyId: conn.companyId || '',
         companyName: conn.company?.nombre || '',
+        transactionCount: conn._count.transactions,
       };
     });
 
-    // Fetch transactions
+    // Fetch transactions with pagination
     const [transactions, totalCount] = await Promise.all([
       prisma.bankTransaction.findMany({
         where: txWhere,
@@ -180,14 +152,21 @@ export async function GET(request: NextRequest) {
         skip: (page - 1) * limit,
         take: limit,
         include: {
-          connection: { select: { id: true, nombreBanco: true, ultimosDigitos: true } },
+          connection: {
+            select: {
+              id: true,
+              nombreBanco: true,
+              ultimosDigitos: true,
+              company: { select: { id: true, nombre: true } },
+            },
+          },
         },
       }),
       prisma.bankTransaction.count({ where: txWhere }),
     ]);
 
     // Map transactions to response format
-    const transactionResponses: BankTransactionResponse[] = transactions.map(tx => {
+    const transactionResponses = transactions.map(tx => {
       const statusMap: Record<string, 'pending' | 'matched' | 'manual' | 'unmatched'> = {
         'pendiente_revision': 'pending',
         'conciliado': 'matched',
@@ -202,8 +181,8 @@ export async function GET(request: NextRequest) {
         description: tx.descripcion,
         reference: tx.referencia || undefined,
         amount: tx.monto,
-        balance: 0, // Running balance not tracked per transaction
-        type: tx.monto >= 0 ? 'income' : 'expense',
+        balance: 0,
+        type: (tx.monto >= 0 ? 'income' : 'expense') as 'income' | 'expense',
         category: tx.categoria || undefined,
         subcategory: tx.subcategoria || undefined,
         reconciliationStatus: tx.paymentId || tx.expenseId
@@ -217,34 +196,53 @@ export async function GET(request: NextRequest) {
         debtorName: tx.debtorName || undefined,
         transactionType: tx.tipoTransaccion || undefined,
         companyId: tx.companyId,
+        companyName: tx.connection?.company?.nombre || '',
+        bankName: tx.connection?.nombreBanco || '',
       };
     });
 
-    // Compute aggregate stats
-    const statsWhere = { ...txWhere };
-    delete statsWhere.estado; // Remove status filter for stats
+    // Compute aggregate stats - use base company filter WITHOUT status/type filters
+    // so stats always show the full picture
+    const globalStatsWhere = {
+      companyId: { in: queryCompanyIds },
+      ...(dateFrom || dateTo ? { fecha: {
+        ...(dateFrom ? { gte: new Date(dateFrom) } : {}),
+        ...(dateTo ? { lte: new Date(dateTo) } : {}),
+      }} : {}),
+      ...(search ? { OR: [
+        { descripcion: { contains: search, mode: 'insensitive' as const } },
+        { beneficiario: { contains: search, mode: 'insensitive' as const } },
+        { referencia: { contains: search, mode: 'insensitive' as const } },
+      ]} : {}),
+    };
 
-    const [totalIncome, totalExpense, pendingCount, matchedCount] = await Promise.all([
+    const [totalIncome, totalExpense, pendingCount, matchedCount, discardedCount] = await Promise.all([
       prisma.bankTransaction.aggregate({
-        where: { ...statsWhere, monto: { gt: 0 } },
+        where: { ...globalStatsWhere, monto: { gt: 0 } },
         _sum: { monto: true },
         _count: true,
       }),
       prisma.bankTransaction.aggregate({
-        where: { ...statsWhere, monto: { lt: 0 } },
+        where: { ...globalStatsWhere, monto: { lt: 0 } },
         _sum: { monto: true },
         _count: true,
       }),
       prisma.bankTransaction.count({
-        where: { ...statsWhere, estado: 'pendiente_revision' },
+        where: { ...globalStatsWhere, estado: 'pendiente_revision' },
       }),
       prisma.bankTransaction.count({
-        where: { ...statsWhere, estado: 'conciliado' },
+        where: { ...globalStatsWhere, estado: 'conciliado' },
+      }),
+      prisma.bankTransaction.count({
+        where: { ...globalStatsWhere, estado: 'descartado' },
       }),
     ]);
 
-    // Get companies with bank data for the filter dropdown
+    // Get ALL companies with bank data that the user has access to (for dropdown)
     const companiesWithBankData = await prisma.bankConnection.findMany({
+      where: {
+        companyId: { in: scope.companyIds },
+      },
       select: {
         companyId: true,
         company: { select: { id: true, nombre: true } },
@@ -259,12 +257,14 @@ export async function GET(request: NextRequest) {
         nombre: c.company!.nombre,
       }));
 
+    const totalTransactionsGlobal = (totalIncome._count || 0) + (totalExpense._count || 0);
+
     return NextResponse.json({
       success: true,
       data: {
         accounts,
         transactions: transactionResponses,
-        invoices: [] as InvoiceResponse[], // TODO: integrate with actual invoices
+        invoices: [],
         stats: {
           totalIncome: totalIncome._sum.monto || 0,
           totalExpense: Math.abs(totalExpense._sum.monto || 0),
@@ -272,9 +272,16 @@ export async function GET(request: NextRequest) {
           expenseCount: totalExpense._count || 0,
           pendingCount,
           matchedCount,
+          discardedCount,
           totalTransactions: totalCount,
+          totalTransactionsGlobal,
         },
         companies,
+        scope: {
+          activeCompanyId: scope.activeCompanyId,
+          isConsolidated: scope.isConsolidated,
+          companyCount: scope.companyIds.length,
+        },
         pagination: {
           page,
           limit,
@@ -297,7 +304,7 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session) {
+    if (!session?.user) {
       return NextResponse.json(
         { error: 'No autenticado' },
         { status: 401 }
@@ -314,8 +321,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
+    const prisma = await getPrisma();
+
+    // Verify the transaction belongs to a company the user has access to
+    const scope = await resolveAccountingScope(request, session.user as any);
+    if (!scope) {
+      return NextResponse.json({ error: 'Sin empresa asociada' }, { status: 403 });
+    }
+
+    const transaction = await prisma.bankTransaction.findUnique({
+      where: { id: transactionId },
+      select: { companyId: true },
+    });
+
+    if (!transaction || !scope.companyIds.includes(transaction.companyId)) {
+      return NextResponse.json(
+        { error: 'Transacción no encontrada o sin permisos' },
+        { status: 404 }
+      );
+    }
+
+    const userId = (session.user as any)?.id || 'manual';
 
     switch (action) {
       case 'conciliar': {
@@ -325,7 +351,7 @@ export async function POST(request: NextRequest) {
             estado: 'conciliado',
             paymentId: paymentId || null,
             expenseId: expenseId || null,
-            conciliadoPor: (session.user as any)?.id || 'manual',
+            conciliadoPor: userId,
             conciliadoEn: new Date(),
             notasConciliacion: notes || 'Conciliación manual',
           },
@@ -337,7 +363,7 @@ export async function POST(request: NextRequest) {
           where: { id: transactionId },
           data: {
             estado: 'descartado',
-            conciliadoPor: (session.user as any)?.id || 'manual',
+            conciliadoPor: userId,
             conciliadoEn: new Date(),
             notasConciliacion: notes || 'Descartado manualmente',
           },

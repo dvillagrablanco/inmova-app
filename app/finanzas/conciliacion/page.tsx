@@ -116,6 +116,8 @@ interface BankTransaction {
   debtorName?: string;
   transactionType?: string;
   companyId: string;
+  companyName?: string;
+  bankName?: string;
 }
 
 interface CompanyOption {
@@ -167,15 +169,24 @@ export default function ConciliacionBancariaPage() {
   const [transactionToMatch, setTransactionToMatch] = useState<BankTransaction | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
 
-  // Cargar datos desde API
-  const fetchData = useCallback(async (page = 1) => {
+  // Cargar datos desde API - accepts explicit params to avoid stale closures
+  const fetchData = async (
+    page = 1,
+    filters?: { company?: string; status?: string; type?: string; search?: string }
+  ) => {
+    const f = filters || {
+      company: selectedCompany,
+      status: statusFilter,
+      type: typeFilter,
+      search: searchTerm,
+    };
     try {
       setLoading(true);
       const params = new URLSearchParams();
-      if (selectedCompany !== 'all') params.set('companyId', selectedCompany);
-      if (statusFilter !== 'all') params.set('status', statusFilter);
-      if (typeFilter !== 'all') params.set('type', typeFilter);
-      if (searchTerm) params.set('search', searchTerm);
+      if (f.company && f.company !== 'all') params.set('companyId', f.company);
+      if (f.status && f.status !== 'all') params.set('status', f.status);
+      if (f.type && f.type !== 'all') params.set('type', f.type);
+      if (f.search) params.set('search', f.search);
       params.set('page', String(page));
       params.set('limit', '50');
 
@@ -197,24 +208,31 @@ export default function ConciliacionBancariaPage() {
     } finally {
       setLoading(false);
     }
-  }, [selectedCompany, statusFilter, typeFilter, searchTerm]);
+  };
 
+  // Initial load
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login');
     } else if (status === 'authenticated') {
-      fetchData();
+      fetchData(1);
     }
-  }, [status, router, fetchData]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status]);
 
-  // Debounced search
+  // Debounced filter changes
   useEffect(() => {
+    if (status !== 'authenticated') return;
     const timeout = setTimeout(() => {
-      if (status === 'authenticated') {
-        fetchData(1);
-      }
+      fetchData(1, {
+        company: selectedCompany,
+        status: statusFilter,
+        type: typeFilter,
+        search: searchTerm,
+      });
     }, 300);
     return () => clearTimeout(timeout);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchTerm, selectedCompany, statusFilter, typeFilter]);
 
   // Filtrar cuentas por empresa seleccionada
@@ -237,9 +255,15 @@ export default function ConciliacionBancariaPage() {
           action === 'descartar' ? 'Movimiento descartado' : 
           'Conciliación revertida'
         );
-        fetchData(pagination.page);
+        fetchData(pagination.page, {
+          company: selectedCompany,
+          status: statusFilter,
+          type: typeFilter,
+          search: searchTerm,
+        });
       } else {
-        toast.error('Error procesando la acción');
+        const err = await response.json().catch(() => ({}));
+        toast.error(err.error || 'Error procesando la acción');
       }
     } catch (error) {
       toast.error('Error de conexión');
@@ -317,14 +341,16 @@ export default function ConciliacionBancariaPage() {
           </div>
           <div className="flex flex-wrap gap-2">
             {/* Company selector */}
-            {companies.length > 1 && (
+            {companies.length > 0 && (
               <Select value={selectedCompany} onValueChange={setSelectedCompany}>
-                <SelectTrigger className="w-[220px]">
+                <SelectTrigger className="w-[240px]">
                   <Building2 className="h-4 w-4 mr-2" />
                   <SelectValue placeholder="Todas las sociedades" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Todas las sociedades</SelectItem>
+                  <SelectItem value="all">
+                    Todas las sociedades ({companies.length})
+                  </SelectItem>
                   {companies.map(c => (
                     <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>
                   ))}
@@ -507,7 +533,10 @@ export default function ConciliacionBancariaPage() {
                       <TableRow>
                         <TableHead className="w-10"></TableHead>
                         <TableHead>Fecha</TableHead>
-                        <TableHead className="min-w-[300px]">Descripción</TableHead>
+                        {selectedCompany === 'all' && companies.length > 1 && (
+                          <TableHead>Sociedad</TableHead>
+                        )}
+                        <TableHead className="min-w-[280px]">Descripción</TableHead>
                         <TableHead>Categoría</TableHead>
                         <TableHead className="text-right">Importe</TableHead>
                         <TableHead>Estado</TableHead>
@@ -533,6 +562,13 @@ export default function ConciliacionBancariaPage() {
                               {format(parseISO(tx.date), "d MMM yyyy", { locale: es })}
                             </div>
                           </TableCell>
+                          {selectedCompany === 'all' && companies.length > 1 && (
+                            <TableCell>
+                              <span className="text-xs font-medium text-primary">
+                                {tx.companyName || '-'}
+                              </span>
+                            </TableCell>
+                          )}
                           <TableCell>
                             <div>
                               <p className="font-medium text-sm line-clamp-1">{tx.description}</p>
@@ -632,7 +668,12 @@ export default function ConciliacionBancariaPage() {
                       variant="outline"
                       size="sm"
                       disabled={pagination.page <= 1}
-                      onClick={() => fetchData(pagination.page - 1)}
+                      onClick={() => fetchData(pagination.page - 1, {
+                        company: selectedCompany,
+                        status: statusFilter,
+                        type: typeFilter,
+                        search: searchTerm,
+                      })}
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
@@ -643,7 +684,12 @@ export default function ConciliacionBancariaPage() {
                       variant="outline"
                       size="sm"
                       disabled={pagination.page >= pagination.pages}
-                      onClick={() => fetchData(pagination.page + 1)}
+                      onClick={() => fetchData(pagination.page + 1, {
+                        company: selectedCompany,
+                        status: statusFilter,
+                        type: typeFilter,
+                        search: searchTerm,
+                      })}
                     >
                       <ChevronRight className="h-4 w-4" />
                     </Button>
@@ -717,7 +763,7 @@ export default function ConciliacionBancariaPage() {
                           size="sm"
                           className="justify-start"
                           onClick={() => {
-                            setSearchTerm(cat.filter);
+                            setSearchTerm(cat.filter.replace(/_/g, ' '));
                             setActiveTab('movimientos');
                           }}
                         >

@@ -550,6 +550,7 @@ async function importSociedad(config: SociedadConfig) {
         companyId: company.id,
         proveedor: 'bankinter_camt053',
         provider: 'bankinter',
+        proveedorItemId: config.iban, // IBAN completo como ID del item
         nombreBanco: 'Bankinter',
         tipoCuenta: 'corriente',
         ultimosDigitos: config.iban.slice(-4),
@@ -560,12 +561,15 @@ async function importSociedad(config: SociedadConfig) {
         notificarErrores: true,
       },
     });
-    console.log(`  BankConnection creada: ${connection.id}`);
+    console.log(`  BankConnection creada: ${connection.id} (IBAN: ${config.iban})`);
   } else {
-    // Update last sync
+    // Update last sync and IBAN if missing
     await prisma.bankConnection.update({
       where: { id: connection.id },
-      data: { ultimaSync: new Date() },
+      data: {
+        ultimaSync: new Date(),
+        proveedorItemId: config.iban,
+      },
     });
     console.log(`  BankConnection existente: ${connection.id}`);
   }
