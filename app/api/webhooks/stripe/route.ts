@@ -550,7 +550,6 @@ async function handleAddOnSubscription(event: Stripe.Event, subscription: Stripe
     return;
   }
 
-  const prisma = await getPrisma();
 
   try {
     switch (event.type) {
@@ -618,7 +617,6 @@ async function handlePlanSubscription(event: Stripe.Event, subscription: Stripe.
     return;
   }
 
-  const prisma = await getPrisma();
 
   try {
     switch (event.type) {

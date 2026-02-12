@@ -52,7 +52,6 @@ const getCompanyContext = async (
 };
 
 const resolvePdfBuffer = async (pdfPath: string): Promise<Buffer> => {
-  const prisma = await getPrisma();
   if (pdfPath.startsWith('http://') || pdfPath.startsWith('https://')) {
     const response = await fetch(pdfPath);
     if (!response.ok) {
