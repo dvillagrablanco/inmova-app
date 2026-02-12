@@ -262,7 +262,6 @@ function generateAIAnalysis(
   riskLevel: string,
   factors: ReturnType<typeof calculateScoringFactors>
 ) {
-  const prisma = await getPrisma();
   const positiveFactors = factors.filter((f) => f.status === 'positive');
   const negativeFactors = factors.filter((f) => f.status === 'negative');
 
