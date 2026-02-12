@@ -154,21 +154,22 @@ Credenciales que estaban en scripts de deploy del servidor y se reintegraron al 
 
 ### Nota sobre credenciales pendientes
 
-Las 8 credenciales restantes **nunca existieron en ninguna parte del servidor**. Se busco exhaustivamente en:
-- `/root/inmova-credentials-backup/` (backup de credenciales de Feb 1)
-- `/var/www/inmova/.env` (instalacion antigua)
-- `/opt/inmova-app.old.*/` (instalacion previa)
-- `/home/deploy/inmova-app/` (deploy user)
-- `/opt/inmova-backups/` (backups de DB)
-- Git history con `git log -p -S` en todas las ramas
-- Git stash (5 stashes)
-- Docker volumes y Coolify data
-- Bash history
+Las 8 credenciales restantes se buscaron exhaustivamente en:
+- `/root/inmova-credentials-backup/CREDENCIALES_COMPLETAS_LATEST.txt` - NO las tiene
+- `/var/www/inmova/.env` (instalacion antigua) - NO las tiene
+- `/opt/inmova-app.old.*/`, `/opt/inmova/`, `/opt/inmova-backups/` - NO las tienen
+- `/home/deploy/inmova-app/` - NO las tiene
+- Git history con `git log -p -S` en TODAS las ramas + `git fsck` blobs unreachable
+- Git stash (5 stashes), filter-branch original refs
+- Docker volumes, Coolify data, bash history
+- API backup `/root/api_backup_20251226/` (solo codigo fuente)
+- Vercel project config (sin token disponible para env pull)
+- Stripe API (la test key actual es INVALIDA: "Invalid API Key provided")
 
-Son servicios que requieren contratar/registrar:
-- **Stripe LIVE secret key**: La sk_live_51Sf0V7IgQi... fue eliminada con git filter-branch. Re-copiar del dashboard Stripe.
-- **SendGrid**: Crear cuenta en https://app.sendgrid.com/ y generar API key
-- **Contasimple**: Contratar servicio en https://contasimple.com/ y obtener auth key
-- **Bizum**: Solicitar merchant ID al banco via Redsys
+**Resultado**:
+- **Stripe**: La `sk_live_51Sf0V7...` fue eliminada con git filter-branch y la `sk_test_` actual es invalida. El usuario debe ir a https://dashboard.stripe.com/apikeys y copiar las claves actuales (tanto test como live).
+- **SendGrid**: Solo existen placeholders (`SG.TU_API_KEY_AQUI`, `SG...`). Nunca hubo key real. Crear cuenta en https://app.sendgrid.com/
+- **Contasimple**: Solo existen placeholders (`cs_auth_tu-key-aqui`, `...`). Nunca hubo key real. Contratar en https://contasimple.com/
+- **Bizum merchant ID**: Solicitar al banco via Redsys
 - **Zucchetti**: Contratar ERP y obtener credenciales OAuth
-- **Redes Sociales**: Registrar apps en cada plataforma (Facebook, LinkedIn, Twitter)
+- **Redes Sociales**: Registrar apps en cada plataforma
