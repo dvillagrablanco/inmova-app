@@ -208,11 +208,11 @@ export async function POST(req: NextRequest) {
               entityType: 'DOCUMENT',
               entityId: document.id,
               entityName: doc.nombre,
-              details: {
+              changes: JSON.stringify({
                 source: 'google-drive',
                 url: doc.url,
                 tipo: doc.tipo,
-              },
+              }),
             },
           });
         } catch {

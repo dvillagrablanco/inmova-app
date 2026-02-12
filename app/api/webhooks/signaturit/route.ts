@@ -142,7 +142,7 @@ async function handleSignatureReady(contract: any, data: any) {
         action: 'SIGNATURE_READY',
         entityType: 'CONTRACT',
         entityId: contract.id,
-        details: { signatureId: data.id },
+        changes: JSON.stringify({ signatureId: data.id }),
       },
     });
 
@@ -235,13 +235,13 @@ async function handleSignatureCompleted(contract: any, data: any) {
         action: 'SIGNATURE_COMPLETED',
         entityType: 'CONTRACT',
         entityId: contract.id,
-        details: {
+        changes: JSON.stringify({
           signatureId: data.id,
           signers: data.signers?.map((s: any) => ({
             email: s.email,
             signedAt: s.signed_at,
           })),
-        },
+        }),
       },
     });
 
@@ -274,10 +274,10 @@ async function handleSignatureDeclined(contract: any, data: any) {
         action: 'SIGNATURE_DECLINED',
         entityType: 'CONTRACT',
         entityId: contract.id,
-        details: {
+        changes: JSON.stringify({
           signatureId: data.id,
           reason: data.decline_reason,
-        },
+        }),
       },
     });
 
@@ -310,7 +310,7 @@ async function handleSignatureExpired(contract: any, data: any) {
         action: 'SIGNATURE_EXPIRED',
         entityType: 'CONTRACT',
         entityId: contract.id,
-        details: { signatureId: data.id },
+        changes: JSON.stringify({ signatureId: data.id }),
       },
     });
 
@@ -343,7 +343,7 @@ async function handleSignatureCanceled(contract: any, data: any) {
         action: 'SIGNATURE_CANCELED',
         entityType: 'CONTRACT',
         entityId: contract.id,
-        details: { signatureId: data.id },
+        changes: JSON.stringify({ signatureId: data.id }),
       },
     });
 
