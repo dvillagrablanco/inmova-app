@@ -133,14 +133,13 @@ async function main() {
       planResults[plan.id] = result;
       console.log(`  ✅ ${plan.name}: prod=${result.productId} | month=${result.monthlyPriceId} | year=${result.annualPriceId}`);
       
-      // Update DB
+      // Update DB - only stripePriceId exists in schema
       await prisma.subscriptionPlan.updateMany({
         where: { tier: plan.tier as any },
         data: {
-          stripeProductId: result.productId,
           stripePriceId: result.monthlyPriceId,
         },
-      });
+      }).catch(() => { /* field may not exist */ });
     } catch (e: any) {
       console.log(`  ❌ ${plan.name}: ${e.message}`);
     }

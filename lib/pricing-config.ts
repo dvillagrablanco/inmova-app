@@ -114,6 +114,10 @@ export const PRICING_PLANS: Record<string, PricingPlan> = {
     signaturesIncluded: 5,
     storageIncluded: '2GB',
     
+    // Stripe IDs (LIVE)
+    stripePriceIdMonthly: 'price_1T067n7ltCPimPyxmXCureYb',
+    stripePriceIdAnnual: 'price_1T067n7ltCPimPyxJbrB79vq',
+    
     features: [
       { text: 'Hasta 5 propiedades', included: true },
       { text: 'Gestión básica de inquilinos', included: true },
@@ -144,6 +148,10 @@ export const PRICING_PLANS: Record<string, PricingPlan> = {
     maxUsers: 3,
     signaturesIncluded: 20,
     storageIncluded: '10GB',
+    
+    // Stripe IDs (LIVE)
+    stripePriceIdMonthly: 'price_1T067p7ltCPimPyxRd54doZW',
+    stripePriceIdAnnual: 'price_1T067p7ltCPimPyxtOWfEVgU',
     
     features: [
       { text: 'Hasta 25 propiedades', included: true },
@@ -180,6 +188,10 @@ export const PRICING_PLANS: Record<string, PricingPlan> = {
     signaturesIncluded: 50,
     storageIncluded: '50GB',
     
+    // Stripe IDs (LIVE)
+    stripePriceIdMonthly: 'price_1T067q7ltCPimPyxPULNS4K3',
+    stripePriceIdAnnual: 'price_1T067q7ltCPimPyxTTBwcbhn',
+    
     features: [
       { text: 'Hasta 100 propiedades', included: true },
       { text: 'Multi-propietario', included: true },
@@ -213,6 +225,10 @@ export const PRICING_PLANS: Record<string, PricingPlan> = {
     maxUsers: 'unlimited',
     signaturesIncluded: 'unlimited',
     storageIncluded: 'Ilimitado',
+    
+    // Stripe IDs (LIVE)
+    stripePriceIdMonthly: 'price_1T067s7ltCPimPyxd3xPFZQK',
+    stripePriceIdAnnual: 'price_1T067s7ltCPimPyxflVTS0AY',
     
     features: [
       { text: 'Todo de Business incluido', included: true },
