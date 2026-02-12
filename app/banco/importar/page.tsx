@@ -54,13 +54,16 @@ interface ImportResult {
   resumen: {
     fichero: string;
     empresa: string;
+    formato?: string;
     cuentas: Array<{
       iban: string;
       banco: string;
+      titular?: string;
       transacciones: number;
       duplicadas: number;
       saldoInicial: number;
       saldoFinal: number;
+      periodo?: string;
     }>;
     totalTransacciones: number;
     totalDuplicadas: number;
@@ -116,10 +119,10 @@ export default function ImportarExtractoBancarioPage() {
     const file = e.target.files?.[0];
     if (file) {
       // Validar extensión
-      const validExtensions = ['.n43', '.txt', '.aeb', '.q43', '.c43'];
+      const validExtensions = ['.xml', '.n43', '.txt', '.aeb', '.q43', '.c43'];
       const ext = '.' + file.name.split('.').pop()?.toLowerCase();
       if (!validExtensions.includes(ext)) {
-        toast.error(`Extensión no válida. Extensiones aceptadas: ${validExtensions.join(', ')}`);
+        toast.error(`Extension no valida. Extensiones aceptadas: ${validExtensions.join(', ')}`);
         return;
       }
       setSelectedFile(file);
@@ -234,7 +237,7 @@ export default function ImportarExtractoBancarioPage() {
             Importar Extracto Bancario
           </h1>
           <p className="text-muted-foreground mt-2">
-            Sube el fichero Norma 43 descargado de tu banca online para importar movimientos
+            Sube el fichero XML (CAMT.053) o Norma 43 descargado de tu banca online para importar movimientos
           </p>
         </div>
 
@@ -244,15 +247,15 @@ export default function ImportarExtractoBancarioPage() {
           <AlertTitle className="text-blue-800 dark:text-blue-200">Como obtener el fichero de Bankinter</AlertTitle>
           <AlertDescription className="text-blue-700 dark:text-blue-300 mt-2">
             <ol className="list-decimal list-inside space-y-1 text-sm">
-              <li>Entra en <strong>Bankinter Online</strong> (empresas.bankinter.com)</li>
+              <li>Entra en <strong>Bankinter Empresas</strong> (empresas.bankinter.com)</li>
               <li>Ve a <strong>Cuentas</strong> &rarr; <strong>Movimientos</strong></li>
               <li>Selecciona el rango de fechas deseado</li>
-              <li>Pulsa <strong>Descargar</strong> &rarr; Formato <strong>Norma 43</strong> (.n43 o .q43)</li>
+              <li>Pulsa <strong>Descargar</strong> &rarr; Formato <strong>XML</strong> (fichero CAMT.053) o <strong>Norma 43</strong></li>
               <li>Sube el fichero descargado aqui abajo</li>
             </ol>
             <p className="mt-2 text-xs text-blue-600">
-              Compatible con Bankinter, BBVA, Santander, CaixaBank, Sabadell, ING y cualquier banco espanol.
-              Coste: gratuito.
+              Soporta formato XML (CAMT.053 ISO 20022) y Norma 43. Compatible con Bankinter, BBVA, Santander, CaixaBank, Sabadell, ING y cualquier banco espanol.
+              El formato se detecta automaticamente. Coste: gratuito.
             </p>
           </AlertDescription>
         </Alert>
@@ -311,7 +314,7 @@ export default function ImportarExtractoBancarioPage() {
               <input
                 ref={fileInputRef}
                 type="file"
-                accept=".n43,.txt,.aeb,.q43,.c43"
+                accept=".xml,.n43,.txt,.aeb,.q43,.c43"
                 onChange={handleFileChange}
                 className="hidden"
               />
@@ -328,7 +331,7 @@ export default function ImportarExtractoBancarioPage() {
                   <Upload className="h-12 w-12 mx-auto text-muted-foreground" />
                   <p className="font-medium">Arrastra el fichero aqui o haz click para seleccionar</p>
                   <p className="text-sm text-muted-foreground">
-                    Formatos: .n43, .q43, .c43, .aeb, .txt
+                    Formatos: .xml (CAMT.053), .n43, .q43, .c43, .aeb, .txt
                   </p>
                 </div>
               )}
@@ -374,21 +377,28 @@ export default function ImportarExtractoBancarioPage() {
                 <CheckCircle2 className="h-5 w-5" />
                 Importacion Completada
               </CardTitle>
-              <CardDescription>
-                {importResult.message}
+              <CardDescription className="space-y-1">
+                <span>{importResult.message}</span>
+                {importResult.resumen.formato && (
+                  <Badge variant="outline" className="ml-2">{importResult.resumen.formato}</Badge>
+                )}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Resumen por cuenta */}
               {importResult.resumen.cuentas.map((cuenta, i) => (
                 <div key={i} className="border rounded-lg p-4 space-y-3">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
                     <div className="flex items-center gap-2">
                       <Building className="h-4 w-4 text-muted-foreground" />
                       <span className="font-semibold">{cuenta.banco}</span>
-                      <Badge variant="outline">****{cuenta.iban.slice(-4)}</Badge>
+                      <Badge variant="outline">{cuenta.iban}</Badge>
+                      {cuenta.titular && <span className="text-sm text-muted-foreground">({cuenta.titular})</span>}
                     </div>
-                    <Badge className="bg-green-500">{cuenta.transacciones} importadas</Badge>
+                    <div className="flex items-center gap-2">
+                      {cuenta.periodo && <span className="text-xs text-muted-foreground">{cuenta.periodo}</span>}
+                      <Badge className="bg-green-500">{cuenta.transacciones} importadas</Badge>
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
