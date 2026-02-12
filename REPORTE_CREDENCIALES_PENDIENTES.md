@@ -14,8 +14,8 @@ Se conecto al servidor por SSH y se realizaron 3 pases de busqueda:
 3. Busqueda en instalaciones antiguas (`/opt/inmova/`, `/opt/inmova-app.old.*/`)
 
 **Health check**: OK  
-**Variables activas**: 83  
-**Credenciales pendientes**: 14 (marcadas con `# PENDIENTE`)
+**Variables activas**: 88  
+**Credenciales pendientes**: 11 (marcadas con `# PENDIENTE`)
 
 ---
 
@@ -40,12 +40,13 @@ Se conecto al servidor por SSH y se realizaron 3 pases de busqueda:
 | 15 | **Redsys PSD2 / Bankinter** | `REDSYS_CLIENT_ID`, `REDSYS_CLIENT_SECRET`, certificados | OPERATIVA en SANDBOX - Certs en /opt/inmova-app/certs/ |
 | 16 | **Bizum** | `BIZUM_SECRET_KEY` | PARCIAL - Sandbox, falta MERCHANT_ID |
 | 17 | **Signaturit** (Firma Digital) | `SIGNATURIT_API_KEY` | OPERATIVA - Key recuperada de `configure-signaturit.py` |
-| 18 | **DocuSign** (Firma Backup) | `DOCUSIGN_INTEGRATION_KEY`, `DOCUSIGN_ACCOUNT_ID`, `DOCUSIGN_USER_ID` | OPERATIVA - Keys recuperadas de `configure-docusign-complete.py` |
+| 18 | **DocuSign** (Firma Backup) | `DOCUSIGN_INTEGRATION_KEY`, `DOCUSIGN_ACCOUNT_ID`, `DOCUSIGN_USER_ID`, `DOCUSIGN_PRIVATE_KEY`, `DOCUSIGN_BASE_PATH` | OPERATIVA - Keys + RSA key completa de `configure-docusign-complete.py` |
+| 18b | **Sentry** (Error Tracking) | `SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN` | OPERATIVA - DSN recuperado de `scripts/` |
 | 19 | **VAPI** (Voz IA) | `VAPI_API_KEY`, `VAPI_PRIVATE_KEY`, `VAPI_WEBHOOK_SECRET` | OPERATIVA - Keys recuperadas de `configure-vapi.py` |
 | 20 | **Cloudflare** (CDN/SSL) | N/A (externo) | OPERATIVA |
 | 21 | **PM2** (Process Manager) | N/A | OPERATIVA - 2 workers cluster |
 
-**Total operativas: 21 integraciones**
+**Total operativas: 23 integraciones**
 
 ---
 
@@ -56,7 +57,6 @@ Se conecto al servidor por SSH y se realizaron 3 pases de busqueda:
 | # | Integracion | Variables Pendientes | Donde obtener | Impacto |
 |---|---|---|---|---|
 | 1 | **Stripe LIVE** | Cambiar `sk_test_` a `sk_live_` | https://dashboard.stripe.com/apikeys (toggle LIVE) | Actualmente en TEST mode. La pk_live esta guardada como referencia. La sk_live (rk_live_51Sf0V7...) se perdio truncada - el usuario debe re-copiarla del dashboard Stripe. |
-| 2 | **Sentry** (Error Tracking) | `SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN` | https://sentry.io/ > Project Settings > DSN | Monitoreo de errores en produccion |
 
 ### MEDIA PRIORIDAD
 
@@ -109,11 +109,11 @@ Con Bankinter Open Banking (Redsys PSD2) operativo en sandbox, la sincronizacion
 | Categoria | Cantidad |
 |---|---|
 | **Integraciones operativas** | 18 |
-| **Credenciales pendientes ALTA** | 2 (Stripe LIVE secret key, Sentry) |
+| **Credenciales pendientes ALTA** | 1 (Stripe LIVE secret key) |
 | **Credenciales pendientes MEDIA** | 4 (Twilio, SendGrid, Contasimple, Bizum merchant ID) |
-| **Credenciales pendientes BAJA** | 8 (redes sociales, Zucchetti, GoCardless, PayPal, Mapbox, Hotjar) |
-| **Total pendientes** | 14 |
-| **Porcentaje operativo** | **83/97 vars = 86%** |
+| **Credenciales pendientes BAJA** | 6 (redes sociales, Zucchetti, GoCardless, PayPal, Mapbox, Hotjar) |
+| **Total pendientes** | 11 |
+| **Porcentaje operativo** | **88/99 vars = 89%** |
 
 ---
 
@@ -130,10 +130,14 @@ Credenciales que estaban en scripts de deploy del servidor y se reintegraron al 
 | `VAPI_PRIVATE_KEY` | `scripts/configure-vapi.py` | Recuperada y aplicada |
 | `VAPI_WEBHOOK_SECRET` | `scripts/configure-vapi.py` | Recuperada y aplicada |
 | `pk_live_51Sf0V7...` (Stripe LIVE) | `scripts/deploy-critical-features.py` | Guardada como referencia |
+| `SENTRY_DSN` + `NEXT_PUBLIC_SENTRY_DSN` | `scripts/` (grep pattern) | Recuperada y aplicada |
+| `DOCUSIGN_PRIVATE_KEY` (RSA completa) | `scripts/configure-docusign-complete.py` | Recuperada y aplicada (1730 chars) |
+| `DOCUSIGN_BASE_PATH` | `scripts/configure-docusign-complete.py` | Recuperada y aplicada |
+| `DOCUSIGN_USER_ID` (corregido) | `scripts/configure-docusign-complete.py` | Corregido de 5f857d75 a 6db6e1e7 |
 
 ## 6. ARCHIVOS MODIFICADOS
 
-1. `/opt/inmova-app/.env.production` - Consolidado con 83 variables activas
+1. `/opt/inmova-app/.env.production` - Consolidado con 88 variables activas
 2. `/opt/inmova-app/.env.local` - Sincronizado con .env.production
 3. `.env.example` - Template completo con todas las integraciones
 4. `REPORTE_CREDENCIALES_PENDIENTES.md` - Este documento
@@ -144,4 +148,15 @@ Credenciales que estaban en scripts de deploy del servidor y se reintegraron al 
 **Fecha**: 12 de febrero de 2026  
 **Health check**: OK  
 **PM2**: 2 workers online  
-**Integraciones operativas**: 21/35
+**Integraciones operativas**: 23/35
+
+### Nota sobre credenciales pendientes
+
+Las 11 credenciales restantes **nunca existieron en el servidor**. Los scripts de configuracion (`configure-twilio.py`, `execute-phase2.5-integrations.py`) estaban disenados para pedir al usuario que las introdujera interactivamente desde la consola de cada servicio. Son cuentas que necesitan ser creadas:
+
+- **Twilio**: Crear cuenta en https://console.twilio.com/ y obtener SID + Token
+- **SendGrid**: Crear cuenta en https://app.sendgrid.com/ y generar API key
+- **Contasimple**: Contratar servicio en https://contasimple.com/ y obtener auth key
+- **Bizum**: Solicitar merchant ID al banco via Redsys
+- **Zucchetti**: Contratar ERP y obtener credenciales OAuth
+- **Redes Sociales**: Registrar apps en cada plataforma (Facebook, LinkedIn, Twitter)
