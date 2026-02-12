@@ -8,7 +8,7 @@ import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/lazy-tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -256,6 +256,15 @@ function AnalyticsPageContent() {
 
             {/* Tendencias */}
             <TabsContent value="trends" className="space-y-6">
+              {revenueData.length === 0 ? (
+                <Card>
+                  <CardContent className="py-12 text-center text-muted-foreground">
+                    <BarChart3 className="h-12 w-12 mx-auto mb-4 opacity-40" />
+                    <p className="font-medium">Sin datos de tendencias</p>
+                    <p className="text-sm mt-1">Los datos se generan automáticamente a partir de la contabilidad y pagos registrados.</p>
+                  </CardContent>
+                </Card>
+              ) : (
               <div className="grid gap-6 md:grid-cols-2">
                 <Card>
                   <CardHeader>
@@ -263,31 +272,33 @@ function AnalyticsPageContent() {
                     <CardDescription>Ingresos brutos vs netos (últimos 12 meses)</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <AreaChart data={revenueData}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        <Area
-                          type="monotone"
-                          dataKey="ingresos"
-                          stackId="1"
-                          stroke="#000000"
-                          fill="#000000"
-                          name="Ingresos Brutos"
-                        />
-                        <Area
-                          type="monotone"
-                          dataKey="neto"
-                          stackId="2"
-                          stroke="#666666"
-                          fill="#666666"
-                          name="Ingresos Netos"
-                        />
-                      </AreaChart>
-                    </ResponsiveContainer>
+                    <div style={{ width: '100%', height: 300 }}>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <AreaChart data={revenueData}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="name" />
+                          <YAxis />
+                          <Tooltip />
+                          <Legend />
+                          <Area
+                            type="monotone"
+                            dataKey="ingresos"
+                            stackId="1"
+                            stroke="#000000"
+                            fill="#000000"
+                            name="Ingresos Brutos"
+                          />
+                          <Area
+                            type="monotone"
+                            dataKey="neto"
+                            stackId="2"
+                            stroke="#666666"
+                            fill="#666666"
+                            name="Ingresos Netos"
+                          />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
                   </CardContent>
                 </Card>
 
@@ -297,25 +308,28 @@ function AnalyticsPageContent() {
                     <CardDescription>Evolución de ocupación (últimos 12 meses)</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <LineChart data={occupancyData}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
-                        <YAxis domain={[0, 100]} />
-                        <Tooltip />
-                        <Legend />
-                        <Line
-                          type="monotone"
-                          dataKey="ocupacion"
-                          stroke="#000000"
-                          strokeWidth={2}
-                          name="% Ocupación"
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
+                    <div style={{ width: '100%', height: 300 }}>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <LineChart data={occupancyData}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="name" />
+                          <YAxis domain={[0, 100]} />
+                          <Tooltip />
+                          <Legend />
+                          <Line
+                            type="monotone"
+                            dataKey="ocupacion"
+                            stroke="#000000"
+                            strokeWidth={2}
+                            name="% Ocupación"
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
                   </CardContent>
                 </Card>
               </div>
+              )}
 
               {trends.length > 0 && (
                 <div className="grid gap-4 md:grid-cols-4">
