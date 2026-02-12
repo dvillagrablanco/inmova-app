@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { calculateLeadScoring, calculateProbabilidadCierre, determinarTemperatura } from '@/lib/crm-service';
-import logger, { logError } from '@/lib/logger';
+import logger from '@/lib/logger';
+import { withRateLimit, RATE_LIMITS } from '@/lib/rate-limiting';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -11,19 +13,36 @@ async function getPrisma() {
   return getPrismaClient();
 }
 
-// Endpoint público para capturar leads desde la landing page y chatbot
+const captureLeadSchema = z.object({
+  email: z.string().email('Email invalido').max(255),
+  nombre: z.string().max(200).optional(),
+  telefono: z.string().max(30).optional(),
+  empresa: z.string().max(200).optional(),
+  mensaje: z.string().max(2000).optional(),
+  origen: z.string().max(100).optional(),
+  vertical: z.string().max(100).optional(),
+  plan: z.string().max(100).optional(),
+}).passthrough();
+
+// Endpoint publico para capturar leads desde la landing page y chatbot
 export async function POST(req: NextRequest) {
+  return withRateLimit(req, async () => {
+    return handleCaptureLead(req);
+  }, RATE_LIMITS.auth);
+}
+
+async function handleCaptureLead(req: NextRequest) {
   const prisma = await getPrisma();
   try {
-    const body = await req.json();
-
-    // Validaciones básicas
-    if (!body.email) {
+    const rawBody = await req.json();
+    const parsed = captureLeadSchema.safeParse(rawBody);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: 'Email es requerido' },
+        { error: 'Datos invalidos', details: parsed.error.errors },
         { status: 400 }
       );
     }
+    const body = parsed.data;
 
     // Buscar o crear compañía demo para leads públicos
     let demoCompany = await prisma.company.findFirst({
@@ -143,4 +162,4 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
-}
+} // handleCaptureLead

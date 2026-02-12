@@ -1,33 +1,51 @@
-import { NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import logger, { logError } from '@/lib/logger';
+import { z } from 'zod';
+import logger from '@/lib/logger';
+import { withAuthRateLimit } from '@/lib/rate-limiting';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Lazy Prisma (auditoria V2)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
+const loginSchema = z.object({
+  email: z.string().email('Email invalido').max(255),
+  password: z.string().min(1, 'Password requerido').max(128),
+});
+
 const JWT_SECRET = process.env.NEXTAUTH_SECRET;
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  return withAuthRateLimit(request, async () => {
+    return handleLogin(request);
+  });
+}
+
+async function handleLogin(request: NextRequest) {
   try {
-    const { email, password } = await request.json();
+    const body = await request.json();
+    const parsed = loginSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'Datos invalidos', details: parsed.error.errors }, { status: 400 });
+    }
+    const { email, password } = parsed.data;
 
     const jwtSecret = JWT_SECRET;
     if (!jwtSecret) {
       logger.error('NEXTAUTH_SECRET no configurado');
       return NextResponse.json(
-        { error: 'Configuración del servidor inválida' },
+        { error: 'Configuracion del servidor invalida' },
         { status: 500 }
       );
     }
 
-    if (!email || !password) {
-      return NextResponse.json(
-        { error: 'Email y contraseña son requeridos' },
-        { status: 400 }
-      );
-    }
+    const db = await getPrisma();
 
     // Buscar inquilino por email
     const tenant = await db.tenant.findUnique({
@@ -73,8 +91,8 @@ export async function POST(request: Request) {
   } catch (error) {
     logger.error('Error en login de inquilino:', error);
     return NextResponse.json(
-      { error: 'Error al iniciar sesión' },
+      { error: 'Error al iniciar sesion' },
       { status: 500 }
     );
   }
-}
+} // handleLogin

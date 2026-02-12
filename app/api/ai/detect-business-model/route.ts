@@ -1,15 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
-import logger, { logError } from '@/lib/logger';
+import { z } from 'zod';
+import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
+const detectBusinessSchema = z.object({
+  companyName: z.string().max(200).optional(),
+  description: z.string().max(2000).optional(),
+  propertyCount: z.number().optional(),
+  propertyTypes: z.array(z.string()).optional(),
+}).passthrough(); // Allow additional fields
 
 /**
  * API para detectar automáticamente el modelo de negocio del usuario
  */
 export async function POST(request: NextRequest) {
   try {
-    const userData = await request.json();
+    const body = await request.json();
+    const parsed = detectBusinessSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'Datos invalidos', details: parsed.error.errors }, { status: 400 });
+    }
+    const userData = parsed.data;
 
     const systemPrompt = `Eres un experto en clasificación de modelos de negocio inmobiliario.
 

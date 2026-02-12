@@ -1,22 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
-import logger, { logError } from '@/lib/logger';
+import { z } from 'zod';
+import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
+const detectIntentSchema = z.object({
+  message: z.string().min(1, 'Message is required').max(2000),
+  context: z.record(z.any()).optional(),
+});
 
 /**
  * API para detectar la intención del usuario usando IA
  */
 export async function POST(request: NextRequest) {
   try {
-    const { message, context } = await request.json();
-
-    if (!message) {
+    const body = await request.json();
+    const parsed = detectIntentSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: 'Message is required' },
+        { error: 'Datos invalidos', details: parsed.error.errors },
         { status: 400 }
       );
     }
+    const { message, context } = parsed.data;
 
     // Construir prompt para el LLM
     const systemPrompt = `Eres un asistente experto en gestión inmobiliaria que ayuda a detectar la intención del usuario.
