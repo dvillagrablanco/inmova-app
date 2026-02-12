@@ -15,6 +15,7 @@ import {
   isAltaiConfigured,
 } from '@/lib/zucchetti-altai-service';
 import logger from '@/lib/logger';
+import { authorizeCronRequest } from '@/lib/cron-auth';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -31,6 +32,12 @@ function verifyCronAuth(request: NextRequest): boolean {
 }
 
 export async function GET(request: NextRequest) {
+  // Cron auth guard (auditoria V2)
+  const cronAuth = await authorizeCronRequest(request as any);
+  if (!cronAuth.authorized) {
+    return NextResponse.json({ error: cronAuth.error || 'No autorizado' }, { status: cronAuth.status });
+  }
+
   if (!verifyCronAuth(request)) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
   }

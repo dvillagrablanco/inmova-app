@@ -14,6 +14,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { processScheduledEmails } from '@/lib/onboarding-email-service';
 import logger from '@/lib/logger';
+import { authorizeCronRequest } from '@/lib/cron-auth';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60; // 60 segundos máximo de ejecución
@@ -25,6 +26,12 @@ export const maxDuration = 60; // 60 segundos máximo de ejecución
  * para evitar ejecuciones no autorizadas
  */
 export async function POST(req: NextRequest) {
+  // Cron auth guard (auditoria V2)
+  const cronAuth = await authorizeCronRequest(req as any);
+  if (!cronAuth.authorized) {
+    return NextResponse.json({ error: cronAuth.error || 'No autorizado' }, { status: cronAuth.status });
+  }
+
   try {
     // Verificar token de seguridad (opcional pero recomendado)
     const authHeader = req.headers.get('authorization');
@@ -68,6 +75,12 @@ export async function POST(req: NextRequest) {
  * Endpoint de health check para verificar que el servicio está funcionando
  */
 export async function GET(req: NextRequest) {
+  // Cron auth guard (auditoria V2)
+  const cronAuth = await authorizeCronRequest(req as any);
+  if (!cronAuth.authorized) {
+    return NextResponse.json({ error: cronAuth.error || 'No autorizado' }, { status: cronAuth.status });
+  }
+
   return NextResponse.json({
     service: 'Email Scheduler',
     status: 'online',

@@ -14,6 +14,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import logger from '@/lib/logger';
+import { authorizeCronRequest } from '@/lib/cron-auth';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -62,6 +63,12 @@ async function sendEmailAlert(subject: string, html: string) {
 }
 
 export async function GET(request: NextRequest) {
+  // Cron auth guard (auditoria V2)
+  const cronAuth = await authorizeCronRequest(request as any);
+  if (!cronAuth.authorized) {
+    return NextResponse.json({ error: cronAuth.error || 'No autorizado' }, { status: cronAuth.status });
+  }
+
   try {
     // Verificar autorización
     const authHeader = request.headers.get('authorization');

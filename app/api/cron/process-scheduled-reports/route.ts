@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { processScheduledReports } from '@/lib/report-service';
 import logger, { logError } from '@/lib/logger';
+import { authorizeCronRequest } from '@/lib/cron-auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,6 +11,12 @@ export const dynamic = 'force-dynamic';
  * Este endpoint debe ser llamado por un servicio de cron externo
  */
 export async function GET(request: NextRequest) {
+  // Cron auth guard (auditoria V2)
+  const cronAuth = await authorizeCronRequest(request as any);
+  if (!cronAuth.authorized) {
+    return NextResponse.json({ error: cronAuth.error || 'No autorizado' }, { status: cronAuth.status });
+  }
+
   try {
     // Validar token de autenticación para cron (opcional pero recomendado)
     const authHeader = request.headers.get('authorization');
@@ -51,5 +58,11 @@ export async function GET(request: NextRequest) {
  * Alternativa con método POST
  */
 export async function POST(request: NextRequest) {
+  // Cron auth guard (auditoria V2)
+  const cronAuth = await authorizeCronRequest(request as any);
+  if (!cronAuth.authorized) {
+    return NextResponse.json({ error: cronAuth.error || 'No autorizado' }, { status: cronAuth.status });
+  }
+
   return GET(request);
 }

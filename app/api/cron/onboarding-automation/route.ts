@@ -22,9 +22,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { processOnboardingReminders } from '@/lib/onboarding-email-automation';
 import { retryFailedWebhooks } from '@/lib/onboarding-webhook-system';
 import logger from '@/lib/logger';
+import { authorizeCronRequest } from '@/lib/cron-auth';
 
 // Proteger con token de autenticación
 export async function GET(request: NextRequest) {
+  // Cron auth guard (auditoria V2)
+  const cronAuth = await authorizeCronRequest(request as any);
+  if (!cronAuth.authorized) {
+    return NextResponse.json({ error: cronAuth.error || 'No autorizado' }, { status: cronAuth.status });
+  }
+
   try {
     // Verificar autorización
     const authHeader = request.headers.get('authorization');
@@ -88,5 +95,11 @@ export async function GET(request: NextRequest) {
 
 // Permitir POST también (para testing manual)
 export async function POST(request: NextRequest) {
+  // Cron auth guard (auditoria V2)
+  const cronAuth = await authorizeCronRequest(request as any);
+  if (!cronAuth.authorized) {
+    return NextResponse.json({ error: cronAuth.error || 'No autorizado' }, { status: cronAuth.status });
+  }
+
   return GET(request);
 }

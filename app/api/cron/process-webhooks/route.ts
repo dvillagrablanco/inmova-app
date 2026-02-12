@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { processWebhookEvents } from '@/lib/webhook-service';
 import logger from '@/lib/logger';
+import { authorizeCronRequest } from '@/lib/cron-auth';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -16,6 +17,12 @@ export const maxDuration = 60;
  * POST /api/cron/process-webhooks
  */
 export async function POST(req: NextRequest) {
+  // Cron auth guard (auditoria V2)
+  const cronAuth = await authorizeCronRequest(req as any);
+  if (!cronAuth.authorized) {
+    return NextResponse.json({ error: cronAuth.error || 'No autorizado' }, { status: cronAuth.status });
+  }
+
   try {
     // Verificar token de seguridad
     const authHeader = req.headers.get('authorization');
@@ -57,6 +64,12 @@ export async function POST(req: NextRequest) {
  * GET /api/cron/process-webhooks
  */
 export async function GET(req: NextRequest) {
+  // Cron auth guard (auditoria V2)
+  const cronAuth = await authorizeCronRequest(req as any);
+  if (!cronAuth.authorized) {
+    return NextResponse.json({ error: cronAuth.error || 'No autorizado' }, { status: cronAuth.status });
+  }
+
   return NextResponse.json({
     service: 'Webhook Processor',
     status: 'online',

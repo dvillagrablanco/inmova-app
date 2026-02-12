@@ -12,7 +12,14 @@ import { NextResponse } from 'next/server';
 import { cleanupExpiredNotifications } from '@/lib/notification-service';
 
 import logger from '@/lib/logger';
+import { authorizeCronRequest } from '@/lib/cron-auth';
 export async function GET() {
+  // Cron auth guard (auditoria V2)
+  const cronAuth = await authorizeCronRequest(request as any);
+  if (!cronAuth.authorized) {
+    return NextResponse.json({ error: cronAuth.error || 'No autorizado' }, { status: cronAuth.status });
+  }
+
   try {
     // Validar que viene desde un cron job (opcional: usar token secreto)
     const authHeader = process.env.CRON_SECRET;
