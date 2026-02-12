@@ -157,8 +157,13 @@ async function main() {
     const monto = Math.max(totalDebe, totalHaber);
     if (monto === 0) continue;
     
-    const { tipo, categoria } = classifySubcuenta(first.subcuenta, first.titulo, totalDebe, totalHaber);
-    const concepto = first.concepto || first.titulo || `Asiento ${first.asiento}`;
+    // Buscar la subcuenta de grupo 6 o 7 en TODOS los apuntes para clasificar correctamente
+    // (el primer apunte suele ser una cuenta de balance, no la de PyG)
+    const pygEntry = entries.find(e => String(e.subcuenta).startsWith('7')) 
+                  || entries.find(e => String(e.subcuenta).startsWith('6'))
+                  || first;
+    const { tipo, categoria } = classifySubcuenta(pygEntry.subcuenta, pygEntry.titulo, totalDebe, totalHaber);
+    const concepto = first.concepto || pygEntry.titulo || first.titulo || `Asiento ${first.asiento}`;
     const subs = [...new Set(entries.map(e => `${e.subcuenta} (${e.titulo})`))];
     
     transactions.push({

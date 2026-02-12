@@ -2837,16 +2837,49 @@ enum TransactionType {
 }
 
 enum AccountingCategory {
+  // Ingresos
   ingreso_renta
+  ingreso_renta_vivienda
+  ingreso_renta_local
+  ingreso_renta_oficina
+  ingreso_renta_garaje
+  ingreso_renta_nave
+  ingreso_renta_edificio
+  ingreso_renta_terreno
+  ingreso_renta_silvela
+  ingreso_renta_reina
+  ingreso_renta_candelaria
+  ingreso_renta_pelayo
+  ingreso_renta_tejada
   ingreso_deposito
+  ingreso_intereses
+  ingreso_dividendos
+  ingreso_beneficio_inversiones
+  ingreso_enajenacion_participaciones
+  ingreso_diferencias_cambio
+  ingreso_subvencion
+  ingreso_servicios_intragrupo
   ingreso_otro
+  // Gastos
   gasto_mantenimiento
   gasto_impuesto
+  gasto_impuesto_sociedades
   gasto_seguro
   gasto_servicio
+  gasto_suministros
   gasto_reparacion
   gasto_comunidad
   gasto_administracion
+  gasto_profesionales
+  gasto_consejeros
+  gasto_personal
+  gasto_bancario
+  gasto_amortizacion
+  gasto_arrendamiento
+  gasto_perdida_inversiones
+  gasto_multas
+  gasto_vehiculos
+  gasto_intragrupo
   gasto_otro
 }
 
