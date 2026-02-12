@@ -2837,9 +2837,33 @@ enum TransactionType {
 }
 
 enum AccountingCategory {
+  // Ingresos generales
   ingreso_renta
   ingreso_deposito
   ingreso_otro
+  // Ingresos Rovida (por tipo de inmueble)
+  ingreso_renta_garaje
+  ingreso_renta_local
+  ingreso_renta_nave
+  ingreso_renta_oficina
+  ingreso_renta_edificio
+  ingreso_renta_vivienda
+  ingreso_renta_terreno
+  // Ingresos Viroda (por edificio)
+  ingreso_renta_silvela
+  ingreso_renta_reina
+  ingreso_renta_candelaria
+  ingreso_renta_pelayo
+  ingreso_renta_tejada
+  // Ingresos Vidaro (holding)
+  ingreso_servicios_intragrupo
+  ingreso_beneficio_inversiones
+  ingreso_dividendos
+  ingreso_intereses
+  ingreso_diferencias_cambio
+  ingreso_enajenacion_participaciones
+  ingreso_subvencion
+  // Gastos generales
   gasto_mantenimiento
   gasto_impuesto
   gasto_seguro
@@ -2848,6 +2872,27 @@ enum AccountingCategory {
   gasto_comunidad
   gasto_administracion
   gasto_otro
+  // Gastos extendidos (Rovida/Viroda/Vidaro)
+  gasto_personal
+  gasto_amortizacion
+  gasto_intragrupo
+  gasto_impuesto_sociedades
+  gasto_arrendamiento
+  gasto_suministros
+  gasto_profesionales
+  // Vidaro gastos específicos
+  gasto_comisiones_custodia
+  gasto_servicios_bancarios
+  gasto_alquiler_oficina
+  gasto_asesoria_fiscal
+  gasto_asesoria_legal
+  gasto_formacion
+  gasto_viajes
+  gasto_sueldos_salarios
+  gasto_seguridad_social
+  gasto_perdidas_inversiones
+  gasto_diferencias_cambio
+  gasto_deterioro_participaciones
 }
 
 model AccountingTransaction {
