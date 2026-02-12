@@ -8,17 +8,20 @@ import { NextRequest, NextResponse } from 'next/server';
 import { addMonths, subDays } from 'date-fns';
 
 // Mock de dependencias
-vi.mock('@/lib/db', () => ({
-  prisma: {
-    payment: {
-      findMany: vi.fn(),
-      findUnique: vi.fn(),
-      count: vi.fn(),
-      create: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-    },
+const mockPrisma = {
+  payment: {
+    findMany: vi.fn(),
+    findUnique: vi.fn(),
+    count: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
   },
+};
+
+vi.mock('@/lib/db', () => ({
+  prisma: mockPrisma,
+  getPrismaClient: () => mockPrisma,
 }));
 
 vi.mock('next-auth', () => ({

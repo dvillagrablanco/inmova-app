@@ -120,6 +120,8 @@ export default defineConfig({
       '**/e2e/**', // Excluir tests E2E de Playwright
       '**/playwright-report/**',
       '**/*.e2e.{ts,tsx}',
+      '**/*.spec.ts', // Excluir Playwright specs (usan test.describe de @playwright/test)
+      '**/tests/**', // Excluir directorio tests/ (Playwright)
     ],
 
     // Watch mode exclusions
