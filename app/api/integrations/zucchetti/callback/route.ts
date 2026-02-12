@@ -91,7 +91,6 @@ async function exchangeCodeForTokens(
 // ═══════════════════════════════════════════════════════════════
 
 async function getZucchettiCompanyInfo(accessToken: string): Promise<{
-  const prisma = await getPrisma();
   companyId: string;
   companyName?: string;
 }> {
