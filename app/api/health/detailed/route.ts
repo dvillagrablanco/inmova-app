@@ -123,6 +123,10 @@ export async function GET(request: NextRequest) {
             configured: contasimpleInmovaConfigured,
             status: contasimpleInmovaConfigured ? 'configured' : 'missing',
           },
+          plaid: {
+            configured: !!process.env.PLAID_CLIENT_ID && !!process.env.PLAID_SECRET,
+            status: (process.env.PLAID_CLIENT_ID && process.env.PLAID_SECRET) ? 'configured' : 'missing',
+          },
         };
 
         const total = Object.keys(checks).length;
