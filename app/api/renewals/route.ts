@@ -10,7 +10,7 @@ async function getPrisma() {
   return getPrismaClient();
 }
 
-// /**
+/**
  * @swagger
  * /api/renewals:
  *   get:

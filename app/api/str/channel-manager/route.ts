@@ -5,16 +5,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/permissions';
 import { addDays } from 'date-fns';
 import {
+  syncCalendar,
+  importBookings,
+  updateChannelPrices,
+} from '@/lib/str-channel-integration-service';
 
 // Lazy Prisma (auditoria V2)
 async function getPrisma() {
   const { getPrismaClient } = await import('@/lib/db');
   return getPrismaClient();
 }
-  syncCalendar,
-  importBookings,
-  updateChannelPrices,
-} from '@/lib/str-channel-integration-service';
 
 // GET - Obtener configuración de canales con métricas
 export async function GET(request: NextRequest) {
