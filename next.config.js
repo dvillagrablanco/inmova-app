@@ -48,14 +48,13 @@ const nextConfig = {
   },
 
   // Build configuration
-  // AUDITORIA 2026-02-11: ignoreBuildErrors y ignoreDuringBuilds deberian ser false
-  // para detectar errores de tipo y lint en produccion. Cambiar progresivamente
-  // despues de corregir errores existentes. Ver AUDITORIA_TOTAL_2026-02-11.md
+  // AUDITORIA V2 2026-02-11: tsc --noEmit retorna 0 errores en codigo propio
+  // (solo 2 errores en node_modules/@vitejs que Next.js ignora)
   typescript: {
-    ignoreBuildErrors: true, // TODO: Cambiar a false (hallazgo critico de auditoria)
+    ignoreBuildErrors: false, // Activado en auditoria V2
   },
   eslint: {
-    ignoreDuringBuilds: true, // TODO: Cambiar a false (hallazgo critico de auditoria)
+    ignoreDuringBuilds: true, // Mantener hasta corregir warnings de ESLint
   },
 
   // Image optimization - Optimizado para producción
@@ -106,7 +105,9 @@ const nextConfig = {
       "form-action 'self'",
       "frame-ancestors 'self'",
       process.env.NODE_ENV === 'production' ? 'upgrade-insecure-requests' : '',
-    ].filter(Boolean).join('; ');
+    ]
+      .filter(Boolean)
+      .join('; ');
 
     return [
       // Landing pages - revalidar siempre para ver cambios rápido
@@ -180,7 +181,7 @@ const nextConfig = {
 
   // Output configuration (Sprint 3)
   // output: 'standalone', // DISABLED: Causa problemas con prerender-manifest.json
-  
+
   // Modularize imports (reduce bundle size)
   modularizeImports: {
     'lucide-react': {
