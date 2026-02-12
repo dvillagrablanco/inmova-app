@@ -1,9 +1,9 @@
 /**
  * POST /api/accounting/refresh-from-source
- * 
+ *
  * Re-importa la contabilidad desde las fuentes originales (Google Sheets).
  * Descarga el spreadsheet actualizado y reimporta los asientos.
- * 
+ *
  * Fuentes configuradas (actualizado Feb 2026):
  * - Rovida 2025: https://docs.google.com/spreadsheets/d/12ebrL4-F4lIbjJaGCPCTpem9L8Yx9_mw
  * - Rovida 2026: https://docs.google.com/spreadsheets/d/1Ce3XvAkboTl4-_-wLuOmXiMmI_A7pwCV
@@ -32,40 +32,131 @@ async function getPrisma() {
 // Fuentes de contabilidad por empresa (Google Sheets export URLs)
 // Cada empresa puede tener múltiples fuentes (por año)
 const ACCOUNTING_SOURCES: Record<string, string[]> = {
-  'Rovida': [
+  Rovida: [
     'https://docs.google.com/spreadsheets/d/12ebrL4-F4lIbjJaGCPCTpem9L8Yx9_mw/export?format=xlsx', // 2025
     'https://docs.google.com/spreadsheets/d/1Ce3XvAkboTl4-_-wLuOmXiMmI_A7pwCV/export?format=xlsx', // 2026
   ],
-  'Vidaro': [
+  Vidaro: [
     'https://docs.google.com/spreadsheets/d/15WLyWpjzt3S5goW0a4sRgLW6tFkzbe6l/export?format=xlsx', // 2025
     'https://docs.google.com/spreadsheets/d/13erHSefePWM7kRglnzjbj8r0_oxckZIj/export?format=xlsx', // 2026
   ],
-  'Viroda': [
+  Viroda: [
     'https://docs.google.com/spreadsheets/d/1_0Kjx5ziPI93s--dPdNmIiJC_TbAufgb/export?format=xlsx', // 2025
     'https://docs.google.com/spreadsheets/d/1lgwUOote2mBoXoJjVx6FGE3rrpaVYQY6/export?format=xlsx', // 2026
   ],
 };
 
-async function classifyEntry(sub: string, titulo: string, debe: number, haber: number) {
-  const prisma = await getPrisma();
+function classifyEntry(sub: string, titulo: string, debe: number, haber: number) {
   let tipo: 'ingreso' | 'gasto' = 'gasto';
   let cat = 'gasto_otro';
+  const t = (titulo || '').toLowerCase();
+
+  // Grupo 7: Ingresos
   if (sub.startsWith('7')) {
     tipo = 'ingreso';
-    cat = titulo.toLowerCase().includes('alquiler') || titulo.toLowerCase().includes('arrendamiento')
-      ? 'ingreso_renta' : 'ingreso_otro';
-  } else if (sub.startsWith('6')) {
-    const t = titulo.toLowerCase();
-    if (t.includes('seguro')) cat = 'gasto_seguro';
-    else if (t.includes('impuesto') || t.includes('ibi') || t.includes('tributo')) cat = 'gasto_impuesto';
-    else if (t.includes('mantenimiento') || t.includes('reparac')) cat = 'gasto_mantenimiento';
-    else if (t.includes('comunidad')) cat = 'gasto_comunidad';
-    else if (t.includes('servicio') || t.includes('suministro') || t.includes('agua') || t.includes('gas')) cat = 'gasto_servicio';
-    else if (t.includes('administrac') || t.includes('gestoría') || t.includes('asesoría')) cat = 'gasto_administracion';
-  } else if (haber > 0 && debe === 0) {
+    if (t.includes('arrend') || t.includes('alquiler') || t.includes('renta')) {
+      // Clasificación granular por inmueble
+      if (t.includes('garaje') || t.includes('plaza')) cat = 'ingreso_renta_garaje';
+      else if (
+        t.includes('local') ||
+        t.includes('constitución') ||
+        t.includes('constitucion') ||
+        t.includes('prado') ||
+        t.includes('barquillo') ||
+        t.includes('reina')
+      )
+        cat = 'ingreso_renta_local';
+      else if (t.includes('nave') || t.includes('cuba')) cat = 'ingreso_renta_nave';
+      else if (t.includes('oficina') || t.includes('europa')) cat = 'ingreso_renta_oficina';
+      else if (t.includes('piamonte') || t.includes('edif')) cat = 'ingreso_renta_edificio';
+      else if (t.includes('gemelos') || t.includes('benidorm') || t.includes('vivienda'))
+        cat = 'ingreso_renta_vivienda';
+      else if (t.includes('silvela')) cat = 'ingreso_renta_silvela';
+      else if (t.includes('candelaria') || t.includes('mora')) cat = 'ingreso_renta_candelaria';
+      else if (t.includes('pelayo')) cat = 'ingreso_renta_pelayo';
+      else if (t.includes('tejada') || t.includes('hernández')) cat = 'ingreso_renta_tejada';
+      else if (t.includes('grijota') || t.includes('finca') || t.includes('terreno'))
+        cat = 'ingreso_renta_terreno';
+      else cat = 'ingreso_renta';
+    } else if (t.includes('servicio') || t.includes('rep.coste') || t.includes('prest.')) {
+      cat = 'ingreso_servicios_intragrupo';
+    } else if (t.includes('benef') && (t.includes('partic') || t.includes('valor'))) {
+      cat = 'ingreso_beneficio_inversiones';
+    } else if (t.includes('dividend')) {
+      cat = 'ingreso_dividendos';
+    } else if (
+      t.includes('inter') &&
+      (t.includes('ccc') || t.includes('ipf') || t.includes('plaz'))
+    ) {
+      cat = 'ingreso_intereses';
+    } else {
+      cat = 'ingreso_otro';
+    }
+  }
+  // Grupo 6: Gastos
+  else if (sub.startsWith('6')) {
+    if (t.includes('seguro') || t.includes('prima')) cat = 'gasto_seguro';
+    else if (t.includes('sociedades')) cat = 'gasto_impuesto_sociedades';
+    else if (
+      t.includes('impuesto') ||
+      t.includes('tributo') ||
+      t.includes('i.b.i') ||
+      t.includes('ibi') ||
+      t.includes('basura') ||
+      t.includes('tasa')
+    )
+      cat = 'gasto_impuesto';
+    else if (
+      t.includes('mantenimiento') ||
+      t.includes('reparacion') ||
+      t.includes('reparación') ||
+      t.includes('reforma') ||
+      t.includes('limpieza') ||
+      t.includes('ascensor')
+    )
+      cat = 'gasto_mantenimiento';
+    else if (
+      t.includes('comunidad') ||
+      t.includes('cdad') ||
+      t.includes('manc') ||
+      t.includes('cuota')
+    )
+      cat = 'gasto_comunidad';
+    else if (
+      t.includes('suministro') ||
+      t.includes('electricidad') ||
+      t.includes('agua') ||
+      t.includes('gas') ||
+      t.includes('luz')
+    )
+      cat = 'gasto_suministros';
+    else if (
+      t.includes('administracion') ||
+      t.includes('administración') ||
+      t.includes('gestoría') ||
+      t.includes('asesoría') ||
+      t.includes('profesional')
+    )
+      cat = 'gasto_administracion';
+    else if (
+      t.includes('sueldo') ||
+      t.includes('salario') ||
+      t.includes('seg. social') ||
+      t.includes('seguridad social')
+    )
+      cat = 'gasto_personal';
+    else if (t.includes('amortiz') || t.includes('dot. am') || t.includes('dotac'))
+      cat = 'gasto_amortizacion';
+    else if (t.includes('intragrupo') || t.includes('vidaro')) cat = 'gasto_intragrupo';
+    else if (t.includes('arrendamiento') || t.includes('arrend')) cat = 'gasto_arrendamiento';
+    else cat = 'gasto_otro';
+  }
+  // Otros grupos
+  else if (haber > 0 && debe === 0) {
     tipo = 'ingreso';
     cat = 'ingreso_otro';
   }
+
   return { tipo, categoria: cat };
 }
 
@@ -99,32 +190,45 @@ export async function POST(request: NextRequest) {
     }
 
     // Buscar fuente para esta empresa
-    const sourceKey = Object.keys(ACCOUNTING_SOURCES).find(k =>
+    const sourceKey = Object.keys(ACCOUNTING_SOURCES).find((k) =>
       company.nombre.toLowerCase().includes(k.toLowerCase())
     );
 
     if (!sourceKey) {
-      return NextResponse.json({
-        error: 'No hay fuente de contabilidad configurada para esta empresa',
-        hint: 'Sube un archivo XLSX desde la sección de importar movimientos contables',
-      }, { status: 404 });
+      return NextResponse.json(
+        {
+          error: 'No hay fuente de contabilidad configurada para esta empresa',
+          hint: 'Sube un archivo XLSX desde la sección de importar movimientos contables',
+        },
+        { status: 404 }
+      );
     }
 
     const sourceUrls = ACCOUNTING_SOURCES[sourceKey];
 
     // Descargar todos los spreadsheets de esta empresa
     const asientos: Array<{
-      num: number; fecha: Date; sub: string; titulo: string;
-      concepto: string; debe: number; haber: number; referencia: string;
+      num: number;
+      fecha: Date;
+      sub: string;
+      titulo: string;
+      concepto: string;
+      debe: number;
+      haber: number;
+      referencia: string;
       sourceIdx: number;
     }> = [];
 
     for (let idx = 0; idx < sourceUrls.length; idx++) {
       const sourceUrl = sourceUrls[idx];
-      logger.info(`[Refresh Accounting] Descargando ${sourceKey} fuente ${idx + 1}/${sourceUrls.length}...`);
+      logger.info(
+        `[Refresh Accounting] Descargando ${sourceKey} fuente ${idx + 1}/${sourceUrls.length}...`
+      );
       const response = await fetch(sourceUrl, { signal: AbortSignal.timeout(30000) });
       if (!response.ok) {
-        logger.warn(`[Refresh Accounting] Error descargando fuente ${idx + 1}: HTTP ${response.status}`);
+        logger.warn(
+          `[Refresh Accounting] Error descargando fuente ${idx + 1}: HTTP ${response.status}`
+        );
         continue;
       }
 
@@ -146,7 +250,8 @@ export async function POST(request: NextRequest) {
         if (isNaN(fecha.getTime())) fecha = new Date('2025-01-01');
 
         asientos.push({
-          num, fecha,
+          num,
+          fecha,
           sub: String(row[5] || ''),
           titulo: String(row[6] || ''),
           concepto: String(row[8] || ''),
@@ -202,9 +307,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Obtener rango de fechas
-    const fechas = asientos.map(a => a.fecha).filter(f => !isNaN(f.getTime()));
-    const minFecha = fechas.length > 0 ? new Date(Math.min(...fechas.map(f => f.getTime()))) : null;
-    const maxFecha = fechas.length > 0 ? new Date(Math.max(...fechas.map(f => f.getTime()))) : null;
+    const fechas = asientos.map((a) => a.fecha).filter((f) => !isNaN(f.getTime()));
+    const minFecha =
+      fechas.length > 0 ? new Date(Math.min(...fechas.map((f) => f.getTime()))) : null;
+    const maxFecha =
+      fechas.length > 0 ? new Date(Math.max(...fechas.map((f) => f.getTime()))) : null;
 
     logger.info(`[Refresh Accounting] ${company.nombre}: ${created} transacciones importadas`);
 
@@ -222,6 +329,9 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: any) {
     logger.error('[Refresh Accounting] Error:', error);
-    return NextResponse.json({ error: error.message || 'Error refrescando contabilidad' }, { status: 500 });
+    return NextResponse.json(
+      { error: error.message || 'Error refrescando contabilidad' },
+      { status: 500 }
+    );
   }
 }
