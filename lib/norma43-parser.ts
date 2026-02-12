@@ -135,6 +135,36 @@ const BANK_CODES: Record<string, string> = {
 };
 
 // ============================================================================
+// IBANs CONOCIDOS - SOCIEDADES DEL GRUPO VIDARO
+// ============================================================================
+// Permite auto-detectar a qué sociedad pertenece cada cuenta del extracto.
+// Formato: IBAN sin espacios → { companyId, companyName }
+
+export const KNOWN_IBANS: Record<string, { companyId: string; companyName: string }> = {
+  'ES5601280250590100083954': { companyId: 'rovida-sl', companyName: 'Rovida S.L.' },
+  'ES8801280250590100081826': { companyId: 'viroda-inversiones', companyName: 'VIRODA INVERSIONES S.L.U.' },
+};
+
+// Mapeo parcial: entidad+oficina+cuenta → sociedad (para matching sin IBAN completo)
+export const KNOWN_ACCOUNTS: Record<string, { companyId: string; companyName: string }> = {
+  '0128_0250_0100083954': { companyId: 'rovida-sl', companyName: 'Rovida S.L.' },
+  '0128_0250_0100081826': { companyId: 'viroda-inversiones', companyName: 'VIRODA INVERSIONES S.L.U.' },
+};
+
+/**
+ * Intenta detectar la sociedad propietaria de una cuenta N43
+ * a partir de los datos del extracto (entidad + oficina + número de cuenta).
+ */
+export function detectCompanyFromAccount(
+  bankCode: string,
+  branchCode: string,
+  accountNumber: string
+): { companyId: string; companyName: string } | null {
+  const key = `${bankCode}_${branchCode}_${accountNumber}`;
+  return KNOWN_ACCOUNTS[key] || null;
+}
+
+// ============================================================================
 // PARSER
 // ============================================================================
 

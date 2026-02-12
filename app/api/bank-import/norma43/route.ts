@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-import { parseNorma43, classifyTransaction, getBankName } from '@/lib/norma43-parser';
+import { parseNorma43, classifyTransaction, getBankName, detectCompanyFromAccount } from '@/lib/norma43-parser';
 import type { N43Account, N43Transaction } from '@/lib/norma43-parser';
 import logger from '@/lib/logger';
 
@@ -81,6 +81,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Auto-detectar sociedad si el fichero contiene cuentas conocidas
+    let autoDetectedCompany: string | null = null;
+    for (const account of parseResult.accounts) {
+      const detected = detectCompanyFromAccount(account.bankCode, account.branchCode, account.accountNumber);
+      if (detected) {
+        if (detected.companyId !== companyId) {
+          // Avisar si la sociedad seleccionada no coincide con la cuenta del extracto
+          parseResult.warnings.push(
+            `La cuenta ${account.accountNumber.slice(-4)} pertenece a ${detected.companyName}, pero se seleccionó otra sociedad. Comprueba que la sociedad es correcta.`
+          );
+        }
+        autoDetectedCompany = detected.companyId;
+      }
+    }
+
     // Procesar cada cuenta encontrada en el fichero
     let totalImported = 0;
     let totalDuplicated = 0;
@@ -91,6 +106,7 @@ export async function POST(request: NextRequest) {
       duplicadas: number;
       saldoInicial: number;
       saldoFinal: number;
+      sociedadDetectada?: string;
     }> = [];
 
     for (const account of parseResult.accounts) {
@@ -186,6 +202,7 @@ export async function POST(request: NextRequest) {
       totalImported += accountImported;
       totalDuplicated += accountDuplicated;
 
+      const detected = detectCompanyFromAccount(account.bankCode, account.branchCode, account.accountNumber);
       accountsProcessed.push({
         iban: account.iban || `****${account.accountNumber.slice(-4)}`,
         banco: bankName,
@@ -193,6 +210,7 @@ export async function POST(request: NextRequest) {
         duplicadas: accountDuplicated,
         saldoInicial: account.initialBalance,
         saldoFinal: account.finalBalance,
+        sociedadDetectada: detected?.companyName,
       });
     }
 

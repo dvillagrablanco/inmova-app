@@ -16,8 +16,8 @@ Para que el sistema funcione, necesitamos poder descargar los movimientos bancar
 
 **Las sociedades para las que necesitamos este acceso son:**
 
-1. **Rovida S.L.** (CIF: [completar CIF])
-2. **VIRODA INVERSIONES S.L.U.** (CIF: [completar CIF])
+1. **Rovida S.L.** (CIF: [completar CIF]) — Cuenta: **ES56 0128 0250 5901 0008 3954**
+2. **VIRODA INVERSIONES S.L.U.** (CIF: [completar CIF]) — Cuenta: **ES88 0128 0250 5901 0008 1826**
 
 **Lo que necesitamos concretamente:**
 
@@ -28,9 +28,9 @@ Para que el sistema funcione, necesitamos poder descargar los movimientos bancar
    - Seleccionar rangos de fechas
    - Descargar en formato Norma 43 / Cuaderno 43 (.n43)
 
-3. **Confirmar los IBANs operativos** de cada sociedad para que podamos configurarlos en nuestro sistema:
-   - IBAN de la(s) cuenta(s) corriente(s) de **Rovida S.L.**
-   - IBAN de la(s) cuenta(s) corriente(s) de **VIRODA INVERSIONES S.L.U.**
+3. **Confirmar que los siguientes IBANs son las cuentas operativas principales** y si hay alguna cuenta adicional que debamos incluir:
+   - **Rovida S.L.:** ES56 0128 0250 5901 0008 3954
+   - **VIRODA INVERSIONES S.L.U.:** ES88 0128 0250 5901 0008 1826
    
 4. **Periodicidad recomendada**: vamos a descargar extractos con frecuencia semanal o quincenal. No necesitamos ningún servicio especial ni API; simplemente la descarga manual del fichero desde la banca online.
 
