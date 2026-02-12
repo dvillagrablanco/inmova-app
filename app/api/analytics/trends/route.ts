@@ -15,11 +15,16 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const months = parseInt(searchParams.get('months') || '12');
 
-    const companyId = session?.user?.companyId;
+    const companyId = (session?.user as any)?.companyId;
+    if (!companyId) {
+      return NextResponse.json({ trends: [] });
+    }
     const { getAnalyticsTrends } = (await import('@/lib/analytics-service')) as any;
-    const trends = await getAnalyticsTrends(companyId, months);
+    const result = await getAnalyticsTrends(companyId, months);
 
-    return NextResponse.json({ trends });
+    // getAnalyticsTrends returns { companyId, trends, months } - extract the array
+    const trendsArray = Array.isArray(result) ? result : (result?.trends || []);
+    return NextResponse.json({ trends: trendsArray });
   } catch (error: any) {
     logger.error('Error fetching trends:', error);
     return NextResponse.json(

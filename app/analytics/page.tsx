@@ -53,10 +53,17 @@ import logger, { logError } from '@/lib/logger';
 
 interface Trend {
   periodo: string;
+  month?: string;
+  year?: number;
   tasaOcupacion: number;
   ingresosMensuales: number;
   ingresoNeto: number;
   morosidad: number;
+  buildings?: number;
+  units?: number;
+  tenants?: number;
+  contracts?: number;
+  revenue?: number;
 }
 
 interface Prediction {
@@ -107,7 +114,15 @@ function AnalyticsPageContent() {
       const trendsRes = await fetch('/api/analytics/trends?months=12');
       if (trendsRes.ok) {
         const data = await trendsRes.json();
-        setTrends(data.trends || []);
+        const rawTrends = Array.isArray(data.trends) ? data.trends : [];
+        // Map API fields to UI fields
+        setTrends(rawTrends.map((t: any) => ({
+          periodo: t.periodo || `${t.month || ''} ${t.year || ''}`.trim(),
+          tasaOcupacion: t.tasaOcupacion || (t.units > 0 && t.contracts > 0 ? (t.contracts / t.units) * 100 : 0),
+          ingresosMensuales: t.ingresosMensuales || t.revenue || 0,
+          ingresoNeto: t.ingresoNeto || t.revenue || 0,
+          morosidad: t.morosidad || 0,
+        })));
       }
 
       // Fetch predictions
