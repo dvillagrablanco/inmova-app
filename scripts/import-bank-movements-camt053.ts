@@ -443,8 +443,8 @@ const SOCIEDADES: SociedadConfig[] = [
     dataDir: 'data/rovida/bancos',
   },
   {
-    nombre: 'Vidaro (Viroda)',
-    searchName: 'Vidaro',
+    nombre: 'Viroda Inversiones',
+    searchName: 'Viroda',
     iban: 'ES8801280250590100081826',
     dataDir: 'data/vidaro/bancos',
   },
