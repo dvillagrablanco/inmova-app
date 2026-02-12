@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
@@ -9,10 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import {
@@ -29,7 +27,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   Table,
@@ -57,9 +54,7 @@ import {
   ArrowRightLeft,
   Building,
   CheckCircle2,
-  AlertCircle,
   Clock,
-  Euro,
   FileText,
   Home,
   RefreshCw,
@@ -68,25 +63,19 @@ import {
   Unlink,
   ArrowUpRight,
   ArrowDownLeft,
-  Filter,
   Download,
-  Upload,
-  Calendar,
   MoreHorizontal,
-  Eye,
-  Trash2,
   Sparkles,
   Zap,
-  TrendingUp,
-  Wallet,
-  CreditCard,
   Building2,
   XCircle,
-  ChevronDown,
   Check,
+  ChevronLeft,
+  ChevronRight,
+  Filter,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { format, subDays, parseISO } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 // ============================================
@@ -96,13 +85,14 @@ import { es } from 'date-fns/locale';
 interface BankAccount {
   id: string;
   bankName: string;
-  bankLogo?: string;
   accountNumber: string;
   iban: string;
   balance: number;
   currency: string;
   lastSync: string;
   status: 'connected' | 'pending' | 'error';
+  companyId: string;
+  companyName: string;
 }
 
 interface BankTransaction {
@@ -116,35 +106,39 @@ interface BankTransaction {
   balance: number;
   type: 'income' | 'expense';
   category?: string;
+  subcategory?: string;
   reconciliationStatus: 'pending' | 'matched' | 'manual' | 'ignored';
   matchedDocumentId?: string;
   matchedDocumentType?: 'invoice' | 'receipt' | 'payment';
   matchConfidence?: number;
+  beneficiary?: string;
+  creditorName?: string;
+  debtorName?: string;
+  transactionType?: string;
+  companyId: string;
 }
 
-interface Invoice {
+interface CompanyOption {
   id: string;
-  number: string;
-  date: string;
-  dueDate: string;
-  tenant?: string;
-  concept: string;
-  amount: number;
-  status: 'pending' | 'paid' | 'partial' | 'overdue';
-  reconciled: boolean;
-  matchedTransactionId?: string;
+  nombre: string;
 }
 
-interface ReconciliationSuggestion {
-  transactionId: string;
-  documentId: string;
-  documentType: 'invoice' | 'receipt' | 'payment';
-  confidence: number;
-  reason: string;
+interface Stats {
+  totalIncome: number;
+  totalExpense: number;
+  incomeCount: number;
+  expenseCount: number;
+  pendingCount: number;
+  matchedCount: number;
+  totalTransactions: number;
 }
 
-// Datos cargados desde API /api/finanzas/conciliacion
-
+interface Pagination {
+  page: number;
+  limit: number;
+  total: number;
+  pages: number;
+}
 
 // ============================================
 // COMPONENTE PRINCIPAL
@@ -156,35 +150,54 @@ export default function ConciliacionBancariaPage() {
   
   const [activeTab, setActiveTab] = useState('movimientos');
   const [selectedAccount, setSelectedAccount] = useState<string>('all');
+  const [selectedCompany, setSelectedCompany] = useState<string>('all');
   const [accounts, setAccounts] = useState<BankAccount[]>([]);
   const [transactions, setTransactions] = useState<BankTransaction[]>([]);
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [companies, setCompanies] = useState<CompanyOption[]>([]);
+  const [stats, setStats] = useState<Stats>({
+    totalIncome: 0, totalExpense: 0, incomeCount: 0, expenseCount: 0,
+    pendingCount: 0, matchedCount: 0, totalTransactions: 0,
+  });
+  const [pagination, setPagination] = useState<Pagination>({ page: 1, limit: 50, total: 0, pages: 0 });
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [selectedTransactions, setSelectedTransactions] = useState<string[]>([]);
+  const [typeFilter, setTypeFilter] = useState<string>('all');
   const [isMatchDialogOpen, setIsMatchDialogOpen] = useState(false);
   const [transactionToMatch, setTransactionToMatch] = useState<BankTransaction | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
-  const [isAutoMatching, setIsAutoMatching] = useState(false);
 
   // Cargar datos desde API
-  const fetchData = async () => {
+  const fetchData = useCallback(async (page = 1) => {
     try {
       setLoading(true);
-      const response = await fetch('/api/finanzas/conciliacion');
+      const params = new URLSearchParams();
+      if (selectedCompany !== 'all') params.set('companyId', selectedCompany);
+      if (statusFilter !== 'all') params.set('status', statusFilter);
+      if (typeFilter !== 'all') params.set('type', typeFilter);
+      if (searchTerm) params.set('search', searchTerm);
+      params.set('page', String(page));
+      params.set('limit', '50');
+
+      const response = await fetch(`/api/finanzas/conciliacion?${params.toString()}`);
       if (response.ok) {
         const result = await response.json();
         setAccounts(result.data?.accounts || []);
         setTransactions(result.data?.transactions || []);
-        setInvoices(result.data?.invoices || []);
+        setCompanies(result.data?.companies || []);
+        setStats(result.data?.stats || {
+          totalIncome: 0, totalExpense: 0, incomeCount: 0, expenseCount: 0,
+          pendingCount: 0, matchedCount: 0, totalTransactions: 0,
+        });
+        setPagination(result.data?.pagination || { page: 1, limit: 50, total: 0, pages: 0 });
       }
     } catch (error) {
       console.error('Error fetching conciliacion data:', error);
+      toast.error('Error cargando datos de conciliación');
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedCompany, statusFilter, typeFilter, searchTerm]);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -192,155 +205,69 @@ export default function ConciliacionBancariaPage() {
     } else if (status === 'authenticated') {
       fetchData();
     }
-  }, [status, router]);
+  }, [status, router, fetchData]);
 
-  // Filtrar transacciones
-  const filteredTransactions = transactions.filter(tx => {
-    const matchesSearch = searchTerm === '' || 
-      tx.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      tx.reference?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesAccount = selectedAccount === 'all' || tx.accountId === selectedAccount;
-    const matchesStatus = statusFilter === 'all' || tx.reconciliationStatus === statusFilter;
-    return matchesSearch && matchesAccount && matchesStatus;
-  });
+  // Debounced search
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (status === 'authenticated') {
+        fetchData(1);
+      }
+    }, 300);
+    return () => clearTimeout(timeout);
+  }, [searchTerm, selectedCompany, statusFilter, typeFilter]);
 
-  // Estadísticas
-  const stats = {
-    pendingCount: transactions.filter(t => t.reconciliationStatus === 'pending').length,
-    matchedCount: transactions.filter(t => t.reconciliationStatus === 'matched' || t.reconciliationStatus === 'manual').length,
-    totalIncome: transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0),
-    totalExpense: transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + Math.abs(t.amount), 0),
+  // Filtrar cuentas por empresa seleccionada
+  const filteredAccounts = selectedCompany === 'all' 
+    ? accounts 
+    : accounts.filter(a => a.companyId === selectedCompany);
+
+  // Conciliar movimiento
+  const handleConciliar = async (transactionId: string, action: 'conciliar' | 'descartar' | 'revertir') => {
+    try {
+      const response = await fetch('/api/finanzas/conciliacion', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transactionId, action }),
+      });
+
+      if (response.ok) {
+        toast.success(
+          action === 'conciliar' ? 'Movimiento conciliado' : 
+          action === 'descartar' ? 'Movimiento descartado' : 
+          'Conciliación revertida'
+        );
+        fetchData(pagination.page);
+      } else {
+        toast.error('Error procesando la acción');
+      }
+    } catch (error) {
+      toast.error('Error de conexión');
+    }
   };
 
-  // Sincronizar bancos
+  // Sincronizar
   const handleSyncBanks = async () => {
     setIsSyncing(true);
-    toast.loading('Sincronizando con bancos...');
-    
-    // Simular sincronización
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
+    toast.loading('Sincronizando movimientos...');
+    await new Promise(resolve => setTimeout(resolve, 2000));
     setIsSyncing(false);
     toast.dismiss();
-    toast.success('Sincronización completada', {
-      description: 'Se han obtenido 12 nuevos movimientos',
-    });
+    toast.info('Los movimientos se cargan desde archivos CAMT.053 importados. Use el script de importación para actualizar.');
   };
 
-  // Auto-matching con IA
-  const handleAutoMatch = async () => {
-    setIsAutoMatching(true);
-    toast.loading('Analizando movimientos con IA...');
-    
-    // Simular análisis IA
-    await new Promise(resolve => setTimeout(resolve, 2500));
-    
-    // Actualizar algunas transacciones como matched
-    setTransactions(prev => prev.map(tx => {
-      if (tx.id === 'tx-1' && tx.reconciliationStatus === 'pending') {
-        return {
-          ...tx,
-          reconciliationStatus: 'matched',
-          matchedDocumentId: 'inv-1',
-          matchedDocumentType: 'invoice',
-          matchConfidence: 95,
-        };
-      }
-      if (tx.id === 'tx-5' && tx.reconciliationStatus === 'pending') {
-        return {
-          ...tx,
-          reconciliationStatus: 'matched',
-          matchedDocumentId: 'inv-4',
-          matchedDocumentType: 'invoice',
-          matchConfidence: 88,
-        };
-      }
-      return tx;
-    }));
-
-    // Actualizar facturas
-    setInvoices(prev => prev.map(inv => {
-      if (inv.id === 'inv-1') {
-        return { ...inv, status: 'paid', reconciled: true, matchedTransactionId: 'tx-1' };
-      }
-      if (inv.id === 'inv-4') {
-        return { ...inv, status: 'paid', reconciled: true, matchedTransactionId: 'tx-5' };
-      }
-      return inv;
-    }));
-    
-    setIsAutoMatching(false);
-    toast.dismiss();
-    toast.success('Conciliación automática completada', {
-      description: '2 movimientos conciliados automáticamente',
-    });
+  // Format currency
+  const formatCurrency = (amount: number) => {
+    return amount.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' });
   };
 
-  // Vincular manualmente
-  const handleManualMatch = (transactionId: string, invoiceId: string) => {
-    setTransactions(prev => prev.map(tx => {
-      if (tx.id === transactionId) {
-        return {
-          ...tx,
-          reconciliationStatus: 'manual',
-          matchedDocumentId: invoiceId,
-          matchedDocumentType: 'invoice',
-        };
-      }
-      return tx;
-    }));
-
-    setInvoices(prev => prev.map(inv => {
-      if (inv.id === invoiceId) {
-        return { ...inv, reconciled: true, matchedTransactionId: transactionId, status: 'paid' };
-      }
-      return inv;
-    }));
-
-    setIsMatchDialogOpen(false);
-    setTransactionToMatch(null);
-    toast.success('Movimiento conciliado manualmente');
-  };
-
-  // Desvincular
-  const handleUnlink = (transactionId: string) => {
-    const tx = transactions.find(t => t.id === transactionId);
-    if (!tx) return;
-
-    setTransactions(prev => prev.map(t => {
-      if (t.id === transactionId) {
-        return {
-          ...t,
-          reconciliationStatus: 'pending',
-          matchedDocumentId: undefined,
-          matchedDocumentType: undefined,
-          matchConfidence: undefined,
-        };
-      }
-      return t;
-    }));
-
-    if (tx.matchedDocumentId) {
-      setInvoices(prev => prev.map(inv => {
-        if (inv.id === tx.matchedDocumentId) {
-          return { ...inv, reconciled: false, matchedTransactionId: undefined, status: 'pending' };
-        }
-        return inv;
-      }));
-    }
-
-    toast.success('Vinculación eliminada');
-  };
-
-  // Ignorar movimiento
-  const handleIgnore = (transactionId: string) => {
-    setTransactions(prev => prev.map(tx => {
-      if (tx.id === transactionId) {
-        return { ...tx, reconciliationStatus: 'ignored' };
-      }
-      return tx;
-    }));
-    toast.success('Movimiento marcado como ignorado');
+  // Format category
+  const formatCategory = (category?: string) => {
+    if (!category) return '-';
+    return category
+      .replace(/_/g, ' ')
+      .replace(/^(ingreso|gasto|transferencia)\s/, '')
+      .replace(/^\w/, c => c.toUpperCase());
   };
 
   if (status === 'loading') {
@@ -352,8 +279,6 @@ export default function ConciliacionBancariaPage() {
       </AuthenticatedLayout>
     );
   }
-
-  const pendingInvoices = invoices.filter(inv => !inv.reconciled && inv.status !== 'paid');
 
   return (
     <AuthenticatedLayout>
@@ -386,26 +311,29 @@ export default function ConciliacionBancariaPage() {
             <div>
               <h1 className="text-2xl md:text-3xl font-bold">Conciliación Bancaria</h1>
               <p className="text-muted-foreground">
-                Vincula movimientos bancarios con facturas y recibos
+                Movimientos bancarios reales de Bankinter (CAMT.053)
               </p>
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" onClick={() => router.push('/open-banking')}>
-              <Building className="h-4 w-4 mr-2" />
-              Open Banking
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => router.push('/contabilidad/integraciones')}>
-              <FileText className="h-4 w-4 mr-2" />
-              Contabilidad
-            </Button>
+            {/* Company selector */}
+            {companies.length > 1 && (
+              <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+                <SelectTrigger className="w-[220px]">
+                  <Building2 className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="Todas las sociedades" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas las sociedades</SelectItem>
+                  {companies.map(c => (
+                    <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
             <Button variant="outline" onClick={handleSyncBanks} disabled={isSyncing}>
               <RefreshCw className={`h-4 w-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
               Sincronizar
-            </Button>
-            <Button onClick={handleAutoMatch} disabled={isAutoMatching}>
-              <Sparkles className={`h-4 w-4 mr-2 ${isAutoMatching ? 'animate-pulse' : ''}`} />
-              Conciliar con IA
             </Button>
           </div>
         </div>
@@ -419,7 +347,7 @@ export default function ConciliacionBancariaPage() {
                   <Clock className="h-5 w-5 text-amber-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{stats.pendingCount}</p>
+                  <p className="text-2xl font-bold">{stats.pendingCount.toLocaleString('es-ES')}</p>
                   <p className="text-xs text-muted-foreground">Pendientes</p>
                 </div>
               </div>
@@ -432,7 +360,7 @@ export default function ConciliacionBancariaPage() {
                   <CheckCircle2 className="h-5 w-5 text-green-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{stats.matchedCount}</p>
+                  <p className="text-2xl font-bold">{stats.matchedCount.toLocaleString('es-ES')}</p>
                   <p className="text-xs text-muted-foreground">Conciliados</p>
                 </div>
               </div>
@@ -445,8 +373,8 @@ export default function ConciliacionBancariaPage() {
                   <ArrowDownLeft className="h-5 w-5 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">+{stats.totalIncome.toLocaleString('es-ES')}€</p>
-                  <p className="text-xs text-muted-foreground">Ingresos</p>
+                  <p className="text-2xl font-bold text-sm md:text-xl">+{formatCurrency(stats.totalIncome)}</p>
+                  <p className="text-xs text-muted-foreground">Ingresos ({stats.incomeCount})</p>
                 </div>
               </div>
             </CardContent>
@@ -458,8 +386,8 @@ export default function ConciliacionBancariaPage() {
                   <ArrowUpRight className="h-5 w-5 text-red-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">-{stats.totalExpense.toLocaleString('es-ES')}€</p>
-                  <p className="text-xs text-muted-foreground">Gastos</p>
+                  <p className="text-2xl font-bold text-sm md:text-xl">-{formatCurrency(stats.totalExpense)}</p>
+                  <p className="text-xs text-muted-foreground">Gastos ({stats.expenseCount})</p>
                 </div>
               </div>
             </CardContent>
@@ -467,54 +395,53 @@ export default function ConciliacionBancariaPage() {
         </div>
 
         {/* Cuentas conectadas */}
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Building2 className="h-5 w-5" />
-                Cuentas Bancarias Conectadas
-              </CardTitle>
-              <Button variant="outline" size="sm" onClick={() => router.push('/open-banking')}>
-                <Link2 className="h-4 w-4 mr-2" />
-                Conectar Cuenta
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-3 gap-4">
-              {accounts.map(account => (
-                <div
-                  key={account.id}
-                  className={`p-4 border rounded-lg cursor-pointer transition-all ${
-                    selectedAccount === account.id ? 'border-primary bg-primary/5' : 'hover:border-primary/50'
-                  }`}
-                  onClick={() => setSelectedAccount(selectedAccount === account.id ? 'all' : account.id)}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <Building className="h-5 w-5 text-muted-foreground" />
-                      <span className="font-medium">{account.bankName}</span>
+        {filteredAccounts.length > 0 && (
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Building2 className="h-5 w-5" />
+                  Cuentas Bancarias ({filteredAccounts.length})
+                </CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredAccounts.map(account => (
+                  <div
+                    key={account.id}
+                    className={`p-4 border rounded-lg cursor-pointer transition-all ${
+                      selectedAccount === account.id ? 'border-primary bg-primary/5' : 'hover:border-primary/50'
+                    }`}
+                    onClick={() => setSelectedAccount(selectedAccount === account.id ? 'all' : account.id)}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <Building className="h-5 w-5 text-muted-foreground" />
+                        <span className="font-medium">{account.bankName}</span>
+                      </div>
+                      <Badge variant={account.status === 'connected' ? 'default' : 'secondary'} className={account.status === 'connected' ? 'bg-green-500' : ''}>
+                        {account.status === 'connected' ? 'Conectado' : 'Pendiente'}
+                      </Badge>
                     </div>
-                    <Badge variant={account.status === 'connected' ? 'default' : 'secondary'} className={account.status === 'connected' ? 'bg-green-500' : ''}>
-                      {account.status === 'connected' ? 'Conectado' : 'Pendiente'}
-                    </Badge>
+                    <p className="text-sm font-medium text-primary">{account.companyName}</p>
+                    <p className="text-sm text-muted-foreground mb-1">{account.iban}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Última sync: {format(parseISO(account.lastSync), "d MMM HH:mm", { locale: es })}
+                    </p>
                   </div>
-                  <p className="text-sm text-muted-foreground mb-1">{account.iban}</p>
-                  <p className="text-xl font-bold">{account.balance.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Última sync: {format(parseISO(account.lastSync), "d MMM HH:mm", { locale: es })}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Tabs principales */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-3 max-w-md">
-            <TabsTrigger value="movimientos">Movimientos</TabsTrigger>
-            <TabsTrigger value="facturas">Facturas</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 max-w-md">
+            <TabsTrigger value="movimientos">
+              Movimientos ({stats.totalTransactions.toLocaleString('es-ES')})
+            </TabsTrigger>
             <TabsTrigger value="sugerencias">Sugerencias IA</TabsTrigger>
           </TabsList>
 
@@ -528,7 +455,7 @@ export default function ConciliacionBancariaPage() {
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
-                        placeholder="Buscar por descripción o referencia..."
+                        placeholder="Buscar por descripción, beneficiario o referencia..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="pl-9"
@@ -543,13 +470,19 @@ export default function ConciliacionBancariaPage() {
                       <SelectItem value="all">Todos los estados</SelectItem>
                       <SelectItem value="pending">Pendientes</SelectItem>
                       <SelectItem value="matched">Conciliados</SelectItem>
-                      <SelectItem value="manual">Manuales</SelectItem>
-                      <SelectItem value="ignored">Ignorados</SelectItem>
+                      <SelectItem value="unmatched">Descartados</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Button variant="outline" size="icon">
-                    <Download className="h-4 w-4" />
-                  </Button>
+                  <Select value={typeFilter} onValueChange={setTypeFilter}>
+                    <SelectTrigger className="w-[150px]">
+                      <SelectValue placeholder="Tipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      <SelectItem value="income">Ingresos</SelectItem>
+                      <SelectItem value="expense">Gastos</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </CardContent>
             </Card>
@@ -557,25 +490,32 @@ export default function ConciliacionBancariaPage() {
             {/* Tabla de movimientos */}
             <Card>
               <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-12"></TableHead>
-                      <TableHead>Fecha</TableHead>
-                      <TableHead>Descripción</TableHead>
-                      <TableHead className="text-right">Importe</TableHead>
-                      <TableHead>Estado</TableHead>
-                      <TableHead>Vinculado a</TableHead>
-                      <TableHead className="w-12"></TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredTransactions.map(tx => {
-                      const linkedInvoice = tx.matchedDocumentId 
-                        ? invoices.find(inv => inv.id === tx.matchedDocumentId)
-                        : null;
-                      
-                      return (
+                {loading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground mr-2" />
+                    <span className="text-muted-foreground">Cargando movimientos...</span>
+                  </div>
+                ) : transactions.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <FileText className="h-12 w-12 mx-auto mb-4 opacity-40" />
+                    <p className="font-medium">No hay movimientos</p>
+                    <p className="text-sm">Importa movimientos con el script de CAMT.053</p>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-10"></TableHead>
+                        <TableHead>Fecha</TableHead>
+                        <TableHead className="min-w-[300px]">Descripción</TableHead>
+                        <TableHead>Categoría</TableHead>
+                        <TableHead className="text-right">Importe</TableHead>
+                        <TableHead>Estado</TableHead>
+                        <TableHead className="w-12"></TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {transactions.map(tx => (
                         <TableRow key={tx.id} className={tx.reconciliationStatus === 'ignored' ? 'opacity-50' : ''}>
                           <TableCell>
                             <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
@@ -589,21 +529,29 @@ export default function ConciliacionBancariaPage() {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <div className="text-sm">
+                            <div className="text-sm whitespace-nowrap">
                               {format(parseISO(tx.date), "d MMM yyyy", { locale: es })}
                             </div>
                           </TableCell>
                           <TableCell>
                             <div>
-                              <p className="font-medium text-sm">{tx.description}</p>
+                              <p className="font-medium text-sm line-clamp-1">{tx.description}</p>
+                              {tx.beneficiary && (
+                                <p className="text-xs text-muted-foreground line-clamp-1">{tx.beneficiary}</p>
+                              )}
                               {tx.reference && (
-                                <p className="text-xs text-muted-foreground">{tx.reference}</p>
+                                <p className="text-xs text-muted-foreground/70 line-clamp-1">{tx.reference}</p>
                               )}
                             </div>
                           </TableCell>
+                          <TableCell>
+                            <span className="text-xs text-muted-foreground">
+                              {formatCategory(tx.category)}
+                            </span>
+                          </TableCell>
                           <TableCell className="text-right">
                             <span className={`font-semibold ${tx.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
-                              {tx.type === 'income' ? '+' : ''}{tx.amount.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
+                              {tx.type === 'income' ? '+' : ''}{formatCurrency(tx.amount)}
                             </span>
                           </TableCell>
                           <TableCell>
@@ -616,7 +564,7 @@ export default function ConciliacionBancariaPage() {
                             {tx.reconciliationStatus === 'matched' && (
                               <Badge className="bg-green-500">
                                 <CheckCircle2 className="h-3 w-3 mr-1" />
-                                Conciliado {tx.matchConfidence && `(${tx.matchConfidence}%)`}
+                                Conciliado
                               </Badge>
                             )}
                             {tx.reconciliationStatus === 'manual' && (
@@ -628,30 +576,8 @@ export default function ConciliacionBancariaPage() {
                             {tx.reconciliationStatus === 'ignored' && (
                               <Badge variant="outline" className="text-gray-500">
                                 <XCircle className="h-3 w-3 mr-1" />
-                                Ignorado
+                                Descartado
                               </Badge>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            {linkedInvoice ? (
-                              <div className="flex items-center gap-2">
-                                <FileText className="h-4 w-4 text-muted-foreground" />
-                                <span className="text-sm">{linkedInvoice.number}</span>
-                              </div>
-                            ) : tx.reconciliationStatus === 'pending' ? (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                  setTransactionToMatch(tx);
-                                  setIsMatchDialogOpen(true);
-                                }}
-                              >
-                                <Link2 className="h-3 w-3 mr-1" />
-                                Vincular
-                              </Button>
-                            ) : (
-                              <span className="text-sm text-muted-foreground">-</span>
                             )}
                           </TableCell>
                           <TableCell>
@@ -662,86 +588,68 @@ export default function ConciliacionBancariaPage() {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => {
-                                  setTransactionToMatch(tx);
-                                  setIsMatchDialogOpen(true);
-                                }}>
-                                  <Link2 className="h-4 w-4 mr-2" />
-                                  Vincular manualmente
-                                </DropdownMenuItem>
+                                {tx.reconciliationStatus === 'pending' && (
+                                  <>
+                                    <DropdownMenuItem onClick={() => handleConciliar(tx.id, 'conciliar')}>
+                                      <CheckCircle2 className="h-4 w-4 mr-2" />
+                                      Conciliar
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleConciliar(tx.id, 'descartar')}>
+                                      <XCircle className="h-4 w-4 mr-2" />
+                                      Descartar
+                                    </DropdownMenuItem>
+                                  </>
+                                )}
                                 {(tx.reconciliationStatus === 'matched' || tx.reconciliationStatus === 'manual') && (
-                                  <DropdownMenuItem onClick={() => handleUnlink(tx.id)}>
+                                  <DropdownMenuItem onClick={() => handleConciliar(tx.id, 'revertir')}>
                                     <Unlink className="h-4 w-4 mr-2" />
-                                    Desvincular
+                                    Revertir conciliación
                                   </DropdownMenuItem>
                                 )}
-                                {tx.reconciliationStatus === 'pending' && (
-                                  <DropdownMenuItem onClick={() => handleIgnore(tx.id)}>
-                                    <XCircle className="h-4 w-4 mr-2" />
-                                    Ignorar
+                                {tx.reconciliationStatus === 'ignored' && (
+                                  <DropdownMenuItem onClick={() => handleConciliar(tx.id, 'revertir')}>
+                                    <RefreshCw className="h-4 w-4 mr-2" />
+                                    Restaurar
                                   </DropdownMenuItem>
                                 )}
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </TableCell>
                         </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
               </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Tab: Facturas */}
-          <TabsContent value="facturas" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Facturas y Recibos Pendientes de Conciliar</CardTitle>
-                <CardDescription>
-                  Facturas emitidas que aún no tienen movimiento bancario vinculado
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Nº Factura</TableHead>
-                      <TableHead>Fecha</TableHead>
-                      <TableHead>Concepto</TableHead>
-                      <TableHead>Inquilino</TableHead>
-                      <TableHead className="text-right">Importe</TableHead>
-                      <TableHead>Estado</TableHead>
-                      <TableHead>Conciliado</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {invoices.map(inv => (
-                      <TableRow key={inv.id}>
-                        <TableCell className="font-medium">{inv.number}</TableCell>
-                        <TableCell>{format(parseISO(inv.date), "d MMM yyyy", { locale: es })}</TableCell>
-                        <TableCell>{inv.concept}</TableCell>
-                        <TableCell>{inv.tenant || '-'}</TableCell>
-                        <TableCell className="text-right font-semibold">
-                          {inv.amount.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={inv.status === 'paid' ? 'default' : inv.status === 'overdue' ? 'destructive' : 'outline'}>
-                            {inv.status === 'paid' ? 'Pagada' : inv.status === 'overdue' ? 'Vencida' : 'Pendiente'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {inv.reconciled ? (
-                            <CheckCircle2 className="h-5 w-5 text-green-500" />
-                          ) : (
-                            <Clock className="h-5 w-5 text-amber-500" />
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
+              {/* Pagination */}
+              {pagination.pages > 1 && (
+                <CardFooter className="flex items-center justify-between py-3 border-t">
+                  <p className="text-sm text-muted-foreground">
+                    Mostrando {((pagination.page - 1) * pagination.limit) + 1}-{Math.min(pagination.page * pagination.limit, pagination.total)} de {pagination.total.toLocaleString('es-ES')} movimientos
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={pagination.page <= 1}
+                      onClick={() => fetchData(pagination.page - 1)}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <span className="text-sm text-muted-foreground">
+                      Página {pagination.page} de {pagination.pages}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={pagination.page >= pagination.pages}
+                      onClick={() => fetchData(pagination.page + 1)}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardFooter>
+              )}
             </Card>
           </TabsContent>
 
@@ -751,7 +659,7 @@ export default function ConciliacionBancariaPage() {
               <Sparkles className="h-4 w-4 text-purple-600" />
               <AlertDescription className="text-purple-800 dark:text-purple-200">
                 <strong>Conciliación Inteligente:</strong> La IA analiza descripciones, importes y fechas para sugerir 
-                vinculaciones automáticas entre movimientos bancarios y facturas.
+                vinculaciones automáticas entre movimientos bancarios y facturas/contratos.
               </AlertDescription>
             </Alert>
 
@@ -760,160 +668,80 @@ export default function ConciliacionBancariaPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Zap className="h-5 w-5 text-amber-500" />
-                    Sugerencias de Conciliación
+                    Resumen de Categorización Automática
                   </CardTitle>
                   <CardDescription>
-                    Movimientos pendientes con posibles coincidencias detectadas
+                    Los movimientos han sido categorizados automáticamente al importarlos.
+                    {stats.pendingCount} movimientos pendientes de revisión.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {transactions
-                    .filter(tx => tx.reconciliationStatus === 'pending')
-                    .map(tx => {
-                      // Buscar posible match
-                      const possibleMatch = invoices.find(inv => 
-                        !inv.reconciled && 
-                        Math.abs(inv.amount - Math.abs(tx.amount)) < 1
-                      );
-                      
-                      if (!possibleMatch) return null;
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="p-4 bg-muted rounded-lg text-center">
+                      <p className="text-2xl font-bold">{stats.totalTransactions.toLocaleString('es-ES')}</p>
+                      <p className="text-xs text-muted-foreground">Total movimientos</p>
+                    </div>
+                    <div className="p-4 bg-green-50 dark:bg-green-950 rounded-lg text-center">
+                      <p className="text-2xl font-bold text-green-600">{stats.incomeCount.toLocaleString('es-ES')}</p>
+                      <p className="text-xs text-muted-foreground">Ingresos</p>
+                    </div>
+                    <div className="p-4 bg-red-50 dark:bg-red-950 rounded-lg text-center">
+                      <p className="text-2xl font-bold text-red-600">{stats.expenseCount.toLocaleString('es-ES')}</p>
+                      <p className="text-xs text-muted-foreground">Gastos</p>
+                    </div>
+                    <div className="p-4 bg-amber-50 dark:bg-amber-950 rounded-lg text-center">
+                      <p className="text-2xl font-bold text-amber-600">{stats.pendingCount.toLocaleString('es-ES')}</p>
+                      <p className="text-xs text-muted-foreground">Pendientes</p>
+                    </div>
+                  </div>
 
-                      return (
-                        <div key={tx.id} className="p-4 border rounded-lg space-y-3">
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <p className="font-medium">{tx.description}</p>
-                              <p className="text-sm text-muted-foreground">
-                                {format(parseISO(tx.date), "d MMMM yyyy", { locale: es })} • 
-                                <span className={tx.type === 'income' ? 'text-green-600' : 'text-red-600'}>
-                                  {' '}{tx.amount.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
-                                </span>
-                              </p>
-                            </div>
-                            <Badge className="bg-purple-500">
-                              <Sparkles className="h-3 w-3 mr-1" />
-                              95% coincidencia
-                            </Badge>
-                          </div>
-                          
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <ArrowRightLeft className="h-4 w-4" />
-                            Posible coincidencia:
-                          </div>
-                          
-                          <div className="p-3 bg-muted rounded-lg flex items-center justify-between">
-                            <div>
-                              <p className="font-medium">{possibleMatch.number}</p>
-                              <p className="text-sm text-muted-foreground">{possibleMatch.concept}</p>
-                            </div>
-                            <p className="font-semibold">
-                              {possibleMatch.amount.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
-                            </p>
-                          </div>
-                          
-                          <div className="flex gap-2">
-                            <Button 
-                              size="sm" 
-                              onClick={() => handleManualMatch(tx.id, possibleMatch.id)}
-                            >
-                              <Check className="h-4 w-4 mr-1" />
-                              Aceptar Vinculación
-                            </Button>
-                            <Button size="sm" variant="outline" onClick={() => handleIgnore(tx.id)}>
-                              <XCircle className="h-4 w-4 mr-1" />
-                              Ignorar
-                            </Button>
-                          </div>
-                        </div>
-                      );
-                    })}
+                  <Separator />
+
+                  <div>
+                    <h4 className="font-medium mb-3">Categorías detectadas en los movimientos:</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                      {[
+                        { label: 'Alquileres', icon: '🏠', filter: 'ingreso_alquiler' },
+                        { label: 'Comunidades', icon: '🏢', filter: 'gasto_comunidad' },
+                        { label: 'Seguros', icon: '🛡️', filter: 'gasto_seguro' },
+                        { label: 'Impuestos', icon: '📋', filter: 'gasto_impuesto' },
+                        { label: 'Suministros', icon: '💡', filter: 'gasto_suministros' },
+                        { label: 'Mantenimiento', icon: '🔧', filter: 'gasto_mantenimiento' },
+                        { label: 'Bancarios', icon: '🏦', filter: 'gasto_bancario' },
+                        { label: 'Personal', icon: '👤', filter: 'gasto_personal' },
+                        { label: 'Transferencias internas', icon: '🔄', filter: 'transferencia_interna' },
+                      ].map(cat => (
+                        <Button
+                          key={cat.filter}
+                          variant="outline"
+                          size="sm"
+                          className="justify-start"
+                          onClick={() => {
+                            setSearchTerm(cat.filter);
+                            setActiveTab('movimientos');
+                          }}
+                        >
+                          <span className="mr-2">{cat.icon}</span>
+                          {cat.label}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             ) : (
               <Card>
                 <CardContent className="py-12 text-center">
                   <CheckCircle2 className="h-12 w-12 mx-auto text-green-500 mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">¡Todo conciliado!</h3>
+                  <h3 className="text-lg font-semibold mb-2">No hay movimientos pendientes</h3>
                   <p className="text-muted-foreground">
-                    No hay movimientos pendientes de conciliar
+                    Todos los movimientos han sido conciliados o descartados
                   </p>
                 </CardContent>
               </Card>
             )}
           </TabsContent>
         </Tabs>
-
-        {/* Dialog para vincular manualmente */}
-        <Dialog open={isMatchDialogOpen} onOpenChange={setIsMatchDialogOpen}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Vincular Movimiento</DialogTitle>
-              <DialogDescription>
-                Selecciona la factura o recibo que corresponde a este movimiento bancario
-              </DialogDescription>
-            </DialogHeader>
-            
-            {transactionToMatch && (
-              <div className="space-y-4">
-                <div className="p-4 bg-muted rounded-lg">
-                  <p className="font-medium">{transactionToMatch.description}</p>
-                  <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                    <span>{format(parseISO(transactionToMatch.date), "d MMM yyyy", { locale: es })}</span>
-                    <span className={`font-semibold ${transactionToMatch.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
-                      {transactionToMatch.amount.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
-                    </span>
-                  </div>
-                </div>
-                
-                <Separator />
-                
-                <div>
-                  <Label className="mb-2 block">Facturas disponibles</Label>
-                  <ScrollArea className="h-[300px]">
-                    <div className="space-y-2">
-                      {pendingInvoices.map(inv => (
-                        <div
-                          key={inv.id}
-                          className="p-3 border rounded-lg hover:border-primary cursor-pointer transition-all"
-                          onClick={() => handleManualMatch(transactionToMatch.id, inv.id)}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="font-medium">{inv.number}</p>
-                              <p className="text-sm text-muted-foreground">{inv.concept}</p>
-                              {inv.tenant && (
-                                <p className="text-xs text-muted-foreground">{inv.tenant}</p>
-                              )}
-                            </div>
-                            <div className="text-right">
-                              <p className="font-semibold">
-                                {inv.amount.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {format(parseISO(inv.date), "d MMM yyyy", { locale: es })}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                      {pendingInvoices.length === 0 && (
-                        <div className="text-center py-8 text-muted-foreground">
-                          No hay facturas pendientes de vincular
-                        </div>
-                      )}
-                    </div>
-                  </ScrollArea>
-                </div>
-              </div>
-            )}
-            
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsMatchDialogOpen(false)}>
-                Cancelar
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
       </div>
     </AuthenticatedLayout>
   );
