@@ -1,187 +1,153 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { getPrismaClient } from '@/lib/db';
-import logger from '@/lib/logger';
-
-interface ContractExpiryDetail {
-  id: string;
-  inquilino: string;
-  propiedad: string;
-  vence: Date;
-  diasRestantes: number;
-}
-
-interface OperationalReport {
-  propiedades: number;
-  unidades: number;
-  inquilinosActivos: number;
-  contratosActivos: number;
-  contratosPorVencer: number;
-  incidenciasAbiertas: number;
-  incidenciasResueltas: number;
-  tiempoMedioResolucion: string;
-  ocupacionMedia: number;
-  detalleContratosPorVencer: ContractExpiryDetail[];
-}
-
-async function getErrorMessage(error: unknown) {
-  const prisma = await getPrisma();
-  return error instanceof Error ? error.message : 'Error desconocido';
-}
+import { resolveAccountingScope } from '@/lib/accounting-scope';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-// GET - Obtener reportes operacionales
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 export async function GET(request: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.companyId) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    if (!session?.user) {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const prisma = getPrismaClient();
-    const companyId = session.user.companyId;
+    const scope = await resolveAccountingScope(request, session.user as any);
+    if (!scope) {
+      return NextResponse.json({ error: 'Sin empresa asociada' }, { status: 403 });
+    }
 
+    const companyIds = scope.companyIds;
     const now = new Date();
     const in90Days = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
-    const startOfYear = new Date(now.getFullYear(), 0, 1);
 
+    // Queries paralelas
     const [
-      propiedades,
-      unidades,
-      unidadesOcupadas,
-      contratosActivos,
-      contratosPorVencer,
-      tenantsActivosRaw,
-      incidenciasAbiertas,
-      incidenciasResueltas,
-      incidenciasCompletadas,
+      buildingCount,
+      unitCount,
+      occupiedUnits,
+      tenantCount,
+      activeContracts,
+      expiringContracts,
+      maintenancePending,
+      maintenanceInProgress,
+      maintenanceResolved,
     ] = await Promise.all([
       prisma.building.count({
-        where: { companyId, isDemo: false },
+        where: { companyId: { in: companyIds } },
       }),
       prisma.unit.count({
-        where: { building: { companyId, isDemo: false }, isDemo: false },
+        where: { building: { companyId: { in: companyIds } } },
       }),
       prisma.unit.count({
-        where: { building: { companyId, isDemo: false }, isDemo: false, estado: 'ocupada' },
+        where: { building: { companyId: { in: companyIds } }, estado: 'ocupada' },
+      }),
+      prisma.tenant.count({
+        where: { companyId: { in: companyIds }, activo: true },
       }),
       prisma.contract.count({
         where: {
+          unit: { building: { companyId: { in: companyIds } } },
           estado: 'activo',
-          isDemo: false,
-          unit: { building: { companyId, isDemo: false }, isDemo: false },
         },
       }),
       prisma.contract.findMany({
         where: {
+          unit: { building: { companyId: { in: companyIds } } },
           estado: 'activo',
-          isDemo: false,
           fechaFin: { gte: now, lte: in90Days },
-          unit: { building: { companyId, isDemo: false }, isDemo: false },
         },
-        select: {
-          id: true,
-          fechaFin: true,
+        include: {
           tenant: { select: { nombreCompleto: true } },
-          unit: {
-            select: {
-              numero: true,
-              building: { select: { nombre: true, direccion: true } },
-            },
-          },
+          unit: { select: { numero: true, building: { select: { nombre: true } } } },
         },
         orderBy: { fechaFin: 'asc' },
-      }),
-      prisma.contract.findMany({
-        where: {
-          estado: 'activo',
-          isDemo: false,
-          unit: { building: { companyId, isDemo: false }, isDemo: false },
-        },
-        select: { tenantId: true },
-        distinct: ['tenantId'],
+        take: 20,
       }),
       prisma.maintenanceRequest.count({
         where: {
-          isDemo: false,
-          estado: { in: ['pendiente', 'en_progreso', 'programado'] },
-          unit: { building: { companyId, isDemo: false }, isDemo: false },
+          unit: { building: { companyId: { in: companyIds } } },
+          estado: 'pendiente',
         },
       }),
       prisma.maintenanceRequest.count({
         where: {
-          isDemo: false,
-          estado: 'completado',
-          fechaCompletada: { gte: startOfYear },
-          unit: { building: { companyId, isDemo: false }, isDemo: false },
+          unit: { building: { companyId: { in: companyIds } } },
+          estado: 'en_progreso',
         },
       }),
-      prisma.maintenanceRequest.findMany({
+      prisma.maintenanceRequest.count({
         where: {
-          isDemo: false,
-          estado: 'completado',
-          fechaCompletada: { gte: startOfYear },
-          unit: { building: { companyId, isDemo: false }, isDemo: false },
-        },
-        select: {
-          fechaSolicitud: true,
-          fechaCompletada: true,
+          unit: { building: { companyId: { in: companyIds } } },
+          estado: { in: ['completada', 'cerrada'] },
         },
       }),
     ]);
 
-    const detalleContratosPorVencer: ContractExpiryDetail[] = contratosPorVencer.map((contract) => {
-      const fechaFin = contract.fechaFin;
-      const diasRestantes = Math.ceil((fechaFin.getTime() - now.getTime()) / (24 * 60 * 60 * 1000));
-      const buildingLabel = contract.unit?.building?.nombre || contract.unit?.building?.direccion || 'N/A';
-      const unidadLabel = contract.unit?.numero ? ` ${contract.unit.numero}` : '';
+    // Tiempo medio de resolucion
+    let tiempoMedio = '-';
+    try {
+      const resolved = await prisma.maintenanceRequest.findMany({
+        where: {
+          unit: { building: { companyId: { in: companyIds } } },
+          estado: { in: ['completada', 'cerrada'] },
+          fechaResolucion: { not: null },
+        },
+        select: { fechaSolicitud: true, fechaResolucion: true },
+        take: 100,
+        orderBy: { fechaResolucion: 'desc' },
+      });
+      if (resolved.length > 0) {
+        const totalDias = resolved.reduce((sum, r) => {
+          if (r.fechaResolucion) {
+            return sum + (r.fechaResolucion.getTime() - r.fechaSolicitud.getTime()) / (1000 * 60 * 60 * 24);
+          }
+          return sum;
+        }, 0);
+        const avg = totalDias / resolved.length;
+        tiempoMedio = avg < 1 ? `${Math.round(avg * 24)}h` : `${avg.toFixed(1)} dias`;
+      }
+    } catch {
+      // maintenanceRequest might not have fechaResolucion
+    }
 
-      return {
-        id: contract.id,
-        inquilino: contract.tenant?.nombreCompleto || 'N/A',
-        propiedad: `${buildingLabel}${unidadLabel}`,
-        vence: fechaFin,
-        diasRestantes,
-      };
-    });
+    const ocupacion = unitCount > 0 ? (occupiedUnits / unitCount) * 100 : 0;
 
-    const totalResolucionDias = incidenciasCompletadas.reduce((sum, incidencia) => {
-      if (!incidencia.fechaCompletada) return sum;
-      const diffMs = incidencia.fechaCompletada.getTime() - incidencia.fechaSolicitud.getTime();
-      return sum + diffMs / (24 * 60 * 60 * 1000);
-    }, 0);
-    const tiempoMedioResolucion =
-      incidenciasCompletadas.length > 0
-        ? `${(totalResolucionDias / incidenciasCompletadas.length).toFixed(1)} días`
-        : '0 días';
-
-    const inquilinosActivos = tenantsActivosRaw.length;
-    const ocupacionMedia = unidades > 0 ? Math.round((unidadesOcupadas / unidades) * 1000) / 10 : 0;
-
-    const operationalData: OperationalReport = {
-      propiedades,
-      unidades,
-      inquilinosActivos,
-      contratosActivos,
-      contratosPorVencer: detalleContratosPorVencer.length,
-      incidenciasAbiertas,
-      incidenciasResueltas,
-      tiempoMedioResolucion,
-      ocupacionMedia,
-      detalleContratosPorVencer,
+    const stats = {
+      propiedades: buildingCount,
+      unidades: unitCount,
+      unidadesOcupadas: occupiedUnits,
+      inquilinosActivos: tenantCount,
+      contratosActivos: activeContracts,
+      contratosPorVencer: expiringContracts.length,
+      incidenciasAbiertas: maintenancePending,
+      incidenciasEnProgreso: maintenanceInProgress,
+      incidenciasResueltas: maintenanceResolved,
+      tiempoMedioResolucion: tiempoMedio,
+      ocupacionMedia: Math.round(ocupacion * 10) / 10,
     };
 
-    return NextResponse.json({
-      success: true,
-      data: operationalData,
-    });
-  } catch (error: unknown) {
-    logger.error('[API Reportes Operacionales] Error:', error);
+    const contratosPorVencer = expiringContracts.map(c => ({
+      id: c.id,
+      inquilino: c.tenant?.nombreCompleto || 'Sin inquilino',
+      propiedad: c.unit?.building?.nombre || '-',
+      unidad: c.unit?.numero || '-',
+      vence: c.fechaFin.toISOString(),
+      diasRestantes: Math.ceil((c.fechaFin.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)),
+    }));
+
+    return NextResponse.json({ stats, contratosPorVencer });
+  } catch (error: any) {
+    console.error('[Reportes Operacionales Error]:', error);
     return NextResponse.json(
-      { error: 'Error al obtener reporte operacional', details: getErrorMessage(error) },
+      { error: 'Error obteniendo datos operacionales', details: error.message },
       { status: 500 }
     );
   }
