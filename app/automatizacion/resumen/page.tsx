@@ -43,77 +43,7 @@ interface Automation {
   tiempoAhorrado: number; // en minutos
 }
 
-const AUTOMATIONS: Automation[] = [
-  {
-    id: '1',
-    nombre: 'Recordatorio de pago',
-    descripcion: 'Envía recordatorio 5 días antes del vencimiento',
-    tipo: 'email',
-    activo: true,
-    ejecuciones: 1250,
-    ultimaEjecucion: '2026-01-20 08:00',
-    proximaEjecucion: '2026-01-21 08:00',
-    tasaExito: 98.5,
-    tiempoAhorrado: 625,
-  },
-  {
-    id: '2',
-    nombre: 'Confirmación de pago',
-    descripcion: 'Envía confirmación automática al recibir pago',
-    tipo: 'notificacion',
-    activo: true,
-    ejecuciones: 890,
-    ultimaEjecucion: '2026-01-20 14:32',
-    tasaExito: 100,
-    tiempoAhorrado: 267,
-  },
-  {
-    id: '3',
-    nombre: 'Generación de recibos',
-    descripcion: 'Genera y envía recibos PDF automáticamente',
-    tipo: 'documento',
-    activo: true,
-    ejecuciones: 890,
-    ultimaEjecucion: '2026-01-20 14:32',
-    tasaExito: 99.2,
-    tiempoAhorrado: 445,
-  },
-  {
-    id: '4',
-    nombre: 'Aviso vencimiento contrato',
-    descripcion: 'Notifica 60 días antes del fin de contrato',
-    tipo: 'recordatorio',
-    activo: true,
-    ejecuciones: 45,
-    ultimaEjecucion: '2026-01-15 09:00',
-    proximaEjecucion: '2026-01-22 09:00',
-    tasaExito: 100,
-    tiempoAhorrado: 90,
-  },
-  {
-    id: '5',
-    nombre: 'Workflow nuevo inquilino',
-    descripcion: 'Secuencia de onboarding para nuevos inquilinos',
-    tipo: 'workflow',
-    activo: true,
-    ejecuciones: 78,
-    ultimaEjecucion: '2026-01-18 11:20',
-    tasaExito: 95.5,
-    tiempoAhorrado: 390,
-  },
-  {
-    id: '6',
-    nombre: 'Informe mensual propietarios',
-    descripcion: 'Genera y envía informe mensual a propietarios',
-    tipo: 'documento',
-    activo: false,
-    ejecuciones: 12,
-    ultimaEjecucion: '2025-12-01 10:00',
-    proximaEjecucion: '2026-02-01 10:00',
-    tasaExito: 100,
-    tiempoAhorrado: 120,
-  },
-];
+const AUTOMATIONS: Automation[] = [];
 
 const TYPE_CONFIG = {
   email: { icon: Mail, color: 'text-blue-500', bgColor: 'bg-blue-100 dark:bg-blue-900/30' },

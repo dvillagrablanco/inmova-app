@@ -44,6 +44,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
 interface Coworking {
   id: string;
@@ -140,6 +141,7 @@ export default function CoworkingPage() {
 
   if (loading) {
     return (
+      <AuthenticatedLayout>
       <div className="container mx-auto p-6 space-y-6">
         <Skeleton className="h-8 w-64" />
         <Skeleton className="h-12 w-full" />
@@ -154,11 +156,13 @@ export default function CoworkingPage() {
           ))}
         </div>
       </div>
+      </AuthenticatedLayout>
     );
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <AuthenticatedLayout>
+      <div className="container mx-auto p-6 space-y-6">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-gray-600">
         <Link href="/comercial" className="hover:text-blue-600">
@@ -425,5 +429,6 @@ export default function CoworkingPage() {
         </CardContent>
       </Card>
     </div>
+    </AuthenticatedLayout>
   );
 }

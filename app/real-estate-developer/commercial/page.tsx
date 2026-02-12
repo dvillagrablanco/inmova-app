@@ -51,12 +51,7 @@ const OBJETIVOS_MENSUALES = {
   leadsObjetivo: 100,
 };
 
-const CITAS_PROXIMAS = [
-  { id: '1', cliente: 'María García', tipo: 'Visita', proyecto: 'Residencial Sol', comercial: 'Juan Pérez', fecha: '25 Ene', hora: '10:00' },
-  { id: '2', cliente: 'Pedro López', tipo: 'Segunda Visita', proyecto: 'Torre Centro', comercial: 'Ana Martín', fecha: '25 Ene', hora: '12:30' },
-  { id: '3', cliente: 'Laura Sánchez', tipo: 'Firma', proyecto: 'Residencial Sol', comercial: 'Juan Pérez', fecha: '26 Ene', hora: '09:00' },
-  { id: '4', cliente: 'Carlos Ruiz', tipo: 'Visita', proyecto: 'Apartamentos Mar', comercial: 'Ana Martín', fecha: '26 Ene', hora: '16:00' },
-];
+const CITAS_PROXIMAS = [];
 
 export default function RealEstateDeveloperCommercialPage() {
   const [comerciales, setComerciales] = useState<Comercial[]>([]);

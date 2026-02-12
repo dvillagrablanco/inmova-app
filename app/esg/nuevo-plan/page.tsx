@@ -37,9 +37,7 @@ export default function NuevoPlanESGPage() {
     targetReduction: 30,
     description: '',
   });
-  const [actions, setActions] = useState<Action[]>([
-    { name: '', impact: 0, cost: 0, deadline: '' },
-  ]);
+  const [actions, setActions] = useState<Action[]>([]);
 
   useEffect(() => {
     if (status === 'unauthenticated') {

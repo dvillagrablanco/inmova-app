@@ -11,32 +11,7 @@ import { Star, Book, MessageCircle, AlertCircle, ThumbsUp, Mail, Gift } from 'lu
 
 export default function GuestExperiencePage() {
   const router = useRouter();
-  const [reviews, setReviews] = useState([
-    {
-      id: '1',
-      guest: 'John Doe',
-      property: 'Apartamento Malasaña',
-      rating: 5,
-      date: '2024-12-01',
-      comment: 'Excelente estancia, muy limpio y bien ubicado',
-    },
-    {
-      id: '2',
-      guest: 'Jane Smith',
-      property: 'Loft Retiro',
-      rating: 4,
-      date: '2024-12-03',
-      comment: 'Muy bueno, solo pequeños detalles a mejorar',
-    },
-    {
-      id: '3',
-      guest: 'Mike Johnson',
-      property: 'Piso Salamanca',
-      rating: 5,
-      date: '2024-12-05',
-      comment: 'Perfecto, sin duda volveremos',
-    },
-  ]);
+  const [reviews, setReviews] = useState([]);
 
   return (
     <AuthenticatedLayout>

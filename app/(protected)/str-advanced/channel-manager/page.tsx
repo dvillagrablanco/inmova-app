@@ -16,18 +16,7 @@ export default function ChannelManagerPage() {
   const { data: session, status } = useSession() || {};
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [channels, setChannels] = useState([
-    { id: '1', name: 'Airbnb', status: 'conectado', lastSync: '2024-12-06T10:30:00', bookings: 12 },
-    {
-      id: '2',
-      name: 'Booking.com',
-      status: 'conectado',
-      lastSync: '2024-12-06T10:25:00',
-      bookings: 8,
-    },
-    { id: '3', name: 'Vrbo', status: 'conectado', lastSync: '2024-12-06T09:45:00', bookings: 5 },
-    { id: '4', name: 'Expedia', status: 'desconectado', lastSync: null, bookings: 0 },
-  ]);
+  const [channels, setChannels] = useState([]);
 
   const syncChannel = async (channelId: string) => {
     try {

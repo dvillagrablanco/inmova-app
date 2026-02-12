@@ -35,18 +35,7 @@ export default function RevenueManagementPage() {
     adr: 135,
   });
 
-  const [strategies, setStrategies] = useState([
-    { id: '1', name: 'Temporada Alta', type: 'alta', active: true, listings: 8, avgIncrease: 30 },
-    {
-      id: '2',
-      name: 'Last Minute',
-      type: 'last_minute',
-      active: true,
-      listings: 12,
-      avgIncrease: -10,
-    },
-    { id: '3', name: 'Early Bird', type: 'early_bird', active: false, listings: 5, avgIncrease: 5 },
-  ]);
+  const [strategies, setStrategies] = useState([]);
 
   return (
     <AuthenticatedLayout>

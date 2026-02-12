@@ -36,6 +36,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
 interface Oficina {
   id: string;
@@ -125,6 +126,7 @@ export default function OficinasPage() {
 
   if (isLoading) {
     return (
+      <AuthenticatedLayout>
       <div className="container mx-auto p-6 space-y-6">
         <Skeleton className="h-8 w-48" />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -139,11 +141,13 @@ export default function OficinasPage() {
           ))}
         </div>
       </div>
+      </AuthenticatedLayout>
     );
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <AuthenticatedLayout>
+      <div className="container mx-auto p-6 space-y-6">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-gray-600">
         <Link href="/comercial" className="hover:text-blue-600">Alquiler Comercial</Link>
@@ -346,5 +350,6 @@ export default function OficinasPage() {
         </Card>
       )}
     </div>
+    </AuthenticatedLayout>
   );
 }

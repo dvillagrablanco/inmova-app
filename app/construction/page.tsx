@@ -23,7 +23,8 @@ import {
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import logger, { logError } from '@/lib/logger';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+// logger (winston) es server-only; usamos console en client components
 
 interface ConstructionProject {
   id: string;
@@ -66,7 +67,7 @@ export default function ConstructionPage() {
         toast.error('Error al cargar proyectos de construcción');
       }
     } catch (error) {
-      logger.error('Error loading construction projects:', error);
+      console.error('Error loading construction projects:', error);
       toast.error('Error al cargar proyectos');
     } finally {
       setLoading(false);
@@ -139,7 +140,8 @@ export default function ConstructionPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <AuthenticatedLayout>
+      <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
@@ -336,5 +338,6 @@ export default function ConstructionPage() {
         </TabsContent>
       </Tabs>
     </div>
+    </AuthenticatedLayout>
   );
 }

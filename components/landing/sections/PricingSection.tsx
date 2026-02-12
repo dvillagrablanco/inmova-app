@@ -324,11 +324,11 @@ export function PricingSection() {
 
               {/* CTA - En CardFooter para alineación */}
               <CardFooter className="mt-auto">
-                <Link href="/register" className="w-full block">
+                <Link href={plan.name === 'Enterprise' ? '/landing/contacto' : `/register?plan=${plan.name.toLowerCase()}`} className="w-full block">
                   <Button 
                     className="w-full font-semibold bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white"
                   >
-                    Probar 30 días gratis
+                    {plan.name === 'Enterprise' ? 'Contactar ventas' : 'Probar 30 días gratis'}
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
                 </Link>

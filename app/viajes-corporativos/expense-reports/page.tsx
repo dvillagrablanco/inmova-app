@@ -78,12 +78,7 @@ const GASTOS_DEPARTAMENTO = [
 ];
 
 // Informes disponibles
-const INFORMES = [
-  { id: 'INF001', nombre: 'Informe Mensual Enero 2026', tipo: 'mensual', fecha: '2026-01-31', estado: 'generado' },
-  { id: 'INF002', nombre: 'Informe por Departamentos Q1', tipo: 'trimestral', fecha: '2026-01-15', estado: 'generado' },
-  { id: 'INF003', nombre: 'Análisis de Proveedores', tipo: 'analisis', fecha: '2026-01-10', estado: 'generado' },
-  { id: 'INF004', nombre: 'Comparativa Interanual', tipo: 'anual', fecha: '2026-01-05', estado: 'generado' },
-];
+const INFORMES = [];
 
 // Alertas de presupuesto
 const ALERTAS_PRESUPUESTO = [

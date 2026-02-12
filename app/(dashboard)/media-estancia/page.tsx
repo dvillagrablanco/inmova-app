@@ -339,38 +339,7 @@ export default function MediaEstanciaPage() {
     occupancyChange: 5,
   });
 
-  const [contracts, setContracts] = useState<ContractSummary[]>([
-    {
-      id: '1',
-      propertyAddress: 'Calle Gran Vía 42, 3ºB',
-      tenantName: 'María García López',
-      status: 'activo',
-      startDate: '01/10/2025',
-      endDate: '31/03/2026',
-      rent: 1350,
-      daysRemaining: 85,
-    },
-    {
-      id: '2',
-      propertyAddress: 'Paseo de la Castellana 120',
-      tenantName: 'John Smith (Expat)',
-      status: 'activo',
-      startDate: '15/11/2025',
-      endDate: '14/02/2026',
-      rent: 1800,
-      daysRemaining: 39,
-    },
-    {
-      id: '3',
-      propertyAddress: 'Calle Serrano 85, 5ºA',
-      tenantName: 'Anna Müller (Erasmus)',
-      status: 'activo',
-      startDate: '01/09/2025',
-      endDate: '31/01/2026',
-      rent: 950,
-      daysRemaining: 25,
-    },
-  ]);
+  const [contracts, setContracts] = useState<ContractSummary[]>([]);
 
   return (
     <div className="container mx-auto p-6 space-y-6">

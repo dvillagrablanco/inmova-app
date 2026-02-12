@@ -47,99 +47,11 @@ interface Webinar {
   estado: 'proximo' | 'en_vivo' | 'grabado';
 }
 
-const COURSES: Course[] = [
-  {
-    id: '1',
-    titulo: 'Introducción a Inmova',
-    descripcion: 'Conoce la plataforma, sus funcionalidades y beneficios principales',
-    duracion: '45 min',
-    modulos: 5,
-    completado: 5,
-    nivel: 'basico',
-    obligatorio: true,
-  },
-  {
-    id: '2',
-    titulo: 'Técnicas de Venta para Partners',
-    descripcion: 'Aprende a presentar Inmova a potenciales clientes',
-    duracion: '1h 30min',
-    modulos: 8,
-    completado: 6,
-    nivel: 'intermedio',
-    obligatorio: true,
-  },
-  {
-    id: '3',
-    titulo: 'Gestión de Leads',
-    descripcion: 'Cómo captar, cualificar y convertir leads en clientes',
-    duracion: '2h',
-    modulos: 10,
-    completado: 0,
-    nivel: 'intermedio',
-    obligatorio: false,
-  },
-  {
-    id: '4',
-    titulo: 'Integración API Avanzada',
-    descripcion: 'Domina las integraciones técnicas de la plataforma',
-    duracion: '3h',
-    modulos: 12,
-    completado: 0,
-    nivel: 'avanzado',
-    obligatorio: false,
-  },
-];
+const COURSES: Course[] = [];
 
-const WEBINARS: Webinar[] = [
-  {
-    id: '1',
-    titulo: 'Novedades Q1 2026',
-    fecha: '2026-01-25',
-    hora: '11:00',
-    ponente: 'María García - Product Manager',
-    estado: 'proximo',
-  },
-  {
-    id: '2',
-    titulo: 'Estrategias de Marketing Digital',
-    fecha: '2026-01-18',
-    hora: '16:00',
-    ponente: 'Carlos López - Marketing Lead',
-    estado: 'proximo',
-  },
-  {
-    id: '3',
-    titulo: 'Mejores Prácticas de Partners',
-    fecha: '2026-01-10',
-    hora: '11:00',
-    ponente: 'Ana Martínez - Partner Success',
-    estado: 'grabado',
-  },
-];
+const WEBINARS: Webinar[] = [];
 
-const CERTIFICATIONS = [
-  {
-    id: 'basic',
-    nombre: 'Partner Certificado',
-    requisitos: ['Completar curso de Introducción', 'Aprobar examen básico'],
-    obtenida: true,
-    fecha: '2025-11-15',
-  },
-  {
-    id: 'silver',
-    nombre: 'Partner Silver',
-    requisitos: ['Partner Certificado', '10+ clientes referidos', 'Completar formación intermedia'],
-    obtenida: false,
-    progreso: 60,
-  },
-  {
-    id: 'gold',
-    nombre: 'Partner Gold',
-    requisitos: ['Partner Silver', '50+ clientes referidos', 'Completar toda la formación'],
-    obtenida: false,
-    progreso: 0,
-  },
-];
+const CERTIFICATIONS = [];
 
 export default function PartnersCapacitacionPage() {
   const [activeTab, setActiveTab] = useState('cursos');

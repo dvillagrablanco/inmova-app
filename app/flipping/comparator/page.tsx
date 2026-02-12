@@ -39,59 +39,7 @@ interface Property {
 
 export default function FlippingComparatorPage() {
   const router = useRouter();
-  const [properties] = useState<Property[]>([
-    {
-      id: '1',
-      address: 'C/ Mayor 123, 3ºA',
-      neighborhood: 'Centro',
-      price: 180000,
-      size: 85,
-      bedrooms: 2,
-      bathrooms: 1,
-      condition: 'needs_renovation',
-      estimatedRenovation: 35000,
-      estimatedSalePrice: 265000,
-      estimatedROI: 23.3,
-      daysOnMarket: 45,
-      features: ['Ascensor', 'Balcón', 'Exterior'],
-      pros: ['Ubicación céntrica', 'Estructura sólida', 'Buena luz natural'],
-      cons: ['Instalaciones antiguas', 'Cocina pequeña'],
-    },
-    {
-      id: '2',
-      address: 'Av. Constitución 45, 1ºB',
-      neighborhood: 'Ensanche',
-      price: 210000,
-      size: 95,
-      bedrooms: 3,
-      bathrooms: 2,
-      condition: 'good',
-      estimatedRenovation: 20000,
-      estimatedSalePrice: 280000,
-      estimatedROI: 21.7,
-      daysOnMarket: 20,
-      features: ['Garaje', 'Ascensor', 'Trastero'],
-      pros: ['Zona en expansión', 'Más espacio', 'Garaje incluido'],
-      cons: ['Menos céntrico', 'Competencia alta'],
-    },
-    {
-      id: '3',
-      address: 'C/ Valencia 78, Bajo',
-      neighborhood: 'Barrio Antiguo',
-      price: 150000,
-      size: 70,
-      bedrooms: 2,
-      bathrooms: 1,
-      condition: 'poor',
-      estimatedRenovation: 50000,
-      estimatedSalePrice: 240000,
-      estimatedROI: 20.0,
-      daysOnMarket: 120,
-      features: ['Patio privado', 'Alto potencial'],
-      pros: ['Precio muy bajo', 'Patio privado', 'Zona en gentrificación'],
-      cons: ['Requiere reforma integral', 'Mucho tiempo en venta'],
-    },
-  ]);
+  const [properties] = useState<Property[]>([]);
 
   const getConditionBadge = (condition: string) => {
     const config = {

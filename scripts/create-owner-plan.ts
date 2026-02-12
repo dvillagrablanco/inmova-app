@@ -2,7 +2,7 @@
  * Script para crear el Plan Owner (Gratuito, Interno)
  * Este plan es solo para empresas del dueño de la plataforma
  * No aparece en landing ni es seleccionable por usuarios externos
- * 
+ *
  * Ejecutar: npx tsx scripts/create-owner-plan.ts
  */
 
@@ -12,8 +12,9 @@ const prisma = new PrismaClient();
 
 const OWNER_PLAN = {
   nombre: 'Owner',
-  descripcion: 'Plan interno gratuito para empresas del propietario de la plataforma. Incluye todas las funcionalidades sin límites.',
-  tier: 'premium' as const, // Usa tier premium para tener todas las features
+  descripcion:
+    'Plan interno gratuito para empresas del propietario de la plataforma. Incluye todas las funcionalidades sin límites.',
+  tier: 'ENTERPRISE' as const, // Tier ENTERPRISE da acceso a TODOS los módulos
   precioMensual: 0,
   maxUsuarios: 999, // Sin límite práctico
   maxPropiedades: 9999, // Sin límite práctico
@@ -61,7 +62,7 @@ async function main() {
 
     if (existing) {
       console.log('⚠️  El plan Owner ya existe. Actualizando...');
-      
+
       const updated = await prisma.subscriptionPlan.update({
         where: { id: existing.id },
         data: OWNER_PLAN,
@@ -107,7 +108,6 @@ async function main() {
     console.log('   • No aparecerá en landing ni registro público');
     console.log('   • Solo visible desde panel admin');
     console.log('   • Asignable manualmente a empresas propias');
-
   } catch (error) {
     console.error('❌ Error:', error);
     throw error;

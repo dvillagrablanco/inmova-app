@@ -39,13 +39,7 @@ export default function RenovacionesContratosPage() {
   const [nuevaRenta, setNuevaRenta] = useState('');
   const [duracion, setDuracion] = useState('12');
 
-  const [contratos, setContratos] = useState<Contrato[]>([
-    { id: 'c1', inquilino: 'María García', propiedad: 'Edificio Centro', unidad: '3A', fechaFin: '2025-02-15', rentaActual: 950, diasRestantes: 23, estado: 'por_vencer' },
-    { id: 'c2', inquilino: 'Juan Martínez', propiedad: 'Residencial Playa', unidad: '2B', fechaFin: '2025-02-28', rentaActual: 1100, diasRestantes: 36, estado: 'por_vencer', propuestaEnviada: true, nuevaRenta: 1150 },
-    { id: 'c3', inquilino: 'Ana López', propiedad: 'Apartamentos Norte', unidad: '1C', fechaFin: '2025-03-10', rentaActual: 850, diasRestantes: 46, estado: 'activo' },
-    { id: 'c4', inquilino: 'Carlos Ruiz', propiedad: 'Edificio Centro', unidad: '5D', fechaFin: '2025-01-15', rentaActual: 1000, diasRestantes: -8, estado: 'vencido' },
-    { id: 'c5', inquilino: 'Laura Sánchez', propiedad: 'Piso Centro', unidad: '2A', fechaFin: '2026-01-01', rentaActual: 1200, diasRestantes: 343, estado: 'renovado' },
-  ]);
+  const [contratos, setContratos] = useState<Contrato[]>([]);
 
   useEffect(() => {
     if (status === 'authenticated') setLoading(false);

@@ -24,8 +24,8 @@ import {
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { Line, Bar, Pie } from 'react-chartjs-2';
-import logger, { logError } from '@/lib/logger';
 import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -111,7 +111,7 @@ export default function ContabilidadPage() {
         setExternalDocs(external);
       }
     } catch (error) {
-      logger.error('Error cargando docs externos contabilidad:', error);
+      console.error('Error cargando docs externos contabilidad:', error);
     } finally {
       setLoadingDocs(false);
     }
@@ -125,7 +125,7 @@ export default function ContabilidadPage() {
         setZucchettiStatus(data);
       }
     } catch (error) {
-      logger.error('Error al cargar estado de Zucchetti:', error);
+      console.error('Error al cargar estado de Zucchetti:', error);
     }
   };
 
@@ -137,7 +137,7 @@ export default function ContabilidadPage() {
         setContaSimpleStatus(data);
       }
     } catch (error) {
-      logger.error('Error al cargar estado de ContaSimple:', error);
+      console.error('Error al cargar estado de ContaSimple:', error);
     }
   };
 
@@ -149,7 +149,7 @@ export default function ContabilidadPage() {
         setSageStatus(data);
       }
     } catch (error) {
-      logger.error('Error al cargar estado de Sage:', error);
+      console.error('Error al cargar estado de Sage:', error);
     }
   };
 
@@ -161,7 +161,7 @@ export default function ContabilidadPage() {
         setHoldedStatus(data);
       }
     } catch (error) {
-      logger.error('Error al cargar estado de Holded:', error);
+      console.error('Error al cargar estado de Holded:', error);
     }
   };
 
@@ -173,7 +173,7 @@ export default function ContabilidadPage() {
         setA3Status(data);
       }
     } catch (error) {
-      logger.error('Error al cargar estado de A3:', error);
+      console.error('Error al cargar estado de A3:', error);
     }
   };
 
@@ -185,7 +185,7 @@ export default function ContabilidadPage() {
         setAlegraStatus(data);
       }
     } catch (error) {
-      logger.error('Error al cargar estado de Alegra:', error);
+      console.error('Error al cargar estado de Alegra:', error);
     }
   };
 
@@ -261,7 +261,7 @@ export default function ContabilidadPage() {
         setLatestProfitLoss(null);
       }
     } catch (error) {
-      logger.error('Error al cargar datos financieros:', error);
+      console.error('Error al cargar datos financieros:', error);
       toast.error('Error al cargar datos financieros');
     } finally {
       setLoading(false);
@@ -298,7 +298,7 @@ export default function ContabilidadPage() {
       toast.success(`Importados ${data.imported || 0} movimientos`);
       await loadFinancialData();
     } catch (error: any) {
-      logger.error('Error importando contabilidad:', error);
+      console.error('Error importando contabilidad:', error);
       toast.error(error?.message || 'Error al importar contabilidad');
     } finally {
       setImporting(false);
@@ -334,7 +334,7 @@ export default function ContabilidadPage() {
         toast.error('Error al sincronizar con Zucchetti');
       }
     } catch (error) {
-      logger.error('Error al sincronizar con Zucchetti:', error);
+      console.error('Error al sincronizar con Zucchetti:', error);
       toast.error('Error al sincronizar con Zucchetti');
     } finally {
       setLoading(false);
@@ -359,7 +359,7 @@ export default function ContabilidadPage() {
         { duration: 5000 }
       );
     } catch (error) {
-      logger.error('Error:', error);
+      console.error('Error:', error);
       toast.error('Error al sincronizar clientes');
     } finally {
       setLoading(false);
@@ -383,7 +383,7 @@ export default function ContabilidadPage() {
         duration: 5000,
       });
     } catch (error) {
-      logger.error('Error:', error);
+      console.error('Error:', error);
       toast.error('Error al crear facturas');
     } finally {
       setLoading(false);
@@ -407,7 +407,7 @@ export default function ContabilidadPage() {
         duration: 5000,
       });
     } catch (error) {
-      logger.error('Error:', error);
+      console.error('Error:', error);
       toast.error('Error al registrar pagos');
     } finally {
       setLoading(false);
@@ -431,7 +431,7 @@ export default function ContabilidadPage() {
       const data = await res.json();
       toast.success(data.message || 'Clientes sincronizados exitosamente');
     } catch (error) {
-      logger.error('Error:', error);
+      console.error('Error:', error);
       toast.error(`Error al sincronizar clientes con ${system.toUpperCase()}`);
     } finally {
       setLoading(false);
@@ -454,7 +454,7 @@ export default function ContabilidadPage() {
       const data = await res.json();
       toast.success(data.message || 'Facturas creadas exitosamente');
     } catch (error) {
-      logger.error('Error:', error);
+      console.error('Error:', error);
       toast.error(`Error al crear facturas en ${system.toUpperCase()}`);
     } finally {
       setLoading(false);
@@ -477,7 +477,7 @@ export default function ContabilidadPage() {
       const data = await res.json();
       toast.success(data.message || 'Pagos registrados exitosamente');
     } catch (error) {
-      logger.error('Error:', error);
+      console.error('Error:', error);
       toast.error(`Error al registrar pagos en ${system.toUpperCase()}`);
     } finally {
       setLoading(false);
@@ -502,7 +502,8 @@ export default function ContabilidadPage() {
   }
 
   return (
-    <div className="ml-0 lg:ml-64 container mx-auto p-6 space-y-6">
+    <AuthenticatedLayout>
+    <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Dashboard Financiero</h1>
@@ -1315,5 +1316,6 @@ export default function ContabilidadPage() {
         position="bottom-right"
       />
     </div>
+    </AuthenticatedLayout>
   );
 }

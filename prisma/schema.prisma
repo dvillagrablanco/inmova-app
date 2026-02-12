@@ -5704,6 +5704,14 @@ model SubscriptionPlan {
 
   // ═══════════════════════════════════════════════════════════════
 
+  // Stripe - Sincronización automática
+  stripeProductId      String? // ID del producto en Stripe
+  stripePriceIdMonthly String? // ID del precio mensual en Stripe
+  stripePriceIdAnnual  String? // ID del precio anual en Stripe
+
+  // Precio anual (descuento 2 meses gratis)
+  precioAnual Float? // Si null, se calcula como precioMensual * 10
+
   activo    Boolean  @default(true)
   esInterno Boolean  @default(false) // Planes internos no visibles en landing ni seleccionables por usuarios externos
   createdAt DateTime @default(now())

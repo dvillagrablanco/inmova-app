@@ -67,50 +67,7 @@ export default function LogsPage() {
     try {
       // En una implementación real, esto llamaría a una API
       // Por ahora, generamos logs de ejemplo
-      const sampleLogs: LogEntry[] = [
-        {
-          id: '1',
-          timestamp: new Date().toISOString(),
-          level: 'info',
-          source: 'api',
-          message: 'Usuario inició sesión correctamente',
-          userId: 'user_123',
-          details: { ip: '192.168.1.1', browser: 'Chrome' },
-        },
-        {
-          id: '2',
-          timestamp: new Date(Date.now() - 5 * 60000).toISOString(),
-          level: 'warn',
-          source: 'payment',
-          message: 'Intento de pago con tarjeta rechazada',
-          companyId: 'company_456',
-          details: { cardLast4: '4242', errorCode: 'card_declined' },
-        },
-        {
-          id: '3',
-          timestamp: new Date(Date.now() - 15 * 60000).toISOString(),
-          level: 'error',
-          source: 'email',
-          message: 'Error al enviar notificación por email',
-          details: { recipient: 'user@example.com', error: 'SMTP connection failed' },
-        },
-        {
-          id: '4',
-          timestamp: new Date(Date.now() - 30 * 60000).toISOString(),
-          level: 'info',
-          source: 'cron',
-          message: 'Job de limpieza de sesiones completado',
-          details: { sessionsDeleted: 145, duration: '2.3s' },
-        },
-        {
-          id: '5',
-          timestamp: new Date(Date.now() - 60 * 60000).toISOString(),
-          level: 'debug',
-          source: 'api',
-          message: 'Query de búsqueda ejecutada',
-          details: { query: 'propiedades', results: 42, time: '0.15s' },
-        },
-      ];
+      const sampleLogs: LogEntry[] = [];
 
       // Aplicar filtros
       let filteredLogs = sampleLogs;
