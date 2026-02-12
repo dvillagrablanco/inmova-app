@@ -89,8 +89,25 @@ const nextConfig = {
     return `${Date.now()}`;
   },
 
-  // Cache headers for static assets
+  // Cache headers for static assets + Security headers
   async headers() {
+    // CSP (Content Security Policy) - auditoria V2 2026-02-11
+    const cspDirectives = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://js.stripe.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "img-src 'self' data: blob: https: http:",
+      "font-src 'self' data: https://fonts.gstatic.com",
+      "connect-src 'self' https://api.stripe.com https://*.amazonaws.com https://*.inmovaapp.com",
+      "media-src 'self' data: blob:",
+      "object-src 'none'",
+      "frame-src 'self' https://js.stripe.com",
+      "base-uri 'self'",
+      "form-action 'self'",
+      "frame-ancestors 'self'",
+      process.env.NODE_ENV === 'production' ? 'upgrade-insecure-requests' : '',
+    ].filter(Boolean).join('; ');
+
     return [
       // Landing pages - revalidar siempre para ver cambios rápido
       {
@@ -136,6 +153,16 @@ const nextConfig = {
           {
             key: 'Cache-Control',
             value: 'no-store, must-revalidate',
+          },
+        ],
+      },
+      // CSP header global (auditoria V2)
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: cspDirectives,
           },
         ],
       },
