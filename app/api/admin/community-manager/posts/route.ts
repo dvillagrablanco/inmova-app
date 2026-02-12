@@ -102,9 +102,6 @@ const getCompanyContext = async (
   if (role && companyId) {
     return { role, companyId };
   }
-
-  const { getPrismaClient } = await import('@/lib/db');
-  const prisma = getPrismaClient();
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { role: true, companyId: true },
@@ -143,9 +140,6 @@ export async function GET(request: NextRequest) {
     if (!companyId) {
       return NextResponse.json({ error: 'CompanyId no disponible' }, { status: 400 });
     }
-
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
 
     const posts = await prisma.socialMediaPost.findMany({
       where: { companyId },
@@ -214,9 +208,6 @@ export async function POST(request: NextRequest) {
     const scheduledAt = scheduledDate ? new Date(scheduledDate) : new Date();
 
     const requestedPlatforms = platforms.map((platform) => PLATFORM_MAP[platform]);
-
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
 
     const accounts = await prisma.socialMediaAccount.findMany({
       where: {

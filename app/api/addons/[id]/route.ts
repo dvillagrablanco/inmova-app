@@ -18,9 +18,6 @@ export async function GET(
   try {
     const { id } = params;
 
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
-
     const addon = await prisma.addOn.findUnique({
       where: { id },
       include: {
@@ -101,9 +98,6 @@ export async function PUT(
     });
 
     const validated = schema.parse(body);
-
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
 
     // Obtener add-on existente
     const existing = await prisma.addOn.findUnique({
@@ -257,9 +251,6 @@ export async function DELETE(
     }
 
     const { id } = params;
-
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
 
     // Verificar que el add-on existe
     const addon = await prisma.addOn.findUnique({

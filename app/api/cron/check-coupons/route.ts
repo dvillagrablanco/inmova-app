@@ -88,9 +88,6 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
-
     const now = new Date();
     let alertasEnviadas = 0;
     const resultados: any[] = [];

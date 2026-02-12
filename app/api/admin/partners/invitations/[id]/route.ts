@@ -25,9 +25,6 @@ export async function GET(
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
-
     const invitation = await prisma.partnerInvitation.findUnique({
       where: { id: params.id },
       include: {
@@ -86,8 +83,6 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
 
     const invitation = await prisma.partnerInvitation.findUnique({
       where: { id: params.id },
@@ -140,9 +135,6 @@ export async function DELETE(
     if (!session?.user || sessionUser?.role !== 'super_admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
-
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
 
     const invitation = await prisma.partnerInvitation.findUnique({
       where: { id: params.id },

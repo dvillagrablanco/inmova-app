@@ -19,8 +19,6 @@ export const runtime = 'nodejs';
 export async function GET(request: NextRequest) {
   try {
     // Lazy load Prisma
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
 
     // Intentar obtener de BD
     let planesFromDB: any[] = [];

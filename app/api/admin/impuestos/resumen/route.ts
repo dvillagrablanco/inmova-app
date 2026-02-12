@@ -112,9 +112,6 @@ const getCompanyContext = async (
   if (role && companyId) {
     return { role, companyId };
   }
-
-  const { getPrismaClient } = await import('@/lib/db');
-  const prisma = getPrismaClient();
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { role: true, companyId: true },
@@ -162,9 +159,6 @@ export async function GET(request: NextRequest) {
       ejercicio: searchParams.get('ejercicio') ?? `${new Date().getFullYear()}`,
       tipoPersona: searchParams.get('tipoPersona') ?? 'fisica',
     });
-
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
 
     const integration = await prisma.integrationConfig.findUnique({
       where: { companyId_provider: { companyId, provider: PROVIDER } },
@@ -440,9 +434,6 @@ export async function POST(request: NextRequest) {
       createdAt: now.toISOString(),
       createdBy: sessionUser.id,
     };
-
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
     const integration = await prisma.integrationConfig.findUnique({
       where: { companyId_provider: { companyId, provider: PROVIDER } },
       select: { credentials: true, settings: true },

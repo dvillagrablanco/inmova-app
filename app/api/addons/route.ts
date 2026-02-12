@@ -24,8 +24,6 @@ export async function GET(request: NextRequest) {
     const vertical = searchParams.get('vertical') || 'all'; // inmova, ewoorker, all
 
     // Lazy load Prisma
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
 
     // Construir filtros
     const where: any = { activo: true };
@@ -156,8 +154,6 @@ export async function POST(request: NextRequest) {
     const validated = schema.parse(body);
 
     // Lazy load Prisma
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
 
     // Crear add-on
     const addon = await prisma.addOn.create({

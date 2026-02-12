@@ -41,9 +41,6 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
-
     const accounts = await prisma.socialMediaAccount.findMany({
       where: { companyId },
       orderBy: { createdAt: 'desc' },
@@ -139,9 +136,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
 
     const existing = await prisma.socialMediaAccount.findFirst({
       where: {

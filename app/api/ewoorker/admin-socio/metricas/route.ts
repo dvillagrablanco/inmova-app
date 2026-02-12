@@ -43,9 +43,6 @@ export async function GET(request: NextRequest) {
 
     const userId = session.user.id;
 
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
-
     // Verificar si es el socio fundador o tiene rol autorizado
     const user = await prisma.user.findUnique({
       where: { id: userId },

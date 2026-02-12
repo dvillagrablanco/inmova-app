@@ -36,9 +36,6 @@ export async function GET(request: NextRequest) {
     const partnerId = searchParams.get('partnerId');
     const periodo = searchParams.get('periodo');
 
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
-
     const where: any = {};
     if (status && status !== 'all') {
       where.estado = status;
@@ -157,9 +154,6 @@ export async function PUT(request: NextRequest) {
     });
 
     const validated = schema.parse(body);
-
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
 
     const commission = await prisma.commission.findUnique({
       where: { id: validated.id },

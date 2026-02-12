@@ -69,9 +69,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
-
     // Contar planes y add-ons sincronizados
     const planesTotal = await prisma.subscriptionPlan.count({ where: { activo: true } });
     const addonsTotal = await prisma.addOn.count({ where: { activo: true } });

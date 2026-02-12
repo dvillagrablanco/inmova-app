@@ -20,9 +20,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
-
     // Verificar Stripe está configurado
     const { getStripe } = await import('@/lib/stripe-config');
     const stripe = getStripe();
@@ -170,9 +167,6 @@ export async function GET(request: NextRequest) {
     if (!session?.user || !['super_admin', 'administrador'].includes(session.user.role)) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
-
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
 
     // Obtener todos los add-ons
     const addons = await prisma.addOn.findMany({

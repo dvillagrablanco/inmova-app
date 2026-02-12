@@ -25,8 +25,6 @@ export async function GET(request: NextRequest) {
     }
 
     // Lazy load Prisma
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
 
     const planes = await prisma.ewoorkerPlan.findMany({
       orderBy: { orden: 'asc' },
@@ -80,8 +78,6 @@ export async function POST(request: NextRequest) {
     const validated = schema.parse(body);
 
     // Lazy load Prisma
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
 
     // Verificar que el código no existe
     const existing = await prisma.ewoorkerPlan.findUnique({

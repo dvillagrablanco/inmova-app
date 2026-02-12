@@ -25,9 +25,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
-
     // Obtener empresa del usuario
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
@@ -135,9 +132,6 @@ export async function POST(request: NextRequest) {
       interval: z.enum(['monthly', 'annual']).default('monthly'),
     });
     const validated = schema.parse(body);
-
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
     const stripeService = await import('@/lib/stripe-subscription-service');
 
     // Obtener usuario y empresa
@@ -311,9 +305,6 @@ export async function DELETE(request: NextRequest) {
         { status: 400 }
       );
     }
-
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
     const stripeService = await import('@/lib/stripe-subscription-service');
 
     // Obtener usuario y empresa

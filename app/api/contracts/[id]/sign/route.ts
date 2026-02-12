@@ -40,9 +40,6 @@ const getCompanyContext = async (
   if (companyId) {
     return { role, companyId };
   }
-
-  const { getPrismaClient } = await import('@/lib/db');
-  const prisma = getPrismaClient();
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { role: true, companyId: true },
@@ -93,9 +90,6 @@ export async function POST(
         { status: 401 }
       );
     }
-
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
 
     // 2. Obtener contrato
     const contract = await prisma.contract.findUnique({

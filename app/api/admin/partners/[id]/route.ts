@@ -21,9 +21,6 @@ export async function GET(
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
-
     const partner = await prisma.partner.findUnique({
       where: { id: params.id },
       include: {
@@ -128,9 +125,6 @@ export async function PUT(
 
     const validated = schema.parse(body);
 
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
-
     // Verificar que existe
     const existing = await prisma.partner.findUnique({
       where: { id: params.id },
@@ -192,9 +186,6 @@ export async function DELETE(
     if (!session?.user || !['super_admin'].includes(session.user.role)) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
-
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
 
     // Verificar que existe
     const existing = await prisma.partner.findUnique({

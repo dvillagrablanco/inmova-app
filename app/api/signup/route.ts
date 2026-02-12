@@ -72,8 +72,6 @@ async function handleSignup(req: NextRequest) {
     } = parseResult.data;
 
     // Lazy load Prisma
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
 
     const existingUser = await prisma.user.findUnique({
       where: { email },

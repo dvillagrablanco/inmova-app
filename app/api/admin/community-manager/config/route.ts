@@ -48,9 +48,6 @@ const getCompanyContext = async (
   if (role && companyId) {
     return { role, companyId };
   }
-
-  const { getPrismaClient } = await import('@/lib/db');
-  const prisma = getPrismaClient();
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { role: true, companyId: true },
@@ -100,9 +97,6 @@ export async function GET(request: NextRequest) {
     if (!companyId) {
       return NextResponse.json({ error: 'CompanyId no disponible' }, { status: 400 });
     }
-
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
     const integration = await prisma.integrationConfig.findUnique({
       where: { companyId_provider: { companyId, provider: CONFIG_PROVIDER } },
       select: { settings: true },
@@ -165,9 +159,6 @@ export async function PUT(request: NextRequest) {
 
     const parsed = configSchema.partial().parse(config);
     const nextConfig = { ...DEFAULT_CONFIG, ...parsed };
-
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
     const integration = await prisma.integrationConfig.findUnique({
       where: { companyId_provider: { companyId, provider: CONFIG_PROVIDER } },
       select: { credentials: true, settings: true },

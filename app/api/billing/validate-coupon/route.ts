@@ -34,9 +34,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validated = validateSchema.parse(body);
 
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
-
     // Buscar cupón
     const coupon = await prisma.promoCoupon.findUnique({
       where: { codigo: validated.code.toUpperCase() },

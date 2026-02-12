@@ -38,8 +38,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Lazy load Prisma
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
 
     // Verificar que la empresa existe
     const company = await prisma.company.findUnique({

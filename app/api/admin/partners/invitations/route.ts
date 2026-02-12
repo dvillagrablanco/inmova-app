@@ -33,9 +33,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
-
     const [invitations, statusCounts] = await prisma.$transaction([
       prisma.partnerInvitation.findMany({
         include: {
@@ -130,9 +127,6 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const validated = createInvitationSchema.parse(body);
-
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
 
     const partnerIdFromBody = validated.partnerId?.trim();
     const defaultPartnerId = process.env.DEFAULT_PARTNER_ID;

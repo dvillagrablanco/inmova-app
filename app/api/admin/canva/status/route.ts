@@ -33,9 +33,6 @@ const getCompanyContext = async (
   if (role && companyId) {
     return { role, companyId };
   }
-
-  const { getPrismaClient } = await import('@/lib/db');
-  const prisma = getPrismaClient();
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { role: true, companyId: true },
@@ -86,9 +83,6 @@ export async function GET(request: NextRequest) {
       canvaClientId.length > 10 && 
       !canvaClientId.includes('placeholder')
     );
-
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
     const integration = await prisma.integrationConfig.findUnique({
       where: { companyId_provider: { companyId, provider: 'canva' } },
       select: { credentials: true },

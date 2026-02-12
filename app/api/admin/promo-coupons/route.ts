@@ -51,9 +51,6 @@ export async function GET(request: NextRequest) {
     const estado = searchParams.get('estado');
     const activo = searchParams.get('activo');
 
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
-
     const allowedStatuses = ['DRAFT', 'ACTIVE', 'PAUSED', 'EXPIRED', 'EXHAUSTED'] as const;
     const estadoFiltro = allowedStatuses.includes(estado as (typeof allowedStatuses)[number])
       ? (estado as (typeof allowedStatuses)[number])
@@ -125,9 +122,6 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const validated = createCouponSchema.parse(body);
-
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
 
     // Verificar que no exista otro cupón con el mismo código
     const existing = await prisma.promoCoupon.findUnique({

@@ -28,9 +28,6 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status');
     const tipo = searchParams.get('tipo');
 
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
-
     const where: any = {};
     if (status && status !== 'all') {
       where.estado = status;
@@ -133,9 +130,6 @@ export async function POST(request: NextRequest) {
     });
 
     const validated = schema.parse(body);
-
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
 
     // Verificar que no existe un partner con el mismo CIF o email
     const existing = await prisma.partner.findFirst({

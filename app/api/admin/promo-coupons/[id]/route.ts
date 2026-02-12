@@ -44,9 +44,6 @@ export async function GET(
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
-
     const coupon = await prisma.promoCoupon.findUnique({
       where: { id: params.id },
       include: {
@@ -92,9 +89,6 @@ export async function PUT(
 
     const body = await request.json();
     const validated = updateCouponSchema.parse(body);
-
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
 
     // Verificar que existe
     const existing = await prisma.promoCoupon.findUnique({
@@ -170,9 +164,6 @@ export async function DELETE(
     if (!session?.user || session.user.role !== 'super_admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
-
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
 
     // Verificar que existe y no tiene usos
     const existing = await prisma.promoCoupon.findUnique({

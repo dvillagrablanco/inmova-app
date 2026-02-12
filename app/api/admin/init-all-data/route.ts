@@ -549,8 +549,6 @@ export async function GET(request: NextRequest) {
     }
 
     // 2. Lazy load Prisma
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
 
     const results = {
       plans: { created: 0, updated: 0 },
