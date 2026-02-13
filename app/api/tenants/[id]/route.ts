@@ -29,6 +29,12 @@ const tenantUpdateSchema = z.object({
     .datetime()
     .or(z.string().regex(/^\d{4}-\d{2}-\d{2}/))
     .optional(),
+  nacionalidad: z.string().optional(),
+  estadoCivil: z.enum(['soltero', 'casado', 'divorciado', 'viudo']).optional(),
+  situacionLaboral: z.enum(['empleado', 'autonomo', 'estudiante', 'jubilado', 'desempleado']).optional(),
+  empresa: z.string().optional(),
+  puesto: z.string().optional(),
+  ingresosMensuales: z.number().nonnegative().optional(),
   scoring: z
     .union([z.string(), z.number()])
     .optional()
@@ -36,7 +42,7 @@ const tenantUpdateSchema = z.object({
     .refine((val) => val === undefined || (val >= 0 && val <= 100), {
       message: 'El scoring debe estar entre 0 y 100',
     }),
-  nivelRiesgo: z.enum(['bajo', 'medio', 'alto']).optional(),
+  nivelRiesgo: z.enum(['bajo', 'medio', 'alto', 'critico']).optional(),
   notas: z.string().optional(),
 });
 
@@ -103,8 +109,11 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       return NextResponse.json({ error: 'Datos inválidos', details: errors }, { status: 400 });
     }
 
-    const { nombreCompleto, dni, email, telefono, fechaNacimiento, scoring, nivelRiesgo, notas } =
-      validationResult.data;
+    const {
+      nombreCompleto, dni, email, telefono, fechaNacimiento,
+      nacionalidad, estadoCivil, situacionLaboral, empresa, puesto, ingresosMensuales,
+      scoring, nivelRiesgo, notas,
+    } = validationResult.data;
 
     const tenant = await prisma.tenant.update({
       where: { id: params.id },
@@ -114,6 +123,12 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         email,
         telefono,
         fechaNacimiento: fechaNacimiento ? new Date(fechaNacimiento) : undefined,
+        nacionalidad,
+        estadoCivil,
+        situacionLaboral,
+        empresa,
+        puesto,
+        ingresosMensuales,
         scoring,
         nivelRiesgo,
         notas,
