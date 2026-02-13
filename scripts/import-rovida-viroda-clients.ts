@@ -98,31 +98,40 @@ function parseUnitFromConcepto(concepto: string, operacion: string): UnitMatch |
   if (!concepto) return null;
   const c = concepto;
 
-  // Garaje Espronceda 32
-  let m = c.match(/Garaje C\/Espronceda 32.*Pt:(\d+)/i);
+  // === ROVIDA BUILDINGS ===
+
+  // Garaje Espronceda 32 (Pt:01, Pt:M18, etc.)
+  let m = c.match(/Garaje C\/Espronceda 32.*Pt:(?:M?)(\d+)/i);
   if (m) return { edificioPattern: 'Espronceda 32', unidad: `Plaza ${m[1]}`, tipo: 'garaje' };
 
-  // Garaje Hernández de Tejada 6
-  m = c.match(/Garaje C\/Hernández de Tejada 6,\s*(-?\d+)\s+(\d+)/i);
-  if (m) return { edificioPattern: 'Hernández de Tejada 6', unidad: `Plaza ${m[2].padStart(2, '0')}`, tipo: 'garaje' };
+  // Garaje Hernández de Tejada 6 (formatos: -1 02, -2 05, -1 04, -2 06, -2 07, -2 16, -2 28)
+  m = c.match(/Garaje C\/Hernández de Tejada 6,\s*-?\d+\s+(\d+)/i);
+  if (m) return { edificioPattern: 'Hernández de Tejada 6', unidad: `Plaza ${m[1].padStart(2, '0')}`, tipo: 'garaje' };
 
-  // Garaje Menéndez Pelayo 17
-  m = c.match(/Garaje C\/M[dé](?:n|ñ)ez Pelayo 17.*?(\d+)/i);
+  // Garaje Menéndez Pelayo 17 (formatos: -1, 18 / -2, 76)
+  m = c.match(/Garaje C\/M[dé](?:n|ñ)?ez Pelayo 17.*?(\d+)\s+(?:Palencia)?/i);
   if (m) return { edificioPattern: 'Menéndez Pelayo 17', unidad: `Plaza ${m[1]}`, tipo: 'garaje' };
 
   // Garaje Constitución 5
   m = c.match(/Garaje C\/Constitución 5.*?(\d+)/i);
   if (m) return { edificioPattern: 'Constitución 5', unidad: `Plaza ${m[1]}`, tipo: 'garaje' };
 
+  // Generic "Renta garaje según contrato" - use operation field
+  if (/garaje según contrato/i.test(c)) {
+    if (operacion.includes('Espronceda')) return { edificioPattern: 'Espronceda 32', unidad: 'Plaza', tipo: 'garaje' };
+    if (operacion.includes('Hernández')) return { edificioPattern: 'Hernández de Tejada 6', unidad: 'Plaza', tipo: 'garaje' };
+    return null;
+  }
+
   // Inmueble Constitución 8 / Módulos
   m = c.match(/Constitución 8.*?Mod\.?\s*([\d\-]+)/i);
   if (m) return { edificioPattern: 'Constitución 8', unidad: `Módulo ${m[1]}`, tipo: 'local' };
 
   // Local Barquillo 30
-  m = c.match(/Local.*C\/Barquillo 30/i);
+  m = c.match(/Local.*(?:Comercial\s+)?C\/Barquillo 30/i);
   if (m) return { edificioPattern: 'Barquillo 30', unidad: 'Local', tipo: 'local' };
 
-  // Local Reina 15 (grande/pequeño o nº finca)
+  // Local Reina 15 (grande/pequeño o nº finca) - ROVIDA locales comerciales
   m = c.match(/Local.*(?:19254|13182|grande).*Reina 15/i);
   if (m) return { edificioPattern: 'Reina 15', unidad: 'Local 1 (Grande)', tipo: 'local' };
   m = c.match(/Local.*(?:19256|13184|peque).*Reina 15/i);
@@ -133,16 +142,26 @@ function parseUnitFromConcepto(concepto: string, operacion: string): UnitMatch |
   if (m) return { edificioPattern: 'Piamonte 23', unidad: 'Edificio completo', tipo: 'local' };
 
   // Nave Cuba
-  m = c.match(/(?:Nave|Cuba)\s*(?:,\s*)?(\d+)?/i);
-  if (c.includes('Cuba')) return { edificioPattern: 'Cuba', unidad: 'Nave 50', tipo: 'nave_industrial' };
+  if (c.includes('Cuba')) {
+    m = c.match(/Cuba.*?(\d+)/i);
+    const naveNum = m ? m[1] : '50';
+    return { edificioPattern: 'Cuba', unidad: `Nave ${naveNum}`, tipo: 'nave_industrial' };
+  }
 
-  // Local Menéndez Pelayo 15
-  m = c.match(/Local.*M[eé]n[eé]ndez Pelayo.*15/i) || c.match(/Mdez Pelayo.*15/i);
-  if (m) return { edificioPattern: 'Menéndez Pelayo 15', unidad: 'Local y Sótano', tipo: 'local' };
+  // Local Menéndez Pelayo 15 (ROVIDA - local comercial)
+  if ((/Local/i.test(c) || /sótano/i.test(c)) && (/M[dé](?:n|ñ)?ez Pelayo.*15/i.test(c) || /Mdez Pelayo.*15/i.test(c))) {
+    return { edificioPattern: 'Menéndez Pelayo 15', unidad: 'Local y Sótano', tipo: 'local' };
+  }
 
-  // Local Prado 10
-  m = c.match(/Prado.*10/i);
-  if (m) return { edificioPattern: 'Prado 10', unidad: 'Bajo y Sótano', tipo: 'local' };
+  // Local Prado 10 / Alquiler del local C/Prado 10
+  if (/Prado.*10/i.test(c)) {
+    return { edificioPattern: 'Prado 10', unidad: 'Bajo y Sótano', tipo: 'local' };
+  }
+
+  // Oficinas Av Europa 34 (múltiples módulos)
+  if (c.includes('Europa 34') || c.includes('Europa, 34') || operacion.includes('Europa')) {
+    return { edificioPattern: 'Europa 34', unidad: 'Bl.B 1ºIz', tipo: 'oficina' };
+  }
 
   // Gemelos
   m = c.match(/Gemelos?\s*(XX|20|II|IV|2|4)/i);
@@ -153,62 +172,69 @@ function parseUnitFromConcepto(concepto: string, operacion: string): UnitMatch |
     if (gemType === 'IV' || gemType === '4') return { edificioPattern: 'Gemelos IV', unidad: 'Apto', tipo: 'vivienda' };
   }
 
-  // === VIRODA BUILDINGS ===
-
-  // Manuel Silvela 5
-  m = c.match(/Manuel Silvela 5.*?(\d+º?\s*[A-C]|LOCAL|Bajo|ÁTICO)/i);
-  if (m) {
-    let unidad = m[1].trim().toUpperCase();
-    // Normalize: "1 A" -> "1º A", "LOCAL" -> "LOCAL", "6 B" -> "6º B"
-    unidad = unidad.replace(/(\d+)\s*([A-C])/i, '$1º $2');
-    if (unidad === 'BAJO') unidad = 'BAJO';
-    if (unidad === 'ATICO' || unidad === 'ÁTICO') unidad = 'ÁTICO';
-    return { edificioPattern: 'Manuel Silvela 5', unidad, tipo: unidad === 'LOCAL' ? 'local' : 'vivienda' };
-  }
-  // Simpler match for Manuel Silvela
-  if (c.includes('Manuel Silvela 5') || c.includes('Manuel Silvela, 5')) {
-    m = c.match(/(\d+)º?\s*([A-C])/i);
-    if (m) return { edificioPattern: 'Manuel Silvela 5', unidad: `${m[1]}º ${m[2].toUpperCase()}`, tipo: 'vivienda' };
-    if (/LOCAL/i.test(c)) return { edificioPattern: 'Manuel Silvela 5', unidad: 'LOCAL', tipo: 'local' };
-    if (/Bajo/i.test(c)) return { edificioPattern: 'Manuel Silvela 5', unidad: 'BAJO', tipo: 'vivienda' };
-  }
-
-  // Hernández de Tejada 6 (VIRODA - viviendas, not garajes)
-  m = c.match(/Hernández de Tejada 6.*?(\d+)º?\s*([A-C])/i);
-  if (m && !c.includes('Garaje')) return { edificioPattern: 'Hernández de Tejada 6', unidad: `${m[1]}º ${m[2].toUpperCase()}`, tipo: 'vivienda' };
-
-  // Candelaria Mora 12-14
-  m = c.match(/Candelaria Mora.*?(\d+)º?\s*([A-E])/i);
-  if (m) return { edificioPattern: 'Candelaria Mora', unidad: `${m[1]}º ${m[2].toUpperCase()}`, tipo: 'vivienda' };
-  if (c.includes('Candelaria Mora') && /Edif/i.test(c)) return { edificioPattern: 'Candelaria Mora', unidad: 'Edificio', tipo: 'vivienda' };
-
-  // Reina 15 (VIRODA - viviendas)
-  m = c.match(/Reina 15.*?(\d+)º?\s*([A-D])/i);
-  if (m && !c.includes('Local')) return { edificioPattern: 'Reina 15', unidad: `${m[1]}º ${m[2].toUpperCase()}`, tipo: 'vivienda' };
-
-  // Menéndez Pelayo 15 (VIRODA - viviendas)
-  m = c.match(/Men[eé](?:n|ñ)dez Pelayo 15.*?(\d+)º?(?:D(?:cha)?|I(?:zq)?|[A-D]|[Áá]tico)/i);
-  if (m && !c.includes('Local') && !c.includes('Garaje')) {
-    const piso = m[1];
-    if (/[Áá]tico/i.test(c)) return { edificioPattern: 'Menéndez Pelayo', unidad: 'Ático', tipo: 'vivienda' };
-    if (/Dcha/i.test(c) || /D$/i.test(m[0])) return { edificioPattern: 'Menéndez Pelayo', unidad: `${piso}º Dcha`, tipo: 'vivienda' };
-    if (/Izq/i.test(c)) return { edificioPattern: 'Menéndez Pelayo', unidad: `${piso}º Izq`, tipo: 'vivienda' };
-    return { edificioPattern: 'Menéndez Pelayo', unidad: `${piso}º A`, tipo: 'vivienda' };
-  }
-  if (c.includes('Menédez Pelayo 15') || c.includes('Menéndez Pelayo 15')) {
-    if (/[Áá]tico/i.test(c)) return { edificioPattern: 'Menéndez Pelayo', unidad: 'Ático', tipo: 'vivienda' };
-    m = c.match(/(\d+)º?D/i);
-    if (m) return { edificioPattern: 'Menéndez Pelayo', unidad: `${m[1]}º Dcha`, tipo: 'vivienda' };
-  }
-
-  // Oficinas Av Europa 34
-  if (c.includes('Europa') || operacion.includes('Europa')) {
-    return { edificioPattern: 'Europa 34', unidad: 'Bl.B 1ºIz', tipo: 'oficina' };
-  }
-
   // Naves Metal/Argales
   if (c.includes('Metal') || c.includes('Argales')) {
     return { edificioPattern: 'Metal 4', unidad: 'Nave Principal', tipo: 'nave_industrial' };
+  }
+
+  // === VIRODA BUILDINGS ===
+
+  // Manuel Silvela 5
+  if (c.includes('Manuel Silvela 5') || c.includes('Manuel Silvela, 5')) {
+    if (/LOCAL/i.test(c) || /Local\s*-/i.test(c)) return { edificioPattern: 'Manuel Silvela 5', unidad: 'LOCAL', tipo: 'local' };
+    if (/Bajo/i.test(c)) return { edificioPattern: 'Manuel Silvela 5', unidad: 'BAJO', tipo: 'vivienda' };
+    if (/[Áá]tico/i.test(c)) return { edificioPattern: 'Manuel Silvela 5', unidad: 'ÁTICO', tipo: 'vivienda' };
+    m = c.match(/(\d+)º?\s*([A-C])/i);
+    if (m) return { edificioPattern: 'Manuel Silvela 5', unidad: `${m[1]}º ${m[2].toUpperCase()}`, tipo: 'vivienda' };
+    // "6ºC C/Manuel Silvela, 5" format (from pendiente facturar)
+    m = c.match(/(\d+)º([A-C])\s+C\/Manuel/i);
+    if (m) return { edificioPattern: 'Manuel Silvela 5', unidad: `${m[1]}º ${m[2].toUpperCase()}`, tipo: 'vivienda' };
+  }
+
+  // Hernández de Tejada 6 (VIRODA - viviendas, NOT garajes)
+  // Note: "C/ Hernández de Tejada 6," with comma followed by floor-letter = vivienda
+  // "Garaje C/Hernández de Tejada 6," = garaje (handled above)
+  if ((c.includes('Hernández de Tejada 6') || c.includes('Hernandez de Tejada 6')) && !c.includes('Garaje')) {
+    m = c.match(/(\d+)º?\s*([A-C])/i);
+    if (m) return { edificioPattern: 'Hernández de Tejada 6', unidad: `${m[1]}º ${m[2].toUpperCase()}`, tipo: 'vivienda' };
+    // "4º A + Plaza de Garaje" or "4º A + Plaza de garaje"
+    if (/Plaza de [Gg]araje/i.test(c)) {
+      m = c.match(/(\d+)º?\s*([A-C])/i);
+      if (m) return { edificioPattern: 'Hernández de Tejada 6', unidad: `${m[1]}º ${m[2].toUpperCase()}`, tipo: 'vivienda' };
+    }
+  }
+
+  // Candelaria Mora 12-14
+  if (c.includes('Candelaria Mora')) {
+    if (/Antena/i.test(c) || /Edif/i.test(c)) return { edificioPattern: 'Candelaria Mora', unidad: 'Edificio', tipo: 'vivienda' };
+    m = c.match(/(\d+)º?\s*([A-E])/i);
+    if (m) return { edificioPattern: 'Candelaria Mora', unidad: `${m[1]}º ${m[2].toUpperCase()}`, tipo: 'vivienda' };
+  }
+
+  // Reina 15 (VIRODA - viviendas) - handles both "Reina 15" and "Reina, 15"
+  if ((c.includes('Reina 15') || c.includes('Reina, 15')) && !c.includes('Local')) {
+    m = c.match(/(\d+)º?\s*([A-D])/i);
+    if (m) return { edificioPattern: 'Reina 15', unidad: `${m[1]}º ${m[2].toUpperCase()}`, tipo: 'vivienda' };
+  }
+
+  // Menéndez Pelayo 15 (VIRODA - viviendas) - handles Menédez/Menéndez typos
+  if ((/Men[eé](?:n|ñ)?dez Pelayo 15/i.test(c) || /Mdez Pelayo.*15/i.test(c)) && !c.includes('Local') && !c.includes('Garaje')) {
+    if (/[Áá]tico/i.test(c)) return { edificioPattern: 'Menéndez Pelayo', unidad: 'Ático', tipo: 'vivienda' };
+    m = c.match(/(\d+)º?D(?:cha)?/i);
+    if (m) return { edificioPattern: 'Menéndez Pelayo', unidad: `${m[1]}º Dcha`, tipo: 'vivienda' };
+    m = c.match(/(\d+)º?I(?:zq)?/i);
+    if (m) return { edificioPattern: 'Menéndez Pelayo', unidad: `${m[1]}º Izq`, tipo: 'vivienda' };
+    m = c.match(/(\d+)º?\s*([A-D])/i);
+    if (m) return { edificioPattern: 'Menéndez Pelayo', unidad: `${m[1]}º ${m[2].toUpperCase()}`, tipo: 'vivienda' };
+  }
+
+  // "Renta pendiente de facturar" - try to extract from the text
+  if (/pendiente de facturar/i.test(c)) {
+    if (c.includes('Manuel Silvela')) {
+      m = c.match(/(\d+)º([A-C])/i);
+      if (m) return { edificioPattern: 'Manuel Silvela 5', unidad: `${m[1]}º ${m[2].toUpperCase()}`, tipo: 'vivienda' };
+    }
+    return null;
   }
 
   return null;
@@ -447,9 +473,36 @@ async function main() {
         }
 
         if (!unit) {
-          // Use first available unit if none match
-          unit = building.units.find(u => !processedUnits.has(u.id));
-          if (!unit) continue;
+          // Create the unit if it doesn't exist (real data from invoicing)
+          try {
+            const tipoMap: Record<string, string> = {
+              garaje: 'garaje',
+              vivienda: 'vivienda',
+              local: 'local',
+              oficina: 'oficina',
+              nave_industrial: 'nave_industrial',
+            };
+            unit = await prisma.unit.create({
+              data: {
+                buildingId: building.id,
+                numero: unitMatch.unidad,
+                tipo: (tipoMap[unitMatch.tipo] || 'vivienda') as any,
+                estado: 'disponible',
+                superficie: unitMatch.tipo === 'garaje' ? 12 : unitMatch.tipo === 'vivienda' ? 60 : 100,
+                rentaMensual: entry.rentaMensual,
+                planta: (() => {
+                  const floorMatch = unitMatch.unidad.match(/(\d+)º/);
+                  return floorMatch ? parseInt(floorMatch[1]) : 0;
+                })(),
+              },
+            });
+            // Add to local cache
+            building.units.push(unit);
+            console.log(`    ➕ Unidad creada: ${building.nombre} - ${unitMatch.unidad}`);
+          } catch {
+            // Unit creation failed, skip
+            continue;
+          }
         }
 
         // Skip if this unit already processed for this tenant
