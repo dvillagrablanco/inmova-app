@@ -49,6 +49,7 @@ import {
   alquilerComercialNavItems,
   patrimonioTerciarioNavItems,
   espaciosFlexiblesNavItems,
+  hospitalityNavItems,
   adminFincasItems,
   studentHousingNavItems,
   viajesCorporativosNavItems,
@@ -382,6 +383,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
   const filteredAlquilerComercialItems = filterItems(alquilerComercialNavItems, useCompanyModules);
   const filteredPatrimonioTerciarioItems = filterItems(patrimonioTerciarioNavItems, useCompanyModules);
   const filteredEspaciosFlexiblesItems = filterItems(espaciosFlexiblesNavItems, useCompanyModules);
+  const filteredHospitalityItems = filterItems(hospitalityNavItems, useCompanyModules);
   const filteredAdminFincasItems = filterItems(adminFincasItems, useCompanyModules);
   const filteredStudentHousingItems = filterItems(studentHousingNavItems, useCompanyModules);
   const filteredViajesCorporativosItems = filterItems(
@@ -432,6 +434,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
     ...comercialNavItems,
     ...patrimonioTerciarioNavItems,
     ...espaciosFlexiblesNavItems,
+    ...hospitalityNavItems,
     ...adminFincasItems,
     // Herramientas Horizontales
     ...finanzasNavItems,
@@ -940,19 +943,28 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
               </div>
             )}
 
-            {/* 2. ALQUILER TURÍSTICO CORTA ESTANCIA (STR) */}
-            {filteredStrItems.length > 0 && (
+            {/* 2. ALQUILER TURÍSTICO Y HOSPITALITY (STR + Hospitality) */}
+            {(filteredStrItems.length > 0 || filteredHospitalityItems.length > 0) && (
               <div className="mb-4">
                 <button
                   onClick={() => toggleSection('str')}
                   className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
                 >
-                  <span>🏖️ Alquiler Turístico (STR)</span>
+                  <span>🏖️ Turístico y Hospitality</span>
                   {expandedSections.str ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                 </button>
                 {expandedSections.str && (
                   <div className="space-y-1 mt-1">
                     {filteredStrItems.map((item) => (
+                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
+                    ))}
+                    {/* Hospitality */}
+                    {filteredHospitalityItems.length > 0 && (
+                      <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">
+                        Hospitality
+                      </div>
+                    )}
+                    {filteredHospitalityItems.map((item) => (
                       <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                   </div>

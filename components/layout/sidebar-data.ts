@@ -448,6 +448,35 @@ const strNavItems = [
   },
 ];
 
+// 2.2.1 HOSPITALITY (Servicios presenciales sobre activos STR)
+// Apart-hotels, B&B, Serviced Apartments - misma infraestructura STR + capa de servicios
+const hospitalityNavItems = [
+  {
+    name: 'Panel Hospitality',
+    href: '/hospitality',
+    icon: Hotel,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Check-in / Check-out',
+    href: '/hospitality/check-in',
+    icon: LogIn,
+    roles: ['super_admin', 'administrador', 'gestor', 'operador'],
+  },
+  {
+    name: 'Housekeeping',
+    href: '/hospitality/housekeeping',
+    icon: ClipboardList,
+    roles: ['super_admin', 'administrador', 'gestor', 'operador'],
+  },
+  {
+    name: 'Servicios al Huésped',
+    href: '/hospitality/servicios',
+    icon: Coffee,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+];
+
 // 2.3 CO-LIVING - SIMPLIFICADO (9→6 items)
 // Fusión: Comunidad Social+Gestión → Comunidad, 2x Reservas → 1
 const coLivingNavItems = [
@@ -1818,6 +1847,7 @@ export {
   alquilerComercialNavItems,
   patrimonioTerciarioNavItems,
   espaciosFlexiblesNavItems,
+  hospitalityNavItems,
   adminFincasItems,
   studentHousingNavItems,
   viajesCorporativosNavItems,
