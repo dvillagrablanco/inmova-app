@@ -376,6 +376,15 @@ export function AIDocumentAssistant({
         const categoryName = categoryNames[analysis.classification.category] || 'Documento';
         const fieldsCount = analysis.extractedFields.length;
 
+        // Construir objeto del archivo completado
+        const updatedFile = {
+          ...uploadedFile,
+          status: 'completed' as const,
+          progress: 100,
+          analysis,
+        };
+        setSelectedFile(updatedFile);
+
         // Toast con botón de acción para abrir el diálogo
         toast.success(`${categoryName} analizado correctamente`, {
           description: `Se extrajeron ${fieldsCount} campos.`,
@@ -394,19 +403,8 @@ export function AIDocumentAssistant({
           onAnalysisComplete(analysis, file);
         }
 
-        // Seleccionar automáticamente el archivo recién procesado
-        const updatedFile = {
-          ...uploadedFile,
-          status: 'completed' as const,
-          progress: 100,
-          analysis,
-        };
-        setSelectedFile(updatedFile);
-
-        // CRÍTICO: Abrir diálogo de revisión automáticamente para mejor UX
-        // Se abre inmediatamente para que el usuario vea los datos extraídos
+        // Abrir diálogo de revisión automáticamente para mejor UX
         if (onApplyData && analysis.extractedFields.length > 0) {
-          // Usar setTimeout corto para asegurar que el estado se ha actualizado
           setTimeout(() => {
             setPendingReviewFile(updatedFile);
             setReviewDialogOpen(true);
