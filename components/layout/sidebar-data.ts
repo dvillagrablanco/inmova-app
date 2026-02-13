@@ -285,6 +285,8 @@ const CORE_MODULES = [
   'contratos',
   'pagos',
   'mantenimiento',
+  'proveedores',
+  'gastos',
   'calendario',
   'chat',
   'notificaciones',
@@ -1221,6 +1223,12 @@ const operacionesNavItems = [
     href: '/mantenimiento',
     icon: Wrench,
     roles: ['super_admin', 'administrador', 'gestor', 'operador'],
+  },
+  {
+    name: 'Proveedores',
+    href: '/proveedores',
+    icon: Users,
+    roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
     name: 'Incidencias',
