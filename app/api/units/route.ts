@@ -258,6 +258,8 @@ export async function POST(req: NextRequest) {
         habitaciones: validatedData.habitaciones || null,
         banos: validatedData.banos || null,
         rentaMensual: validatedData.rentaMensual || 0,
+        gastosComunidad: validatedData.gastosComunidad ?? null,
+        ibiAnual: validatedData.ibiAnual ?? null,
       },
     });
 

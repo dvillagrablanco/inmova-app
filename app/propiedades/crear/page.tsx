@@ -73,6 +73,8 @@ export default function CrearPropiedadPage() {
     planta: '',
     orientacion: '',
     rentaMensual: '',
+    gastosComunidad: '',
+    ibiAnual: '',
     
     // Características
     aireAcondicionado: false,
@@ -165,6 +167,8 @@ export default function CrearPropiedadPage() {
         planta: formData.planta ? parseInt(formData.planta) : null,
         orientacion: formData.orientacion.trim() || null,
         rentaMensual: parseFloat(formData.rentaMensual),
+        gastosComunidad: formData.gastosComunidad ? parseFloat(formData.gastosComunidad) : null,
+        ibiAnual: formData.ibiAnual ? parseFloat(formData.ibiAnual) : null,
         aireAcondicionado: formData.aireAcondicionado,
         calefaccion: formData.calefaccion,
         terraza: formData.terraza,
@@ -572,6 +576,32 @@ export default function CrearPropiedadPage() {
                 <p className="text-sm text-muted-foreground">
                   Precio de alquiler mensual de la propiedad
                 </p>
+              </div>
+              <div className="grid gap-4 md:grid-cols-2 mt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="gastosComunidad">Gastos de Comunidad (€/mes)</Label>
+                  <Input
+                    id="gastosComunidad"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="ej: 80.00"
+                    value={formData.gastosComunidad}
+                    onChange={(e) => handleInputChange('gastosComunidad', e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="ibiAnual">IBI Anual (€/año)</Label>
+                  <Input
+                    id="ibiAnual"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="ej: 450.00"
+                    value={formData.ibiAnual}
+                    onChange={(e) => handleInputChange('ibiAnual', e.target.value)}
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>

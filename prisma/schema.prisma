@@ -746,6 +746,8 @@ model Unit {
   terraza           Boolean    @default(false)
   balcon            Boolean    @default(false)
   amueblado         Boolean    @default(false)
+  gastosComunidad   Float?     // Gastos de comunidad mensuales asignados a esta unidad
+  ibiAnual          Float?     // IBI anual asignado a esta unidad
   imagenes          String[]   @default([])
   tourVirtual       String?
   planos            String[]   @default([])

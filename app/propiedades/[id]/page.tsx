@@ -55,6 +55,8 @@ interface PropertyDetails {
   planta?: number;
   orientacion?: string;
   rentaMensual: number;
+  gastosComunidad?: number;
+  ibiAnual?: number;
   aireAcondicionado: boolean;
   calefaccion: boolean;
   terraza: boolean;
@@ -430,6 +432,26 @@ export default function PropiedadDetallesPage() {
                     €{(property.rentaMensual / property.superficie).toFixed(2)}/m²
                   </p>
                 </div>
+                {(property.gastosComunidad || property.ibiAnual) && (
+                  <div className="grid grid-cols-2 gap-3 mt-3">
+                    {property.gastosComunidad != null && property.gastosComunidad > 0 && (
+                      <div className="text-center p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                        <p className="text-xs text-muted-foreground">Comunidad</p>
+                        <p className="text-lg font-bold text-blue-600">
+                          €{property.gastosComunidad.toLocaleString('es-ES')}/mes
+                        </p>
+                      </div>
+                    )}
+                    {property.ibiAnual != null && property.ibiAnual > 0 && (
+                      <div className="text-center p-3 bg-amber-50 dark:bg-amber-950 rounded-lg">
+                        <p className="text-xs text-muted-foreground">IBI Anual</p>
+                        <p className="text-lg font-bold text-amber-600">
+                          €{property.ibiAnual.toLocaleString('es-ES')}/año
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
 

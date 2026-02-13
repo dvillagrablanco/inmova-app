@@ -72,6 +72,8 @@ export default function EditarPropiedadPage() {
     planta: '',
     orientacion: '',
     rentaMensual: '',
+    gastosComunidad: '',
+    ibiAnual: '',
     
     // Características
     aireAcondicionado: false,
@@ -122,6 +124,8 @@ export default function EditarPropiedadPage() {
             planta: property.planta?.toString() || '',
             orientacion: property.orientacion || '',
             rentaMensual: property.rentaMensual?.toString() || '',
+            gastosComunidad: property.gastosComunidad?.toString() || '',
+            ibiAnual: property.ibiAnual?.toString() || '',
             aireAcondicionado: property.aireAcondicionado || false,
             calefaccion: property.calefaccion || false,
             terraza: property.terraza || false,
@@ -199,6 +203,8 @@ export default function EditarPropiedadPage() {
         planta: formData.planta ? parseInt(formData.planta) : null,
         orientacion: formData.orientacion.trim() || null,
         rentaMensual: parseFloat(formData.rentaMensual),
+        gastosComunidad: formData.gastosComunidad ? parseFloat(formData.gastosComunidad) : null,
+        ibiAnual: formData.ibiAnual ? parseFloat(formData.ibiAnual) : null,
         aireAcondicionado: formData.aireAcondicionado,
         calefaccion: formData.calefaccion,
         terraza: formData.terraza,
@@ -583,7 +589,7 @@ export default function EditarPropiedadPage() {
                 Información Económica
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="rentaMensual">
                   Renta Mensual (€) <span className="text-red-500">*</span>
@@ -599,6 +605,32 @@ export default function EditarPropiedadPage() {
                   required
                   className="text-lg font-semibold"
                 />
+              </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="gastosComunidad">Gastos de Comunidad (€/mes)</Label>
+                  <Input
+                    id="gastosComunidad"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="ej: 80.00"
+                    value={formData.gastosComunidad}
+                    onChange={(e) => handleInputChange('gastosComunidad', e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="ibiAnual">IBI Anual (€/año)</Label>
+                  <Input
+                    id="ibiAnual"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="ej: 450.00"
+                    value={formData.ibiAnual}
+                    onChange={(e) => handleInputChange('ibiAnual', e.target.value)}
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>

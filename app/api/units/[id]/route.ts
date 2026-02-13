@@ -36,6 +36,8 @@ const unitUpdateSchema = z.object({
   terraza: z.boolean().optional(),
   balcon: z.boolean().optional(),
   amueblado: z.boolean().optional(),
+  gastosComunidad: z.number().nonnegative().nullable().optional(),
+  ibiAnual: z.number().nonnegative().nullable().optional(),
   tourVirtual: z.string().nullable().optional(),
 });
 

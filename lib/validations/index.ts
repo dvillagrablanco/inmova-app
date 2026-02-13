@@ -91,6 +91,14 @@ export const unitCreateSchema = z.object({
     .nonnegative('La renta debe ser cero o mayor')
     .max(1000000, 'La renta mensual no puede exceder 1,000,000')
     .optional(),
+  gastosComunidad: z.number()
+    .nonnegative('Los gastos de comunidad deben ser cero o mayor')
+    .nullable()
+    .optional(),
+  ibiAnual: z.number()
+    .nonnegative('El IBI debe ser cero o mayor')
+    .nullable()
+    .optional(),
   descripcion: z.string()
     .max(2000, 'La descripción no puede exceder 2000 caracteres')
     .optional()
