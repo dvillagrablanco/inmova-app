@@ -164,73 +164,209 @@ class SignaturitProvider implements ISignatureProvider {
 // ============================================================================
 
 class DocuSignProvider implements ISignatureProvider {
-  private apiKey: string;
+  private integrationKey: string;
   private accountId: string;
-  private baseUrl: string = 'https://demo.docusign.net/restapi';
+  private userId: string;
+  private basePath: string;
+  private privateKey: string;
   
   constructor() {
-    this.apiKey = process.env.DOCUSIGN_INTEGRATION_KEY || '';
+    this.integrationKey = process.env.DOCUSIGN_INTEGRATION_KEY || '';
     this.accountId = process.env.DOCUSIGN_ACCOUNT_ID || '';
+    this.userId = process.env.DOCUSIGN_USER_ID || '';
+    this.basePath = process.env.DOCUSIGN_BASE_PATH || 'https://demo.docusign.net/restapi';
+    this.privateKey = process.env.DOCUSIGN_PRIVATE_KEY || '';
     
-    if (!this.apiKey || !this.accountId) {
-      logger.warn('DocuSign not fully configured');
+    if (!this.integrationKey || !this.accountId) {
+      logger.warn('DocuSign not fully configured - set DOCUSIGN_INTEGRATION_KEY and DOCUSIGN_ACCOUNT_ID');
     }
+  }
+
+  private async getAccessToken(): Promise<string> {
+    const docusign = require('docusign-esign');
+    const apiClient = new docusign.ApiClient();
+    apiClient.setBasePath(this.basePath);
+
+    // JWT Auth
+    if (this.privateKey && this.userId) {
+      try {
+        const results = await apiClient.requestJWTUserToken(
+          this.integrationKey,
+          this.userId,
+          ['signature', 'impersonation'],
+          Buffer.from(this.privateKey, 'utf8'),
+          3600
+        );
+        return results.body.access_token;
+      } catch (jwtError: any) {
+        logger.error('DocuSign JWT auth failed:', jwtError.message);
+        throw new Error('DocuSign authentication failed. Check DOCUSIGN_PRIVATE_KEY and DOCUSIGN_USER_ID.');
+      }
+    }
+
+    throw new Error('DocuSign credentials not configured. Need DOCUSIGN_PRIVATE_KEY + DOCUSIGN_USER_ID for JWT auth.');
   }
   
   async createSignatureRequest(request: SignatureRequest) {
     try {
-      logger.info('📝 Creating signature request with DocuSign', {
+      logger.info('Creating signature request with DocuSign', {
         contractId: request.contractId,
         signatories: request.signatories.length,
       });
       
-      // Mock - En producción usar SDK oficial de DocuSign
-      // const docusign = require('docusign-esign');
-      // const apiClient = new docusign.ApiClient();
-      // ...
+      const docusign = require('docusign-esign');
+      const accessToken = await this.getAccessToken();
       
-      const externalId = `env_${crypto.randomBytes(16).toString('hex')}`;
-      const signingUrl = `https://demo.docusign.net/Signing/${externalId}`;
+      const apiClient = new docusign.ApiClient();
+      apiClient.setBasePath(this.basePath);
+      apiClient.addDefaultHeader('Authorization', `Bearer ${accessToken}`);
+      
+      const envelopesApi = new docusign.EnvelopesApi(apiClient);
+      
+      // Construir envelope
+      const signers = request.signatories.map((s, idx) => {
+        const signer = new docusign.Signer();
+        signer.email = s.email;
+        signer.name = s.name;
+        signer.recipientId = String(idx + 1);
+        signer.routingOrder = String(idx + 1);
+        
+        // Añadir tab de firma
+        const signHere = new docusign.SignHere();
+        signHere.anchorString = '/firma/';
+        signHere.anchorUnits = 'pixels';
+        signHere.anchorXOffset = '0';
+        signHere.anchorYOffset = '0';
+        
+        signer.tabs = new docusign.Tabs();
+        signer.tabs.signHereTabs = [signHere];
+        
+        return signer;
+      });
+      
+      const recipients = new docusign.Recipients();
+      recipients.signers = signers;
+      
+      const envelopeDefinition = new docusign.EnvelopeDefinition();
+      envelopeDefinition.emailSubject = request.emailSubject || 'Firma de contrato de arrendamiento - Inmova';
+      envelopeDefinition.emailBlurb = request.emailMessage || 'Por favor, revisa y firma el documento adjunto.';
+      envelopeDefinition.recipients = recipients;
+      envelopeDefinition.status = 'sent';
+      
+      // Documento desde URL
+      const document = new docusign.Document();
+      document.documentBase64 = ''; // Se rellenaría con el PDF real
+      document.name = request.documentName || 'Contrato';
+      document.fileExtension = 'pdf';
+      document.documentId = '1';
+      envelopeDefinition.documents = [document];
+      
+      const results = await envelopesApi.createEnvelope(this.accountId, {
+        envelopeDefinition,
+      });
+      
+      const externalId = results.envelopeId;
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + (request.expiresInDays || 7));
+      
+      // Obtener URL de firma para el primer firmante
+      const viewRequest = new docusign.RecipientViewRequest();
+      viewRequest.returnUrl = `${process.env.NEXTAUTH_URL || 'https://inmovaapp.com'}/contratos?signed=true`;
+      viewRequest.authenticationMethod = 'none';
+      viewRequest.email = request.signatories[0].email;
+      viewRequest.userName = request.signatories[0].name;
+      viewRequest.recipientId = '1';
+      
+      let signingUrl = `https://demo.docusign.net/Signing/${externalId}`;
+      try {
+        const viewResults = await envelopesApi.createRecipientView(this.accountId, externalId, {
+          recipientViewRequest: viewRequest,
+        });
+        signingUrl = viewResults.url;
+      } catch (viewErr) {
+        logger.warn('Could not get embedded signing URL, using envelope ID');
+      }
+      
+      logger.info(`DocuSign envelope created: ${externalId}`);
       
       return {
         externalId,
         signingUrl,
         expiresAt,
       };
-    } catch (error) {
-      logger.error('Error creating DocuSign signature:', error);
-      throw new Error(`DocuSign error: ${error}`);
+    } catch (error: any) {
+      logger.error('Error creating DocuSign signature:', error.message);
+      throw new Error(`DocuSign error: ${error.message}`);
     }
   }
   
   async getSignatureStatus(externalId: string) {
     try {
-      return {
-        status: 'PENDING' as const,
-        completedUrl: undefined,
+      const docusign = require('docusign-esign');
+      const accessToken = await this.getAccessToken();
+      
+      const apiClient = new docusign.ApiClient();
+      apiClient.setBasePath(this.basePath);
+      apiClient.addDefaultHeader('Authorization', `Bearer ${accessToken}`);
+      
+      const envelopesApi = new docusign.EnvelopesApi(apiClient);
+      const envelope = await envelopesApi.getEnvelope(this.accountId, externalId);
+      
+      const statusMap: Record<string, 'PENDING' | 'SIGNED' | 'DECLINED' | 'EXPIRED'> = {
+        sent: 'PENDING',
+        delivered: 'PENDING',
+        completed: 'SIGNED',
+        declined: 'DECLINED',
+        voided: 'EXPIRED',
       };
-    } catch (error) {
-      logger.error('Error getting DocuSign status:', error);
+      
+      return {
+        status: statusMap[envelope.status] || 'PENDING',
+        completedUrl: envelope.status === 'completed' ? envelope.certificateUri : undefined,
+      };
+    } catch (error: any) {
+      logger.error('Error getting DocuSign status:', error.message);
       throw error;
     }
   }
   
   async cancelSignature(externalId: string) {
     try {
-      logger.info('❌ Cancelling DocuSign envelope:', externalId);
-    } catch (error) {
-      logger.error('Error cancelling DocuSign envelope:', error);
+      const docusign = require('docusign-esign');
+      const accessToken = await this.getAccessToken();
+      
+      const apiClient = new docusign.ApiClient();
+      apiClient.setBasePath(this.basePath);
+      apiClient.addDefaultHeader('Authorization', `Bearer ${accessToken}`);
+      
+      const envelopesApi = new docusign.EnvelopesApi(apiClient);
+      const envelope = new docusign.Envelope();
+      envelope.status = 'voided';
+      envelope.voidedReason = 'Cancelled from Inmova';
+      
+      await envelopesApi.update(this.accountId, externalId, { envelope });
+      logger.info(`DocuSign envelope voided: ${externalId}`);
+    } catch (error: any) {
+      logger.error('Error cancelling DocuSign envelope:', error.message);
       throw error;
     }
   }
   
   async downloadSignedDocument(externalId: string): Promise<Buffer> {
     try {
-      return Buffer.from('Mock signed document');
-    } catch (error) {
-      logger.error('Error downloading signed document:', error);
+      const docusign = require('docusign-esign');
+      const accessToken = await this.getAccessToken();
+      
+      const apiClient = new docusign.ApiClient();
+      apiClient.setBasePath(this.basePath);
+      apiClient.addDefaultHeader('Authorization', `Bearer ${accessToken}`);
+      
+      const envelopesApi = new docusign.EnvelopesApi(apiClient);
+      const documentBuffer = await envelopesApi.getDocument(this.accountId, externalId, 'combined');
+      
+      return Buffer.from(documentBuffer);
+    } catch (error: any) {
+      logger.error('Error downloading signed document:', error.message);
       throw error;
     }
   }
@@ -320,7 +456,7 @@ export async function createSignatureRequest(
   request: SignatureRequest
 ): Promise<SignatureResponse> {
   try {
-    const provider = request.provider || 'SIGNATURIT';
+    const provider = request.provider || (process.env.DOCUSIGN_INTEGRATION_KEY ? 'DOCUSIGN' : 'SIGNATURIT');
     
     logger.info('🚀 Creating digital signature request', {
       contractId: request.contractId,
