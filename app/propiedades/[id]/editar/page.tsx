@@ -467,7 +467,7 @@ export default function EditarPropiedadPage() {
                 <div className="space-y-2">
                   <Label htmlFor="orientacion">Orientación</Label>
                   <Select
-                    value={formData.orientacion}
+                    value={formData.orientacion || undefined}
                     onValueChange={(value) => handleInputChange('orientacion', value)}
                   >
                     <SelectTrigger>

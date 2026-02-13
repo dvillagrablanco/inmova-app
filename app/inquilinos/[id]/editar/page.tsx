@@ -383,7 +383,7 @@ export default function EditarInquilinoPage() {
                     Estado Civil
                   </Label>
                   <Select
-                    value={formData.estadoCivil}
+                    value={formData.estadoCivil || undefined}
                     onValueChange={(value) => handleInputChange('estadoCivil', value)}
                   >
                     <SelectTrigger>
@@ -414,7 +414,7 @@ export default function EditarInquilinoPage() {
                 <div className="space-y-2">
                   <Label htmlFor="situacionLaboral">Situación Laboral</Label>
                   <Select
-                    value={formData.situacionLaboral}
+                    value={formData.situacionLaboral || undefined}
                     onValueChange={(value) => handleInputChange('situacionLaboral', value)}
                   >
                     <SelectTrigger>
