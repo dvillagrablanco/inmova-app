@@ -313,6 +313,152 @@ export default function ValoracionIAPage() {
     }
   };
 
+  // Guardar valoración en BD
+  const handleGuardar = async () => {
+    if (!resultado) return;
+
+    try {
+      let direccion = '';
+      let ciudad = '';
+      let unitId: string | undefined;
+      let buildingId: string | undefined;
+
+      if (selectedAsset && selectedAsset !== 'manual' && assetType === 'unit') {
+        const unit = units.find(u => u.id === selectedAsset);
+        direccion = unit?.building?.direccion || '';
+        ciudad = unit?.building?.ciudad || '';
+        unitId = selectedAsset;
+      } else if (selectedAsset && selectedAsset !== 'manual' && assetType === 'building') {
+        const building = buildings.find(b => b.id === selectedAsset);
+        direccion = building?.direccion || '';
+        ciudad = building?.ciudad || '';
+        buildingId = selectedAsset;
+      }
+
+      const response = await fetch('/api/valoraciones', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          unitId,
+          buildingId,
+          direccion,
+          ciudad,
+          superficie: parseFloat(formData.superficie) || 0,
+          habitaciones: parseInt(formData.habitaciones) || null,
+          banos: parseInt(formData.banos) || null,
+          antiguedad: parseInt(formData.antiguedad) || null,
+          estadoConservacion: formData.estadoConservacion,
+          orientacion: formData.orientacion,
+          finalidad: formData.finalidad,
+          caracteristicas: formData.caracteristicas,
+          resultado,
+        }),
+      });
+
+      if (response.ok) {
+        toast.success('Valoración guardada correctamente');
+      } else {
+        const err = await response.json().catch(() => ({}));
+        toast.error(err.message || 'Error al guardar la valoración');
+      }
+    } catch (error) {
+      logger.error('Error guardando valoración:', error);
+      toast.error('Error al guardar la valoración');
+    }
+  };
+
+  // Descargar informe como archivo de texto
+  const handleDescargarInforme = () => {
+    if (!resultado) return;
+
+    const lines = [
+      '════════════════════════════════════════════════════════',
+      '         INFORME DE VALORACIÓN DE ACTIVO INMOBILIARIO',
+      '                    Generado por Inmova IA',
+      '════════════════════════════════════════════════════════',
+      '',
+      `Fecha: ${new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })}`,
+      '',
+      '── DATOS DEL INMUEBLE ──────────────────────────────────',
+      `Superficie: ${formData.superficie} m²`,
+      `Habitaciones: ${formData.habitaciones || 'N/A'}`,
+      `Baños: ${formData.banos || 'N/A'}`,
+      `Antigüedad: ${formData.antiguedad ? formData.antiguedad + ' años' : 'N/A'}`,
+      `Estado: ${formData.estadoConservacion}`,
+      `Orientación: ${formData.orientacion}`,
+      `Finalidad: ${formData.finalidad}`,
+      formData.caracteristicas.length > 0 ? `Características: ${formData.caracteristicas.join(', ')}` : '',
+      '',
+      '── VALORACIÓN ESTIMADA ─────────────────────────────────',
+      `Valor estimado: ${formatCurrency(resultado.valorEstimado)}`,
+      `Rango: ${formatCurrency(resultado.valorMinimo)} - ${formatCurrency(resultado.valorMaximo)}`,
+      `Precio por m²: ${formatCurrency(resultado.precioM2)}`,
+      `Nivel de confianza: ${resultado.confianza}%`,
+      `Tendencia del mercado: ${resultado.tendenciaMercado} (${resultado.porcentajeTendencia}%)`,
+      `Tiempo estimado de venta: ${resultado.tiempoEstimadoVenta}`,
+      '',
+    ];
+
+    if (formData.finalidad === 'alquiler' || formData.finalidad === 'ambos') {
+      lines.push(
+        '── RENTABILIDAD ────────────────────────────────────────',
+        `Alquiler mensual estimado: ${formatCurrency(resultado.alquilerEstimado)}/mes`,
+        `Rentabilidad bruta: ${resultado.rentabilidadAlquiler.toFixed(2)}%`,
+        '',
+      );
+    }
+
+    if (resultado.factoresPositivos.length > 0) {
+      lines.push('── FACTORES POSITIVOS ──────────────────────────────────');
+      resultado.factoresPositivos.forEach(f => lines.push(`  + ${f}`));
+      lines.push('');
+    }
+
+    if (resultado.factoresNegativos.length > 0) {
+      lines.push('── FACTORES NEGATIVOS ──────────────────────────────────');
+      resultado.factoresNegativos.forEach(f => lines.push(`  - ${f}`));
+      lines.push('');
+    }
+
+    if (resultado.recomendaciones.length > 0) {
+      lines.push('── RECOMENDACIONES ─────────────────────────────────────');
+      resultado.recomendaciones.forEach((r, i) => lines.push(`  ${i + 1}. ${r}`));
+      lines.push('');
+    }
+
+    if (resultado.comparables.length > 0) {
+      lines.push('── PROPIEDADES COMPARABLES ─────────────────────────────');
+      resultado.comparables.forEach((c, i) => {
+        lines.push(`  ${i + 1}. ${c.direccion}`);
+        lines.push(`     Precio: ${formatCurrency(c.precio)} | ${c.superficie}m² | ${formatCurrency(c.precioM2)}/m² | Similitud: ${Math.round(c.similitud * 100)}%`);
+      });
+      lines.push('');
+    }
+
+    if (resultado.analisisMercado) {
+      lines.push('── ANÁLISIS DE MERCADO ─────────────────────────────────');
+      lines.push(resultado.analisisMercado);
+      lines.push('');
+    }
+
+    lines.push('════════════════════════════════════════════════════════');
+    lines.push('Informe generado automáticamente por Inmova App');
+    lines.push('https://inmovaapp.com');
+
+    const content = lines.join('\n');
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `informe-valoracion-${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    toast.success('Informe descargado');
+  };
+
   // Obtener color de tendencia
   const getTrendColor = (trend: string) => {
     switch (trend) {
@@ -893,11 +1039,11 @@ export default function ValoracionIAPage() {
                     <RefreshCw className="h-4 w-4 mr-2" />
                     Nueva Valoración
                   </Button>
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={handleDescargarInforme}>
                     <Download className="h-4 w-4 mr-2" />
                     Descargar Informe
                   </Button>
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={handleGuardar}>
                     <FileText className="h-4 w-4 mr-2" />
                     Guardar
                   </Button>
