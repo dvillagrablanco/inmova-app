@@ -437,11 +437,24 @@ async function main() {
           continue;
         }
 
-        // Find matching building
+        // Find matching building (flexible: strip accents, numbers, and compare keywords)
+        const normalize = (s: string) => s.toLowerCase()
+          .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // strip accents
+          .replace(/[,\.]/g, ' ')
+          .trim();
+        
         const building = buildings.find(b => {
-          const bName = b.nombre.toLowerCase();
-          const pattern = unitMatch.edificioPattern.toLowerCase();
-          return bName.includes(pattern) || pattern.split(' ').every(part => bName.includes(part));
+          const bName = normalize(b.nombre);
+          const pattern = normalize(unitMatch.edificioPattern);
+          // Direct inclusion
+          if (bName.includes(pattern) || pattern.includes(bName)) return true;
+          // Keyword matching (every word of 3+ chars in pattern must appear in building name)
+          const keywords = pattern.split(/\s+/).filter(w => w.length >= 3);
+          if (keywords.length > 0 && keywords.every(kw => bName.includes(kw))) return true;
+          // Reverse: building name keywords in pattern
+          const bKeywords = bName.split(/\s+/).filter(w => w.length >= 3);
+          if (bKeywords.length > 0 && bKeywords.every(kw => pattern.includes(kw))) return true;
+          return false;
         });
 
         if (!building) {
