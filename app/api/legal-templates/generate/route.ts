@@ -82,7 +82,7 @@ Responde en formato JSON con esta estructura:
 }`;
 
     const message = await anthropic.messages.create({
-      model: CLAUDE_MODEL_FAST,
+      model: CLAUDE_MODEL_PRIMARY,
       max_tokens: 4096,
       messages: [
         {

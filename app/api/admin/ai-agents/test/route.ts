@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
       status: {
         configured: hasApiKey,
         keyPrefix: hasApiKey ? keyPrefix : null,
-        model: process.env.ANTHROPIC_MODEL || CLAUDE_MODEL_FAST,
+        model: process.env.ANTHROPIC_MODEL || CLAUDE_MODEL_PRIMARY,
         maxTokens: process.env.ANTHROPIC_MAX_TOKENS || '4096',
       },
       message: hasApiKey 
@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
     });
 
     const message = await anthropic.messages.create({
-      model: process.env.ANTHROPIC_MODEL || CLAUDE_MODEL_FAST,
+      model: process.env.ANTHROPIC_MODEL || CLAUDE_MODEL_PRIMARY,
       max_tokens: 100,
       messages: [
         {

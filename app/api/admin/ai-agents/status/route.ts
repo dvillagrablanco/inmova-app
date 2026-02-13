@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
             'anthropic-version': '2023-06-01',
           },
           body: JSON.stringify({
-            model: CLAUDE_MODEL_FAST,
+            model: CLAUDE_MODEL_PRIMARY,
             max_tokens: 10,
             messages: [{ role: 'user', content: 'test' }]
           })

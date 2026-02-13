@@ -24,8 +24,8 @@ import { DocumentImportCategory, DocumentImportStatus } from '@/types/prisma-typ
 // ============================================================================
 
 const CLAUDE_API_KEY = process.env.ANTHROPIC_API_KEY || '';
-import { CLAUDE_MODEL_FAST } from './ai-model-config';
-const DEFAULT_MODEL = CLAUDE_MODEL_FAST;
+import { CLAUDE_MODEL_PRIMARY } from './ai-model-config';
+const DEFAULT_MODEL = CLAUDE_MODEL_PRIMARY;
 const MAX_TOKENS = 4096;
 
 // Lazy initialization para evitar errores en tests/SSR

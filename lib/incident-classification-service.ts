@@ -23,8 +23,8 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || '',
 });
 
-import { CLAUDE_MODEL_FAST } from './ai-model-config';
-const CLAUDE_MODEL = CLAUDE_MODEL_FAST;
+import { CLAUDE_MODEL_PRIMARY } from './ai-model-config';
+const CLAUDE_MODEL = CLAUDE_MODEL_PRIMARY;
 
 // ============================================================================
 // TIPOS

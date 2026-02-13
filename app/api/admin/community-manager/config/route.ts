@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { z } from 'zod';
+import { CLAUDE_MODEL_PRIMARY } from '@/lib/ai-model-config';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
@@ -15,7 +16,7 @@ const DEFAULT_CONFIG = {
   bestTimeToPost: '10:00',
   hashtagStrategy: 'auto',
   contentStyle: 'professional',
-  aiModel: 'claude-3-5-sonnet',
+  aiModel: CLAUDE_MODEL_PRIMARY,
   temperature: 0.7,
 };
 

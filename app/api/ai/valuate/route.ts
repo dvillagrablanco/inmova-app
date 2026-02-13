@@ -122,7 +122,7 @@ Responde SOLO con el JSON, sin texto adicional:
 
   try {
     const message = await anthropic.messages.create({
-      model: process.env.ANTHROPIC_MODEL || CLAUDE_MODEL_FAST,
+      model: process.env.ANTHROPIC_MODEL || CLAUDE_MODEL_PRIMARY,
       max_tokens: 2048,
       messages: [{ role: 'user', content: prompt }],
     });
@@ -498,7 +498,7 @@ export async function POST(request: NextRequest) {
           estimatedRent: normalizedValuation.estimatedRent,
           estimatedROI: normalizedValuation.estimatedROI,
           capRate: normalizedValuation.capRate,
-          model: process.env.ANTHROPIC_MODEL || CLAUDE_MODEL_FAST,
+          model: process.env.ANTHROPIC_MODEL || CLAUDE_MODEL_PRIMARY,
         },
       });
     }

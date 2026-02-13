@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { AIValuationService } from '@/lib/ai-valuation-service';
 import { ValuationCacheService } from '@/lib/valuation-cache-service';
+import { CLAUDE_MODEL_PRIMARY } from '@/lib/ai-model-config';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
@@ -167,7 +168,7 @@ export async function GET(
           keyFactors: valuation.keyFactors,
           comparables: marketData.similarProperties || [],
           recommendations: valuation.recommendations,
-          model: 'claude-3.5-sonnet',
+          model: CLAUDE_MODEL_PRIMARY,
           requestedBy: session.user.id,
         },
       });

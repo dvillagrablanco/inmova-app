@@ -68,7 +68,7 @@ Reglas:
           success: true,
           content,
           source: 'ai',
-          model: 'claude-3-haiku',
+          model: CLAUDE_MODEL_FAST,
         });
       } catch (aiError) {
         logger.error('[AI Generation Error]:', aiError);
