@@ -1,5 +1,8 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+# Data import temp files (Excel + JSON)
+/data-import/
+
 # dependencies
 /node_modules
 /.pnp
