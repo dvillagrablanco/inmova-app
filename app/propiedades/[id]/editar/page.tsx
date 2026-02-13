@@ -15,6 +15,7 @@ import {
   ArrowLeft,
   Save,
   Info,
+  Upload,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -355,9 +356,10 @@ export default function EditarPropiedadPage() {
                       <SelectItem value="vivienda">Vivienda</SelectItem>
                       <SelectItem value="local">Local Comercial</SelectItem>
                       <SelectItem value="oficina">Oficina</SelectItem>
-                      <SelectItem value="estudio">Estudio</SelectItem>
                       <SelectItem value="garaje">Garaje</SelectItem>
                       <SelectItem value="trastero">Trastero</SelectItem>
+                      <SelectItem value="nave_industrial">Nave Industrial</SelectItem>
+                      <SelectItem value="coworking_space">Coworking</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

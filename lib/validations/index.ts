@@ -67,7 +67,7 @@ export const unitCreateSchema = z.object({
   piso: z.string()
     .max(20, 'El piso no puede exceder 20 caracteres')
     .optional(),
-  tipo: z.enum(['vivienda', 'local', 'garaje', 'trastero'])
+  tipo: z.enum(['vivienda', 'local', 'garaje', 'trastero', 'oficina', 'nave_industrial', 'coworking_space'])
     .optional()
     .default('vivienda'),
   estado: z.enum(['disponible', 'ocupada', 'en_mantenimiento'])

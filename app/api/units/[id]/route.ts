@@ -22,7 +22,7 @@ async function getPrisma() {
 const unitUpdateSchema = z.object({
   buildingId: z.string().cuid().optional(),
   numero: z.string().min(1).max(50).optional(),
-  tipo: z.enum(['vivienda', 'local', 'garaje', 'trastero']).optional(),
+  tipo: z.enum(['vivienda', 'local', 'garaje', 'trastero', 'oficina', 'nave_industrial', 'coworking_space']).optional(),
   estado: z.enum(['disponible', 'ocupada', 'en_mantenimiento']).optional(),
   superficie: z.number().positive().optional(),
   superficieUtil: z.number().positive().nullable().optional(),
