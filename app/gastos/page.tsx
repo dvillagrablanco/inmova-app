@@ -61,9 +61,29 @@ interface Expense {
   categoria: string;
   monto: number;
   fecha: string;
-  building?: { nombre: string };
-  unit?: { numero: string };
-  provider?: { nombre: string };
+  buildingId?: string;
+  unitId?: string;
+  providerId?: string;
+  building?: { id: string; nombre: string };
+  unit?: { id: string; numero: string };
+  provider?: { id: string; nombre: string };
+  notas?: string;
+}
+
+interface Building {
+  id: string;
+  nombre: string;
+}
+
+interface Unit {
+  id: string;
+  numero: string;
+  buildingId: string;
+}
+
+interface Provider {
+  id: string;
+  nombre: string;
 }
 
 export default function GastosPage() {
@@ -80,12 +100,18 @@ export default function GastosPage() {
   const [activeFilters, setActiveFilters] = useState<
     Array<{ id: string; label: string; value: string }>
   >([]);
+  const [buildings, setBuildings] = useState<Building[]>([]);
+  const [units, setUnits] = useState<Unit[]>([]);
+  const [providers, setProviders] = useState<Provider[]>([]);
   const [form, setForm] = useState({
     concepto: '',
     categoria: 'otro',
     monto: '',
     fecha: new Date().toISOString().split('T')[0],
     notas: '',
+    buildingId: '',
+    unitId: '',
+    providerId: '',
   });
   const [editForm, setEditForm] = useState({
     concepto: '',
@@ -93,6 +119,9 @@ export default function GastosPage() {
     monto: '',
     fecha: '',
     notas: '',
+    buildingId: '',
+    unitId: '',
+    providerId: '',
   });
 
   useEffect(() => {
@@ -104,8 +133,50 @@ export default function GastosPage() {
   useEffect(() => {
     if (session) {
       fetchExpenses();
+      fetchBuildings();
+      fetchProviders();
     }
   }, [session]);
+
+  const fetchBuildings = async () => {
+    try {
+      const res = await fetch('/api/buildings');
+      if (res.ok) {
+        const data = await res.json();
+        setBuildings(data || []);
+      }
+    } catch (error) {
+      logger.error('Error fetching buildings:', error);
+    }
+  };
+
+  const fetchUnits = async (buildingId: string) => {
+    if (!buildingId) {
+      setUnits([]);
+      return;
+    }
+    try {
+      const res = await fetch(`/api/units?buildingId=${buildingId}`);
+      if (res.ok) {
+        const response = await res.json();
+        setUnits(response.data || response || []);
+      }
+    } catch (error) {
+      logger.error('Error fetching units:', error);
+    }
+  };
+
+  const fetchProviders = async () => {
+    try {
+      const res = await fetch('/api/providers');
+      if (res.ok) {
+        const data = await res.json();
+        setProviders(Array.isArray(data) ? data : data.data || []);
+      }
+    } catch (error) {
+      logger.error('Error fetching providers:', error);
+    }
+  };
 
   const fetchExpenses = async () => {
     try {
@@ -135,10 +206,21 @@ export default function GastosPage() {
     }
 
     try {
+      const payload: Record<string, any> = {
+        concepto: form.concepto,
+        categoria: form.categoria,
+        monto: parseFloat(form.monto),
+        fecha: form.fecha,
+        notas: form.notas || undefined,
+      };
+      if (form.buildingId) payload.buildingId = form.buildingId;
+      if (form.unitId) payload.unitId = form.unitId;
+      if (form.providerId) payload.providerId = form.providerId;
+
       const res = await fetch('/api/expenses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
 
       if (res.ok) {
@@ -150,10 +232,14 @@ export default function GastosPage() {
           monto: '',
           fecha: new Date().toISOString().split('T')[0],
           notas: '',
+          buildingId: '',
+          unitId: '',
+          providerId: '',
         });
         fetchExpenses();
       } else {
-        toast.error('Error al registrar gasto');
+        const errorData = await res.json().catch(() => ({}));
+        toast.error(errorData.message || 'Error al registrar gasto');
       }
     } catch (error) {
       logger.error('Error creating expense:', error);
@@ -163,13 +249,18 @@ export default function GastosPage() {
 
   const handleOpenEdit = (expense: Expense) => {
     setEditingExpense(expense);
+    const bId = expense.buildingId || expense.building?.id || '';
     setEditForm({
       concepto: expense.concepto || '',
       categoria: expense.categoria || 'otro',
       monto: expense.monto?.toString() || '',
       fecha: expense.fecha ? new Date(expense.fecha).toISOString().split('T')[0] : '',
-      notas: (expense as any).notas || '',
+      notas: expense.notas || '',
+      buildingId: bId,
+      unitId: expense.unitId || expense.unit?.id || '',
+      providerId: expense.providerId || expense.provider?.id || '',
     });
+    if (bId) fetchUnits(bId);
     setOpenEditDialog(true);
   };
 
@@ -187,10 +278,21 @@ export default function GastosPage() {
     }
 
     try {
+      const payload: Record<string, any> = {
+        concepto: editForm.concepto,
+        categoria: editForm.categoria,
+        monto: parseFloat(editForm.monto),
+        fecha: editForm.fecha,
+        notas: editForm.notas || undefined,
+        buildingId: editForm.buildingId || null,
+        unitId: editForm.unitId || null,
+        providerId: editForm.providerId || null,
+      };
+
       const res = await fetch(`/api/expenses/${editingExpense.id}`, {
-        method: 'PATCH',
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editForm),
+        body: JSON.stringify(payload),
       });
 
       if (res.ok) {
@@ -199,7 +301,8 @@ export default function GastosPage() {
         setEditingExpense(null);
         fetchExpenses();
       } else {
-        toast.error('Error al actualizar gasto');
+        const errorData = await res.json().catch(() => ({}));
+        toast.error(errorData.message || 'Error al actualizar gasto');
       }
     } catch (error) {
       logger.error('Error updating expense:', error);
@@ -439,6 +542,30 @@ export default function GastosPage() {
                           required
                         />
                       </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="monto">Importe (€) *</Label>
+                          <Input
+                            id="monto"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={form.monto}
+                            onChange={(e) => setForm({ ...form, monto: e.target.value })}
+                            required
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="fecha">Fecha *</Label>
+                          <Input
+                            id="fecha"
+                            type="date"
+                            value={form.fecha}
+                            onChange={(e) => setForm({ ...form, fecha: e.target.value })}
+                            required
+                          />
+                        </div>
+                      </div>
                       <div>
                         <Label htmlFor="categoria">Categoría *</Label>
                         <Select
@@ -450,7 +577,9 @@ export default function GastosPage() {
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="mantenimiento">Mantenimiento</SelectItem>
+                            <SelectItem value="reparaciones">Reparaciones</SelectItem>
                             <SelectItem value="servicios">Servicios</SelectItem>
+                            <SelectItem value="comunidad">Comunidad</SelectItem>
                             <SelectItem value="impuestos">Impuestos</SelectItem>
                             <SelectItem value="seguros">Seguros</SelectItem>
                             <SelectItem value="personal">Personal</SelectItem>
@@ -461,25 +590,65 @@ export default function GastosPage() {
                         </Select>
                       </div>
                       <div>
-                        <Label htmlFor="monto">Importe (€) *</Label>
-                        <Input
-                          id="monto"
-                          type="number"
-                          step="0.01"
-                          value={form.monto}
-                          onChange={(e) => setForm({ ...form, monto: e.target.value })}
-                          required
-                        />
+                        <Label htmlFor="buildingId">Edificio</Label>
+                        <Select
+                          value={form.buildingId || undefined}
+                          onValueChange={(value) => {
+                            setForm({ ...form, buildingId: value, unitId: '' });
+                            fetchUnits(value);
+                          }}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccionar edificio" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {buildings.map((b) => (
+                              <SelectItem key={b.id} value={b.id}>
+                                {b.nombre}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
+                      {form.buildingId && units.length > 0 && (
+                        <div>
+                          <Label htmlFor="unitId">Unidad</Label>
+                          <Select
+                            value={form.unitId || undefined}
+                            onValueChange={(value) => setForm({ ...form, unitId: value })}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Seleccionar unidad" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {units
+                                .filter((u) => u.buildingId === form.buildingId)
+                                .map((u) => (
+                                  <SelectItem key={u.id} value={u.id}>
+                                    Unidad {u.numero}
+                                  </SelectItem>
+                                ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
                       <div>
-                        <Label htmlFor="fecha">Fecha *</Label>
-                        <Input
-                          id="fecha"
-                          type="date"
-                          value={form.fecha}
-                          onChange={(e) => setForm({ ...form, fecha: e.target.value })}
-                          required
-                        />
+                        <Label htmlFor="providerId">Proveedor</Label>
+                        <Select
+                          value={form.providerId || undefined}
+                          onValueChange={(value) => setForm({ ...form, providerId: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccionar proveedor" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {providers.map((p) => (
+                              <SelectItem key={p.id} value={p.id}>
+                                {p.nombre}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                       <div>
                         <Label htmlFor="notas">Notas</Label>
@@ -487,6 +656,7 @@ export default function GastosPage() {
                           id="notas"
                           value={form.notas}
                           onChange={(e) => setForm({ ...form, notas: e.target.value })}
+                          placeholder="Observaciones adicionales..."
                         />
                       </div>
                       <div className="flex justify-end gap-2">
@@ -521,6 +691,30 @@ export default function GastosPage() {
                       required
                     />
                   </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="edit-monto">Importe (€) *</Label>
+                      <Input
+                        id="edit-monto"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={editForm.monto}
+                        onChange={(e) => setEditForm({ ...editForm, monto: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-fecha">Fecha *</Label>
+                      <Input
+                        id="edit-fecha"
+                        type="date"
+                        value={editForm.fecha}
+                        onChange={(e) => setEditForm({ ...editForm, fecha: e.target.value })}
+                        required
+                      />
+                    </div>
+                  </div>
                   <div>
                     <Label htmlFor="edit-categoria">Categoría *</Label>
                     <Select
@@ -532,7 +726,9 @@ export default function GastosPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="mantenimiento">Mantenimiento</SelectItem>
+                        <SelectItem value="reparaciones">Reparaciones</SelectItem>
                         <SelectItem value="servicios">Servicios</SelectItem>
+                        <SelectItem value="comunidad">Comunidad</SelectItem>
                         <SelectItem value="impuestos">Impuestos</SelectItem>
                         <SelectItem value="seguros">Seguros</SelectItem>
                         <SelectItem value="personal">Personal</SelectItem>
@@ -543,25 +739,65 @@ export default function GastosPage() {
                     </Select>
                   </div>
                   <div>
-                    <Label htmlFor="edit-monto">Importe (€) *</Label>
-                    <Input
-                      id="edit-monto"
-                      type="number"
-                      step="0.01"
-                      value={editForm.monto}
-                      onChange={(e) => setEditForm({ ...editForm, monto: e.target.value })}
-                      required
-                    />
+                    <Label htmlFor="edit-buildingId">Edificio</Label>
+                    <Select
+                      value={editForm.buildingId || undefined}
+                      onValueChange={(value) => {
+                        setEditForm({ ...editForm, buildingId: value, unitId: '' });
+                        fetchUnits(value);
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar edificio" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {buildings.map((b) => (
+                          <SelectItem key={b.id} value={b.id}>
+                            {b.nombre}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
+                  {editForm.buildingId && units.length > 0 && (
+                    <div>
+                      <Label htmlFor="edit-unitId">Unidad</Label>
+                      <Select
+                        value={editForm.unitId || undefined}
+                        onValueChange={(value) => setEditForm({ ...editForm, unitId: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccionar unidad" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {units
+                            .filter((u) => u.buildingId === editForm.buildingId)
+                            .map((u) => (
+                              <SelectItem key={u.id} value={u.id}>
+                                Unidad {u.numero}
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
                   <div>
-                    <Label htmlFor="edit-fecha">Fecha *</Label>
-                    <Input
-                      id="edit-fecha"
-                      type="date"
-                      value={editForm.fecha}
-                      onChange={(e) => setEditForm({ ...editForm, fecha: e.target.value })}
-                      required
-                    />
+                    <Label htmlFor="edit-providerId">Proveedor</Label>
+                    <Select
+                      value={editForm.providerId || undefined}
+                      onValueChange={(value) => setEditForm({ ...editForm, providerId: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar proveedor" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {providers.map((p) => (
+                          <SelectItem key={p.id} value={p.id}>
+                            {p.nombre}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div>
                     <Label htmlFor="edit-notas">Notas</Label>
@@ -569,6 +805,7 @@ export default function GastosPage() {
                       id="edit-notas"
                       value={editForm.notas}
                       onChange={(e) => setEditForm({ ...editForm, notas: e.target.value })}
+                      placeholder="Observaciones adicionales..."
                     />
                   </div>
                   <div className="flex justify-end gap-2">

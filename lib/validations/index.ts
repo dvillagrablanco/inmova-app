@@ -355,14 +355,17 @@ export const userUpdateSchema = userCreateSchema.partial()
 
 export const expenseCreateSchema = z.object({
   buildingId: z.string()
-    .uuid('ID de edificio inválido')
-    .optional(),
+    .min(1, 'ID de edificio inválido')
+    .optional()
+    .nullable(),
   unitId: z.string()
-    .uuid('ID de unidad inválido')
-    .optional(),
+    .min(1, 'ID de unidad inválido')
+    .optional()
+    .nullable(),
   providerId: z.string()
-    .uuid('ID de proveedor inválido')
-    .optional(),
+    .min(1, 'ID de proveedor inválido')
+    .optional()
+    .nullable(),
   concepto: z.string()
     .min(1, 'El concepto es requerido')
     .max(500, 'El concepto no puede exceder 500 caracteres')
@@ -372,6 +375,8 @@ export const expenseCreateSchema = z.object({
     'servicios',
     'impuestos',
     'seguros',
+    'reparaciones',
+    'comunidad',
     'suministros',
     'personal',
     'marketing',
@@ -379,11 +384,11 @@ export const expenseCreateSchema = z.object({
     'tecnologia',
     'otro'
   ]),
-  monto: z.number()
-    .positive('El monto debe ser mayor a 0')
-    .max(10000000, 'El monto no puede exceder 10,000,000'),
+  monto: z.union([z.number(), z.string().transform(v => parseFloat(v))])
+    .pipe(z.number().positive('El monto debe ser mayor a 0').max(10000000, 'El monto no puede exceder 10,000,000')),
   fecha: z.string()
-    .datetime({ message: 'Fecha inválida' })
+    .regex(/^\d{4}-\d{2}-\d{2}/, 'Fecha inválida (formato YYYY-MM-DD)')
+    .or(z.string().datetime())
     .or(z.date()),
   facturaPdfPath: z.string()
     .max(1000, 'La ruta del archivo no puede exceder 1000 caracteres')

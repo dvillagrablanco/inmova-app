@@ -279,11 +279,54 @@ export async function POST(req: NextRequest) {
     const expense = await prisma.expense.create({
       data: expenseData,
       include: {
-        building: { select: { nombre: true, id: true } },
+        building: { select: { nombre: true, id: true, companyId: true } },
         unit: { select: { numero: true, id: true } },
         provider: { select: { nombre: true, id: true } },
       },
     });
+
+    // Registrar en contabilidad (AccountingTransaction)
+    try {
+      const categoriaMap: Record<string, string> = {
+        mantenimiento: 'gasto_mantenimiento',
+        reparaciones: 'gasto_reparacion',
+        servicios: 'gasto_servicio',
+        comunidad: 'gasto_comunidad',
+        impuestos: 'gasto_impuesto',
+        seguros: 'gasto_seguro',
+        personal: 'gasto_personal',
+        marketing: 'gasto_otro',
+        legal: 'gasto_profesional',
+        suministros: 'gasto_suministro',
+        tecnologia: 'gasto_otro',
+        otro: 'gasto_otro',
+      };
+
+      const accountingCategoria = categoriaMap[validatedData.categoria] || 'gasto_otro';
+      const companyId = expense.building?.companyId || scope.activeCompanyId;
+
+      if (companyId) {
+        await prisma.accountingTransaction.create({
+          data: {
+            companyId,
+            buildingId: expense.buildingId,
+            unitId: expense.unitId,
+            tipo: 'gasto',
+            categoria: accountingCategoria as any,
+            concepto: validatedData.concepto,
+            monto: validatedData.monto,
+            fecha: new Date(validatedData.fecha),
+            expenseId: expense.id,
+            referencia: expense.provider ? `Proveedor: ${expense.provider.nombre}` : undefined,
+            notas: validatedData.notas || undefined,
+          },
+        });
+        logger.info(`Gasto registrado en contabilidad: ${expense.id}`, { userId: user.id });
+      }
+    } catch (accountingError) {
+      // No bloquear la creación del gasto si falla el registro contable
+      logger.warn('Error registrando gasto en contabilidad (no bloqueante):', accountingError);
+    }
 
     logger.info(`Gasto creado: ${expense.id}`, { userId: user.id, expenseId: expense.id });
     return NextResponse.json(expense, { status: 201 });
