@@ -58,6 +58,8 @@ import {
   Calculator,
   MapPin,
   Crown,
+  LogIn,
+  Coffee,
 } from 'lucide-react';
 
 export interface SubItem {
