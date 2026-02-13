@@ -212,14 +212,18 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/economia-circular': 'economia_circular',
   '/auditoria': 'auditoria',
   '/seguridad-compliance': 'seguridad_compliance',
-  // Alquiler Comercial - Oficinas, Locales, Naves, Coworking
+  // Patrimonio Terciario - Locales, Oficinas, Naves, Garajes, Trasteros
   '/comercial': 'alquiler_comercial',
   '/comercial/oficinas': 'alquiler_comercial',
   '/comercial/locales': 'alquiler_comercial',
   '/comercial/naves': 'alquiler_comercial',
-  '/comercial/coworking': 'alquiler_comercial',
   '/comercial/contratos': 'alquiler_comercial',
   '/comercial/leads': 'alquiler_comercial',
+  '/garajes-trasteros': 'alquiler_comercial',
+  // Espacios Flexibles - Coworking, Salas, Workspace
+  '/comercial/coworking': 'alquiler_comercial',
+  '/espacios-coworking': 'alquiler_comercial',
+  '/salas-reuniones': 'alquiler_comercial',
   '/comercial/pagos': 'alquiler_comercial',
   '/comercial/visitas': 'alquiler_comercial',
   '/comercial/analytics': 'alquiler_comercial',
@@ -680,76 +684,71 @@ const ewoorkerNavItems = [
   },
 ];
 
-// 2.6 COMERCIAL (Servicios Profesionales)
-const comercialNavItems = [
+// 2.6 PATRIMONIO TERCIARIO (Activos no residenciales: Locales, Oficinas, Naves, Garajes, Trasteros)
+// Estos son activos inmobiliarios que se gestionan/alquilan de forma independiente,
+// no como parte de un edificio residencial.
+const patrimonioTerciarioNavItems = [
   {
-    name: 'Servicios Profesionales',
-    href: '/professional/projects',
-    icon: Briefcase,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Clientes Comerciales',
-    href: '/professional/clients',
-    icon: Users,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Facturación Comercial',
-    href: '/professional/invoicing',
-    icon: FileText,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-];
-
-// 2.6.1 ALQUILER COMERCIAL (Oficinas, Locales, Naves, Coworking)
-// AMPLIADO: Incluye garajes, salas reuniones, retail, hospitality
-const alquilerComercialNavItems = [
-  {
-    name: 'Dashboard Comercial',
+    name: 'Panel Terciario',
     href: '/comercial',
     icon: Building2,
     roles: ['super_admin', 'administrador', 'gestor'],
-    dataTour: 'tour-comercial-dashboard',
+    dataTour: 'tour-terciario-dashboard',
+  },
+  {
+    name: 'Locales Comerciales',
+    href: '/comercial/locales',
+    icon: Star,
+    roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'tour-terciario-locales',
   },
   {
     name: 'Oficinas',
     href: '/comercial/oficinas',
     icon: Building2,
     roles: ['super_admin', 'administrador', 'gestor'],
-    dataTour: 'tour-comercial-oficinas',
-  },
-  {
-    name: 'Locales',
-    href: '/comercial/locales',
-    icon: Star,
-    roles: ['super_admin', 'administrador', 'gestor'],
-    dataTour: 'tour-comercial-locales',
+    dataTour: 'tour-terciario-oficinas',
   },
   {
     name: 'Naves Industriales',
     href: '/comercial/naves',
     icon: Package,
     roles: ['super_admin', 'administrador', 'gestor'],
-    dataTour: 'tour-comercial-naves',
-  },
-  {
-    name: 'Coworking',
-    href: '/comercial/coworking',
-    icon: Users2,
-    roles: ['super_admin', 'administrador', 'gestor'],
-    dataTour: 'tour-comercial-coworking',
-  },
-  {
-    name: 'Espacios Coworking',
-    href: '/espacios-coworking',
-    icon: Users2,
-    roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'tour-terciario-naves',
   },
   {
     name: 'Garajes y Trasteros',
     href: '/garajes-trasteros',
     icon: Car,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Contratos Terciarios',
+    href: '/comercial/contratos',
+    icon: FileText,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Leads',
+    href: '/comercial/leads',
+    icon: UserPlus,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+];
+
+// 2.6.1 ESPACIOS FLEXIBLES (Coworking, Salas de Reuniones, Workspace)
+// Espacios compartidos o de uso temporal, diferente de activos terciarios fijos.
+const espaciosFlexiblesNavItems = [
+  {
+    name: 'Coworking',
+    href: '/comercial/coworking',
+    icon: Users2,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Espacios',
+    href: '/espacios-coworking',
+    icon: Users2,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
@@ -759,30 +758,43 @@ const alquilerComercialNavItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
-    name: 'Retail',
-    href: '/retail',
-    icon: ShoppingBag,
+    name: 'Reservas',
+    href: '/workspace/booking',
+    icon: Calendar,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
-    name: 'Hospitality',
-    href: '/hospitality',
-    icon: Hotel,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Contratos Comerciales',
-    href: '/comercial/contratos',
-    icon: FileText,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
-  {
-    name: 'Leads Comerciales',
-    href: '/comercial/leads',
-    icon: UserPlus,
+    name: 'Miembros',
+    href: '/workspace/members',
+    icon: Users,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
 ];
+
+// 2.6.2 SERVICIOS PROFESIONALES (CRM/Facturación de servicios)
+const comercialNavItems = [
+  {
+    name: 'Servicios Profesionales',
+    href: '/professional/projects',
+    icon: Briefcase,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Clientes',
+    href: '/professional/clients',
+    icon: Users,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Facturación',
+    href: '/professional/invoicing',
+    icon: FileText,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+];
+
+// LEGACY: mantener alquilerComercialNavItems como alias para compatibilidad
+const alquilerComercialNavItems = patrimonioTerciarioNavItems;
 
 // 2.7 ADMINISTRADOR DE FINCAS / COMUNIDADES
 // AMPLIADO: Incluye todas las sub-páginas de comunidades
@@ -1804,6 +1816,8 @@ export {
   ewoorkerNavItems,
   comercialNavItems,
   alquilerComercialNavItems,
+  patrimonioTerciarioNavItems,
+  espaciosFlexiblesNavItems,
   adminFincasItems,
   studentHousingNavItems,
   viajesCorporativosNavItems,

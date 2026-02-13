@@ -47,6 +47,8 @@ import {
   ewoorkerNavItems,
   comercialNavItems,
   alquilerComercialNavItems,
+  patrimonioTerciarioNavItems,
+  espaciosFlexiblesNavItems,
   adminFincasItems,
   studentHousingNavItems,
   viajesCorporativosNavItems,
@@ -378,6 +380,8 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
   const filteredEwoorkerItems = filterItems(ewoorkerNavItems, useCompanyModules);
   const filteredComercialItems = filterItems(comercialNavItems, useCompanyModules);
   const filteredAlquilerComercialItems = filterItems(alquilerComercialNavItems, useCompanyModules);
+  const filteredPatrimonioTerciarioItems = filterItems(patrimonioTerciarioNavItems, useCompanyModules);
+  const filteredEspaciosFlexiblesItems = filterItems(espaciosFlexiblesNavItems, useCompanyModules);
   const filteredAdminFincasItems = filterItems(adminFincasItems, useCompanyModules);
   const filteredStudentHousingItems = filterItems(studentHousingNavItems, useCompanyModules);
   const filteredViajesCorporativosItems = filterItems(
@@ -426,7 +430,8 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
     ...flippingNavItems,
     ...construccionNavItems,
     ...comercialNavItems,
-    ...alquilerComercialNavItems,
+    ...patrimonioTerciarioNavItems,
+    ...espaciosFlexiblesNavItems,
     ...adminFincasItems,
     // Herramientas Horizontales
     ...finanzasNavItems,
@@ -866,7 +871,8 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
               filteredBuildToRentItems.length > 0 ||
               filteredFlippingItems.length > 0 ||
               filteredComercialItems.length > 0 ||
-              filteredAlquilerComercialItems.length > 0 ||
+              filteredPatrimonioTerciarioItems.length > 0 ||
+              filteredEspaciosFlexiblesItems.length > 0 ||
               filteredWarehouseItems.length > 0 ||
               filteredViviendaSocialItems.length > 0) &&
               (role === 'administrador' || (role === 'super_admin' && selectedCompany)) && (
@@ -1020,17 +1026,16 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
               </div>
             )}
 
-            {/* 3. INMUEBLES COMERCIALES (Oficinas + Locales + Naves/Logística + Workspace) */}
-            {(filteredComercialItems.length > 0 ||
-              filteredAlquilerComercialItems.length > 0 ||
-              filteredWarehouseItems.length > 0 ||
-              filteredWorkspaceItems.length > 0) && (
+            {/* 3. PATRIMONIO TERCIARIO (Locales + Oficinas + Naves + Garajes/Trasteros) */}
+            {(filteredPatrimonioTerciarioItems.length > 0 ||
+              filteredEspaciosFlexiblesItems.length > 0 ||
+              filteredWarehouseItems.length > 0) && (
               <div className="mb-4">
                 <button
                   onClick={() => toggleSection('comercial')}
                   className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
                 >
-                  <span>🏢 Inmuebles Comerciales</span>
+                  <span>🏢 Patrimonio Terciario</span>
                   {expandedSections.comercial ? (
                     <ChevronDown size={16} />
                   ) : (
@@ -1039,30 +1044,27 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                 </button>
                 {expandedSections.comercial && (
                   <div className="space-y-1 mt-1">
-                    {/* Servicios Profesionales */}
-                    {filteredComercialItems.map((item) => (
+                    {/* Locales, Oficinas, Naves, Garajes/Trasteros */}
+                    {filteredPatrimonioTerciarioItems.map((item) => (
                       <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
-                    {/* Oficinas, Locales, Naves */}
-                    {filteredAlquilerComercialItems.map((item) => (
+                    {/* Espacios Flexibles */}
+                    {filteredEspaciosFlexiblesItems.length > 0 && (
+                      <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">
+                        Espacios Flexibles
+                      </div>
+                    )}
+                    {filteredEspaciosFlexiblesItems.map((item) => (
                       <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                     {/* Naves y Logística */}
+                    {/* Logística / Almacenes */}
                     {filteredWarehouseItems.length > 0 && (
                       <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">
                         Logística / Almacenes
                       </div>
                     )}
                     {filteredWarehouseItems.map((item) => (
-                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
-                    ))}
-                    {/* Workspace / Coworking */}
-                    {filteredWorkspaceItems.length > 0 && (
-                      <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">
-                        Workspace
-                      </div>
-                    )}
-                    {filteredWorkspaceItems.map((item) => (
                       <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                   </div>
