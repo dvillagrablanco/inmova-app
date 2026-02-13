@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
+import { OccupancyByTypeCard, OccupancyTypeData } from '@/components/dashboard/OccupancyByTypeCard';
 import {
   AreaChart,
   Area,
@@ -91,6 +92,9 @@ function AnalyticsPageContent() {
   const [trends, setTrends] = useState<Trend[]>([]);
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [occupancyByType, setOccupancyByType] = useState<OccupancyTypeData[]>([]);
+  const [tasaOcupacionTotal, setTasaOcupacionTotal] = useState(0);
+  const [tasaOcupacionCore, setTasaOcupacionCore] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -123,6 +127,19 @@ function AnalyticsPageContent() {
           ingresoNeto: t.ingresoNeto || t.revenue || 0,
           morosidad: t.morosidad || 0,
         })));
+
+        // Extract occupancy by type from latest trend
+        const lastTrend = rawTrends[rawTrends.length - 1];
+        if (lastTrend?.occupancyByType) {
+          setOccupancyByType(lastTrend.occupancyByType);
+          const total = lastTrend.occupancyByType.reduce((s: number, t: any) => s + t.total, 0);
+          const occ = lastTrend.occupancyByType.reduce((s: number, t: any) => s + t.ocupadas, 0);
+          setTasaOcupacionTotal(total > 0 ? (occ / total) * 100 : 0);
+          const core = lastTrend.occupancyByType.filter((t: any) => !['garaje', 'trastero'].includes(t.tipo));
+          const coreTotal = core.reduce((s: number, t: any) => s + t.total, 0);
+          const coreOcc = core.reduce((s: number, t: any) => s + t.ocupadas, 0);
+          setTasaOcupacionCore(coreTotal > 0 ? (coreOcc / coreTotal) * 100 : 0);
+        }
       }
 
       // Fetch predictions
@@ -346,15 +363,24 @@ function AnalyticsPageContent() {
               </div>
               )}
 
+              {/* Ocupación por tipo de activo */}
+              {occupancyByType.length > 0 && (
+                <OccupancyByTypeCard
+                  data={occupancyByType}
+                  tasaTotal={tasaOcupacionTotal}
+                  tasaCore={tasaOcupacionCore}
+                />
+              )}
+
               {trends.length > 0 && (
                 <div className="grid gap-4 md:grid-cols-4">
                   <Card>
                     <CardHeader className="pb-3">
-                      <CardTitle className="text-sm font-medium">Ocupación Actual</CardTitle>
+                      <CardTitle className="text-sm font-medium">Ocupación (sin garajes)</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">
-                        {trends[trends.length - 1]?.tasaOcupacion.toFixed(1)}%
+                        {tasaOcupacionCore > 0 ? tasaOcupacionCore.toFixed(1) : trends[trends.length - 1]?.tasaOcupacion.toFixed(1)}%
                       </div>
                     </CardContent>
                   </Card>

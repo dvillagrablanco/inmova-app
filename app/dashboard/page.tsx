@@ -45,12 +45,14 @@ import DemoDataGenerator from '@/components/automation/DemoDataGenerator';
 import logger, { logError } from '@/lib/logger';
 import { ContextualQuickActions } from '@/components/navigation/contextual-quick-actions';
 import { OnboardingTour } from '@/components/onboarding/OnboardingTour';
+import { OccupancyByTypeCard, OccupancyTypeData } from '@/components/dashboard/OccupancyByTypeCard';
 
 interface DashboardData {
   kpis: {
     ingresosTotalesMensuales: number;
     numeroPropiedades: number;
     tasaOcupacion: number;
+    tasaOcupacionCore: number;
     tasaMorosidad: number;
     ingresosNetos: number;
     gastosTotales: number;
@@ -58,12 +60,13 @@ interface DashboardData {
   };
   monthlyIncome: Array<{ mes: string; ingresos: number }>;
   occupancyChartData: Array<{ name: string; ocupadas: number; disponibles: number; total: number }>;
+  occupancyByType: OccupancyTypeData[];
   expensesChartData: Array<{ name: string; value: number }>;
   pagosPendientes: any[];
   contractsExpiringSoon: any[];
   maintenanceRequests: any[];
   unidadesDisponibles: any[];
-  esEmpresaPrueba?: boolean; // Flag para mostrar generador de datos demo
+  esEmpresaPrueba?: boolean;
 }
 
 const COLORS = ['#4F46E5', '#7C3AED', '#EC4899', '#8B5CF6', '#A78BFA']; // Indigo, Violet, Pink gradients
@@ -339,8 +342,8 @@ function DashboardPageContent() {
             icon={Building2}
           />
           <KPICard
-            title="Tasa de Ocupación"
-            value={Number(data.kpis.tasaOcupacion || 0).toFixed(1)}
+            title="Ocupación (sin garajes)"
+            value={Number(data.kpis.tasaOcupacionCore || data.kpis.tasaOcupacion || 0).toFixed(1)}
             suffix="%"
             icon={Percent}
           />
@@ -416,49 +419,15 @@ function DashboardPageContent() {
           </ResponsiveContainer>
         </div>
 
-        {/* Additional Charts Grid */}
+        {/* Occupancy by Type + Expenses Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Occupancy by Unit Type - Optimizado para móvil */}
-          {data.occupancyChartData && data.occupancyChartData.length > 0 && (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 sm:p-4 md:p-6">
-              <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">
-                Ocupación por Tipo
-              </h2>
-              <ResponsiveContainer width="100%" height={250} className="sm:h-[300px]">
-                <BarChart
-                  data={data.occupancyChartData}
-                  margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis
-                    dataKey="name"
-                    tickLine={false}
-                    tick={{ fontSize: 9, fill: '#666' }}
-                    angle={-45}
-                    textAnchor="end"
-                    height={60}
-                  />
-                  <YAxis tickLine={false} tick={{ fontSize: 9, fill: '#666' }} width={35} />
-                  <Tooltip
-                    wrapperStyle={{ fontSize: 11 }}
-                    contentStyle={{
-                      borderRadius: '8px',
-                      border: '1px solid #e5e7eb',
-                      fontSize: '12px',
-                    }}
-                  />
-                  <Legend verticalAlign="top" wrapperStyle={{ fontSize: 10, paddingBottom: 10 }} />
-                  <Bar
-                    dataKey="ocupadas"
-                    fill="#000000"
-                    name="Ocupadas"
-                    stackId="a"
-                    radius={[4, 4, 0, 0]}
-                  />
-                  <Bar dataKey="disponibles" fill="#9CA3AF" name="Disponibles" stackId="a" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+          {/* Occupancy by Asset Type - Componente reutilizable */}
+          {data.occupancyByType && data.occupancyByType.length > 0 && (
+            <OccupancyByTypeCard
+              data={data.occupancyByType}
+              tasaTotal={data.kpis.tasaOcupacion}
+              tasaCore={data.kpis.tasaOcupacionCore}
+            />
           )}
 
           {/* Expenses by Category - Optimizado para móvil */}

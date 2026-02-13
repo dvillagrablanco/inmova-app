@@ -26,6 +26,7 @@ import Link from 'next/link';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { OccupancyByTypeCard, OccupancyTypeData } from '@/components/dashboard/OccupancyByTypeCard';
 
 interface DashboardStats {
   totalPropiedades: number;
@@ -66,6 +67,8 @@ export default function TraditionalRentalDashboard() {
     rentabilidadMedia: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [occupancyByType, setOccupancyByType] = useState<OccupancyTypeData[]>([]);
+  const [tasaOcupacionCore, setTasaOcupacionCore] = useState(0);
 
   useEffect(() => {
     async function fetchStats() {
@@ -89,6 +92,40 @@ export default function TraditionalRentalDashboard() {
           .length;
         const totalUnits = units.length;
         const occupancyRate = totalUnits > 0 ? (occupiedUnits / totalUnits) * 100 : 0;
+
+        // Desglose de ocupación por tipo de activo
+        const typeLabels: Record<string, string> = {
+          vivienda: 'Viviendas', local: 'Locales', garaje: 'Garajes',
+          trastero: 'Trasteros', oficina: 'Oficinas',
+          nave_industrial: 'Naves industriales', coworking_space: 'Coworking',
+        };
+        const typeOrder = ['vivienda', 'local', 'oficina', 'nave_industrial', 'garaje', 'trastero', 'coworking_space'];
+        const byType: Record<string, { total: number; ocupadas: number }> = {};
+        units.forEach((u: any) => {
+          const tipo = u.tipo || 'vivienda';
+          if (!byType[tipo]) byType[tipo] = { total: 0, ocupadas: 0 };
+          byType[tipo].total++;
+          if (u.estado?.toLowerCase() === 'ocupada') byType[tipo].ocupadas++;
+        });
+        const occByType: OccupancyTypeData[] = Object.entries(byType)
+          .filter(([, v]) => v.total > 0)
+          .map(([tipo, v]) => ({
+            tipo,
+            label: typeLabels[tipo] || tipo,
+            ocupadas: v.ocupadas,
+            disponibles: v.total - v.ocupadas,
+            total: v.total,
+            tasa: v.total > 0 ? Number(((v.ocupadas / v.total) * 100).toFixed(1)) : 0,
+          }))
+          .sort((a, b) => typeOrder.indexOf(a.tipo) - typeOrder.indexOf(b.tipo));
+        setOccupancyByType(occByType);
+
+        // Tasa core (sin garajes/trasteros)
+        const coreTypes = occByType.filter(t => !['garaje', 'trastero'].includes(t.tipo));
+        const coreTotal = coreTypes.reduce((s, t) => s + t.total, 0);
+        const coreOcupadas = coreTypes.reduce((s, t) => s + t.ocupadas, 0);
+        const coreRate = coreTotal > 0 ? (coreOcupadas / coreTotal) * 100 : 0;
+        setTasaOcupacionCore(coreRate);
 
         const monthlyIncome = activeContracts.reduce(
           (acc: number, c: any) => acc + (Number(c.rentaMensual) || 0),
@@ -133,10 +170,10 @@ export default function TraditionalRentalDashboard() {
           contratosProximosVencer: expiringContracts.length,
           inquilinosActivos: tenants.filter((t: any) => t.activo !== false).length,
           rentaMediaMensual: avgRent,
-          duracionMediaContrato: 12, // Aproximado
-          rotacionAnual: 15, // Aproximado (%)
+          duracionMediaContrato: 12,
+          rotacionAnual: 15,
           morosidadPorcentaje: morosidadRate,
-          rentabilidadMedia: 5.2, // Aproximado (%)
+          rentabilidadMedia: 5.2,
         });
       } catch (error) {
         console.error('Error fetching stats:', error);
@@ -154,14 +191,14 @@ export default function TraditionalRentalDashboard() {
   // KPIs principales para alquiler larga/media estancia
   const kpis = [
     {
-      title: 'Tasa de Ocupación',
-      value: `${stats.tasaOcupacion.toFixed(1)}%`,
-      subValue: `${stats.propiedadesOcupadas}/${stats.totalPropiedades} propiedades`,
+      title: 'Ocupación (sin garajes)',
+      value: `${tasaOcupacionCore.toFixed(1)}%`,
+      subValue: `Total con garajes: ${stats.tasaOcupacion.toFixed(1)}% (${stats.propiedadesOcupadas}/${stats.totalPropiedades})`,
       icon: Home,
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
-      trend: stats.tasaOcupacion > 80 ? 'up' : 'down',
-      trendValue: stats.tasaOcupacion > 80 ? '+5%' : '-3%',
+      trend: tasaOcupacionCore > 80 ? 'up' : 'down',
+      trendValue: tasaOcupacionCore > 80 ? '+5%' : '-3%',
     },
     {
       title: 'Ingresos Mensuales',
@@ -295,38 +332,36 @@ export default function TraditionalRentalDashboard() {
           })}
         </div>
 
-        {/* Progress indicators */}
+        {/* Occupancy by Type + Contracts */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Ocupación visual */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Home className="h-5 w-5 text-blue-600" />
-                Estado de Ocupación
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <div className="flex justify-between mb-2">
-                  <span className="text-sm font-medium">Propiedades ocupadas</span>
-                  <span className="text-sm text-gray-500">
-                    {stats.propiedadesOcupadas}/{stats.totalPropiedades}
-                  </span>
+          {/* Ocupación por tipo de activo */}
+          {occupancyByType.length > 0 ? (
+            <OccupancyByTypeCard
+              data={occupancyByType}
+              tasaTotal={stats.tasaOcupacion}
+              tasaCore={tasaOcupacionCore}
+            />
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Home className="h-5 w-5 text-blue-600" />
+                  Estado de Ocupación
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <div className="flex justify-between mb-2">
+                    <span className="text-sm font-medium">Propiedades ocupadas</span>
+                    <span className="text-sm text-gray-500">
+                      {stats.propiedadesOcupadas}/{stats.totalPropiedades}
+                    </span>
+                  </div>
+                  <Progress value={stats.tasaOcupacion} className="h-3" />
                 </div>
-                <Progress value={stats.tasaOcupacion} className="h-3" />
-              </div>
-              <div className="grid grid-cols-2 gap-4 pt-2">
-                <div className="p-3 bg-green-50 rounded-lg">
-                  <p className="text-xs text-green-600 font-medium">Ocupadas</p>
-                  <p className="text-xl font-bold text-green-700">{stats.propiedadesOcupadas}</p>
-                </div>
-                <div className="p-3 bg-amber-50 rounded-lg">
-                  <p className="text-xs text-amber-600 font-medium">Disponibles</p>
-                  <p className="text-xl font-bold text-amber-700">{stats.propiedadesDisponibles}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Contratos a renovar */}
           <Card>

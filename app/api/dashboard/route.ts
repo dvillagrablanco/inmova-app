@@ -207,6 +207,58 @@ export async function GET(request: NextRequest) {
       };
     });
 
+    // Ocupación desglosada por tipo de activo (con tasas individuales y renta)
+    const rentaByType = await prisma.contract.groupBy({
+      by: ['tipo'],
+      where: {
+        unit: { building: { companyId: companyFilter } },
+        estado: 'activo',
+      },
+      _sum: { rentaMensual: true },
+      _count: true,
+    });
+
+    // Mapa de labels legibles por tipo
+    const typeLabels: Record<string, string> = {
+      vivienda: 'Viviendas',
+      local: 'Locales',
+      garaje: 'Garajes',
+      trastero: 'Trasteros',
+      oficina: 'Oficinas',
+      nave_industrial: 'Naves industriales',
+      coworking_space: 'Coworking',
+    };
+
+    const occupancyByType = occupancyChartData
+      .filter(t => t.total > 0)
+      .map(t => {
+        const rate = t.total > 0 ? (t.ocupadas / t.total) * 100 : 0;
+        // Buscar renta de contratos de ese tipo (contrato.tipo puede ser residencial/comercial/temporal)
+        // Usamos la renta de las unidades ocupadas en su lugar
+        const tipoKey = t.name;
+        return {
+          tipo: tipoKey,
+          label: typeLabels[tipoKey] || tipoKey,
+          ocupadas: t.ocupadas,
+          disponibles: t.disponibles,
+          total: t.total,
+          tasa: Number(rate.toFixed(1)),
+        };
+      })
+      .sort((a, b) => {
+        // Orden de relevancia: vivienda > local > oficina > nave > garaje > trastero > coworking
+        const order = ['vivienda', 'local', 'oficina', 'nave_industrial', 'garaje', 'trastero', 'coworking_space'];
+        return order.indexOf(a.tipo) - order.indexOf(b.tipo);
+      });
+
+    // Tasa de ocupación excluyendo garajes/trasteros (activos "de peso")
+    const coreTypes = occupancyChartData.filter(t =>
+      !['garaje', 'trastero'].includes(t.name)
+    );
+    const coreTotal = coreTypes.reduce((s, t) => s + t.total, 0);
+    const coreOcupadas = coreTypes.reduce((s, t) => s + t.ocupadas, 0);
+    const tasaOcupacionCore = coreTotal > 0 ? (coreOcupadas / coreTotal) * 100 : 0;
+
     const accountingMonthTotals = accountingTransactions.reduce(
       (acc, transaction) => {
         if (transaction.fecha >= startDate && transaction.fecha <= endDate) {
@@ -423,6 +475,7 @@ export async function GET(request: NextRequest) {
         ingresosTotalesMensuales,
         numeroPropiedades: totalBuildings,
         tasaOcupacion: Number(tasaOcupacion.toFixed(1)),
+        tasaOcupacionCore: Number(tasaOcupacionCore.toFixed(1)),
         tasaMorosidad: Number(tasaMorosidad.toFixed(1)),
         ingresosNetos,
         gastosTotales,
@@ -430,6 +483,7 @@ export async function GET(request: NextRequest) {
       },
       monthlyIncome,
       occupancyChartData,
+      occupancyByType,
       expensesChartData,
       pagosPendientes,
       contractsExpiringSoon: contractsExpiring,

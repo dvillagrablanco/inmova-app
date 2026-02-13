@@ -514,6 +514,36 @@ export async function getAnalyticsTrends(
         }),
       ]);
 
+      // Ocupación por tipo (solo para el último mes, para no sobrecargar)
+      let occupancyByType: any[] | undefined;
+      if (i === 0) {
+        const unitsByType = await prisma.unit.groupBy({
+          by: ['tipo'],
+          where: { building: { companyId, ...excludeDemoFilter }, ...excludeDemoFilter },
+          _count: true,
+        });
+        const occupiedByType = await prisma.unit.groupBy({
+          by: ['tipo'],
+          where: { building: { companyId, ...excludeDemoFilter }, ...excludeDemoFilter, estado: 'ocupada' },
+          _count: true,
+        });
+        const typeLabels: Record<string, string> = {
+          vivienda: 'Viviendas', local: 'Locales', garaje: 'Garajes',
+          trastero: 'Trasteros', oficina: 'Oficinas',
+          nave_industrial: 'Naves industriales', coworking_space: 'Coworking',
+        };
+        occupancyByType = unitsByType
+          .filter(t => t._count > 0)
+          .map(t => {
+            const occ = occupiedByType.find(o => o.tipo === t.tipo)?._count || 0;
+            return {
+              tipo: t.tipo, label: typeLabels[t.tipo as string] || t.tipo,
+              total: t._count, ocupadas: occ, disponibles: t._count - occ,
+              tasa: Number(((occ / t._count) * 100).toFixed(1)),
+            };
+          });
+      }
+
       trends.push({
         month: monthNames[monthStart.getMonth()],
         year: monthStart.getFullYear(),
@@ -522,6 +552,7 @@ export async function getAnalyticsTrends(
         tenants,
         contracts,
         revenue: payments._sum.monto || 0,
+        ...(occupancyByType && { occupancyByType }),
       });
     }
 
