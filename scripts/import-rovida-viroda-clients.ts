@@ -192,16 +192,12 @@ function parseUnitFromConcepto(concepto: string, operacion: string): UnitMatch |
   }
 
   // Hernández de Tejada 6 (VIRODA - viviendas, NOT garajes)
-  // Note: "C/ Hernández de Tejada 6," with comma followed by floor-letter = vivienda
+  // Note: "Viv. C/ Hernández de Tejada 6" = vivienda
   // "Garaje C/Hernández de Tejada 6," = garaje (handled above)
-  if ((c.includes('Hernández de Tejada 6') || c.includes('Hernandez de Tejada 6')) && !c.includes('Garaje')) {
+  // Key distinction: "Viv." or "Plaza de Garaje" (addon) vs "Garaje C/" (standalone garaje)
+  if ((c.includes('Hernández de Tejada 6') || c.includes('Hernandez de Tejada 6')) && !c.startsWith('Renta Garaje')) {
     m = c.match(/(\d+)º?\s*([A-C])/i);
     if (m) return { edificioPattern: 'Hernández de Tejada 6', unidad: `${m[1]}º ${m[2].toUpperCase()}`, tipo: 'vivienda' };
-    // "4º A + Plaza de Garaje" or "4º A + Plaza de garaje"
-    if (/Plaza de [Gg]araje/i.test(c)) {
-      m = c.match(/(\d+)º?\s*([A-C])/i);
-      if (m) return { edificioPattern: 'Hernández de Tejada 6', unidad: `${m[1]}º ${m[2].toUpperCase()}`, tipo: 'vivienda' };
-    }
   }
 
   // Candelaria Mora 12-14
@@ -217,9 +213,9 @@ function parseUnitFromConcepto(concepto: string, operacion: string): UnitMatch |
     if (m) return { edificioPattern: 'Reina 15', unidad: `${m[1]}º ${m[2].toUpperCase()}`, tipo: 'vivienda' };
   }
 
-  // Menéndez Pelayo 15 (VIRODA - viviendas) - handles Menédez/Menéndez typos
-  if ((/Men[eé](?:n|ñ)?dez Pelayo 15/i.test(c) || /Mdez Pelayo.*15/i.test(c)) && !c.includes('Local') && !c.includes('Garaje')) {
-    if (/[Áá]tico/i.test(c)) return { edificioPattern: 'Menéndez Pelayo', unidad: 'Ático', tipo: 'vivienda' };
+  // Menéndez Pelayo 15 (VIRODA - viviendas) - handles Menédez/Menéndez/Mdez typos
+  if ((/Men[eé](?:n|ñ)?dez Pelayo.?15/i.test(c) || /M[eé]n?[eé]dez Pelayo.?15/i.test(c) || /Mdez Pelayo.*15/i.test(c)) && !c.includes('Local') && !c.includes('Garaje')) {
+    if (/[Áá]tico/i.test(c) || /Atico/i.test(c)) return { edificioPattern: 'Menéndez Pelayo', unidad: 'Ático', tipo: 'vivienda' };
     m = c.match(/(\d+)º?D(?:cha)?/i);
     if (m) return { edificioPattern: 'Menéndez Pelayo', unidad: `${m[1]}º Dcha`, tipo: 'vivienda' };
     m = c.match(/(\d+)º?I(?:zq)?/i);
