@@ -140,8 +140,12 @@ export default function CrearPropiedadPage() {
       toast.error('La superficie debe ser mayor a 0');
       return false;
     }
-    if (!formData.rentaMensual || parseFloat(formData.rentaMensual) <= 0) {
-      toast.error('La renta mensual debe ser mayor a 0');
+    if (formData.rentaMensual === '' || formData.rentaMensual === null || formData.rentaMensual === undefined) {
+      toast.error('La renta mensual es obligatoria (puede ser 0 para uso interno)');
+      return false;
+    }
+    if (parseFloat(formData.rentaMensual) < 0) {
+      toast.error('La renta mensual no puede ser negativa');
       return false;
     }
     return true;
