@@ -13,6 +13,7 @@ import logger from '@/lib/logger';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // ============================================================================
 // VALIDACIÓN CON ZOD
@@ -74,7 +75,8 @@ export async function POST(req: NextRequest) {
       const validatedData = validationResult.data;
 
       // 3. Verificar que el inquilino existe y pertenece a la empresa
-      const { prisma } = await import('@/lib/db');
+      const { getPrismaClient } = await import('@/lib/db');
+      const prisma = getPrismaClient();
       const tenant = await prisma.tenant.findFirst({
         where: {
           id: validatedData.tenantId,

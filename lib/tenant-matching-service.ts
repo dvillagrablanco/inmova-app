@@ -72,11 +72,11 @@ export async function findBestMatches(
   useAI: boolean = true
 ): Promise<PropertyMatch[]> {
   try {
-    // 1. Obtener datos del inquilino
+    // 1. Obtener datos del inquilino con preferencias
     const tenant = await prisma.tenant.findUnique({
       where: { id: tenantId },
       include: {
-        preferences: true, // Asume que existe relación con preferencias
+        tenantPreferences: true,
       },
     });
 
@@ -84,40 +84,42 @@ export async function findBestMatches(
       throw new Error('Tenant not found');
     }
 
-    // 2. Construir preferencias (desde datos existentes o defaults)
+    const prefs = tenant.tenantPreferences;
+
+    // 2. Construir preferencias (desde TenantPreferences o defaults razonables)
     const preferences: TenantPreferences = {
-      minBudget: tenant.presupuestoMin || 500,
-      maxBudget: tenant.presupuestoMax || 2000,
-      idealBudget: tenant.presupuestoIdeal || 1000,
-      preferredCities: tenant.ciudadesPreferidas || [],
-      minRooms: tenant.habitacionesMin || 1,
-      prefersModern: tenant.prefiereModerno || false,
-      needsPublicTransport: tenant.necesitaTransportePublico || false,
-      hasCar: tenant.tieneCoche || false,
-      hasPets: tenant.tieneMascotas || false,
-      isSmoker: tenant.fumador || false,
-      minSquareMeters: tenant.metrosCuadradosMin,
-      preferredFloors: tenant.pisosPreferidos,
-      wantsElevator: tenant.quiereAscensor,
-      wantsParking: tenant.quiereParking,
-      wantsFurnished: tenant.quiereAmueblado,
+      minBudget: prefs?.minBudget || 0,
+      maxBudget: prefs?.maxBudget || 50000,
+      idealBudget: prefs?.idealBudget || (prefs?.maxBudget ? prefs.maxBudget * 0.8 : 1500),
+      preferredCities: prefs?.preferredCities || [],
+      minRooms: prefs?.minRooms || 1,
+      prefersModern: prefs?.prefersModern || false,
+      needsPublicTransport: prefs?.needsPublicTransport || false,
+      hasCar: prefs?.hasCar || false,
+      hasPets: prefs?.hasPets || prefs?.needsPetFriendly || false,
+      isSmoker: false,
+      minSquareMeters: prefs?.minSquareMeters || undefined,
+      wantsElevator: prefs?.needsElevator || false,
+      wantsParking: prefs?.needsParking || false,
+      wantsFurnished: prefs?.needsFurnished || false,
     };
 
     // 3. Obtener propiedades disponibles
+    const unitWhere: any = {
+      building: { companyId },
+      estado: 'disponible',
+    };
+
+    // Solo filtrar por renta si hay presupuesto máximo definido y razonable
+    if (preferences.maxBudget && preferences.maxBudget < 50000) {
+      unitWhere.rentaMensual = { lte: preferences.maxBudget };
+      if (preferences.minBudget > 0) {
+        unitWhere.rentaMensual.gte = preferences.minBudget;
+      }
+    }
+
     const properties = await prisma.unit.findMany({
-      where: {
-        building: {
-          companyId,
-        },
-        estado: 'disponible',
-        rentaMensual: {
-          gte: preferences.minBudget,
-          lte: preferences.maxBudget,
-        },
-        habitaciones: {
-          gte: preferences.minRooms,
-        },
-      },
+      where: unitWhere,
       include: {
         building: {
           select: {
@@ -126,14 +128,10 @@ export async function findBestMatches(
             direccion: true,
             ciudad: true,
             codigoPostal: true,
-            tieneAscensor: true,
-            tieneParking: true,
-            cercaMetro: true,
-            cercaAutobus: true,
           },
         },
       },
-      take: 100, // Máximo para evaluar
+      take: 100,
     });
 
     logger.info(`📊 Evaluating ${properties.length} properties for tenant ${tenantId}`);
@@ -209,70 +207,51 @@ function scorePropertyMatch(
   // ============================================================================
   let locationScore = 0;
 
-  // Ciudad preferida
-  if (preferences.preferredCities.includes(property.building.ciudad)) {
-    locationScore += 10;
-    pros.push(`Ciudad preferida (${property.building.ciudad})`);
-  }
-
-  // Transporte público
-  if (preferences.needsPublicTransport) {
-    if (property.building.cercaMetro) {
-      locationScore += 10;
-      pros.push('Cerca del metro');
-    } else if (property.building.cercaAutobus) {
-      locationScore += 5;
-      pros.push('Cerca de autobús');
-    } else {
-      cons.push('Lejos del transporte público');
+  // Dirección contiene ciudad preferida
+  const buildingAddress = (property.building?.direccion || '').toLowerCase();
+  const buildingCity = (property.building?.ciudad || '').toLowerCase();
+  if (preferences.preferredCities.length > 0) {
+    const matchesCity = preferences.preferredCities.some(
+      city => buildingAddress.includes(city.toLowerCase()) || buildingCity.includes(city.toLowerCase())
+    );
+    if (matchesCity) {
+      locationScore += 15;
+      pros.push(`Zona preferida`);
     }
   } else {
-    locationScore += 5; // Bonus si no importa el transporte
+    locationScore += 5; // Bonus si no tiene preferencias de ubicación
   }
 
-  // Parking
-  if (preferences.hasCar) {
-    if (property.building.tieneParking || property.tieneGaraje) {
+  // Parking / Garaje
+  if (preferences.hasCar || preferences.wantsParking) {
+    if (property.building?.garaje) {
       locationScore += 10;
-      pros.push('Tiene parking disponible');
+      pros.push('Tiene garaje disponible');
     } else {
-      cons.push('No tiene parking (necesario para coche)');
+      cons.push('Sin garaje');
     }
+  } else {
+    locationScore += 5;
   }
 
-  matchScore += Math.min(locationScore, 25); // Cap a 25
+  matchScore += Math.min(locationScore, 25);
 
   // ============================================================================
   // 3. CARACTERÍSTICAS (Peso: 20%)
   // ============================================================================
   let featuresScore = 0;
 
-  // Mascotas
-  if (preferences.hasPets) {
-    if (property.admiteMascotas) {
-      featuresScore += 8;
-      pros.push('Admite mascotas');
-    } else {
-      featuresScore -= 5;
-      cons.push('No admite mascotas');
-    }
-  }
-
-  // Fumador
-  if (preferences.isSmoker && !property.permiteFumar) {
-    cons.push('No se permite fumar');
-    featuresScore -= 3;
-  }
-
   // Ascensor
   if (preferences.wantsElevator) {
-    if (property.building.tieneAscensor) {
-      featuresScore += 5;
+    if (property.building?.ascensor) {
+      featuresScore += 7;
       pros.push('Tiene ascensor');
-    } else if (property.piso && property.piso > 3) {
-      cons.push(`Sin ascensor (piso ${property.piso})`);
+    } else if (property.planta && property.planta > 2) {
+      cons.push(`Sin ascensor (planta ${property.planta})`);
       featuresScore -= 3;
     }
+  } else {
+    featuresScore += 3;
   }
 
   // Amueblado
@@ -283,9 +262,17 @@ function scorePropertyMatch(
     } else {
       cons.push('No está amueblado');
     }
+  } else {
+    featuresScore += 3;
   }
 
-  matchScore += Math.max(0, Math.min(featuresScore, 20)); // Entre 0 y 20
+  // Terraza / Balcón como bonus
+  if (property.terraza) {
+    featuresScore += 3;
+    pros.push('Tiene terraza');
+  }
+
+  matchScore += Math.max(0, Math.min(featuresScore, 20));
 
   // ============================================================================
   // 4. TAMAÑO (Peso: 15%)
@@ -403,18 +390,18 @@ async function enrichSingleMatch(
 
 INQUILINO:
 - Nombre: ${tenant.nombreCompleto}
-- Presupuesto: ${tenant.presupuestoMin}-${tenant.presupuestoMax}€
-- Preferencias: ${tenant.preferencias || 'No especificadas'}
+- Email: ${tenant.email}
 
 PROPIEDAD:
-- Ubicación: ${property.building.direccion}, ${property.building.ciudad}
+- Ubicación: ${property.building?.direccion || 'N/A'}
 - Precio: ${property.rentaMensual}€/mes
-- Tamaño: ${property.superficie}m², ${property.habitaciones} hab
+- Tamaño: ${property.superficie}m², ${property.habitaciones} hab, ${property.banos} baños
 - Características: ${JSON.stringify({
   amueblado: property.amueblado,
-  mascotas: property.admiteMascotas,
-  ascensor: property.building.tieneAscensor,
-  parking: property.building.tieneParking,
+  ascensor: property.building?.ascensor,
+  garaje: property.building?.garaje,
+  terraza: property.terraza,
+  balcon: property.balcon,
 })}
 
 MATCH SCORE: ${match.matchScore}/100
