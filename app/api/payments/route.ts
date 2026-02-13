@@ -280,6 +280,44 @@ export async function POST(req: NextRequest) {
     await invalidateDashboardCache(scope.activeCompanyId);
 
     logger.info('Payment created successfully', { paymentId: payment.id });
+
+    // Sincronizar ingreso con Zucchetti (async, no bloqueante)
+    // Solo si el pago está marcado como pagado
+    if (scope.activeCompanyId && (validatedData.estado === 'pagado' || validatedData.fechaPago)) {
+      import('@/lib/zucchetti-accounting-sync').then(async ({ syncIncomeToZucchetti }) => {
+        try {
+          // Obtener datos del contrato para referencia
+          const contract = await prisma.contract.findUnique({
+            where: { id: validatedData.contractId },
+            select: {
+              unit: {
+                select: {
+                  numero: true,
+                  building: { select: { nombre: true, companyId: true } },
+                },
+              },
+              tenant: { select: { nombreCompleto: true } },
+            },
+          });
+
+          const companyId = contract?.unit?.building?.companyId || scope.activeCompanyId;
+
+          await syncIncomeToZucchetti({
+            companyId,
+            concepto: validatedData.concepto || `Renta ${payment.periodo}`,
+            monto: validatedData.monto,
+            fecha: validatedData.fechaPago ? new Date(validatedData.fechaPago) : new Date(),
+            tenantName: contract?.tenant?.nombreCompleto,
+            buildingName: contract?.unit?.building?.nombre,
+            unitNumero: contract?.unit?.numero,
+            paymentId: payment.id,
+          });
+        } catch (err: any) {
+          logger.warn('Zucchetti sync error (no bloqueante):', err.message);
+        }
+      }).catch(() => {});
+    }
+
     return NextResponse.json(payment, { status: 201 });
   } catch (error: any) {
     logError(error, { context: 'Error creating payment' });

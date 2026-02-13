@@ -329,6 +329,25 @@ export async function POST(req: NextRequest) {
     }
 
     logger.info(`Gasto creado: ${expense.id}`, { userId: user.id, expenseId: expense.id });
+
+    // Sincronizar con Zucchetti (async, no bloqueante)
+    const companyIdForSync = expense.building?.companyId || scope.activeCompanyId;
+    if (companyIdForSync) {
+      import('@/lib/zucchetti-accounting-sync').then(({ syncExpenseToZucchetti }) => {
+        syncExpenseToZucchetti({
+          companyId: companyIdForSync,
+          concepto: validatedData.concepto,
+          monto: validatedData.monto,
+          fecha: new Date(validatedData.fecha),
+          categoria: validatedData.categoria,
+          providerName: expense.provider?.nombre,
+          buildingName: expense.building?.nombre,
+          unitNumero: expense.unit?.numero,
+          expenseId: expense.id,
+        }).catch(err => logger.warn('Zucchetti sync error (no bloqueante):', err.message));
+      }).catch(() => {});
+    }
+
     return NextResponse.json(expense, { status: 201 });
     
   } catch (error: any) {
