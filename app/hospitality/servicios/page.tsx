@@ -46,23 +46,19 @@ const CATEGORIAS = [
   { id: 'extras', label: 'Extras', icon: Package },
 ];
 
-const DEFAULT_SERVICES: GuestService[] = [
-  { id: '1', nombre: 'Desayuno', descripcion: 'Desayuno buffet continental', categoria: 'alimentacion', precio: 15, activo: true, icono: 'coffee' },
-  { id: '2', nombre: 'Late Check-out', descripcion: 'Salida hasta las 14:00h', categoria: 'extras', precio: 30, activo: true, icono: 'clock' },
-  { id: '3', nombre: 'Early Check-in', descripcion: 'Entrada desde las 10:00h', categoria: 'extras', precio: 25, activo: true, icono: 'clock' },
-  { id: '4', nombre: 'Transfer Aeropuerto', descripcion: 'Traslado aeropuerto-alojamiento', categoria: 'transporte', precio: 45, activo: true, icono: 'car' },
-  { id: '5', nombre: 'Lavandería Express', descripcion: 'Servicio de lavandería en 4h', categoria: 'lavanderia', precio: 20, activo: true, icono: 'shirt' },
-  { id: '6', nombre: 'Pack Bienvenida Premium', descripcion: 'Cava, fruta, chocolates artesanales', categoria: 'extras', precio: 35, activo: true, icono: 'star' },
-  { id: '7', nombre: 'Cuna Bebé', descripcion: 'Cuna y kit infantil', categoria: 'infantil', precio: 0, activo: true, icono: 'baby' },
-  { id: '8', nombre: 'Kit Mascota', descripcion: 'Comedero, cama y bolsas', categoria: 'mascotas', precio: 10, activo: false, icono: 'dog' },
-  { id: '9', nombre: 'Parking', descripcion: 'Plaza de garaje por noche', categoria: 'transporte', precio: 18, activo: true, icono: 'car' },
-  { id: '10', nombre: 'Acceso Gym/Spa', descripcion: 'Acceso diario a zona wellness', categoria: 'bienestar', precio: 12, activo: true, icono: 'dumbbell' },
+// Servicios iniciales sugeridos - se usan solo cuando el usuario crea sus primeros servicios
+const SUGGESTED_SERVICES: Omit<GuestService, 'id'>[] = [
+  { nombre: 'Desayuno', descripcion: 'Desayuno buffet continental', categoria: 'alimentacion', precio: 15, activo: true, icono: 'coffee' },
+  { nombre: 'Late Check-out', descripcion: 'Salida hasta las 14:00h', categoria: 'extras', precio: 30, activo: true, icono: 'clock' },
+  { nombre: 'Transfer Aeropuerto', descripcion: 'Traslado aeropuerto-alojamiento', categoria: 'transporte', precio: 45, activo: true, icono: 'car' },
+  { nombre: 'Lavandería Express', descripcion: 'Servicio de lavandería en 4h', categoria: 'lavanderia', precio: 20, activo: true, icono: 'shirt' },
+  { nombre: 'Parking', descripcion: 'Plaza de garaje por noche', categoria: 'transporte', precio: 18, activo: true, icono: 'car' },
 ];
 
 export default function ServiciosHospitalityPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [services, setServices] = useState<GuestService[]>(DEFAULT_SERVICES);
+  const [services, setServices] = useState<GuestService[]>([]);
   const [loading, setLoading] = useState(true);
   const [editDialog, setEditDialog] = useState(false);
   const [editingService, setEditingService] = useState<GuestService | null>(null);
@@ -80,15 +76,22 @@ export default function ServiciosHospitalityPage() {
       const res = await fetch('/api/hospitality/servicios');
       if (res.ok) {
         const data = await res.json();
-        if (data.data && data.data.length > 0) {
-          setServices(data.data);
-        }
+        setServices(data.data || []);
       }
     } catch (error) {
       console.error('Error:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleAddSuggested = () => {
+    const newServices = SUGGESTED_SERVICES.map((s, i) => ({
+      ...s,
+      id: `new-${Date.now()}-${i}`,
+    }));
+    setServices(newServices);
+    toast.success(`${newServices.length} servicios sugeridos añadidos`);
   };
 
   const toggleService = (id: string) => {
@@ -177,6 +180,20 @@ export default function ServiciosHospitalityPage() {
         </div>
 
         {/* Grid de servicios */}
+        {services.length === 0 && !loading && (
+          <Card className="border-dashed">
+            <CardContent className="py-12 text-center">
+              <Coffee className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+              <h3 className="text-lg font-semibold mb-2">Sin servicios configurados</h3>
+              <p className="text-muted-foreground mb-4">Configura los servicios que ofreces a tus huéspedes</p>
+              <Button onClick={handleAddSuggested} className="gap-2">
+                <Plus className="h-4 w-4" />
+                Cargar servicios sugeridos
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((service) => (
             <Card key={service.id} className={`transition-all ${!service.activo ? 'opacity-60' : ''}`}>

@@ -1,176 +1,123 @@
 /**
- * API Endpoint: Gestión de Habitaciones de Hotel/Hospitality
- * Utiliza el modelo Room existente con configuración para hospitality
+ * API Hospitality: Rooms (Habitaciones)
+ * Usa el modelo Unit existente - habitaciones son unidades de un edificio
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { z } from 'zod';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-const createRoomSchema = z.object({
-  buildingId: z.string(),
-  unitId: z.string().optional(),
-  numero: z.string(),
-  tipo: z.string(), // suite, standard, deluxe, etc.
-  capacidad: z.number().int().min(1),
-  precioPorNoche: z.number().min(0),
-  amenidades: z.array(z.string()).default([]),
-  descripcion: z.string().optional(),
-  superficie: z.number().optional(),
-  vistas: z.string().optional(),
-  piso: z.number().optional(),
-  estado: z.enum(['disponible', 'ocupada', 'mantenimiento', 'reservada']).default('disponible'),
-});
-
-type RoomStatusDb = 'disponible' | 'ocupada' | 'mantenimiento' | 'reservada';
-
-const normalizeRoomStatus = (estado?: string | null): RoomStatusDb | null => {
-  if (!estado) return null;
-  const normalized = estado.trim().toLowerCase();
-  if (normalized === 'disponible') return 'disponible';
-  if (normalized === 'ocupada') return 'ocupada';
-  if (normalized === 'mantenimiento') return 'mantenimiento';
-  if (normalized === 'reservada') return 'reservada';
-  return null;
-};
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 export async function GET(req: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
-    }
-
-    const companyId = session.user.companyId;
-    if (!companyId) {
-      return NextResponse.json({ error: 'Company ID no encontrado' }, { status: 400 });
+    if (!session?.user?.companyId) {
+      return NextResponse.json({ data: [], stats: null }, { status: 200 });
     }
 
     const { searchParams } = new URL(req.url);
     const buildingId = searchParams.get('buildingId');
     const estado = searchParams.get('estado');
-    const normalizedEstado = normalizeRoomStatus(estado);
 
-    const { prisma } = await import('@/lib/db');
+    const where: any = {
+      building: { companyId: session.user.companyId },
+    };
+    if (buildingId && buildingId !== 'all') where.buildingId = buildingId;
+    if (estado && estado !== 'all') where.estado = estado;
 
-    // Obtener habitaciones (rooms) de edificios con tipo hospitality
-    const rooms = await prisma.room.findMany({
-      where: {
-        companyId,
-        ...(buildingId && { unit: { buildingId } }),
-        ...(normalizedEstado && { estado: normalizedEstado }),
-      },
+    const units = await prisma.unit.findMany({
+      where,
       include: {
-        unit: {
-          select: {
-            id: true,
-            numero: true,
-            building: {
-              select: { id: true, nombre: true, direccion: true },
-            },
-          },
-        },
+        building: { select: { id: true, nombre: true, direccion: true } },
       },
-      orderBy: [{ unitId: 'asc' }, { numero: 'asc' }],
+      orderBy: { numero: 'asc' },
     });
 
-    // Estadísticas
+    // Mapear a formato Room esperado por la página
+    const rooms = units.map((u: any) => ({
+      id: u.id,
+      numero: u.numero,
+      tipo: u.tipo || 'standard',
+      capacidad: u.habitaciones || 1,
+      precioMensual: Number(u.rentaMensual) || 0,
+      amenidades: [
+        u.aireAcondicionado && 'aire',
+        u.calefaccion && 'calefaccion',
+        u.terraza && 'balcon',
+        u.amueblado && 'amueblado',
+      ].filter(Boolean),
+      descripcion: '',
+      superficie: Number(u.superficie) || 0,
+      estado: u.estado,
+      building: u.building,
+    }));
+
+    // Stats
     const stats = {
       total: rooms.length,
-      disponibles: rooms.filter(r => r.estado === 'disponible').length,
-      ocupadas: rooms.filter(r => r.estado === 'ocupada').length,
-      mantenimiento: rooms.filter(r => r.estado === 'mantenimiento').length,
-      reservadas: rooms.filter(r => r.estado === 'reservada').length,
+      disponibles: rooms.filter((r: any) => r.estado === 'disponible').length,
+      ocupadas: rooms.filter((r: any) => r.estado === 'ocupada').length,
+      mantenimiento: rooms.filter((r: any) => r.estado === 'en_mantenimiento').length,
+      reservadas: 0,
     };
 
-    return NextResponse.json({
-      success: true,
-      data: rooms,
-      stats,
-    });
+    return NextResponse.json({ data: rooms, stats });
   } catch (error: any) {
-    logger.error('Error fetching hospitality rooms:', error);
-    return NextResponse.json({ error: 'Error al obtener habitaciones' }, { status: 500 });
+    logger.error('Error en hospitality rooms GET:', error);
+    return NextResponse.json({ data: [], stats: null }, { status: 500 });
   }
 }
 
 export async function POST(req: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    if (!session?.user?.companyId) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = session.user.companyId;
-    if (!companyId) {
-      return NextResponse.json({ error: 'Company ID no encontrado' }, { status: 400 });
-    }
-
     const body = await req.json();
-    const validationResult = createRoomSchema.safeParse(body);
 
-    if (!validationResult.success) {
-      return NextResponse.json({
-        error: 'Datos inválidos',
-        details: validationResult.error.errors,
-      }, { status: 400 });
+    // Verificar que el edificio pertenece a la empresa
+    const building = await prisma.building.findFirst({
+      where: { id: body.buildingId, companyId: session.user.companyId },
+    });
+    if (!building) {
+      return NextResponse.json({ error: 'Edificio no encontrado' }, { status: 404 });
     }
 
-    const data = validationResult.data;
-    const { prisma } = await import('@/lib/db');
-
-    const resolvedUnitId = data.unitId
-      ? data.unitId
-      : (
-          await prisma.unit.findFirst({
-            where: { buildingId: data.buildingId, building: { companyId } },
-            select: { id: true },
-          })
-        )?.id;
-
-    if (!resolvedUnitId) {
-      return NextResponse.json(
-        { error: 'Unit ID no encontrado para el edificio' },
-        { status: 400 }
-      );
-    }
-
-    const room = await prisma.room.create({
+    const unit = await prisma.unit.create({
       data: {
-        companyId,
-        unitId: resolvedUnitId,
-        numero: data.numero,
-        tipoHabitacion: data.tipo,
-        rentaMensual: data.precioPorNoche,
-        descripcion: data.descripcion,
-        superficie: data.superficie ?? 0,
-        estado: data.estado,
+        buildingId: body.buildingId,
+        numero: body.numero,
+        tipo: 'vivienda',
+        estado: 'disponible',
+        superficie: body.superficie || 0,
+        habitaciones: body.capacidad || 1,
+        banos: body.banos || 1,
+        rentaMensual: body.precioMensual || 0,
+        amueblado: body.amenidades?.includes('amueblado') || false,
+        aireAcondicionado: body.amenidades?.includes('aire') || false,
+        calefaccion: body.amenidades?.includes('calefaccion') || false,
+        terraza: body.amenidades?.includes('balcon') || false,
       },
       include: {
-        unit: {
-          select: {
-            id: true,
-            numero: true,
-            building: { select: { nombre: true } },
-          },
-        },
+        building: { select: { id: true, nombre: true, direccion: true } },
       },
     });
 
-    logger.info('Hospitality room created', { roomId: room.id, companyId });
-
-    return NextResponse.json({
-      success: true,
-      data: room,
-      message: 'Habitación creada exitosamente',
-    }, { status: 201 });
+    return NextResponse.json(unit, { status: 201 });
   } catch (error: any) {
-    logger.error('Error creating hospitality room:', error);
+    logger.error('Error en hospitality rooms POST:', error);
     return NextResponse.json({ error: 'Error al crear habitación' }, { status: 500 });
   }
 }

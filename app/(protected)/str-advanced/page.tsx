@@ -58,21 +58,52 @@ export default function STRAdvancedDashboard() {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      // Aquí se cargarían los datos reales desde las APIs
-      // Por ahora usamos datos de ejemplo
-      setTimeout(() => {
-        setDashboardData({
-          totalListings: 12,
-          activeBookings: 8,
-          monthlyRevenue: 15750,
-          occupancyRate: 78,
-          pendingTasks: 5,
-          legalCompliance: 92,
-        });
-        setLoading(false);
-      }, 500);
+
+      // Cargar datos reales desde API STR
+      const [listingsRes, bookingsRes] = await Promise.all([
+        fetch('/api/str/listings').catch(() => null),
+        fetch('/api/str/bookings').catch(() => null),
+      ]);
+
+      let totalListings = 0;
+      let activeBookings = 0;
+      let monthlyRevenue = 0;
+      let occupancyRate = 0;
+
+      if (listingsRes?.ok) {
+        const data = await listingsRes.json();
+        const listings = data.data || data || [];
+        totalListings = Array.isArray(listings) ? listings.length : 0;
+        const activos = Array.isArray(listings) ? listings.filter((l: any) => l.activo).length : 0;
+        occupancyRate = totalListings > 0 ? Math.round((activos / totalListings) * 100) : 0;
+      }
+
+      if (bookingsRes?.ok) {
+        const data = await bookingsRes.json();
+        const bookings = data.data || data || [];
+        if (Array.isArray(bookings)) {
+          activeBookings = bookings.filter((b: any) => 
+            b.estado === 'confirmada' || b.estado === 'checked_in'
+          ).length;
+          const now = new Date();
+          const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+          monthlyRevenue = bookings
+            .filter((b: any) => new Date(b.checkInDate || b.checkIn) >= monthStart)
+            .reduce((sum: number, b: any) => sum + (Number(b.precioTotal) || 0), 0);
+        }
+      }
+
+      setDashboardData({
+        totalListings,
+        activeBookings,
+        monthlyRevenue,
+        occupancyRate,
+        pendingTasks: 0,
+        legalCompliance: 0,
+      });
     } catch (error) {
       logger.error('Error cargando dashboard:', error);
+    } finally {
       setLoading(false);
     }
   };
