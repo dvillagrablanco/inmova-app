@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { z } from 'zod';
 
 import logger from '@/lib/logger';
+import { prisma } from '@/lib/db';
+
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 

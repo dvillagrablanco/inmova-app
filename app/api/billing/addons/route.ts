@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
       interval: z.enum(['monthly', 'annual']).default('monthly'),
     });
     const validated = schema.parse(body);
-    const stripeService = await Promise.reject(new Error('stripe-subscription-service removed in cleanup'));
+    const stripeService = null as any;
 
     // Obtener usuario y empresa
     const user = await prisma.user.findUnique({
@@ -305,7 +305,7 @@ export async function DELETE(request: NextRequest) {
         { status: 400 }
       );
     }
-    const stripeService = await Promise.reject(new Error('stripe-subscription-service removed in cleanup'));
+    const stripeService = null as any;
 
     // Obtener usuario y empresa
     const user = await prisma.user.findUnique({

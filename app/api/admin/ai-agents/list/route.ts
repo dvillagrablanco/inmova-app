@@ -5,6 +5,12 @@ import { authOptions } from '@/lib/auth-options';
 import { z } from 'zod';
 
 import logger from '@/lib/logger';
+import { getPrismaClient } from '@/lib/db';
+
+async function getPrisma() {
+  return getPrismaClient();
+}
+
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 

@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const stripeService = await Promise.reject(new Error('stripe-subscription-service removed in cleanup'));
+    const stripeService = (() => { throw new Error('Stripe sync not available'); })();
 
     // Sincronizar todo
     const result = await stripeService.syncAllToStripe();

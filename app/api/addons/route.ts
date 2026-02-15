@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import { z } from 'zod';
 
 import logger from '@/lib/logger';
+import { prisma } from '@/lib/db';
+
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -180,32 +182,8 @@ export async function POST(request: NextRequest) {
 
     if (validated.syncWithStripe !== false) {
       try {
-        const { syncAddOnToStripe } = await Promise.reject(new Error('stripe-subscription-service removed in cleanup'));
-
-        const stripeIds = await syncAddOnToStripe({
-          id: addon.id,
-          codigo: addon.codigo,
-          nombre: addon.nombre,
-          descripcion: addon.descripcion,
-          precioMensual: addon.precioMensual,
-          precioAnual: addon.precioAnual || undefined,
-          categoria: addon.categoria,
-        });
-
-        if (stripeIds) {
-          // Actualizar con IDs de Stripe
-          await prisma.addOn.update({
-            where: { id: addon.id },
-            data: {
-              stripeProductId: stripeIds.productId,
-              stripePriceIdMonthly: stripeIds.priceIdMonthly,
-              stripePriceIdAnnual: stripeIds.priceIdAnnual,
-            },
-          });
-          stripeSync.synced = true;
-        } else {
-          stripeSync.error = 'Stripe no configurado o error de sincronización';
-        }
+        // stripe-subscription-service removed in cleanup - sync disabled
+        stripeSync.error = 'Stripe sync module not available';
       } catch (stripeError: any) {
         logger.error('[Stripe Sync Error]:', stripeError);
         stripeSync.error = stripeError.message;

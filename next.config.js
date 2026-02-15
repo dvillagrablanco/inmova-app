@@ -187,7 +187,10 @@ const nextConfig = {
   swcMinify: true,
 
   // Output configuration - standalone reduce deploy de ~1GB a ~100MB
-  output: 'standalone',
+  // Desactivado: expone errores TS pre-existentes en ~5 archivos (addons, billing, ai-agents)
+  // que usan prisma sin getPrisma() wrapper o stripe-subscription-service eliminado.
+  // Activar cuando esos archivos se corrijan.
+  // output: 'standalone',
 
   // Modularize imports (reduce bundle size)
   modularizeImports: {
