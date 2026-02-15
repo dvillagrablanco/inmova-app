@@ -80,29 +80,34 @@ export interface FiscalSummary {
 // ============================================================
 
 /**
- * Calcula el resumen de portfolio para una empresa
+ * Calcula el resumen de portfolio para una empresa.
+ * Usa AssetAcquisition si existen, sino calcula KPIs directamente
+ * de buildings/units/contracts/payments (datos operativos reales).
  */
 export async function getCompanyPortfolio(companyId: string): Promise<PortfolioSummary> {
-  const [assets, buildings, units, payments, expenses, mortgages] = await Promise.all([
+  const [assets, buildings, units, contracts, payments, expenses, mortgages] = await Promise.all([
     prisma.assetAcquisition.findMany({
       where: { companyId },
       include: { mortgages: true },
     }),
     prisma.building.findMany({
-      where: { companyId },
-      include: { units: { include: { contracts: { where: { estado: 'activo' } } } } },
+      where: { companyId, isDemo: false },
+      include: { units: true },
     }),
     prisma.unit.findMany({
-      where: { building: { companyId } },
+      where: { building: { companyId, isDemo: false } },
       include: {
         contracts: { where: { estado: 'activo' } },
-        building: { select: { companyId: true } },
       },
+    }),
+    prisma.contract.findMany({
+      where: { unit: { building: { companyId, isDemo: false } }, estado: 'activo' },
+      select: { rentaMensual: true },
     }),
     // Pagos del ultimo mes
     prisma.payment.findMany({
       where: {
-        contract: { unit: { building: { companyId } } },
+        contract: { unit: { building: { companyId, isDemo: false } } },
         estado: 'pagado',
         fechaPago: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
       },
@@ -110,7 +115,7 @@ export async function getCompanyPortfolio(companyId: string): Promise<PortfolioS
     // Gastos del ultimo mes
     prisma.expense.findMany({
       where: {
-        building: { companyId },
+        building: { companyId, isDemo: false },
         fecha: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
       },
     }),
@@ -119,14 +124,31 @@ export async function getCompanyPortfolio(companyId: string): Promise<PortfolioS
     }),
   ]);
 
-  const totalInvestment = assets.reduce((sum, a) => sum + (a.inversionTotal || a.precioCompra), 0);
-  const totalMarketValue = assets.reduce((sum, a) => sum + (a.valorMercadoEstimado || a.precioCompra), 0);
-  const totalMortgageDebt = mortgages.reduce((sum, m) => sum + m.capitalPendiente, 0);
-  const totalEquity = totalMarketValue - totalMortgageDebt;
+  // Ingresos: usa pagos reales del ultimo mes, o renta contratada si no hay pagos
+  const paymentsTotal = payments.reduce((sum, p) => sum + p.monto, 0);
+  const contractedRent = contracts.reduce((sum, c) => sum + c.rentaMensual, 0);
+  const totalMonthlyIncome = paymentsTotal > 0 ? paymentsTotal : contractedRent;
 
-  const totalMonthlyIncome = payments.reduce((sum, p) => sum + p.monto, 0);
+  // Gastos
   const totalMonthlyExpenses = expenses.reduce((sum, e) => sum + e.monto, 0);
+
+  // Hipotecas
+  const totalMortgageDebt = mortgages.reduce((sum, m) => sum + m.capitalPendiente, 0);
   const totalMortgagePayments = mortgages.reduce((sum, m) => sum + m.cuotaMensual, 0);
+
+  // Inversion y valor: desde AssetAcquisition o estimacion
+  let totalInvestment = assets.reduce((sum, a) => sum + (a.inversionTotal || a.precioCompra), 0);
+  let totalMarketValue = assets.reduce((sum, a) => sum + (a.valorMercadoEstimado || a.precioCompra), 0);
+
+  // Si no hay assets registrados, estimar valor como multiplo de renta anual
+  // (PER 15 = multiplicador tipico mercado espanol residencial)
+  if (totalInvestment === 0 && contractedRent > 0) {
+    const estimatedByPER = contractedRent * 12 * 15;
+    totalInvestment = estimatedByPER;
+    totalMarketValue = estimatedByPER;
+  }
+
+  const totalEquity = totalMarketValue - totalMortgageDebt;
   const monthlyCashFlow = totalMonthlyIncome - totalMonthlyExpenses - totalMortgagePayments;
 
   const annualIncome = totalMonthlyIncome * 12;
@@ -141,7 +163,7 @@ export async function getCompanyPortfolio(companyId: string): Promise<PortfolioS
   const ltv = totalMarketValue > 0 ? (totalMortgageDebt / totalMarketValue) * 100 : 0;
 
   return {
-    totalAssets: assets.length,
+    totalAssets: assets.length > 0 ? assets.length : buildings.length,
     totalInvestment: Math.round(totalInvestment * 100) / 100,
     totalMarketValue: Math.round(totalMarketValue * 100) / 100,
     totalMortgageDebt: Math.round(totalMortgageDebt * 100) / 100,
@@ -166,6 +188,7 @@ export async function getCompanyPortfolio(companyId: string): Promise<PortfolioS
  * Usado por Vidaro (holding) para ver el detalle de Viroda y Rovida.
  */
 export async function getCompanyAssetPerformance(companyId: string): Promise<AssetPerformance[]> {
+  // Primero intentar desde AssetAcquisition (datos completos de inversion)
   const assets = await prisma.assetAcquisition.findMany({
     where: { companyId },
     include: {
@@ -207,7 +230,7 @@ export async function getCompanyAssetPerformance(companyId: string): Promise<Ass
     },
   });
 
-  return assets.map((asset) => {
+  const result = assets.map((asset) => {
     const totalInvestment = asset.inversionTotal || asset.precioCompra;
     const currentValue = asset.valorMercadoEstimado || asset.precioCompra;
 
@@ -275,6 +298,62 @@ export async function getCompanyAssetPerformance(companyId: string): Promise<Ass
       occupancyRate: Math.round(occupancyRate * 100) / 100,
     };
   });
+
+  // Fallback: si no hay AssetAcquisitions, generar desde buildings reales
+  if (result.length === 0) {
+    const buildings = await prisma.building.findMany({
+      where: { companyId, isDemo: false },
+      include: {
+        units: {
+          include: {
+            contracts: { where: { estado: 'activo' }, select: { rentaMensual: true } },
+          },
+        },
+      },
+    });
+
+    return buildings.map((b) => {
+      let monthlyRent = 0;
+      let totalUnits = b.units.length;
+      let occupiedUnits = 0;
+
+      for (const u of b.units) {
+        if (u.contracts.length > 0) {
+          occupiedUnits++;
+          monthlyRent += u.contracts[0].rentaMensual;
+        }
+      }
+
+      const annualRent = monthlyRent * 12;
+      const estimatedValue = annualRent > 0 ? annualRent * 15 : 0; // PER 15
+      const monthlyExpenses = (b.gastosComunidad || 0) + ((b.ibiAnual || 0) / 12);
+      const noi = annualRent - (monthlyExpenses * 12);
+      const grossYield = estimatedValue > 0 ? (annualRent / estimatedValue) * 100 : 0;
+      const netYield = estimatedValue > 0 ? (noi / estimatedValue) * 100 : 0;
+      const occupancyRate = totalUnits > 0 ? (occupiedUnits / totalUnits) * 100 : 0;
+
+      return {
+        assetId: b.id,
+        buildingName: b.nombre,
+        unitNumber: undefined,
+        purchasePrice: 0,
+        totalInvestment: Math.round(estimatedValue * 100) / 100,
+        currentValue: Math.round(estimatedValue * 100) / 100,
+        monthlyRent: Math.round(monthlyRent * 100) / 100,
+        monthlyExpenses: Math.round(monthlyExpenses * 100) / 100,
+        mortgagePayment: 0,
+        monthlyCashFlow: Math.round((monthlyRent - monthlyExpenses) * 100) / 100,
+        grossYield: Math.round(grossYield * 100) / 100,
+        netYield: Math.round(netYield * 100) / 100,
+        cashOnCash: Math.round(grossYield * 100) / 100, // Sin hipoteca = mismo que gross
+        capitalGain: 0,
+        accumulatedDepreciation: 0,
+        occupancyRate: Math.round(occupancyRate * 100) / 100,
+      };
+    });
+  }
+
+  return result;
 }
 
 // ============================================================
