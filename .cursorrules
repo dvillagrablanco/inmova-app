@@ -1488,7 +1488,7 @@ Actúas como un **equipo senior completo** con las siguientes especialidades:
 - **NextAuth.js**: 4.24.11 (configurado en `lib/auth-options.ts`)
 - **Encriptación**: bcryptjs
 - **2FA**: speakeasy, otpauth
-- **Rate Limiting**: @upstash/ratelimit + rate-limiter-flexible
+- **Rate Limiting**: `lib/rate-limiting.ts` (Redis hibrido + fallback memoria). Consolidado en Feb 2026 de 3 implementaciones a 1.
 - **Validación**: Zod 3.23.8, Yup 1.3.0
 - **Sanitización**: isomorphic-dompurify
 
@@ -1509,10 +1509,10 @@ Actúas como un **equipo senior completo** con las siguientes especialidades:
 - **Maps**: mapbox-gl
 
 ### Testing
-- **Unit Tests**: Vitest 4.0.15 + @vitest/ui
-- **Integration Tests**: Jest 30.2.0 + Testing Library
+- **Unit/Integration Tests**: Vitest 4.0.16 + @vitest/ui + @testing-library/react
 - **E2E Tests**: Playwright 1.57.0
 - **Accessibility**: @axe-core/cli, pa11y
+- **Nota**: Jest fue eliminado (Feb 2026). Todo consolidado en Vitest.
 
 ### Herramientas de Desarrollo
 - **Linting**: ESLint 9.24.0 + @typescript-eslint
@@ -7058,21 +7058,22 @@ Antes de CADA deployment, verificar:
 
 ### 📈 MÉTRICAS DE ÉXITO
 
-**Deployment 3 Enero 2026**:
+**Cleanup Feb 2026**:
 ```
-✅ Health check arreglado (500 → 200)
-✅ Gmail SMTP configurado (500 emails/día)
-✅ Stripe webhook configurado (live mode)
-✅ PM2 cluster mode (2 workers)
-✅ API documentation completa (Swagger UI)
-✅ Git secrets limpiados (filter-branch)
+✅ 96 archivos lib/ dead code eliminados (~35K lineas)
+✅ Tests: 497 passing, 0 failures (Vitest)
+✅ TypeScript: ignoreBuildErrors: false (0 errores TS)
+✅ Auth guards en 37+ API routes criticas + 17 cron jobs
+✅ Rate limiting consolidado (3 -> 1)
+✅ react-hot-toast migrado a sonner (35 archivos)
+✅ Sentry captureException en 12 rutas criticas
+✅ Husky hooks actualizados (sin deprecation warnings)
+✅ Dependencias limpiadas (Apollo, GraphQL, pdf-lib, webpack, Jest)
+✅ IE11 eliminado de browserslist
+✅ error.tsx + loading.tsx en 10 secciones principales
 
-Integraciones: 7/11 operativas (64%)
-Uptime: 99%+ (PM2 auto-restart)
-Response time: <200ms (landing), <500ms (API)
-Capacidad: 50-100 usuarios activos
-
-Pendiente crítico: Fix DATABASE_URL placeholder
+Pendiente: Fix DATABASE_URL placeholder en produccion
+Pendiente: ESLint ignoreDuringBuilds aun activo
 ```
 
 ---
