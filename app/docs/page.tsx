@@ -163,14 +163,16 @@ export default function DocsPage() {
         </div>
       </footer>
 
-      {/* Swagger UI Script */}
+      {/* Swagger UI Script - loaded async */}
       <script
         src="https://unpkg.com/swagger-ui-dist@5.10.5/swagger-ui-bundle.js"
         crossOrigin="anonymous"
+        async
       />
       <script
         src="https://unpkg.com/swagger-ui-dist@5.10.5/swagger-ui-standalone-preset.js"
         crossOrigin="anonymous"
+        async
       />
       <link
         rel="stylesheet"

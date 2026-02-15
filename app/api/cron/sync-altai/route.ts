@@ -8,7 +8,6 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { requireCronSecret } from '@/lib/api-auth-guard';
 import {
   getAltaiAccessToken,
   getAltaiConfig,
@@ -16,6 +15,7 @@ import {
 } from '@/lib/zucchetti-altai-service';
 import logger from '@/lib/logger';
 import { authorizeCronRequest } from '@/lib/cron-auth';
+import { requireCronSecret } from '@/lib/api-auth-guard';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -42,7 +42,11 @@ export async function GET(request: NextRequest) {
   // Cron auth guard
   const cronAuth = requireCronSecret(request);
   if (!cronAuth.authenticated) return cronAuth.response;
+
   const prisma = await getPrisma();
+  // Cron auth guard (auditoria V2)
+  const cronAuth = await authorizeCronRequest(request as any);
+  if (!cronAuth.authorized) {
     return NextResponse.json({ error: cronAuth.error || 'No autorizado' }, { status: cronAuth.status });
   }
 

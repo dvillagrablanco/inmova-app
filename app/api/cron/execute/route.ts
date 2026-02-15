@@ -18,6 +18,7 @@ export async function POST(request: NextRequest) {
   // Cron auth guard
   const cronAuth = requireCronSecret(request);
   if (!cronAuth.authenticated) return cronAuth.response;
+
   try {
     const authResult = await authorizeCronRequest(request, {
       allowSession: true,
@@ -76,6 +77,7 @@ export async function GET(request: NextRequest) {
   // Cron auth guard
   const cronAuth = requireCronSecret(request);
   if (!cronAuth.authenticated) return cronAuth.response;
+
   try {
     const authResult = await authorizeCronRequest(request, {
       allowSession: true,

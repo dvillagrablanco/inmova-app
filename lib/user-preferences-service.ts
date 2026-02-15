@@ -184,8 +184,8 @@ export async function activateModule(
 ): Promise<{ success: boolean; error?: string; activeModules?: string[] }> {
   try {
     // Verificar que el módulo existe
-    const module = MODULES[moduleId];
-    if (!module) {
+    const mod = MODULES[moduleId];
+    if (!mod) {
       return { success: false, error: 'Módulo no encontrado' };
     }
 

@@ -16,7 +16,6 @@
  * @module lib/nordigen-service
  */
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const NordigenClient = require('nordigen-node');
 import logger from '@/lib/logger';
 

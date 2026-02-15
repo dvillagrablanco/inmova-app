@@ -470,8 +470,8 @@ export function getDefaultActiveModules(
   const recommended = getRecommendedModules(role, vertical, experienceLevel);
   
   return recommended.filter(moduleId => {
-    const module = MODULES[moduleId];
-    return module && module.defaultActive[experienceLevel];
+    const mod = MODULES[moduleId];
+    return mod && mod.defaultActive[experienceLevel];
   });
 }
 
@@ -482,7 +482,7 @@ export function validateModuleDependencies(
   moduleId: string,
   activeModules: string[]
 ): { valid: boolean; missingDependencies?: string[] } {
-  const module = MODULES[moduleId];
+  const mod = MODULES[moduleId];
   
   if (!module || !module.dependencies) {
     return { valid: true };
@@ -539,7 +539,7 @@ export function getModulesByCategory(category: Module['category']): Module[] {
  */
 export function calculateTotalLearningTime(moduleIds: string[]): number {
   return moduleIds.reduce((total, id) => {
-    const module = MODULES[id];
+    const mod = MODULES[id];
     return total + (module?.estimatedLearningTime || 0);
   }, 0);
 }

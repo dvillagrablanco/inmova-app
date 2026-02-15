@@ -295,7 +295,7 @@ export default function PlantillasSMSPage() {
     }
   };
 
-  const useSuggestion = (suggestion: string) => {
+  const applySuggestion = (suggestion: string) => {
     setFormData(prev => ({ ...prev, mensaje: suggestion }));
     setAiSuggestions([]);
     toast.success('Plantilla aplicada');
@@ -457,7 +457,7 @@ export default function PlantillasSMSPage() {
                               <div
                                 key={idx}
                                 className="p-2 bg-background rounded border cursor-pointer hover:border-primary transition-colors"
-                                onClick={() => useSuggestion(suggestion)}
+                                onClick={() => applySuggestion(suggestion)}
                               >
                                 <p className="text-sm">{suggestion}</p>
                                 <p className="text-xs text-muted-foreground mt-1">

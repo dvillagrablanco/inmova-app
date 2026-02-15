@@ -56,8 +56,12 @@ const nextConfig = {
     ignoreBuildErrors: false,
   },
   eslint: {
-    // TODO: Reactivar cuando se corrijan ESLint warnings
+    // ESLint 9 + Next 14 tienen incompatibilidad con `next lint`.
+    // La verificacion se ejecuta via `eslint` directo (eslint.config.js flat config).
+    // Mantener ignoreDuringBuilds:true porque next build usa opciones de ESLint 8 internamente.
+    // En su lugar, lint se ejecuta en pre-commit via husky + lint-staged.
     ignoreDuringBuilds: true,
+    dirs: ['app', 'lib', 'components'],
   },
 
   // Image optimization - Optimizado para producción

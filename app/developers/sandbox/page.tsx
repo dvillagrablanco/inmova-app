@@ -2,6 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Info } from 'lucide-react';
+import Link from 'next/link';
 
 export default function SandboxPage() {
   return (
@@ -33,9 +34,9 @@ export default function SandboxPage() {
             <h3 className="font-semibold mb-2">1. Obtén una API Key de Test</h3>
             <p className="text-sm text-gray-600">
               Ve a{' '}
-              <a href="/dashboard/integrations/api-keys" className="text-blue-600 hover:underline">
+              <Link href="/dashboard/integrations/api-keys" className="text-blue-600 hover:underline">
                 Dashboard → API Keys
-              </a>{' '}
+              </Link>{' '}
               y crea una key con prefijo <code>sk_test_</code>
             </p>
           </div>
@@ -208,12 +209,12 @@ curl -X POST "https://inmovaapp.com/api/v1/sandbox?resource=properties" \\
           Una vez que hayas probado en sandbox, obtén una API key de producción (
           <code>sk_live_</code>) para trabajar con datos reales.
         </p>
-        <a
+        <Link
           href="/dashboard/integrations/api-keys"
           className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
         >
           Crear API Key de Producción
-        </a>
+        </Link>
       </div>
     </div>
   );
