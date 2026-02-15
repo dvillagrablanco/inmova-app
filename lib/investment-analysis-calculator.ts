@@ -26,6 +26,9 @@ export interface AnalysisInput {
   // Precio
   askingPrice: number;
 
+  // Potencial de zona
+  precioM2Zona?: number;       // EUR/m2 medio alquiler en la zona
+
   // Gastos de compra
   gastosNotaria: number;
   gastosRegistro: number;
@@ -112,6 +115,17 @@ export interface AnalysisResult {
   yieldNeto: number;          // NOI / inversion total
   cashOnCash: number;         // Cash-flow / capital propio
   paybackAnos: number;        // Capital propio / cash-flow anual
+
+  // Potencial de zona
+  potencialZona: {
+    precioM2Zona: number;
+    rentaPotencialMensual: number;
+    rentaPotencialAnual: number;
+    yieldPotencial: number;           // Yield si se cobra a precio zona
+    cashFlowPotencialAnual: number;
+    gapRentaActualVsPotencial: number; // % diferencia
+    upside: number;                    // EUR anuales extra si se sube a mercado
+  } | null;
 
   // Tabla de sensibilidad
   tablaSensibilidad: SensitivityRow[];
@@ -301,9 +315,37 @@ export function runInvestmentAnalysis(input: AnalysisInput): AnalysisResult {
     };
   });
 
+  // Potencial de zona (EUR/m2)
+  let potencialZona: AnalysisResult['potencialZona'] = null;
+  if (input.precioM2Zona && input.precioM2Zona > 0 && rentRollSummary.superficieTotal > 0) {
+    const precioM2 = input.precioM2Zona;
+    const rentaPotencialMensual = round(rentRollSummary.superficieTotal * precioM2);
+    const rentaPotencialAnual = round(rentaPotencialMensual * 12);
+    const ajusteVacioPotencial = rentaPotencialAnual * (input.vacioEstimadoPct / 100);
+    const rentaEfectivaPotencial = rentaPotencialAnual - ajusteVacioPotencial;
+    const noiPotencial = rentaEfectivaPotencial - base.opexAnual;
+    const yieldPotencial = base.inversionTotal > 0
+      ? round((noiPotencial / base.inversionTotal) * 100) : 0;
+    const cashFlowPotencialAnual = round(noiPotencial - base.cuotaAnual);
+    const gapPct = base.rentaBrutaAnual > 0
+      ? round(((rentaPotencialAnual - base.rentaBrutaAnual) / base.rentaBrutaAnual) * 100) : 0;
+    const upside = round(rentaPotencialAnual - base.rentaBrutaAnual);
+
+    potencialZona = {
+      precioM2Zona: precioM2,
+      rentaPotencialMensual,
+      rentaPotencialAnual,
+      yieldPotencial,
+      cashFlowPotencialAnual,
+      gapRentaActualVsPotencial: gapPct,
+      upside,
+    };
+  }
+
   return {
     rentRollSummary,
     ...base,
+    potencialZona,
     tablaSensibilidad,
   };
 }

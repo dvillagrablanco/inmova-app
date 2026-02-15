@@ -16056,11 +16056,18 @@ model InvestmentAnalysis {
   plazoAnos           Int?
   comisionApertura    Float?  // %
 
+  // Potencial de zona (EUR/m2)
+  precioM2Zona        Float?  // EUR/m2 medio de alquiler en la zona
+  precioM2ZonaFuente  String? // "manual", "ia", "idealista", etc.
+
   // Rent roll (JSON array de unidades)
   // Cada entrada: { tipo, referencia, superficie, rentaMensual, estado }
   rentRoll            Json    @default("[]")
 
   // Resultados calculados (se regeneran al guardar)
+  rentaPotencialAnual   Float? // Si todas las unidades estuvieran al precio/m2 de zona
+  yieldPotencial        Float? // Yield si se alquila a precio de mercado
+  gapRentaActualVsPotencial Float? // % de diferencia renta actual vs potencial
   rentaBrutaAnual       Float?
   rentaNetaAnual        Float?
   inversionTotal        Float?

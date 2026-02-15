@@ -50,6 +50,9 @@ const analysisSchema = z.object({
   plazoAnos: z.number().int().min(1).max(40).optional(),
   comisionApertura: z.number().min(0).max(10).optional(),
 
+  precioM2Zona: z.number().min(0).optional(),
+  precioM2ZonaFuente: z.string().optional(),
+
   rentRoll: z.array(rentRollEntrySchema).min(1),
   notas: z.string().optional(),
 });
@@ -128,6 +131,10 @@ export async function POST(request: NextRequest) {
         cashOnCash: results.cashOnCash,
         paybackAnos: results.paybackAnos,
         tablaSensibilidad: results.tablaSensibilidad as any,
+        // Potencial zona
+        rentaPotencialAnual: results.potencialZona?.rentaPotencialAnual,
+        yieldPotencial: results.potencialZona?.yieldPotencial,
+        gapRentaActualVsPotencial: results.potencialZona?.gapRentaActualVsPotencial,
       },
     });
 

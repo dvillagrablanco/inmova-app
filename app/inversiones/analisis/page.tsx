@@ -51,6 +51,9 @@ export default function AnalisisInversionPage() {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [results, setResults] = useState<any>(null);
+  const [savedId, setSavedId] = useState<string | null>(null);
+  const [savedAnalyses, setSavedAnalyses] = useState<any[]>([]);
+  const [loadingSaved, setLoadingSaved] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiValuation, setAiValuation] = useState<any>(null);
   const [aiText, setAiText] = useState('');
@@ -59,6 +62,10 @@ export default function AnalisisInversionPage() {
   const [nombre, setNombre] = useState('');
   const [direccion, setDireccion] = useState('');
   const [askingPrice, setAskingPrice] = useState<number>(0);
+
+  // Potencial zona
+  const [precioM2Zona, setPrecioM2Zona] = useState<number>(0);
+  const [precioM2ZonaFuente, setPrecioM2ZonaFuente] = useState('manual');
 
   // Gastos compra
   const [gastosNotaria, setGastosNotaria] = useState(3000);
@@ -96,7 +103,95 @@ export default function AnalisisInversionPage() {
 
   const [notas, setNotas] = useState('');
 
+  // Cargar analisis guardados al montar
+  useState(() => {
+    if (status === 'authenticated') {
+      setLoadingSaved(true);
+      fetch('/api/investment/analysis')
+        .then(r => r.ok ? r.json() : null)
+        .then(data => { if (data?.data) setSavedAnalyses(data.data); })
+        .catch(() => {})
+        .finally(() => setLoadingSaved(false));
+    }
+  });
+
   if (status === 'unauthenticated') { router.push('/login'); }
+
+  const loadSavedAnalysis = async (id: string) => {
+    try {
+      const res = await fetch(`/api/investment/analysis/${id}`);
+      if (!res.ok) { toast.error('Error cargando analisis'); return; }
+      const { data } = await res.json();
+      // Poblar formulario con datos guardados
+      setNombre(data.nombre);
+      setDireccion(data.direccion || '');
+      setAskingPrice(data.askingPrice);
+      setGastosNotaria(data.gastosNotaria);
+      setGastosRegistro(data.gastosRegistro);
+      setImpuestoCompra(data.impuestoCompra);
+      setComisionCompra(data.comisionCompra);
+      setOtrosGastosCompra(data.otrosGastosCompra);
+      setCapexReforma(data.capexReforma);
+      setCapexImprevistos(data.capexImprevistos);
+      setCapexOtros(data.capexOtros);
+      setIbiAnual(data.ibiAnual);
+      setComunidadMensual(data.comunidadMensual);
+      setSeguroAnual(data.seguroAnual);
+      setMantenimientoAnual(data.mantenimientoAnual);
+      setGestionAdminPct(data.gestionAdminPct);
+      setVacioEstimadoPct(data.vacioEstimadoPct);
+      setComisionAlquilerPct(data.comisionAlquilerPct);
+      setOtrosGastosAnuales(data.otrosGastosAnuales);
+      setUsaFinanciacion(data.usaFinanciacion);
+      if (data.ltv) setLtv(data.ltv);
+      if (data.tipoInteres) setTipoInteres(data.tipoInteres);
+      if (data.plazoAnos) setPlazoAnos(data.plazoAnos);
+      if (data.comisionApertura) setComisionApertura(data.comisionApertura);
+      if (data.precioM2Zona) setPrecioM2Zona(data.precioM2Zona);
+      if (data.precioM2ZonaFuente) setPrecioM2ZonaFuente(data.precioM2ZonaFuente);
+      setRentRoll((data.rentRoll as any[]) || []);
+      setNotas(data.notas || '');
+      setSavedId(data.id);
+      // Reconstruir resultados
+      if (data.yieldBruto != null) {
+        setResults({
+          rentaBrutaAnual: data.rentaBrutaAnual,
+          noiAnual: data.rentaNetaAnual,
+          inversionTotal: data.inversionTotal,
+          capitalPropio: data.capitalPropio,
+          importeHipoteca: data.importeHipoteca,
+          cuotaMensual: data.cuotaHipotecaMensual,
+          cashFlowAnualPreTax: data.cashFlowAnual,
+          yieldBruto: data.yieldBruto,
+          yieldNeto: data.yieldNeto,
+          cashOnCash: data.cashOnCash,
+          paybackAnos: data.paybackAnos,
+          tablaSensibilidad: data.tablaSensibilidad || [],
+          potencialZona: data.rentaPotencialAnual ? {
+            precioM2Zona: data.precioM2Zona,
+            rentaPotencialAnual: data.rentaPotencialAnual,
+            yieldPotencial: data.yieldPotencial,
+            gapRentaActualVsPotencial: data.gapRentaActualVsPotencial,
+          } : null,
+          rentRollSummary: { totalUnidades: (data.rentRoll as any[])?.length || 0 },
+          rentaBrutaMensual: (data.rentaBrutaAnual || 0) / 12,
+          rentaEfectivaAnual: data.rentaNetaAnual,
+          ajusteVacio: 0,
+          totalGastosCompra: 0,
+          totalCapex: 0,
+          opexAnual: 0,
+          detalleOpex: {},
+          cuotaAnual: (data.cuotaHipotecaMensual || 0) * 12,
+        });
+      }
+      toast.success('Analisis cargado');
+    } catch { toast.error('Error cargando'); }
+  };
+
+  const handleExport = (format: 'csv' | 'json') => {
+    if (!savedId) { toast.error('Primero calcula y guarda el analisis'); return; }
+    window.open(`/api/investment/analysis/${savedId}/export?format=${format}`, '_blank');
+  };
 
   const addUnit = (tipo: RentRollEntry['tipo'] = 'vivienda') => {
     setRentRoll([...rentRoll, { tipo, referencia: '', superficie: 0, rentaMensual: 0, estado: 'alquilado' }]);
@@ -198,6 +293,8 @@ export default function AnalisisInversionPage() {
           ibiAnual, comunidadMensual, seguroAnual, mantenimientoAnual,
           gestionAdminPct, vacioEstimadoPct, comisionAlquilerPct, otrosGastosAnuales,
           usaFinanciacion, ltv, tipoInteres, plazoAnos, comisionApertura,
+          precioM2Zona: precioM2Zona || undefined,
+          precioM2ZonaFuente: precioM2Zona ? precioM2ZonaFuente : undefined,
           rentRoll, notas,
         }),
       });
@@ -210,6 +307,9 @@ export default function AnalisisInversionPage() {
 
       const data = await res.json();
       setResults(data.data.results);
+      setSavedId(data.data.analysis.id);
+      // Refrescar lista
+      fetch('/api/investment/analysis').then(r => r.ok ? r.json() : null).then(d => { if (d?.data) setSavedAnalyses(d.data); });
       toast.success('Analisis calculado y guardado');
     } catch {
       toast.error('Error de conexion');
@@ -226,8 +326,9 @@ export default function AnalisisInversionPage() {
           <p className="text-gray-500">Introduce el rent roll y datos del activo para calcular rentabilidad y sensibilidad</p>
         </div>
 
-        <Tabs defaultValue="ia" className="space-y-4">
+        <Tabs defaultValue="guardados" className="space-y-4">
           <TabsList className="flex-wrap">
+            <TabsTrigger value="guardados" className="gap-1"><Save className="h-3 w-3" /> Guardados</TabsTrigger>
             <TabsTrigger value="ia" className="gap-1"><Brain className="h-3 w-3" /> Asistente IA</TabsTrigger>
             <TabsTrigger value="datos">Datos del Activo</TabsTrigger>
             <TabsTrigger value="rentroll">Rent Roll</TabsTrigger>
@@ -236,6 +337,46 @@ export default function AnalisisInversionPage() {
             {results && <TabsTrigger value="resultados">Resultados</TabsTrigger>}
             {results && <TabsTrigger value="sensibilidad">Sensibilidad</TabsTrigger>}
           </TabsList>
+
+          {/* TAB: Analisis guardados */}
+          <TabsContent value="guardados">
+            <Card>
+              <CardHeader>
+                <CardTitle>Analisis Guardados</CardTitle>
+                <CardDescription>Selecciona un analisis para cargarlo o exportarlo</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {savedAnalyses.length === 0 ? (
+                  <p className="text-gray-500 text-center py-8">No hay analisis guardados. Crea uno nuevo desde las pestanas.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {savedAnalyses.map((a) => (
+                      <div key={a.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                        <div className="flex-1 cursor-pointer" onClick={() => loadSavedAnalysis(a.id)}>
+                          <div className="font-medium text-gray-900">{a.nombre}</div>
+                          <div className="text-sm text-gray-500 flex gap-3">
+                            {a.direccion && <span>{a.direccion}</span>}
+                            <span>{fmt(a.askingPrice)}</span>
+                            <span>Yield: {a.yieldNeto}%</span>
+                            <span>CoC: {a.cashOnCash}%</span>
+                          </div>
+                          <div className="text-xs text-gray-400">{new Date(a.createdAt).toLocaleDateString('es-ES')}</div>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button size="sm" variant="ghost" onClick={() => { setSavedId(a.id); handleExport('csv'); }}>
+                            <FileText className="h-3 w-3" />
+                          </Button>
+                          <Button size="sm" variant="ghost" onClick={() => loadSavedAnalysis(a.id)}>
+                            <Upload className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           {/* TAB: Asistente IA Documental */}
           <TabsContent value="ia">
@@ -410,6 +551,52 @@ Comunidad: 180 EUR/mes"
                     <Label>Precio que piden (asking price) *</Label>
                     <Input type="number" value={askingPrice || ''} onChange={e => setAskingPrice(Number(e.target.value))} placeholder="500000" />
                     <p className="text-xs text-gray-400 mt-1">Techo maximo para la tabla de sensibilidad</p>
+                  </div>
+                </div>
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div>
+                    <Label>EUR/m2 alquiler de la zona</Label>
+                    <Input type="number" step="0.5" value={precioM2Zona || ''} onChange={e => setPrecioM2Zona(Number(e.target.value))} placeholder="12.50" />
+                    <p className="text-xs text-gray-400 mt-1">Para calcular potencial de rentabilidad</p>
+                  </div>
+                  <div>
+                    <Label>Fuente del dato</Label>
+                    <Select value={precioM2ZonaFuente} onValueChange={setPrecioM2ZonaFuente}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="manual">Manual</SelectItem>
+                        <SelectItem value="ia">Valoracion IA</SelectItem>
+                        <SelectItem value="idealista">Idealista</SelectItem>
+                        <SelectItem value="fotocasa">Fotocasa</SelectItem>
+                        <SelectItem value="tasacion">Tasacion oficial</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex items-end">
+                    <Button variant="outline" size="sm" disabled={aiLoading} onClick={async () => {
+                      if (!direccion) { toast.error('Introduce direccion primero'); return; }
+                      setAiLoading(true);
+                      try {
+                        const formData = new FormData();
+                        formData.append('text', `Estima el precio medio de alquiler por m2 en la zona de: ${direccion}. Responde SOLO con un numero decimal (ej: 12.5)`);
+                        formData.append('context', 'Precio EUR/m2 alquiler zona');
+                        const res = await fetch('/api/investment/analysis/ai-extract', { method: 'POST', body: formData });
+                        if (res.ok) {
+                          const data = await res.json();
+                          const raw = data.data?.rawAnalysis || '';
+                          const match = raw.match(/(\d+[.,]?\d*)/);
+                          if (match) {
+                            const val = parseFloat(match[1].replace(',', '.'));
+                            setPrecioM2Zona(val);
+                            setPrecioM2ZonaFuente('ia');
+                            toast.success(`IA estima ${val} EUR/m2`);
+                          }
+                        }
+                      } catch {} finally { setAiLoading(false); }
+                    }}>
+                      {aiLoading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Sparkles className="h-3 w-3 mr-1" />}
+                      Estimar con IA
+                    </Button>
                   </div>
                 </div>
                 <div>
@@ -664,6 +851,47 @@ Comunidad: 180 EUR/mes"
                 </div>
 
                 {/* Rent Roll Summary */}
+                {/* Potencial de zona */}
+                {results.potencialZona && (
+                  <Card className="border-green-200 bg-green-50/30 md:col-span-2">
+                    <CardHeader><CardTitle className="text-lg flex items-center gap-2"><TrendingUp className="h-5 w-5 text-green-600" /> Potencial de Rentabilidad por Zona</CardTitle></CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
+                        <div>
+                          <span className="text-gray-500">EUR/m2 zona</span>
+                          <div className="text-lg font-bold">{results.potencialZona.precioM2Zona} EUR</div>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Renta potencial anual</span>
+                          <div className="text-lg font-bold text-green-600">{fmt(results.potencialZona.rentaPotencialAnual)}</div>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Yield potencial</span>
+                          <div className="text-lg font-bold text-green-600">{results.potencialZona.yieldPotencial}%</div>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">CF potencial anual</span>
+                          <div className={`text-lg font-bold ${results.potencialZona.cashFlowPotencialAnual >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {fmt(results.potencialZona.cashFlowPotencialAnual)}
+                          </div>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Gap vs actual</span>
+                          <div className={`text-lg font-bold ${results.potencialZona.gapRentaActualVsPotencial > 0 ? 'text-green-600' : 'text-orange-600'}`}>
+                            {results.potencialZona.gapRentaActualVsPotencial > 0 ? '+' : ''}{results.potencialZona.gapRentaActualVsPotencial}%
+                          </div>
+                          <div className="text-xs text-gray-400">
+                            {results.potencialZona.upside > 0
+                              ? `+${fmt(results.potencialZona.upside)}/ano de upside`
+                              : 'Renta actual por encima de mercado'
+                            }
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
                 <Card>
                   <CardHeader><CardTitle className="text-lg">Resumen Rent Roll</CardTitle></CardHeader>
                   <CardContent>
@@ -745,14 +973,26 @@ Comunidad: 180 EUR/mes"
           )}
         </Tabs>
 
-        {/* Boton calcular */}
-        <div className="flex gap-3">
+        {/* Boton calcular + export */}
+        <div className="flex gap-3 flex-wrap">
           <Button onClick={handleCalcular} disabled={saving} size="lg">
             <Calculator className="h-4 w-4 mr-2" />
             {saving ? 'Calculando...' : 'Calcular y Guardar'}
           </Button>
+          {savedId && (
+            <>
+              <Button variant="outline" onClick={() => handleExport('csv')}>
+                <FileText className="h-4 w-4 mr-2" />
+                Exportar CSV
+              </Button>
+              <Button variant="outline" onClick={() => handleExport('json')}>
+                <FileText className="h-4 w-4 mr-2" />
+                Exportar JSON
+              </Button>
+            </>
+          )}
           {results && (
-            <Button variant="outline" onClick={() => setResults(null)}>
+            <Button variant="outline" onClick={() => { setResults(null); setSavedId(null); setNombre(''); }}>
               Nuevo analisis
             </Button>
           )}
