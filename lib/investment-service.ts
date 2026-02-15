@@ -158,6 +158,126 @@ export async function getCompanyPortfolio(companyId: string): Promise<PortfolioS
 }
 
 // ============================================================
+// ASSET PERFORMANCE PER COMPANY
+// ============================================================
+
+/**
+ * Calcula la rentabilidad de cada activo de una sociedad.
+ * Usado por Vidaro (holding) para ver el detalle de Viroda y Rovida.
+ */
+export async function getCompanyAssetPerformance(companyId: string): Promise<AssetPerformance[]> {
+  const assets = await prisma.assetAcquisition.findMany({
+    where: { companyId },
+    include: {
+      building: {
+        select: {
+          nombre: true,
+          direccion: true,
+          units: {
+            select: {
+              id: true,
+              numero: true,
+              rentaMensual: true,
+              gastosComunidad: true,
+              ibiAnual: true,
+              contracts: {
+                where: { estado: 'activo' },
+                select: { id: true, rentaMensual: true },
+              },
+            },
+          },
+        },
+      },
+      unit: {
+        select: {
+          numero: true,
+          rentaMensual: true,
+          gastosComunidad: true,
+          ibiAnual: true,
+          contracts: {
+            where: { estado: 'activo' },
+            select: { id: true, rentaMensual: true },
+          },
+        },
+      },
+      mortgages: {
+        where: { estado: 'activa' },
+        select: { cuotaMensual: true, capitalPendiente: true },
+      },
+    },
+  });
+
+  return assets.map((asset) => {
+    const totalInvestment = asset.inversionTotal || asset.precioCompra;
+    const currentValue = asset.valorMercadoEstimado || asset.precioCompra;
+
+    // Calcular renta mensual del activo
+    let monthlyRent = 0;
+    let totalUnits = 0;
+    let occupiedUnits = 0;
+
+    if (asset.building) {
+      for (const unit of asset.building.units) {
+        totalUnits++;
+        if (unit.contracts.length > 0) {
+          occupiedUnits++;
+          monthlyRent += unit.contracts[0].rentaMensual;
+        }
+      }
+    } else if (asset.unit) {
+      totalUnits = 1;
+      if (asset.unit.contracts.length > 0) {
+        occupiedUnits = 1;
+        monthlyRent = asset.unit.contracts[0].rentaMensual;
+      }
+    }
+
+    // Gastos mensuales estimados
+    const monthlyExpenses = asset.building
+      ? asset.building.units.reduce((s, u) => s + (u.gastosComunidad || 0), 0) +
+        (asset.building.units.reduce((s, u) => s + (u.ibiAnual || 0), 0) / 12)
+      : (asset.unit?.gastosComunidad || 0) + ((asset.unit?.ibiAnual || 0) / 12);
+
+    const mortgagePayment = asset.mortgages.reduce((s, m) => s + m.cuotaMensual, 0);
+    const monthlyCashFlow = monthlyRent - monthlyExpenses - mortgagePayment;
+    const annualRent = monthlyRent * 12;
+    const annualExpenses = monthlyExpenses * 12;
+
+    const grossYield = totalInvestment > 0 ? (annualRent / totalInvestment) * 100 : 0;
+    const noi = annualRent - annualExpenses;
+    const netYield = totalInvestment > 0 ? (noi / totalInvestment) * 100 : 0;
+
+    // Cash-on-cash: cash-flow / capital propio (inversion - hipoteca)
+    const mortgageDebt = asset.mortgages.reduce((s, m) => s + m.capitalPendiente, 0);
+    const ownCapital = totalInvestment - mortgageDebt;
+    const annualCashFlow = monthlyCashFlow * 12;
+    const cashOnCash = ownCapital > 0 ? (annualCashFlow / ownCapital) * 100 : 0;
+
+    const capitalGain = currentValue - (totalInvestment - asset.amortizacionAcumulada);
+    const occupancyRate = totalUnits > 0 ? (occupiedUnits / totalUnits) * 100 : 0;
+
+    return {
+      assetId: asset.id,
+      buildingName: asset.building?.nombre || 'Unidad individual',
+      unitNumber: asset.unit?.numero,
+      purchasePrice: asset.precioCompra,
+      totalInvestment: Math.round(totalInvestment * 100) / 100,
+      currentValue: Math.round(currentValue * 100) / 100,
+      monthlyRent: Math.round(monthlyRent * 100) / 100,
+      monthlyExpenses: Math.round(monthlyExpenses * 100) / 100,
+      mortgagePayment: Math.round(mortgagePayment * 100) / 100,
+      monthlyCashFlow: Math.round(monthlyCashFlow * 100) / 100,
+      grossYield: Math.round(grossYield * 100) / 100,
+      netYield: Math.round(netYield * 100) / 100,
+      cashOnCash: Math.round(cashOnCash * 100) / 100,
+      capitalGain: Math.round(capitalGain * 100) / 100,
+      accumulatedDepreciation: asset.amortizacionAcumulada,
+      occupancyRate: Math.round(occupancyRate * 100) / 100,
+    };
+  });
+}
+
+// ============================================================
 // CONSOLIDATED MULTI-SOCIETY REPORT
 // ============================================================
 
@@ -188,12 +308,15 @@ export async function getConsolidatedReport(parentCompanyId: string): Promise<Co
 
     const portfolio = await getCompanyPortfolio(companyId);
 
+    // Cargar activos con rentabilidad para la comparativa
+    const companyAssets = await getCompanyAssetPerformance(companyId);
+
     companies.push({
       companyId: company.id,
       companyName: company.nombre,
       cif: company.cif || '',
       portfolio,
-      assets: [], // Se populan bajo demanda
+      assets: companyAssets,
     });
   }
 
