@@ -1184,10 +1184,10 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                     )}
                   </button>
                   {expandedSections.holdingGrupo && (
-                    <div className="space-y-0.5 mt-1">
-                      {filteredHoldingGrupoItems.map((item: any) =>
-                        renderNavItem(item)
-                      )}
+                    <div className="space-y-1 mt-1">
+                      {filteredHoldingGrupoItems.map((item) => (
+                        <NavItemWithSubs key={item.href} item={item as SidebarItem} />
+                      ))}
                     </div>
                   )}
                 </div>
