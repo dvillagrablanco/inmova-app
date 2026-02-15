@@ -5,7 +5,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { generateDemoData, hasDemoData } from '@/lib/demo-data-generator';
 import logger from '@/lib/logger';
-import type { BusinessVertical } from '@/lib/onboarding-tours';
+// BusinessVertical type from Prisma schema
+type BusinessVertical = string;
 
 const DEMO_VERTICALS = new Set<BusinessVertical>([
   'alquiler_tradicional',

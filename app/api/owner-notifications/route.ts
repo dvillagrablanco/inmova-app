@@ -19,9 +19,6 @@ export async function GET(req: NextRequest) {
   if (!auth.authenticated) return auth.response;
   const prisma = await getPrisma();
   try {
-  // Auth guard
-  const auth = await requireSession();
-  if (!auth.authenticated) return auth.response;
     const owner = await getAuthenticatedOwner();
 
     if (!owner) {
@@ -62,9 +59,6 @@ export async function PATCH(req: NextRequest) {
   if (!auth.authenticated) return auth.response;
   const prisma = await getPrisma();
   try {
-  // Auth guard
-  const auth = await requireSession();
-  if (!auth.authenticated) return auth.response;
     const owner = await getAuthenticatedOwner();
 
     if (!owner) {

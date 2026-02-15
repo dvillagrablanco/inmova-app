@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
       orderBy: { orden: 'asc' },
     });
 
-    const { syncAddOnToStripe } = await import('@/lib/stripe-subscription-service');
+    const { syncAddOnToStripe } = await Promise.reject(new Error('stripe-subscription-service removed in cleanup'));
 
     const results = {
       total: addons.length,

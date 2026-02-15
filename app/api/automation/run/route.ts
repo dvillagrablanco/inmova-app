@@ -32,9 +32,6 @@ export async function POST(request: NextRequest) {
   if (!auth.authenticated) return auth.response;
   const prisma = await getPrisma();
   try {
-  // Auth guard
-  const auth = await requireSession();
-  if (!auth.authenticated) return auth.response;
     // Verificar token de autorización
     const authHeader = request.headers.get('authorization');
     const token = authHeader?.replace('Bearer ', '');
@@ -134,9 +131,6 @@ export async function GET(request: NextRequest) {
   if (!auth.authenticated) return auth.response;
   const prisma = await getPrisma();
   const { searchParams } = new URL(request.url);
-  // Auth guard
-  const auth = await requireSession();
-  if (!auth.authenticated) return auth.response;
   const token = searchParams.get('token');
 
   if (token !== AUTOMATION_TOKEN) {

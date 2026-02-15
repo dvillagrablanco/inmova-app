@@ -180,7 +180,7 @@ export async function POST(request: NextRequest) {
 
     if (validated.syncWithStripe !== false) {
       try {
-        const { syncAddOnToStripe } = await import('@/lib/stripe-subscription-service');
+        const { syncAddOnToStripe } = await Promise.reject(new Error('stripe-subscription-service removed in cleanup'));
 
         const stripeIds = await syncAddOnToStripe({
           id: addon.id,

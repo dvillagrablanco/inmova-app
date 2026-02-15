@@ -30,12 +30,6 @@ export async function POST(req: NextRequest) {
   // Cron auth guard
   const cronAuth = requireCronSecret(request);
   if (!cronAuth.authenticated) return cronAuth.response;
-  // Cron auth guard (auditoria V2)
-  const cronAuth = await authorizeCronRequest(req as any);
-  if (!cronAuth.authorized) {
-  // Cron auth guard
-  const cronAuth = requireCronSecret(request);
-  if (!cronAuth.authenticated) return cronAuth.response;
     return NextResponse.json({ error: cronAuth.error || 'No autorizado' }, { status: cronAuth.status });
   }
 
@@ -82,12 +76,6 @@ export async function POST(req: NextRequest) {
  * Endpoint de health check para verificar que el servicio está funcionando
  */
 export async function GET(req: NextRequest) {
-  // Cron auth guard
-  const cronAuth = requireCronSecret(request);
-  if (!cronAuth.authenticated) return cronAuth.response;
-  // Cron auth guard (auditoria V2)
-  const cronAuth = await authorizeCronRequest(req as any);
-  if (!cronAuth.authorized) {
   // Cron auth guard
   const cronAuth = requireCronSecret(request);
   if (!cronAuth.authenticated) return cronAuth.response;

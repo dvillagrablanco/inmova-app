@@ -182,8 +182,9 @@ const nextConfig = {
   // Optimización de SWC Minify
   swcMinify: true,
 
-  // Output configuration (Sprint 3)
-  // output: 'standalone', // DISABLED: Causa problemas con prerender-manifest.json
+  // Output configuration - standalone reduce deploy de ~1GB a ~100MB
+  // TODO: Activar cuando se resuelvan los auth guard duplicados en cron routes
+  // output: 'standalone',
 
   // Modularize imports (reduce bundle size)
   modularizeImports: {

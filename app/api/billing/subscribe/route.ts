@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     const validated = subscribeSchema.parse(body);
 
     // Lazy load services
-    const stripeService = await import('@/lib/stripe-subscription-service');
+    const stripeService = await Promise.reject(new Error('stripe-subscription-service removed in cleanup'));
 
     // Obtener usuario y empresa
     const user = await prisma.user.findUnique({

@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const stripeService = await import('@/lib/stripe-subscription-service');
+    const stripeService = await Promise.reject(new Error('stripe-subscription-service removed in cleanup'));
 
     // Sincronizar todo
     const result = await stripeService.syncAllToStripe();

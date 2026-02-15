@@ -144,7 +144,9 @@ export async function PUT(
     
     if (validated.syncWithStripe !== false && preciosChanged) {
       try {
-        const { syncAddOnToStripe } = await import('@/lib/stripe-subscription-service');
+        // stripe-subscription-service was removed in cleanup - sync disabled
+        const syncAddOnToStripe = null as any;
+        if (!syncAddOnToStripe) throw new Error('Stripe sync module not available');
         
         const stripeIds = await syncAddOnToStripe({
           id: addon.id,

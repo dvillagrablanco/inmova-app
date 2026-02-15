@@ -17,9 +17,6 @@ export async function POST(request: NextRequest) {
   const cronAuth = requireCronSecret(request);
   if (!cronAuth.authenticated) return cronAuth.response;
   try {
-  // Cron auth guard
-  const cronAuth = requireCronSecret(request);
-  if (!cronAuth.authenticated) return cronAuth.response;
     const authResult = await authorizeCronRequest(request, {
       allowSession: true,
       requireSuperAdmin: true,

@@ -17,9 +17,6 @@ export async function POST(request: NextRequest) {
   const auth = await requireSession();
   if (!auth.authenticated) return auth.response;
   try {
-  // Auth guard
-  const auth = await requireSession();
-  if (!auth.authenticated) return auth.response;
     // Verificar cron secret (para llamadas desde Vercel Cron)
     const authHeader = request.headers.get('authorization');
     const cronSecret = process.env.CRON_SECRET;
@@ -49,9 +46,6 @@ export async function GET() {
   const auth = await requireSession();
   if (!auth.authenticated) return auth.response;
   try {
-  // Auth guard
-  const auth = await requireSession();
-  if (!auth.authenticated) return auth.response;
     return NextResponse.json({
       status: 'ok',
       service: 'ewoorker-document-alerts',

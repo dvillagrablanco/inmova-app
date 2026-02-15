@@ -22,9 +22,6 @@ export async function GET(request: NextRequest) {
   if (!auth.authenticated) return auth.response;
   const prisma = await getPrisma();
   try {
-  // Auth guard
-  const auth = await requireSession();
-  if (!auth.authenticated) return auth.response;
     const ownerId = request.headers.get('x-owner-id');
     if (!ownerId) {
       return NextResponse.json(
@@ -77,9 +74,6 @@ export async function PUT(request: NextRequest) {
   if (!auth.authenticated) return auth.response;
   const prisma = await getPrisma();
   try {
-  // Auth guard
-  const auth = await requireSession();
-  if (!auth.authenticated) return auth.response;
     const ownerId = request.headers.get('x-owner-id');
     if (!ownerId) {
       return NextResponse.json(

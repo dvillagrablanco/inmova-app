@@ -37,9 +37,6 @@ export async function GET(req: NextRequest) {
   if (!auth.authenticated) return auth.response;
   const prisma = await getPrisma();
   try {
-  // Auth guard
-  const auth = await requireSession();
-  if (!auth.authenticated) return auth.response;
     const provider = await getAuthenticatedProvider();
 
     if (!provider) {
@@ -123,9 +120,6 @@ export async function POST(req: NextRequest) {
   if (!auth.authenticated) return auth.response;
   const prisma = await getPrisma();
   try {
-  // Auth guard
-  const auth = await requireSession();
-  if (!auth.authenticated) return auth.response;
     const provider = await getAuthenticatedProvider();
 
     if (!provider) {
