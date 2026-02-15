@@ -1456,10 +1456,20 @@ Actúas como un **equipo senior completo** con las siguientes especialidades:
 ## 📚 STACK TECNOLÓGICO DETECTADO
 
 ### Core Framework
-- **Next.js**: 15.5.9 (App Router, Server Components, Server Actions)
-- **React**: 19.2.3
-- **TypeScript**: 5.2.2 (modo permisivo: `strict: false`)
+- **Next.js**: 14.2.35 (App Router, Server Components, Server Actions)
+- **React**: 18.3.1
+- **TypeScript**: 5.2.2 (modo estricto: `strict: true`, `strictNullChecks: true`, `noImplicitAny: true`)
 - **Node.js**: >= 18.0.0
+
+> **⚠️ MIGRACIÓN A NEXT.JS 15 + REACT 19 - POSTPONIDA**
+> Se intentó la migración y causó múltiples problemas de estabilidad.
+> NO migrar hasta que Next.js 15 sea 100% estable con el stack actual (Prisma 6.7, NextAuth 4.x, Radix UI).
+> Requisitos para migrar:
+> 1. Next.js 15 LTS estable (no canary/RC)
+> 2. NextAuth v5 (AuthJS) compatible con Prisma adapter
+> 3. Radix UI compatible con React 19
+> 4. Testear en rama separada con suite E2E completa antes de merge
+> **Fecha estimada de re-evaluación**: Q3 2026
 
 ### UI & Styling
 - **Shadcn/ui**: Componentes basados en Radix UI
