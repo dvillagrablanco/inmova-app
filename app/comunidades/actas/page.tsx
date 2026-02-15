@@ -79,7 +79,7 @@ const ESTADOS_ACTA = [
 export default function ActasPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const [actas, setActas] = useState<Acta[]>([]);
   const [loading, setLoading] = useState(true);
   const [showDialog, setShowDialog] = useState(false);

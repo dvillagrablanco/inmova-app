@@ -60,7 +60,7 @@ interface DashboardPresidente {
 export default function PresidentePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const [data, setData] = useState<DashboardPresidente | null>(null);
   const [loading, setLoading] = useState(true);
 

@@ -23,7 +23,7 @@ import {
 
 export default function ComunidadesPage() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 

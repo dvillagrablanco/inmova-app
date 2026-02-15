@@ -122,7 +122,7 @@ const badges = [
 ];
 
 export default function ColivingEventosPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('upcoming');
   const [events, setEvents] = useState<Event[]>([]);

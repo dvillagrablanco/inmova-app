@@ -126,7 +126,7 @@ const DEFAULT_DATA: CalculatorData = {
 };
 
 export default function FlippingCalculatorPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
   
   const [history, setHistory] = useState<HistoryEntry[]>([]);

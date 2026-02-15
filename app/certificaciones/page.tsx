@@ -52,7 +52,7 @@ import { es } from 'date-fns/locale';
 import logger, { logError } from '@/lib/logger';
 
 export default function CertificacionesPage() {
-  const { data: session, status } = useSession() || {};
+  const { data: _session, status } = useSession() || {};
   const router = useRouter();
   const [certificados, setCertificados] = useState<any[]>([]);
   const [units, setUnits] = useState<any[]>([]);

@@ -33,7 +33,7 @@ import {
 } from 'lucide-react';
 
 export default function HerramientasEmpresaPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('propias');
 

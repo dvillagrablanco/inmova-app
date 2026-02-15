@@ -72,7 +72,7 @@ const TIPOS_DOCUMENTO = [
 export default function CumplimientoPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const [cumplimiento, setCumplimiento] = useState<EdificioCumplimiento[]>([]);
   const [loading, setLoading] = useState(true);
   const [showDialog, setShowDialog] = useState(false);

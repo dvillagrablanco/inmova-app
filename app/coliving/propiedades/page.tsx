@@ -42,7 +42,7 @@ interface ColivingProperty {
 }
 
 export default function ColivingPropertiesPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
   const [properties, setProperties] = useState<ColivingProperty[]>([]);
   const [loading, setLoading] = useState(true);

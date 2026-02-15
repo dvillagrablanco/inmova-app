@@ -57,7 +57,7 @@ interface ComunidadDetalle {
 export default function DetalleComunidadPage() {
   const router = useRouter();
   const params = useParams();
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const [comunidad, setComunidad] = useState<ComunidadDetalle | null>(null);
   const [loading, setLoading] = useState(true);
 

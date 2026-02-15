@@ -73,7 +73,7 @@ interface Unidad {
 export default function PropietariosPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const [propietarios, setPropietarios] = useState<Propietario[]>([]);
   const [unidades, setUnidades] = useState<Unidad[]>([]);
   const [loading, setLoading] = useState(true);

@@ -56,7 +56,7 @@ const SUGGESTED_SERVICES: Omit<GuestService, 'id'>[] = [
 ];
 
 export default function ServiciosHospitalityPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
   const [services, setServices] = useState<GuestService[]>([]);
   const [loading, setLoading] = useState(true);

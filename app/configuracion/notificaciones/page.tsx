@@ -78,7 +78,7 @@ const defaultPreferences: NotificationPreferences = {
 };
 
 export default function ConfiguracionNotificacionesPage() {
-  const { data: session, status } = useSession() || {};
+  const { data: _session, status } = useSession() || {};
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

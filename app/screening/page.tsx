@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/breadcrumb';
 
 export default function ScreeningPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [screenings, setScreenings] = useState<any[]>([]);

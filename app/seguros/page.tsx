@@ -153,7 +153,7 @@ export default function SegurosPage() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const companyId = searchParams.get('companyId');
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const [seguros, setSeguros] = useState<Insurance[]>([]);
   const [filteredSeguros, setFilteredSeguros] = useState<Insurance[]>([]);
   const [isLoading, setIsLoading] = useState(true);

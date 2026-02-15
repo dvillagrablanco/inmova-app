@@ -318,7 +318,7 @@ const portals: Portal[] = [
 ];
 
 export default function PortalesInmobiliariosPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [portalStatus, setPortalStatus] = useState<Record<string, any>>({});

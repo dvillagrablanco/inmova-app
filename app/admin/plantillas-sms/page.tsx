@@ -86,7 +86,7 @@ const variablesDisponibles = [
 ];
 
 export default function PlantillasSMSPage() {
-  const { data: session, status } = useSession() || {};
+  const { data: _session, status } = useSession() || {};
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);

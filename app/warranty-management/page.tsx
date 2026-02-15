@@ -99,7 +99,7 @@ const TIPOS_GARANTIA = [
 // ============================================================================
 
 export default function WarrantyManagementPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
 
   // Estados

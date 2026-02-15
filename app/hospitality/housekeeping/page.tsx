@@ -35,7 +35,7 @@ interface HousekeepingTask {
 }
 
 export default function HousekeepingPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
   const [tasks, setTasks] = useState<HousekeepingTask[]>([]);
   const [loading, setLoading] = useState(true);

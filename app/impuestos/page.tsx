@@ -15,7 +15,7 @@ import { Home, ArrowLeft, Receipt, Euro, Calendar, AlertTriangle, CheckCircle2, 
 import { toast } from 'sonner';
 
 export default function ImpuestosPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [year, setYear] = useState('2025');

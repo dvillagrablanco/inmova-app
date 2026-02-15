@@ -22,7 +22,7 @@ interface DashboardKPIs {
 }
 
 export default function AdminFincasPage() {
-  const { data: session, status } = useSession() || {};
+  const { data: _session, status } = useSession() || {};
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [kpis, setKpis] = useState<DashboardKPIs | null>(null);

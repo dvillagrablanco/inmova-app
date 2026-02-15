@@ -114,7 +114,7 @@ const CATEGORIAS = [
 // ============================================================================
 
 export default function ServiciosConciergePage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
 
   // Estados

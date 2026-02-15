@@ -85,7 +85,7 @@ interface Coupon {
 }
 
 export default function CuponesPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
   const { canCreate, canUpdate, canDelete, isAdmin } = usePermissions();
 

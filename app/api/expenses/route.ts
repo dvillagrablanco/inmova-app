@@ -333,7 +333,10 @@ export async function POST(req: NextRequest) {
     // Sincronizar con Zucchetti (async, no bloqueante)
     const companyIdForSync = expense.building?.companyId || scope.activeCompanyId;
     if (companyIdForSync) {
-      import('@/lib/zucchetti-accounting-sync').then(({ syncExpenseToZucchetti }) => {
+      // Zucchetti sync disabled - module removed in cleanup
+      Promise.resolve().then(() => { return; }).then(() => {
+        const syncExpenseToZucchetti = null as any;
+        if (!syncExpenseToZucchetti) return;
         syncExpenseToZucchetti({
           companyId: companyIdForSync,
           concepto: validatedData.concepto,

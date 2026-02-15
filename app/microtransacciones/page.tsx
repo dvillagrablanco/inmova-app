@@ -94,7 +94,7 @@ const CATEGORIAS_PAGO = [
 // ============================================================================
 
 export default function MicrotransaccionesPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
 
   // Estados

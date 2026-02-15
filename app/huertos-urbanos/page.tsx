@@ -102,7 +102,7 @@ interface GardenPlot {
 
 export default function HuertosUrbanosPage() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const [gardens, setGardens] = useState<UrbanGarden[]>([]);
   const [plots, setPlots] = useState<GardenPlot[]>([]);
   const [isLoading, setIsLoading] = useState(true);

@@ -71,7 +71,7 @@ interface Building {
 
 export default function ListaComunidadesPage() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const [comunidades, setComunidades] = useState<Comunidad[]>([]);
   const [buildings, setBuildings] = useState<Building[]>([]);
   const [loading, setLoading] = useState(true);

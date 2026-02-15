@@ -49,7 +49,7 @@ import {
 } from '@/components/ui/breadcrumb';
 
 export default function SMSPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [smsLogs, setSmsLogs] = useState<any[]>([]);

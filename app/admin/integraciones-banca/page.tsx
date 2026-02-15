@@ -87,7 +87,7 @@ const bankIntegrations: BankIntegration[] = [
 ];
 
 export default function IntegracionesBancaPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
   const [selectedIntegration, setSelectedIntegration] = useState<BankIntegration | null>(null);
   const [configValues, setConfigValues] = useState<Record<string, string>>({});

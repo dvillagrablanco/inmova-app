@@ -88,7 +88,7 @@ interface Recommendation {
 
 function AnalyticsPageContent() {
   const router = useRouter();
-  const { data: session, status } = useSession() || {};
+  const { data: _session, status } = useSession() || {};
   const [trends, setTrends] = useState<Trend[]>([]);
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);

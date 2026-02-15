@@ -187,8 +187,7 @@ const nextConfig = {
   swcMinify: true,
 
   // Output configuration - standalone reduce deploy de ~1GB a ~100MB
-  // TODO: Activar cuando se resuelvan los auth guard duplicados en cron routes
-  // output: 'standalone',
+  output: 'standalone',
 
   // Modularize imports (reduce bundle size)
   modularizeImports: {

@@ -48,7 +48,7 @@ interface Item {
  * ✓ Focus Indicators: Visibles en todos los elementos
  */
 export default function EjemploUXPage() {
-  const { data: session, status } = useSession()
+  const { data: _session, status } = useSession()
   const router = useRouter()
   const isDemoMode = process.env.NODE_ENV !== 'production'
   

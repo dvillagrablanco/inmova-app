@@ -24,7 +24,7 @@ export default function DocuSignConfigPage() {
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<{ ok: boolean; message: string } | null>(null);
 
-  const docusignStatus = searchParams.get('docusign');
+  const docusignStatus = searchParams?.get('docusign');
 
   const INTEGRATION_KEY = '0daca02a-dbe5-45cd-9f78-35108236c0cd';
   const CONSENT_URL = `https://account-d.docusign.com/oauth/auth?response_type=code&scope=signature%20impersonation&client_id=${INTEGRATION_KEY}&redirect_uri=${encodeURIComponent(typeof window !== 'undefined' ? window.location.origin + '/api/integrations/docusign/callback' : 'https://inmovaapp.com/api/integrations/docusign/callback')}`;

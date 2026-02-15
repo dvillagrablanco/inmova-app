@@ -19,7 +19,7 @@ import { PageHeader, PageContainer } from '@/components/layout/page-header';
  * Permite al usuario cambiar entre Simple / Standard / Advanced
  */
 export default function UIModePage() {
-  const { data: session, status } = useSession() || {};
+  const { data: _session, status } = useSession() || {};
   const router = useRouter();
   const [currentMode, setCurrentMode] = useState<string>('standard');
   const [loading, setLoading] = useState(true);

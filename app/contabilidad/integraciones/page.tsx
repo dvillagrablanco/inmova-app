@@ -76,7 +76,7 @@ const accountingProviders: AccountingProvider[] = [
 ];
 
 export default function ContabilidadIntegracionesPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('contasimple');
   const [loading, setLoading] = useState(false);

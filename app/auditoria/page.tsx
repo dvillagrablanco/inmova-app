@@ -82,7 +82,7 @@ interface AuditReport {
 }
 
 export default function AuditoriaPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
 
   const [stats, setStats] = useState<AuditStats | null>(null);

@@ -49,7 +49,7 @@ interface DashboardData {
 export default function FinanzasPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [periodo, setPeriodo] = useState('anual');

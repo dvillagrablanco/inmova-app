@@ -96,7 +96,7 @@ interface Reservation {
 
 export default function InstalacionesDeportivasPage() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const [facilities, setFacilities] = useState<SportsFacility[]>([]);
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [isLoading, setIsLoading] = useState(true);

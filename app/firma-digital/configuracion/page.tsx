@@ -70,7 +70,7 @@ const signatureProviders: SignatureProvider[] = [
 ];
 
 export default function FirmaDigitalConfiguracionPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('docusign');
   const [saving, setSaving] = useState(false);

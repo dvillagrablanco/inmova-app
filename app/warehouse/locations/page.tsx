@@ -71,7 +71,7 @@ interface Location {
 // ============================================================================
 
 export default function WarehouseLocationsPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
 
   // Estados

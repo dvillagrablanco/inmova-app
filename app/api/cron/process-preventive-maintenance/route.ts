@@ -3,7 +3,6 @@ import { sendEmail } from '@/lib/email-config';
 import logger from '@/lib/logger';
 import { addDays, format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { authorizeCronRequest } from '@/lib/cron-auth';
 import { requireCronSecret } from '@/lib/api-auth-guard';
 
 export const dynamic = 'force-dynamic';
@@ -188,12 +187,6 @@ export async function GET(request: NextRequest) {
   if (!cronAuth.authenticated) return cronAuth.response;
 
   const prisma = await getPrisma();
-  // Cron auth guard (auditoria V2)
-  const cronAuth = await authorizeCronRequest(request as any);
-  if (!cronAuth.authorized) {
-    return NextResponse.json({ error: cronAuth.error || 'No autorizado' }, { status: cronAuth.status });
-  }
-
   try {
     // Validar token de autenticación para cron
     const authHeader = request.headers.get('authorization');
@@ -240,11 +233,5 @@ export async function POST(request: NextRequest) {
   if (!cronAuth.authenticated) return cronAuth.response;
 
   const prisma = await getPrisma();
-  // Cron auth guard (auditoria V2)
-  const cronAuth = await authorizeCronRequest(request as any);
-  if (!cronAuth.authorized) {
-    return NextResponse.json({ error: cronAuth.error || 'No autorizado' }, { status: cronAuth.status });
-  }
-
   return GET(request);
 }

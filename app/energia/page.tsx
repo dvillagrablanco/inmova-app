@@ -119,7 +119,7 @@ interface Stats {
 }
 
 export default function EnergiaPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
   const { canCreate } = usePermissions();
 

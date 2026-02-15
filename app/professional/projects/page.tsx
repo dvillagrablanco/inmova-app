@@ -113,7 +113,7 @@ function EmptyState({ onCreateNew }: { onCreateNew: () => void }) {
 }
 
 export default function ProfessionalProjectsPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
   
   const [isLoading, setIsLoading] = useState(true);

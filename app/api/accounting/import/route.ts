@@ -209,7 +209,7 @@ async function normalizeAmount(
   amount: number | null,
   debit: number | null,
   credit: number | null
-): number | null {
+): Promise<number | null> {
   const prisma = await getPrisma();
   if (debit && credit && debit > 0 && credit > 0) {
     return Math.abs(credit - debit);

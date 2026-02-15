@@ -142,7 +142,7 @@ function EmptyState({ onRefresh }: { onRefresh: () => void }) {
 }
 
 export default function AIAgentsPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [agents, setAgents] = useState<AgentInfo[]>([]);

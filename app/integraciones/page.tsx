@@ -296,7 +296,7 @@ const allIntegrations: Integration[] = [
 ];
 
 export default function IntegracionesPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');

@@ -36,7 +36,7 @@ interface SimulacionRenovacion {
 export default function RenovacionesPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const [loading, setLoading] = useState(true);
   const [ipcActual, setIpcActual] = useState(3.2); // IPC actual simulado
   const [cuotaBase, setCuotaBase] = useState(150);

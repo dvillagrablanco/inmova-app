@@ -56,7 +56,7 @@ interface InvoiceItem {
 }
 
 export default function ProfessionalInvoicingPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [invoices, setInvoices] = useState<Invoice[]>([]);

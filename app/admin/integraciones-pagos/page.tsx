@@ -86,7 +86,7 @@ const paymentMethods: PaymentMethod[] = [
 ];
 
 export default function IntegracionesPagosPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
   const [methods, setMethods] = useState(paymentMethods);
   const [activeTab, setActiveTab] = useState('metodos');

@@ -72,7 +72,7 @@ const ESTADOS_REUNION = [
 export default function ReunionesPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const [reuniones, setReuniones] = useState<Reunion[]>([]);
   const [proximaReunion, setProximaReunion] = useState<Reunion | null>(null);
   const [loading, setLoading] = useState(true);

@@ -86,7 +86,7 @@ interface SolarInstallation {
 
 export default function EnergiaSolarPage() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const [installations, setInstallations] = useState<SolarInstallation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);

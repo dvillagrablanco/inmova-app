@@ -62,7 +62,7 @@ interface DashboardData {
 
 export default function RedAgentesDashboardPage() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const [periodo, setPeriodo] = useState('mes');
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<DashboardData | null>(null);

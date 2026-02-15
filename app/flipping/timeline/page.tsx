@@ -43,7 +43,7 @@ interface Project {
 }
 
 export default function FlippingTimelinePage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);

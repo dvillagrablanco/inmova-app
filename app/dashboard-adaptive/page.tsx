@@ -15,7 +15,7 @@ import { Loader2 } from 'lucide-react';
  * - AdaptiveSidebar: Sidebar contextual
  */
 export default function AdaptiveDashboardPage() {
-  const { data: session, status } = useSession() || {};
+  const { data: _session, status } = useSession() || {};
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [stats, setStats] = useState({
     totalBuildings: 0,

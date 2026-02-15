@@ -118,7 +118,7 @@ const configSections: ConfigSection[] = [
 ];
 
 export default function ConfiguracionPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState('general');

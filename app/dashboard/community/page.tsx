@@ -30,7 +30,7 @@ import AnnouncementsPanel from './components/AnnouncementsPanel';
 import EngagementMetrics from './components/EngagementMetrics';
 
 export default function CommunityDashboard() {
-  const { data: session, status } = useSession() || {};
+  const { data: _session, status } = useSession() || {};
   const { isCommunityManager, isAdmin, canManageEvents, canViewEngagement } = usePermissions();
   const [activeTab, setActiveTab] = useState('overview');
   const [metrics, setMetrics] = useState<any>(null);

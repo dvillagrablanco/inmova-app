@@ -14,7 +14,7 @@ import { Euro, TrendingUp, TrendingDown, Home, ArrowLeft, Download, Building2, C
 import { toast } from 'sonner';
 
 export default function ReportesFinancierosPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState('month');

@@ -12,7 +12,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { processScheduledEmails } from '@/lib/email-triggers-service';
 
 import logger from '@/lib/logger';
-import { authorizeCronRequest } from '@/lib/cron-auth';
 import { requireCronSecret } from '@/lib/api-auth-guard';
 
 export async function GET(request: NextRequest) {
@@ -21,13 +20,6 @@ export async function GET(request: NextRequest) {
   if (!cronAuth.authenticated) return cronAuth.response;
 
   try {
-    const authResult = await authorizeCronRequest(request, { allowSession: false });
-    if (!authResult.authorized) {
-      return NextResponse.json(
-        { error: authResult.error || 'No autorizado' },
-        { status: authResult.status }
-      );
-    }
 
     const result = await processScheduledEmails();
 

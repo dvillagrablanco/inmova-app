@@ -111,7 +111,7 @@ const ETAPAS_PIPELINE = [
 
 export default function CRMPage() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({

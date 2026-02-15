@@ -27,7 +27,7 @@ import { INTEGRATION_PROVIDERS, type IntegrationProvider } from '@/lib/integrati
 export default function ProviderSetupPage() {
   const params = useParams();
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const providerId = params.provider as string;
 
   const [provider, setProvider] = useState<IntegrationProvider | null>(null);

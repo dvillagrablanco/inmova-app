@@ -14,7 +14,6 @@ import {
   isAltaiConfigured,
 } from '@/lib/zucchetti-altai-service';
 import logger from '@/lib/logger';
-import { authorizeCronRequest } from '@/lib/cron-auth';
 import { requireCronSecret } from '@/lib/api-auth-guard';
 
 export const dynamic = 'force-dynamic';
@@ -31,32 +30,6 @@ async function verifyCronAuth(request: NextRequest): boolean {
   const prisma = await getPrisma();
   const cronSecret = process.env.CRON_SECRET;
   if (!cronSecret) return true; // Sin secret configurado, permitir
-
-  const authHeader = request.headers.get('authorization') || '';
-  const querySecret = new URL(request.url).searchParams.get('secret');
-  
-  return authHeader === `Bearer ${cronSecret}` || querySecret === cronSecret;
-}
-
-export async function GET(request: NextRequest) {
-  // Cron auth guard
-  const cronAuth = requireCronSecret(request);
-  if (!cronAuth.authenticated) return cronAuth.response;
-
-  const prisma = await getPrisma();
-  // Cron auth guard (auditoria V2)
-  const cronAuth = await authorizeCronRequest(request as any);
-  if (!cronAuth.authorized) {
-    return NextResponse.json({ error: cronAuth.error || 'No autorizado' }, { status: cronAuth.status });
-  }
-
-  if (!verifyCronAuth(request)) {
-    return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
-  }
-
-  if (!isAltaiConfigured()) {
-    return NextResponse.json({ message: 'Altai no configurado', synced: 0 });
-  }
 
   try {
     // Obtener todas las empresas con Altai activado

@@ -74,7 +74,7 @@ const paymentProviders: PaymentProvider[] = [
 ];
 
 export default function PagosConfiguracionPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
   const [providers, setProviders] = useState(paymentProviders);
   const [loading, setLoading] = useState(true);

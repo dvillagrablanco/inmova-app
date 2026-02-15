@@ -57,7 +57,7 @@ interface Plan {
 export default function EditarClientePage() {
   const router = useRouter();
   const params = useParams<{ id?: string }>();
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const companyId = typeof params?.id === 'string' ? params.id : '';
 
   const [loading, setLoading] = useState(true);

@@ -97,7 +97,7 @@ const ESTADO_LABELS: Record<string, string> = {
 };
 
 export default function CrmPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [stats, setStats] = useState<any>({});

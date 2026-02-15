@@ -5,7 +5,6 @@ import logger from '@/lib/logger';
 import { executeCronJob, executeAllCronJobs, cronJobs } from '@/lib/cron-service';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { authorizeCronRequest } from '@/lib/cron-auth';
 import { requireCronSecret } from '@/lib/api-auth-guard';
 
 /**
@@ -20,16 +19,6 @@ export async function POST(request: NextRequest) {
   if (!cronAuth.authenticated) return cronAuth.response;
 
   try {
-    const authResult = await authorizeCronRequest(request, {
-      allowSession: true,
-      requireSuperAdmin: true,
-    });
-    if (!authResult.authorized) {
-      return NextResponse.json(
-        { error: authResult.error || 'No autorizado' },
-        { status: authResult.status }
-      );
-    }
 
     const body = await request.json().catch(() => ({}));
     const { jobId, all } = body;
@@ -79,16 +68,6 @@ export async function GET(request: NextRequest) {
   if (!cronAuth.authenticated) return cronAuth.response;
 
   try {
-    const authResult = await authorizeCronRequest(request, {
-      allowSession: true,
-      requireSuperAdmin: true,
-    });
-    if (!authResult.authorized) {
-      return NextResponse.json(
-        { error: authResult.error || 'No autorizado' },
-        { status: authResult.status }
-      );
-    }
     return NextResponse.json({
       success: true,
       jobs: cronJobs

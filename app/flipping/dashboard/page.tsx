@@ -71,7 +71,7 @@ const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
 
 export default function FlippingDashboardPage() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const [loading, setLoading] = useState(true);
   const [metrics, setMetrics] = useState<FlippingMetrics | null>(null);
   const [projectStatus, setProjectStatus] = useState<ProjectStatus[]>([]);

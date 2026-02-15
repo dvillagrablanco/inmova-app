@@ -90,7 +90,7 @@ const categoryConfig = {
 };
 
 export default function OrdenesTrabajoPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('all');
   const [orders, setOrders] = useState<WorkOrder[]>([]);

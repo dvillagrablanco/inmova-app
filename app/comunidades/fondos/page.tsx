@@ -77,7 +77,7 @@ const TIPOS_FONDO = [
 export default function FondosPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const [fondos, setFondos] = useState<Fondo[]>([]);
   const [loading, setLoading] = useState(true);
   const [showDialog, setShowDialog] = useState(false);

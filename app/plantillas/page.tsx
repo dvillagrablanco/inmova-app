@@ -31,7 +31,7 @@ import {
 import { toast } from 'sonner';
 
 export default function PlantillasPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);

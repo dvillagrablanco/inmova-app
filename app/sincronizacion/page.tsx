@@ -183,7 +183,7 @@ const emptyForm = {
 
 export default function SincronizacionPage() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const [loading, setLoading] = useState(true);
   const [connections, setConnections] = useState<SyncConnection[]>([]);
   const [logs, setLogs] = useState<SyncLog[]>([]);

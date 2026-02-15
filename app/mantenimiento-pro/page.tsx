@@ -118,7 +118,7 @@ interface Budget {
 
 export default function MantenimientoProPage() {
   const router = useRouter();
-  const { data: session, status } = useSession() || {};
+  const { data: _session, status } = useSession() || {};
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [metrics, setMetrics] = useState<MaintenanceMetrics[]>([]);

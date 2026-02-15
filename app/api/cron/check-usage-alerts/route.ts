@@ -12,7 +12,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { checkUsageLimitsForAllCompanies } from '@/lib/usage-alerts-service';
 
 import logger from '@/lib/logger';
-import { authorizeCronRequest } from '@/lib/cron-auth';
 import { requireCronSecret } from '@/lib/api-auth-guard';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -27,13 +26,6 @@ export async function GET(request: NextRequest) {
   // Cron auth guard
   const cronAuth = requireCronSecret(request);
   if (!cronAuth.authenticated) return cronAuth.response;
-
-  // Cron auth guard (auditoria V2)
-  const cronAuth = await authorizeCronRequest(request as any);
-  if (!cronAuth.authorized) {
-    return NextResponse.json({ error: cronAuth.error || 'No autorizado' }, { status: cronAuth.status });
-  }
-
   try {
     // Verificar cron secret (seguridad)
     const authHeader = request.headers.get('authorization');

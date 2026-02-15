@@ -57,7 +57,7 @@ interface CommunicationTemplate {
 
 export default function ComunicacionesPage() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const [messages, setMessages] = useState<Message[]>([]);
   const [templates, setTemplates] = useState<CommunicationTemplate[]>([]);
   const [isLoading, setIsLoading] = useState(true);

@@ -22,7 +22,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { processOnboardingReminders } from '@/lib/onboarding-email-automation';
 import { retryFailedWebhooks } from '@/lib/onboarding-webhook-system';
 import logger from '@/lib/logger';
-import { authorizeCronRequest } from '@/lib/cron-auth';
 import { requireCronSecret } from '@/lib/api-auth-guard';
 
 // Proteger con token de autenticación
@@ -31,23 +30,8 @@ export async function GET(request: NextRequest) {
   const cronAuth = requireCronSecret(request);
   if (!cronAuth.authenticated) return cronAuth.response;
 
-  // Cron auth guard (auditoria V2)
-  const cronAuth = await authorizeCronRequest(request as any);
-  if (!cronAuth.authorized) {
-    return NextResponse.json({ error: cronAuth.error || 'No autorizado' }, { status: cronAuth.status });
-  }
 
   try {
-    // Verificar autorización
-    const authHeader = request.headers.get('authorization');
-    const cronSecret = process.env.CRON_SECRET;
-
-    if (!cronSecret) {
-      return NextResponse.json(
-        { error: 'CRON_SECRET no configurado' },
-        { status: 500 }
-      );
-    }
 
     if (authHeader !== `Bearer ${cronSecret}`) {
       return NextResponse.json(
@@ -104,11 +88,6 @@ export async function POST(request: NextRequest) {
   const cronAuth = requireCronSecret(request);
   if (!cronAuth.authenticated) return cronAuth.response;
 
-  // Cron auth guard (auditoria V2)
-  const cronAuth = await authorizeCronRequest(request as any);
-  if (!cronAuth.authorized) {
-    return NextResponse.json({ error: cronAuth.error || 'No autorizado' }, { status: cronAuth.status });
-  }
 
   return GET(request);
 }

@@ -83,7 +83,7 @@ const ESTADOS = [
 export default function IncidenciasPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const [incidencias, setIncidencias] = useState<Incidencia[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');

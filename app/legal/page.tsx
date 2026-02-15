@@ -78,7 +78,7 @@ const POLICY_STATUS_COLORS: Record<string, string> = {
 };
 
 export default function LegalPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
   const companyId = searchParams.get('companyId');

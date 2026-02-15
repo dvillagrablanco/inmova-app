@@ -66,7 +66,7 @@ interface KPIsData {
 }
 
 export default function EstadisticasPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState('6m');

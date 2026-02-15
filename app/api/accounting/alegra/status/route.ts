@@ -7,7 +7,4 @@ export async function GET() {
   const auth = await requireSession();
   if (!auth.authenticated) return auth.response;
   return NextResponse.json({ configured: false, enabled: false });
-  // Auth guard
-  const auth = await requireSession();
-  if (!auth.authenticated) return auth.response;
 }

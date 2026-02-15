@@ -180,7 +180,7 @@ function SummarySkeleton() {
 }
 
 export default function FinanzasPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
   const { selectedCompany } = useSelectedCompany();
   const [loading, setLoading] = useState(true);

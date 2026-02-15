@@ -12,9 +12,7 @@ export async function GET() {
   // Auth guard
   const auth = await requireSession();
   if (!auth.authenticated) return auth.response;
+
   // TODO: Cuando exista el modelo Webinar en Prisma, leer de la BD
   return NextResponse.json({ data: [] });
-  // Auth guard
-  const auth = await requireSession();
-  if (!auth.authenticated) return auth.response;
 }

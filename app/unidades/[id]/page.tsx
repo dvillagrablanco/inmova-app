@@ -105,7 +105,7 @@ interface Unit {
 }
 
 export default function UnitDetailPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
   const params = useParams();
   const unitId = params?.id as string;

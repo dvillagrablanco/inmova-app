@@ -197,7 +197,7 @@ const MODELOS_TRIBUTARIOS: ModeloTributario[] = [
 ];
 
 export default function ImpuestosPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialTab = searchParams?.get('tab') ?? 'resumen';

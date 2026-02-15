@@ -108,7 +108,7 @@ const PRIORITIES = [
 
 export default function AutomatizacionPage() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const [loading, setLoading] = useState(true);
   const [automations, setAutomations] = useState<Automation[]>([]);
   const [templates, setTemplates] = useState<AutomationTemplate[]>([]);

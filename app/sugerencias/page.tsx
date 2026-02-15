@@ -23,7 +23,7 @@ import logger, { logError } from '@/lib/logger';
 
 export default function SugerenciasPage() {
   const router = useRouter();
-  const { data: session, status } = useSession() || {};
+  const { data: _session, status } = useSession() || {};
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     titulo: '',

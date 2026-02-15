@@ -20,7 +20,7 @@ import {
 import { Home, ArrowLeft, Shield, Lock, AlertTriangle, FileCheck } from 'lucide-react';
 
 export default function SeguridadCompliancePage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
 

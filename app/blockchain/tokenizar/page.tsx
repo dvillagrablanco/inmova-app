@@ -28,7 +28,7 @@ const steps = [
 ];
 
 export default function TokenizarPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
   const propertyId = searchParams.get('property');

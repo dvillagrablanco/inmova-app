@@ -59,7 +59,7 @@ interface DecarbonizationPlan {
 }
 
 export default function ESGPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [metrics, setMetrics] = useState<ESGMetrics | null>(null);

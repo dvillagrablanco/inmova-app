@@ -75,7 +75,7 @@ const conditions = [
 ];
 
 export default function MarketplaceCircularPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<MarketplaceItem[]>([]);

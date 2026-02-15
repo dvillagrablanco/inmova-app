@@ -178,7 +178,7 @@ function EmptyState({
 }
 
 export default function CommunityManagerPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
   
   const [activeTab, setActiveTab] = useState('dashboard');

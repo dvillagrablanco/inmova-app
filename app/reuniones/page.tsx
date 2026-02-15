@@ -63,7 +63,7 @@ interface Reunion {
 }
 
 export default function ReunionesPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
   const [reuniones, setReuniones] = useState<Reunion[]>([]);
   const [buildings, setBuildings] = useState<any[]>([]);

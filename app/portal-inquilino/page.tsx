@@ -18,7 +18,7 @@ import { Home, ArrowLeft, CreditCard, FileText, Wrench, MessageSquare, Bell, Eur
 import { toast } from 'sonner';
 
 export default function PortalInquilinoPage() {
-  const { data: session, status } = useSession();
+  const { data: _session, status } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [showIncidenciaDialog, setShowIncidenciaDialog] = useState(false);
