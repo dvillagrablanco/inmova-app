@@ -51,13 +51,13 @@ const nextConfig = {
   // AUDITORIA V2 2026-02-11: tsc --noEmit retorna 0 errores en codigo propio
   // (solo 2 errores en node_modules/@vitejs que Next.js ignora)
   typescript: {
-    // ignoreBuildErrors: false activado en auditoria V2 pero revertido temporalmente.
-    // 105+ funciones helper necesitan revision manual para prisma scope.
-    // Los fixes de seguridad (cron auth, CSP, debug, Zod) estan aplicados.
-    ignoreBuildErrors: true,
+    // Reactivado en cleanup Feb 2026 - 0 errores TS en codigo propio
+    // (solo 2 errores en node_modules/@vitejs que Next.js ignora)
+    ignoreBuildErrors: false,
   },
   eslint: {
-    ignoreDuringBuilds: true, // Mantener hasta corregir warnings de ESLint
+    // TODO: Reactivar cuando se corrijan ESLint warnings
+    ignoreDuringBuilds: true,
   },
 
   // Image optimization - Optimizado para producción

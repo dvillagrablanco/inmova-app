@@ -1,7 +1,7 @@
 import { requireSession } from '@/lib/api-auth-guard';
 /**
  * EJEMPLO: Dashboard con Caché Redis y Rate Limiting
- * 
+ *
  * Este archivo es un EJEMPLO DESHABILITADO (para prevenir errores de build)
  * En producción, debería implementarse con:
  * 1. Rate limiting funcional
@@ -18,11 +18,6 @@ export async function GET(request: NextRequest) {
   // Auth guard
   const auth = await requireSession();
   if (!auth.authenticated) return auth.response;
-  return NextResponse.json(
-    { error: 'Endpoint de ejemplo deshabilitado' },
-  // Auth guard
-  const auth = await requireSession();
-  if (!auth.authenticated) return auth.response;
-    { status: 501 }
-  );
+
+  return NextResponse.json({ error: 'Endpoint de ejemplo deshabilitado' }, { status: 501 });
 }
