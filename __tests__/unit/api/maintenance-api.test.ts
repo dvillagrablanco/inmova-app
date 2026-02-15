@@ -7,8 +7,8 @@ import { describe, test, expect, vi, beforeEach } from 'vitest';
 import { NextRequest, NextResponse } from 'next/server';
 
 // Mock de dependencias
-vi.mock('@/lib/db', () => ({
-  prisma: {
+const { mockPrismaInstance } = vi.hoisted(() => ({
+  mockPrismaInstance: {
     maintenanceRequest: {
       findMany: vi.fn(),
       findUnique: vi.fn(),
@@ -20,8 +20,17 @@ vi.mock('@/lib/db', () => ({
   },
 }));
 
+vi.mock('@/lib/db', () => ({
+  prisma: mockPrismaInstance,
+  getPrismaClient: () => mockPrismaInstance,
+}));
+
 vi.mock('next-auth', () => ({
   getServerSession: vi.fn(),
+}));
+
+vi.mock('@/lib/auth-options', () => ({
+  authOptions: {},
 }));
 
 vi.mock('@/lib/logger', () => ({

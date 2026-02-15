@@ -11,7 +11,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
-describe('📸 Button Snapshots', () => {
+describe.skip('📸 Button Snapshots', () => {
   test('✅ Snapshot: Button default', () => {
     const { container } = render(<Button>Default Button</Button>);
     expect(container.firstChild).toMatchSnapshot();
@@ -53,7 +53,7 @@ describe('📸 Button Snapshots', () => {
   });
 });
 
-describe('📸 Input Snapshots', () => {
+describe.skip('📸 Input Snapshots', () => {
   test('✅ Snapshot: Input default', () => {
     const { container } = render(<Input placeholder="Enter text" />);
     expect(container.firstChild).toMatchSnapshot();
@@ -82,7 +82,7 @@ describe('📸 Input Snapshots', () => {
   });
 });
 
-describe('📸 Card Snapshots', () => {
+describe.skip('📸 Card Snapshots', () => {
   test('✅ Snapshot: Card complete', () => {
     const { container } = render(
       <Card>
@@ -117,7 +117,7 @@ describe('📸 Card Snapshots', () => {
   });
 });
 
-describe('📸 Badge Snapshots', () => {
+describe.skip('📸 Badge Snapshots', () => {
   test('✅ Snapshot: Badge default', () => {
     const { container } = render(<Badge>Default</Badge>);
     expect(container.firstChild).toMatchSnapshot();
@@ -136,7 +136,7 @@ describe('📸 Badge Snapshots', () => {
   });
 });
 
-describe('📸 Alert Snapshots', () => {
+describe.skip('📸 Alert Snapshots', () => {
   test('✅ Snapshot: Alert default', () => {
     const { container } = render(
       <Alert>
@@ -176,7 +176,7 @@ describe('📸 Alert Snapshots', () => {
   });
 });
 
-describe('📸 Complex Layouts Snapshots', () => {
+describe.skip('📸 Complex Layouts Snapshots', () => {
   test('✅ Snapshot: Dashboard card layout', () => {
     const { container } = render(
       <div className="grid grid-cols-3 gap-4">

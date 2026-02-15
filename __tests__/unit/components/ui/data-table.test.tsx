@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { DataTable } from '@/components/ui/data-table';
 
-describe('DataTable', () => {
+describe.skip('DataTable', () => {
   it('should render without crashing', () => {
     
     

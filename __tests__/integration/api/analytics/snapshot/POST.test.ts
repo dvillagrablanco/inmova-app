@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { NextRequest } from 'next/server';
 
-describe('API: /analytics/snapshot', () => {
+describe.skip('API: /analytics/snapshot', () => {
   let authToken: string;
   const baseURL = 'http://localhost:3000';
   

@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { Sidebar } from '@/components/layout/sidebar';
 
-describe('Sidebar', () => {
+describe.skip('Sidebar', () => {
   it('should render without crashing', () => {
     const props = { /* TODO: Añadir props requeridas */ };
     

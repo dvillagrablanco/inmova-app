@@ -14,6 +14,19 @@ vi.mock('@/lib/db', () => ({
       findFirst: vi.fn(),
     },
   },
+  getPrismaClient: () => ({ default: {
+    tenant: {
+      findUnique: vi.fn(),
+      findMany: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+    },
+    contract: {
+      findMany: vi.fn(),
+      findFirst: vi.fn(),
+    },
+  } }),
 }));
 
 import prisma from '@/lib/db';

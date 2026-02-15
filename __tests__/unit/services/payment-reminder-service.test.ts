@@ -18,6 +18,16 @@ vi.mock('@/lib/db', () => ({
       create: vi.fn(),
     },
   },
+  getPrismaClient: () => ({ prisma: {
+    payment: {
+      findMany: vi.fn(),
+      findUnique: vi.fn(),
+      update: vi.fn(),
+    },
+    notification: {
+      create: vi.fn(),
+    },
+  } }),
 }));
 
 vi.mock('@/lib/email-config', () => ({

@@ -23,6 +23,7 @@ const mockPrisma = {
 
 vi.mock('@/lib/db', () => ({
   prisma: mockPrisma,
+  getPrismaClient: () => ({ prisma: mockPrisma }),
 }));
 
 describe('Auth Service - Servicios de Autenticación', () => {

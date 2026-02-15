@@ -37,6 +37,30 @@ vi.mock('@/lib/db', () => ({
       findMany: vi.fn(),
     },
   },
+  getPrismaClient: () => ({ prisma: {
+    analyticsEvent: {
+      create: vi.fn(),
+      findMany: vi.fn(),
+      count: vi.fn(),
+      groupBy: vi.fn(),
+    },
+    building: {
+      count: vi.fn(),
+      findMany: vi.fn(),
+    },
+    unit: {
+      count: vi.fn(),
+      findMany: vi.fn(),
+    },
+    tenant: {
+      count: vi.fn(),
+      findMany: vi.fn(),
+    },
+    payment: {
+      aggregate: vi.fn(),
+      findMany: vi.fn(),
+    },
+  } }),
 }));
 
 import { getServerSession } from 'next-auth';

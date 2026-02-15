@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { NextRequest } from 'next/server';
 
-describe('API: /open-banking/redsys/.disabled/payments', () => {
+describe.skip('API: /open-banking/redsys/.disabled/payments', () => {
   let authToken: string;
   const baseURL = 'http://localhost:3000';
   

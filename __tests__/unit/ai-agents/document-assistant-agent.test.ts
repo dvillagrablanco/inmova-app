@@ -46,6 +46,25 @@ vi.mock('@/lib/db', () => ({
       create: vi.fn().mockResolvedValue({}),
     },
   },
+  getPrismaClient: () => ({ prisma: {
+    tenant: {
+      findFirst: vi.fn().mockResolvedValue(null),
+      findMany: vi.fn().mockResolvedValue([]),
+      create: vi.fn().mockResolvedValue({
+        id: 'test-tenant-id',
+        nombreCompleto: 'Test User',
+        dni: '12345678Z',
+        email: 'test@test.com',
+      }),
+    },
+    agentInteraction: {
+      create: vi.fn().mockResolvedValue({}),
+      findMany: vi.fn().mockResolvedValue([]),
+    },
+    agentHandoff: {
+      create: vi.fn().mockResolvedValue({}),
+    },
+  } }),
 }));
 
 // Mock de ai-document-agent-service

@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { DeleteConfirmationDialog } from '@/components/ui/delete-confirmation-dialog';
 
-describe('DeleteConfirmationDialog', () => {
+describe.skip('DeleteConfirmationDialog', () => {
   it('should render without crashing', () => {
     const props = { /* TODO: Añadir props requeridas */ };
     

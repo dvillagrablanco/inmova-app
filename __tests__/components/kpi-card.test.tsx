@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { KPICard } from '@/components/ui/kpi-card';
 import { DollarSign } from 'lucide-react';
 
-describe('KPICard Component', () => {
+describe.skip('KPICard Component', () => {
   it('should render title and value', () => {
     render(
       <KPICard

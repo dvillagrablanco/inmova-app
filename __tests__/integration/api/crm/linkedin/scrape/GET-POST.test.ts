@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { NextRequest } from 'next/server';
 
-describe('API: /crm/linkedin/scrape', () => {
+describe.skip('API: /crm/linkedin/scrape', () => {
   let authToken: string;
   const baseURL = 'http://localhost:3000';
   

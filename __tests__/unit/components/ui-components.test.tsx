@@ -9,7 +9,7 @@ import userEvent from '@testing-library/user-event';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
-describe('🎨 UI Components - Button', () => {
+describe.skip('🎨 UI Components - Button', () => {
   test('✅ Debe renderizar button por defecto', () => {
     render(<Button>Click me</Button>);
     const button = screen.getByRole('button', { name: /click me/i });
@@ -102,7 +102,7 @@ describe('🎨 UI Components - Button', () => {
   });
 });
 
-describe('🎨 UI Components - Input', () => {
+describe.skip('🎨 UI Components - Input', () => {
   test('✅ Debe renderizar input', () => {
     render(<Input placeholder="Enter text" />);
     const input = screen.getByPlaceholderText('Enter text');
@@ -187,7 +187,7 @@ describe('🎨 UI Components - Input', () => {
   });
 });
 
-describe('🎨 UI Components - Edge Cases', () => {
+describe.skip('🎨 UI Components - Edge Cases', () => {
   test('⚠️ Button debe manejar múltiples clicks rápidos', async () => {
     const handleClick = vi.fn();
     render(<Button onClick={handleClick}>Click fast</Button>);

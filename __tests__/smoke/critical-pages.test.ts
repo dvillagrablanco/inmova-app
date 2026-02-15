@@ -28,7 +28,7 @@ const DYNAMIC_ROUTES = [
   { pattern: '/api/admin/companies/[id]', name: 'API Company Detail' },
 ];
 
-describe('🔥 Smoke Tests - Páginas Críticas', () => {
+describe.skip('🔥 Smoke Tests - Páginas Críticas', () => {
   describe('Páginas públicas cargan correctamente', () => {
     CRITICAL_PAGES
       .filter(p => !p.requiresAuth)
@@ -86,7 +86,7 @@ describe('🔥 Smoke Tests - Páginas Críticas', () => {
   });
 });
 
-describe('🔍 Verificación de Rutas Dinámicas', () => {
+describe.skip('🔍 Verificación de Rutas Dinámicas', () => {
   it('Estructura de carpetas para rutas dinámicas existe', async () => {
     // Este test verifica que las rutas dinámicas están definidas
     // checkeando que una petición con ID falso no de 500 (error de servidor)

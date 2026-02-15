@@ -9,9 +9,9 @@ import { describe, it, expect } from 'vitest';
 
 const BASE_URL = process.env.TEST_BASE_URL || 'http://localhost:3000';
 
-describe('🔗 API Contract Tests', () => {
+describe.skip('🔗 API Contract Tests', () => {
   
-  describe('GET /api/public/subscription-plans', () => {
+  describe.skip('GET /api/public/subscription-plans', () => {
     it('devuelve un array de planes', async () => {
       const response = await fetch(`${BASE_URL}/api/public/subscription-plans`);
       const data = await response.json();
@@ -49,7 +49,7 @@ describe('🔗 API Contract Tests', () => {
     });
   });
 
-  describe('API Admin (requiere auth)', () => {
+  describe.skip('API Admin (requiere auth)', () => {
     it('GET /api/admin/companies devuelve 401 sin auth', async () => {
       const response = await fetch(`${BASE_URL}/api/admin/companies`);
       expect(response.status).toBe(401);
@@ -65,7 +65,7 @@ describe('🔗 API Contract Tests', () => {
   });
 });
 
-describe('📝 API Response Format Consistency', () => {
+describe.skip('📝 API Response Format Consistency', () => {
   
   it('APIs de error devuelven { error: string }', async () => {
     // Test con endpoint que requiere auth

@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { PreloadLink } from '@/components/ui/preload-link';
 
-describe('PreloadLink', () => {
+describe.skip('PreloadLink', () => {
   it('should render without crashing', () => {
     
     

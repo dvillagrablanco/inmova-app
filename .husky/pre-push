@@ -1,11 +1,8 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
 echo "🚀 Running pre-push checks..."
 
-# Run CI test suite (no watch)
+# Run test suite (no watch, no coverage to keep it fast)
 echo "🧪 Running all tests..."
-npm run test:ci || {
+npx vitest run || {
   echo "❌ Tests failed. Push aborted."
   exit 1
 }

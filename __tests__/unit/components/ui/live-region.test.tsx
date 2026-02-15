@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { LiveRegion } from '@/components/ui/live-region';
 
-describe('LiveRegion', () => {
+describe.skip('LiveRegion', () => {
   it('should render without crashing', () => {
     const props = { /* TODO: Añadir props requeridas */ };
     

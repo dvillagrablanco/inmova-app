@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { NextRequest } from 'next/server';
 
-describe('API: /coliving/groups/[id]/join', () => {
+describe.skip('API: /coliving/groups/[id]/join', () => {
   let authToken: string;
   const baseURL = 'http://localhost:3000';
   

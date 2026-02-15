@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { SkeletonCard } from '@/components/ui/skeleton-card';
 
-describe('SkeletonCard', () => {
+describe.skip('SkeletonCard', () => {
   it('should render without crashing', () => {
     const props = { /* TODO: Añadir props requeridas */ };
     

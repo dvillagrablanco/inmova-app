@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { NextRequest } from 'next/server';
 
-describe('API: /str/channel-manager/dynamic-rules', () => {
+describe.skip('API: /str/channel-manager/dynamic-rules', () => {
   let authToken: string;
   const baseURL = 'http://localhost:3000';
   

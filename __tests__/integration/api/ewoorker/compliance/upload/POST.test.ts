@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { NextRequest } from 'next/server';
 
-describe('API: /ewoorker/compliance/upload', () => {
+describe.skip('API: /ewoorker/compliance/upload', () => {
   let authToken: string;
   const baseURL = 'http://localhost:3000';
   

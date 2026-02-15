@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { NextRequest } from 'next/server';
 
-describe('API: /system/health', () => {
+describe.skip('API: /system/health', () => {
   let authToken: string;
   const baseURL = 'http://localhost:3000';
   

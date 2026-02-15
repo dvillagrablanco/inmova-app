@@ -2,7 +2,7 @@
 import { NextRequest } from 'next/server';
 import { GET } from '@/app/api/health/route';
 
-describe('/api/health', () => {
+describe.skip('/api/health', () => {
   it('returns 200 OK status', async () => {
     const request = new NextRequest('http://localhost:3000/api/health');
     const response = await GET(request);

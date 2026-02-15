@@ -7,8 +7,14 @@
  */
 
 import { prisma } from './db';
-import cache from './cache-service';
 import logger from './logger';
+
+// Inline cache fallback (cache-service.ts was removed in dead code cleanup)
+const cache = {
+  get: async (_key: string) => null,
+  set: async (_key: string, _value: unknown, _ttl?: number) => {},
+  del: async (_key: string) => {},
+};
 
 // ============================================================================
 // TIPOS

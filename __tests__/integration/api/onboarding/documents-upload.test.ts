@@ -25,6 +25,18 @@ vi.mock('@/lib/db', () => ({
       create: vi.fn(),
     },
   },
+  getPrismaClient: () => ({ prisma: {
+    company: {
+      findUnique: vi.fn(),
+    },
+    documentImportBatch: {
+      create: vi.fn(),
+      update: vi.fn(),
+    },
+    documentImport: {
+      create: vi.fn(),
+    },
+  } }),
 }));
 
 // Mock de AWS S3

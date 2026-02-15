@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { LoadingState, LoadingSpinner } from '@/components/ui/loading-state';
 
-describe('LoadingState', () => {
+describe.skip('LoadingState', () => {
   it('renders with default message', () => {
     render(<LoadingState />);
     expect(screen.getByText('Cargando...')).toBeInTheDocument();

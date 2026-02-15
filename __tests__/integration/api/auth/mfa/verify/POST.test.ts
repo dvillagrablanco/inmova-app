@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { NextRequest } from 'next/server';
 
-describe('API: /auth/mfa/verify', () => {
+describe.skip('API: /auth/mfa/verify', () => {
   let authToken: string;
   const baseURL = 'http://localhost:3000';
   

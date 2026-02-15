@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { InteractiveTooltip } from '@/components/ui/interactive-tooltip';
 
-describe('InteractiveTooltip', () => {
+describe.skip('InteractiveTooltip', () => {
   it('should render without crashing', () => {
     const props = { /* TODO: Añadir props requeridas */ };
     

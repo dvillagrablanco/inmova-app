@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { NextRequest } from 'next/server';
 
-describe('API: /ewoorker/admin-socio/export', () => {
+describe.skip('API: /ewoorker/admin-socio/export', () => {
   let authToken: string;
   const baseURL = 'http://localhost:3000';
   

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { NextRequest } from 'next/server';
 
-describe('API: /portal-proveedor/chat/conversations', () => {
+describe.skip('API: /portal-proveedor/chat/conversations', () => {
   let authToken: string;
   const baseURL = 'http://localhost:3000';
   

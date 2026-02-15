@@ -17,6 +17,16 @@ vi.mock('@/lib/db', () => ({
       delete: vi.fn(),
     },
   },
+  getPrismaClient: () => ({ prisma: {
+    notification: {
+      create: vi.fn(),
+      findMany: vi.fn(),
+      update: vi.fn(),
+      updateMany: vi.fn(),
+      count: vi.fn(),
+      delete: vi.fn(),
+    },
+  } }),
 }));
 
 vi.mock('@/lib/push-service', () => ({

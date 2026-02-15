@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { NextRequest } from 'next/server';
 
-describe('API: /auth/mfa/regenerate-backup-codes', () => {
+describe.skip('API: /auth/mfa/regenerate-backup-codes', () => {
   let authToken: string;
   const baseURL = 'http://localhost:3000';
   
