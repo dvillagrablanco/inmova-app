@@ -8,6 +8,7 @@ import { uploadFile } from '@/lib/s3';
 import logger, { logError } from '@/lib/logger';
 import { invalidatePaymentsCache, invalidateDashboardCache } from '@/lib/api-cache-helpers';
 import { z } from 'zod';
+import * as Sentry from '@sentry/nextjs';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -75,6 +76,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     return NextResponse.json(payment);
   } catch (error) {
     logger.error('Error fetching payment:', error);
+      Sentry.captureException(error);
     return NextResponse.json({ error: 'Error al obtener pago' }, { status: 500 });
   }
 }
@@ -241,6 +243,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         logger.info(`✅ Recibo generado y enviado para pago ${payment.id}`);
       } catch (emailError) {
         logger.error('Error generando recibo o enviando email:', emailError);
+      Sentry.captureException(error);
         // No fallar la actualización del pago si falla el email
       }
     }
@@ -255,6 +258,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     return NextResponse.json(payment);
   } catch (error) {
     logger.error('Error updating payment:', error);
+      Sentry.captureException(error);
     return NextResponse.json({ error: 'Error al actualizar pago' }, { status: 500 });
   }
 }
@@ -282,6 +286,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     return NextResponse.json({ message: 'Pago eliminado' });
   } catch (error) {
     logger.error('Error deleting payment:', error);
+      Sentry.captureException(error);
     return NextResponse.json({ error: 'Error al eliminar pago' }, { status: 500 });
   }
 }

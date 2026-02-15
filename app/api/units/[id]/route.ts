@@ -9,6 +9,7 @@ import {
   invalidateUnitsCache,
 } from '@/lib/api-cache-helpers';
 import { resolveCompanyScope } from '@/lib/company-scope';
+import * as Sentry from '@sentry/nextjs';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -104,6 +105,7 @@ export async function GET(
     return NextResponse.json(unit);
   } catch (error) {
     logger.error('Error fetching unit:', error);
+      Sentry.captureException(error);
     return NextResponse.json({ error: 'Error al obtener la unidad' }, { status: 500 });
   }
 }
@@ -214,6 +216,7 @@ export async function PUT(
     return NextResponse.json(updatedUnit);
   } catch (error) {
     logger.error('Error updating unit:', error);
+      Sentry.captureException(error);
     return NextResponse.json({ error: 'Error al actualizar la unidad' }, { status: 500 });
   }
 }
@@ -264,6 +267,7 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (error) {
     logger.error('Error deleting unit:', error);
+      Sentry.captureException(error);
     return NextResponse.json({ error: 'Error al eliminar la unidad' }, { status: 500 });
   }
 }

@@ -6,6 +6,7 @@ import { scheduleOnboardingEmailSequence } from '@/lib/onboarding-email-service'
 import { scheduleOnboardingEmails } from '@/lib/email-triggers-service';
 import { z } from 'zod';
 import { withAuthRateLimit } from '@/lib/rate-limiting';
+import * as Sentry from '@sentry/nextjs';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -127,6 +128,7 @@ async function handleSignup(req: NextRequest) {
     } catch (onboardingError) {
       // No fallar el signup si hay error en onboarding, solo registrar
       logger.error('Error inicializando onboarding tasks:', onboardingError);
+      Sentry.captureException(error);
     }
 
     // Programar secuencia automática de emails de onboarding
@@ -136,6 +138,7 @@ async function handleSignup(req: NextRequest) {
     } catch (emailError) {
       // No fallar el signup si hay error en emails, solo registrar
       logger.error('Error programando emails de onboarding:', emailError);
+      Sentry.captureException(error);
     }
 
     // Programar emails automáticos diferidos (2h, 24h, 7d, 30d)
@@ -145,6 +148,7 @@ async function handleSignup(req: NextRequest) {
     } catch (emailTriggersError) {
       // No fallar el signup si hay error en triggers, solo registrar
       logger.error('Error programando email triggers:', emailTriggersError);
+      Sentry.captureException(error);
     }
 
     return NextResponse.json(
@@ -163,6 +167,7 @@ async function handleSignup(req: NextRequest) {
     );
   } catch (error) {
     logger.error('Signup error:', error);
+      Sentry.captureException(error);
     return NextResponse.json(
       { error: 'Error al crear usuario' },
       { status: 500 }

@@ -4,6 +4,7 @@ import logger, { logError } from '@/lib/logger';
 import { buildingCreateSchema } from '@/lib/validations';
 import { cachedBuildings, invalidateBuildingsCache, invalidateDashboardCache } from '@/lib/api-cache-helpers';
 import { resolveCompanyScope } from '@/lib/company-scope';
+import * as Sentry from '@sentry/nextjs';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -124,6 +125,7 @@ export async function GET(req: NextRequest) {
     const errorMessage = error?.message || 'Error desconocido';
     const errorStack = error?.stack || '';
     logger.error('Error fetching buildings:', { message: errorMessage, stack: errorStack.slice(0, 500) });
+      Sentry.captureException(error);
     
     if (errorMessage === 'No autenticado') {
       return NextResponse.json({ error: errorMessage }, { status: 401 });
@@ -207,6 +209,7 @@ export async function POST(req: NextRequest) {
       } catch (socialError) {
         // No queremos que falle la creación si falla la publicación social
         logger.error('Error en autopublicación de edificio:', socialError);
+      Sentry.captureException(error);
       }
     })();
 

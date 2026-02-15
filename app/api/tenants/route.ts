@@ -4,6 +4,7 @@ import { requireAuth, requirePermission, forbiddenResponse, badRequestResponse }
 import logger, { logError } from '@/lib/logger';
 import { tenantCreateSchema } from '@/lib/validations';
 import { resolveCompanyScope } from '@/lib/company-scope';
+import * as Sentry from '@sentry/nextjs';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -106,6 +107,7 @@ export async function GET(req: NextRequest) {
     const errorMessage = error?.message || 'Error desconocido';
     const errorStack = error?.stack || '';
     logger.error('Error fetching tenants:', { message: errorMessage, stack: errorStack.slice(0, 500) });
+      Sentry.captureException(error);
     
     if (errorMessage === 'No autenticado') {
       return NextResponse.json({ error: errorMessage }, { status: 401 });
@@ -188,6 +190,7 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) { return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 }); }
     logger.error('Error creating tenant:', error);
+      Sentry.captureException(error);
     if (error.message?.includes('permiso')) {
       return forbiddenResponse(error.message);
     }

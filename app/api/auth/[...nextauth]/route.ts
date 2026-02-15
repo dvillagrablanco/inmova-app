@@ -1,5 +1,6 @@
 import NextAuth from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import * as Sentry from '@sentry/nextjs';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs'; // CRÍTICO: NextAuth + Prisma requiere Node.js runtime

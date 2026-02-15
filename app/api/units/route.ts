@@ -7,6 +7,7 @@ import { cachedUnits, invalidateUnitsCache, invalidateBuildingsCache, invalidate
 import { getPaginationParams, buildPaginationResponse } from '@/lib/pagination-helper';
 import { selectBuildingMinimal, selectTenantMinimal, selectContractMinimal } from '@/lib/query-optimizer';
 import { resolveCompanyScope } from '@/lib/company-scope';
+import * as Sentry from '@sentry/nextjs';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -202,6 +203,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(units);
   } catch (error) {
     logger.error('Error fetching units:', error);
+      Sentry.captureException(error);
     return NextResponse.json(
       { error: 'Error al obtener unidades' },
       { status: 500 }
@@ -301,6 +303,7 @@ export async function POST(req: NextRequest) {
           );
         } catch (socialError) {
           logger.error('Error en autopublicación de unidad:', socialError);
+      Sentry.captureException(error);
         }
       })();
     }

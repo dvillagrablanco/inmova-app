@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import logger, { logError } from '@/lib/logger';
 import { invalidateBuildingsCache, invalidateDashboardCache } from '@/lib/api-cache-helpers';
 import { z } from 'zod';
+import * as Sentry from '@sentry/nextjs';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -62,6 +63,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     return NextResponse.json(building);
   } catch (error) {
     logger.error('Error fetching building:', error);
+      Sentry.captureException(error);
     return NextResponse.json({ error: 'Error al obtener edificio' }, { status: 500 });
   }
 }
@@ -111,6 +113,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     return NextResponse.json(building);
   } catch (error) {
     logger.error('Error updating building:', error);
+      Sentry.captureException(error);
     return NextResponse.json({ error: 'Error al actualizar edificio' }, { status: 500 });
   }
 }
@@ -138,6 +141,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     return NextResponse.json({ message: 'Edificio eliminado' });
   } catch (error) {
     logger.error('Error deleting building:', error);
+      Sentry.captureException(error);
     return NextResponse.json({ error: 'Error al eliminar edificio' }, { status: 500 });
   }
 }

@@ -6,6 +6,7 @@ import { paymentCreateSchema } from '@/lib/validations';
 import { cachedPayments, invalidatePaymentsCache, invalidateDashboardCache } from '@/lib/api-cache-helpers';
 import { withPaymentRateLimit } from '@/lib/rate-limiting';
 import { resolveCompanyScope } from '@/lib/company-scope';
+import * as Sentry from '@sentry/nextjs';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -214,6 +215,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(paymentsResult);
   } catch (error) {
     logger.error('Error fetching payments:', error);
+      Sentry.captureException(error);
     return NextResponse.json({ error: 'Error al obtener pagos' }, { status: 500 });
   }
   });

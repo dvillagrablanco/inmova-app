@@ -8,6 +8,7 @@ import {
   invalidateDashboardCache,
 } from '@/lib/api-cache-helpers';
 import { z } from 'zod';
+import * as Sentry from '@sentry/nextjs';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -94,6 +95,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     return NextResponse.json(contract);
   } catch (error) {
     logger.error('Error fetching contract:', error);
+      Sentry.captureException(error);
     return NextResponse.json({ error: 'Error al obtener contrato' }, { status: 500 });
   }
 }
@@ -145,6 +147,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     return NextResponse.json(contract);
   } catch (error) {
     logger.error('Error updating contract:', error);
+      Sentry.captureException(error);
     return NextResponse.json({ error: 'Error al actualizar contrato' }, { status: 500 });
   }
 }
@@ -173,6 +176,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     return NextResponse.json({ message: 'Contrato eliminado' });
   } catch (error) {
     logger.error('Error deleting contract:', error);
+      Sentry.captureException(error);
     return NextResponse.json({ error: 'Error al eliminar contrato' }, { status: 500 });
   }
 }

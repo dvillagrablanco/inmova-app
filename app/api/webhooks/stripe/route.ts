@@ -19,6 +19,7 @@ import Stripe from 'stripe';
 import { getInmovaContasimpleBridge } from '@/lib/inmova-contasimple-bridge';
 import { handleEwoorkerStripeWebhook } from '@/lib/ewoorker-stripe-service';
 import logger from '@/lib/logger';
+import * as Sentry from '@sentry/nextjs';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -77,6 +78,7 @@ export async function POST(req: NextRequest) {
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Error desconocido';
       logger.error('[Stripe Webhook] Signature verification failed:', { message });
+      Sentry.captureException(error);
       return NextResponse.json(
         { error: 'Invalid signature' },
         { status: 400 }
@@ -152,6 +154,7 @@ export async function POST(req: NextRequest) {
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('[Stripe Webhook Error]:', { message });
+      Sentry.captureException(error);
     return NextResponse.json(
       { error: 'Webhook error', message },
       { status: 500 }
@@ -348,6 +351,7 @@ async function handleB2BInvoiceCreated(stripeInvoice: Stripe.Invoice) {
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('[Stripe Webhook] Error sincronizando factura con Contasimple:', { message });
+      Sentry.captureException(error);
     // No lanzar error para no fallar el webhook
   }
 }
@@ -415,6 +419,7 @@ async function handleB2BInvoicePaymentSucceeded(stripeInvoice: Stripe.Invoice) {
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('[Stripe Webhook] Error procesando pago de factura B2B:', { message });
+      Sentry.captureException(error);
   }
 }
 
@@ -458,6 +463,7 @@ async function handleB2BInvoicePaymentFailed(stripeInvoice: Stripe.Invoice) {
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('[Stripe Webhook] Error procesando fallo de pago:', { message });
+      Sentry.captureException(error);
   }
 }
 
@@ -534,6 +540,7 @@ async function handleSubscriptionEvent(event: Stripe.Event) {
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('[Stripe Webhook] Error actualizando suscripción Inmova:', { message });
+      Sentry.captureException(error);
   }
 }
 
@@ -601,6 +608,7 @@ async function handleAddOnSubscription(event: Stripe.Event, subscription: Stripe
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('[Stripe Webhook] Error procesando add-on subscription:', { message });
+      Sentry.captureException(error);
   }
 }
 
@@ -670,5 +678,6 @@ async function handlePlanSubscription(event: Stripe.Event, subscription: Stripe.
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('[Stripe Webhook] Error procesando plan subscription:', { message });
+      Sentry.captureException(error);
   }
 }
