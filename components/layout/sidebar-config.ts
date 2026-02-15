@@ -38,6 +38,7 @@ export const DEFAULT_EXPANDED_BY_ROLE: Record<UserRole, Record<string, boolean>>
     favorites: true,
     dashboard: true,
     superAdminPlatform: true, // CRÍTICO: Gestión de clientes
+    holdingGrupo: true, // Consolidacion grupo societario
     administradorEmpresa: false,
     finanzas: false,
     analytics: false,
@@ -62,6 +63,7 @@ export const DEFAULT_EXPANDED_BY_ROLE: Record<UserRole, Record<string, boolean>>
   administrador: {
     favorites: true,
     dashboard: true,
+    holdingGrupo: true, // Consolidacion grupo societario
     analytics: true, // CRÍTICO: Toma de decisiones
     finanzas: true, // CRÍTICO: Flujo de caja
     herramientasInversion: true, // NUEVO: Calculadoras y herramientas de inversión

@@ -58,6 +58,7 @@ import {
   Calculator,
   MapPin,
   Crown,
+  Landmark,
   LogIn,
   Coffee,
 } from 'lucide-react';
@@ -1268,6 +1269,59 @@ const operacionesNavItems = [
   },
 ];
 
+// 3.3.0 HOLDING / GRUPO SOCIETARIO
+// Consolidacion de sociedades patrimoniales (Vidaro como holding de Viroda+Rovida)
+const holdingGrupoNavItems = [
+  {
+    name: 'Dashboard Grupo',
+    href: '/inversiones',
+    icon: Crown,
+    roles: ['super_admin', 'administrador'],
+  },
+  {
+    name: 'Comparativa Sociedades',
+    href: '/inversiones/comparativa',
+    icon: BarChart3,
+    roles: ['super_admin', 'administrador'],
+  },
+  {
+    name: 'Activos del Grupo',
+    href: '/inversiones/activos',
+    icon: Building2,
+    roles: ['super_admin', 'administrador'],
+  },
+  {
+    name: 'Hipotecas',
+    href: '/inversiones/hipotecas',
+    icon: Landmark,
+    roles: ['super_admin', 'administrador'],
+  },
+  {
+    name: 'Fiscal Grupo',
+    href: '/inversiones/fiscal',
+    icon: FileBarChart,
+    roles: ['super_admin', 'administrador'],
+  },
+  {
+    name: 'P&L Consolidado',
+    href: '/inversiones/pyl',
+    icon: TrendingUp,
+    roles: ['super_admin', 'administrador'],
+  },
+  {
+    name: 'Fianzas',
+    href: '/inversiones/fianzas',
+    icon: Shield,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Export Gestoria',
+    href: '/inversiones/export',
+    icon: FileText,
+    roles: ['super_admin', 'administrador'],
+  },
+];
+
 // 3.3.1 HERRAMIENTAS DE INVERSIÓN (NUEVO - Basado en ZONA3)
 // Calculadoras, contratos y recursos para inversores
 const herramientasInversionNavItems = [
@@ -1865,6 +1919,7 @@ export {
   realEstateDeveloperNavItems,
   workspaceNavItems,
   warehouseNavItems,
+  holdingGrupoNavItems,
   finanzasNavItems,
   analyticsNavItems,
   operacionesNavItems,
