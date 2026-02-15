@@ -1,3 +1,4 @@
+import { requireSession } from '@/lib/api-auth-guard';
 /**
  * API de Servicio Individual para el Portal del Proveedor
  * 

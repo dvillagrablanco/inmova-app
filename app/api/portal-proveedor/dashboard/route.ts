@@ -1,3 +1,4 @@
+import { requireSession } from '@/lib/api-auth-guard';
 import { NextRequest, NextResponse } from 'next/server';
 import logger, { logError } from '@/lib/logger';
 
@@ -12,6 +13,10 @@ async function getPrisma() {
 
 // GET /api/portal-proveedor/dashboard - Dashboard del proveedor
 export async function GET(req: NextRequest) {
+  // Auth guard: requiere sesion autenticada
+  const auth = await requireSession();
+  if (!auth.authenticated) return auth.response;
+
   const prisma = await getPrisma();
   try {
     const { searchParams } = new URL(req.url);

@@ -1,3 +1,4 @@
+import { requireSession } from '@/lib/api-auth-guard';
 import { NextRequest, NextResponse } from 'next/server';
 import { searchArticles } from '@/lib/knowledge-base-data';
 import logger, { logError } from '@/lib/logger';
@@ -9,7 +10,13 @@ export const dynamic = 'force-dynamic';
  * API para categorizar automáticamente tickets de soporte usando IA
  */
 export async function POST(request: NextRequest) {
+  // Auth guard
+  const auth = await requireSession();
+  if (!auth.authenticated) return auth.response;
   try {
+  // Auth guard
+  const auth = await requireSession();
+  if (!auth.authenticated) return auth.response;
     const { subject, description, attachments } = await request.json();
 
     if (!subject || !description) {

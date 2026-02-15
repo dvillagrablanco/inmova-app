@@ -1,3 +1,4 @@
+import { requireSession } from '@/lib/api-auth-guard';
 import { NextRequest, NextResponse } from 'next/server';
 import logger from '@/lib/logger';
 
@@ -15,8 +16,14 @@ async function getPrisma() {
  * Obtiene las solicitudes de mantenimiento relacionadas con las propiedades del propietario
  */
 export async function GET(request: NextRequest) {
+  // Auth guard
+  const auth = await requireSession();
+  if (!auth.authenticated) return auth.response;
   const prisma = await getPrisma();
   try {
+  // Auth guard
+  const auth = await requireSession();
+  if (!auth.authenticated) return auth.response;
     const ownerId = request.headers.get('x-owner-id');
     if (!ownerId) {
       return NextResponse.json(

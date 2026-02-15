@@ -1,3 +1,4 @@
+import { requireSession } from '@/lib/api-auth-guard';
 import { NextRequest, NextResponse } from 'next/server';
 import { logError } from '@/lib/logger';
 
@@ -15,8 +16,14 @@ async function getPrisma() {
  * Obtiene los mensajes de una conversación
  */
 export async function GET(request: NextRequest) {
+  // Auth guard
+  const auth = await requireSession();
+  if (!auth.authenticated) return auth.response;
   const prisma = await getPrisma();
   try {
+  // Auth guard
+  const auth = await requireSession();
+  if (!auth.authenticated) return auth.response;
     const providerId = request.headers.get('x-provider-id');
 
     if (!providerId) {
@@ -103,8 +110,14 @@ export async function GET(request: NextRequest) {
  * Envía un nuevo mensaje en una conversación
  */
 export async function POST(request: NextRequest) {
+  // Auth guard
+  const auth = await requireSession();
+  if (!auth.authenticated) return auth.response;
   const prisma = await getPrisma();
   try {
+  // Auth guard
+  const auth = await requireSession();
+  if (!auth.authenticated) return auth.response;
     const providerId = request.headers.get('x-provider-id');
 
     if (!providerId) {

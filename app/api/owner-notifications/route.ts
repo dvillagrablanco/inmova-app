@@ -1,3 +1,4 @@
+import { requireSession } from '@/lib/api-auth-guard';
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthenticatedOwner } from '@/lib/owner-auth';
 import logger from '@/lib/logger';
@@ -13,8 +14,14 @@ async function getPrisma() {
 
 // GET /api/owner-notifications - Obtener notificaciones del propietario autenticado
 export async function GET(req: NextRequest) {
+  // Auth guard
+  const auth = await requireSession();
+  if (!auth.authenticated) return auth.response;
   const prisma = await getPrisma();
   try {
+  // Auth guard
+  const auth = await requireSession();
+  if (!auth.authenticated) return auth.response;
     const owner = await getAuthenticatedOwner();
 
     if (!owner) {
@@ -50,8 +57,14 @@ export async function GET(req: NextRequest) {
 
 // PATCH /api/owner-notifications - Marcar notificación como leída
 export async function PATCH(req: NextRequest) {
+  // Auth guard
+  const auth = await requireSession();
+  if (!auth.authenticated) return auth.response;
   const prisma = await getPrisma();
   try {
+  // Auth guard
+  const auth = await requireSession();
+  if (!auth.authenticated) return auth.response;
     const owner = await getAuthenticatedOwner();
 
     if (!owner) {

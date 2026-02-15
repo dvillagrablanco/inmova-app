@@ -1,3 +1,4 @@
+import { requireCronSecret } from '@/lib/api-auth-guard';
 /**
  * Cron Job para verificar cupones próximos a expirar
  * Ejecuta diariamente a las 9:00 AM
@@ -64,9 +65,15 @@ async function sendEmailAlert(subject: string, html: string) {
 }
 
 export async function GET(request: NextRequest) {
+  // Cron auth guard
+  const cronAuth = requireCronSecret(request);
+  if (!cronAuth.authenticated) return cronAuth.response;
   // Cron auth guard (auditoria V2)
   const cronAuth = await authorizeCronRequest(request as any);
   if (!cronAuth.authorized) {
+  // Cron auth guard
+  const cronAuth = requireCronSecret(request);
+  if (!cronAuth.authenticated) return cronAuth.response;
     return NextResponse.json({ error: cronAuth.error || 'No autorizado' }, { status: cronAuth.status });
   }
 

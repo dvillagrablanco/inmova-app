@@ -1,3 +1,4 @@
+import { requireSession } from '@/lib/api-auth-guard';
 import { NextRequest, NextResponse } from 'next/server';
 import logger from '@/lib/logger';
 
@@ -15,8 +16,14 @@ async function getPrisma() {
  * Obtiene los mensajes del propietario
  */
 export async function GET(request: NextRequest) {
+  // Auth guard
+  const auth = await requireSession();
+  if (!auth.authenticated) return auth.response;
   const prisma = await getPrisma();
   try {
+  // Auth guard
+  const auth = await requireSession();
+  if (!auth.authenticated) return auth.response;
     const ownerId = request.headers.get('x-owner-id');
     if (!ownerId) {
       return NextResponse.json(
@@ -66,8 +73,14 @@ export async function GET(request: NextRequest) {
  * Marca mensajes como leídos
  */
 export async function POST(request: NextRequest) {
+  // Auth guard
+  const auth = await requireSession();
+  if (!auth.authenticated) return auth.response;
   const prisma = await getPrisma();
   try {
+  // Auth guard
+  const auth = await requireSession();
+  if (!auth.authenticated) return auth.response;
     const ownerId = request.headers.get('x-owner-id');
     if (!ownerId) {
       return NextResponse.json(

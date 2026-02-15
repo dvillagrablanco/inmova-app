@@ -1,3 +1,4 @@
+import { requireSession } from '@/lib/api-auth-guard';
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import logger from '@/lib/logger';
@@ -16,8 +17,14 @@ async function getPrisma() {
  * Obtiene la configuración del propietario
  */
 export async function GET(request: NextRequest) {
+  // Auth guard
+  const auth = await requireSession();
+  if (!auth.authenticated) return auth.response;
   const prisma = await getPrisma();
   try {
+  // Auth guard
+  const auth = await requireSession();
+  if (!auth.authenticated) return auth.response;
     const ownerId = request.headers.get('x-owner-id');
     if (!ownerId) {
       return NextResponse.json(
@@ -65,8 +72,14 @@ export async function GET(request: NextRequest) {
  * Actualiza la configuración del propietario
  */
 export async function PUT(request: NextRequest) {
+  // Auth guard
+  const auth = await requireSession();
+  if (!auth.authenticated) return auth.response;
   const prisma = await getPrisma();
   try {
+  // Auth guard
+  const auth = await requireSession();
+  if (!auth.authenticated) return auth.response;
     const ownerId = request.headers.get('x-owner-id');
     if (!ownerId) {
       return NextResponse.json(

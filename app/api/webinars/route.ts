@@ -1,3 +1,4 @@
+import { requireSession } from '@/lib/api-auth-guard';
 import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
@@ -8,6 +9,12 @@ export const dynamic = 'force-dynamic';
  * Cuando se implemente el módulo de webinars, este endpoint leerá de la tabla Webinar.
  */
 export async function GET() {
+  // Auth guard
+  const auth = await requireSession();
+  if (!auth.authenticated) return auth.response;
   // TODO: Cuando exista el modelo Webinar en Prisma, leer de la BD
   return NextResponse.json({ data: [] });
+  // Auth guard
+  const auth = await requireSession();
+  if (!auth.authenticated) return auth.response;
 }

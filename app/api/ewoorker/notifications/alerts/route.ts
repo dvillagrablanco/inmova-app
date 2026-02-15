@@ -1,3 +1,4 @@
+import { requireSession } from '@/lib/api-auth-guard';
 /**
  * API: Procesar alertas de documentos ewoorker
  * POST /api/ewoorker/notifications/alerts
@@ -12,7 +13,13 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
+  // Auth guard
+  const auth = await requireSession();
+  if (!auth.authenticated) return auth.response;
   try {
+  // Auth guard
+  const auth = await requireSession();
+  if (!auth.authenticated) return auth.response;
     // Verificar cron secret (para llamadas desde Vercel Cron)
     const authHeader = request.headers.get('authorization');
     const cronSecret = process.env.CRON_SECRET;
@@ -38,7 +45,13 @@ export async function POST(request: NextRequest) {
  * GET: Estado de alertas (para monitoreo)
  */
 export async function GET() {
+  // Auth guard
+  const auth = await requireSession();
+  if (!auth.authenticated) return auth.response;
   try {
+  // Auth guard
+  const auth = await requireSession();
+  if (!auth.authenticated) return auth.response;
     return NextResponse.json({
       status: 'ok',
       service: 'ewoorker-document-alerts',

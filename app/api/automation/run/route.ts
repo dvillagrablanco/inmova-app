@@ -1,3 +1,4 @@
+import { requireSession } from '@/lib/api-auth-guard';
 /**
  * ENDPOINT PARA EJECUTAR AUTOMATIZACIONES
  * Este endpoint debe ser llamado periódicamente (por ejemplo, por un cron job)
@@ -26,8 +27,14 @@ async function getPrisma() {
 const AUTOMATION_TOKEN = process.env.AUTOMATION_TOKEN || 'inmova_automation_2024';
 
 export async function POST(request: NextRequest) {
+  // Auth guard
+  const auth = await requireSession();
+  if (!auth.authenticated) return auth.response;
   const prisma = await getPrisma();
   try {
+  // Auth guard
+  const auth = await requireSession();
+  if (!auth.authenticated) return auth.response;
     // Verificar token de autorización
     const authHeader = request.headers.get('authorization');
     const token = authHeader?.replace('Bearer ', '');
@@ -122,8 +129,14 @@ export async function POST(request: NextRequest) {
 
 // También permitir GET para ejecución manual (solo con token)
 export async function GET(request: NextRequest) {
+  // Auth guard
+  const auth = await requireSession();
+  if (!auth.authenticated) return auth.response;
   const prisma = await getPrisma();
   const { searchParams } = new URL(request.url);
+  // Auth guard
+  const auth = await requireSession();
+  if (!auth.authenticated) return auth.response;
   const token = searchParams.get('token');
 
   if (token !== AUTOMATION_TOKEN) {

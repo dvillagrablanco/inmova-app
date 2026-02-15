@@ -1,3 +1,4 @@
+import { requireSession } from '@/lib/api-auth-guard';
 /**
  * EJEMPLO: Dashboard con Caché Redis y Rate Limiting
  * 
@@ -14,8 +15,14 @@ import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
+  // Auth guard
+  const auth = await requireSession();
+  if (!auth.authenticated) return auth.response;
   return NextResponse.json(
     { error: 'Endpoint de ejemplo deshabilitado' },
+  // Auth guard
+  const auth = await requireSession();
+  if (!auth.authenticated) return auth.response;
     { status: 501 }
   );
 }

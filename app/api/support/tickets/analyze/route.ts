@@ -1,3 +1,4 @@
+import { requireSession } from '@/lib/api-auth-guard';
 import { NextRequest, NextResponse } from 'next/server';
 import { searchKnowledgeBase, searchFAQs } from '@/lib/knowledge-base';
 import logger from '@/lib/logger';
@@ -6,7 +7,13 @@ export const dynamic = 'force-dynamic';
 
 
 export async function POST(request: NextRequest) {
+  // Auth guard
+  const auth = await requireSession();
+  if (!auth.authenticated) return auth.response;
   try {
+  // Auth guard
+  const auth = await requireSession();
+  if (!auth.authenticated) return auth.response;
     const { subject, description } = await request.json();
     const fullText = `${subject} ${description}`;
 

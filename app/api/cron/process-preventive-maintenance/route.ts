@@ -1,3 +1,4 @@
+import { requireCronSecret } from '@/lib/api-auth-guard';
 import { NextRequest, NextResponse } from 'next/server';
 import { sendEmail } from '@/lib/email-config';
 import logger from '@/lib/logger';
@@ -182,10 +183,16 @@ async function processPreventiveMaintenance() {
  * Este endpoint debe ser llamado por un servicio de cron externo (diariamente)
  */
 export async function GET(request: NextRequest) {
+  // Cron auth guard
+  const cronAuth = requireCronSecret(request);
+  if (!cronAuth.authenticated) return cronAuth.response;
   const prisma = await getPrisma();
   // Cron auth guard (auditoria V2)
   const cronAuth = await authorizeCronRequest(request as any);
   if (!cronAuth.authorized) {
+  // Cron auth guard
+  const cronAuth = requireCronSecret(request);
+  if (!cronAuth.authenticated) return cronAuth.response;
     return NextResponse.json({ error: cronAuth.error || 'No autorizado' }, { status: cronAuth.status });
   }
 
@@ -230,10 +237,16 @@ export async function GET(request: NextRequest) {
  * Alternativa con método POST
  */
 export async function POST(request: NextRequest) {
+  // Cron auth guard
+  const cronAuth = requireCronSecret(request);
+  if (!cronAuth.authenticated) return cronAuth.response;
   const prisma = await getPrisma();
   // Cron auth guard (auditoria V2)
   const cronAuth = await authorizeCronRequest(request as any);
   if (!cronAuth.authorized) {
+  // Cron auth guard
+  const cronAuth = requireCronSecret(request);
+  if (!cronAuth.authenticated) return cronAuth.response;
     return NextResponse.json({ error: cronAuth.error || 'No autorizado' }, { status: cronAuth.status });
   }
 

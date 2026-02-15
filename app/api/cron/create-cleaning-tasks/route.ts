@@ -1,3 +1,4 @@
+import { requireCronSecret } from '@/lib/api-auth-guard';
 export const dynamic = 'force-dynamic';
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -12,7 +13,13 @@ import { authOptions } from '@/lib/auth-options';
  * POST /api/cron/create-cleaning-tasks
  */
 export async function POST(request: NextRequest) {
+  // Cron auth guard
+  const cronAuth = requireCronSecret(request);
+  if (!cronAuth.authenticated) return cronAuth.response;
   try {
+  // Cron auth guard
+  const cronAuth = requireCronSecret(request);
+  if (!cronAuth.authenticated) return cronAuth.response;
     const authResult = await authorizeCronRequest(request, {
       allowSession: true,
       requireSuperAdmin: true,
