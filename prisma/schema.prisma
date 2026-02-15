@@ -2160,9 +2160,10 @@ model Company {
   onboardingDocumentSessions OnboardingDocumentSession?
 
   // 🏢 SOCIEDADES INVERSORAS / PATRIMONIALES
-  assetAcquisitions AssetAcquisition[]
-  mortgages         Mortgage[]
-  fianzaDeposits    FianzaDeposit[]
+  assetAcquisitions    AssetAcquisition[]
+  mortgages            Mortgage[]
+  fianzaDeposits       FianzaDeposit[]
+  investmentAnalyses   InvestmentAnalysis[]
 
   @@map("company")
 }
@@ -15996,4 +15997,91 @@ model FianzaDeposit {
   @@index([contractId])
   @@index([companyId])
   @@index([estado])
+}
+
+// ==========================================
+// ANALISIS DE INVERSIONES (VIDARO HOLDING)
+// Rent roll, OPEX, CAPEX, financiacion,
+// tabla de sensibilidad sobre precio maximo
+// ==========================================
+
+enum AnalysisUnitType {
+  vivienda
+  garaje
+  local
+  trastero
+  oficina
+  otro
+}
+
+/// Analisis de inversion inmobiliaria completo
+model InvestmentAnalysis {
+  id          String   @id @default(cuid())
+  companyId   String
+  createdBy   String
+
+  // Datos del activo
+  nombre            String   // Nombre descriptivo del analisis
+  direccion         String?
+  ciudad            String?
+  tipoActivo        String?  // edificio_completo, unidad_individual, cartera
+  askingPrice       Float    // Precio que piden (techo de la tabla sensibilidad)
+
+  // Datos de compra
+  gastosNotaria       Float @default(0)
+  gastosRegistro      Float @default(0)
+  impuestoCompra      Float @default(0) // ITP o IVA+AJD
+  comisionCompra      Float @default(0) // Comision agencia compra (%)
+  otrosGastosCompra   Float @default(0)
+
+  // CAPEX (reformas/mejoras)
+  capexReforma        Float @default(0)
+  capexImprevistos    Float @default(0) // % sobre capex
+  capexOtros          Float @default(0)
+
+  // OPEX anual (gastos recurrentes)
+  ibiAnual            Float @default(0)
+  comunidadMensual    Float @default(0)
+  seguroAnual         Float @default(0)
+  mantenimientoAnual  Float @default(0) // % sobre renta o fijo
+  gestionAdminPct     Float @default(0) // % sobre renta bruta
+  vacioEstimadoPct    Float @default(5) // % del ano vacio
+  comisionAlquilerPct Float @default(0) // Comision por nueva contratacion
+  otrosGastosAnuales  Float @default(0)
+
+  // Financiacion
+  usaFinanciacion     Boolean @default(false)
+  ltv                 Float?  // % financiado sobre precio compra
+  tipoInteres         Float?  // % anual
+  plazoAnos           Int?
+  comisionApertura    Float?  // %
+
+  // Rent roll (JSON array de unidades)
+  // Cada entrada: { tipo, referencia, superficie, rentaMensual, estado }
+  rentRoll            Json    @default("[]")
+
+  // Resultados calculados (se regeneran al guardar)
+  rentaBrutaAnual       Float?
+  rentaNetaAnual        Float?
+  inversionTotal        Float?
+  capitalPropio         Float?
+  importeHipoteca       Float?
+  cuotaHipotecaMensual  Float?
+  cashFlowAnual         Float?
+  yieldBruto            Float?
+  yieldNeto             Float?
+  cashOnCash            Float?
+  paybackAnos           Float?
+  // Tabla de sensibilidad (JSON)
+  // Array de { precio, yield, cashOnCash, cashFlow }
+  tablaSensibilidad     Json?
+
+  notas     String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([createdBy])
 }

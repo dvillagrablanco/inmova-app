@@ -1279,6 +1279,13 @@ const holdingGrupoNavItems = [
     roles: ['super_admin', 'administrador'],
   },
   {
+    name: 'Analisis Inversion',
+    href: '/inversiones/analisis',
+    icon: Calculator,
+    roles: ['super_admin', 'administrador'],
+    badge: 'Nuevo',
+  },
+  {
     name: 'Comparativa Sociedades',
     href: '/inversiones/comparativa',
     icon: BarChart3,
