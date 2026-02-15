@@ -1,4 +1,3 @@
-import { requireCronSecret } from '@/lib/api-auth-guard';
 export const dynamic = 'force-dynamic';
 
 /**
@@ -24,6 +23,7 @@ import { processOnboardingReminders } from '@/lib/onboarding-email-automation';
 import { retryFailedWebhooks } from '@/lib/onboarding-webhook-system';
 import logger from '@/lib/logger';
 import { authorizeCronRequest } from '@/lib/cron-auth';
+import { requireCronSecret } from '@/lib/api-auth-guard';
 
 // Proteger con token de autenticación
 export async function GET(request: NextRequest) {

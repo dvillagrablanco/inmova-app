@@ -4,8 +4,44 @@
  */
 
 import { prisma } from './db';
-import { withCache, cacheService } from './redis-cache-service';
 import { startOfMonth, endOfMonth, subMonths } from 'date-fns';
+
+// ============================================================
+// Inline cache (eliminado redis-cache-service.ts en cleanup)
+// Provee withCache y cacheService como fallback en memoria
+// ============================================================
+const memoryCache = new Map<string, { data: unknown; expiry: number }>();
+
+async function withCache<T>(
+  key: string,
+  ttlMs: number,
+  fetcher: () => Promise<T>
+): Promise<T> {
+  const cached = memoryCache.get(key);
+  if (cached && cached.expiry > Date.now()) {
+    return cached.data as T;
+  }
+  const data = await fetcher();
+  memoryCache.set(key, { data, expiry: Date.now() + ttlMs });
+  return data;
+}
+
+const cacheService = {
+  invalidate: (pattern: string) => {
+    for (const key of memoryCache.keys()) {
+      if (key.includes(pattern)) {
+        memoryCache.delete(key);
+      }
+    }
+  },
+  get: async (key: string) => {
+    const cached = memoryCache.get(key);
+    return cached && cached.expiry > Date.now() ? cached.data : null;
+  },
+  set: async (key: string, data: unknown, ttlMs: number) => {
+    memoryCache.set(key, { data, expiry: Date.now() + ttlMs });
+  },
+};
 
 // TTLs específicos por tipo de dato (en milisegundos)
 const TTL_DASHBOARD = 5 * 60 * 1000; // 5 minutos

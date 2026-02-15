@@ -1,8 +1,8 @@
-import { requireCronSecret } from '@/lib/api-auth-guard';
 import { NextRequest, NextResponse } from 'next/server';
 import { processScheduledReports } from '@/lib/report-service';
 import logger, { logError } from '@/lib/logger';
 import { authorizeCronRequest } from '@/lib/cron-auth';
+import { requireCronSecret } from '@/lib/api-auth-guard';
 
 export const dynamic = 'force-dynamic';
 

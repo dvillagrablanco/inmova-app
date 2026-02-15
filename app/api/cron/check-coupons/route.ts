@@ -1,4 +1,3 @@
-import { requireCronSecret } from '@/lib/api-auth-guard';
 /**
  * Cron Job para verificar cupones próximos a expirar
  * Ejecuta diariamente a las 9:00 AM
@@ -16,6 +15,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import logger from '@/lib/logger';
 import { authorizeCronRequest } from '@/lib/cron-auth';
+import { requireCronSecret } from '@/lib/api-auth-guard';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 

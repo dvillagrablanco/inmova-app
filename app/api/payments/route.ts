@@ -284,7 +284,9 @@ export async function POST(req: NextRequest) {
     // Sincronizar ingreso con Zucchetti (async, no bloqueante)
     // Solo si el pago está marcado como pagado
     if (scope.activeCompanyId && (validatedData.estado === 'pagado' || validatedData.fechaPago)) {
-      import('@/lib/zucchetti-accounting-sync').then(async ({ syncIncomeToZucchetti }) => {
+      // Zucchetti sync (disabled - module removed in cleanup)
+      Promise.resolve().then(async () => {
+        return; // TODO: Re-enable when Zucchetti integration is active
         try {
           // Obtener datos del contrato para referencia
           const contract = await prisma.contract.findUnique({

@@ -1,4 +1,3 @@
-import { requireCronSecret } from '@/lib/api-auth-guard';
 /**
  * API Route: Cron Job - Process Monthly Overages
  * GET /api/cron/process-monthly-overages
@@ -14,6 +13,7 @@ import { processMonthlyOverages } from '@/lib/usage-billing-service';
 
 import logger from '@/lib/logger';
 import { authorizeCronRequest } from '@/lib/cron-auth';
+import { requireCronSecret } from '@/lib/api-auth-guard';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 export const maxDuration = 600; // 10 minutos

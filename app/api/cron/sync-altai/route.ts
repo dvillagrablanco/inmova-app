@@ -1,4 +1,3 @@
-import { requireCronSecret } from '@/lib/api-auth-guard';
 /**
  * CRON: Sincronización automática con Altai
  * 
@@ -9,6 +8,7 @@ import { requireCronSecret } from '@/lib/api-auth-guard';
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { requireCronSecret } from '@/lib/api-auth-guard';
 import {
   getAltaiAccessToken,
   getAltaiConfig,

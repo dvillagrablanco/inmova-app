@@ -1,7 +1,7 @@
-import { requireSession } from '@/lib/api-auth-guard';
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthenticatedOwner } from '@/lib/owner-auth';
 import logger from '@/lib/logger';
+import { requireSession } from '@/lib/api-auth-guard';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';

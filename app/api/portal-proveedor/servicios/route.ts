@@ -1,4 +1,3 @@
-import { requireSession } from '@/lib/api-auth-guard';
 /**
  * API de Servicios para el Portal del Proveedor
  * 
@@ -10,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAuthenticatedProvider } from '@/lib/provider-auth';
 import logger from '@/lib/logger';
 import { z } from 'zod';
+import { requireSession } from '@/lib/api-auth-guard';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';

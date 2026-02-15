@@ -1,4 +1,3 @@
-import { requireCronSecret } from '@/lib/api-auth-guard';
 /**
  * API Route: Cron Job - Check Usage Alerts
  * GET /api/cron/check-usage-alerts
@@ -14,6 +13,7 @@ import { checkUsageLimitsForAllCompanies } from '@/lib/usage-alerts-service';
 
 import logger from '@/lib/logger';
 import { authorizeCronRequest } from '@/lib/cron-auth';
+import { requireCronSecret } from '@/lib/api-auth-guard';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 export const maxDuration = 300; // 5 minutos

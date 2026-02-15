@@ -1,4 +1,3 @@
-import { requireCronSecret } from '@/lib/api-auth-guard';
 /**
  * API Cron Job: Procesar Webhooks Pendientes
  * 
@@ -10,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { processWebhookEvents } from '@/lib/webhook-service';
 import logger from '@/lib/logger';
 import { authorizeCronRequest } from '@/lib/cron-auth';
+import { requireCronSecret } from '@/lib/api-auth-guard';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;

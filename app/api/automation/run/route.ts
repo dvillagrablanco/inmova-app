@@ -1,4 +1,3 @@
-import { requireSession } from '@/lib/api-auth-guard';
 /**
  * ENDPOINT PARA EJECUTAR AUTOMATIZACIONES
  * Este endpoint debe ser llamado periódicamente (por ejemplo, por un cron job)
@@ -12,6 +11,7 @@ import {
   paymentReminderService 
 } from '@/lib/automation-service-simple';
 import logger from '@/lib/logger';
+import { requireSession } from '@/lib/api-auth-guard';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';

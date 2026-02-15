@@ -1,4 +1,3 @@
-import { requireCronSecret } from '@/lib/api-auth-guard';
 export const dynamic = 'force-dynamic';
 
 /**
@@ -14,6 +13,7 @@ import { cleanupExpiredNotifications } from '@/lib/notification-service';
 
 import logger from '@/lib/logger';
 import { authorizeCronRequest } from '@/lib/cron-auth';
+import { requireCronSecret } from '@/lib/api-auth-guard';
 export async function GET(request: NextRequest) {
   // Cron auth guard
   const cronAuth = requireCronSecret(request);

@@ -1,4 +1,3 @@
-import { requireCronSecret } from '@/lib/api-auth-guard';
 export const dynamic = 'force-dynamic';
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -7,6 +6,7 @@ import { syncAllICalFeeds } from '@/lib/cron-service';
 import { authorizeCronRequest } from '@/lib/cron-auth';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import { requireCronSecret } from '@/lib/api-auth-guard';
 
 /**
  * API Route: Sincronización manual de calendarios iCal
