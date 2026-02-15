@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     const event = body.event;
     const data = body.data;
 
-    console.log('[Signaturit Webhook] Event received:', event, 'ID:', data.id);
+    logger.info('[Signaturit Webhook] Event received:', event, 'ID:', data.id);
 
     // 3. Verificar firma del webhook (usando webhook secret global de Inmova)
     const isValid = SignaturitService.verifyWebhookSignature(bodyText, signature);
@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
         break;
 
       default:
-        console.log('[Signaturit Webhook] Unknown event:', event);
+        logger.info('[Signaturit Webhook] Unknown event:', event);
     }
 
     // 6. Respuesta OK (Signaturit requiere 200 OK)
@@ -147,7 +147,7 @@ async function handleSignatureReady(contract: any, data: any) {
       },
     });
 
-    console.log('[Signaturit] Signature ready:', data.id);
+    logger.info('[Signaturit] Signature ready:', data.id);
   } catch (error: any) {
     logger.error('[handleSignatureReady] Error:', error);
   }
@@ -250,7 +250,7 @@ async function handleSignatureCompleted(contract: any, data: any) {
     // 5. Enviar notificación al propietario (opcional)
     // await sendContractSignedNotification(contract);
 
-    console.log('[Signaturit] Signature completed:', data.id);
+    logger.info('[Signaturit] Signature completed:', data.id);
   } catch (error: any) {
     logger.error('[handleSignatureCompleted] Error:', error);
   }
@@ -287,7 +287,7 @@ async function handleSignatureDeclined(contract: any, data: any) {
     // Notificar al propietario
     // await sendContractDeclinedNotification(contract);
 
-    console.log('[Signaturit] Signature declined:', data.id);
+    logger.info('[Signaturit] Signature declined:', data.id);
   } catch (error: any) {
     logger.error('[handleSignatureDeclined] Error:', error);
   }
@@ -321,7 +321,7 @@ async function handleSignatureExpired(contract: any, data: any) {
     // Notificar al propietario
     // await sendContractExpiredNotification(contract);
 
-    console.log('[Signaturit] Signature expired:', data.id);
+    logger.info('[Signaturit] Signature expired:', data.id);
   } catch (error: any) {
     logger.error('[handleSignatureExpired] Error:', error);
   }
@@ -352,7 +352,7 @@ async function handleSignatureCanceled(contract: any, data: any) {
       },
     });
 
-    console.log('[Signaturit] Signature canceled:', data.id);
+    logger.info('[Signaturit] Signature canceled:', data.id);
   } catch (error: any) {
     logger.error('[handleSignatureCanceled] Error:', error);
   }

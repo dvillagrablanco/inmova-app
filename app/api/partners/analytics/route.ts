@@ -57,7 +57,7 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error('[API Error] Partners Analytics:', error);
+    logger.error('[API Error] Partners Analytics:', error);
     return NextResponse.json({ error: 'Error obteniendo analytics' }, { status: 500 });
   }
 }

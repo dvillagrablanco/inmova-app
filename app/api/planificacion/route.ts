@@ -57,7 +57,7 @@ export async function GET() {
       data: mapped,
     });
   } catch (error) {
-    console.error('[API Error] Planificación:', error);
+    logger.error('[API Error] Planificación:', error);
     return NextResponse.json(
       { error: 'Error obteniendo eventos' },
       { status: 500 }
@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
       },
     }, { status: 201 });
   } catch (error) {
-    console.error('[API Error] Create Event:', error);
+    logger.error('[API Error] Create Event:', error);
     return NextResponse.json({ error: 'Error creando evento' }, { status: 500 });
   }
 }

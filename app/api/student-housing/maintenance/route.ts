@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
       data: requests
     });
   } catch (error: any) {
-    console.error('[Student Housing Maintenance GET Error]:', error);
+    logger.error('[Student Housing Maintenance GET Error]:', error);
     return NextResponse.json(
       { error: 'Error obteniendo solicitudes', message: error.message },
       { status: 500 }
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    console.error('[Student Housing Maintenance POST Error]:', error);
+    logger.error('[Student Housing Maintenance POST Error]:', error);
     return NextResponse.json(
       { error: 'Error creando solicitud', message: error.message },
       { status: 500 }
@@ -106,7 +106,7 @@ export async function PATCH(request: NextRequest) {
       message: 'Estado de solicitud actualizado'
     });
   } catch (error: any) {
-    console.error('[Student Housing Maintenance PATCH Error]:', error);
+    logger.error('[Student Housing Maintenance PATCH Error]:', error);
     return NextResponse.json(
       { error: 'Error actualizando solicitud', message: error.message },
       { status: 500 }

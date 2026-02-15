@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
       data: bookings
     });
   } catch (error: any) {
-    console.error('[Workspace Bookings GET Error]:', error);
+    logger.error('[Workspace Bookings GET Error]:', error);
     return NextResponse.json(
       { error: 'Error obteniendo reservas', message: error.message },
       { status: 500 }
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    console.error('[Workspace Bookings POST Error]:', error);
+    logger.error('[Workspace Bookings POST Error]:', error);
     return NextResponse.json(
       { error: 'Error creando reserva', message: error.message },
       { status: 500 }
@@ -108,7 +108,7 @@ export async function PATCH(request: NextRequest) {
       message: 'Estado de reserva actualizado'
     });
   } catch (error: any) {
-    console.error('[Workspace Bookings PATCH Error]:', error);
+    logger.error('[Workspace Bookings PATCH Error]:', error);
     return NextResponse.json(
       { error: 'Error actualizando reserva', message: error.message },
       { status: 500 }

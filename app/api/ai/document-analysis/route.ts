@@ -388,12 +388,12 @@ async function analyzeDocumentWithVision(
   let mediaType: 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp' = 'image/png';
 
   if (isPDF) {
-    console.error('[Vision Analysis] 📄 PDF detectado - convirtiendo a imagen:', file.name);
+    logger.error('[Vision Analysis] 📄 PDF detectado - convirtiendo a imagen:', file.name);
     try {
       base64Data = await convertPDFToImage(file);
-      console.error('[Vision Analysis] ✅ PDF convertido exitosamente');
+      logger.error('[Vision Analysis] ✅ PDF convertido exitosamente');
     } catch (convError: any) {
-      console.error('[Vision Analysis] ❌ Error convirtiendo PDF:', convError.message);
+      logger.error('[Vision Analysis] ❌ Error convirtiendo PDF:', convError.message);
       throw convError;
     }
     mediaType = 'image/png';
@@ -413,14 +413,14 @@ async function analyzeDocumentWithVision(
     },
   } as const;
 
-  console.error('[Vision Analysis] 📤 Enviando a Claude Vision:', file.name, 'isPDF:', isPDF);
+  logger.error('[Vision Analysis] 📤 Enviando a Claude Vision:', file.name, 'isPDF:', isPDF);
 
   const prompt = getVisionPromptForContext(context, companyInfo);
 
   const startTime = Date.now();
 
   // Usar claude-3-haiku para imágenes (rápido y confiable)
-  console.error('[Vision Analysis] 🤖 Llamando a Claude API...');
+  logger.error('[Vision Analysis] 🤖 Llamando a Claude API...');
   const response = await client.messages.create({
     model: CLAUDE_MODEL_PRIMARY,
     max_tokens: 4096,
@@ -439,16 +439,16 @@ async function analyzeDocumentWithVision(
   });
 
   const processingTimeMs = Date.now() - startTime;
-  console.error('[Vision Analysis] ✅ Claude respondió en', processingTimeMs, 'ms');
+  logger.error('[Vision Analysis] ✅ Claude respondió en', processingTimeMs, 'ms');
 
   const content = response.content[0];
 
   if (content.type === 'text') {
-    console.error('[Vision Analysis] 📝 Procesando respuesta de texto...');
+    logger.error('[Vision Analysis] 📝 Procesando respuesta de texto...');
     // Extraer JSON de la respuesta
     const jsonMatch = content.text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
-      console.error('[Vision Analysis] ✅ JSON encontrado en respuesta');
+      logger.error('[Vision Analysis] ✅ JSON encontrado en respuesta');
       const result = JSON.parse(jsonMatch[0]);
       const category = result.classification?.category || 'otro';
       const targetEntity = result.suggestedEntity || getTargetEntityFromCategory(category);
@@ -475,7 +475,7 @@ async function analyzeDocumentWithVision(
 
       // Si extractedFields es un objeto (no array), convertirlo a array
       if (!Array.isArray(rawFields) && typeof rawFields === 'object') {
-        console.error('[Vision Analysis] 🔄 Convirtiendo extractedFields de objeto a array');
+        logger.error('[Vision Analysis] 🔄 Convirtiendo extractedFields de objeto a array');
         rawFields = Object.entries(rawFields).map(([key, value]) => ({
           fieldName: key,
           fieldValue: value,
@@ -492,7 +492,7 @@ async function analyzeDocumentWithVision(
         targetField: mapFieldNameToTarget(f.fieldName, category),
       }));
 
-      console.error('[Vision Analysis] ✅ Campos extraídos:', extractedFields.length);
+      logger.error('[Vision Analysis] ✅ Campos extraídos:', extractedFields.length);
 
       // Generar acciones sugeridas basadas en los campos extraídos
       const suggestedActions = generateSuggestedActions(extractedFields, category, targetEntity);
@@ -1146,7 +1146,7 @@ export async function POST(request: NextRequest) {
         };
 
         // Log crítico usando console.error para PM2
-        console.error('[AI Document Analysis] ❌ ERROR CRÍTICO:', JSON.stringify(errorDetails));
+        logger.error('[AI Document Analysis] ❌ ERROR CRÍTICO:', JSON.stringify(errorDetails));
         logger.error('[AI Document Analysis] Error:', errorDetails);
 
         // Retornar análisis básico como fallback con mensaje de error claro

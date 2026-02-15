@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
       data: rooms
     });
   } catch (error: any) {
-    console.error('[Student Housing Rooms GET Error]:', error);
+    logger.error('[Student Housing Rooms GET Error]:', error);
     return NextResponse.json(
       { error: 'Error obteniendo habitaciones', message: error.message },
       { status: 500 }
@@ -61,7 +61,7 @@ export async function PATCH(request: NextRequest) {
       message: 'Estado de habitación actualizado'
     });
   } catch (error: any) {
-    console.error('[Student Housing Rooms PATCH Error]:', error);
+    logger.error('[Student Housing Rooms PATCH Error]:', error);
     return NextResponse.json(
       { error: 'Error actualizando habitación', message: error.message },
       { status: 500 }

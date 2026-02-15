@@ -99,7 +99,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(templates);
   } catch (error: any) {
-    console.error('[Automation Templates Error]:', error);
+    logger.error('[Automation Templates Error]:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

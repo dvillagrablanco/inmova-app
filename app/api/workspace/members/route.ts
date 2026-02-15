@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
       data: members
     });
   } catch (error: any) {
-    console.error('[Workspace Members GET Error]:', error);
+    logger.error('[Workspace Members GET Error]:', error);
     return NextResponse.json(
       { error: 'Error obteniendo miembros', message: error.message },
       { status: 500 }
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    console.error('[Workspace Members POST Error]:', error);
+    logger.error('[Workspace Members POST Error]:', error);
     return NextResponse.json(
       { error: 'Error creando miembro', message: error.message },
       { status: 500 }
@@ -107,7 +107,7 @@ export async function PATCH(request: NextRequest) {
       message: 'Estado de miembro actualizado'
     });
   } catch (error: any) {
-    console.error('[Workspace Members PATCH Error]:', error);
+    logger.error('[Workspace Members PATCH Error]:', error);
     return NextResponse.json(
       { error: 'Error actualizando miembro', message: error.message },
       { status: 500 }

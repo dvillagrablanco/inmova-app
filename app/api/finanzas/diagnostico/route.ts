@@ -197,7 +197,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('[Diagnostico Error]:', error);
+    logger.error('[Diagnostico Error]:', error);
     return NextResponse.json(
       { error: 'Error en diagnóstico', details: error.message },
       { status: 500 }

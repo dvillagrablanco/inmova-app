@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     const stats = await ViviendaSocialService.getStats(session.user.companyId);
     return NextResponse.json({ success: true, data: stats });
   } catch (error: any) {
-    console.error('[Vivienda Social Stats Error]:', error);
+    logger.error('[Vivienda Social Stats Error]:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     
     // Log del error del cliente
-    console.error(`[CLIENT ERROR] [AI Document Analysis] Frontend error:`, JSON.stringify({
+    logger.error(`[CLIENT ERROR] [AI Document Analysis] Frontend error:`, JSON.stringify({
       error: body.error,
       filename: body.filename,
       timestamp: body.timestamp,

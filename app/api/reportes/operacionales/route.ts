@@ -145,7 +145,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ stats, contratosPorVencer });
   } catch (error: any) {
-    console.error('[Reportes Operacionales Error]:', error);
+    logger.error('[Reportes Operacionales Error]:', error);
     return NextResponse.json(
       { error: 'Error obteniendo datos operacionales', details: error.message },
       { status: 500 }

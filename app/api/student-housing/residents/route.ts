@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
       data: residents
     });
   } catch (error: any) {
-    console.error('[Student Housing Residents GET Error]:', error);
+    logger.error('[Student Housing Residents GET Error]:', error);
     return NextResponse.json(
       { error: 'Error obteniendo residentes', message: error.message },
       { status: 500 }
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    console.error('[Student Housing Residents POST Error]:', error);
+    logger.error('[Student Housing Residents POST Error]:', error);
     return NextResponse.json(
       { error: 'Error creando residente', message: error.message },
       { status: 500 }

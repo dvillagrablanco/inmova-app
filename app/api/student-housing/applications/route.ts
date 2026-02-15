@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
       data: applications
     });
   } catch (error: any) {
-    console.error('[Student Housing Applications GET Error]:', error);
+    logger.error('[Student Housing Applications GET Error]:', error);
     return NextResponse.json(
       { error: 'Error obteniendo aplicaciones', message: error.message },
       { status: 500 }
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    console.error('[Student Housing Applications POST Error]:', error);
+    logger.error('[Student Housing Applications POST Error]:', error);
     return NextResponse.json(
       { error: 'Error creando aplicación', message: error.message },
       { status: 500 }
@@ -107,7 +107,7 @@ export async function PATCH(request: NextRequest) {
       message: 'Estado de aplicación actualizado'
     });
   } catch (error: any) {
-    console.error('[Student Housing Applications PATCH Error]:', error);
+    logger.error('[Student Housing Applications PATCH Error]:', error);
     return NextResponse.json(
       { error: 'Error actualizando aplicación', message: error.message },
       { status: 500 }

@@ -17,7 +17,7 @@ async function sendPasswordResetEmail(email: string, token: string, tenantName: 
   });
   
   // Por ahora solo log, en producción enviar email real
-  console.log(`
+  logger.info(`
 ==============================================
 RECUPERACIÓN DE CONTRASEÑA - PORTAL INQUILINO
 ==============================================

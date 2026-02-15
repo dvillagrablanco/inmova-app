@@ -54,7 +54,7 @@ export async function PUT(request: NextRequest) {
       },
     });
 
-    console.log(`[Preferences] Usuario ${session.user.id} actualizó preferencias`);
+    logger.info(`[Preferences] Usuario ${session.user.id} actualizó preferencias`);
 
     return NextResponse.json({
       success: true,

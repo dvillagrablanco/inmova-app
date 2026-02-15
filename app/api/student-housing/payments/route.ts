@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
       data: payments
     });
   } catch (error: any) {
-    console.error('[Student Housing Payments GET Error]:', error);
+    logger.error('[Student Housing Payments GET Error]:', error);
     return NextResponse.json(
       { error: 'Error obteniendo pagos', message: error.message },
       { status: 500 }
@@ -61,7 +61,7 @@ export async function PATCH(request: NextRequest) {
       message: 'Estado de pago actualizado'
     });
   } catch (error: any) {
-    console.error('[Student Housing Payments PATCH Error]:', error);
+    logger.error('[Student Housing Payments PATCH Error]:', error);
     return NextResponse.json(
       { error: 'Error actualizando pago', message: error.message },
       { status: 500 }

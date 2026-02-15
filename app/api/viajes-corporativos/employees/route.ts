@@ -37,7 +37,7 @@ export async function GET() {
 
     return NextResponse.json({ data: employees });
   } catch (error) {
-    console.error('Error fetching employees:', error);
+    logger.error('Error fetching employees:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }
 }

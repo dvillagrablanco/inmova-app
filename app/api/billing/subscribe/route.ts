@@ -170,7 +170,7 @@ export async function POST(request: NextRequest) {
         precioConDescuento: Math.round((plan.precioMensual - descuentoMensual) * 100) / 100,
       };
 
-      console.log(`[Subscribe] Cupón ${promoCoupon.codigo} aplicado:`, discountInfo);
+      logger.info(`[Subscribe] Cupón ${promoCoupon.codigo} aplicado:`, discountInfo);
     }
 
     // ════════════════════════════════════════════════════════════════

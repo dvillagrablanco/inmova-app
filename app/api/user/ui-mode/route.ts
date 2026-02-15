@@ -46,7 +46,7 @@ export async function PUT(request: NextRequest) {
       },
     });
 
-    console.log(`[UI Mode] Usuario ${session.user.id} cambió a modo: ${uiMode}`);
+    logger.info(`[UI Mode] Usuario ${session.user.id} cambió a modo: ${uiMode}`);
 
     return NextResponse.json({
       success: true,

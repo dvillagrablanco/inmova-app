@@ -291,7 +291,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('[API Error] Conciliación:', error);
+    logger.error('[API Error] Conciliación:', error);
     return NextResponse.json(
       { error: 'Error obteniendo datos de conciliación', details: error.message },
       { status: 500 }
@@ -397,7 +397,7 @@ export async function POST(request: NextRequest) {
       message: `Transacción ${action === 'conciliar' ? 'conciliada' : action === 'descartar' ? 'descartada' : 'revertida'} correctamente`,
     });
   } catch (error: any) {
-    console.error('[API Error] Conciliación POST:', error);
+    logger.error('[API Error] Conciliación POST:', error);
     return NextResponse.json(
       { error: 'Error procesando conciliación', details: error.message },
       { status: 500 }

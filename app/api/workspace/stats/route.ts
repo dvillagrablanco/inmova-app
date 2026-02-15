@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
       data: stats
     });
   } catch (error: any) {
-    console.error('[Workspace Stats Error]:', error);
+    logger.error('[Workspace Stats Error]:', error);
     return NextResponse.json(
       { error: 'Error obteniendo estadísticas', message: error.message },
       { status: 500 }

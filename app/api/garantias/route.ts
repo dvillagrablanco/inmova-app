@@ -199,7 +199,7 @@ export async function GET(request: NextRequest) {
       stats,
     });
   } catch (error: any) {
-    console.error('[API Garantías] Error:', error);
+    logger.error('[API Garantías] Error:', error);
     return NextResponse.json(
       { error: 'Error al obtener garantías', details: error.message },
       { status: 500 }
@@ -300,7 +300,7 @@ export async function POST(request: NextRequest) {
       message: 'Garantía creada correctamente',
     }, { status: 201 });
   } catch (error: any) {
-    console.error('[API Garantías] Error POST:', error);
+    logger.error('[API Garantías] Error POST:', error);
     return NextResponse.json(
       { error: 'Error al crear garantía', details: error.message },
       { status: 500 }

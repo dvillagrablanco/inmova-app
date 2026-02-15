@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
       data: spaces
     });
   } catch (error: any) {
-    console.error('[Workspace Spaces GET Error]:', error);
+    logger.error('[Workspace Spaces GET Error]:', error);
     return NextResponse.json(
       { error: 'Error obteniendo espacios', message: error.message },
       { status: 500 }
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    console.error('[Workspace Spaces POST Error]:', error);
+    logger.error('[Workspace Spaces POST Error]:', error);
     return NextResponse.json(
       { error: 'Error creando espacio', message: error.message },
       { status: 500 }
@@ -108,7 +108,7 @@ export async function PATCH(request: NextRequest) {
       message: 'Estado actualizado'
     });
   } catch (error: any) {
-    console.error('[Workspace Spaces PATCH Error]:', error);
+    logger.error('[Workspace Spaces PATCH Error]:', error);
     return NextResponse.json(
       { error: 'Error actualizando espacio', message: error.message },
       { status: 500 }

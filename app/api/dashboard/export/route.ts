@@ -100,7 +100,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('[Dashboard Export Error]:', error);
+    logger.error('[Dashboard Export Error]:', error);
     return NextResponse.json(
       { error: 'Error generando exportación', message: error.message },
       { status: 500 }

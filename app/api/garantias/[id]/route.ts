@@ -70,7 +70,7 @@ export async function GET(
       data: deposit,
     });
   } catch (error: any) {
-    console.error('[API Garantías GET ID] Error:', error);
+    logger.error('[API Garantías GET ID] Error:', error);
     return NextResponse.json(
       { error: 'Error al obtener garantía', details: error.message },
       { status: 500 }
@@ -226,7 +226,7 @@ export async function PUT(
       message: 'Garantía actualizada correctamente',
     });
   } catch (error: any) {
-    console.error('[API Garantías PUT] Error:', error);
+    logger.error('[API Garantías PUT] Error:', error);
     return NextResponse.json(
       { error: 'Error al actualizar garantía', details: error.message },
       { status: 500 }
@@ -278,7 +278,7 @@ export async function DELETE(
       message: 'Garantía eliminada correctamente',
     });
   } catch (error: any) {
-    console.error('[API Garantías DELETE] Error:', error);
+    logger.error('[API Garantías DELETE] Error:', error);
     return NextResponse.json(
       { error: 'Error al eliminar garantía', details: error.message },
       { status: 500 }

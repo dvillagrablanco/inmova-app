@@ -22,7 +22,7 @@ export async function GET() {
 
     return NextResponse.json({ data: hotels });
   } catch (error) {
-    console.error('Error fetching hotels:', error);
+    logger.error('Error fetching hotels:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }
 }

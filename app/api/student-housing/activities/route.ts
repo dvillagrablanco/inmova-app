@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
       data: activities
     });
   } catch (error: any) {
-    console.error('[Student Housing Activities GET Error]:', error);
+    logger.error('[Student Housing Activities GET Error]:', error);
     return NextResponse.json(
       { error: 'Error obteniendo actividades', message: error.message },
       { status: 500 }
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    console.error('[Student Housing Activities POST Error]:', error);
+    logger.error('[Student Housing Activities POST Error]:', error);
     return NextResponse.json(
       { error: 'Error creando actividad', message: error.message },
       { status: 500 }

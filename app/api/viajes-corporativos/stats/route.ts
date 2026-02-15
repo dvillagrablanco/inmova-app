@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     const stats = await ViajesCorporativosService.getStats(session.user.companyId);
     return NextResponse.json({ success: true, data: stats });
   } catch (error: any) {
-    console.error('[Viajes Corporativos Stats Error]:', error);
+    logger.error('[Viajes Corporativos Stats Error]:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

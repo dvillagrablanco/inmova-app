@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     const stats = await RealEstateDeveloperService.getStats(session.user.companyId);
     return NextResponse.json({ success: true, data: stats });
   } catch (error: any) {
-    console.error('[Real Estate Developer Stats Error]:', error);
+    logger.error('[Real Estate Developer Stats Error]:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
