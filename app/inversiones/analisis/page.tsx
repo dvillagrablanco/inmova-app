@@ -16,6 +16,7 @@ import { Textarea } from '@/components/ui/textarea';
 import {
   Building2, Plus, Trash2, Calculator, Euro, TrendingUp, Landmark,
   ArrowUpRight, ArrowDownRight, Table2, Save, ParkingCircle, Store, Home,
+  Brain, Upload, FileText, Sparkles, Loader2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -50,6 +51,9 @@ export default function AnalisisInversionPage() {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [results, setResults] = useState<any>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiValuation, setAiValuation] = useState<any>(null);
+  const [aiText, setAiText] = useState('');
 
   // Form state
   const [nombre, setNombre] = useState('');
@@ -114,6 +118,67 @@ export default function AnalisisInversionPage() {
   const fmt = (n: number) =>
     new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
 
+  const handleAIExtract = async (file?: File) => {
+    setAiLoading(true);
+    try {
+      const formData = new FormData();
+      if (file) {
+        formData.append('file', file);
+      }
+      if (aiText) {
+        formData.append('text', aiText);
+      }
+      formData.append('context', `Analisis de inversion para grupo societario. Extraer rent roll con viviendas, garajes, locales, trasteros. Datos del activo y gastos.`);
+
+      const res = await fetch('/api/investment/analysis/ai-extract', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        toast.error(err.error || 'Error en analisis IA');
+        return;
+      }
+
+      const data = await res.json();
+      const extracted = data.data;
+
+      // Aplicar rent roll extraido
+      if (extracted.rentRoll && extracted.rentRoll.length > 0) {
+        setRentRoll(extracted.rentRoll.map((u: any) => ({
+          tipo: u.tipo || 'vivienda',
+          referencia: u.referencia || '',
+          superficie: u.superficie || 0,
+          rentaMensual: u.rentaMensual || 0,
+          estado: u.estado || 'alquilado',
+        })));
+        toast.success(`${extracted.rentRoll.length} unidades extraidas del documento`);
+      }
+
+      // Aplicar datos del activo
+      if (extracted.datosActivo) {
+        const d = extracted.datosActivo;
+        if (d.nombre) setNombre(d.nombre);
+        if (d.direccion) setDireccion(d.direccion);
+        if (d.askingPrice) setAskingPrice(d.askingPrice);
+        if (d.ibiAnual) setIbiAnual(d.ibiAnual);
+        if (d.comunidadMensual) setComunidadMensual(d.comunidadMensual);
+        if (d.seguroAnual) setSeguroAnual(d.seguroAnual);
+      }
+
+      // Valoracion IA
+      if (extracted.valoracionIA) {
+        setAiValuation(extracted.valoracionIA);
+        toast.success('Valoracion IA del activo generada');
+      }
+    } catch {
+      toast.error('Error de conexion con IA');
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   const handleCalcular = async () => {
     if (!nombre || askingPrice <= 0 || rentRoll.length === 0) {
       toast.error('Completa nombre, precio y al menos 1 unidad');
@@ -161,8 +226,9 @@ export default function AnalisisInversionPage() {
           <p className="text-gray-500">Introduce el rent roll y datos del activo para calcular rentabilidad y sensibilidad</p>
         </div>
 
-        <Tabs defaultValue="datos" className="space-y-4">
-          <TabsList>
+        <Tabs defaultValue="ia" className="space-y-4">
+          <TabsList className="flex-wrap">
+            <TabsTrigger value="ia" className="gap-1"><Brain className="h-3 w-3" /> Asistente IA</TabsTrigger>
             <TabsTrigger value="datos">Datos del Activo</TabsTrigger>
             <TabsTrigger value="rentroll">Rent Roll</TabsTrigger>
             <TabsTrigger value="gastos">OPEX / CAPEX</TabsTrigger>
@@ -170,6 +236,157 @@ export default function AnalisisInversionPage() {
             {results && <TabsTrigger value="resultados">Resultados</TabsTrigger>}
             {results && <TabsTrigger value="sensibilidad">Sensibilidad</TabsTrigger>}
           </TabsList>
+
+          {/* TAB: Asistente IA Documental */}
+          <TabsContent value="ia">
+            <div className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Brain className="h-5 w-5 text-purple-600" />
+                    Asistente IA Documental
+                  </CardTitle>
+                  <CardDescription>
+                    Sube un documento (rent roll, ficha del activo, informe de valoracion) y la IA extraera
+                    automaticamente las unidades, rentas, gastos y datos del activo. Tambien generara una
+                    valoracion IA si hay datos suficientes.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Upload de archivo */}
+                  <div>
+                    <Label className="text-sm font-medium">Subir documento</Label>
+                    <div className="mt-2 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-purple-400 transition-colors">
+                      <input
+                        type="file"
+                        accept=".pdf,.csv,.txt,.xlsx,.jpg,.jpeg,.png"
+                        className="hidden"
+                        id="ai-file-upload"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleAIExtract(file);
+                        }}
+                        disabled={aiLoading}
+                      />
+                      <label htmlFor="ai-file-upload" className="cursor-pointer">
+                        {aiLoading ? (
+                          <div className="flex flex-col items-center gap-2">
+                            <Loader2 className="h-8 w-8 text-purple-600 animate-spin" />
+                            <span className="text-sm text-purple-600">Analizando documento con IA...</span>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center gap-2">
+                            <Upload className="h-8 w-8 text-gray-400" />
+                            <span className="text-sm text-gray-600">
+                              PDF, CSV, Excel, imagen o texto
+                            </span>
+                            <span className="text-xs text-gray-400">
+                              Rent roll, ficha de activo, nota simple, informe de tasacion
+                            </span>
+                          </div>
+                        )}
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* O pegar texto */}
+                  <div>
+                    <Label className="text-sm font-medium">O pega el contenido directamente</Label>
+                    <Textarea
+                      value={aiText}
+                      onChange={(e) => setAiText(e.target.value)}
+                      placeholder="Pega aqui el rent roll, datos del activo, o cualquier informacion relevante...
+
+Ejemplo:
+Edificio Calle Mayor 12, Madrid
+Precio: 850.000 EUR
+- 1A: Vivienda 75m2, 900 EUR/mes, alquilado
+- 1B: Vivienda 60m2, 750 EUR/mes, vacio
+- Local: 120m2, 1.200 EUR/mes, alquilado
+- Garaje 1: 100 EUR/mes, alquilado
+- Garaje 2: 100 EUR/mes, vacio
+IBI: 3.200 EUR/ano
+Comunidad: 180 EUR/mes"
+                      rows={8}
+                      disabled={aiLoading}
+                    />
+                    <Button
+                      className="mt-2"
+                      variant="default"
+                      disabled={aiLoading || !aiText.trim()}
+                      onClick={() => handleAIExtract()}
+                    >
+                      {aiLoading ? (
+                        <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Analizando...</>
+                      ) : (
+                        <><Sparkles className="h-4 w-4 mr-2" /> Extraer con IA</>
+                      )}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Valoracion IA */}
+              {aiValuation && (
+                <Card className="border-purple-200 bg-purple-50/50">
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Sparkles className="h-5 w-5 text-purple-600" />
+                      Valoracion IA del Activo
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      {aiValuation.estimatedValue && (
+                        <div>
+                          <span className="text-gray-500">Valor estimado</span>
+                          <div className="text-lg font-bold text-purple-600">
+                            {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(aiValuation.estimatedValue)}
+                          </div>
+                        </div>
+                      )}
+                      {aiValuation.minValue && (
+                        <div>
+                          <span className="text-gray-500">Rango minimo</span>
+                          <div className="font-medium">
+                            {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(aiValuation.minValue)}
+                          </div>
+                        </div>
+                      )}
+                      {aiValuation.maxValue && (
+                        <div>
+                          <span className="text-gray-500">Rango maximo</span>
+                          <div className="font-medium">
+                            {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(aiValuation.maxValue)}
+                          </div>
+                        </div>
+                      )}
+                      {aiValuation.confidenceScore && (
+                        <div>
+                          <span className="text-gray-500">Confianza</span>
+                          <div className="font-medium">{aiValuation.confidenceScore}%</div>
+                        </div>
+                      )}
+                    </div>
+                    {aiValuation.reasoning && (
+                      <p className="text-sm text-gray-600 mt-3 border-t pt-3">{aiValuation.reasoning}</p>
+                    )}
+                    {aiValuation.estimatedValue && askingPrice > 0 && (
+                      <div className="mt-3 p-3 rounded-lg bg-white border">
+                        <span className="text-sm text-gray-500">Asking vs Valoracion IA: </span>
+                        <span className={`font-bold ${askingPrice > aiValuation.estimatedValue ? 'text-red-600' : 'text-green-600'}`}>
+                          {askingPrice > aiValuation.estimatedValue
+                            ? `Asking ${Math.round((askingPrice / aiValuation.estimatedValue - 1) * 100)}% POR ENCIMA de valoracion`
+                            : `Asking ${Math.round((1 - askingPrice / aiValuation.estimatedValue) * 100)}% por debajo de valoracion`
+                          }
+                        </span>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </TabsContent>
 
           {/* TAB: Datos del activo */}
           <TabsContent value="datos">

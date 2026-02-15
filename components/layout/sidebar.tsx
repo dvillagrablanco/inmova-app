@@ -57,6 +57,7 @@ import {
   realEstateDeveloperNavItems,
   workspaceNavItems,
   warehouseNavItems,
+  holdingGrupoNavItems,
   finanzasNavItems,
   analyticsNavItems,
   operacionesNavItems,
@@ -398,6 +399,9 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
   const filteredWorkspaceItems = filterItems(workspaceNavItems, useCompanyModules);
   const filteredWarehouseItems = filterItems(warehouseNavItems, useCompanyModules);
 
+  // Holding / Grupo Societario
+  const filteredHoldingGrupoItems = filterItems(holdingGrupoNavItems, useCompanyModules);
+
   // Herramientas Horizontales - Usar módulos de empresa seleccionada si hay una (Super Admin)
   const filteredFinanzasItems = filterItems(finanzasNavItems, useCompanyModules);
   const filteredAnalyticsItems = filterItems(analyticsNavItems, useCompanyModules);
@@ -436,6 +440,8 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
     ...espaciosFlexiblesNavItems,
     ...hospitalityNavItems,
     ...adminFincasItems,
+    // Holding / Grupo
+    ...holdingGrupoNavItems,
     // Herramientas Horizontales
     ...finanzasNavItems,
     ...analyticsNavItems,
@@ -1156,6 +1162,37 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                 - Living: Alquiler + Coliving + Student Housing
                 - Comercial: Oficinas + Locales + Naves + Logística + Workspace
                 - Construcción: Obra + Flipping + Promociones + eWoorker */}
+
+            {/* HOLDING / GRUPO SOCIETARIO */}
+            {filteredHoldingGrupoItems.length > 0 && (
+              <>
+                <div className="px-2 py-3 mb-2 border-t border-gray-800">
+                  <h3 className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
+                    🏛️ Holding / Grupo
+                  </h3>
+                </div>
+                <div className="mb-4">
+                  <button
+                    onClick={() => toggleSection('holdingGrupo')}
+                    className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-amber-400/80 uppercase hover:text-amber-300 transition-colors"
+                  >
+                    <span>🏛️ Inversiones Grupo</span>
+                    {expandedSections.holdingGrupo ? (
+                      <ChevronDown className="h-3 w-3" />
+                    ) : (
+                      <ChevronRight className="h-3 w-3" />
+                    )}
+                  </button>
+                  {expandedSections.holdingGrupo && (
+                    <div className="space-y-0.5 mt-1">
+                      {filteredHoldingGrupoItems.map((item: any) =>
+                        renderNavItem(item)
+                      )}
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
 
             {/* HERRAMIENTAS HORIZONTALES - Separador visual */}
             {(filteredFinanzasItems.length > 0 ||
