@@ -112,11 +112,9 @@ export async function POST(request: NextRequest) {
   // Auth guard
   const auth = await requireSession();
   if (!auth.authenticated) return auth.response;
+
   const prisma = await getPrisma();
   try {
-  // Auth guard
-  const auth = await requireSession();
-  if (!auth.authenticated) return auth.response;
     const providerId = request.headers.get('x-provider-id');
 
     if (!providerId) {
