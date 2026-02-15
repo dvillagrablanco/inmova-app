@@ -535,6 +535,9 @@ model Building {
   valoraciones  ValoracionPropiedad[]
   publicaciones PublicacionPortal[]
 
+  // Sociedades Inversoras
+  assetAcquisitions AssetAcquisition[]
+
   // Fase 1
   calendarEvents CalendarEvent[]
 
@@ -771,6 +774,9 @@ model Unit {
   // Prioridades Medias
   valoraciones  ValoracionPropiedad[]
   publicaciones PublicacionPortal[]
+
+  // Sociedades Inversoras
+  assetAcquisitions AssetAcquisition[]
 
   // Fase 1
   calendarEvents CalendarEvent[]
@@ -1408,6 +1414,9 @@ model Contract {
 
   // Nuevas funcionalidades IA (Firma Digital)
   contractSignatures ContractSignature[] @relation("ContractSignatures")
+
+  // Sociedades Inversoras
+  fianzaDeposits FianzaDeposit[]
 
   // Índices optimizados para consultas frecuentes
   @@index([tenantId, estado])
@@ -2149,6 +2158,11 @@ model Company {
   documentImportBatches      DocumentImportBatch[]
   documentImports            DocumentImport[]
   onboardingDocumentSessions OnboardingDocumentSession?
+
+  // 🏢 SOCIEDADES INVERSORAS / PATRIMONIALES
+  assetAcquisitions AssetAcquisition[]
+  mortgages         Mortgage[]
+  fianzaDeposits    FianzaDeposit[]
 
   @@map("company")
 }
@@ -15777,4 +15791,209 @@ model OnboardingDocumentSession {
   @@index([userId])
   @@index([isActive])
   @@map("onboarding_document_sessions")
+}
+
+// ==========================================
+// SOCIEDADES INVERSORAS / PATRIMONIALES
+// Modelos para tracking de activos, hipotecas,
+// amortizaciones y fiscalidad de SLs
+// ==========================================
+
+enum AssetType {
+  vivienda
+  local_comercial
+  oficina
+  garaje
+  trastero
+  nave_industrial
+  solar
+  otro
+}
+
+enum MortgageType {
+  fijo
+  variable
+  mixto
+}
+
+enum MortgageStatus {
+  activa
+  amortizada
+  cancelada
+  novada
+}
+
+enum DepositStatus {
+  pendiente_deposito
+  depositada
+  devuelta
+  retenida_parcial
+  retenida_total
+}
+
+/// Datos de adquisicion de un inmueble (Building o Unit)
+/// Tracking del valor de compra, gastos, y valor actual
+model AssetAcquisition {
+  id          String    @id @default(cuid())
+  companyId   String
+  buildingId  String?
+  unitId      String?
+
+  // Datos de compra
+  assetType           AssetType
+  fechaAdquisicion    DateTime
+  precioCompra        Float       // Precio escriturado
+  gastosNotaria       Float       @default(0)
+  gastosRegistro      Float       @default(0)
+  gastosGestoria      Float       @default(0)
+  impuestoCompra      Float       @default(0) // ITP o IVA+AJD
+  otrosGastosCompra   Float       @default(0)
+
+  // Desglose catastral (necesario para amortizacion)
+  valorCatastralTotal       Float?
+  valorCatastralSuelo       Float?
+  valorCatastralConstruccion Float?
+  referenciaCatastral       String?
+
+  // Valor actual
+  valorMercadoEstimado  Float?    // Ultima valoracion de mercado
+  fechaValoracion       DateTime? // Fecha de ultima valoracion
+
+  // Reformas capitalizables (incrementan valor del activo)
+  reformasCapitalizadas Float     @default(0)
+
+  // Datos calculados (se recalculan)
+  inversionTotal          Float?  // precioCompra + gastos + reformas
+  amortizacionAcumulada   Float   @default(0)
+  valorContableNeto       Float?  // inversionTotal - amortizacionAcumulada
+  plusvaliaLatente         Float?  // valorMercado - valorContable
+
+  notas     String?   @db.Text
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  company   Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  building  Building? @relation(fields: [buildingId], references: [id], onDelete: SetNull)
+  unit      Unit?     @relation(fields: [unitId], references: [id], onDelete: SetNull)
+
+  mortgages     Mortgage[]
+  depreciations DepreciationEntry[]
+
+  @@index([companyId])
+  @@index([buildingId])
+  @@index([unitId])
+}
+
+/// Hipoteca asociada a un activo inmobiliario
+model Mortgage {
+  id                String         @id @default(cuid())
+  assetId           String
+  companyId         String
+
+  // Datos del prestamo
+  entidadFinanciera String
+  numeroExpediente  String?
+  tipoHipoteca      MortgageType
+  estado            MortgageStatus @default(activa)
+
+  capitalInicial    Float          // Importe original del prestamo
+  capitalPendiente  Float          // Capital vivo actual
+  tipoInteres       Float          // Tipo de interes actual (%)
+  diferencial       Float?         // Diferencial sobre Euribor (para variable/mixto)
+  indiceReferencia   String?        // "euribor_12m", "euribor_6m", etc.
+  plazoAnos         Int            // Plazo total en anos
+  cuotaMensual      Float          // Cuota mensual actual
+  diaVencimiento    Int            @default(1) // Dia del mes de pago
+
+  fechaConstitucion DateTime       // Fecha firma hipoteca
+  fechaVencimiento  DateTime       // Fecha fin del prestamo
+  fechaRevision     DateTime?      // Proxima revision de tipo (variable/mixto)
+  periodoCarencia   Int?           // Meses de carencia (si aplica)
+
+  // Gastos asociados
+  gastosConstitucion Float         @default(0) // Notaria, tasacion, etc.
+  comisionApertura   Float         @default(0)
+  comisionCancelacion Float?       // Comision por cancelacion anticipada
+
+  // Seguros vinculados
+  seguroVidaAnual   Float?
+  seguroHogarAnual  Float?
+
+  notas     String?   @db.Text
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  asset             AssetAcquisition @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  company           Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  amortizationTable MortgagePayment[]
+
+  @@index([companyId])
+  @@index([assetId])
+}
+
+/// Pago mensual de hipoteca (tabla de amortizacion real)
+model MortgagePayment {
+  id          String   @id @default(cuid())
+  mortgageId  String
+
+  fecha       DateTime
+  cuotaTotal  Float
+  capital     Float    // Parte de capital amortizado
+  intereses   Float    // Parte de intereses (gasto deducible)
+  capitalPendiente Float // Capital restante tras este pago
+  pagado      Boolean  @default(false)
+
+  createdAt   DateTime @default(now())
+
+  mortgage    Mortgage @relation(fields: [mortgageId], references: [id], onDelete: Cascade)
+
+  @@index([mortgageId])
+  @@index([fecha])
+}
+
+/// Amortizacion contable anual de un activo (3% construccion para IS)
+model DepreciationEntry {
+  id        String   @id @default(cuid())
+  assetId   String
+
+  ano                 Int
+  baseAmortizable     Float   // Valor construccion + reformas capitalizables
+  porcentaje          Float   // Tipicamente 3% para inmuebles
+  cuotaAnual          Float   // baseAmortizable * porcentaje / 100
+  amortizacionAcumulada Float // Suma de todas las cuotas hasta este ano
+
+  createdAt DateTime @default(now())
+
+  asset     AssetAcquisition @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@unique([assetId, ano])
+  @@index([assetId])
+}
+
+/// Tracking de fianzas depositadas en organismo autonomico
+model FianzaDeposit {
+  id          String        @id @default(cuid())
+  contractId  String
+  companyId   String
+
+  importeFianza     Float
+  mesesFianza       Int         @default(1)
+  organismoDeposito String?     // IVIMA, INCASOL, AVVR, etc.
+  numeroDeposito    String?     // Referencia del deposito
+  fechaDeposito     DateTime?
+  fechaDevolucion   DateTime?
+  importeDevuelto   Float?
+  importeRetenido   Float?
+  motivoRetencion   String?     @db.Text
+  estado            DepositStatus @default(pendiente_deposito)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  contract  Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([contractId])
+  @@index([companyId])
+  @@index([estado])
 }
