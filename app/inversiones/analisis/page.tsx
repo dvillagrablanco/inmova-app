@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
@@ -104,7 +104,7 @@ export default function AnalisisInversionPage() {
   const [notas, setNotas] = useState('');
 
   // Cargar analisis guardados al montar
-  useState(() => {
+  useEffect(() => {
     if (status === 'authenticated') {
       setLoadingSaved(true);
       fetch('/api/investment/analysis')
@@ -113,7 +113,7 @@ export default function AnalisisInversionPage() {
         .catch(() => {})
         .finally(() => setLoadingSaved(false));
     }
-  });
+  }, [status]);
 
   if (status === 'unauthenticated') { router.push('/login'); }
 
@@ -326,16 +326,16 @@ export default function AnalisisInversionPage() {
           <p className="text-gray-500">Introduce el rent roll y datos del activo para calcular rentabilidad y sensibilidad</p>
         </div>
 
-        <Tabs defaultValue="guardados" className="space-y-4">
-          <TabsList className="flex-wrap">
-            <TabsTrigger value="guardados" className="gap-1"><Save className="h-3 w-3" /> Guardados</TabsTrigger>
-            <TabsTrigger value="ia" className="gap-1"><Brain className="h-3 w-3" /> Asistente IA</TabsTrigger>
-            <TabsTrigger value="datos">Datos del Activo</TabsTrigger>
-            <TabsTrigger value="rentroll">Rent Roll</TabsTrigger>
-            <TabsTrigger value="gastos">OPEX / CAPEX</TabsTrigger>
-            <TabsTrigger value="financiacion">Financiacion</TabsTrigger>
-            {results && <TabsTrigger value="resultados">Resultados</TabsTrigger>}
-            {results && <TabsTrigger value="sensibilidad">Sensibilidad</TabsTrigger>}
+        <Tabs defaultValue="datos" className="space-y-4">
+          <TabsList className="flex flex-wrap gap-1">
+            <TabsTrigger value="guardados" className="gap-1 text-xs"><Save className="h-3 w-3" /> Guardados</TabsTrigger>
+            <TabsTrigger value="ia" className="gap-1 text-xs"><Brain className="h-3 w-3" /> IA</TabsTrigger>
+            <TabsTrigger value="datos" className="text-xs">Activo</TabsTrigger>
+            <TabsTrigger value="rentroll" className="text-xs">Rent Roll</TabsTrigger>
+            <TabsTrigger value="gastos" className="text-xs">Gastos</TabsTrigger>
+            <TabsTrigger value="financiacion" className="text-xs">Financiacion</TabsTrigger>
+            {results && <TabsTrigger value="resultados" className="text-xs">Resultados</TabsTrigger>}
+            {results && <TabsTrigger value="sensibilidad" className="text-xs">Sensibilidad</TabsTrigger>}
           </TabsList>
 
           {/* TAB: Analisis guardados */}
@@ -624,34 +624,33 @@ Comunidad: 180 EUR/mes"
                       {rentRoll.length} unidades | Renta mensual: {fmt(totalRentaMensual)} | Anual: {fmt(totalRentaAnual)}
                     </CardDescription>
                   </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" onClick={() => addUnit('vivienda')}><Home className="h-3 w-3 mr-1" />Vivienda</Button>
-                    <Button size="sm" variant="outline" onClick={() => addUnit('garaje')}><ParkingCircle className="h-3 w-3 mr-1" />Garaje</Button>
-                    <Button size="sm" variant="outline" onClick={() => addUnit('local')}><Store className="h-3 w-3 mr-1" />Local</Button>
-                    <Button size="sm" variant="outline" onClick={() => addUnit('trastero')}>Trastero</Button>
+                  <div className="flex flex-wrap gap-1">
+                    <Button size="sm" variant="outline" onClick={() => addUnit('vivienda')}><Home className="h-3 w-3 mr-1" />Viv</Button>
+                    <Button size="sm" variant="outline" onClick={() => addUnit('garaje')}><ParkingCircle className="h-3 w-3 mr-1" />Gar</Button>
+                    <Button size="sm" variant="outline" onClick={() => addUnit('local')}><Store className="h-3 w-3 mr-1" />Loc</Button>
+                    <Button size="sm" variant="outline" onClick={() => addUnit('trastero')}>Tra</Button>
+                    <Button size="sm" variant="outline" onClick={() => addUnit('oficina')}>Ofi</Button>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  {/* Header */}
-                  <div className="grid grid-cols-12 gap-2 text-xs font-medium text-gray-500 px-2">
+                  {/* Desktop header */}
+                  <div className="hidden md:grid grid-cols-12 gap-2 text-xs font-medium text-gray-500 px-2">
                     <div className="col-span-2">Tipo</div>
-                    <div className="col-span-2">Referencia</div>
+                    <div className="col-span-2">Ref.</div>
                     <div className="col-span-2">m2</div>
-                    <div className="col-span-2">Renta/mes</div>
+                    <div className="col-span-2">EUR/mes</div>
                     <div className="col-span-2">Estado</div>
                     <div className="col-span-2"></div>
                   </div>
-                  {rentRoll.map((unit, idx) => {
-                    const Icon = TIPO_ICONS[unit.tipo] || Building2;
-                    return (
-                      <div key={idx} className="grid grid-cols-12 gap-2 items-center bg-gray-50 rounded-lg p-2">
+                  {rentRoll.map((unit, idx) => (
+                    <div key={idx} className="bg-gray-50 rounded-lg p-3">
+                      {/* Desktop: row */}
+                      <div className="hidden md:grid grid-cols-12 gap-2 items-center">
                         <div className="col-span-2">
                           <Select value={unit.tipo} onValueChange={v => updateUnit(idx, 'tipo', v)}>
-                            <SelectTrigger className="h-8 text-xs">
-                              <SelectValue />
-                            </SelectTrigger>
+                            <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
                             <SelectContent>
                               {Object.entries(TIPO_LABELS).map(([k, v]) => (
                                 <SelectItem key={k} value={k}>{v}</SelectItem>
@@ -673,9 +672,7 @@ Comunidad: 180 EUR/mes"
                         </div>
                         <div className="col-span-2">
                           <Select value={unit.estado} onValueChange={v => updateUnit(idx, 'estado', v)}>
-                            <SelectTrigger className="h-8 text-xs">
-                              <SelectValue />
-                            </SelectTrigger>
+                            <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
                             <SelectContent>
                               <SelectItem value="alquilado">Alquilado</SelectItem>
                               <SelectItem value="vacio">Vacio</SelectItem>
@@ -691,8 +688,57 @@ Comunidad: 180 EUR/mes"
                           )}
                         </div>
                       </div>
-                    );
-                  })}
+                      {/* Mobile: card */}
+                      <div className="md:hidden space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-xs">{TIPO_LABELS[unit.tipo]}</Badge>
+                            <span className="text-sm font-medium">{unit.referencia || `Ud. ${idx + 1}`}</span>
+                          </div>
+                          {rentRoll.length > 1 && (
+                            <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-500" onClick={() => removeUnit(idx)}>
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          )}
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <Select value={unit.tipo} onValueChange={v => updateUnit(idx, 'tipo', v)}>
+                            <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              {Object.entries(TIPO_LABELS).map(([k, v]) => (
+                                <SelectItem key={k} value={k}>{v}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <Input className="h-8 text-sm" placeholder="Ref" value={unit.referencia}
+                            onChange={e => updateUnit(idx, 'referencia', e.target.value)} />
+                        </div>
+                        <div className="grid grid-cols-3 gap-2">
+                          <div>
+                            <Label className="text-[10px] text-gray-400">m2</Label>
+                            <Input className="h-8 text-sm" type="number" placeholder="75" value={unit.superficie || ''}
+                              onChange={e => updateUnit(idx, 'superficie', Number(e.target.value))} />
+                          </div>
+                          <div>
+                            <Label className="text-[10px] text-gray-400">EUR/mes</Label>
+                            <Input className="h-8 text-sm" type="number" placeholder="800" value={unit.rentaMensual || ''}
+                              onChange={e => updateUnit(idx, 'rentaMensual', Number(e.target.value))} />
+                          </div>
+                          <div>
+                            <Label className="text-[10px] text-gray-400">Estado</Label>
+                            <Select value={unit.estado} onValueChange={v => updateUnit(idx, 'estado', v)}>
+                              <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="alquilado">Alquilado</SelectItem>
+                                <SelectItem value="vacio">Vacio</SelectItem>
+                                <SelectItem value="reforma">Reforma</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
 
                 {/* Resumen por tipo */}
