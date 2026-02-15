@@ -49,7 +49,7 @@ import { DeleteConfirmationDialog } from '@/components/ui/delete-confirmation-di
 import { IconButton } from '@/components/ui/icon-button';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { SmartBreadcrumbs } from '@/components/navigation/smart-breadcrumbs';
 import { ContextualQuickActions } from '@/components/navigation/contextual-quick-actions';

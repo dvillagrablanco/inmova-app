@@ -22,7 +22,7 @@ import { MobileFAB } from '@/components/mobile/MobileFAB';
 import { MobileSheet } from '@/components/mobile/MobileSheet';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/lib/hooks/useIsMobile';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
 interface DashboardStats {

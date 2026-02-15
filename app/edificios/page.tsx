@@ -47,7 +47,7 @@ import { IconButton } from '@/components/ui/icon-button';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import logger, { logError } from '@/lib/logger';
 

@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Check, Sparkles, Zap, Rocket, Palette } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { PageHeader, PageContainer } from '@/components/layout/page-header';
 

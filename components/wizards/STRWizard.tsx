@@ -16,7 +16,7 @@ import {
   TrendingUp,
   Loader2
 } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 
 interface STRWizardProps {

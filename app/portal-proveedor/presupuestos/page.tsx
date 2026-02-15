@@ -24,7 +24,7 @@ import {
 import { FileText, Plus, Eye, Filter } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
 interface Quote {

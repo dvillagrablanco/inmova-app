@@ -37,7 +37,7 @@ import {
   Globe,
   Building,
 } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import logger from '@/lib/logger';
 

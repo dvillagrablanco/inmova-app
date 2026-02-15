@@ -41,7 +41,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { FilterChips } from '@/components/ui/filter-chips';
 import { SearchInput } from '@/components/ui/search-input';
 import { DeleteConfirmationDialog } from '@/components/ui/delete-confirmation-dialog';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import logger from '@/lib/logger';
 
 interface Contract {

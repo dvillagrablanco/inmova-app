@@ -20,7 +20,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 interface HealthCheck {
   name: string;

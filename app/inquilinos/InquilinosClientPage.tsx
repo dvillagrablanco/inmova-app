@@ -30,7 +30,7 @@ import { FilterChips } from '@/components/ui/filter-chips';
 import { ViewModeToggle, ViewMode } from '@/components/ui/view-mode-toggle';
 import { SearchInput } from '@/components/ui/search-input';
 import { DeleteConfirmationDialog } from '@/components/ui/delete-confirmation-dialog';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import logger from '@/lib/logger';
 
 interface Tenant {

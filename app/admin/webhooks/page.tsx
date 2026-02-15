@@ -20,7 +20,7 @@ import {
   EyeOff,
 } from 'lucide-react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 interface WebhookConfig {
   id: string;

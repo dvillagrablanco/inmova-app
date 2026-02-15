@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Calendar, RefreshCw, Download, Plus, CheckCircle, XCircle, Clock } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
 export default function ChannelManagerPage() {

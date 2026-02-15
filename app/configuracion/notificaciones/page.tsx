@@ -18,7 +18,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import { Bell, Mail, MessageSquare, AlertCircle, CheckCircle, Save, Settings } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { PageHeader, PageContainer } from '@/components/layout/page-header';
 import logger, { logError } from '@/lib/logger';

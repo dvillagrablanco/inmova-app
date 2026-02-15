@@ -34,7 +34,7 @@ import {
   Server,
   Wifi,
 } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';

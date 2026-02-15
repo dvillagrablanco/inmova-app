@@ -28,7 +28,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Skeleton } from '@/components/ui/skeleton';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 interface Message {
   id: string;

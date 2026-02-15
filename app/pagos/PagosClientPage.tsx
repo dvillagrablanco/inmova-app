@@ -44,7 +44,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { DeleteConfirmationDialog } from '@/components/ui/delete-confirmation-dialog';
 import logger from '@/lib/logger';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 interface Payment {
   id: string;

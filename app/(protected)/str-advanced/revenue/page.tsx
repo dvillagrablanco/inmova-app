@@ -17,7 +17,7 @@ import {
   ArrowUp,
   ArrowDown,
 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
 export default function RevenueManagementPage() {
