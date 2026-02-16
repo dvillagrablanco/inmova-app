@@ -16,7 +16,7 @@ import { Textarea } from '@/components/ui/textarea';
 import {
   Building2, Plus, Trash2, Calculator, Euro, TrendingUp, Landmark,
   ArrowUpRight, ArrowDownRight, Table2, Save, ParkingCircle, Store, Home,
-  Brain, Upload, FileText, Sparkles, Loader2,
+  Brain, Upload, FileText, Sparkles, Loader2, Copy, BarChart3,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -207,6 +207,14 @@ export default function AnalisisInversionPage() {
 
   const removeUnit = (idx: number) => {
     setRentRoll(rentRoll.filter((_, i) => i !== idx));
+  };
+
+  const duplicateUnit = (idx: number) => {
+    const original = rentRoll[idx];
+    const copy = { ...original, referencia: `${original.referencia} (copia)` };
+    const updated = [...rentRoll];
+    updated.splice(idx + 1, 0, copy);
+    setRentRoll(updated);
   };
 
   const updateUnit = (idx: number, field: keyof RentRollEntry, value: any) => {
@@ -671,10 +679,19 @@ Comunidad: 180 EUR/mes"
                               </SelectContent>
                             </Select>
                           </div>
+                          <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-gray-400 shrink-0" onClick={() => duplicateUnit(idx)} title="Duplicar">
+                            <Copy className="h-3 w-3" />
+                          </Button>
                           {rentRoll.length > 1 && (
                             <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-red-500 shrink-0" onClick={() => removeUnit(idx)}>
                               <Trash2 className="h-3 w-3" />
                             </Button>
+                          )}
+                          {/* EUR/m2 indicator */}
+                          {unit.superficie > 0 && unit.rentaMensual > 0 && (
+                            <span className="text-[10px] text-blue-600 font-medium shrink-0 hidden md:block">
+                              {(unit.rentaMensual / unit.superficie).toFixed(1)} €/m2
+                            </span>
                           )}
                         </div>
                         {/* Fila 2: m2 + hab + banos + renta */}
@@ -782,25 +799,109 @@ Comunidad: 180 EUR/mes"
           {results && (
             <TabsContent value="resultados">
               <div className="space-y-4">
-                {/* KPIs */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {/* Semaforo de calidad del deal */}
+                {(() => {
+                  const y = results.yieldNeto || 0;
+                  const isGood = y >= 6;
+                  const isOk = y >= 4;
+                  const color = isGood ? 'bg-green-100 border-green-300 text-green-800' : isOk ? 'bg-yellow-100 border-yellow-300 text-yellow-800' : 'bg-red-100 border-red-300 text-red-800';
+                  const label = isGood ? 'Buena oportunidad' : isOk ? 'Aceptable' : 'Rentabilidad baja';
+                  return (
+                    <div className={`p-3 rounded-lg border text-sm font-medium text-center ${color}`}>
+                      {label} — Yield neto {y}% | PER {results.per || 0}x | {fmt(results.precioM2Activo || 0)}/m2
+                    </div>
+                  );
+                })()}
+
+                {/* KPIs principales */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   <Card><CardContent className="p-4">
-                    <div className="text-sm text-gray-500">Yield Bruto</div>
+                    <div className="text-xs text-gray-500">Yield Bruto</div>
                     <div className="text-2xl font-bold">{results.yieldBruto}%</div>
                   </CardContent></Card>
                   <Card><CardContent className="p-4">
-                    <div className="text-sm text-gray-500">Yield Neto</div>
+                    <div className="text-xs text-gray-500">Yield Neto</div>
                     <div className="text-2xl font-bold text-blue-600">{results.yieldNeto}%</div>
                   </CardContent></Card>
                   <Card><CardContent className="p-4">
-                    <div className="text-sm text-gray-500">Cash-on-Cash</div>
+                    <div className="text-xs text-gray-500">Cash-on-Cash</div>
                     <div className="text-2xl font-bold text-green-600">{results.cashOnCash}%</div>
                   </CardContent></Card>
                   <Card><CardContent className="p-4">
-                    <div className="text-sm text-gray-500">Payback</div>
-                    <div className="text-2xl font-bold">{results.paybackAnos < 100 ? `${results.paybackAnos} anos` : 'N/A'}</div>
+                    <div className="text-xs text-gray-500">Payback</div>
+                    <div className="text-2xl font-bold">{results.paybackAnos < 100 ? `${results.paybackAnos} a` : 'N/A'}</div>
                   </CardContent></Card>
                 </div>
+
+                {/* KPIs secundarios */}
+                <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+                  <Card><CardContent className="p-3">
+                    <div className="text-[10px] text-gray-400">Precio/m2</div>
+                    <div className="text-sm font-bold">{fmt(results.precioM2Activo || 0)}</div>
+                  </CardContent></Card>
+                  <Card><CardContent className="p-3">
+                    <div className="text-[10px] text-gray-400">PER (multiplo)</div>
+                    <div className="text-sm font-bold">{results.per || 0}x</div>
+                  </CardContent></Card>
+                  <Card><CardContent className="p-3">
+                    <div className="text-[10px] text-gray-400">Renta/m2/mes</div>
+                    <div className="text-sm font-bold">{results.rentaM2Mensual || 0} €</div>
+                  </CardContent></Card>
+                  <Card><CardContent className="p-3">
+                    <div className="text-[10px] text-gray-400">NOI anual</div>
+                    <div className="text-sm font-bold">{fmt(results.noiAnual || 0)}</div>
+                  </CardContent></Card>
+                  <Card><CardContent className="p-3">
+                    <div className="text-[10px] text-gray-400">CF mensual</div>
+                    <div className={`text-sm font-bold ${(results.cashFlowAnualPreTax || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>{fmt((results.cashFlowAnualPreTax || 0) / 12)}</div>
+                  </CardContent></Card>
+                  <Card><CardContent className="p-3">
+                    <div className="text-[10px] text-gray-400">Superficie</div>
+                    <div className="text-sm font-bold">{results.rentRollSummary?.superficieTotal || 0} m2</div>
+                  </CardContent></Card>
+                </div>
+
+                {/* Rentabilidad por tipo */}
+                {results.rentabilidadPorTipo && results.rentabilidadPorTipo.length > 1 && (
+                  <Card>
+                    <CardHeader className="pb-2"><CardTitle className="text-base flex items-center gap-2"><BarChart3 className="h-4 w-4" /> Rentabilidad por Tipo</CardTitle></CardHeader>
+                    <CardContent>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="border-b text-xs text-gray-500">
+                              <th className="text-left p-2">Tipo</th>
+                              <th className="text-right p-2">Uds</th>
+                              <th className="text-right p-2">m2</th>
+                              <th className="text-right p-2">Renta/mes</th>
+                              <th className="text-right p-2">EUR/m2</th>
+                              <th className="text-right p-2">% Total</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y">
+                            {results.rentabilidadPorTipo.map((t: any) => (
+                              <tr key={t.tipo}>
+                                <td className="p-2 font-medium">{TIPO_LABELS[t.tipo] || t.tipo}</td>
+                                <td className="p-2 text-right">{t.unidades}</td>
+                                <td className="p-2 text-right">{t.superficie}</td>
+                                <td className="p-2 text-right">{fmt(t.rentaMensual)}</td>
+                                <td className="p-2 text-right font-medium text-blue-600">{t.eurM2Mes} €</td>
+                                <td className="p-2 text-right">
+                                  <div className="flex items-center justify-end gap-1">
+                                    <div className="w-12 h-2 bg-gray-100 rounded-full overflow-hidden">
+                                      <div className="h-full bg-blue-500 rounded-full" style={{ width: `${Math.min(t.pctDelTotal, 100)}%` }} />
+                                    </div>
+                                    <span className="text-xs">{t.pctDelTotal}%</span>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
                 <div className="grid md:grid-cols-2 gap-4">
                   {/* Ingresos */}

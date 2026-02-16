@@ -120,6 +120,20 @@ export interface AnalysisResult {
   cashOnCash: number;         // Cash-flow / capital propio
   paybackAnos: number;        // Capital propio / cash-flow anual
 
+  // Metricas avanzadas
+  precioM2Activo: number;     // Asking / superficie total
+  per: number;                // Price-to-Earnings: precio / renta anual (multiplo)
+  rentaM2Mensual: number;     // Renta bruta mensual / m2 total
+  rentabilidadPorTipo: {
+    tipo: string;
+    unidades: number;
+    superficie: number;
+    rentaMensual: number;
+    rentaAnual: number;
+    eurM2Mes: number;
+    pctDelTotal: number;      // % sobre renta total
+  }[];
+
   // Potencial de zona
   potencialZona: {
     precioM2Zona: number;
@@ -298,6 +312,26 @@ export function runInvestmentAnalysis(input: AnalysisInput): AnalysisResult {
     totalBanos: input.rentRoll.reduce((s, u) => s + (u.banos || 0), 0),
   };
 
+  // Metricas avanzadas
+  const superficieTotal = rentRollSummary.superficieTotal;
+  const rentaBrutaMensualTotal = input.rentRoll.reduce((s, u) => s + u.rentaMensual, 0);
+  const rentaBrutaAnualTotal = rentaBrutaMensualTotal * 12;
+  const precioM2Activo = superficieTotal > 0 ? round(input.askingPrice / superficieTotal) : 0;
+  const per = rentaBrutaAnualTotal > 0 ? round(input.askingPrice / rentaBrutaAnualTotal) : 0;
+  const rentaM2Mensual = superficieTotal > 0 ? round(rentaBrutaMensualTotal / superficieTotal) : 0;
+
+  // Rentabilidad por tipo de unidad
+  const tiposPresentes = [...new Set(input.rentRoll.map(u => u.tipo))];
+  const rentabilidadPorTipo = tiposPresentes.map(tipo => {
+    const unidades = input.rentRoll.filter(u => u.tipo === tipo);
+    const superficie = round(unidades.reduce((s, u) => s + (u.superficie || 0), 0));
+    const rentaMensual = round(unidades.reduce((s, u) => s + u.rentaMensual, 0));
+    const rentaAnual = round(rentaMensual * 12);
+    const eurM2Mes = superficie > 0 ? round(rentaMensual / superficie) : 0;
+    const pctDelTotal = rentaBrutaMensualTotal > 0 ? round((rentaMensual / rentaBrutaMensualTotal) * 100) : 0;
+    return { tipo, unidades: unidades.length, superficie, rentaMensual, rentaAnual, eurM2Mes, pctDelTotal };
+  });
+
   // Resultado base (al asking price)
   const base = calcularParaPrecio(input, input.askingPrice);
 
@@ -351,6 +385,10 @@ export function runInvestmentAnalysis(input: AnalysisInput): AnalysisResult {
   return {
     rentRollSummary,
     ...base,
+    precioM2Activo,
+    per,
+    rentaM2Mensual,
+    rentabilidadPorTipo,
     potencialZona,
     tablaSensibilidad,
   };
