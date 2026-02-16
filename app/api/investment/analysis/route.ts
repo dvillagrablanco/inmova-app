@@ -13,6 +13,8 @@ const rentRollEntrySchema = z.object({
   tipo: z.enum(['vivienda', 'garaje', 'local', 'trastero', 'oficina', 'otro']),
   referencia: z.string().min(1),
   superficie: z.number().min(0).optional(),
+  habitaciones: z.number().int().min(0).optional(),
+  banos: z.number().int().min(0).optional(),
   rentaMensual: z.number().min(0),
   estado: z.enum(['alquilado', 'vacio', 'reforma']),
   notas: z.string().optional(),

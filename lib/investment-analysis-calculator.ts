@@ -17,6 +17,8 @@ export interface RentRollEntry {
   tipo: 'vivienda' | 'garaje' | 'local' | 'trastero' | 'oficina' | 'otro';
   referencia: string;        // Ej: "1A", "Garaje 3", "Local B"
   superficie?: number;       // m2
+  habitaciones?: number;     // Numero de habitaciones
+  banos?: number;            // Numero de banos
   rentaMensual: number;      // Renta mensual actual o estimada
   estado: 'alquilado' | 'vacio' | 'reforma';
   notas?: string;
@@ -75,6 +77,8 @@ export interface AnalysisResult {
     unidadesVacias: number;
     ocupacionActual: number; // %
     superficieTotal: number;
+    totalHabitaciones: number;
+    totalBanos: number;
   };
 
   // Ingresos
@@ -290,6 +294,8 @@ export function runInvestmentAnalysis(input: AnalysisInput): AnalysisResult {
       ? round((input.rentRoll.filter(u => u.estado === 'alquilado').length / input.rentRoll.length) * 100)
       : 0,
     superficieTotal: round(input.rentRoll.reduce((s, u) => s + (u.superficie || 0), 0)),
+    totalHabitaciones: input.rentRoll.reduce((s, u) => s + (u.habitaciones || 0), 0),
+    totalBanos: input.rentRoll.reduce((s, u) => s + (u.banos || 0), 0),
   };
 
   // Resultado base (al asking price)
