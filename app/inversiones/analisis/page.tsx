@@ -362,11 +362,11 @@ export default function AnalisisInversionPage() {
                       <div key={a.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                         <div className="flex-1 cursor-pointer" onClick={() => loadSavedAnalysis(a.id)}>
                           <div className="font-medium text-gray-900">{a.nombre}</div>
-                          <div className="text-sm text-gray-500 flex gap-3">
+                          <div className="text-sm text-gray-500 flex flex-wrap gap-x-3 gap-y-1">
                             {a.direccion && <span>{a.direccion}</span>}
-                            <span>{fmt(a.askingPrice)}</span>
-                            <span>Yield: {a.yieldNeto}%</span>
-                            <span>CoC: {a.cashOnCash}%</span>
+                            <span>{fmt(a.askingPrice || 0)}</span>
+                            {a.yieldNeto != null && <span>Yield: {a.yieldNeto}%</span>}
+                            {a.cashOnCash != null && <span>CoC: {a.cashOnCash}%</span>}
                           </div>
                           <div className="text-xs text-gray-400">{new Date(a.createdAt).toLocaleDateString('es-ES')}</div>
                         </div>
@@ -710,8 +710,8 @@ Comunidad: 180 EUR/mes"
                 </div>
 
                 {/* Resumen por tipo */}
-                <div className="flex gap-3 mt-4 pt-4 border-t">
-                  {(['vivienda', 'garaje', 'local', 'trastero'] as const).map(tipo => {
+                <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t">
+                  {(['vivienda', 'garaje', 'local', 'trastero', 'oficina'] as const).map(tipo => {
                     const count = rentRoll.filter(u => u.tipo === tipo).length;
                     const renta = rentRoll.filter(u => u.tipo === tipo).reduce((s, u) => s + u.rentaMensual, 0);
                     if (count === 0) return null;
@@ -834,14 +834,18 @@ Comunidad: 180 EUR/mes"
                   <Card>
                     <CardHeader><CardTitle className="text-lg">OPEX Anual</CardTitle></CardHeader>
                     <CardContent className="space-y-2 text-sm">
-                      <div className="flex justify-between"><span className="text-gray-500">IBI</span><span>{fmt(results.detalleOpex.ibi)}</span></div>
-                      <div className="flex justify-between"><span className="text-gray-500">Comunidad</span><span>{fmt(results.detalleOpex.comunidad)}</span></div>
-                      <div className="flex justify-between"><span className="text-gray-500">Seguro</span><span>{fmt(results.detalleOpex.seguro)}</span></div>
-                      <div className="flex justify-between"><span className="text-gray-500">Mantenimiento</span><span>{fmt(results.detalleOpex.mantenimiento)}</span></div>
-                      <div className="flex justify-between"><span className="text-gray-500">Gestion admin</span><span>{fmt(results.detalleOpex.gestionAdmin)}</span></div>
-                      <div className="flex justify-between"><span className="text-gray-500">Comisiones alquiler</span><span>{fmt(results.detalleOpex.comisionAlquiler)}</span></div>
-                      <div className="flex justify-between"><span className="text-gray-500">Otros</span><span>{fmt(results.detalleOpex.otros)}</span></div>
-                      <div className="flex justify-between border-t pt-2 font-bold"><span>Total OPEX</span><span className="text-red-600">{fmt(results.opexAnual)}</span></div>
+                      {results.detalleOpex ? (<>
+                        <div className="flex justify-between"><span className="text-gray-500">IBI</span><span>{fmt(results.detalleOpex.ibi || 0)}</span></div>
+                        <div className="flex justify-between"><span className="text-gray-500">Comunidad</span><span>{fmt(results.detalleOpex.comunidad || 0)}</span></div>
+                        <div className="flex justify-between"><span className="text-gray-500">Seguro</span><span>{fmt(results.detalleOpex.seguro || 0)}</span></div>
+                        <div className="flex justify-between"><span className="text-gray-500">Mantenimiento</span><span>{fmt(results.detalleOpex.mantenimiento || 0)}</span></div>
+                        <div className="flex justify-between"><span className="text-gray-500">Gestion admin</span><span>{fmt(results.detalleOpex.gestionAdmin || 0)}</span></div>
+                        <div className="flex justify-between"><span className="text-gray-500">Comisiones</span><span>{fmt(results.detalleOpex.comisionAlquiler || 0)}</span></div>
+                        <div className="flex justify-between"><span className="text-gray-500">Otros</span><span>{fmt(results.detalleOpex.otros || 0)}</span></div>
+                      </>) : (
+                        <p className="text-gray-400 text-xs">Recalcula para ver el desglose</p>
+                      )}
+                      <div className="flex justify-between border-t pt-2 font-bold"><span>Total OPEX</span><span className="text-red-600">{fmt(results.opexAnual || 0)}</span></div>
                     </CardContent>
                   </Card>
 
@@ -915,8 +919,11 @@ Comunidad: 180 EUR/mes"
                       {results.rentRollSummary.garajes > 0 && <Badge variant="outline">{results.rentRollSummary.garajes} garajes</Badge>}
                       {results.rentRollSummary.locales > 0 && <Badge variant="outline">{results.rentRollSummary.locales} locales</Badge>}
                       {results.rentRollSummary.trasteros > 0 && <Badge variant="outline">{results.rentRollSummary.trasteros} trasteros</Badge>}
-                      <Badge variant="outline">Ocupacion actual: {results.rentRollSummary.ocupacionActual}%</Badge>
+                      {results.rentRollSummary.otros > 0 && <Badge variant="outline">{results.rentRollSummary.otros} otros</Badge>}
+                      <Badge variant="outline">Ocupacion: {results.rentRollSummary.ocupacionActual}%</Badge>
                       <Badge variant="outline">{results.rentRollSummary.superficieTotal} m2</Badge>
+                      {results.rentRollSummary.totalHabitaciones > 0 && <Badge variant="outline">{results.rentRollSummary.totalHabitaciones} hab.</Badge>}
+                      {results.rentRollSummary.totalBanos > 0 && <Badge variant="outline">{results.rentRollSummary.totalBanos} banos</Badge>}
                     </div>
                   </CardContent>
                 </Card>
@@ -933,8 +940,9 @@ Comunidad: 180 EUR/mes"
                   <CardDescription>Partiendo del asking price ({fmt(askingPrice)}) como maximo, bajando en escalones del 5%</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
+                  <p className="text-xs text-gray-400 mb-2 md:hidden">Desliza horizontalmente para ver todas las columnas →</p>
+                  <div className="overflow-x-auto -mx-4 px-4">
+                    <table className="w-full text-sm min-w-[800px]">
                       <thead>
                         <tr className="border-b bg-gray-50">
                           <th className="text-left p-3 font-medium">Precio</th>
