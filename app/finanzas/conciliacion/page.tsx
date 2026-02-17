@@ -294,7 +294,7 @@ export default function ConciliacionBancariaPage() {
         body: JSON.stringify({ action: 'count' }),
       });
       const countData = await countRes.json();
-      const totalPending = Math.min(countData.count || 0, useAI ? 25 : 50);
+      const totalPending = Math.min(countData.count || 0, useAI ? 50 : 200);
 
       if (totalPending === 0) {
         setAiProgress(p => ({ ...p, active: false, phase: 'Sin movimientos pendientes' }));
@@ -861,9 +861,9 @@ export default function ConciliacionBancariaPage() {
                 </CardTitle>
                 <CardDescription>
                   {stats.pendingCount > 0
-                    ? `${stats.pendingCount.toLocaleString('es-ES')} movimientos pendientes de revisión.`
+                    ? `${stats.pendingCount.toLocaleString('es-ES')} movimientos pendientes (${stats.incomeCount.toLocaleString('es-ES')} ingresos analizables, ${stats.expenseCount.toLocaleString('es-ES')} gastos).`
                     : 'No hay movimientos pendientes.'}
-                  {' '}La IA identificará inquilino + unidad en cada ingreso.
+                  {' '}La IA analiza los ingresos para identificar pagos de alquiler.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -872,21 +872,21 @@ export default function ConciliacionBancariaPage() {
                     onClick={async () => {
                       await runSmartReconcile(true);
                     }}
-                    disabled={aiProgress.active || stats.pendingCount === 0}
+                    disabled={aiProgress.active || stats.incomeCount === 0}
                   >
                     {aiProgress.active ? (
                       <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
                     ) : (
                       <Sparkles className="h-4 w-4 mr-2" />
                     )}
-                    {aiProgress.active ? 'Analizando...' : 'Analizar con IA (reglas + Claude)'}
+                    {aiProgress.active ? 'Analizando...' : `Analizar ${stats.incomeCount > 0 ? stats.incomeCount.toLocaleString('es-ES') + ' ingresos' : ''} con IA`}
                   </Button>
                   <Button
                     variant="outline"
                     onClick={async () => {
                       await runSmartReconcile(false);
                     }}
-                    disabled={aiProgress.active || stats.pendingCount === 0}
+                    disabled={aiProgress.active || stats.incomeCount === 0}
                   >
                     <Zap className="h-4 w-4 mr-2" />
                     Solo reglas (rápido, sin IA)
