@@ -48,7 +48,7 @@ export interface GCMandate {
   id?: string;
   reference: string;
   status?: 'pending_customer_approval' | 'pending_submission' | 'submitted' | 'active' | 'failed' | 'cancelled' | 'expired' | 'suspended_by_payer';
-  scheme: 'bacs' | 'sepa_core' | 'ach' | 'autogiro' | 'becs' | 'pad' | 'betalingsservice';
+  scheme: 'bacs' | 'sepa_core' | 'sepa_cor1' | 'ach' | 'autogiro' | 'becs' | 'pad' | 'betalingsservice';
   nextPossibleChargeDate?: string;
   paymentsRequireApproval?: boolean;
   metadata?: Record<string, string>;
@@ -813,13 +813,20 @@ export function getGoCardlessClient(config?: GoCardlessConfig): GoCardlessClient
 /**
  * Determinar el scheme adecuado según el país
  */
-export function getSupportedScheme(countryCode: string): GCMandate['scheme'] | null {
-  const schemeMap: Record<string, GCMandate['scheme']> = {
-    'AT': 'sepa_core', 'BE': 'sepa_core', 'CY': 'sepa_core', 'EE': 'sepa_core',
-    'FI': 'sepa_core', 'FR': 'sepa_core', 'DE': 'sepa_core', 'GR': 'sepa_core',
-    'IE': 'sepa_core', 'IT': 'sepa_core', 'LV': 'sepa_core', 'LT': 'sepa_core',
-    'LU': 'sepa_core', 'MT': 'sepa_core', 'NL': 'sepa_core', 'PT': 'sepa_core',
-    'SK': 'sepa_core', 'SI': 'sepa_core', 'ES': 'sepa_core',
+/**
+ * Determinar el scheme adecuado según el país.
+ * @param b2b Si true, devuelve sepa_cor1 (SEPA B2B) para países SEPA.
+ *            SEPA B2B no permite devoluciones por el pagador (más seguro para el acreedor).
+ */
+export function getSupportedScheme(countryCode: string, b2b: boolean = false): GCMandate['scheme'] | null {
+  const sepaCountries = [
+    'AT', 'BE', 'CY', 'EE', 'FI', 'FR', 'DE', 'GR', 'IE', 'IT',
+    'LV', 'LT', 'LU', 'MT', 'NL', 'PT', 'SK', 'SI', 'ES',
+  ];
+  if (sepaCountries.includes(countryCode)) {
+    return b2b ? 'sepa_cor1' : 'sepa_core';
+  }
+  const otherSchemes: Record<string, GCMandate['scheme']> = {
     'GB': 'bacs',
     'US': 'ach',
     'SE': 'autogiro',
@@ -827,7 +834,7 @@ export function getSupportedScheme(countryCode: string): GCMandate['scheme'] | n
     'CA': 'pad',
     'DK': 'betalingsservice',
   };
-  return schemeMap[countryCode] || null;
+  return otherSchemes[countryCode] || null;
 }
 
 /**
