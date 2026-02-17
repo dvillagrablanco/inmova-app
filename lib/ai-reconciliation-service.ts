@@ -83,6 +83,28 @@ async function loadTenants(companyId: string): Promise<TenantInfo[]> {
 }
 
 // ============================================================================
+// TEXT CLEANING (eliminar ruido bancario)
+// ============================================================================
+
+function cleanBankText(raw: string): string {
+  return raw
+    .replace(/^CORE/i, '')
+    .replace(/NOTPROVIDE?D?/gi, '')
+    .replace(/\bESES?\b/g, '')
+    .replace(/BANKINTER\s*S\.?A\.?/gi, '')
+    .replace(/BANCO\s+(DE\s+)?(SANTANDER|SABADELL|BILBAO|VIZCAYA|ARGENTINA)/gi, '')
+    .replace(/CAIXABANK\s*S\.?A\.?/gi, '')
+    .replace(/KUTXABANK\s*S\.?A\.?/gi, '')
+    .replace(/CITIBANK?/gi, '')
+    .replace(/\b[A-Z]{2}\d{10,}\b/g, '') // Remove IBANs/references
+    .replace(/\d{4}[-/]\d{2}[-/]\d{2}T[\d:]+/g, '') // Remove dates
+    .replace(/[-|\/]+/g, ' ')
+    .replace(/\s{2,}/g, ' ')
+    .trim()
+    .toUpperCase();
+}
+
+// ============================================================================
 // RULE-BASED MATCHING (rápido, sin IA)
 // ============================================================================
 
@@ -93,7 +115,8 @@ function ruleBasedMatch(
   txReference: string | null,
   tenants: TenantInfo[]
 ): AIMatchResult {
-  const text = `${txDebtorName || ''} ${txDescription} ${txReference || ''}`.toUpperCase();
+  const rawText = `${txDebtorName || ''} ${txDescription} ${txReference || ''}`;
+  const text = cleanBankText(rawText);
 
   // 1. GoCardless metadata (si la descripción contiene ID de GC)
   const gcMatch = text.match(/GC[- ]?([A-Z0-9]+)|GOCARDLESS/i);
@@ -353,11 +376,17 @@ export async function smartReconcileBatch(
   const MAX_AI_CALLS = 5; // Limitar llamadas a Claude por batch
   let aiCallCount = 0;
 
+  // Obtener rango de rentas para filtrar solo ingresos relevantes
+  const tenants = await loadTenants(companyId);
+  const rents = tenants.map(t => t.rentaMensual).filter(r => r > 0);
+  const minRent = rents.length > 0 ? Math.min(...rents) * 0.8 : 30;
+  const maxRent = rents.length > 0 ? Math.max(...rents) * 1.5 : 10000;
+
   const transactions = await prisma.bankTransaction.findMany({
     where: {
       companyId,
       estado: 'pendiente_revision',
-      monto: { gt: 0 }, // Solo ingresos
+      monto: { gte: minRent, lte: maxRent }, // Solo ingresos en rango de alquiler
     },
     orderBy: { fecha: 'desc' },
     take: limit,
