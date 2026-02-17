@@ -182,8 +182,8 @@ function ruleBasedMatch(
     }
   }
 
-  // 4. Match solo por monto exacto (baja confianza)
-  const amountMatches = tenants.filter(t => Math.abs(txAmount - t.rentaMensual) < 0.02);
+  // 4. Match por monto exacto (±1€) — puede haber 1 o pocos inquilinos con esa renta
+  const amountMatches = tenants.filter(t => Math.abs(txAmount - t.rentaMensual) < 1.5);
   if (amountMatches.length === 1) {
     const t = amountMatches[0];
     return {
@@ -192,25 +192,44 @@ function ruleBasedMatch(
       contractId: t.contractId,
       unitId: t.unitId,
       unitLabel: `${t.buildingNombre} - ${t.unitNumero}`,
-      confidence: 40,
-      reasoning: `Único inquilino con renta de ${t.rentaMensual}€ (coincide con monto). Sin match de nombre.`,
+      confidence: 60,
+      reasoning: `Monto ${txAmount}€ coincide con renta ${t.rentaMensual}€ de ${t.nombre} (único inquilino con esa renta).`,
       method: 'fuzzy_name',
     };
   }
+  if (amountMatches.length > 1 && amountMatches.length <= 3) {
+    // Si hay pocos candidatos por monto, intentar match parcial de nombre
+    for (const t of amountMatches) {
+      const partialMatch = t.nameParts.filter(part => text.includes(part)).length;
+      if (partialMatch >= 1) {
+        return {
+          tenantId: t.id,
+          tenantName: t.nombre,
+          contractId: t.contractId,
+          unitId: t.unitId,
+          unitLabel: `${t.buildingNombre} - ${t.unitNumero}`,
+          confidence: 65,
+          reasoning: `Monto coincide (${txAmount}€ ≈ ${t.rentaMensual}€) + nombre parcial (${partialMatch} partes).`,
+          method: 'fuzzy_name',
+        };
+      }
+    }
+  }
 
-  // 5. Match por referencia con número de unidad/piso
+  // 5. Match por referencia con número de unidad/piso/edificio
   for (const t of tenants) {
-    const unitInRef = text.includes(t.unitNumero.toUpperCase()) ||
-      text.includes(t.buildingNombre.toUpperCase());
+    const unitInRef = (t.unitNumero.length > 1 && text.includes(t.unitNumero.toUpperCase())) ||
+      (t.buildingNombre.length > 3 && text.includes(t.buildingNombre.toUpperCase()));
     if (unitInRef) {
+      const amountClose = Math.abs(txAmount - t.rentaMensual) < t.rentaMensual * 0.15;
       return {
         tenantId: t.id,
         tenantName: t.nombre,
         contractId: t.contractId,
         unitId: t.unitId,
         unitLabel: `${t.buildingNombre} - ${t.unitNumero}`,
-        confidence: 50,
-        reasoning: `Referencia contiene unidad/edificio "${t.unitNumero}" de ${t.buildingNombre}.`,
+        confidence: amountClose ? 65 : 45,
+        reasoning: `Referencia contiene "${t.unitNumero}" de ${t.buildingNombre}${amountClose ? ' y monto cercano' : ''}.`,
         method: 'reference_code',
       };
     }
@@ -378,9 +397,9 @@ export async function smartReconcileBatch(
 
   // Obtener rango de rentas para filtrar solo ingresos relevantes
   const tenants = await loadTenants(companyId);
-  const rents = tenants.map(t => t.rentaMensual).filter(r => r > 0);
-  const minRent = rents.length > 0 ? Math.min(...rents) * 0.8 : 30;
-  const maxRent = rents.length > 0 ? Math.max(...rents) * 1.5 : 10000;
+  const rents = tenants.map(t => t.rentaMensual).filter(r => r > 0 && r < 20000);
+  const minRent = rents.length > 0 ? Math.min(...rents) * 0.7 : 30;
+  const maxRent = rents.length > 0 ? Math.max(...rents) * 1.3 : 10000;
 
   const transactions = await prisma.bankTransaction.findMany({
     where: {
