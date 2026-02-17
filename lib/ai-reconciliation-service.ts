@@ -46,11 +46,11 @@ interface TenantInfo {
 // LOAD TENANTS CACHE
 // ============================================================================
 
-let _tenantsCache: TenantInfo[] | null = null;
-let _tenantsCacheExpiry = 0;
+const _tenantsCache: Record<string, { data: TenantInfo[]; expiry: number }> = {};
 
 async function loadTenants(companyId: string): Promise<TenantInfo[]> {
-  if (_tenantsCache && Date.now() < _tenantsCacheExpiry) return _tenantsCache;
+  const cached = _tenantsCache[companyId];
+  if (cached && Date.now() < cached.expiry) return cached.data;
 
   const prisma = getPrismaClient();
   const contracts = await prisma.contract.findMany({
@@ -66,7 +66,7 @@ async function loadTenants(companyId: string): Promise<TenantInfo[]> {
     },
   });
 
-  _tenantsCache = contracts.map(c => ({
+  const tenantList = contracts.map(c => ({
     id: c.tenant.id,
     nombre: c.tenant.nombreCompleto,
     email: c.tenant.email,
@@ -78,8 +78,8 @@ async function loadTenants(companyId: string): Promise<TenantInfo[]> {
     nameParts: c.tenant.nombreCompleto.toUpperCase().split(/\s+/).filter(p => p.length > 2),
   }));
 
-  _tenantsCacheExpiry = Date.now() + 5 * 60 * 1000; // 5 min
-  return _tenantsCache;
+  _tenantsCache[companyId] = { data: tenantList, expiry: Date.now() + 5 * 60 * 1000 };
+  return tenantList;
 }
 
 // ============================================================================
