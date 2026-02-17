@@ -153,6 +153,14 @@ export default function ConciliacionBancariaPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [isSyncing, setIsSyncing] = useState(false);
+  const [aiProgress, setAiProgress] = useState<{
+    active: boolean;
+    phase: string;
+    current: number;
+    total: number;
+    matched: number;
+    reconciled: number;
+  }>({ active: false, phase: '', current: 0, total: 0, matched: 0, reconciled: 0 });
   const [aiResults, setAiResults] = useState<Array<{
     txId: string;
     match: {
@@ -265,6 +273,95 @@ export default function ConciliacionBancariaPage() {
       }
     } catch (error) {
       toast.error('Error de conexión');
+    }
+  };
+
+  // Conciliación inteligente con barra de progreso (mini-batches)
+  const runSmartReconcile = async (useAI: boolean) => {
+    const BATCH_SIZE = useAI ? 5 : 15;
+    let allResults: typeof aiResults = [];
+    let totalMatched = 0;
+    let totalReconciled = 0;
+
+    try {
+      // 1. Obtener total de ingresos pendientes
+      setAiProgress({ active: true, phase: 'Contando movimientos pendientes...', current: 0, total: 0, matched: 0, reconciled: 0 });
+      setAiResults([]);
+
+      const countRes = await fetch('/api/banking/smart-reconcile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'count' }),
+      });
+      const countData = await countRes.json();
+      const totalPending = Math.min(countData.count || 0, useAI ? 25 : 50);
+
+      if (totalPending === 0) {
+        setAiProgress(p => ({ ...p, active: false, phase: 'Sin movimientos pendientes' }));
+        toast.info('No hay ingresos pendientes de conciliar');
+        return;
+      }
+
+      setAiProgress(p => ({ ...p, total: totalPending, phase: useAI ? 'Analizando con IA...' : 'Analizando por reglas...' }));
+
+      // 2. Procesar en mini-batches
+      let processed = 0;
+      while (processed < totalPending) {
+        const batchLimit = Math.min(BATCH_SIZE, totalPending - processed);
+
+        const res = await fetch('/api/banking/smart-reconcile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'batch', useAI, limit: batchLimit }),
+        });
+        const data = await res.json();
+
+        if (!data.success) {
+          toast.error(data.error || 'Error en batch');
+          break;
+        }
+
+        processed += data.processed || batchLimit;
+        totalMatched += data.matched || 0;
+        totalReconciled += data.reconciled || 0;
+        if (data.results) allResults = [...allResults, ...data.results];
+
+        setAiProgress(p => ({
+          ...p,
+          current: Math.min(processed, totalPending),
+          matched: totalMatched,
+          reconciled: totalReconciled,
+          phase: useAI
+            ? `Analizando con IA... (${data.aiCalls || 0} llamadas Claude)`
+            : 'Analizando por reglas...',
+        }));
+
+        // Si este batch no procesó nada nuevo, salir
+        if ((data.processed || 0) === 0) break;
+      }
+
+      // 3. Finalizar
+      setAiResults(allResults);
+      setAiProgress(p => ({
+        ...p,
+        active: false,
+        current: p.total,
+        phase: 'Completado',
+      }));
+
+      toast.success(
+        `Análisis completado: ${totalReconciled} conciliados, ${totalMatched} identificados de ${processed} procesados`
+      );
+
+      fetchData(pagination.page, {
+        company: selectedCompany,
+        status: statusFilter,
+        type: typeFilter,
+        search: searchTerm,
+      });
+    } catch (e: any) {
+      setAiProgress(p => ({ ...p, active: false, phase: 'Error' }));
+      toast.error(e?.name === 'AbortError' ? 'Timeout' : 'Error de conexión');
     }
   };
 
@@ -773,88 +870,50 @@ export default function ConciliacionBancariaPage() {
                 <div className="flex flex-wrap gap-3">
                   <Button
                     onClick={async () => {
-                      setIsSyncing(true);
-                      try {
-                        const ctrl = new AbortController();
-                        const timer = setTimeout(() => ctrl.abort(), 55000);
-                        const res = await fetch('/api/banking/smart-reconcile', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ action: 'batch', useAI: true, limit: 20 }),
-                          signal: ctrl.signal,
-                        });
-                        clearTimeout(timer);
-                        const data = await res.json();
-                        if (data.success) {
-                          setAiResults(data.results || []);
-                          toast.success(data.message || `${data.reconciled} conciliados`);
-                          fetchData(pagination.page, {
-                            company: selectedCompany,
-                            status: statusFilter,
-                            type: typeFilter,
-                            search: searchTerm,
-                          });
-                        } else {
-                          toast.error(data.error || 'Error en conciliación IA');
-                        }
-                      } catch (e: any) {
-                        if (e?.name === 'AbortError') {
-                          toast.error('Timeout: el análisis tardó demasiado. Usa "Solo reglas" para más rapidez.');
-                        } else {
-                          toast.error('Error de conexión');
-                        }
-                      } finally {
-                        setIsSyncing(false);
-                      }
+                      await runSmartReconcile(true);
                     }}
-                    disabled={isSyncing || stats.pendingCount === 0}
+                    disabled={aiProgress.active || stats.pendingCount === 0}
                   >
-                    {isSyncing ? (
+                    {aiProgress.active ? (
                       <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
                     ) : (
                       <Sparkles className="h-4 w-4 mr-2" />
                     )}
-                    {isSyncing ? 'Analizando...' : 'Analizar con IA (reglas + Claude)'}
+                    {aiProgress.active ? 'Analizando...' : 'Analizar con IA (reglas + Claude)'}
                   </Button>
                   <Button
                     variant="outline"
                     onClick={async () => {
-                      setIsSyncing(true);
-                      try {
-                        const ctrl = new AbortController();
-                        const timer = setTimeout(() => ctrl.abort(), 30000);
-                        const res = await fetch('/api/banking/smart-reconcile', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ action: 'batch', useAI: false, limit: 50 }),
-                          signal: ctrl.signal,
-                        });
-                        clearTimeout(timer);
-                        const data = await res.json();
-                        if (data.success) {
-                          setAiResults(data.results || []);
-                          toast.success(data.message || `${data.reconciled} conciliados`);
-                          fetchData(pagination.page, {
-                            company: selectedCompany,
-                            status: statusFilter,
-                            type: typeFilter,
-                            search: searchTerm,
-                          });
-                        } else {
-                          toast.error(data.error || 'Error');
-                        }
-                      } catch (e) {
-                        toast.error('Error de conexión');
-                      } finally {
-                        setIsSyncing(false);
-                      }
+                      await runSmartReconcile(false);
                     }}
-                    disabled={isSyncing || stats.pendingCount === 0}
+                    disabled={aiProgress.active || stats.pendingCount === 0}
                   >
                     <Zap className="h-4 w-4 mr-2" />
                     Solo reglas (rápido, sin IA)
                   </Button>
                 </div>
+
+                {/* Barra de progreso */}
+                {aiProgress.active && (
+                  <div className="space-y-2 p-4 bg-muted/50 rounded-lg border">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="font-medium">{aiProgress.phase}</span>
+                      <span className="text-muted-foreground">
+                        {aiProgress.current}/{aiProgress.total} ({aiProgress.total > 0 ? Math.round((aiProgress.current / aiProgress.total) * 100) : 0}%)
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-500 ease-out bg-gradient-to-r from-cyan-500 to-purple-500"
+                        style={{ width: `${aiProgress.total > 0 ? Math.round((aiProgress.current / aiProgress.total) * 100) : 0}%` }}
+                      />
+                    </div>
+                    <div className="flex gap-4 text-xs text-muted-foreground">
+                      <span>Identificados: <strong className="text-foreground">{aiProgress.matched}</strong></span>
+                      <span>Conciliados: <strong className="text-green-600">{aiProgress.reconciled}</strong></span>
+                    </div>
+                  </div>
+                )}
 
                 {/* Stats */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

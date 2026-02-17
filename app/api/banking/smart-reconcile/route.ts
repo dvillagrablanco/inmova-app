@@ -2,27 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { identifyPaymentSource, smartReconcileBatch } from '@/lib/ai-reconciliation-service';
+import { getPrismaClient } from '@/lib/db';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-/**
- * POST /api/banking/smart-reconcile
- *
- * Conciliación inteligente con IA.
- *
- * Body:
- * - { action: 'batch' }
- *     Procesa hasta 100 transacciones pendientes, identifica inquilino+unidad
- *     por reglas + IA, y concilia automáticamente si confidence >= 70%.
- *
- * - { action: 'identify', description, amount, debtorName?, reference? }
- *     Identifica un movimiento individual sin conciliar.
- *
- * - { action: 'batch', useAI: false }
- *     Solo reglas, sin llamar a Claude (más rápido).
- */
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -34,8 +19,22 @@ export async function POST(request: NextRequest) {
     const { action, useAI = true } = body;
 
     switch (action) {
+      // Contar ingresos pendientes (para barra de progreso)
+      case 'count': {
+        const prisma = getPrismaClient();
+        const count = await prisma.bankTransaction.count({
+          where: {
+            companyId: session.user.companyId,
+            estado: 'pendiente_revision',
+            monto: { gt: 0 },
+          },
+        });
+        return NextResponse.json({ success: true, count });
+      }
+
+      // Procesar un mini-batch
       case 'batch': {
-        const batchLimit = Math.min(body.limit || 30, 50);
+        const batchLimit = Math.min(body.limit || 10, 50);
         const result = await smartReconcileBatch(
           session.user.companyId,
           batchLimit,
@@ -45,11 +44,11 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           success: true,
           ...result,
-          message: `Procesados ${result.processed} movimientos: ${result.reconciled} conciliados, ${result.matched} identificados` +
-            (result.aiCalls > 0 ? ` (${result.aiCalls} análisis IA).` : '.'),
+          message: `${result.reconciled} conciliados, ${result.matched} identificados`,
         });
       }
 
+      // Identificar un movimiento individual
       case 'identify': {
         const { description, amount, debtorName, reference } = body;
         if (!description || amount === undefined) {
@@ -73,7 +72,7 @@ export async function POST(request: NextRequest) {
 
       default:
         return NextResponse.json(
-          { error: 'action debe ser batch o identify' },
+          { error: 'action debe ser batch, count o identify' },
           { status: 400 }
         );
     }
