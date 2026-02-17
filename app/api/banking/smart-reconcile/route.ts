@@ -19,26 +19,17 @@ export async function POST(request: NextRequest) {
     const { action, useAI = true } = body;
 
     switch (action) {
-      // Contar ingresos pendientes en rango de alquiler
+      // Contar ingresos pendientes
       case 'count': {
         const prisma = getPrismaClient();
-        // Obtener rango de rentas activas
-        const contracts = await prisma.contract.findMany({
-          where: { estado: 'activo', unit: { building: { companyId: session.user.companyId } } },
-          select: { rentaMensual: true },
-        });
-        const rents = contracts.map(c => c.rentaMensual).filter(r => r > 0);
-        const minRent = rents.length > 0 ? Math.min(...rents) * 0.8 : 30;
-        const maxRent = rents.length > 0 ? Math.max(...rents) * 1.5 : 10000;
-
         const count = await prisma.bankTransaction.count({
           where: {
             companyId: session.user.companyId,
             estado: 'pendiente_revision',
-            monto: { gte: minRent, lte: maxRent },
+            monto: { gt: 0 },
           },
         });
-        return NextResponse.json({ success: true, count, rentRange: { min: minRent, max: maxRent } });
+        return NextResponse.json({ success: true, count });
       }
 
       // Procesar un mini-batch

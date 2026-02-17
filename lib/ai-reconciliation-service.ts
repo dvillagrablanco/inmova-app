@@ -395,17 +395,13 @@ export async function smartReconcileBatch(
   const MAX_AI_CALLS = 5; // Limitar llamadas a Claude por batch
   let aiCallCount = 0;
 
-  // Obtener rango de rentas para filtrar solo ingresos relevantes
   const tenants = await loadTenants(companyId);
-  const rents = tenants.map(t => t.rentaMensual).filter(r => r > 0 && r < 20000);
-  const minRent = rents.length > 0 ? Math.min(...rents) * 0.7 : 30;
-  const maxRent = rents.length > 0 ? Math.max(...rents) * 1.3 : 10000;
 
   const transactions = await prisma.bankTransaction.findMany({
     where: {
       companyId,
       estado: 'pendiente_revision',
-      monto: { gte: minRent, lte: maxRent }, // Solo ingresos en rango de alquiler
+      monto: { gt: 0 },
     },
     orderBy: { fecha: 'desc' },
     take: limit,
