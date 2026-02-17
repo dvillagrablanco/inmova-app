@@ -153,6 +153,19 @@ export default function ConciliacionBancariaPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [isSyncing, setIsSyncing] = useState(false);
+  const [aiResults, setAiResults] = useState<Array<{
+    txId: string;
+    match: {
+      tenantId: string | null;
+      tenantName: string | null;
+      contractId: string | null;
+      unitId: string | null;
+      unitLabel: string | null;
+      confidence: number;
+      reasoning: string;
+      method: string;
+    };
+  }>>([]);
 
   // Cargar datos desde API - accepts explicit params to avoid stale closures
   const fetchData = async (
@@ -726,88 +739,245 @@ export default function ConciliacionBancariaPage() {
             <Alert className="border-purple-200 bg-purple-50 dark:bg-purple-950">
               <Sparkles className="h-4 w-4 text-purple-600" />
               <AlertDescription className="text-purple-800 dark:text-purple-200">
-                <strong>Conciliación Inteligente:</strong> La IA analiza descripciones, importes y fechas para sugerir 
-                vinculaciones automáticas entre movimientos bancarios y facturas/contratos.
+                <strong>Conciliación Inteligente:</strong> La IA analiza cada movimiento pendiente,
+                identifica el inquilino y la unidad correspondiente, y concilia automáticamente
+                los pagos con confianza alta (&ge;70%).
               </AlertDescription>
             </Alert>
 
-            {stats.pendingCount > 0 ? (
+            {/* Acciones IA */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Zap className="h-5 w-5 text-amber-500" />
+                  Ejecutar Conciliación Inteligente
+                </CardTitle>
+                <CardDescription>
+                  {stats.pendingCount > 0
+                    ? `${stats.pendingCount.toLocaleString('es-ES')} movimientos pendientes de revisión.`
+                    : 'No hay movimientos pendientes.'}
+                  {' '}La IA identificará inquilino + unidad en cada ingreso.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex flex-wrap gap-3">
+                  <Button
+                    onClick={async () => {
+                      setIsSyncing(true);
+                      try {
+                        const res = await fetch('/api/banking/smart-reconcile', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ action: 'batch', useAI: true }),
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                          setAiResults(data.results || []);
+                          toast.success(
+                            `Procesados ${data.processed} movimientos: ${data.reconciled} conciliados, ${data.matched} identificados`
+                          );
+                          fetchData(pagination.page, {
+                            company: selectedCompany,
+                            status: statusFilter,
+                            type: typeFilter,
+                            search: searchTerm,
+                          });
+                        } else {
+                          toast.error(data.error || 'Error en conciliación IA');
+                        }
+                      } catch (e) {
+                        toast.error('Error de conexión');
+                      } finally {
+                        setIsSyncing(false);
+                      }
+                    }}
+                    disabled={isSyncing || stats.pendingCount === 0}
+                  >
+                    {isSyncing ? (
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Sparkles className="h-4 w-4 mr-2" />
+                    )}
+                    {isSyncing ? 'Analizando con IA...' : 'Analizar con IA (reglas + Claude)'}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={async () => {
+                      setIsSyncing(true);
+                      try {
+                        const res = await fetch('/api/banking/smart-reconcile', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ action: 'batch', useAI: false }),
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                          setAiResults(data.results || []);
+                          toast.success(
+                            `${data.reconciled} conciliados por reglas (sin IA)`
+                          );
+                          fetchData(pagination.page, {
+                            company: selectedCompany,
+                            status: statusFilter,
+                            type: typeFilter,
+                            search: searchTerm,
+                          });
+                        } else {
+                          toast.error(data.error || 'Error');
+                        }
+                      } catch (e) {
+                        toast.error('Error de conexión');
+                      } finally {
+                        setIsSyncing(false);
+                      }
+                    }}
+                    disabled={isSyncing || stats.pendingCount === 0}
+                  >
+                    <Zap className="h-4 w-4 mr-2" />
+                    Solo reglas (rápido, sin IA)
+                  </Button>
+                </div>
+
+                {/* Stats */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="p-4 bg-muted rounded-lg text-center">
+                    <p className="text-2xl font-bold">{stats.totalTransactions.toLocaleString('es-ES')}</p>
+                    <p className="text-xs text-muted-foreground">Total movimientos</p>
+                  </div>
+                  <div className="p-4 bg-amber-50 dark:bg-amber-950 rounded-lg text-center">
+                    <p className="text-2xl font-bold text-amber-600">{stats.pendingCount.toLocaleString('es-ES')}</p>
+                    <p className="text-xs text-muted-foreground">Pendientes</p>
+                  </div>
+                  <div className="p-4 bg-green-50 dark:bg-green-950 rounded-lg text-center">
+                    <p className="text-2xl font-bold text-green-600">{stats.matchedCount.toLocaleString('es-ES')}</p>
+                    <p className="text-xs text-muted-foreground">Conciliados</p>
+                  </div>
+                  <div className="p-4 bg-green-50 dark:bg-green-950 rounded-lg text-center">
+                    <p className="text-2xl font-bold text-green-600">{stats.incomeCount.toLocaleString('es-ES')}</p>
+                    <p className="text-xs text-muted-foreground">Ingresos</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Resultados IA */}
+            {aiResults.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Zap className="h-5 w-5 text-amber-500" />
-                    Resumen de Categorización Automática
-                  </CardTitle>
+                  <CardTitle className="text-lg">Resultados del análisis IA</CardTitle>
                   <CardDescription>
-                    Los movimientos han sido categorizados automáticamente al importarlos.
-                    {stats.pendingCount} movimientos pendientes de revisión.
+                    {aiResults.filter(r => r.match.confidence >= 70).length} identificados con alta confianza,{' '}
+                    {aiResults.filter(r => r.match.confidence > 0 && r.match.confidence < 70).length} con baja confianza,{' '}
+                    {aiResults.filter(r => r.match.confidence === 0).length} sin match
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="p-4 bg-muted rounded-lg text-center">
-                      <p className="text-2xl font-bold">{stats.totalTransactions.toLocaleString('es-ES')}</p>
-                      <p className="text-xs text-muted-foreground">Total movimientos</p>
-                    </div>
-                    <div className="p-4 bg-green-50 dark:bg-green-950 rounded-lg text-center">
-                      <p className="text-2xl font-bold text-green-600">{stats.incomeCount.toLocaleString('es-ES')}</p>
-                      <p className="text-xs text-muted-foreground">Ingresos</p>
-                    </div>
-                    <div className="p-4 bg-red-50 dark:bg-red-950 rounded-lg text-center">
-                      <p className="text-2xl font-bold text-red-600">{stats.expenseCount.toLocaleString('es-ES')}</p>
-                      <p className="text-xs text-muted-foreground">Gastos</p>
-                    </div>
-                    <div className="p-4 bg-amber-50 dark:bg-amber-950 rounded-lg text-center">
-                      <p className="text-2xl font-bold text-amber-600">{stats.pendingCount.toLocaleString('es-ES')}</p>
-                      <p className="text-xs text-muted-foreground">Pendientes</p>
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  <div>
-                    <h4 className="font-medium mb-3">Categorías detectadas en los movimientos:</h4>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                      {[
-                        { label: 'Alquileres', icon: '🏠', filter: 'ingreso_alquiler' },
-                        { label: 'Comunidades', icon: '🏢', filter: 'gasto_comunidad' },
-                        { label: 'Seguros', icon: '🛡️', filter: 'gasto_seguro' },
-                        { label: 'Impuestos', icon: '📋', filter: 'gasto_impuesto' },
-                        { label: 'Suministros', icon: '💡', filter: 'gasto_suministros' },
-                        { label: 'Mantenimiento', icon: '🔧', filter: 'gasto_mantenimiento' },
-                        { label: 'Bancarios', icon: '🏦', filter: 'gasto_bancario' },
-                        { label: 'Personal', icon: '👤', filter: 'gasto_personal' },
-                        { label: 'Transferencias internas', icon: '🔄', filter: 'transferencia_interna' },
-                      ].map(cat => (
-                        <Button
-                          key={cat.filter}
-                          variant="outline"
-                          size="sm"
-                          className="justify-start"
-                          onClick={() => {
-                            setSearchTerm(cat.filter.replace(/_/g, ' '));
-                            setActiveTab('movimientos');
-                          }}
-                        >
-                          <span className="mr-2">{cat.icon}</span>
-                          {cat.label}
-                        </Button>
+                <CardContent className="p-0">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Confianza</TableHead>
+                        <TableHead>Inquilino</TableHead>
+                        <TableHead>Unidad</TableHead>
+                        <TableHead>Método</TableHead>
+                        <TableHead className="min-w-[200px]">Razonamiento</TableHead>
+                        <TableHead>Acción</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {aiResults
+                        .filter(r => r.match.confidence > 0)
+                        .sort((a, b) => b.match.confidence - a.match.confidence)
+                        .slice(0, 50)
+                        .map((r, idx) => (
+                        <TableRow key={idx}>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <div className={`h-3 w-3 rounded-full ${
+                                r.match.confidence >= 70 ? 'bg-green-500' :
+                                r.match.confidence >= 40 ? 'bg-amber-500' : 'bg-red-500'
+                              }`} />
+                              <span className="text-sm font-medium">{r.match.confidence}%</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-sm font-medium">{r.match.tenantName || '-'}</TableCell>
+                          <TableCell className="text-sm">{r.match.unitLabel || '-'}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-xs">
+                              {r.match.method === 'exact_amount_name' ? 'Nombre+Monto' :
+                               r.match.method === 'fuzzy_name' ? 'Nombre parcial' :
+                               r.match.method === 'reference_code' ? 'Referencia' :
+                               r.match.method === 'ai_inference' ? 'IA Claude' :
+                               r.match.method === 'gocardless_metadata' ? 'GoCardless' :
+                               r.match.method}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground max-w-[200px] truncate">
+                            {r.match.reasoning}
+                          </TableCell>
+                          <TableCell>
+                            {r.match.confidence >= 70 ? (
+                              <Badge className="bg-green-500 text-xs">Conciliado</Badge>
+                            ) : (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-xs h-7"
+                                onClick={() => handleConciliar(r.txId, 'conciliar')}
+                              >
+                                Aprobar
+                              </Button>
+                            )}
+                          </TableCell>
+                        </TableRow>
                       ))}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <Card>
-                <CardContent className="py-12 text-center">
-                  <CheckCircle2 className="h-12 w-12 mx-auto text-green-500 mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No hay movimientos pendientes</h3>
-                  <p className="text-muted-foreground">
-                    Todos los movimientos han sido conciliados o descartados
-                  </p>
+                      {aiResults.filter(r => r.match.confidence > 0).length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                            No se encontraron coincidencias en los movimientos analizados
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
                 </CardContent>
               </Card>
             )}
+
+            {/* Categorías rápidas */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Filtrar por categoría</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                  {[
+                    { label: 'Alquileres', icon: '🏠', filter: 'alquiler' },
+                    { label: 'Comunidades', icon: '🏢', filter: 'comunidad' },
+                    { label: 'Seguros', icon: '🛡️', filter: 'seguro' },
+                    { label: 'Impuestos', icon: '📋', filter: 'impuesto' },
+                    { label: 'Suministros', icon: '💡', filter: 'suministro' },
+                    { label: 'Mantenimiento', icon: '🔧', filter: 'mantenimiento' },
+                    { label: 'Bancarios', icon: '🏦', filter: 'bancario' },
+                    { label: 'Personal', icon: '👤', filter: 'nomina' },
+                    { label: 'Transferencias', icon: '🔄', filter: 'transferencia' },
+                  ].map(cat => (
+                    <Button
+                      key={cat.filter}
+                      variant="outline"
+                      size="sm"
+                      className="justify-start"
+                      onClick={() => {
+                        setSearchTerm(cat.filter);
+                        setActiveTab('movimientos');
+                      }}
+                    >
+                      <span className="mr-2">{cat.icon}</span>
+                      {cat.label}
+                    </Button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>
