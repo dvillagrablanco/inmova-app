@@ -397,15 +397,38 @@ export async function smartReconcileBatch(
 
   const tenants = await loadTenants(companyId);
 
-  const transactions = await prisma.bankTransaction.findMany({
+  // Calcular rango de rentas para priorizar ingresos que pueden ser alquileres
+  const rents = tenants.map(t => t.rentaMensual).filter(r => r > 0);
+  const minRent = rents.length > 0 ? Math.min(...rents) * 0.7 : 20;
+  const maxRent = rents.length > 0 ? Math.max(...rents) * 1.5 : 20000;
+
+  // Primero buscar ingresos en rango de alquiler (más probable que sean pagos)
+  let transactions = await prisma.bankTransaction.findMany({
     where: {
       companyId,
       estado: 'pendiente_revision',
-      monto: { gt: 0 },
+      monto: { gte: minRent, lte: maxRent },
     },
     orderBy: { fecha: 'desc' },
     take: limit,
   });
+
+  // Si no hay suficientes en rango, completar con otros ingresos
+  if (transactions.length < limit) {
+    const remaining = limit - transactions.length;
+    const existingIds = transactions.map(t => t.id);
+    const extra = await prisma.bankTransaction.findMany({
+      where: {
+        companyId,
+        estado: 'pendiente_revision',
+        monto: { gt: 0 },
+        id: { notIn: existingIds },
+      },
+      orderBy: { fecha: 'desc' },
+      take: remaining,
+    });
+    transactions = [...transactions, ...extra];
+  }
 
   const results: Array<{ txId: string; match: AIMatchResult }> = [];
   let matched = 0;
