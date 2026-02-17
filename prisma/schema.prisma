@@ -720,6 +720,9 @@ model Tenant {
   referralsEnviados        TenantReferral[]        @relation("TenantReferrer")
   referralRecibido         TenantReferral?         @relation("TenantReferred")
 
+  // GoCardless SEPA
+  gcCustomer GCCustomer? @relation("TenantGCCustomer")
+
   // Índices optimizados para consultas frecuentes
   @@index([companyId])
   @@index([email])
@@ -1475,6 +1478,9 @@ model Payment {
   // Gestión de Comunidades
   badDebtProvision BadDebtProvision?
 
+  // GoCardless SEPA
+  sepaPayments SepaPayment[] @relation("SepaToInmovaPayment")
+
   // Índices optimizados para consultas frecuentes
   @@index([contractId, estado])
   @@index([estado])
@@ -2164,6 +2170,13 @@ model Company {
   mortgages            Mortgage[]
   fianzaDeposits       FianzaDeposit[]
   investmentAnalyses   InvestmentAnalysis[]
+
+  // 💳 GOCARDLESS - PAGOS SEPA
+  gcCustomers       GCCustomer[]       @relation("CompanyGCCustomers")
+  sepaMandates      SepaMandate[]      @relation("CompanySepaMandates")
+  sepaPayments      SepaPayment[]      @relation("CompanySepaPayments")
+  sepaSubscriptions SepaSubscription[] @relation("CompanySepaSubscriptions")
+  gcPayouts         GCPayout[]         @relation("CompanyGCPayouts")
 
   @@map("company")
 }
@@ -16091,4 +16104,284 @@ model InvestmentAnalysis {
 
   @@index([companyId])
   @@index([createdBy])
+}
+
+// ============================================
+// GOCARDLESS - PAGOS SEPA DIRECT DEBIT
+// ============================================
+
+enum SepaMandateStatus {
+  pending_customer_approval
+  pending_submission
+  submitted
+  active
+  suspended_by_payer
+  failed
+  cancelled
+  expired
+}
+
+enum SepaPaymentStatus {
+  pending_customer_approval
+  pending_submission
+  submitted
+  confirmed
+  paid_out
+  cancelled
+  customer_approval_denied
+  failed
+  charged_back
+}
+
+enum SepaSubscriptionStatus {
+  pending_customer_approval
+  customer_approval_denied
+  active
+  finished
+  cancelled
+  paused
+}
+
+model GCCustomer {
+  id        String @id @default(cuid())
+  companyId String
+
+  // GoCardless IDs
+  gcCustomerId     String  @unique // ID en GoCardless (CU...)
+  gcBankAccountId  String? // ID de cuenta bancaria (BA...)
+
+  // Relacion con inquilino
+  tenantId String? @unique
+  tenant   Tenant? @relation("TenantGCCustomer", fields: [tenantId], references: [id], onDelete: SetNull)
+
+  // Datos del cliente
+  email       String
+  givenName   String
+  familyName  String
+  companyName String?
+  countryCode String  @default("ES")
+  iban        String? // Ultimos 4 digitos
+  bankName    String?
+
+  // Estado
+  activo    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relaciones
+  company       Company        @relation("CompanyGCCustomers", fields: [companyId], references: [id], onDelete: Cascade)
+  mandates      SepaMandate[]
+  metadata      Json?
+
+  @@unique([companyId, tenantId])
+  @@index([companyId])
+  @@index([tenantId])
+  @@index([gcCustomerId])
+  @@map("gc_customers")
+}
+
+model SepaMandate {
+  id        String @id @default(cuid())
+  companyId String
+
+  // GoCardless IDs
+  gcMandateId String @unique // ID en GoCardless (MD...)
+  gcCustomerId String
+
+  // Relacion
+  customerId String
+  customer   GCCustomer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  // Datos del mandato
+  reference              String? // Referencia unica SEPA
+  scheme                 String  @default("sepa_core") // sepa_core, bacs, etc
+  status                 SepaMandateStatus @default(pending_submission)
+  nextPossibleChargeDate String? // YYYY-MM-DD
+
+  // Metadatos
+  metadata  Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relaciones
+  company       Company            @relation("CompanySepaMandates", fields: [companyId], references: [id], onDelete: Cascade)
+  payments      SepaPayment[]
+  subscriptions SepaSubscription[]
+
+  @@index([companyId])
+  @@index([gcCustomerId])
+  @@index([status])
+  @@map("sepa_mandates")
+}
+
+model SepaPayment {
+  id        String @id @default(cuid())
+  companyId String
+
+  // GoCardless IDs
+  gcPaymentId String @unique // ID en GoCardless (PM...)
+
+  // Relaciones GoCardless
+  mandateId String
+  mandate   SepaMandate @relation(fields: [mandateId], references: [id], onDelete: Cascade)
+
+  subscriptionId String?
+  subscription   SepaSubscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+
+  // Datos del pago
+  amount      Int    // En centimos (1200 = 12.00 EUR)
+  currency    String @default("EUR")
+  description String
+  reference   String? // Referencia para conciliacion
+  chargeDate  String? // YYYY-MM-DD
+  status      SepaPaymentStatus @default(pending_submission)
+
+  // Conciliacion con Payment de Inmova
+  inmovaPaymentId String? // FK a Payment (pago de alquiler)
+  inmovaPayment   Payment? @relation("SepaToInmovaPayment", fields: [inmovaPaymentId], references: [id], onDelete: SetNull)
+
+  // Conciliacion con contrato/inquilino
+  tenantId   String?
+  contractId String?
+
+  // Payout (cuando GC transfiere a tu cuenta)
+  gcPayoutId   String? // ID del payout (PO...)
+  payoutDate   DateTime?
+  payoutAmount Int? // Monto neto recibido (despues de fees)
+
+  // Fees
+  gcFeeAmount Int? // Fee de GoCardless en centimos
+
+  // Estado de conciliacion
+  conciliado       Boolean   @default(false)
+  conciliadoEn     DateTime?
+  conciliadoPor    String?
+  notaConciliacion String?   @db.Text
+
+  // Errores y reintentos
+  failureReason    String?
+  chargeBackDate   DateTime?
+  amountRefunded   Int       @default(0)
+
+  metadata  Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relaciones
+  company Company @relation("CompanySepaPayments", fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([mandateId])
+  @@index([status])
+  @@index([chargeDate])
+  @@index([conciliado])
+  @@index([gcPayoutId])
+  @@index([tenantId])
+  @@index([contractId])
+  @@map("sepa_payments")
+}
+
+model SepaSubscription {
+  id        String @id @default(cuid())
+  companyId String
+
+  // GoCardless IDs
+  gcSubscriptionId String @unique // ID en GoCardless (SB...)
+
+  // Relacion
+  mandateId String
+  mandate   SepaMandate @relation(fields: [mandateId], references: [id], onDelete: Cascade)
+
+  // Datos de la suscripcion
+  name         String
+  amount       Int    // En centimos
+  currency     String @default("EUR")
+  interval     Int    @default(1)
+  intervalUnit String @default("monthly") // weekly, monthly, yearly
+  dayOfMonth   Int?   // 1-28
+  startDate    String? // YYYY-MM-DD
+  endDate      String? // YYYY-MM-DD
+  status       SepaSubscriptionStatus @default(active)
+
+  // Relaciones Inmova
+  tenantId   String?
+  contractId String?
+
+  metadata  Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relaciones
+  company  Company       @relation("CompanySepaSubscriptions", fields: [companyId], references: [id], onDelete: Cascade)
+  payments SepaPayment[]
+
+  @@index([companyId])
+  @@index([mandateId])
+  @@index([status])
+  @@index([tenantId])
+  @@index([contractId])
+  @@map("sepa_subscriptions")
+}
+
+model GCPayout {
+  id        String @id @default(cuid())
+  companyId String
+
+  // GoCardless IDs
+  gcPayoutId String @unique // ID en GoCardless (PO...)
+
+  // Datos del payout
+  amount       Int      // En centimos
+  currency     String   @default("EUR")
+  arrivalDate  DateTime // Fecha de llegada a cuenta bancaria
+  status       String   // pending, paid, bounced
+  reference    String?
+
+  // Desglose
+  debitCount   Int @default(0)
+  debitAmount  Int @default(0)
+  feeAmount    Int @default(0)
+  refundAmount Int @default(0)
+
+  // Conciliacion bancaria
+  conciliado          Boolean   @default(false)
+  conciliadoEn        DateTime?
+  bankTransactionId   String?   // FK a BankTransaction si se concilia
+  notaConciliacion    String?   @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation("CompanyGCPayouts", fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([arrivalDate])
+  @@index([conciliado])
+  @@map("gc_payouts")
+}
+
+model GCWebhookEvent {
+  id        String @id @default(cuid())
+  companyId String?
+
+  // Datos del evento
+  gcEventId    String @unique // ID del evento en GC
+  resourceType String // payments, mandates, subscriptions, payouts, refunds
+  action       String // created, confirmed, paid_out, failed, etc.
+  resourceId   String // ID del recurso afectado
+
+  // Procesamiento
+  processed    Boolean  @default(false)
+  processedAt  DateTime?
+  error        String?  @db.Text
+
+  // Payload completo
+  payload Json
+
+  createdAt DateTime @default(now())
+
+  @@index([gcEventId])
+  @@index([resourceType, action])
+  @@index([processed])
+  @@map("gc_webhook_events")
 }

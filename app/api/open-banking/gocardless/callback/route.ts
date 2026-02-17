@@ -7,7 +7,7 @@ export const runtime = 'nodejs';
 
 /**
  * GET /api/open-banking/gocardless/callback
- * 
+ *
  * Callback después de que el inquilino autoriza la domiciliación SEPA.
  * GoCardless redirige aquí con redirect_flow_id.
  */
@@ -23,23 +23,27 @@ export async function GET(request: NextRequest) {
 
     const token = process.env.GOCARDLESS_ACCESS_TOKEN;
     const env = process.env.GOCARDLESS_ENVIRONMENT || 'live';
-    const baseUrl = env === 'live' ? 'https://api.gocardless.com' : 'https://api-sandbox.gocardless.com';
+    const baseUrl =
+      env === 'live' ? 'https://api.gocardless.com' : 'https://api-sandbox.gocardless.com';
 
     if (!token) {
-      return NextResponse.redirect(new URL('/dashboard/pagos?error=gc_not_configured', request.url));
+      return NextResponse.redirect(
+        new URL('/dashboard/pagos?error=gc_not_configured', request.url)
+      );
     }
 
     // Complete the redirect flow to get the mandate
     const res = await fetch(`${baseUrl}/redirect_flows/${redirectFlowId}/actions/complete`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         'GoCardless-Version': '2015-07-06',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         data: {
-          session_token: request.nextUrl.searchParams.get('session_token') || `tenant_${tenantId}_auto`,
+          session_token:
+            request.nextUrl.searchParams.get('session_token') || `tenant_${tenantId}_auto`,
         },
       }),
     });
@@ -64,16 +68,18 @@ export async function GET(request: NextRequest) {
 
     if (tenantId && companyId) {
       // Update tenant with GoCardless IDs
-      await prisma.tenant.update({
-        where: { id: tenantId },
-        data: {
-          // Store in JSON metadata since specific GC fields may not exist
-          observaciones: `GC_MANDATE=${mandateId}|GC_CUSTOMER=${customerId}|GC_BANK_ACCOUNT=${customerBankAccountId}`,
-        },
-      }).catch(() => {
-        // If observaciones field doesn't work, try other approach
-        logger.warn('[GC Callback] Could not update tenant metadata');
-      });
+      await prisma.tenant
+        .update({
+          where: { id: tenantId },
+          data: {
+            // Store in JSON metadata since specific GC fields may not exist
+            observaciones: `GC_MANDATE=${mandateId}|GC_CUSTOMER=${customerId}|GC_BANK_ACCOUNT=${customerBankAccountId}`,
+          },
+        })
+        .catch(() => {
+          // If observaciones field doesn't work, try other approach
+          logger.warn('[GC Callback] Could not update tenant metadata');
+        });
 
       // Create a bank connection record
       await prisma.bankConnection.create({
@@ -87,7 +93,7 @@ export async function GET(request: NextRequest) {
           estado: 'conectado',
           accessToken: `mandate:${mandateId}|customer:${customerId}|bank_account:${customerBankAccountId}`,
           tenantId,
-          ultimaSincronizacion: new Date(),
+          ultimaSync: new Date(),
         },
       });
     }
