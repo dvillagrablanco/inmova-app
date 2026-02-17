@@ -340,15 +340,18 @@ export async function identifyPaymentSource(
  */
 export async function smartReconcileBatch(
   companyId: string,
-  limit: number = 100,
+  limit: number = 30,
   useAI: boolean = true
 ): Promise<{
   processed: number;
   matched: number;
   reconciled: number;
+  aiCalls: number;
   results: Array<{ txId: string; match: AIMatchResult }>;
 }> {
   const prisma = getPrismaClient();
+  const MAX_AI_CALLS = 5; // Limitar llamadas a Claude por batch
+  let aiCallCount = 0;
 
   const transactions = await prisma.bankTransaction.findMany({
     where: {
@@ -365,14 +368,17 @@ export async function smartReconcileBatch(
   let reconciled = 0;
 
   for (const tx of transactions) {
+    // Limitar llamadas a IA por batch para evitar timeouts
+    const canUseAI = useAI && aiCallCount < MAX_AI_CALLS;
     const match = await identifyPaymentSource(
       companyId,
       tx.descripcion,
       tx.monto,
       tx.debtorName,
       tx.referencia,
-      useAI
+      canUseAI
     );
+    if (match.method === 'ai_inference') aiCallCount++;
 
     results.push({ txId: tx.id, match });
 
@@ -440,8 +446,8 @@ export async function smartReconcileBatch(
 
   logger.info(
     `[SmartReconcile] ${companyId}: ${transactions.length} processed, ` +
-    `${matched} matched, ${reconciled} reconciled`
+    `${matched} matched, ${reconciled} reconciled, ${aiCallCount} AI calls`
   );
 
-  return { processed: transactions.length, matched, reconciled, results };
+  return { processed: transactions.length, matched, reconciled, aiCalls: aiCallCount, results };
 }

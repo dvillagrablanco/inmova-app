@@ -286,13 +286,23 @@ export default function ConciliacionBancariaPage() {
         (d1.reconciliation?.payoutToBankTx?.matched || 0) +
         (d1.reconciliation?.bankTxToPayment?.matched || 0);
 
-      // Paso 2: Conciliación inteligente con IA
-      const res2 = await fetch('/api/banking/smart-reconcile', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'batch', useAI: true }),
-      });
-      const d2 = await res2.json();
+      // Paso 2: Conciliación inteligente (solo reglas, rápido)
+      const ctrl2 = new AbortController();
+      const t2 = setTimeout(() => ctrl2.abort(), 45000);
+      let d2: any = {};
+      try {
+        const res2 = await fetch('/api/banking/smart-reconcile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'batch', useAI: false, limit: 30 }),
+          signal: ctrl2.signal,
+        });
+        d2 = await res2.json();
+      } catch (e) {
+        d2 = { reconciled: 0 };
+      } finally {
+        clearTimeout(t2);
+      }
       const smartReconciled = d2.reconciled || 0;
 
       const total = unifiedMatched + smartReconciled;
@@ -765,17 +775,19 @@ export default function ConciliacionBancariaPage() {
                     onClick={async () => {
                       setIsSyncing(true);
                       try {
+                        const ctrl = new AbortController();
+                        const timer = setTimeout(() => ctrl.abort(), 55000);
                         const res = await fetch('/api/banking/smart-reconcile', {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ action: 'batch', useAI: true }),
+                          body: JSON.stringify({ action: 'batch', useAI: true, limit: 20 }),
+                          signal: ctrl.signal,
                         });
+                        clearTimeout(timer);
                         const data = await res.json();
                         if (data.success) {
                           setAiResults(data.results || []);
-                          toast.success(
-                            `Procesados ${data.processed} movimientos: ${data.reconciled} conciliados, ${data.matched} identificados`
-                          );
+                          toast.success(data.message || `${data.reconciled} conciliados`);
                           fetchData(pagination.page, {
                             company: selectedCompany,
                             status: statusFilter,
@@ -785,8 +797,12 @@ export default function ConciliacionBancariaPage() {
                         } else {
                           toast.error(data.error || 'Error en conciliación IA');
                         }
-                      } catch (e) {
-                        toast.error('Error de conexión');
+                      } catch (e: any) {
+                        if (e?.name === 'AbortError') {
+                          toast.error('Timeout: el análisis tardó demasiado. Usa "Solo reglas" para más rapidez.');
+                        } else {
+                          toast.error('Error de conexión');
+                        }
                       } finally {
                         setIsSyncing(false);
                       }
@@ -798,24 +814,26 @@ export default function ConciliacionBancariaPage() {
                     ) : (
                       <Sparkles className="h-4 w-4 mr-2" />
                     )}
-                    {isSyncing ? 'Analizando con IA...' : 'Analizar con IA (reglas + Claude)'}
+                    {isSyncing ? 'Analizando...' : 'Analizar con IA (reglas + Claude)'}
                   </Button>
                   <Button
                     variant="outline"
                     onClick={async () => {
                       setIsSyncing(true);
                       try {
+                        const ctrl = new AbortController();
+                        const timer = setTimeout(() => ctrl.abort(), 30000);
                         const res = await fetch('/api/banking/smart-reconcile', {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ action: 'batch', useAI: false }),
+                          body: JSON.stringify({ action: 'batch', useAI: false, limit: 50 }),
+                          signal: ctrl.signal,
                         });
+                        clearTimeout(timer);
                         const data = await res.json();
                         if (data.success) {
                           setAiResults(data.results || []);
-                          toast.success(
-                            `${data.reconciled} conciliados por reglas (sin IA)`
-                          );
+                          toast.success(data.message || `${data.reconciled} conciliados`);
                           fetchData(pagination.page, {
                             company: selectedCompany,
                             status: statusFilter,

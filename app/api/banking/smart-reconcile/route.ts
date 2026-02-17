@@ -35,16 +35,18 @@ export async function POST(request: NextRequest) {
 
     switch (action) {
       case 'batch': {
+        const batchLimit = Math.min(body.limit || 30, 50);
         const result = await smartReconcileBatch(
           session.user.companyId,
-          body.limit || 100,
+          batchLimit,
           useAI
         );
 
         return NextResponse.json({
           success: true,
           ...result,
-          message: `Procesados ${result.processed} movimientos: ${result.reconciled} conciliados, ${result.matched} identificados.`,
+          message: `Procesados ${result.processed} movimientos: ${result.reconciled} conciliados, ${result.matched} identificados` +
+            (result.aiCalls > 0 ? ` (${result.aiCalls} análisis IA).` : '.'),
         });
       }
 
