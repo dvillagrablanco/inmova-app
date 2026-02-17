@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { identifyPaymentSource, smartReconcileBatch } from '@/lib/ai-reconciliation-service';
 import { getPrismaClient } from '@/lib/db';
+import { resolveAccountingScope } from '@/lib/accounting-scope';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -11,20 +12,28 @@ export const runtime = 'nodejs';
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.companyId) {
+    if (!session?.user) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const body = await request.json();
     const { action, useAI = true } = body;
 
+    // Resolver scope de empresa (soporta selector de empresa, holdings, super_admin)
+    const scope = await resolveAccountingScope(request, session.user as any);
+    if (!scope) {
+      return NextResponse.json({ error: 'Sin empresa asociada' }, { status: 403 });
+    }
+
+    // Usar la empresa activa (o la primera del scope)
+    const companyId = scope.activeCompanyId;
+
     switch (action) {
-      // Contar ingresos pendientes
       case 'count': {
         const prisma = getPrismaClient();
         const count = await prisma.bankTransaction.count({
           where: {
-            companyId: session.user.companyId,
+            companyId: { in: scope.companyIds },
             estado: 'pendiente_revision',
             monto: { gt: 0 },
           },
@@ -32,23 +41,36 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: true, count });
       }
 
-      // Procesar un mini-batch
       case 'batch': {
         const batchLimit = Math.min(body.limit || 10, 50);
-        const result = await smartReconcileBatch(
-          session.user.companyId,
-          batchLimit,
-          useAI
-        );
+
+        // Procesar para cada empresa del scope
+        let totalProcessed = 0;
+        let totalMatched = 0;
+        let totalReconciled = 0;
+        let totalAiCalls = 0;
+        let allResults: any[] = [];
+
+        for (const cid of scope.companyIds) {
+          const result = await smartReconcileBatch(cid, batchLimit, useAI);
+          totalProcessed += result.processed;
+          totalMatched += result.matched;
+          totalReconciled += result.reconciled;
+          totalAiCalls += result.aiCalls;
+          allResults = allResults.concat(result.results);
+        }
 
         return NextResponse.json({
           success: true,
-          ...result,
-          message: `${result.reconciled} conciliados, ${result.matched} identificados`,
+          processed: totalProcessed,
+          matched: totalMatched,
+          reconciled: totalReconciled,
+          aiCalls: totalAiCalls,
+          results: allResults,
+          message: `${totalReconciled} conciliados, ${totalMatched} identificados`,
         });
       }
 
-      // Identificar un movimiento individual
       case 'identify': {
         const { description, amount, debtorName, reference } = body;
         if (!description || amount === undefined) {
@@ -59,7 +81,7 @@ export async function POST(request: NextRequest) {
         }
 
         const match = await identifyPaymentSource(
-          session.user.companyId,
+          companyId,
           description,
           amount,
           debtorName || null,

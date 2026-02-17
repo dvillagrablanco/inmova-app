@@ -52,13 +52,17 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.companyId) {
+    if (!session?.user) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const body = await request.json();
     const { action, companyId: targetCompanyId } = body;
-    const companyId = targetCompanyId || session.user.companyId;
+
+    // Resolver scope de empresa
+    const { resolveAccountingScope } = await import('@/lib/accounting-scope');
+    const scope = await resolveAccountingScope(request, session.user as any);
+    const companyId = targetCompanyId || scope?.activeCompanyId || (session.user as any).companyId;
 
     switch (action) {
       case 'reconcile': {
