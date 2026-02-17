@@ -383,7 +383,7 @@ export async function smartReconcileBatch(
       const pendingPayment = await prisma.payment.findFirst({
         where: {
           contractId: match.contractId!,
-          estado: { in: ['pendiente', 'vencido'] },
+          estado: { in: ['pendiente', 'atrasado'] },
           monto: { gte: tx.monto * 0.99, lte: tx.monto * 1.01 },
         },
         orderBy: { fechaVencimiento: 'asc' },

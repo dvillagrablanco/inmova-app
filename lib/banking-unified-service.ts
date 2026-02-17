@@ -209,7 +209,7 @@ export async function unifiedReconcile(companyId: string): Promise<UnifiedReconc
     const match = await prisma.payment.findFirst({
       where: {
         contract: { tenantId, companyId },
-        estado: { in: ['pendiente', 'vencido'] },
+        estado: { in: ['pendiente', 'atrasado'] },
         monto: { gte: amountEuros - 0.02, lte: amountEuros + 0.02 },
       },
       orderBy: { fechaVencimiento: 'asc' },
@@ -321,7 +321,7 @@ export async function unifiedReconcile(companyId: string): Promise<UnifiedReconc
     const candidates = await prisma.payment.findMany({
       where: {
         contract: { companyId },
-        estado: { in: ['pendiente', 'vencido'] },
+        estado: { in: ['pendiente', 'atrasado'] },
         monto: { gte: tx.monto * 0.99, lte: tx.monto * 1.01 },
       },
       include: {

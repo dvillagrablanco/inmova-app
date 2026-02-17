@@ -272,7 +272,7 @@ export async function autoReconcile(companyId: string): Promise<ReconciliationSu
             tenantId,
             companyId,
           },
-          estado: { in: ['pendiente', 'vencido'] },
+          estado: { in: ['pendiente', 'atrasado'] },
           monto: {
             gte: amountEuros - 0.02,
             lte: amountEuros + 0.02,
