@@ -255,14 +255,45 @@ export default function ConciliacionBancariaPage() {
     }
   };
 
-  // Sincronizar
+  // Sincronizar y conciliar con GoCardless + Bankinter
   const handleSyncBanks = async () => {
     setIsSyncing(true);
-    toast.loading('Sincronizando movimientos...');
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsSyncing(false);
-    toast.dismiss();
-    toast.info('Los movimientos se cargan desde archivos CAMT.053 importados. Use el script de importación para actualizar.');
+    try {
+      const companyParam = selectedCompany !== 'all' ? selectedCompany : undefined;
+      const res = await fetch('/api/banking/reconcile-unified', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'full-sync',
+          companyId: companyParam,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        const r = data.reconciliation;
+        const totalMatched =
+          (r?.sepaToPayment?.matched || 0) +
+          (r?.payoutToBankTx?.matched || 0) +
+          (r?.bankTxToPayment?.matched || 0);
+        if (totalMatched > 0) {
+          toast.success(`Sincronizado y conciliado: ${totalMatched} registros`);
+        } else {
+          toast.info('Sincronización completada. No hay nuevos registros para conciliar.');
+        }
+        fetchData(pagination.page, {
+          company: selectedCompany,
+          status: statusFilter,
+          type: typeFilter,
+          search: searchTerm,
+        });
+      } else {
+        toast.error(data.error || 'Error en sincronización');
+      }
+    } catch (error) {
+      toast.error('Error de conexión');
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
   // Format currency
@@ -344,7 +375,7 @@ export default function ConciliacionBancariaPage() {
             )}
             <Button variant="outline" onClick={handleSyncBanks} disabled={isSyncing}>
               <RefreshCw className={`h-4 w-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
-              Sincronizar
+              {isSyncing ? 'Sincronizando...' : 'Sync + Conciliar'}
             </Button>
           </div>
         </div>
