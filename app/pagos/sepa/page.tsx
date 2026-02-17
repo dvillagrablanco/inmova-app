@@ -199,10 +199,16 @@ export default function SepaPaymentsPage() {
 
   // Alta SEPA dialog
   const [setupDialogOpen, setSetupDialogOpen] = useState(false);
-  const [tenants, setTenants] = useState<Array<{ id: string; nombreCompleto: string; email: string; hasMandate: boolean }>>([]);
+  const [tenants, setTenants] = useState<Array<{ id: string; nombreCompleto: string; email: string; telefono?: string; hasMandate: boolean; contract?: { rentaMensual: number; unitNumero: string; buildingNombre: string } }>>([]);
   const [selectedTenantId, setSelectedTenantId] = useState('');
   const [setupLoading, setSetupLoading] = useState(false);
-  const [setupResult, setSetupResult] = useState<{ redirectUrl?: string; tenantName?: string; alreadySetup?: boolean; mandateId?: string } | null>(null);
+  const [setupResult, setSetupResult] = useState<{
+    redirectUrl?: string; tenantName?: string; alreadySetup?: boolean;
+    mandateId?: string; notification?: { email: { sent: boolean }; sms: { sent: boolean }; whatsapp: { sent: boolean } };
+    contract?: { rentaMensual: number; unit: string; building: string };
+  } | null>(null);
+  const [sepaScheme, setSepaScheme] = useState<'sepa_core' | 'sepa_cor1'>('sepa_core');
+  const [sendChannels, setSendChannels] = useState<{ email: boolean; sms: boolean; whatsapp: boolean }>({ email: true, sms: false, whatsapp: false });
 
   useEffect(() => {
     if (authStatus === 'unauthenticated') router.push('/login');
@@ -289,16 +295,25 @@ export default function SepaPaymentsPage() {
 
   const fetchTenants = useCallback(async () => {
     try {
-      const res = await fetch('/api/tenants?limit=500');
+      const res = await fetch('/api/tenants?limit=500&includeContracts=true');
       if (res.ok) {
         const data = await res.json();
-        const list = (data.data || data.tenants || []).map((t: any) => ({
-          id: t.id,
-          nombreCompleto: t.nombreCompleto,
-          email: t.email,
-          hasMandate: false,
-        }));
-        // Mark those with active mandates
+        const list = (data.data || data.tenants || []).map((t: any) => {
+          const activeContract = t.contracts?.find((c: any) => c.estado === 'activo');
+          return {
+            id: t.id,
+            nombreCompleto: t.nombreCompleto,
+            email: t.email,
+            telefono: t.telefono,
+            hasMandate: false,
+            contract: activeContract ? {
+              rentaMensual: activeContract.rentaMensual,
+              unitNumero: activeContract.unit?.numero || activeContract.unitId,
+              buildingNombre: activeContract.unit?.building?.nombre || '',
+            } : undefined,
+          };
+        });
+        // Marcar inquilinos con mandato activo
         const mandatesRes = await fetch('/api/gocardless/mandates?status=active');
         if (mandatesRes.ok) {
           const mData = await mandatesRes.json();
@@ -321,13 +336,22 @@ export default function SepaPaymentsPage() {
       toast.error('Selecciona un inquilino');
       return;
     }
+    const channels: string[] = [];
+    if (sendChannels.email) channels.push('email');
+    if (sendChannels.sms) channels.push('sms');
+    if (sendChannels.whatsapp) channels.push('whatsapp');
+
     setSetupLoading(true);
     setSetupResult(null);
     try {
       const res = await fetch('/api/gocardless/setup-tenant', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tenantId: selectedTenantId }),
+        body: JSON.stringify({
+          tenantId: selectedTenantId,
+          scheme: sepaScheme,
+          channels,
+        }),
       });
       const data = await res.json();
       if (data.success) {
@@ -335,7 +359,15 @@ export default function SepaPaymentsPage() {
         if (data.alreadySetup) {
           toast.info('Este inquilino ya tiene mandato SEPA activo');
         } else {
-          toast.success('Link de autorización generado');
+          const sentChannels = [];
+          if (data.notification?.email?.sent) sentChannels.push('email');
+          if (data.notification?.sms?.sent) sentChannels.push('SMS');
+          if (data.notification?.whatsapp?.sent) sentChannels.push('WhatsApp');
+          toast.success(
+            sentChannels.length > 0
+              ? `Link enviado por ${sentChannels.join(', ')}`
+              : 'Link generado (envíalo manualmente)'
+          );
         }
         fetchMandates();
       } else {
@@ -430,7 +462,7 @@ export default function SepaPaymentsPage() {
           <div className="flex gap-2">
             <Dialog open={setupDialogOpen} onOpenChange={(open) => {
               setSetupDialogOpen(open);
-              if (open) { fetchTenants(); setSetupResult(null); setSelectedTenantId(''); }
+              if (open) { fetchTenants(); setSetupResult(null); setSelectedTenantId(''); setSepaScheme('sepa_core'); setSendChannels({ email: true, sms: false, whatsapp: false }); }
             }}>
               <DialogTrigger asChild>
                 <Button size="sm" variant="default">
@@ -438,15 +470,16 @@ export default function SepaPaymentsPage() {
                   Alta SEPA
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-lg">
+              <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Alta domiciliación SEPA</DialogTitle>
                   <DialogDescription>
-                    Genera un link para que el inquilino autorice la domiciliación bancaria.
-                    El inquilino introducirá su IBAN en la página segura de GoCardless.
+                    Selecciona inquilino y canal de envío. El inquilino recibirá un link
+                    seguro donde introducirá su IBAN para autorizar la domiciliación.
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 pt-2">
+                  {/* Inquilino */}
                   <div className="space-y-2">
                     <Label>Inquilino</Label>
                     <Select value={selectedTenantId} onValueChange={setSelectedTenantId}>
@@ -458,8 +491,13 @@ export default function SepaPaymentsPage() {
                           <SelectItem key={t.id} value={t.id}>
                             <span className="flex items-center gap-2">
                               {t.nombreCompleto}
+                              {t.contract && (
+                                <span className="text-xs text-muted-foreground">
+                                  ({t.contract.rentaMensual}€ - {t.contract.buildingNombre} {t.contract.unitNumero})
+                                </span>
+                              )}
                               {t.hasMandate && (
-                                <Badge variant="outline" className="text-xs ml-1 border-green-300 text-green-600">SEPA activo</Badge>
+                                <Badge variant="outline" className="text-xs border-green-300 text-green-600">SEPA</Badge>
                               )}
                             </span>
                           </SelectItem>
@@ -468,21 +506,90 @@ export default function SepaPaymentsPage() {
                     </Select>
                   </div>
 
+                  {/* Info del inquilino seleccionado */}
+                  {selectedTenantId && (() => {
+                    const t = tenants.find(x => x.id === selectedTenantId);
+                    if (!t) return null;
+                    return (
+                      <div className="p-3 bg-muted/50 rounded-lg text-sm space-y-1">
+                        <div className="flex justify-between"><span className="text-muted-foreground">Email:</span> <span>{t.email}</span></div>
+                        <div className="flex justify-between"><span className="text-muted-foreground">Teléfono:</span> <span>{t.telefono || 'N/A'}</span></div>
+                        {t.contract && (
+                          <>
+                            <div className="flex justify-between"><span className="text-muted-foreground">Renta:</span> <span className="font-medium">{t.contract.rentaMensual}€/mes</span></div>
+                            <div className="flex justify-between"><span className="text-muted-foreground">Inmueble:</span> <span>{t.contract.buildingNombre} - {t.contract.unitNumero}</span></div>
+                          </>
+                        )}
+                      </div>
+                    );
+                  })()}
+
+                  {/* Tipo de mandato */}
+                  <div className="space-y-2">
+                    <Label>Tipo de mandato</Label>
+                    <Select value={sepaScheme} onValueChange={(v) => setSepaScheme(v as any)}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="sepa_core">SEPA Core (particulares)</SelectItem>
+                        <SelectItem value="sepa_cor1">SEPA B2B (empresas — sin derecho a devolución)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">
+                      {sepaScheme === 'sepa_core'
+                        ? 'Core: el pagador puede solicitar devolución hasta 8 semanas.'
+                        : 'B2B: sin derecho a devolución por el pagador. Requiere que el pagador sea empresa.'}
+                    </p>
+                  </div>
+
+                  {/* Canales de envío */}
+                  <div className="space-y-2">
+                    <Label>Enviar link por</Label>
+                    <div className="flex gap-4">
+                      <label className="flex items-center gap-2 text-sm cursor-pointer">
+                        <input type="checkbox" checked={sendChannels.email} onChange={e => setSendChannels(p => ({ ...p, email: e.target.checked }))} className="rounded" />
+                        Email
+                      </label>
+                      <label className="flex items-center gap-2 text-sm cursor-pointer">
+                        <input type="checkbox" checked={sendChannels.sms} onChange={e => setSendChannels(p => ({ ...p, sms: e.target.checked }))} className="rounded" />
+                        SMS
+                      </label>
+                      <label className="flex items-center gap-2 text-sm cursor-pointer">
+                        <input type="checkbox" checked={sendChannels.whatsapp} onChange={e => setSendChannels(p => ({ ...p, whatsapp: e.target.checked }))} className="rounded" />
+                        WhatsApp
+                      </label>
+                    </div>
+                  </div>
+
                   {!setupResult && (
                     <Button onClick={handleSetupTenant} disabled={setupLoading || !selectedTenantId} className="w-full">
                       {setupLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}
-                      Generar link de autorización
+                      {sendChannels.email || sendChannels.sms || sendChannels.whatsapp
+                        ? 'Generar y enviar link'
+                        : 'Generar link (envío manual)'}
                     </Button>
                   )}
 
+                  {/* Resultado */}
                   {setupResult && !setupResult.alreadySetup && setupResult.redirectUrl && (
                     <div className="space-y-3 p-4 bg-green-50 dark:bg-green-950 rounded-lg border border-green-200">
                       <p className="text-sm font-medium text-green-800 dark:text-green-200">
                         Link generado para {setupResult.tenantName}
                       </p>
-                      <p className="text-xs text-muted-foreground">
-                        Envía este link al inquilino. Al abrirlo, introducirá su IBAN y autorizará la domiciliación SEPA.
-                      </p>
+                      {/* Notification status */}
+                      {setupResult.notification && (
+                        <div className="flex gap-3 text-xs">
+                          {setupResult.notification.email.sent && <Badge variant="outline" className="border-green-300 text-green-600">Email enviado</Badge>}
+                          {setupResult.notification.sms.sent && <Badge variant="outline" className="border-green-300 text-green-600">SMS enviado</Badge>}
+                          {setupResult.notification.whatsapp.sent && <Badge variant="outline" className="border-green-300 text-green-600">WhatsApp enviado</Badge>}
+                        </div>
+                      )}
+                      {setupResult.contract && (
+                        <p className="text-xs text-muted-foreground">
+                          {setupResult.contract.building} — {setupResult.contract.unit} — {setupResult.contract.rentaMensual}€/mes
+                        </p>
+                      )}
                       <div className="flex gap-2">
                         <Input value={setupResult.redirectUrl} readOnly className="text-xs" />
                         <Button size="sm" variant="outline" onClick={() => copyToClipboard(setupResult.redirectUrl!)}>
@@ -491,7 +598,7 @@ export default function SepaPaymentsPage() {
                       </div>
                       <div className="flex gap-2">
                         <Button size="sm" variant="outline" className="flex-1" onClick={() => copyToClipboard(setupResult.redirectUrl!)}>
-                          <Copy className="h-4 w-4 mr-1" /> Copiar link
+                          <Copy className="h-4 w-4 mr-1" /> Copiar
                         </Button>
                         <Button size="sm" variant="outline" className="flex-1" onClick={() => window.open(setupResult.redirectUrl!, '_blank')}>
                           <ExternalLink className="h-4 w-4 mr-1" /> Abrir
