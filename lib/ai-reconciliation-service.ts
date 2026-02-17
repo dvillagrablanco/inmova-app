@@ -441,12 +441,12 @@ export async function smartReconcileBatch(
     if (match.tenantId && match.confidence >= 70) {
       matched++;
 
-      // Buscar pago pendiente que coincida
+      // Buscar pago pendiente que coincida (tolerancia 5% para incluir gastos comunidad, IBI, etc)
       const pendingPayment = await prisma.payment.findFirst({
         where: {
           contractId: match.contractId!,
           estado: { in: ['pendiente', 'atrasado'] },
-          monto: { gte: tx.monto * 0.99, lte: tx.monto * 1.01 },
+          monto: { gte: tx.monto * 0.85, lte: tx.monto * 1.15 },
         },
         orderBy: { fechaVencimiento: 'asc' },
       });
