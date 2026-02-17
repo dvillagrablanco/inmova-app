@@ -62,9 +62,7 @@ export default function GoCardlessConfigPage() {
   const handleSave = async () => {
     setLoading(true);
     try {
-      // Simular guardado
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.success('Configuración de GoCardless guardada');
+      toast.success('Configuración de GoCardless guardada. Las variables de entorno se configuran en el servidor.');
       setIsConfigured(true);
     } catch (error) {
       toast.error('Error al guardar la configuración');
@@ -76,8 +74,19 @@ export default function GoCardlessConfigPage() {
   const handleTest = async () => {
     setTesting(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      toast.success('Conexión con GoCardless verificada correctamente');
+      const res = await fetch('/api/gocardless/stats');
+      const data = await res.json();
+      if (data.success && data.gocardless?.configured) {
+        const creditor = data.gocardless.creditor;
+        toast.success(
+          creditor
+            ? `Conectado a GoCardless: ${creditor.name} (${data.gocardless.environment})`
+            : 'GoCardless configurado correctamente'
+        );
+        setIsConfigured(true);
+      } else {
+        toast.error('GoCardless no configurado. Verifica GOCARDLESS_ACCESS_TOKEN en las variables de entorno.');
+      }
     } catch (error) {
       toast.error('Error al verificar la conexión');
     } finally {
