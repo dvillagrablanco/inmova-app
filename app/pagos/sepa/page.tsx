@@ -34,6 +34,15 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import {
   Home,
   RefreshCw,
   CreditCard,
@@ -48,6 +57,10 @@ import {
   Zap,
   FileCheck2,
   Loader2,
+  UserPlus,
+  Copy,
+  ExternalLink,
+  Send,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -184,6 +197,13 @@ export default function SepaPaymentsPage() {
   // Filters
   const [paymentStatus, setPaymentStatus] = useState('all');
 
+  // Alta SEPA dialog
+  const [setupDialogOpen, setSetupDialogOpen] = useState(false);
+  const [tenants, setTenants] = useState<Array<{ id: string; nombreCompleto: string; email: string; hasMandate: boolean }>>([]);
+  const [selectedTenantId, setSelectedTenantId] = useState('');
+  const [setupLoading, setSetupLoading] = useState(false);
+  const [setupResult, setSetupResult] = useState<{ redirectUrl?: string; tenantName?: string; alreadySetup?: boolean; mandateId?: string } | null>(null);
+
   useEffect(() => {
     if (authStatus === 'unauthenticated') router.push('/login');
   }, [authStatus, router]);
@@ -267,6 +287,72 @@ export default function SepaPaymentsPage() {
     }
   };
 
+  const fetchTenants = useCallback(async () => {
+    try {
+      const res = await fetch('/api/tenants?limit=500');
+      if (res.ok) {
+        const data = await res.json();
+        const list = (data.data || data.tenants || []).map((t: any) => ({
+          id: t.id,
+          nombreCompleto: t.nombreCompleto,
+          email: t.email,
+          hasMandate: false,
+        }));
+        // Mark those with active mandates
+        const mandatesRes = await fetch('/api/gocardless/mandates?status=active');
+        if (mandatesRes.ok) {
+          const mData = await mandatesRes.json();
+          const mandateTenantIds = new Set(
+            (mData.data || []).map((m: any) => m.customer?.tenantId).filter(Boolean)
+          );
+          for (const t of list) {
+            t.hasMandate = mandateTenantIds.has(t.id);
+          }
+        }
+        setTenants(list);
+      }
+    } catch (e) {
+      console.error('Error fetching tenants:', e);
+    }
+  }, []);
+
+  const handleSetupTenant = async () => {
+    if (!selectedTenantId) {
+      toast.error('Selecciona un inquilino');
+      return;
+    }
+    setSetupLoading(true);
+    setSetupResult(null);
+    try {
+      const res = await fetch('/api/gocardless/setup-tenant', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tenantId: selectedTenantId }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSetupResult(data);
+        if (data.alreadySetup) {
+          toast.info('Este inquilino ya tiene mandato SEPA activo');
+        } else {
+          toast.success('Link de autorización generado');
+        }
+        fetchMandates();
+      } else {
+        toast.error(data.error || 'Error configurando inquilino');
+      }
+    } catch (e) {
+      toast.error('Error de conexión');
+    } finally {
+      setSetupLoading(false);
+    }
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success('Copiado al portapapeles');
+  };
+
   const handleAutoReconcile = async () => {
     setReconciling(true);
     try {
@@ -342,11 +428,95 @@ export default function SepaPaymentsPage() {
             </div>
           </div>
           <div className="flex gap-2">
+            <Dialog open={setupDialogOpen} onOpenChange={(open) => {
+              setSetupDialogOpen(open);
+              if (open) { fetchTenants(); setSetupResult(null); setSelectedTenantId(''); }
+            }}>
+              <DialogTrigger asChild>
+                <Button size="sm" variant="default">
+                  <UserPlus className="h-4 w-4 mr-1" />
+                  Alta SEPA
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-lg">
+                <DialogHeader>
+                  <DialogTitle>Alta domiciliación SEPA</DialogTitle>
+                  <DialogDescription>
+                    Genera un link para que el inquilino autorice la domiciliación bancaria.
+                    El inquilino introducirá su IBAN en la página segura de GoCardless.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 pt-2">
+                  <div className="space-y-2">
+                    <Label>Inquilino</Label>
+                    <Select value={selectedTenantId} onValueChange={setSelectedTenantId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar inquilino..." />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-[300px]">
+                        {tenants.map(t => (
+                          <SelectItem key={t.id} value={t.id}>
+                            <span className="flex items-center gap-2">
+                              {t.nombreCompleto}
+                              {t.hasMandate && (
+                                <Badge variant="outline" className="text-xs ml-1 border-green-300 text-green-600">SEPA activo</Badge>
+                              )}
+                            </span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {!setupResult && (
+                    <Button onClick={handleSetupTenant} disabled={setupLoading || !selectedTenantId} className="w-full">
+                      {setupLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}
+                      Generar link de autorización
+                    </Button>
+                  )}
+
+                  {setupResult && !setupResult.alreadySetup && setupResult.redirectUrl && (
+                    <div className="space-y-3 p-4 bg-green-50 dark:bg-green-950 rounded-lg border border-green-200">
+                      <p className="text-sm font-medium text-green-800 dark:text-green-200">
+                        Link generado para {setupResult.tenantName}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Envía este link al inquilino. Al abrirlo, introducirá su IBAN y autorizará la domiciliación SEPA.
+                      </p>
+                      <div className="flex gap-2">
+                        <Input value={setupResult.redirectUrl} readOnly className="text-xs" />
+                        <Button size="sm" variant="outline" onClick={() => copyToClipboard(setupResult.redirectUrl!)}>
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="outline" className="flex-1" onClick={() => copyToClipboard(setupResult.redirectUrl!)}>
+                          <Copy className="h-4 w-4 mr-1" /> Copiar link
+                        </Button>
+                        <Button size="sm" variant="outline" className="flex-1" onClick={() => window.open(setupResult.redirectUrl!, '_blank')}>
+                          <ExternalLink className="h-4 w-4 mr-1" /> Abrir
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {setupResult?.alreadySetup && (
+                    <Alert>
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      <AlertDescription>
+                        Este inquilino ya tiene mandato SEPA activo ({setupResult.mandateId}).
+                        Puedes cobrarle directamente desde la pestaña Pagos.
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
             <Button variant="outline" size="sm" onClick={handleSync} disabled={syncing}>
               {syncing ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-1" />}
               Sincronizar
             </Button>
-            <Button size="sm" onClick={handleAutoReconcile} disabled={reconciling}>
+            <Button variant="outline" size="sm" onClick={handleAutoReconcile} disabled={reconciling}>
               {reconciling ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <FileCheck2 className="h-4 w-4 mr-1" />}
               Conciliar
             </Button>
