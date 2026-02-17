@@ -2,6 +2,8 @@
  * GOCARDLESS INTEGRATION SERVICE
  * Direct Debit (domiciliaciones bancarias) para Europa, UK, USA, Canada, Australia
  * SEPA, BACS, ACH, Autogiro, BECS, PAD, Betalingsservice
+ *
+ * API Reference: https://developer.gocardless.com/api-reference
  */
 
 import { logger } from '@/lib/logger';
@@ -25,7 +27,7 @@ export interface GCCustomer {
   addressLine1?: string;
   city?: string;
   postalCode?: string;
-  countryCode: string; // ISO 3166-1 alpha-2
+  countryCode: string;
   language?: string;
   phoneNumber?: string;
   metadata?: Record<string, string>;
@@ -45,42 +47,46 @@ export interface GCBankAccount {
 export interface GCMandate {
   id?: string;
   reference: string;
-  status?: 'pending_customer_approval' | 'pending_submission' | 'submitted' | 'active' | 'failed' | 'cancelled' | 'expired';
+  status?: 'pending_customer_approval' | 'pending_submission' | 'submitted' | 'active' | 'failed' | 'cancelled' | 'expired' | 'suspended_by_payer';
   scheme: 'bacs' | 'sepa_core' | 'ach' | 'autogiro' | 'becs' | 'pad' | 'betalingsservice';
   nextPossibleChargeDate?: string;
   paymentsRequireApproval?: boolean;
   metadata?: Record<string, string>;
   customerId?: string;
   customerBankAccountId?: string;
+  createdAt?: string;
 }
 
 export interface GCPayment {
   id?: string;
-  amount: number; // En centavos/céntimos
+  amount: number;
   currency: string;
   description: string;
-  chargeDate?: string; // YYYY-MM-DD
+  chargeDate?: string;
   reference?: string;
   status?: 'pending_customer_approval' | 'pending_submission' | 'submitted' | 'confirmed' | 'paid_out' | 'cancelled' | 'customer_approval_denied' | 'failed' | 'charged_back';
   amountRefunded?: number;
   metadata?: Record<string, string>;
   mandateId: string;
+  links?: { mandate?: string; subscription?: string; payout?: string };
+  createdAt?: string;
 }
 
 export interface GCSubscription {
   id?: string;
-  amount: number; // En centavos/céntimos
+  amount: number;
   currency: string;
   name: string;
-  interval: number; // Número de unidades
+  interval: number;
   intervalUnit: 'weekly' | 'monthly' | 'yearly';
-  dayOfMonth?: number; // Para monthly (1-28)
-  month?: number; // Para yearly (1-12)
-  startDate?: string; // YYYY-MM-DD
-  endDate?: string; // YYYY-MM-DD
+  dayOfMonth?: number;
+  month?: number;
+  startDate?: string;
+  endDate?: string;
   status?: 'pending_customer_approval' | 'customer_approval_denied' | 'active' | 'finished' | 'cancelled' | 'paused';
   metadata?: Record<string, string>;
   mandateId: string;
+  upcomingPayments?: Array<{ chargeDate: string; amount: number }>;
 }
 
 export interface GCRefund {
@@ -92,6 +98,52 @@ export interface GCRefund {
   paymentId: string;
 }
 
+export interface GCPayout {
+  id?: string;
+  amount: number;
+  currency: string;
+  arrivalDate?: string;
+  status?: 'pending' | 'paid' | 'bounced';
+  reference?: string;
+  debitReference?: string;
+  createdAt?: string;
+}
+
+export interface GCCreditor {
+  id: string;
+  name: string;
+  addressLine1?: string;
+  city?: string;
+  postalCode?: string;
+  countryCode?: string;
+  createdAt?: string;
+  canCreateRefunds?: boolean;
+  schemeIdentifiers?: Array<{
+    name: string;
+    scheme: string;
+    reference: string;
+    status: string;
+  }>;
+}
+
+export interface GCPayoutItem {
+  amount: number;
+  type: 'payment_paid_out' | 'payment_failed' | 'payment_charged_back' | 'payment_refunded' | 'refund' | 'gocardless_fee' | 'app_fee' | 'revenue_share' | 'surcharge_fee';
+  links: {
+    payment?: string;
+    mandate?: string;
+    refund?: string;
+  };
+}
+
+export interface GCListResult<T> {
+  items: T[];
+  meta: {
+    cursors: { before: string | null; after: string | null };
+    limit: number;
+  };
+}
+
 // ============================================================================
 // GOCARDLESS CLIENT
 // ============================================================================
@@ -99,7 +151,7 @@ export interface GCRefund {
 export class GoCardlessClient {
   private accessToken: string;
   private baseUrl: string;
-  private version: string = '2015-07-06'; // API version
+  private version: string = '2015-07-06';
 
   constructor(config: GoCardlessConfig) {
     this.accessToken = config.accessToken;
@@ -108,9 +160,6 @@ export class GoCardlessClient {
       : 'https://api-sandbox.gocardless.com';
   }
 
-  /**
-   * Headers de autenticación
-   */
   private getAuthHeaders(): HeadersInit {
     return {
       'Authorization': `Bearer ${this.accessToken}`,
@@ -120,123 +169,117 @@ export class GoCardlessClient {
     };
   }
 
-  /**
-   * Crear cliente
-   */
-  async createCustomer(customer: GCCustomer): Promise<GCCustomer> {
+  private async request<T>(method: string, path: string, body?: any): Promise<T> {
+    const response = await fetch(`${this.baseUrl}${path}`, {
+      method,
+      headers: this.getAuthHeaders(),
+      ...(body && { body: JSON.stringify(body) }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const msg = errorData?.error?.message || response.statusText;
+      throw new Error(`GoCardless ${method} ${path} failed (${response.status}): ${msg}`);
+    }
+
+    return response.json();
+  }
+
+  // =========================================================================
+  // CREDITOR
+  // =========================================================================
+
+  async getCreditor(): Promise<GCCreditor | null> {
     try {
-      const response = await fetch(`${this.baseUrl}/customers`, {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify({
-          customers: {
-            email: customer.email,
-            given_name: customer.givenName,
-            family_name: customer.familyName,
-            company_name: customer.companyName,
-            address_line1: customer.addressLine1,
-            city: customer.city,
-            postal_code: customer.postalCode,
-            country_code: customer.countryCode,
-            language: customer.language,
-            phone_number: customer.phoneNumber,
-            metadata: customer.metadata,
-          },
-        }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(`GoCardless create customer failed: ${error.error?.message || response.statusText}`);
-      }
-
-      const data = await response.json();
-
-      logger.info(`GoCardless customer created: ${data.customers.id}`);
-
+      const data = await this.request<any>('GET', '/creditors');
+      const c = data.creditors?.[0];
+      if (!c) return null;
       return {
-        id: data.customers.id,
-        ...customer,
+        id: c.id,
+        name: c.name,
+        addressLine1: c.address_line1,
+        city: c.city,
+        postalCode: c.postal_code,
+        countryCode: c.country_code,
+        createdAt: c.created_at,
+        canCreateRefunds: c.can_create_refunds,
+        schemeIdentifiers: c.scheme_identifiers?.map((si: any) => ({
+          name: si.name,
+          scheme: si.scheme,
+          reference: si.reference,
+          status: si.status,
+        })),
       };
     } catch (error) {
-      logger.error('Error creating GoCardless customer:', error);
-      throw error;
+      logger.error('Error getting creditor:', error);
+      return null;
     }
   }
 
-  /**
-   * Obtener cliente
-   */
+  // =========================================================================
+  // CUSTOMERS
+  // =========================================================================
+
+  async createCustomer(customer: GCCustomer): Promise<GCCustomer> {
+    const data = await this.request<any>('POST', '/customers', {
+      customers: {
+        email: customer.email,
+        given_name: customer.givenName,
+        family_name: customer.familyName,
+        company_name: customer.companyName,
+        address_line1: customer.addressLine1,
+        city: customer.city,
+        postal_code: customer.postalCode,
+        country_code: customer.countryCode,
+        language: customer.language,
+        phone_number: customer.phoneNumber,
+        metadata: customer.metadata,
+      },
+    });
+
+    logger.info(`[GC] Customer created: ${data.customers.id}`);
+    return { id: data.customers.id, ...customer };
+  }
+
   async getCustomer(customerId: string): Promise<GCCustomer> {
-    try {
-      const response = await fetch(`${this.baseUrl}/customers/${customerId}`, {
-        method: 'GET',
-        headers: this.getAuthHeaders(),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to get customer: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      return this.mapCustomer(data.customers);
-    } catch (error) {
-      logger.error('Error getting GoCardless customer:', error);
-      throw error;
-    }
+    const data = await this.request<any>('GET', `/customers/${customerId}`);
+    return this.mapCustomer(data.customers);
   }
 
-  /**
-   * Listar clientes
-   */
-  async listCustomers(limit: number = 50): Promise<GCCustomer[]> {
-    try {
-      const response = await fetch(
-        `${this.baseUrl}/customers?limit=${limit}`,
-        {
-          method: 'GET',
-          headers: this.getAuthHeaders(),
-        }
-      );
+  async listCustomers(params?: { limit?: number; after?: string }): Promise<GCListResult<GCCustomer>> {
+    const qs = new URLSearchParams();
+    if (params?.limit) qs.set('limit', String(params.limit));
+    if (params?.after) qs.set('after', params.after);
+    const query = qs.toString() ? `?${qs.toString()}` : '';
 
-      if (!response.ok) {
-        throw new Error(`Failed to list customers: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-
-      logger.info(`Retrieved ${data.customers?.length || 0} GoCardless customers`);
-
-      return (data.customers || []).map((c: any) => this.mapCustomer(c));
-    } catch (error) {
-      logger.error('Error listing GoCardless customers:', error);
-      return [];
-    }
-  }
-
-  /**
-   * Mapear cliente de GoCardless
-   */
-  private mapCustomer(gcCustomer: any): GCCustomer {
+    const data = await this.request<any>('GET', `/customers${query}`);
     return {
-      id: gcCustomer.id,
-      email: gcCustomer.email,
-      givenName: gcCustomer.given_name,
-      familyName: gcCustomer.family_name,
-      companyName: gcCustomer.company_name,
-      addressLine1: gcCustomer.address_line1,
-      city: gcCustomer.city,
-      postalCode: gcCustomer.postal_code,
-      countryCode: gcCustomer.country_code,
-      language: gcCustomer.language,
-      phoneNumber: gcCustomer.phone_number,
-      metadata: gcCustomer.metadata,
+      items: (data.customers || []).map((c: any) => this.mapCustomer(c)),
+      meta: data.meta || { cursors: { before: null, after: null }, limit: 50 },
     };
   }
 
-  /**
-   * Crear cuenta bancaria (Customer Bank Account)
-   */
+  private mapCustomer(c: any): GCCustomer {
+    return {
+      id: c.id,
+      email: c.email,
+      givenName: c.given_name,
+      familyName: c.family_name,
+      companyName: c.company_name,
+      addressLine1: c.address_line1,
+      city: c.city,
+      postalCode: c.postal_code,
+      countryCode: c.country_code,
+      language: c.language,
+      phoneNumber: c.phone_number,
+      metadata: c.metadata,
+    };
+  }
+
+  // =========================================================================
+  // BANK ACCOUNTS
+  // =========================================================================
+
   async createBankAccount(params: {
     customerId: string;
     accountHolderName: string;
@@ -247,367 +290,478 @@ export class GoCardlessClient {
     currency: string;
     metadata?: Record<string, string>;
   }): Promise<GCBankAccount> {
-    try {
-      const payload: any = {
-        customer_bank_accounts: {
-          account_holder_name: params.accountHolderName,
-          country_code: params.countryCode,
-          currency: params.currency,
-          metadata: params.metadata,
-          links: {
-            customer: params.customerId,
-          },
-        },
-      };
-
-      // IBAN (para SEPA)
-      if (params.iban) {
-        payload.customer_bank_accounts.iban = params.iban;
-      }
-      // Account Number + Branch Code (para BACS, ACH, etc.)
-      else if (params.accountNumber) {
-        payload.customer_bank_accounts.account_number = params.accountNumber;
-        if (params.branchCode) {
-          payload.customer_bank_accounts.branch_code = params.branchCode;
-        }
-      }
-
-      const response = await fetch(`${this.baseUrl}/customer_bank_accounts`, {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(`Failed to create bank account: ${error.error?.message || response.statusText}`);
-      }
-
-      const data = await response.json();
-
-      logger.info(`GoCardless bank account created: ${data.customer_bank_accounts.id}`);
-
-      return {
-        id: data.customer_bank_accounts.id,
-        accountHolderName: params.accountHolderName,
-        accountNumberEnding: data.customer_bank_accounts.account_number_ending,
-        bankName: data.customer_bank_accounts.bank_name,
-        countryCode: params.countryCode,
+    const payload: any = {
+      customer_bank_accounts: {
+        account_holder_name: params.accountHolderName,
+        country_code: params.countryCode,
         currency: params.currency,
-        enabled: data.customer_bank_accounts.enabled,
         metadata: params.metadata,
-      };
-    } catch (error) {
-      logger.error('Error creating GoCardless bank account:', error);
-      throw error;
+        links: { customer: params.customerId },
+      },
+    };
+
+    if (params.iban) {
+      payload.customer_bank_accounts.iban = params.iban;
+    } else if (params.accountNumber) {
+      payload.customer_bank_accounts.account_number = params.accountNumber;
+      if (params.branchCode) {
+        payload.customer_bank_accounts.branch_code = params.branchCode;
+      }
     }
+
+    const data = await this.request<any>('POST', '/customer_bank_accounts', payload);
+    const ba = data.customer_bank_accounts;
+
+    logger.info(`[GC] Bank account created: ${ba.id}`);
+    return {
+      id: ba.id,
+      accountHolderName: params.accountHolderName,
+      accountNumberEnding: ba.account_number_ending,
+      bankName: ba.bank_name,
+      countryCode: params.countryCode,
+      currency: params.currency,
+      enabled: ba.enabled,
+      metadata: params.metadata,
+    };
   }
 
-  /**
-   * Crear mandato (autorización de domiciliación)
-   */
+  // =========================================================================
+  // MANDATES
+  // =========================================================================
+
   async createMandate(params: {
     customerBankAccountId: string;
     scheme: GCMandate['scheme'];
     reference?: string;
     metadata?: Record<string, string>;
   }): Promise<GCMandate> {
-    try {
-      const response = await fetch(`${this.baseUrl}/mandates`, {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify({
-          mandates: {
-            scheme: params.scheme,
-            reference: params.reference,
-            metadata: params.metadata,
-            links: {
-              customer_bank_account: params.customerBankAccountId,
-            },
-          },
-        }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(`Failed to create mandate: ${error.error?.message || response.statusText}`);
-      }
-
-      const data = await response.json();
-
-      logger.info(`GoCardless mandate created: ${data.mandates.id}`);
-
-      return {
-        id: data.mandates.id,
-        reference: data.mandates.reference,
-        status: data.mandates.status,
-        scheme: data.mandates.scheme,
-        nextPossibleChargeDate: data.mandates.next_possible_charge_date,
+    const data = await this.request<any>('POST', '/mandates', {
+      mandates: {
+        scheme: params.scheme,
+        reference: params.reference,
         metadata: params.metadata,
-        customerBankAccountId: params.customerBankAccountId,
-      };
-    } catch (error) {
-      logger.error('Error creating GoCardless mandate:', error);
-      throw error;
-    }
+        links: { customer_bank_account: params.customerBankAccountId },
+      },
+    });
+    const m = data.mandates;
+    logger.info(`[GC] Mandate created: ${m.id}`);
+    return this.mapMandate(m);
   }
 
-  /**
-   * Obtener mandato
-   */
   async getMandate(mandateId: string): Promise<GCMandate> {
-    try {
-      const response = await fetch(`${this.baseUrl}/mandates/${mandateId}`, {
-        method: 'GET',
-        headers: this.getAuthHeaders(),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to get mandate: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      return this.mapMandate(data.mandates);
-    } catch (error) {
-      logger.error('Error getting GoCardless mandate:', error);
-      throw error;
-    }
+    const data = await this.request<any>('GET', `/mandates/${mandateId}`);
+    return this.mapMandate(data.mandates);
   }
 
-  /**
-   * Mapear mandato
-   */
-  private mapMandate(gcMandate: any): GCMandate {
+  async listMandates(params?: {
+    limit?: number;
+    after?: string;
+    status?: string;
+    customer?: string;
+  }): Promise<GCListResult<GCMandate>> {
+    const qs = new URLSearchParams();
+    if (params?.limit) qs.set('limit', String(params.limit));
+    if (params?.after) qs.set('after', params.after);
+    if (params?.status) qs.set('status', params.status);
+    if (params?.customer) qs.set('customer', params.customer);
+    const query = qs.toString() ? `?${qs.toString()}` : '';
+
+    const data = await this.request<any>('GET', `/mandates${query}`);
     return {
-      id: gcMandate.id,
-      reference: gcMandate.reference,
-      status: gcMandate.status,
-      scheme: gcMandate.scheme,
-      nextPossibleChargeDate: gcMandate.next_possible_charge_date,
-      paymentsRequireApproval: gcMandate.payments_require_approval,
-      metadata: gcMandate.metadata,
+      items: (data.mandates || []).map((m: any) => this.mapMandate(m)),
+      meta: data.meta || { cursors: { before: null, after: null }, limit: 50 },
     };
   }
 
-  /**
-   * Crear pago (cobro único)
-   */
+  async cancelMandate(mandateId: string): Promise<boolean> {
+    try {
+      await this.request<any>('POST', `/mandates/${mandateId}/actions/cancel`, { data: {} });
+      logger.info(`[GC] Mandate cancelled: ${mandateId}`);
+      return true;
+    } catch (error) {
+      logger.error(`Error cancelling mandate ${mandateId}:`, error);
+      return false;
+    }
+  }
+
+  private mapMandate(m: any): GCMandate {
+    return {
+      id: m.id,
+      reference: m.reference,
+      status: m.status,
+      scheme: m.scheme,
+      nextPossibleChargeDate: m.next_possible_charge_date,
+      paymentsRequireApproval: m.payments_require_approval,
+      metadata: m.metadata,
+      customerId: m.links?.customer,
+      customerBankAccountId: m.links?.customer_bank_account,
+      createdAt: m.created_at,
+    };
+  }
+
+  // =========================================================================
+  // PAYMENTS
+  // =========================================================================
+
   async createPayment(payment: GCPayment): Promise<GCPayment> {
-    try {
-      const response = await fetch(`${this.baseUrl}/payments`, {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify({
-          payments: {
-            amount: payment.amount,
-            currency: payment.currency,
-            description: payment.description,
-            charge_date: payment.chargeDate,
-            reference: payment.reference,
-            metadata: payment.metadata,
-            links: {
-              mandate: payment.mandateId,
-            },
-          },
-        }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(`Failed to create payment: ${error.error?.message || response.statusText}`);
-      }
-
-      const data = await response.json();
-
-      logger.info(`GoCardless payment created: ${data.payments.id}`);
-
-      return {
-        ...payment,
-        id: data.payments.id,
-        status: data.payments.status,
-        chargeDate: data.payments.charge_date,
-      };
-    } catch (error) {
-      logger.error('Error creating GoCardless payment:', error);
-      throw error;
-    }
+    const data = await this.request<any>('POST', '/payments', {
+      payments: {
+        amount: payment.amount,
+        currency: payment.currency,
+        description: payment.description,
+        charge_date: payment.chargeDate,
+        reference: payment.reference,
+        metadata: payment.metadata,
+        links: { mandate: payment.mandateId },
+      },
+    });
+    const p = data.payments;
+    logger.info(`[GC] Payment created: ${p.id} (${p.amount} ${p.currency})`);
+    return this.mapPayment(p);
   }
 
-  /**
-   * Obtener pago
-   */
   async getPayment(paymentId: string): Promise<GCPayment> {
-    try {
-      const response = await fetch(`${this.baseUrl}/payments/${paymentId}`, {
-        method: 'GET',
-        headers: this.getAuthHeaders(),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to get payment: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      return this.mapPayment(data.payments);
-    } catch (error) {
-      logger.error('Error getting GoCardless payment:', error);
-      throw error;
-    }
+    const data = await this.request<any>('GET', `/payments/${paymentId}`);
+    return this.mapPayment(data.payments);
   }
 
-  /**
-   * Mapear pago
-   */
-  private mapPayment(gcPayment: any): GCPayment {
+  async listPayments(params?: {
+    limit?: number;
+    after?: string;
+    status?: string;
+    mandate?: string;
+    subscription?: string;
+    chargeDate?: { gte?: string; lte?: string };
+    createdAt?: { gte?: string; lte?: string };
+    sortField?: string;
+    sortDirection?: 'asc' | 'desc';
+  }): Promise<GCListResult<GCPayment>> {
+    const qs = new URLSearchParams();
+    if (params?.limit) qs.set('limit', String(params.limit));
+    if (params?.after) qs.set('after', params.after);
+    if (params?.status) qs.set('status', params.status);
+    if (params?.mandate) qs.set('mandate', params.mandate);
+    if (params?.subscription) qs.set('subscription', params.subscription);
+    if (params?.chargeDate?.gte) qs.set('charge_date[gte]', params.chargeDate.gte);
+    if (params?.chargeDate?.lte) qs.set('charge_date[lte]', params.chargeDate.lte);
+    if (params?.createdAt?.gte) qs.set('created_at[gte]', params.createdAt.gte);
+    if (params?.createdAt?.lte) qs.set('created_at[lte]', params.createdAt.lte);
+    if (params?.sortField) qs.set('sort_field', params.sortField);
+    if (params?.sortDirection) qs.set('sort_direction', params.sortDirection);
+    const query = qs.toString() ? `?${qs.toString()}` : '';
+
+    const data = await this.request<any>('GET', `/payments${query}`);
     return {
-      id: gcPayment.id,
-      amount: gcPayment.amount,
-      currency: gcPayment.currency,
-      description: gcPayment.description,
-      chargeDate: gcPayment.charge_date,
-      reference: gcPayment.reference,
-      status: gcPayment.status,
-      amountRefunded: gcPayment.amount_refunded,
-      metadata: gcPayment.metadata,
-      mandateId: gcPayment.links.mandate,
+      items: (data.payments || []).map((p: any) => this.mapPayment(p)),
+      meta: data.meta || { cursors: { before: null, after: null }, limit: 50 },
     };
   }
 
-  /**
-   * Cancelar pago
-   */
   async cancelPayment(paymentId: string): Promise<boolean> {
     try {
-      const response = await fetch(`${this.baseUrl}/payments/${paymentId}/actions/cancel`, {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify({ data: {} }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to cancel payment: ${response.statusText}`);
-      }
-
-      logger.info(`GoCardless payment cancelled: ${paymentId}`);
+      await this.request<any>('POST', `/payments/${paymentId}/actions/cancel`, { data: {} });
+      logger.info(`[GC] Payment cancelled: ${paymentId}`);
       return true;
     } catch (error) {
-      logger.error('Error cancelling GoCardless payment:', error);
+      logger.error(`Error cancelling payment ${paymentId}:`, error);
       return false;
     }
   }
 
-  /**
-   * Crear suscripción (cobros recurrentes)
-   */
-  async createSubscription(subscription: GCSubscription): Promise<GCSubscription> {
+  async retryPayment(paymentId: string): Promise<boolean> {
     try {
-      const response = await fetch(`${this.baseUrl}/subscriptions`, {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify({
-          subscriptions: {
-            amount: subscription.amount,
-            currency: subscription.currency,
-            name: subscription.name,
-            interval: subscription.interval,
-            interval_unit: subscription.intervalUnit,
-            day_of_month: subscription.dayOfMonth,
-            month: subscription.month,
-            start_date: subscription.startDate,
-            end_date: subscription.endDate,
-            metadata: subscription.metadata,
-            links: {
-              mandate: subscription.mandateId,
-            },
-          },
-        }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(`Failed to create subscription: ${error.error?.message || response.statusText}`);
-      }
-
-      const data = await response.json();
-
-      logger.info(`GoCardless subscription created: ${data.subscriptions.id}`);
-
-      return {
-        ...subscription,
-        id: data.subscriptions.id,
-        status: data.subscriptions.status,
-      };
+      await this.request<any>('POST', `/payments/${paymentId}/actions/retry`, { data: {} });
+      logger.info(`[GC] Payment retry: ${paymentId}`);
+      return true;
     } catch (error) {
-      logger.error('Error creating GoCardless subscription:', error);
-      throw error;
+      logger.error(`Error retrying payment ${paymentId}:`, error);
+      return false;
     }
   }
 
-  /**
-   * Cancelar suscripción
-   */
+  private mapPayment(p: any): GCPayment {
+    return {
+      id: p.id,
+      amount: p.amount,
+      currency: p.currency,
+      description: p.description,
+      chargeDate: p.charge_date,
+      reference: p.reference,
+      status: p.status,
+      amountRefunded: p.amount_refunded,
+      metadata: p.metadata,
+      mandateId: p.links?.mandate,
+      links: p.links,
+      createdAt: p.created_at,
+    };
+  }
+
+  // =========================================================================
+  // SUBSCRIPTIONS
+  // =========================================================================
+
+  async createSubscription(subscription: GCSubscription): Promise<GCSubscription> {
+    const data = await this.request<any>('POST', '/subscriptions', {
+      subscriptions: {
+        amount: subscription.amount,
+        currency: subscription.currency,
+        name: subscription.name,
+        interval: subscription.interval,
+        interval_unit: subscription.intervalUnit,
+        day_of_month: subscription.dayOfMonth,
+        month: subscription.month,
+        start_date: subscription.startDate,
+        end_date: subscription.endDate,
+        metadata: subscription.metadata,
+        links: { mandate: subscription.mandateId },
+      },
+    });
+    const s = data.subscriptions;
+    logger.info(`[GC] Subscription created: ${s.id}`);
+    return this.mapSubscription(s);
+  }
+
+  async getSubscription(subscriptionId: string): Promise<GCSubscription> {
+    const data = await this.request<any>('GET', `/subscriptions/${subscriptionId}`);
+    return this.mapSubscription(data.subscriptions);
+  }
+
+  async listSubscriptions(params?: {
+    limit?: number;
+    after?: string;
+    mandate?: string;
+    status?: string;
+    customer?: string;
+  }): Promise<GCListResult<GCSubscription>> {
+    const qs = new URLSearchParams();
+    if (params?.limit) qs.set('limit', String(params.limit));
+    if (params?.after) qs.set('after', params.after);
+    if (params?.mandate) qs.set('mandate', params.mandate);
+    if (params?.status) qs.set('status', params.status);
+    if (params?.customer) qs.set('customer', params.customer);
+    const query = qs.toString() ? `?${qs.toString()}` : '';
+
+    const data = await this.request<any>('GET', `/subscriptions${query}`);
+    return {
+      items: (data.subscriptions || []).map((s: any) => this.mapSubscription(s)),
+      meta: data.meta || { cursors: { before: null, after: null }, limit: 50 },
+    };
+  }
+
   async cancelSubscription(subscriptionId: string): Promise<boolean> {
     try {
-      const response = await fetch(`${this.baseUrl}/subscriptions/${subscriptionId}/actions/cancel`, {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify({ data: {} }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to cancel subscription: ${response.statusText}`);
-      }
-
-      logger.info(`GoCardless subscription cancelled: ${subscriptionId}`);
+      await this.request<any>('POST', `/subscriptions/${subscriptionId}/actions/cancel`, { data: {} });
+      logger.info(`[GC] Subscription cancelled: ${subscriptionId}`);
       return true;
     } catch (error) {
-      logger.error('Error cancelling GoCardless subscription:', error);
+      logger.error(`Error cancelling subscription ${subscriptionId}:`, error);
       return false;
     }
   }
 
-  /**
-   * Crear reembolso
-   */
-  async createRefund(refund: GCRefund): Promise<GCRefund> {
+  async pauseSubscription(subscriptionId: string): Promise<boolean> {
     try {
-      const response = await fetch(`${this.baseUrl}/refunds`, {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify({
-          refunds: {
-            amount: refund.amount,
-            reference: refund.reference,
-            metadata: refund.metadata,
-            links: {
-              payment: refund.paymentId,
-            },
-          },
-        }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(`Failed to create refund: ${error.error?.message || response.statusText}`);
-      }
-
-      const data = await response.json();
-
-      logger.info(`GoCardless refund created: ${data.refunds.id}`);
-
-      return {
-        ...refund,
-        id: data.refunds.id,
-      };
+      await this.request<any>('POST', `/subscriptions/${subscriptionId}/actions/pause`, { data: {} });
+      logger.info(`[GC] Subscription paused: ${subscriptionId}`);
+      return true;
     } catch (error) {
-      logger.error('Error creating GoCardless refund:', error);
-      throw error;
+      logger.error(`Error pausing subscription ${subscriptionId}:`, error);
+      return false;
     }
   }
 
-  /**
-   * Verificar webhook signature
-   */
+  async resumeSubscription(subscriptionId: string): Promise<boolean> {
+    try {
+      await this.request<any>('POST', `/subscriptions/${subscriptionId}/actions/resume`, { data: {} });
+      logger.info(`[GC] Subscription resumed: ${subscriptionId}`);
+      return true;
+    } catch (error) {
+      logger.error(`Error resuming subscription ${subscriptionId}:`, error);
+      return false;
+    }
+  }
+
+  private mapSubscription(s: any): GCSubscription {
+    return {
+      id: s.id,
+      amount: s.amount,
+      currency: s.currency,
+      name: s.name,
+      interval: s.interval,
+      intervalUnit: s.interval_unit,
+      dayOfMonth: s.day_of_month,
+      month: s.month,
+      startDate: s.start_date,
+      endDate: s.end_date,
+      status: s.status,
+      metadata: s.metadata,
+      mandateId: s.links?.mandate,
+      upcomingPayments: s.upcoming_payments?.map((up: any) => ({
+        chargeDate: up.charge_date,
+        amount: up.amount,
+      })),
+    };
+  }
+
+  // =========================================================================
+  // REFUNDS
+  // =========================================================================
+
+  async createRefund(refund: GCRefund): Promise<GCRefund> {
+    const data = await this.request<any>('POST', '/refunds', {
+      refunds: {
+        amount: refund.amount,
+        reference: refund.reference,
+        metadata: refund.metadata,
+        links: { payment: refund.paymentId },
+      },
+    });
+    logger.info(`[GC] Refund created: ${data.refunds.id}`);
+    return { ...refund, id: data.refunds.id };
+  }
+
+  // =========================================================================
+  // PAYOUTS
+  // =========================================================================
+
+  async getPayout(payoutId: string): Promise<GCPayout> {
+    const data = await this.request<any>('GET', `/payouts/${payoutId}`);
+    return this.mapPayout(data.payouts);
+  }
+
+  async listPayouts(params?: {
+    limit?: number;
+    after?: string;
+    status?: string;
+    createdAt?: { gte?: string; lte?: string };
+  }): Promise<GCListResult<GCPayout>> {
+    const qs = new URLSearchParams();
+    if (params?.limit) qs.set('limit', String(params.limit));
+    if (params?.after) qs.set('after', params.after);
+    if (params?.status) qs.set('status', params.status);
+    if (params?.createdAt?.gte) qs.set('created_at[gte]', params.createdAt.gte);
+    if (params?.createdAt?.lte) qs.set('created_at[lte]', params.createdAt.lte);
+    const query = qs.toString() ? `?${qs.toString()}` : '';
+
+    const data = await this.request<any>('GET', `/payouts${query}`);
+    return {
+      items: (data.payouts || []).map((p: any) => this.mapPayout(p)),
+      meta: data.meta || { cursors: { before: null, after: null }, limit: 50 },
+    };
+  }
+
+  async listPayoutItems(payoutId: string, params?: {
+    limit?: number;
+    after?: string;
+  }): Promise<GCListResult<GCPayoutItem>> {
+    const qs = new URLSearchParams();
+    qs.set('payout', payoutId);
+    if (params?.limit) qs.set('limit', String(params.limit));
+    if (params?.after) qs.set('after', params.after);
+
+    const data = await this.request<any>('GET', `/payout_items?${qs.toString()}`);
+    return {
+      items: (data.payout_items || []).map((pi: any) => ({
+        amount: pi.amount,
+        type: pi.type,
+        links: pi.links || {},
+      })),
+      meta: data.meta || { cursors: { before: null, after: null }, limit: 50 },
+    };
+  }
+
+  private mapPayout(p: any): GCPayout {
+    return {
+      id: p.id,
+      amount: p.amount,
+      currency: p.currency,
+      arrivalDate: p.arrival_date,
+      status: p.status,
+      reference: p.reference,
+      debitReference: p.debit_reference,
+      createdAt: p.created_at,
+    };
+  }
+
+  // =========================================================================
+  // REDIRECT FLOWS (for mandate setup)
+  // =========================================================================
+
+  async createRedirectFlow(params: {
+    description: string;
+    sessionToken: string;
+    successRedirectUrl: string;
+    scheme?: string;
+    customerId?: string;
+  }): Promise<{ id: string; redirectUrl: string }> {
+    const payload: any = {
+      redirect_flows: {
+        description: params.description,
+        session_token: params.sessionToken,
+        success_redirect_url: params.successRedirectUrl,
+        scheme: params.scheme || 'sepa_core',
+      },
+    };
+    if (params.customerId) {
+      payload.redirect_flows.links = { customer: params.customerId };
+    }
+
+    const data = await this.request<any>('POST', '/redirect_flows', payload);
+    return {
+      id: data.redirect_flows.id,
+      redirectUrl: data.redirect_flows.redirect_url,
+    };
+  }
+
+  async completeRedirectFlow(redirectFlowId: string, sessionToken: string): Promise<{
+    mandateId: string;
+    customerId: string;
+    customerBankAccountId: string;
+  }> {
+    const data = await this.request<any>(
+      'POST',
+      `/redirect_flows/${redirectFlowId}/actions/complete`,
+      { data: { session_token: sessionToken } }
+    );
+    const links = data.redirect_flows?.links || {};
+    return {
+      mandateId: links.mandate,
+      customerId: links.customer,
+      customerBankAccountId: links.customer_bank_account,
+    };
+  }
+
+  // =========================================================================
+  // EVENTS (for polling instead of webhooks)
+  // =========================================================================
+
+  async listEvents(params?: {
+    limit?: number;
+    after?: string;
+    resourceType?: string;
+    action?: string;
+    createdAt?: { gte?: string; lte?: string };
+  }): Promise<GCListResult<any>> {
+    const qs = new URLSearchParams();
+    if (params?.limit) qs.set('limit', String(params.limit));
+    if (params?.after) qs.set('after', params.after);
+    if (params?.resourceType) qs.set('resource_type', params.resourceType);
+    if (params?.action) qs.set('action', params.action);
+    if (params?.createdAt?.gte) qs.set('created_at[gte]', params.createdAt.gte);
+    if (params?.createdAt?.lte) qs.set('created_at[lte]', params.createdAt.lte);
+    const query = qs.toString() ? `?${qs.toString()}` : '';
+
+    const data = await this.request<any>('GET', `/events${query}`);
+    return {
+      items: data.events || [],
+      meta: data.meta || { cursors: { before: null, after: null }, limit: 50 },
+    };
+  }
+
+  // =========================================================================
+  // WEBHOOK SIGNATURE VERIFICATION
+  // =========================================================================
+
   verifyWebhookSignature(params: {
     webhookSignature: string;
     webhookBody: string;
@@ -618,7 +772,6 @@ export class GoCardlessClient {
       const hmac = crypto.createHmac('sha256', params.webhookSecret);
       hmac.update(params.webhookBody);
       const calculatedSignature = hmac.digest('hex');
-
       return calculatedSignature === params.webhookSignature;
     } catch (error) {
       logger.error('Error verifying webhook signature:', error);
@@ -631,19 +784,29 @@ export class GoCardlessClient {
 // HELPER FUNCTIONS
 // ============================================================================
 
+let _gcClient: GoCardlessClient | null = null;
+
+/**
+ * Get singleton GoCardless client from environment variables
+ */
+export function getGCClient(): GoCardlessClient | null {
+  const token = process.env.GOCARDLESS_ACCESS_TOKEN;
+  if (!token) return null;
+
+  if (!_gcClient) {
+    const env = (process.env.GOCARDLESS_ENVIRONMENT || 'live') as 'sandbox' | 'live';
+    _gcClient = new GoCardlessClient({ accessToken: token, environment: env, enabled: true });
+  }
+  return _gcClient;
+}
+
 export function isGoCardlessConfigured(config?: GoCardlessConfig | null): boolean {
   if (!config) return false;
-  return !!(
-    config.accessToken &&
-    config.enabled
-  );
+  return !!(config.accessToken && config.enabled);
 }
 
 export function getGoCardlessClient(config?: GoCardlessConfig): GoCardlessClient | null {
-  if (!config || !isGoCardlessConfigured(config)) {
-    return null;
-  }
-
+  if (!config || !isGoCardlessConfigured(config)) return null;
   return new GoCardlessClient(config);
 }
 
@@ -652,31 +815,31 @@ export function getGoCardlessClient(config?: GoCardlessConfig): GoCardlessClient
  */
 export function getSupportedScheme(countryCode: string): GCMandate['scheme'] | null {
   const schemeMap: Record<string, GCMandate['scheme']> = {
-    // SEPA (Eurozona)
     'AT': 'sepa_core', 'BE': 'sepa_core', 'CY': 'sepa_core', 'EE': 'sepa_core',
     'FI': 'sepa_core', 'FR': 'sepa_core', 'DE': 'sepa_core', 'GR': 'sepa_core',
     'IE': 'sepa_core', 'IT': 'sepa_core', 'LV': 'sepa_core', 'LT': 'sepa_core',
     'LU': 'sepa_core', 'MT': 'sepa_core', 'NL': 'sepa_core', 'PT': 'sepa_core',
     'SK': 'sepa_core', 'SI': 'sepa_core', 'ES': 'sepa_core',
-    
-    // BACS (UK)
     'GB': 'bacs',
-    
-    // ACH (USA)
     'US': 'ach',
-    
-    // Autogiro (Suecia)
     'SE': 'autogiro',
-    
-    // BECS (Australia)
     'AU': 'becs',
-    
-    // PAD (Canadá)
     'CA': 'pad',
-    
-    // Betalingsservice (Dinamarca)
     'DK': 'betalingsservice',
   };
-
   return schemeMap[countryCode] || null;
+}
+
+/**
+ * Convertir cantidad en euros a centimos
+ */
+export function eurosToCents(euros: number): number {
+  return Math.round(euros * 100);
+}
+
+/**
+ * Convertir centimos a euros
+ */
+export function centsToEuros(cents: number): number {
+  return cents / 100;
 }
