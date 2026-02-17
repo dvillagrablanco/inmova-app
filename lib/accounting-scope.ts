@@ -95,7 +95,23 @@ export async function resolveAccountingScope(
     };
   }
 
-  // 4. Empresa individual
+  // 4. Para super_admin, incluir todas las empresas activas (vista consolidada)
+  if (sessionUser.role === 'super_admin') {
+    const allCompanies = await prisma.company.findMany({
+      where: { activo: true },
+      select: { id: true },
+      take: 50,
+    });
+    if (allCompanies.length > 1) {
+      return {
+        companyIds: allCompanies.map(c => c.id),
+        activeCompanyId,
+        isConsolidated: true,
+      };
+    }
+  }
+
+  // 5. Empresa individual
   return {
     companyIds: [activeCompanyId],
     activeCompanyId,
