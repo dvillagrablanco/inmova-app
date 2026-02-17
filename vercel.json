@@ -16,6 +16,10 @@
     {
       "path": "/api/cron/sync-altai",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/sync-gocardless",
+      "schedule": "*/15 * * * *"
     }
   ],
   "headers": [

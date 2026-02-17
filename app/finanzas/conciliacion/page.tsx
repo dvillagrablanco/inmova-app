@@ -255,40 +255,46 @@ export default function ConciliacionBancariaPage() {
     }
   };
 
-  // Sincronizar y conciliar con GoCardless + Bankinter
+  // Sincronizar y conciliar con GoCardless + Bankinter + IA
   const handleSyncBanks = async () => {
     setIsSyncing(true);
     try {
       const companyParam = selectedCompany !== 'all' ? selectedCompany : undefined;
-      const res = await fetch('/api/banking/reconcile-unified', {
+
+      // Paso 1: Sync GC + conciliación unificada
+      const res1 = await fetch('/api/banking/reconcile-unified', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'full-sync',
-          companyId: companyParam,
-        }),
+        body: JSON.stringify({ action: 'full-sync', companyId: companyParam }),
       });
-      const data = await res.json();
-      if (data.success) {
-        const r = data.reconciliation;
-        const totalMatched =
-          (r?.sepaToPayment?.matched || 0) +
-          (r?.payoutToBankTx?.matched || 0) +
-          (r?.bankTxToPayment?.matched || 0);
-        if (totalMatched > 0) {
-          toast.success(`Sincronizado y conciliado: ${totalMatched} registros`);
-        } else {
-          toast.info('Sincronización completada. No hay nuevos registros para conciliar.');
-        }
-        fetchData(pagination.page, {
-          company: selectedCompany,
-          status: statusFilter,
-          type: typeFilter,
-          search: searchTerm,
-        });
+      const d1 = await res1.json();
+      const unifiedMatched =
+        (d1.reconciliation?.sepaToPayment?.matched || 0) +
+        (d1.reconciliation?.payoutToBankTx?.matched || 0) +
+        (d1.reconciliation?.bankTxToPayment?.matched || 0);
+
+      // Paso 2: Conciliación inteligente con IA
+      const res2 = await fetch('/api/banking/smart-reconcile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'batch', useAI: true }),
+      });
+      const d2 = await res2.json();
+      const smartReconciled = d2.reconciled || 0;
+
+      const total = unifiedMatched + smartReconciled;
+      if (total > 0) {
+        toast.success(`Conciliado: ${unifiedMatched} (GC/banco) + ${smartReconciled} (IA) = ${total} pagos`);
       } else {
-        toast.error(data.error || 'Error en sincronización');
+        toast.info('Sincronización completada. No hay nuevos registros para conciliar.');
       }
+
+      fetchData(pagination.page, {
+        company: selectedCompany,
+        status: statusFilter,
+        type: typeFilter,
+        search: searchTerm,
+      });
     } catch (error) {
       toast.error('Error de conexión');
     } finally {
