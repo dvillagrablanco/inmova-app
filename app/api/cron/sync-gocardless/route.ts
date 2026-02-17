@@ -8,21 +8,12 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-/**
- * GET /api/cron/sync-gocardless
- *
- * Cron job que se ejecuta cada 15 minutos (configurar en vercel.json o crontab).
- * Sincroniza pagos y payouts de GoCardless, ejecuta conciliación unificada
- * y la conciliación inteligente con IA para todas las empresas con GC activo.
- *
- * Para proteger el endpoint, verificar CRON_SECRET header.
- *
- * vercel.json:
- *   "crons": [{ "path": "/api/cron/sync-gocardless", "schedule": "*/15 * * * *" }]
- *
- * PM2/crontab:
- *   curl -H "Authorization: Bearer $CRON_SECRET" https://inmovaapp.com/api/cron/sync-gocardless
- */
+// GET /api/cron/sync-gocardless
+//
+// Cron job cada 15 minutos (vercel.json o crontab).
+// Sincroniza pagos/payouts de GoCardless, conciliación unificada
+// y conciliación inteligente con IA para todas las empresas con GC activo.
+// Proteger con CRON_SECRET header en producción.
 export async function GET(request: NextRequest) {
   try {
     // Verificar autenticación cron
