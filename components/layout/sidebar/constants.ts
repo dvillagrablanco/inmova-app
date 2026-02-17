@@ -13,6 +13,8 @@ export const ROUTE_TO_MODULE: Record<string, string> = {
   '/inquilinos': 'inquilinos',
   '/contratos': 'contratos',
   '/pagos': 'pagos',
+  '/pagos/sepa': 'pagos',
+  '/finanzas/conciliacion': 'pagos',
   '/mantenimiento': 'mantenimiento',
   '/calendario': 'calendario',
   '/chat': 'chat',

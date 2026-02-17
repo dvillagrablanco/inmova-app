@@ -61,6 +61,8 @@ import {
   Landmark,
   LogIn,
   Coffee,
+  Banknote,
+  ArrowRightLeft,
 } from 'lucide-react';
 
 export interface SubItem {
@@ -90,6 +92,8 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/matching': 'matching',
   '/contratos': 'contratos',
   '/pagos': 'pagos',
+  '/pagos/sepa': 'pagos',
+  '/finanzas/conciliacion': 'pagos',
   '/mantenimiento': 'mantenimiento',
   '/dashboard/servicios': 'servicios',
   '/calendario': 'calendario',
@@ -1130,6 +1134,18 @@ const finanzasNavItems = [
     icon: CreditCard,
     roles: ['super_admin', 'administrador', 'gestor'],
     dataTour: 'pagos-menu',
+  },
+  {
+    name: 'Cobros SEPA',
+    href: '/pagos/sepa',
+    icon: Banknote,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Conciliación Bancaria',
+    href: '/finanzas/conciliacion',
+    icon: ArrowRightLeft,
+    roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
     name: 'Gastos',
