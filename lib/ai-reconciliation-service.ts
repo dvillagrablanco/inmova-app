@@ -128,108 +128,97 @@ function ruleBasedMatch(
     };
   }
 
-  // 2. Match exacto por nombre completo + monto similar
+  // Helper: check if amount is close to rent
+  const amountClose = (txAmt: number, rent: number) => {
+    const tolerance = Math.max(rent * 0.03, 2); // 3% o 2€ mínimo
+    return Math.abs(txAmt - rent) <= tolerance;
+  };
+  const amountNear = (txAmt: number, rent: number) => {
+    return Math.abs(txAmt - rent) <= rent * 0.15; // 15%
+  };
+
+  // Score all tenants and pick best
+  let bestMatch: { tenant: TenantInfo; score: number; reason: string; method: string } | null = null;
+
   for (const t of tenants) {
-    const nameInText = t.nameParts.length > 0 &&
-      t.nameParts.every(part => text.includes(part));
+    if (t.nameParts.length === 0) continue;
 
-    if (nameInText) {
-      const amountDiff = Math.abs(txAmount - t.rentaMensual);
-      const amountMatch = amountDiff < 1.0;
+    const nameMatchCount = t.nameParts.filter(part => text.includes(part)).length;
+    const nameRatio = nameMatchCount / t.nameParts.length;
+    const fullName = nameRatio === 1;
+    const partialName = nameMatchCount >= 2 || (t.nameParts.length <= 2 && nameMatchCount >= 1);
+    const amtExact = amountClose(txAmount, t.rentaMensual);
+    const amtClose = amountNear(txAmount, t.rentaMensual);
 
-      if (amountMatch) {
-        return {
-          tenantId: t.id,
-          tenantName: t.nombre,
-          contractId: t.contractId,
-          unitId: t.unitId,
-          unitLabel: `${t.buildingNombre} - ${t.unitNumero}`,
-          confidence: 95,
-          reasoning: `Nombre "${t.nombre}" encontrado en descripción y monto coincide (${txAmount}€ ≈ ${t.rentaMensual}€)`,
-          method: 'exact_amount_name',
-        };
-      }
+    let score = 0;
+    let reason = '';
+    let method = 'fuzzy_name';
 
-      return {
-        tenantId: t.id,
-        tenantName: t.nombre,
-        contractId: t.contractId,
-        unitId: t.unitId,
-        unitLabel: `${t.buildingNombre} - ${t.unitNumero}`,
-        confidence: 75,
-        reasoning: `Nombre "${t.nombre}" encontrado en descripción. Monto (${txAmount}€) difiere de renta (${t.rentaMensual}€).`,
-        method: 'fuzzy_name',
-      };
+    if (fullName && amtExact) {
+      score = 95;
+      reason = `Nombre completo "${t.nombre}" + monto exacto (${txAmount}€ ≈ ${t.rentaMensual}€)`;
+      method = 'exact_amount_name';
+    } else if (fullName && amtClose) {
+      score = 85;
+      reason = `Nombre completo "${t.nombre}" + monto cercano (${txAmount}€ ~ ${t.rentaMensual}€)`;
+    } else if (fullName) {
+      score = 75;
+      reason = `Nombre completo "${t.nombre}" en texto. Monto (${txAmount}€) difiere de renta (${t.rentaMensual}€).`;
+    } else if (partialName && amtExact) {
+      score = 85;
+      reason = `Nombre parcial (${nameMatchCount}/${t.nameParts.length}) + monto exacto (${txAmount}€ ≈ ${t.rentaMensual}€)`;
+    } else if (partialName && amtClose) {
+      score = 70;
+      reason = `Nombre parcial (${nameMatchCount}/${t.nameParts.length}) + monto cercano (${txAmount}€ ~ ${t.rentaMensual}€)`;
+    } else if (partialName) {
+      score = 50;
+      reason = `Nombre parcial (${nameMatchCount}/${t.nameParts.length}). Monto: ${txAmount}€, renta: ${t.rentaMensual}€.`;
+    } else if (amtExact) {
+      score = 45;
+      reason = `Monto ${txAmount}€ coincide con renta ${t.rentaMensual}€ de ${t.nombre}. Sin match de nombre.`;
+    }
+
+    if (score > (bestMatch?.score || 0)) {
+      bestMatch = { tenant: t, score, reason, method };
     }
   }
 
-  // 3. Match parcial por apellido + monto
-  for (const t of tenants) {
-    const matchCount = t.nameParts.filter(part => text.includes(part)).length;
-    if (matchCount >= 2) {
-      const amountDiff = Math.abs(txAmount - t.rentaMensual);
-      const confidence = amountDiff < 1.0 ? 80 : 55;
-      return {
-        tenantId: t.id,
-        tenantName: t.nombre,
-        contractId: t.contractId,
-        unitId: t.unitId,
-        unitLabel: `${t.buildingNombre} - ${t.unitNumero}`,
-        confidence,
-        reasoning: `Coincidencia parcial de nombre (${matchCount}/${t.nameParts.length} partes). Monto: ${txAmount}€.`,
-        method: 'fuzzy_name',
-      };
+  // Si hay match por monto exacto y es el UNICO inquilino con esa renta, subir confianza
+  if (bestMatch && bestMatch.method === 'fuzzy_name' && bestMatch.score <= 45) {
+    const sameRentCount = tenants.filter(t => amountClose(txAmount, t.rentaMensual)).length;
+    if (sameRentCount === 1) {
+      bestMatch.score = 70;
+      bestMatch.reason += ' (único inquilino con esa renta)';
     }
   }
 
-  // 4. Match por monto exacto (±1€) — puede haber 1 o pocos inquilinos con esa renta
-  const amountMatches = tenants.filter(t => Math.abs(txAmount - t.rentaMensual) < 1.5);
-  if (amountMatches.length === 1) {
-    const t = amountMatches[0];
+  if (bestMatch && bestMatch.score >= 40) {
+    const t = bestMatch.tenant;
     return {
       tenantId: t.id,
       tenantName: t.nombre,
       contractId: t.contractId,
       unitId: t.unitId,
       unitLabel: `${t.buildingNombre} - ${t.unitNumero}`,
-      confidence: 60,
-      reasoning: `Monto ${txAmount}€ coincide con renta ${t.rentaMensual}€ de ${t.nombre} (único inquilino con esa renta).`,
-      method: 'fuzzy_name',
+      confidence: bestMatch.score,
+      reasoning: bestMatch.reason,
+      method: bestMatch.method as any,
     };
   }
-  if (amountMatches.length > 1 && amountMatches.length <= 3) {
-    // Si hay pocos candidatos por monto, intentar match parcial de nombre
-    for (const t of amountMatches) {
-      const partialMatch = t.nameParts.filter(part => text.includes(part)).length;
-      if (partialMatch >= 1) {
-        return {
-          tenantId: t.id,
-          tenantName: t.nombre,
-          contractId: t.contractId,
-          unitId: t.unitId,
-          unitLabel: `${t.buildingNombre} - ${t.unitNumero}`,
-          confidence: 65,
-          reasoning: `Monto coincide (${txAmount}€ ≈ ${t.rentaMensual}€) + nombre parcial (${partialMatch} partes).`,
-          method: 'fuzzy_name',
-        };
-      }
-    }
-  }
 
-  // 5. Match por referencia con número de unidad/piso/edificio
+  // Fallback: check for building/unit names in text
   for (const t of tenants) {
     const unitInRef = (t.unitNumero.length > 1 && text.includes(t.unitNumero.toUpperCase())) ||
       (t.buildingNombre.length > 3 && text.includes(t.buildingNombre.toUpperCase()));
-    if (unitInRef) {
-      const amountClose = Math.abs(txAmount - t.rentaMensual) < t.rentaMensual * 0.15;
+    if (unitInRef && amountNear(txAmount, t.rentaMensual)) {
       return {
         tenantId: t.id,
         tenantName: t.nombre,
         contractId: t.contractId,
         unitId: t.unitId,
         unitLabel: `${t.buildingNombre} - ${t.unitNumero}`,
-        confidence: amountClose ? 65 : 45,
-        reasoning: `Referencia contiene "${t.unitNumero}" de ${t.buildingNombre}${amountClose ? ' y monto cercano' : ''}.`,
+        confidence: 55,
+        reasoning: `Referencia contiene "${t.unitNumero}" de ${t.buildingNombre} + monto cercano.`,
         method: 'reference_code',
       };
     }
