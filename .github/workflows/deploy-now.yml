@@ -1,7 +1,8 @@
 name: Deploy Now
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [main]
 
 jobs:
   deploy:
