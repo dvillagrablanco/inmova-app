@@ -175,10 +175,11 @@ export async function verificarIngresos(tenantId: string, mesesAnalisis?: number
 
 /**
  * Concilia pagos automáticamente con transacciones bancarias
+ * Soporta: Bankinter PSD2 real, importaciones Norma 43, y modo demo
  */
 export async function conciliarPagos(companyId: string, mesesAtras?: number) {
-  // Verificar si hay conexiones Bankinter
-  const connections = await prisma.bankConnection.findMany({
+  // Verificar si hay conexiones Bankinter PSD2
+  const bankinterConnections = await prisma.bankConnection.findMany({
     where: {
       companyId,
       proveedor: 'bankinter_redsys',
@@ -187,8 +188,8 @@ export async function conciliarPagos(companyId: string, mesesAtras?: number) {
     take: 1
   });
 
-  // Si tiene Bankinter configurado, usar integración real
-  if (connections.length > 0 && isBankinterConfigured()) {
+  // Si tiene Bankinter PSD2 configurado, usar integración real
+  if (bankinterConnections.length > 0 && isBankinterConfigured()) {
     try {
       const bankinterService = getBankinterService();
       const resultado = await bankinterService.conciliarPagosBankinter(
@@ -206,8 +207,29 @@ export async function conciliarPagos(companyId: string, mesesAtras?: number) {
       };
     } catch (error) {
       logError(error as Error, { context: 'conciliarPagos.bankinter' });
-      // Caer en modo demo si falla
     }
+  }
+
+  // Verificar si hay transacciones importadas via Norma 43 pendientes de conciliar
+  const n43Pending = await prisma.bankTransaction.count({
+    where: {
+      companyId,
+      connection: { proveedor: 'norma43_import' },
+      estado: 'pendiente_revision',
+      monto: { gt: 0 },
+    }
+  });
+
+  if (n43Pending > 0) {
+    logger.info(`🔄 Conciliación N43: ${n43Pending} transacciones pendientes para ${companyId}. Usar /api/bank-import/reconcile para conciliar.`);
+
+    return {
+      success: true,
+      conciliados: 0,
+      total: n43Pending,
+      pendientesN43: n43Pending,
+      message: `${n43Pending} transacciones importadas (Norma 43) pendientes de conciliar`
+    };
   }
 
   // Modo DEMO
@@ -217,7 +239,7 @@ export async function conciliarPagos(companyId: string, mesesAtras?: number) {
     success: true,
     conciliados: 0,
     total: 0,
-    message: '[MODO DEMO] 0 pagos conciliados'
+    message: '[MODO DEMO] 0 pagos conciliados. Importa un extracto Norma 43 desde /banco/importar'
   };
 }
 
