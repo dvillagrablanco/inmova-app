@@ -95,18 +95,24 @@ export async function resolveAccountingScope(
     };
   }
 
-  // 4. Para super_admin, incluir todas las empresas activas (vista consolidada)
-  if (sessionUser.role === 'super_admin') {
-    const allCompanies = await prisma.company.findMany({
-      where: { activo: true },
-      select: { id: true },
-      take: 50,
+  // 4. Para super_admin con empresa sin datos bancarios propios,
+  // incluir empresas con bank data si no hay selección explícita
+  if (sessionUser.role === 'super_admin' && !queryCompanyId && !cookieCompanyId) {
+    const companiesWithBankData = await prisma.bankConnection.findMany({
+      where: { companyId: { not: undefined } },
+      select: { companyId: true },
+      distinct: ['companyId'],
     });
-    if (allCompanies.length > 1) {
+    const bankCompanyIds = companiesWithBankData
+      .map(c => c.companyId)
+      .filter((id): id is string => !!id);
+
+    if (bankCompanyIds.length > 0) {
+      const allIds = [...new Set([activeCompanyId, ...bankCompanyIds])];
       return {
-        companyIds: allCompanies.map(c => c.id),
+        companyIds: allIds,
         activeCompanyId,
-        isConsolidated: true,
+        isConsolidated: allIds.length > 1,
       };
     }
   }
