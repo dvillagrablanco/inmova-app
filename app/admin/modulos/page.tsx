@@ -183,11 +183,15 @@ export default function ModulosAdminPage() {
   }
 
   function isModuleActive(codigo: string): boolean {
-    const modulo = modulos.find((m) => m.codigo === codigo);
-    if (modulo?.esCore) return true; // Core siempre activo
-
+    // Si hay un registro explícito en CompanyModule, usar su valor
     const companyModule = companyModules.find((cm) => cm.moduloCodigo === codigo);
-    return companyModule?.activo || false;
+    if (companyModule) return companyModule.activo;
+
+    // Si no hay registro, los core están activos por defecto
+    const modulo = modulos.find((m) => m.codigo === codigo);
+    if (modulo?.esCore) return true;
+
+    return false;
   }
 
   // Verificar si el plan actual tiene acceso total a todos los módulos
@@ -407,9 +411,8 @@ export default function ModulosAdminPage() {
                           const activo = isModuleActive(modulo.codigo);
                           const incluidoEnPlan = isModuleIncludedInPlan(modulo.codigo);
                           const tieneAccesoTotal = hasTotalAccess();
-                          const isDisabled = modulo.esCore || updating === modulo.codigo;
-                          // Permitir activar si está incluido en el plan o si tiene acceso total
-                          const canToggle = !modulo.esCore && (incluidoEnPlan || tieneAccesoTotal);
+                          const isDisabled = updating === modulo.codigo;
+                          const canToggle = incluidoEnPlan || tieneAccesoTotal || modulo.esCore;
 
                           return (
                             <div

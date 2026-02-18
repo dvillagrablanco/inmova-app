@@ -1029,22 +1029,21 @@ export async function deactivateModuleForCompany(
   companyId: string,
   moduloCodigo: string
 ): Promise<void> {
-  // No se pueden desactivar módulos core
-  const moduloDefinicion = MODULOS_CATALOGO.find(m => m.codigo === moduloCodigo);
-  if (moduloDefinicion?.esCore) {
-    throw new Error('No se pueden desactivar módulos esenciales');
-  }
-
-  await prisma.companyModule.update({
+  await prisma.companyModule.upsert({
     where: {
       companyId_moduloCodigo: {
         companyId,
         moduloCodigo
       }
     },
-    data: {
+    update: {
       activo: false,
       updatedAt: new Date()
+    },
+    create: {
+      companyId,
+      moduloCodigo,
+      activo: false,
     }
   });
 }
