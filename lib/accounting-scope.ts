@@ -96,24 +96,27 @@ export async function resolveAccountingScope(
   }
 
   // 4. Para super_admin con empresa sin datos bancarios propios,
-  // incluir empresas con bank data si no hay selección explícita
+  // incluir empresas que tienen transacciones bancarias
   if (sessionUser.role === 'super_admin' && !queryCompanyId && !cookieCompanyId) {
-    const companiesWithBankData = await prisma.bankConnection.findMany({
-      where: { companyId: { not: undefined } },
-      select: { companyId: true },
-      distinct: ['companyId'],
-    });
-    const bankCompanyIds = companiesWithBankData
-      .map(c => c.companyId)
-      .filter((id): id is string => !!id);
+    try {
+      const result = await prisma.bankTransaction.groupBy({
+        by: ['companyId'],
+        _count: true,
+      });
+      const bankCompanyIds = result
+        .map(r => r.companyId)
+        .filter((id): id is string => !!id && id.length > 0);
 
-    if (bankCompanyIds.length > 0) {
-      const allIds = [...new Set([activeCompanyId, ...bankCompanyIds])];
-      return {
-        companyIds: allIds,
-        activeCompanyId,
-        isConsolidated: allIds.length > 1,
-      };
+      if (bankCompanyIds.length > 0) {
+        const allIds = [...new Set([activeCompanyId, ...bankCompanyIds])];
+        return {
+          companyIds: allIds,
+          activeCompanyId,
+          isConsolidated: allIds.length > 1,
+        };
+      }
+    } catch {
+      // If groupBy fails, fall through to single company
     }
   }
 
