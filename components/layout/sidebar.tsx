@@ -351,10 +351,14 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
       const moduleCode = ROUTE_TO_MODULE[item.href];
       if (!moduleCode) return true; // Si no hay mapeo, mostrar por defecto
 
-      // Los módulos core siempre se muestran (esCore: true)
-      if (CORE_MODULES.includes(moduleCode)) return true;
+      // Si hay módulos cargados, verificar si este módulo está en la lista activa.
+      // Esto respeta desactivaciones explícitas del admin, incluso para módulos core.
+      if (modulesToCheck.length > 0) {
+        return modulesToCheck.includes(moduleCode);
+      }
 
-      return modulesToCheck.includes(moduleCode);
+      // Fallback: si no hay módulos cargados, mostrar core por defecto
+      return CORE_MODULES.includes(moduleCode);
     });
 
     // Aplicar búsqueda

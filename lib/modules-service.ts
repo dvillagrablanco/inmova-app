@@ -946,7 +946,7 @@ export async function isModuleActiveForCompany(
  * Considera: 1) Módulos core, 2) Modelos de negocio activos, 3) Módulos activados manualmente
  */
 export async function getActiveModulesForCompany(companyId: string): Promise<string[]> {
-  // 1. Obtener módulos core (siempre activos)
+  // 1. Obtener módulos core (activos por defecto)
   const coreModules = MODULOS_CATALOGO
     .filter(m => m.esCore)
     .map(m => m.codigo);
@@ -962,34 +962,35 @@ export async function getActiveModulesForCompany(companyId: string): Promise<str
     }
   });
 
-  // Obtener módulos según los modelos de negocio activos
   const businessModelModules: string[] = [];
   for (const bm of businessModels) {
     const modules = BUSINESS_MODEL_MODULES[bm.businessModel] || [];
     businessModelModules.push(...modules);
   }
 
-  // 3. Obtener módulos activados manualmente
-  const activeModules = await prisma.companyModule.findMany({
-    where: {
-      companyId,
-      activo: true
-    },
-    select: {
-      moduloCodigo: true
-    }
+  // 3. Obtener TODOS los módulos de la empresa (activos e inactivos)
+  const companyModules = await prisma.companyModule.findMany({
+    where: { companyId },
+    select: { moduloCodigo: true, activo: true }
   });
 
-  const activatedModules = activeModules.map(m => m.moduloCodigo);
+  const activatedModules = companyModules.filter(m => m.activo).map(m => m.moduloCodigo);
+  const deactivatedModules = new Set(companyModules.filter(m => !m.activo).map(m => m.moduloCodigo));
 
-  // 4. Combinar todas las fuentes y eliminar duplicados
+  // 4. Combinar fuentes y eliminar duplicados
   const allModules = [
     ...coreModules,
     ...businessModelModules,
     ...activatedModules
   ];
 
-  return Array.from(new Set(allModules));
+  // 5. Respetar desactivaciones explícitas del administrador
+  // Si un módulo fue desactivado manualmente (activo=false en CompanyModule),
+  // se excluye aunque sea core o de modelo de negocio
+  const finalModules = Array.from(new Set(allModules))
+    .filter(m => !deactivatedModules.has(m));
+
+  return finalModules;
 }
 
 /**
