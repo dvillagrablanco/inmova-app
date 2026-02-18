@@ -32,8 +32,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { moduloCodigo, activo } = await req.json();
-    const companyId = (session.user as any).companyId;
+    const { moduloCodigo, activo, companyId: bodyCompanyId } = await req.json();
+    // Usar companyId del body (para super_admin editando otra empresa),
+    // luego cookie activeCompanyId, luego session
+    const cookieCompanyId = req.cookies.get('activeCompanyId')?.value;
+    const companyId = bodyCompanyId || cookieCompanyId || (session.user as any).companyId;
     const userId = session.user.id;
 
     if (!moduloCodigo) {
