@@ -1,0 +1,52 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to Server
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Deploy to Production Server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          port: 22
+          timeout: 30s
+          command_timeout: 15m
+          script: |
+            cd /opt/inmova-app
+            
+            echo "Pulling latest..."
+            git pull origin main
+            
+            echo "Installing deps..."
+            npm install --legacy-peer-deps
+            
+            echo "Prisma generate..."
+            npx prisma generate
+            
+            echo "Building..."
+            npm run build
+            
+            echo "Reloading PM2..."
+            pm2 reload inmova-app --update-env
+            
+            sleep 10
+            
+            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/api/health)
+            echo "Health: HTTP $HTTP_STATUS"
+            
+            if [ "$HTTP_STATUS" -eq 200 ]; then
+              echo "Deploy OK"
+            else
+              echo "Health check failed"
+              exit 1
+            fi

@@ -110,13 +110,13 @@
     "playwright": "^1.57.0",
     "prettier": "^3.7.4",
     "prisma": "6.7.0",
+    "puppeteer": "^23.11.1",
     "storybook": "^10.1.2",
     "ts-node": "10.9.2",
     "tsx": "4.20.3",
     "typescript": "5.2.2",
     "vercel": "^49.1.1",
     "vite": "^7.2.6",
-    "puppeteer": "^23.11.1",
     "vitest": "^4.0.16"
   },
   "dependencies": {
