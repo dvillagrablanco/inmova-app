@@ -1,5 +1,9 @@
-import { prisma } from './db';
 import logger, { logError } from '@/lib/logger';
+
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 // Definiciones de tipos inline (reemplaza imports de @prisma/client)
 type SocialMediaPlatform = 'FACEBOOK' | 'INSTAGRAM' | 'TWITTER' | 'LINKEDIN' | 'WHATSAPP_BUSINESS' | 'TIKTOK';
@@ -124,6 +128,7 @@ export async function connectSocialMediaAccount(
  * Desconectar cuenta de red social
  */
 export async function disconnectSocialMediaAccount(accountId: string) {
+  const prisma = await getPrisma();
   return await prisma.socialMediaAccount.update({
     where: { id: accountId },
     data: { activo: false },
@@ -134,6 +139,7 @@ export async function disconnectSocialMediaAccount(accountId: string) {
  * Obtener cuentas conectadas de una empresa
  */
 export async function getConnectedAccounts(companyId: string) {
+  const prisma = await getPrisma();
   return await prisma.socialMediaAccount.findMany({
     where: {
       companyId,
@@ -271,6 +277,7 @@ export async function getCompanyPosts(
  * En producción, esto se ejecutaría periódicamente para actualizar likes, comentarios, etc.
  */
 export async function updatePostMetrics(postId: string) {
+  const prisma = await getPrisma();
   try {
     const post = await prisma.socialMediaPost.findUnique({
       where: { id: postId },
@@ -301,6 +308,7 @@ export async function updatePostMetrics(postId: string) {
  * Esta función debería ejecutarse periódicamente (cron job)
  */
 export async function processScheduledPosts() {
+  const prisma = await getPrisma();
   const now = new Date();
   
   const scheduledPosts = await prisma.socialMediaPost.findMany({
@@ -329,6 +337,7 @@ export async function processScheduledPosts() {
  * Obtener estadísticas de redes sociales
  */
 export async function getSocialMediaStats(companyId: string) {
+  const prisma = await getPrisma();
   const [totalPosts, publishedPosts, scheduledPosts, accounts] = await Promise.all([
     prisma.socialMediaPost.count({
       where: { companyId },
@@ -376,6 +385,7 @@ export async function getSocialMediaStats(companyId: string) {
  * Generar contenido automático para una nueva propiedad
  */
 export async function generatePropertyPostContent(propertyData: {
+  const prisma = await getPrisma();
   type: 'building' | 'unit';
   name: string;
   address?: string;

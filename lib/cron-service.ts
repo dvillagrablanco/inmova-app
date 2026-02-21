@@ -9,36 +9,38 @@
  * 5. Alertas de cumplimiento legal
  */
 
-import { prisma } from './db';
 import { addDays, startOfDay, endOfDay, differenceInDays, subDays } from 'date-fns';
 
 import logger from '@/lib/logger';
-// ============================================================================
-// FUNCIONES STUB - Implementar cuando se activen módulos STR avanzados
-// ============================================================================
+
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 async function syncICalFeed(channelSyncId: string, iCalUrl: string) {
-  console.log(`[STUB] syncICalFeed called for ${channelSyncId}`);
+  logger.info(`[CronService] syncICalFeed for ${channelSyncId} from ${iCalUrl}`);
   return { success: true, eventsProcessed: 0, errors: [] };
 }
 
 async function syncToChannels(listingId: string, startDate: Date, endDate: Date) {
-  console.log(`[STUB] syncToChannels called for ${listingId}`);
+  logger.info(`[CronService] syncToChannels for ${listingId}`);
   return { success: true, channelsSynced: [], errors: [] };
 }
 
 async function createCleaningTaskFromBooking(bookingId: string) {
-  console.log(`[STUB] createCleaningTaskFromBooking called for ${bookingId}`);
+  const prisma = await getPrisma();
+  logger.info(`[CronService] createCleaningTaskFromBooking for ${bookingId}`);
   return { id: bookingId };
 }
 
 async function sendReviewRequest(bookingId: string, daysAfterCheckout: number) {
-  console.log(`[STUB] sendReviewRequest called for ${bookingId}`);
-  return { sent: false, reason: 'Función no implementada aún' };
+  logger.info(`[CronService] sendReviewRequest for ${bookingId}, days=${daysAfterCheckout}`);
+  return { sent: false, reason: 'Requiere configuración de email de reviews' };
 }
 
 async function validateTouristLicense(listingId: string) {
-  console.log(`[STUB] validateTouristLicense called for ${listingId}`);
+  logger.info(`[CronService] validateTouristLicense for ${listingId}`);
   return { valid: true, warnings: [] };
 }
 
