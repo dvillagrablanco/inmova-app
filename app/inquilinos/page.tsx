@@ -110,7 +110,6 @@ function InquilinosPageContent() {
       try {
         setError(null);
         const response = await fetch('/api/tenants');
-        }
         const json = await response.json();
         const data = Array.isArray(json) ? json : (json.data || json.buildings || json.units || json.tenants || json.payments || json.requests || []);
         setTenants(data);
