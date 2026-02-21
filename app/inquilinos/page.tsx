@@ -113,7 +113,8 @@ function InquilinosPageContent() {
         if (!response.ok) {
           throw new Error(`Error ${response.status}: No se pudieron cargar los inquilinos`);
         }
-        const data = await response.json();
+        const json = await response.json();
+        const data = Array.isArray(json) ? json : (json.data || json.buildings || json.units || json.tenants || json.payments || json.requests || []);
         setTenants(data);
         setFilteredTenants(data);
       } catch (error) {

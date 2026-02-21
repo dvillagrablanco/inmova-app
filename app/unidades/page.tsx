@@ -109,7 +109,8 @@ export default function UnidadesPage() {
       try {
         const response = await fetch('/api/units');
         if (response.ok) {
-          const data = await response.json();
+          const json = await response.json();
+        const data = Array.isArray(json) ? json : (json.data || json.buildings || json.units || json.tenants || json.payments || json.requests || []);
           setUnits(data);
           setFilteredUnits(data);
         }

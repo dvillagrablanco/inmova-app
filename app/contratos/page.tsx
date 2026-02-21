@@ -108,7 +108,8 @@ function ContratosPageContent() {
         if (!response.ok) {
       throw new Error(`Error ${response.status}: No se pudieron cargar los contratos`);
         }
-        const data = await response.json();
+        const json = await response.json();
+        const data = Array.isArray(json) ? json : (json.data || []);
         setContracts(data);
         setFilteredContracts(data);
       } catch (error) {
