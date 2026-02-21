@@ -52,45 +52,11 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-// Mock data para gastos
-const GASTOS_MENSUALES = [
-  { mes: 'Enero', presupuesto: 100000, gastado: 84500, ahorro: 15500 },
-  { mes: 'Diciembre', presupuesto: 95000, gastado: 92000, ahorro: 3000 },
-  { mes: 'Noviembre', presupuesto: 90000, gastado: 78500, ahorro: 11500 },
-  { mes: 'Octubre', presupuesto: 85000, gastado: 81200, ahorro: 3800 },
-];
-
-// Gastos por categoría
-const GASTOS_CATEGORIA = [
-  { categoria: 'Alojamiento', gasto: 48500, porcentaje: 57, icono: Hotel, color: 'bg-blue-500' },
-  { categoria: 'Vuelos', gasto: 24200, porcentaje: 29, icono: Plane, color: 'bg-purple-500' },
-  { categoria: 'Transporte local', gasto: 6800, porcentaje: 8, icono: Car, color: 'bg-green-500' },
-  { categoria: 'Dietas', gasto: 5000, porcentaje: 6, icono: Coffee, color: 'bg-orange-500' },
-];
-
-// Gastos por departamento
-const GASTOS_DEPARTAMENTO = [
-  { departamento: 'Ventas', gasto: 28500, presupuesto: 30000, empleados: 12, viajes: 45 },
-  { departamento: 'Dirección', gasto: 22000, presupuesto: 25000, empleados: 3, viajes: 18 },
-  { departamento: 'Operaciones', gasto: 18500, presupuesto: 20000, empleados: 8, viajes: 22 },
-  { departamento: 'Marketing', gasto: 12000, presupuesto: 15000, empleados: 6, viajes: 15 },
-  { departamento: 'IT', gasto: 3500, presupuesto: 10000, empleados: 5, viajes: 8 },
-];
-
-// Informes disponibles
-const INFORMES = [
-  { id: 'INF001', nombre: 'Informe Mensual Enero 2026', tipo: 'mensual', fecha: '2026-01-31', estado: 'generado' },
-  { id: 'INF002', nombre: 'Informe por Departamentos Q1', tipo: 'trimestral', fecha: '2026-01-15', estado: 'generado' },
-  { id: 'INF003', nombre: 'Análisis de Proveedores', tipo: 'analisis', fecha: '2026-01-10', estado: 'generado' },
-  { id: 'INF004', nombre: 'Comparativa Interanual', tipo: 'anual', fecha: '2026-01-05', estado: 'generado' },
-];
-
-// Alertas de presupuesto
-const ALERTAS_PRESUPUESTO = [
-  { id: 1, departamento: 'Ventas', porcentaje: 95, tipo: 'warning' },
-  { id: 2, departamento: 'Dirección', porcentaje: 88, tipo: 'info' },
-  { id: 3, departamento: 'Operaciones', porcentaje: 92, tipo: 'warning' },
-];
+const GASTOS_MENSUALES: any[] = [];
+const GASTOS_CATEGORIA: any[] = [];
+const GASTOS_DEPARTAMENTO: any[] = [];
+const INFORMES: any[] = [];
+const ALERTAS_PRESUPUESTO: any[] = [];
 
 export default function ViajesCorporativosExpenseReportsPage() {
   const [periodoSeleccionado, setPeriodoSeleccionado] = useState('enero-2026');

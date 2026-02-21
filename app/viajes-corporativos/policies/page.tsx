@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -51,96 +51,9 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-// Mock data para políticas
-const POLITICAS = [
-  {
-    id: 'POL001',
-    nombre: 'Política Estándar',
-    descripcion: 'Política por defecto para empleados regulares',
-    nivelEmpleado: 'standard',
-    activa: true,
-    limites: {
-      hotelNoche: 150,
-      vueloDomestico: 300,
-      vueloEuropeo: 500,
-      vueloIntercontinental: 1500,
-      dietaDiaria: 50,
-      transporteLocal: 30,
-    },
-    restricciones: {
-      claseVuelo: 'economy',
-      categoriaHotel: '3-4 estrellas',
-      anticipacionReserva: 14,
-      aprobacionRequerida: true,
-      nivelAprobacion: 'manager',
-    },
-    proveedoresAutorizados: ['NH Hotels', 'Ibis', 'Holiday Inn', 'Iberia', 'Vueling', 'Ryanair'],
-    excepciones: 'Requiere aprobación del director para exceder límites',
-    fechaCreacion: '2024-01-15',
-    ultimaModificacion: '2025-12-01',
-  },
-  {
-    id: 'POL002',
-    nombre: 'Política Directivos',
-    descripcion: 'Política para directores y nivel C-suite',
-    nivelEmpleado: 'executive',
-    activa: true,
-    limites: {
-      hotelNoche: 300,
-      vueloDomestico: 500,
-      vueloEuropeo: 1200,
-      vueloIntercontinental: 3500,
-      dietaDiaria: 100,
-      transporteLocal: 80,
-    },
-    restricciones: {
-      claseVuelo: 'business',
-      categoriaHotel: '4-5 estrellas',
-      anticipacionReserva: 7,
-      aprobacionRequerida: false,
-      nivelAprobacion: null,
-    },
-    proveedoresAutorizados: ['Hotel Arts', 'Marriott', 'NH Collection', 'Iberia Plus', 'Air Europa'],
-    excepciones: 'Auto-aprobación hasta límite. CEO no requiere aprobación.',
-    fechaCreacion: '2024-01-15',
-    ultimaModificacion: '2025-11-15',
-  },
-  {
-    id: 'POL003',
-    nombre: 'Política Ventas',
-    descripcion: 'Política especial para el equipo comercial',
-    nivelEmpleado: 'sales',
-    activa: true,
-    limites: {
-      hotelNoche: 180,
-      vueloDomestico: 350,
-      vueloEuropeo: 600,
-      vueloIntercontinental: 1800,
-      dietaDiaria: 70,
-      transporteLocal: 50,
-    },
-    restricciones: {
-      claseVuelo: 'economy-premium',
-      categoriaHotel: '3-4 estrellas',
-      anticipacionReserva: 7,
-      aprobacionRequerida: true,
-      nivelAprobacion: 'director-ventas',
-    },
-    proveedoresAutorizados: ['NH Hotels', 'AC Hotels', 'Meliá', 'Iberia', 'Vueling'],
-    excepciones: 'Visitas a clientes clave permiten exceder límite +20%',
-    fechaCreacion: '2024-03-01',
-    ultimaModificacion: '2025-10-20',
-  },
-];
+// Datos cargados desde API
 
-// Proveedores autorizados globales
-const PROVEEDORES = [
-  { id: 1, nombre: 'NH Hotels', tipo: 'hotel', descuento: '15%', contrato: 'Activo', vencimiento: '2026-12-31' },
-  { id: 2, nombre: 'Marriott Internacional', tipo: 'hotel', descuento: '12%', contrato: 'Activo', vencimiento: '2027-06-30' },
-  { id: 3, nombre: 'Iberia', tipo: 'aerolinea', descuento: '10%', contrato: 'Activo', vencimiento: '2026-09-30' },
-  { id: 4, nombre: 'Europcar', tipo: 'alquiler', descuento: '18%', contrato: 'Activo', vencimiento: '2026-06-30' },
-  { id: 5, nombre: 'Cabify Business', tipo: 'transporte', descuento: '20%', contrato: 'Activo', vencimiento: '2026-03-31' },
-];
+const PROVEEDORES: any[] = [];
 
 export default function ViajesCorporativosPoliciesPage() {
   const [politicas, setPoliticas] = useState<any[]>([]);
