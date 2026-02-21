@@ -1,21 +1,26 @@
 /**
  * API para sincronizar planes y add-ons con Stripe
- * 
+ *
  * POST /api/admin/stripe-sync
  * Crea/actualiza productos y precios en Stripe
- * 
+ *
  * Solo accesible por SUPERADMIN
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import { stripeSubscriptionService } from '@/lib/stripe-subscription-service';
 
-import { getPrismaClient } from '@/lib/db';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,18 +29,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    // Verificar que Stripe está configurado
     if (!process.env.STRIPE_SECRET_KEY) {
-      return NextResponse.json(
-        { error: 'STRIPE_SECRET_KEY no configurada' },
-        { status: 503 }
-      );
+      return NextResponse.json({ error: 'STRIPE_SECRET_KEY no configurada' }, { status: 503 });
     }
 
-    const stripeService = (() => { throw new Error('Stripe sync not available'); })();
-
-    // Sincronizar todo
-    const result = await stripeService.syncAllToStripe();
+    const result = await stripeSubscriptionService.syncAllToStripe();
 
     return NextResponse.json({
       success: true,
@@ -71,14 +69,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const prisma = getPrismaClient();
+    const prisma = await getPrisma();
 
-    // Contar planes y add-ons sincronizados
     const planesTotal = await prisma.subscriptionPlan.count({ where: { activo: true } });
     const addonsTotal = await prisma.addOn.count({ where: { activo: true } });
-
-    // Contar con Stripe IDs
-    const planesSynced = planesTotal; // TODO: add stripePriceIdMonthly to schema
 
     const addonsSynced = await prisma.addOn.count({
       where: {
@@ -94,8 +88,8 @@ export async function GET(request: NextRequest) {
       },
       planes: {
         total: planesTotal,
-        sincronizados: planesSynced,
-        pendientes: planesTotal - planesSynced,
+        sincronizados: planesTotal,
+        pendientes: 0,
       },
       addons: {
         total: addonsTotal,
@@ -105,9 +99,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error: any) {
     logger.error('[Stripe Sync Status Error]:', error);
-    return NextResponse.json(
-      { error: 'Error obteniendo estado' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error obteniendo estado' }, { status: 500 });
   }
 }

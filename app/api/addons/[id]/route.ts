@@ -4,21 +4,23 @@ import { authOptions } from '@/lib/auth-options';
 import { z } from 'zod';
 
 import logger from '@/lib/logger';
-import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 /**
  * GET /api/addons/[id]
  * Obtiene un add-on específico por ID
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const { id } = params;
+    const prisma = await getPrisma();
 
     const addon = await prisma.addOn.findUnique({
       where: { id },
@@ -35,10 +37,7 @@ export async function GET(
     });
 
     if (!addon) {
-      return NextResponse.json(
-        { error: 'Add-on no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Add-on no encontrado' }, { status: 404 });
     }
 
     return NextResponse.json({
@@ -67,10 +66,7 @@ export async function GET(
  * Actualiza un add-on existente (solo admin)
  * Sincroniza automáticamente con Stripe si cambian precios
  */
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user || !['super_admin', 'administrador'].includes(session.user.role)) {
@@ -79,6 +75,7 @@ export async function PUT(
 
     const { id } = params;
     const body = await request.json();
+    const prisma = await getPrisma();
 
     // Schema de validación para actualización
     const schema = z.object({
@@ -107,15 +104,13 @@ export async function PUT(
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { error: 'Add-on no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Add-on no encontrado' }, { status: 404 });
     }
 
     // Detectar si cambiaron los precios
-    const preciosChanged = 
-      (validated.precioMensual !== undefined && validated.precioMensual !== existing.precioMensual) ||
+    const preciosChanged =
+      (validated.precioMensual !== undefined &&
+        validated.precioMensual !== existing.precioMensual) ||
       (validated.precioAnual !== undefined && validated.precioAnual !== existing.precioAnual) ||
       (validated.nombre !== undefined && validated.nombre !== existing.nombre) ||
       (validated.descripcion !== undefined && validated.descripcion !== existing.descripcion);
@@ -133,7 +128,9 @@ export async function PUT(
         ...(validated.tipoUnidad !== undefined && { tipoUnidad: validated.tipoUnidad }),
         ...(validated.disponiblePara && { disponiblePara: validated.disponiblePara }),
         ...(validated.incluidoEn && { incluidoEn: validated.incluidoEn }),
-        ...(validated.margenPorcentaje !== undefined && { margenPorcentaje: validated.margenPorcentaje }),
+        ...(validated.margenPorcentaje !== undefined && {
+          margenPorcentaje: validated.margenPorcentaje,
+        }),
         ...(validated.costoUnitario !== undefined && { costoUnitario: validated.costoUnitario }),
         ...(validated.destacado !== undefined && { destacado: validated.destacado }),
         ...(validated.activo !== undefined && { activo: validated.activo }),
@@ -143,14 +140,11 @@ export async function PUT(
 
     // Sincronizar con Stripe si cambiaron precios o datos relevantes
     let stripeSync = { synced: false, error: null as string | null, updated: false };
-    
+
     if (validated.syncWithStripe !== false && preciosChanged) {
       try {
-        // stripe-subscription-service was removed in cleanup - sync disabled
-        const syncAddOnToStripe = null as any;
-        if (!syncAddOnToStripe) throw new Error('Stripe sync module not available');
-        
-        const stripeIds = await syncAddOnToStripe({
+        const { stripeSubscriptionService } = await import('@/lib/stripe-subscription-service');
+        const stripeIds = await stripeSubscriptionService.syncAddOnToStripe({
           id: addon.id,
           codigo: addon.codigo,
           nombre: addon.nombre,
@@ -161,7 +155,6 @@ export async function PUT(
         });
 
         if (stripeIds) {
-          // Actualizar con nuevos IDs de Stripe
           await prisma.addOn.update({
             where: { id: addon.id },
             data: {
@@ -173,7 +166,7 @@ export async function PUT(
           stripeSync.synced = true;
           stripeSync.updated = true;
         } else {
-          stripeSync.error = 'Stripe no configurado';
+          stripeSync.error = 'Stripe no configurado (falta STRIPE_SECRET_KEY)';
         }
       } catch (stripeError: any) {
         logger.error('[Stripe Sync Error]:', stripeError);
@@ -189,7 +182,7 @@ export async function PUT(
         where: { id: session.user.id },
         select: { companyId: true },
       });
-      
+
       if (user?.companyId) {
         await prisma.auditLog.create({
           data: {
@@ -200,7 +193,7 @@ export async function PUT(
             entityId: addon.id,
             entityName: addon.nombre,
             changes: JSON.stringify({
-              changes: Object.keys(validated).filter(k => k !== 'syncWithStripe'),
+              changes: Object.keys(validated).filter((k) => k !== 'syncWithStripe'),
               addonName: addon.nombre,
               stripeSync,
               preciosChanged,
@@ -218,7 +211,7 @@ export async function PUT(
       success: true,
       data: addon,
       stripe: stripeSync,
-      message: stripeSync.updated 
+      message: stripeSync.updated
         ? 'Add-on actualizado y sincronizado con Stripe'
         : 'Add-on actualizado correctamente',
     });
@@ -226,16 +219,22 @@ export async function PUT(
     logger.error('[Add-ons PUT Error]:', error);
 
     if (error instanceof z.ZodError) {
-      return NextResponse.json({
-        error: 'Datos inválidos',
-        details: error.errors,
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'Datos inválidos',
+          details: error.errors,
+        },
+        { status: 400 }
+      );
     }
 
-    return NextResponse.json({
-      error: 'Error actualizando add-on',
-      message: error.message,
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'Error actualizando add-on',
+        message: error.message,
+      },
+      { status: 500 }
+    );
   }
 }
 
@@ -244,10 +243,7 @@ export async function PUT(
  * Elimina un add-on (solo admin)
  * Desactiva el producto en Stripe
  */
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user || !['super_admin', 'administrador'].includes(session.user.role)) {
@@ -255,8 +251,8 @@ export async function DELETE(
     }
 
     const { id } = params;
+    const prisma = await getPrisma();
 
-    // Verificar que el add-on existe
     const addon = await prisma.addOn.findUnique({
       where: { id },
       include: {
@@ -267,10 +263,7 @@ export async function DELETE(
     });
 
     if (!addon) {
-      return NextResponse.json(
-        { error: 'Add-on no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Add-on no encontrado' }, { status: 404 });
     }
 
     // Desactivar producto en Stripe si existe
@@ -279,7 +272,7 @@ export async function DELETE(
       try {
         const { getStripe } = await import('@/lib/stripe-config');
         const stripe = getStripe();
-        
+
         if (stripe) {
           await stripe.products.update(addon.stripeProductId, {
             active: false,
@@ -304,7 +297,7 @@ export async function DELETE(
           where: { id: session.user.id },
           select: { companyId: true },
         });
-        
+
         if (user?.companyId) {
           await prisma.auditLog.create({
             data: {
@@ -348,7 +341,7 @@ export async function DELETE(
         where: { id: session.user.id },
         select: { companyId: true },
       });
-      
+
       if (user?.companyId) {
         await prisma.auditLog.create({
           data: {
@@ -378,9 +371,12 @@ export async function DELETE(
     });
   } catch (error: any) {
     logger.error('[Add-ons DELETE Error]:', error);
-    return NextResponse.json({
-      error: 'Error eliminando add-on',
-      message: error.message,
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'Error eliminando add-on',
+        message: error.message,
+      },
+      { status: 500 }
+    );
   }
 }

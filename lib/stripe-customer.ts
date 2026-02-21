@@ -1,17 +1,23 @@
-import { stripe } from './stripe-config';
-import { prisma } from './db';
+import { getStripe } from './stripe-config';
+import logger from '@/lib/logger';
+
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 export async function getOrCreateStripeCustomer(
   tenantId: string,
   email: string,
   name: string
 ): Promise<string> {
-  // Check if Stripe is configured
+  const stripe = getStripe();
   if (!stripe) {
     throw new Error('Stripe no está configurado');
   }
 
-  // Check if customer already exists in our database
+  const prisma = await getPrisma();
+
   const existingCustomer = await prisma.stripeCustomer.findUnique({
     where: { tenantId },
   });
@@ -20,7 +26,6 @@ export async function getOrCreateStripeCustomer(
     return existingCustomer.stripeCustomerId;
   }
 
-  // Create new Stripe customer
   const stripeCustomer = await stripe.customers.create({
     email,
     name,
@@ -29,7 +34,6 @@ export async function getOrCreateStripeCustomer(
     },
   });
 
-  // Save to database
   await prisma.stripeCustomer.create({
     data: {
       tenantId,
@@ -43,20 +47,20 @@ export async function getOrCreateStripeCustomer(
 }
 
 export async function deleteStripeCustomer(tenantId: string): Promise<void> {
-  // Check if Stripe is configured
+  const stripe = getStripe();
   if (!stripe) {
     throw new Error('Stripe no está configurado');
   }
+
+  const prisma = await getPrisma();
 
   const customer = await prisma.stripeCustomer.findUnique({
     where: { tenantId },
   });
 
   if (customer) {
-    // Delete from Stripe
     await stripe.customers.del(customer.stripeCustomerId);
 
-    // Delete from database
     await prisma.stripeCustomer.delete({
       where: { tenantId },
     });

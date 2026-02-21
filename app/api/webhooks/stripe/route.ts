@@ -1,13 +1,13 @@
 /**
  * API Route: Webhook de Stripe
  * POST /api/webhooks/stripe
- * 
+ *
  * Maneja eventos de Stripe para AMBAS plataformas:
- * 
+ *
  * 1. INMOVA - Pagos 100% para la plataforma
  *    - Suscripciones de gestores inmobiliarios
  *    - Pagos de alquiler (con comisión)
- * 
+ *
  * 2. EWOORKER - Pagos con división 50/50
  *    - 50% para socio fundador
  *    - 50% para plataforma
@@ -33,7 +33,7 @@ function getStripe(): Stripe {
       throw new Error('STRIPE_SECRET_KEY not configured');
     }
     stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY, {
-      apiVersion: '2024-11-20.acacia',
+      apiVersion: '2025-12-15.clover',
     });
   }
   return stripeInstance;
@@ -53,10 +53,7 @@ export async function POST(req: NextRequest) {
     const signature = req.headers.get('stripe-signature');
 
     if (!signature) {
-      return NextResponse.json(
-        { error: 'No signature provided' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No signature provided' }, { status: 400 });
     }
 
     // Verificar firma del webhook
@@ -65,10 +62,7 @@ export async function POST(req: NextRequest) {
     try {
       if (!webhookSecret) {
         if (process.env.NODE_ENV === 'production') {
-          return NextResponse.json(
-            { error: 'Webhook secret no configurado' },
-            { status: 503 }
-          );
+          return NextResponse.json({ error: 'Webhook secret no configurado' }, { status: 503 });
         }
         logger.warn('[Stripe Webhook] No webhook secret configured (dev)');
         event = JSON.parse(body);
@@ -78,11 +72,8 @@ export async function POST(req: NextRequest) {
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Error desconocido';
       logger.error('[Stripe Webhook] Signature verification failed:', { message });
-      Sentry.captureException(error);
-      return NextResponse.json(
-        { error: 'Invalid signature' },
-        { status: 400 }
-      );
+      Sentry.captureException(err);
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
     }
 
     // Manejar eventos
@@ -93,12 +84,12 @@ export async function POST(req: NextRequest) {
     // Los pagos de eWoorker tienen metadata.platform === 'ewoorker'
     // y se dividen 50/50 entre socio y plataforma
     // ══════════════════════════════════════════════════════════════════
-    
+
     const ewoorkerResult = await handleEwoorkerStripeWebhook(event);
     if (ewoorkerResult.handled) {
       logger.info(`[Stripe Webhook] Evento manejado por eWoorker: ${ewoorkerResult.message}`);
-      return NextResponse.json({ 
-        received: true, 
+      return NextResponse.json({
+        received: true,
         platform: 'ewoorker',
         message: ewoorkerResult.message,
       });
@@ -150,15 +141,11 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ received: true, platform: 'inmova' });
-
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('[Stripe Webhook Error]:', { message });
-      Sentry.captureException(error);
-    return NextResponse.json(
-      { error: 'Webhook error', message },
-      { status: 500 }
-    );
+    Sentry.captureException(error);
+    return NextResponse.json({ error: 'Webhook error', message }, { status: 500 });
   }
 }
 
@@ -297,8 +284,7 @@ async function handleChargeRefunded(charge: Stripe.Charge) {
   logger.warn(`[Stripe] Charge refunded: ${charge.id}`);
 
   const prisma = await getPrisma();
-  const paymentIntentId =
-    typeof charge.payment_intent === 'string' ? charge.payment_intent : null;
+  const paymentIntentId = typeof charge.payment_intent === 'string' ? charge.payment_intent : null;
   const payment = paymentIntentId
     ? await prisma.payment.findFirst({
         where: { stripePaymentIntentId: paymentIntentId },
@@ -338,7 +324,9 @@ async function handleB2BInvoiceCreated(stripeInvoice: Stripe.Invoice) {
     });
 
     if (!b2bInvoice) {
-      logger.warn(`[Stripe Webhook] No se encontró B2BInvoice para Stripe Invoice ${stripeInvoice.id}`);
+      logger.warn(
+        `[Stripe Webhook] No se encontró B2BInvoice para Stripe Invoice ${stripeInvoice.id}`
+      );
       return;
     }
 
@@ -346,12 +334,14 @@ async function handleB2BInvoiceCreated(stripeInvoice: Stripe.Invoice) {
     // Sincronizar con Contasimple si está configurado
     if (inmovaContasimpleBridge.isConfigured()) {
       await inmovaContasimpleBridge.syncB2BInvoiceToContasimple(b2bInvoice.id);
-      logger.info(`[Stripe Webhook] ✅ Factura ${b2bInvoice.numeroFactura} sincronizada con Contasimple`);
+      logger.info(
+        `[Stripe Webhook] ✅ Factura ${b2bInvoice.numeroFactura} sincronizada con Contasimple`
+      );
     }
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('[Stripe Webhook] Error sincronizando factura con Contasimple:', { message });
-      Sentry.captureException(error);
+    Sentry.captureException(error);
     // No lanzar error para no fallar el webhook
   }
 }
@@ -371,7 +361,9 @@ async function handleB2BInvoicePaymentSucceeded(stripeInvoice: Stripe.Invoice) {
     });
 
     if (!b2bInvoice) {
-      logger.warn(`[Stripe Webhook] No se encontró B2BInvoice para Stripe Invoice ${stripeInvoice.id}`);
+      logger.warn(
+        `[Stripe Webhook] No se encontró B2BInvoice para Stripe Invoice ${stripeInvoice.id}`
+      );
       return;
     }
 
@@ -382,7 +374,7 @@ async function handleB2BInvoicePaymentSucceeded(stripeInvoice: Stripe.Invoice) {
         estado: 'PAGADA',
         fechaPago: new Date(),
         metodoPago: 'stripe',
-        stripePaymentIntentId: stripeInvoice.payment_intent as string || null,
+        stripePaymentIntentId: (stripeInvoice.payment_intent as string) || null,
       },
     });
 
@@ -398,9 +390,7 @@ async function handleB2BInvoicePaymentSucceeded(stripeInvoice: Stripe.Invoice) {
         fechaPago: new Date(),
         estado: 'completado',
         stripePaymentId:
-          typeof stripeInvoice.payment_intent === 'string'
-            ? stripeInvoice.payment_intent
-            : null,
+          typeof stripeInvoice.payment_intent === 'string' ? stripeInvoice.payment_intent : null,
       },
     });
 
@@ -410,7 +400,7 @@ async function handleB2BInvoicePaymentSucceeded(stripeInvoice: Stripe.Invoice) {
       await inmovaContasimpleBridge.syncPaymentToContasimple(b2bInvoice.id, {
         amount: stripeInvoice.amount_paid / 100,
         date: new Date(),
-        stripePaymentIntentId: stripeInvoice.payment_intent as string || 'unknown',
+        stripePaymentIntentId: (stripeInvoice.payment_intent as string) || 'unknown',
         method: 'card',
       });
 
@@ -419,7 +409,7 @@ async function handleB2BInvoicePaymentSucceeded(stripeInvoice: Stripe.Invoice) {
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('[Stripe Webhook] Error procesando pago de factura B2B:', { message });
-      Sentry.captureException(error);
+    Sentry.captureException(error);
   }
 }
 
@@ -463,7 +453,7 @@ async function handleB2BInvoicePaymentFailed(stripeInvoice: Stripe.Invoice) {
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('[Stripe Webhook] Error procesando fallo de pago:', { message });
-      Sentry.captureException(error);
+    Sentry.captureException(error);
   }
 }
 
@@ -478,7 +468,7 @@ async function handleB2BInvoicePaymentFailed(stripeInvoice: Stripe.Invoice) {
 async function handleSubscriptionEvent(event: Stripe.Event) {
   const subscription = event.data.object as Stripe.Subscription;
   const prisma = await getPrisma();
-  
+
   // Verificar que NO sea una suscripción de eWoorker
   if (subscription.metadata?.platform === 'ewoorker') {
     return; // Ya manejado por handleEwoorkerStripeWebhook
@@ -495,7 +485,7 @@ async function handleSubscriptionEvent(event: Stripe.Event) {
     // VERIFICAR SI ES UN ADD-ON
     // Los add-ons tienen metadata.type === 'addon'
     // ═══════════════════════════════════════════════════════════════
-    
+
     if (subscription.metadata?.type === 'addon') {
       await handleAddOnSubscription(event, subscription);
       return;
@@ -505,7 +495,7 @@ async function handleSubscriptionEvent(event: Stripe.Event) {
     // VERIFICAR SI ES UN PLAN DE SUSCRIPCIÓN
     // Los planes tienen metadata.planId y metadata.companyId
     // ═══════════════════════════════════════════════════════════════
-    
+
     if (subscription.metadata?.planId && subscription.metadata?.companyId) {
       await handlePlanSubscription(event, subscription);
       return;
@@ -514,7 +504,7 @@ async function handleSubscriptionEvent(event: Stripe.Event) {
     // ═══════════════════════════════════════════════════════════════
     // SUSCRIPCIONES DE CONTRATOS (alquiler)
     // ═══════════════════════════════════════════════════════════════
-    
+
     switch (event.type) {
       case 'customer.subscription.created':
       case 'customer.subscription.updated':
@@ -540,7 +530,7 @@ async function handleSubscriptionEvent(event: Stripe.Event) {
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('[Stripe Webhook] Error actualizando suscripción Inmova:', { message });
-      Sentry.captureException(error);
+    Sentry.captureException(error);
   }
 }
 
@@ -556,7 +546,6 @@ async function handleAddOnSubscription(event: Stripe.Event, subscription: Stripe
     logger.warn('[Stripe Webhook] Add-on subscription sin metadata requerida');
     return;
   }
-
 
   try {
     switch (event.type) {
@@ -608,7 +597,7 @@ async function handleAddOnSubscription(event: Stripe.Event, subscription: Stripe
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('[Stripe Webhook] Error procesando add-on subscription:', { message });
-      Sentry.captureException(error);
+    Sentry.captureException(error);
   }
 }
 
@@ -625,7 +614,6 @@ async function handlePlanSubscription(event: Stripe.Event, subscription: Stripe.
     return;
   }
 
-
   try {
     switch (event.type) {
       case 'customer.subscription.created':
@@ -635,8 +623,12 @@ async function handlePlanSubscription(event: Stripe.Event, subscription: Stripe.
           where: { id: companyId },
           data: {
             subscriptionPlanId: planId,
-            estadoCliente: subscription.status === 'active' ? 'activo' : 
-                           subscription.status === 'trialing' ? 'prueba' : 'suspendido',
+            estadoCliente:
+              subscription.status === 'active'
+                ? 'activo'
+                : subscription.status === 'trialing'
+                  ? 'prueba'
+                  : 'suspendido',
           },
         });
 
@@ -678,6 +670,6 @@ async function handlePlanSubscription(event: Stripe.Event, subscription: Stripe.
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('[Stripe Webhook] Error procesando plan subscription:', { message });
-      Sentry.captureException(error);
+    Sentry.captureException(error);
   }
 }

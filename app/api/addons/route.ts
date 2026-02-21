@@ -4,10 +4,14 @@ import { authOptions } from '@/lib/auth-options';
 import { z } from 'zod';
 
 import logger from '@/lib/logger';
-import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 /**
  * GET /api/addons
@@ -23,9 +27,9 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const categoria = searchParams.get('categoria');
     const plan = searchParams.get('plan');
-    const vertical = searchParams.get('vertical') || 'all'; // inmova, ewoorker, all
+    const vertical = searchParams.get('vertical') || 'all';
 
-    // Lazy load Prisma
+    const prisma = await getPrisma();
 
     // Construir filtros
     const where: any = { activo: true };
@@ -134,8 +138,8 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
+    const prisma = await getPrisma();
 
-    // Validación
     const schema = z.object({
       codigo: z.string().min(3).max(50),
       nombre: z.string().min(3).max(100),
@@ -154,8 +158,6 @@ export async function POST(request: NextRequest) {
     });
 
     const validated = schema.parse(body);
-
-    // Lazy load Prisma
 
     // Crear add-on
     const addon = await prisma.addOn.create({
@@ -182,8 +184,30 @@ export async function POST(request: NextRequest) {
 
     if (validated.syncWithStripe !== false) {
       try {
-        // stripe-subscription-service removed in cleanup - sync disabled
-        stripeSync.error = 'Stripe sync module not available';
+        const { stripeSubscriptionService } = await import('@/lib/stripe-subscription-service');
+        const stripeIds = await stripeSubscriptionService.syncAddOnToStripe({
+          id: addon.id,
+          codigo: addon.codigo,
+          nombre: addon.nombre,
+          descripcion: addon.descripcion,
+          precioMensual: addon.precioMensual,
+          precioAnual: addon.precioAnual || undefined,
+          categoria: addon.categoria,
+        });
+
+        if (stripeIds) {
+          await prisma.addOn.update({
+            where: { id: addon.id },
+            data: {
+              stripeProductId: stripeIds.productId,
+              stripePriceIdMonthly: stripeIds.priceIdMonthly,
+              stripePriceIdAnnual: stripeIds.priceIdAnnual,
+            },
+          });
+          stripeSync.synced = true;
+        } else {
+          stripeSync.error = 'Stripe no configurado (falta STRIPE_SECRET_KEY)';
+        }
       } catch (stripeError: any) {
         logger.error('[Stripe Sync Error]:', stripeError);
         stripeSync.error = stripeError.message;
@@ -196,7 +220,7 @@ export async function POST(request: NextRequest) {
         where: { id: session.user.id },
         select: { companyId: true },
       });
-      
+
       if (user?.companyId) {
         await prisma.auditLog.create({
           data: {

@@ -1,6 +1,6 @@
 /**
  * API para gestionar add-ons de una empresa
- * 
+ *
  * GET /api/billing/addons - Lista add-ons disponibles y contratados
  * POST /api/billing/addons - Comprar un add-on
  * DELETE /api/billing/addons - Cancelar un add-on
@@ -10,10 +10,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { z } from 'zod';
+import { stripeSubscriptionService } from '@/lib/stripe-subscription-service';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 /**
  * GET: Lista add-ons disponibles y los contratados por la empresa
@@ -25,7 +31,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    // Obtener empresa del usuario
+    const prisma = await getPrisma();
+
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
       include: {
@@ -42,32 +49,24 @@ export async function GET(request: NextRequest) {
     });
 
     if (!user?.company) {
-      return NextResponse.json(
-        { error: 'Usuario no tiene empresa asociada' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Usuario no tiene empresa asociada' }, { status: 400 });
     }
 
-    // Obtener plan actual para filtrar add-ons disponibles
     const planTier = user.company.subscriptionPlan?.tier || 'STARTER';
 
-    // Obtener todos los add-ons disponibles para el plan
     const availableAddons = await prisma.addOn.findMany({
       where: { activo: true },
       orderBy: [{ destacado: 'desc' }, { orden: 'asc' }],
     });
 
-    // Filtrar por disponibilidad para el plan
     const filteredAddons = availableAddons.filter((addon: any) => {
       const disponiblePara = addon.disponiblePara as string[];
       const incluidoEn = (addon.incluidoEn as string[]) || [];
       return disponiblePara.includes(planTier) || incluidoEn.includes(planTier);
     });
 
-    // IDs de add-ons ya contratados
     const contratadosIds = user.company.addOns.map((ca: any) => ca.addOnId);
 
-    // Formatear respuesta
     const addons = filteredAddons.map((addon: any) => {
       const incluidoEn = (addon.incluidoEn as string[]) || [];
       const isIncluded = incluidoEn.includes(planTier);
@@ -109,10 +108,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error: any) {
     logger.error('[Billing Addons GET Error]:', error);
-    return NextResponse.json(
-      { error: 'Error obteniendo add-ons' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error obteniendo add-ons' }, { status: 500 });
   }
 }
 
@@ -132,22 +128,17 @@ export async function POST(request: NextRequest) {
       interval: z.enum(['monthly', 'annual']).default('monthly'),
     });
     const validated = schema.parse(body);
-    const stripeService = null as any;
+    const prisma = await getPrisma();
 
-    // Obtener usuario y empresa
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
       include: { company: true },
     });
 
     if (!user?.company) {
-      return NextResponse.json(
-        { error: 'Usuario no tiene empresa asociada' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Usuario no tiene empresa asociada' }, { status: 400 });
     }
 
-    // Verificar que no tiene ya el add-on
     const existingAddOn = await prisma.companyAddOn.findFirst({
       where: {
         companyId: user.company.id,
@@ -157,26 +148,18 @@ export async function POST(request: NextRequest) {
     });
 
     if (existingAddOn) {
-      return NextResponse.json(
-        { error: 'Ya tienes este add-on contratado' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Ya tienes este add-on contratado' }, { status: 400 });
     }
 
-    // Obtener add-on
     const addon = await prisma.addOn.findUnique({
       where: { id: validated.addOnId },
     });
 
     if (!addon || !addon.activo) {
-      return NextResponse.json(
-        { error: 'Add-on no encontrado o inactivo' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Add-on no encontrado o inactivo' }, { status: 404 });
     }
 
-    // Sincronizar add-on con Stripe
-    const stripeIds = await stripeService.syncAddOnToStripe({
+    const stripeIds = await stripeSubscriptionService.syncAddOnToStripe({
       id: addon.id,
       codigo: addon.codigo,
       nombre: addon.nombre,
@@ -188,29 +171,31 @@ export async function POST(request: NextRequest) {
 
     if (!stripeIds) {
       return NextResponse.json(
-        { error: 'Error sincronizando con Stripe' },
+        {
+          error: 'Error sincronizando con Stripe. Verifica que STRIPE_SECRET_KEY está configurada.',
+        },
         { status: 500 }
       );
     }
 
-    // Actualizar add-on con IDs de Stripe
     await prisma.addOn.update({
       where: { id: addon.id },
       data: {
+        stripeProductId: stripeIds.productId,
         stripePriceIdMonthly: stripeIds.priceIdMonthly,
         stripePriceIdAnnual: stripeIds.priceIdAnnual,
       },
     });
 
-    const stripePriceId = validated.interval === 'annual'
-      ? stripeIds.priceIdAnnual || stripeIds.priceIdMonthly
-      : stripeIds.priceIdMonthly;
+    const stripePriceId =
+      validated.interval === 'annual'
+        ? stripeIds.priceIdAnnual || stripeIds.priceIdMonthly
+        : stripeIds.priceIdMonthly;
 
-    // Crear o recuperar cliente de Stripe
     let customerId = user.company.stripeCustomerId;
 
     if (!customerId) {
-      customerId = await stripeService.getOrCreateCustomer({
+      customerId = await stripeSubscriptionService.getOrCreateCustomer({
         email: user.email,
         name: user.name || user.company.nombre,
         companyId: user.company.id,
@@ -225,19 +210,14 @@ export async function POST(request: NextRequest) {
     }
 
     if (!customerId) {
-      return NextResponse.json(
-        { error: 'Error creando cliente en Stripe' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Error creando cliente en Stripe' }, { status: 500 });
     }
 
-    // Construir URLs
     const baseUrl = process.env.NEXTAUTH_URL || 'https://inmovaapp.com';
     const successUrl = `${baseUrl}/dashboard/billing?addon_success=true&addon=${addon.codigo}`;
     const cancelUrl = `${baseUrl}/dashboard/billing?addon_canceled=true`;
 
-    // Crear sesión de checkout
-    const checkoutUrl = await stripeService.createCheckoutSession({
+    const checkoutUrl = await stripeSubscriptionService.createCheckoutSession({
       customerId,
       priceId: stripePriceId,
       successUrl,
@@ -251,10 +231,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!checkoutUrl) {
-      return NextResponse.json(
-        { error: 'Error creando sesión de checkout' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Error creando sesión de checkout' }, { status: 500 });
     }
 
     return NextResponse.json({
@@ -263,9 +240,10 @@ export async function POST(request: NextRequest) {
       addon: {
         id: addon.id,
         nombre: addon.nombre,
-        precio: validated.interval === 'annual'
-          ? addon.precioAnual || addon.precioMensual * 10
-          : addon.precioMensual,
+        precio:
+          validated.interval === 'annual'
+            ? addon.precioAnual || addon.precioMensual * 10
+            : addon.precioMensual,
         interval: validated.interval,
       },
     });
@@ -279,10 +257,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return NextResponse.json(
-      { error: 'Error procesando compra de add-on' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error procesando compra de add-on' }, { status: 500 });
   }
 }
 
@@ -300,27 +275,20 @@ export async function DELETE(request: NextRequest) {
     const addOnId = searchParams.get('addOnId');
 
     if (!addOnId) {
-      return NextResponse.json(
-        { error: 'addOnId requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'addOnId requerido' }, { status: 400 });
     }
-    const stripeService = null as any;
 
-    // Obtener usuario y empresa
+    const prisma = await getPrisma();
+
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
       include: { company: true },
     });
 
     if (!user?.company) {
-      return NextResponse.json(
-        { error: 'Usuario no tiene empresa asociada' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Usuario no tiene empresa asociada' }, { status: 400 });
     }
 
-    // Buscar add-on contratado
     const companyAddOn = await prisma.companyAddOn.findFirst({
       where: {
         companyId: user.company.id,
@@ -330,18 +298,13 @@ export async function DELETE(request: NextRequest) {
     });
 
     if (!companyAddOn) {
-      return NextResponse.json(
-        { error: 'Add-on no encontrado o ya cancelado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Add-on no encontrado o ya cancelado' }, { status: 404 });
     }
 
-    // Cancelar en Stripe si tiene suscripción
     if (companyAddOn.stripeSubscriptionId) {
-      await stripeService.cancelSubscription(companyAddOn.stripeSubscriptionId, false);
+      await stripeSubscriptionService.cancelSubscription(companyAddOn.stripeSubscriptionId, false);
     }
 
-    // Marcar como inactivo en BD
     await prisma.companyAddOn.update({
       where: { id: companyAddOn.id },
       data: {
@@ -356,9 +319,6 @@ export async function DELETE(request: NextRequest) {
     });
   } catch (error: any) {
     logger.error('[Billing Addons DELETE Error]:', error);
-    return NextResponse.json(
-      { error: 'Error cancelando add-on' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error cancelando add-on' }, { status: 500 });
   }
 }
