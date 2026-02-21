@@ -1,4 +1,4 @@
-/** @jest-environment node */
+import { describe, it, expect } from 'vitest';
 import { NextRequest } from 'next/server';
 import { GET } from '@/app/api/health/route';
 
