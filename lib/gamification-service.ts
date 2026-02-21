@@ -560,8 +560,6 @@ export async function onPaymentCompleted(
 }
 
 export async function onCleaningCompleted(tenantId: string) {
-  const prisma = await getPrisma();
-  const prisma = await getPrisma();
   await addPoints(
     tenantId,
     'limpieza',
@@ -571,13 +569,9 @@ export async function onCleaningCompleted(tenantId: string) {
 }
 
 export async function onRecyclingDone(tenantId: string) {
-  const prisma = await getPrisma();
-  const prisma = await getPrisma();
   await addPoints(tenantId, 'reciclaje', 10, 'Reciclaje correcto');
 }
 
 export async function onReferralCompleted(tenantId: string) {
-  const prisma = await getPrisma();
-  const prisma = await getPrisma();
   await addPoints(tenantId, 'referido', 500, 'Nuevo inquilino referido');
 }

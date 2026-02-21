@@ -385,7 +385,6 @@ export async function getSocialMediaStats(companyId: string) {
  * Generar contenido automático para una nueva propiedad
  */
 export async function generatePropertyPostContent(propertyData: {
-  const prisma = await getPrisma();
   type: 'building' | 'unit';
   name: string;
   address?: string;

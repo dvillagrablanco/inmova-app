@@ -239,8 +239,6 @@ export async function syncExpensesToAccounting(companyId: string): Promise<numbe
 }
 
 export async function getBalanceSheet(companyId: string, fecha: Date) {
-  const prisma = await getPrisma();
-  const prisma = await getPrisma();
   const transactions = await prisma.accountingTransaction.findMany({
     where: {
       companyId,
@@ -269,8 +267,6 @@ export async function getBalanceSheet(companyId: string, fecha: Date) {
 }
 
 export async function getCenterOfCostsReport(companyId: string, periodo: string) {
-  const prisma = await getPrisma();
-  const prisma = await getPrisma();
   const [year, month] = periodo.split('-').map(Number);
   const fechaInicio = startOfMonth(new Date(year, month - 1));
   const fechaFin = endOfMonth(new Date(year, month - 1));

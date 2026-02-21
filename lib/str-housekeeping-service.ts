@@ -106,8 +106,6 @@ export interface StaffPerformance {
  * Crea una nueva tarea de housekeeping/turnover
  */
 export async function createHousekeepingTask(input: CreateTaskInput) {
-  const prisma = await getPrisma();
-  const prisma = await getPrisma();
   const { companyId, listingId, tipoTurnover, fechaProgramada, ...rest } = input;
 
   // Validar que el listing pertenece a la compañía
@@ -164,8 +162,6 @@ export async function createHousekeepingTask(input: CreateTaskInput) {
  * Actualiza una tarea de housekeeping
  */
 export async function updateHousekeepingTask(taskId: string, companyId: string, input: UpdateTaskInput) {
-  const prisma = await getPrisma();
-  const prisma = await getPrisma();
   // Verificar que la tarea pertenece a la compañía
   const existingTask = await prisma.sTRHousekeepingTask.findFirst({
     where: { id: taskId, companyId }
@@ -333,8 +329,6 @@ export async function getHousekeepingStats(companyId: string, fechaInicio?: Date
  * Crea un nuevo miembro del personal de housekeeping
  */
 export async function createHousekeepingStaff(companyId: string, input: StaffInput) {
-  const prisma = await getPrisma();
-  const prisma = await getPrisma();
   const staff = await prisma.sTRHousekeepingStaff.create({
     data: {
       companyId,
@@ -466,8 +460,6 @@ export async function getStaffPerformance(companyId: string): Promise<StaffPerfo
  * Crea un nuevo item de inventario
  */
 export async function createInventoryItem(companyId: string, input: InventoryInput) {
-  const prisma = await getPrisma();
-  const prisma = await getPrisma();
   const item = await prisma.sTRHousekeepingInventory.create({
     data: {
       companyId,
@@ -524,8 +516,6 @@ export async function processInventoryUsage(
  * Obtiene items de inventario con bajo stock
  */
 export async function getLowStockItems(companyId: string) {
-  const prisma = await getPrisma();
-  const prisma = await getPrisma();
   const items = await prisma.sTRHousekeepingInventory.findMany({
     where: {
       companyId,
@@ -545,8 +535,6 @@ export async function getLowStockItems(companyId: string) {
  * Crea un template de checklist
  */
 export async function createChecklistTemplate(companyId: string, input: ChecklistTemplateInput) {
-  const prisma = await getPrisma();
-  const prisma = await getPrisma();
   const template = await prisma.sTRHousekeepingChecklist.create({
     data: {
       companyId,
@@ -586,8 +574,6 @@ function calculateEstimatedTime(tipo: TurnoverType, capacidad: number): number {
  * Genera tareas automáticas para las próximas reservas
  */
 export async function generateAutomaticTasks(companyId: string, diasAnticipacion: number = 7) {
-  const prisma = await getPrisma();
-  const prisma = await getPrisma();
   const fechaFin = addDays(new Date(), diasAnticipacion);
 
   // Obtener reservas próximas
