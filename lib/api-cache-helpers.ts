@@ -3,8 +3,12 @@
  * Cada helper define su propia lógica de caché, TTL e invalidación
  */
 
-import { prisma } from './db';
 import { startOfMonth, endOfMonth, subMonths } from 'date-fns';
+
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 // ============================================================
 // Inline cache (eliminado redis-cache-service.ts en cleanup)
@@ -64,6 +68,7 @@ export async function cachedDashboardStats(companyId: string) {
   return withCache(
     cacheKey,
     async () => {
+      const prisma = await getPrisma();
       // Consultas originales del dashboard
       const [totalBuildings, totalUnits, totalTenants, activeContracts] = await Promise.all([
         prisma.building.count({ where: { companyId } }),
@@ -175,6 +180,7 @@ export async function cachedBuildings(companyId: string) {
   return withCache(
     cacheKey,
     async () => {
+      const prisma = await getPrisma();
       const buildings = await prisma.building.findMany({
         where: { companyId },
         include: {
@@ -231,6 +237,7 @@ export async function cachedUnits(companyId: string) {
   return withCache(
     cacheKey,
     async () => {
+      const prisma = await getPrisma();
       const units = await prisma.unit.findMany({
         where: { building: { companyId } },
         include: {
@@ -289,6 +296,7 @@ export async function cachedPayments(companyId: string) {
   return withCache(
     cacheKey,
     async () => {
+      const prisma = await getPrisma();
       const payments = await prisma.payment.findMany({
         where: {
           contract: {
@@ -354,6 +362,7 @@ export async function cachedContracts(companyId: string) {
   return withCache(
     cacheKey,
     async () => {
+      const prisma = await getPrisma();
       const contracts = await prisma.contract.findMany({
         where: {
           unit: { building: { companyId } },
@@ -417,6 +426,7 @@ export async function cachedTenants(companyId: string) {
   return withCache(
     cacheKey,
     async () => {
+      const prisma = await getPrisma();
       return prisma.tenant.findMany({
         where: { companyId },
         include: {
@@ -459,6 +469,7 @@ export async function cachedExpenses(companyId: string) {
   return withCache(
     cacheKey,
     async () => {
+      const prisma = await getPrisma();
       const expenses = await prisma.expense.findMany({
         where: {
           building: { companyId },
@@ -501,6 +512,7 @@ export async function cachedMaintenance(companyId: string) {
   return withCache(
     cacheKey,
     async () => {
+      const prisma = await getPrisma();
       return prisma.maintenanceRequest.findMany({
         where: {
           unit: { building: { companyId } },
@@ -540,6 +552,7 @@ export async function cachedAnalytics(companyId: string, type: string) {
   return withCache(
     cacheKey,
     async () => {
+      const prisma = await getPrisma();
       // Aquí puedes implementar diferentes tipos de analytics
       // Por ahora devolvemos un objeto básico
       return {
