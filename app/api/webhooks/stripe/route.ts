@@ -602,7 +602,12 @@ async function handleAddOnSubscription(event: Stripe.Event, subscription: Stripe
 }
 
 /**
- * Maneja eventos de suscripción a planes
+ * Maneja eventos de suscripción a planes.
+ * Cuando se crea una nueva suscripción activa:
+ * 1. Actualiza plan de la empresa
+ * 2. Genera factura B2B
+ * 3. Sincroniza con Contasimple (si configurado)
+ * 4. Envía factura por email al cliente
  */
 async function handlePlanSubscription(event: Stripe.Event, subscription: Stripe.Subscription) {
   const prisma = await getPrisma();
@@ -617,8 +622,7 @@ async function handlePlanSubscription(event: Stripe.Event, subscription: Stripe.
   try {
     switch (event.type) {
       case 'customer.subscription.created':
-      case 'customer.subscription.updated':
-        // Actualizar plan de la empresa
+      case 'customer.subscription.updated': {
         await prisma.company.update({
           where: { id: companyId },
           data: {
@@ -632,7 +636,6 @@ async function handlePlanSubscription(event: Stripe.Event, subscription: Stripe.
           },
         });
 
-        // Registrar cambio de suscripción
         await prisma.b2BSubscriptionHistory.create({
           data: {
             companyId,
@@ -642,11 +645,15 @@ async function handlePlanSubscription(event: Stripe.Event, subscription: Stripe.
           },
         });
 
-        logger.info(`[Stripe Webhook] ✅ Empresa ${companyId} suscrita a plan ${planId}`);
+        logger.info(`[Stripe Webhook] Empresa ${companyId} suscrita a plan ${planId}`);
+
+        if (event.type === 'customer.subscription.created' && subscription.status === 'active') {
+          await generateInvoiceAndNotify(prisma, companyId, planId, subscription);
+        }
         break;
+      }
 
       case 'customer.subscription.deleted':
-        // Cancelar plan de la empresa
         await prisma.company.update({
           where: { id: companyId },
           data: {
@@ -664,12 +671,218 @@ async function handlePlanSubscription(event: Stripe.Event, subscription: Stripe.
           },
         });
 
-        logger.info(`[Stripe Webhook] ✅ Suscripción cancelada para empresa ${companyId}`);
+        logger.info(`[Stripe Webhook] Suscripción cancelada para empresa ${companyId}`);
         break;
     }
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('[Stripe Webhook] Error procesando plan subscription:', { message });
     Sentry.captureException(error);
+  }
+}
+
+/**
+ * Genera factura B2B, sincroniza con Contasimple y envía email al cliente
+ */
+async function generateInvoiceAndNotify(
+  prisma: any,
+  companyId: string,
+  planId: string,
+  subscription: Stripe.Subscription,
+) {
+  try {
+    const company = await prisma.company.findUnique({
+      where: { id: companyId },
+      include: { subscriptionPlan: true },
+    });
+
+    if (!company?.subscriptionPlan) {
+      logger.warn(`[Stripe Webhook] Empresa ${companyId} sin plan para factura`);
+      return;
+    }
+
+    const plan = company.subscriptionPlan;
+    const { format: fmtDate } = await import('date-fns');
+    const { es: esLocale } = await import('date-fns/locale');
+
+    const now = new Date();
+    const periodo = fmtDate(now, 'yyyy-MM');
+    const mesLabel = fmtDate(now, 'MMMM yyyy', { locale: esLocale });
+
+    const existing = await prisma.b2BInvoice.findFirst({
+      where: { companyId, periodo },
+    });
+    if (existing) {
+      logger.info(`[Stripe Webhook] Factura ya existe para ${companyId} periodo ${periodo}`);
+      return;
+    }
+
+    const { generateInvoiceNumber } = await import('@/lib/b2b-billing-service');
+    const numeroFactura = await generateInvoiceNumber();
+
+    const subtotal = plan.precioMensual;
+    const impuestos = Math.round(subtotal * 0.21 * 100) / 100;
+    const total = Math.round((subtotal + impuestos) * 100) / 100;
+
+    const conceptos = [
+      {
+        descripcion: `Suscripción ${plan.nombre} - ${mesLabel}`,
+        cantidad: 1,
+        precioUnitario: plan.precioMensual,
+        total: plan.precioMensual,
+      },
+    ];
+
+    const invoice = await prisma.b2BInvoice.create({
+      data: {
+        companyId,
+        numeroFactura,
+        periodo,
+        subscriptionPlanId: plan.id,
+        subtotal,
+        descuento: 0,
+        impuestos,
+        total,
+        estado: 'PAGADA',
+        metodoPago: 'stripe',
+        fechaPago: now,
+        fechaVencimiento: now,
+        conceptos,
+        terminosPago: 'Cobro automático',
+      },
+    });
+
+    logger.info(`[Stripe Webhook] Factura B2B generada: ${numeroFactura} (€${total})`);
+
+    await prisma.b2BPaymentHistory.create({
+      data: {
+        companyId,
+        invoiceId: invoice.id,
+        monto: total,
+        metodoPago: 'stripe',
+        fechaPago: now,
+        estado: 'completado',
+        stripePaymentId:
+          typeof subscription.latest_invoice === 'string'
+            ? subscription.latest_invoice
+            : null,
+      },
+    });
+
+    // Sincronizar con Contasimple si está configurado
+    let contasimpleSynced = false;
+    try {
+      const { getInmovaContasimpleBridge } = await import('@/lib/inmova-contasimple-bridge');
+      const bridge = getInmovaContasimpleBridge();
+
+      if (bridge.isConfigured()) {
+        await bridge.syncB2BInvoiceToContasimple(invoice.id);
+        contasimpleSynced = true;
+        logger.info(`[Stripe Webhook] Factura ${numeroFactura} sincronizada con Contasimple y enviada`);
+      }
+    } catch (csError) {
+      logger.warn('[Stripe Webhook] Contasimple sync error:', csError);
+    }
+
+    // Si Contasimple no envió el email, lo enviamos directamente
+    if (!contasimpleSynced) {
+      await sendInvoiceEmailDirect(invoice, company, plan, conceptos, mesLabel);
+    }
+
+    await prisma.notification.create({
+      data: {
+        companyId,
+        tipo: 'info',
+        titulo: 'Suscripción activada',
+        mensaje: `Tu suscripción al plan ${plan.nombre} ha sido activada. Factura ${numeroFactura} generada.`,
+        entityId: invoice.id,
+        entityType: 'B2B_INVOICE',
+      },
+    });
+  } catch (error) {
+    logger.error('[Stripe Webhook] Error generando factura B2B:', error);
+    Sentry.captureException(error);
+  }
+}
+
+/**
+ * Envía factura por email directamente (fallback cuando Contasimple no disponible)
+ */
+async function sendInvoiceEmailDirect(
+  invoice: any,
+  company: any,
+  plan: any,
+  conceptos: any[],
+  mesLabel: string,
+) {
+  try {
+    const email = company.emailContacto || company.email;
+    if (!email) {
+      logger.warn(`[Stripe Webhook] Empresa ${company.id} sin email para factura`);
+      return;
+    }
+
+    const { sendEmail } = await import('@/lib/email-config');
+
+    const itemsHtml = conceptos
+      .map(
+        (c: any) =>
+          `<tr>
+            <td style="padding:8px;border-bottom:1px solid #eee;">${c.descripcion}</td>
+            <td style="padding:8px;border-bottom:1px solid #eee;text-align:center;">${c.cantidad}</td>
+            <td style="padding:8px;border-bottom:1px solid #eee;text-align:right;">€${Number(c.precioUnitario).toFixed(2)}</td>
+            <td style="padding:8px;border-bottom:1px solid #eee;text-align:right;">€${Number(c.total).toFixed(2)}</td>
+          </tr>`,
+      )
+      .join('');
+
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
+    <body style="font-family:Arial,sans-serif;color:#333;max-width:700px;margin:0 auto;">
+      <div style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:30px;text-align:center;border-radius:8px 8px 0 0;">
+        <h1 style="margin:0;">INMOVA</h1>
+        <p style="margin:5px 0 0;opacity:0.9;">Factura de Suscripción</p>
+      </div>
+      <div style="background:#f9f9f9;padding:30px;border-radius:0 0 8px 8px;">
+        <p>Hola ${company.nombre},</p>
+        <p>Adjuntamos tu factura correspondiente a tu suscripción INMOVA.</p>
+        <div style="background:white;border:1px solid #e5e7eb;border-radius:8px;padding:20px;margin:20px 0;">
+          <table style="width:100%;margin-bottom:15px;"><tr>
+            <td><strong>Factura:</strong> ${invoice.numeroFactura}<br/><strong>Fecha:</strong> ${new Date().toLocaleDateString('es-ES')}<br/><strong>Período:</strong> ${mesLabel}</td>
+            <td style="text-align:right;"><strong>Plan:</strong> ${plan.nombre}<br/><strong>Estado:</strong> <span style="color:#10b981;font-weight:bold;">Pagada</span></td>
+          </tr></table>
+          <table style="width:100%;border-collapse:collapse;">
+            <thead><tr style="background:#f3f4f6;">
+              <th style="padding:8px;text-align:left;">Concepto</th>
+              <th style="padding:8px;text-align:center;">Ud.</th>
+              <th style="padding:8px;text-align:right;">Precio</th>
+              <th style="padding:8px;text-align:right;">Total</th>
+            </tr></thead>
+            <tbody>${itemsHtml}</tbody>
+          </table>
+          <div style="margin-top:15px;text-align:right;">
+            <p style="margin:4px 0;">Subtotal: <strong>€${Number(invoice.subtotal).toFixed(2)}</strong></p>
+            <p style="margin:4px 0;">IVA (21%): <strong>€${Number(invoice.impuestos).toFixed(2)}</strong></p>
+            <p style="margin:4px 0;font-size:18px;color:#4F46E5;">Total: <strong>€${Number(invoice.total).toFixed(2)}</strong></p>
+          </div>
+        </div>
+        <p style="color:#6b7280;font-size:13px;">Este cobro se ha realizado automáticamente a través de Stripe. Si tienes alguna pregunta, contacta con facturacion@inmova.app</p>
+        <div style="text-align:center;margin-top:20px;">
+          <a href="${process.env.NEXTAUTH_URL || 'https://inmovaapp.com'}/dashboard/billing" style="background:#4F46E5;color:white;padding:12px 30px;text-decoration:none;border-radius:6px;display:inline-block;">Ver mis facturas</a>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:20px;color:#9ca3af;font-size:12px;">
+        <p>INMOVA PROPTECH SL · CIF: ${process.env.INMOVA_CIF || 'B12345678'} · ${process.env.INMOVA_DIRECCION || 'Madrid, España'}</p>
+      </div>
+    </body></html>`;
+
+    await sendEmail({
+      to: email,
+      subject: `Factura ${invoice.numeroFactura} - Suscripción INMOVA ${plan.nombre}`,
+      html,
+    });
+
+    logger.info(`[Stripe Webhook] Factura ${invoice.numeroFactura} enviada por email a ${email}`);
+  } catch (emailError) {
+    logger.error('[Stripe Webhook] Error enviando factura por email:', emailError);
   }
 }

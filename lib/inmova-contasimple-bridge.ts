@@ -10,7 +10,6 @@
  * 4. Mantiene contabilidad oficial de ingresos B2B
  */
 
-import { prisma } from './db';
 import {
   ContaSimpleIntegrationService,
   type ContaSimpleCustomer,
@@ -21,6 +20,11 @@ import {
 import logger from './logger';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 let contasimpleConfigLogged = false;
 let contasimpleConfiguredLogged = false;
@@ -98,6 +102,7 @@ export class InmovaContasimpleBridge {
     }
 
     try {
+      const prisma = await getPrisma();
       // 1. Obtener factura de BD
       const b2bInvoice = await prisma.b2BInvoice.findUnique({
         where: { id: b2bInvoiceId },
@@ -141,7 +146,6 @@ export class InmovaContasimpleBridge {
         paymentMethod: this.mapPaymentMethod(b2bInvoice.metodoPago),
       });
 
-      // 5. Guardar ID de Contasimple en BD
       await prisma.b2BInvoice.update({
         where: { id: b2bInvoiceId },
         data: {
@@ -186,7 +190,7 @@ export class InmovaContasimpleBridge {
     }
 
     try {
-      // 1. Obtener factura
+      const prisma = await getPrisma();
       const b2bInvoice = await prisma.b2BInvoice.findUnique({
         where: { id: b2bInvoiceId },
       });
@@ -204,7 +208,6 @@ export class InmovaContasimpleBridge {
 
       logger.info(`[Inmova-Contasimple] Registrando pago para factura ${b2bInvoice.numeroFactura}...`);
 
-      // 2. Registrar pago en Contasimple
       const payment = await this.contasimple.registerPayment({
         invoiceId: b2bInvoice.contasimpleInvoiceId,
         date: paymentData.date,
@@ -213,7 +216,6 @@ export class InmovaContasimpleBridge {
         reference: `Stripe: ${paymentData.stripePaymentIntentId}`,
       });
 
-      // 3. Actualizar estado de factura en BD local
       await prisma.b2BInvoice.update({
         where: { id: b2bInvoiceId },
         data: {
@@ -239,6 +241,7 @@ export class InmovaContasimpleBridge {
     synced: number;
     errors: number;
   }> {
+    const prisma = await getPrisma();
     const invoices = await prisma.b2BInvoice.findMany({
       where: {
         fechaEmision: {
@@ -297,7 +300,7 @@ export class InmovaContasimpleBridge {
       customerType: 'business',
     });
 
-    // Guardar ID en BD para futuras referencias
+    const prisma = await getPrisma();
     await prisma.company.update({
       where: { id: company.id },
       data: {
