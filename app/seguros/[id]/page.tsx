@@ -121,70 +121,47 @@ export default function InsuranceDetailPage() {
   const loadInsurance = async () => {
     try {
       setLoading(true);
-      // TODO: Llamar a API real
-      // const response = await fetch(`/api/insurances/${insuranceId}`);
-      // const data = await response.json();
-      // setInsurance(data);
-
-      // Datos de ejemplo
-      const mockInsurance: Insurance = {
-        id: insuranceId,
-        type: 'Hogar',
-        provider: 'Mapfre',
-        policyNumber: 'POL-2024-001234',
-        status: 'ACTIVE',
-        startDate: '2024-01-01',
-        endDate: '2024-12-31',
-        annualPremium: 350,
-        coverage: 250000,
-        propertyAddress: 'Calle Mayor 123, Madrid',
-        propertyId: 'prop_123',
-        contactName: 'Juan García',
-        contactPhone: '+34 600 000 000',
-        contactEmail: 'juan@mapfre.com',
-        notes: 'Incluye cobertura de contenido hasta €50,000',
-        documents: [
-          {
-            id: 'doc_1',
-            name: 'Poliza_2024.pdf',
-            type: 'POLICY',
-            url: '/documents/poliza.pdf',
-            uploadedAt: '2024-01-01T10:00:00Z',
-            size: 2456789,
-          },
-          {
-            id: 'doc_2',
-            name: 'Condiciones_Generales.pdf',
-            type: 'TERMS',
-            url: '/documents/terms.pdf',
-            uploadedAt: '2024-01-01T10:05:00Z',
-            size: 5234567,
-          },
-        ],
-        claims: [
-          {
-            id: 'claim_1',
-            claimNumber: 'SIN-2024-001',
-            type: 'WATER_DAMAGE',
-            description: 'Fuga de agua en cocina causó daños en suelo y muebles',
-            reportedDate: '2024-03-15T14:30:00Z',
-            amount: 4500,
-            status: 'APPROVED',
-            resolvedDate: '2024-04-10T10:00:00Z',
-          },
-          {
-            id: 'claim_2',
-            claimNumber: 'SIN-2024-002',
-            type: 'THEFT',
-            description: 'Robo de electrodomésticos',
-            reportedDate: '2024-06-20T09:00:00Z',
-            amount: 2300,
-            status: 'IN_REVIEW',
-          },
-        ],
-      };
-
-      setInsurance(mockInsurance);
+      const response = await fetch(`/api/seguros/${insuranceId}`);
+      if (!response.ok) {
+        throw new Error('Error al cargar el seguro');
+      }
+      const data = await response.json();
+      const seguro = data.data || data;
+      setInsurance({
+        id: seguro.id,
+        type: seguro.tipo || seguro.type || 'Hogar',
+        provider: seguro.aseguradora || seguro.provider || '',
+        policyNumber: seguro.numeroPoliza || seguro.policyNumber || '',
+        status: seguro.estado || seguro.status || 'ACTIVE',
+        startDate: seguro.fechaInicio || seguro.startDate || '',
+        endDate: seguro.fechaFin || seguro.endDate || '',
+        annualPremium: seguro.primaAnual || seguro.annualPremium || 0,
+        coverage: seguro.cobertura || seguro.coverage || 0,
+        propertyAddress: seguro.building?.direccion || seguro.propertyAddress || '',
+        propertyId: seguro.buildingId || seguro.propertyId || '',
+        contactName: seguro.contactoNombre || seguro.contactName || '',
+        contactPhone: seguro.contactoTelefono || seguro.contactPhone || '',
+        contactEmail: seguro.contactoEmail || seguro.contactEmail || '',
+        notes: seguro.notas || seguro.notes || '',
+        documents: (seguro.documents || []).map((d: any) => ({
+          id: d.id,
+          name: d.nombre || d.name || '',
+          type: d.tipo || d.type || 'OTHER',
+          url: d.url || '',
+          uploadedAt: d.createdAt || d.uploadedAt || '',
+          size: d.size || 0,
+        })),
+        claims: (seguro.claims || []).map((c: any) => ({
+          id: c.id,
+          claimNumber: c.numeroSiniestro || c.claimNumber || '',
+          type: c.tipo || c.type || '',
+          description: c.descripcion || c.description || '',
+          reportedDate: c.fechaReporte || c.reportedDate || '',
+          amount: c.monto || c.amount || 0,
+          status: c.estado || c.status || 'IN_REVIEW',
+          resolvedDate: c.fechaResolucion || c.resolvedDate,
+        })),
+      });
     } catch (error) {
       console.error('Error loading insurance:', error);
       toast.error('Error al cargar el seguro');

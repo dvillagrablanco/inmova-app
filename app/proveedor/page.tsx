@@ -66,50 +66,34 @@ export default function ProveedorDashboard() {
   const loadDashboard = async () => {
     try {
       setLoading(true);
-      // TODO: Cargar datos reales del API
-      // const response = await fetch('/api/proveedor/dashboard');
-
-      // Mock data para demostración
-      setStats({
-        serviciosActivos: 5,
-        reservasEsteMes: 23,
-        reservasPendientes: 4,
-        ingresosMes: 2450,
-        valoracionMedia: 4.8,
-        totalValoraciones: 47,
-      });
-
-      setRecentBookings([
-        {
-          id: '1',
-          servicio: 'Limpieza profunda',
-          cliente: 'María García',
-          fecha: '2026-01-10',
-          hora: '10:00',
-          estado: 'pendiente',
-          precio: 80,
-        },
-        {
-          id: '2',
-          servicio: 'Reparación fontanería',
-          cliente: 'Carlos Ruiz',
-          fecha: '2026-01-10',
-          hora: '14:00',
-          estado: 'confirmada',
-          precio: 120,
-        },
-        {
-          id: '3',
-          servicio: 'Limpieza regular',
-          cliente: 'Ana López',
-          fecha: '2026-01-09',
-          hora: '09:00',
-          estado: 'completada',
-          precio: 45,
-        },
-      ]);
+      const response = await fetch('/api/portal-proveedor/dashboard');
+      if (response.ok) {
+        const data = await response.json();
+        setStats({
+          serviciosActivos: data.serviciosActivos ?? 0,
+          reservasEsteMes: data.reservasEsteMes ?? 0,
+          reservasPendientes: data.reservasPendientes ?? 0,
+          ingresosMes: data.ingresosMes ?? 0,
+          valoracionMedia: data.valoracionMedia ?? 0,
+          totalValoraciones: data.totalValoraciones ?? 0,
+        });
+        setRecentBookings((data.recentBookings || []).map((b: any) => ({
+          id: b.id,
+          servicio: b.servicio || b.service?.nombre || '',
+          cliente: b.cliente || b.tenant?.nombreCompleto || '',
+          fecha: b.fecha || b.fechaReserva || '',
+          hora: b.hora || '',
+          estado: b.estado || 'pendiente',
+          precio: b.precio || b.monto || 0,
+        })));
+      } else {
+        setStats({ serviciosActivos: 0, reservasEsteMes: 0, reservasPendientes: 0, ingresosMes: 0, valoracionMedia: 0, totalValoraciones: 0 });
+        setRecentBookings([]);
+      }
     } catch (error) {
-      toast.error('Error al cargar dashboard');
+      console.error('Error loading dashboard:', error);
+      setStats({ serviciosActivos: 0, reservasEsteMes: 0, reservasPendientes: 0, ingresosMes: 0, valoracionMedia: 0, totalValoraciones: 0 });
+      setRecentBookings([]);
     } finally {
       setLoading(false);
     }

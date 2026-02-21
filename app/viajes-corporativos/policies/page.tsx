@@ -143,9 +143,28 @@ const PROVEEDORES = [
 ];
 
 export default function ViajesCorporativosPoliciesPage() {
-  const [politicas, setPoliticas] = useState(POLITICAS);
+  const [politicas, setPoliticas] = useState<any[]>([]);
   const [editandoPolitica, setEditandoPolitica] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch('/api/viajes-corporativos/policies');
+        if (res.ok) {
+          const data = await res.json();
+          setPoliticas(data.data || data || []);
+        } else {
+          setPoliticas([]);
+        }
+      } catch {
+        setPoliticas([]);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
 
   const handleTogglePolitica = (id: string) => {
     setPoliticas(prev =>

@@ -110,7 +110,7 @@ export default function PartnerLandingsPage() {
           colorPrimario: '#4F46E5',
           colorSecundario: '#818CF8',
           estado: p.status === 'ACTIVE' ? 'published' : 'draft',
-          visitas: Math.floor(Math.random() * 1000), // TODO: Conectar con analytics real
+          visitas: p.totalVisits || 0,
           conversiones: p.totalClients || 0,
           createdAt: p.createdAt,
           updatedAt: p.createdAt,

@@ -310,17 +310,41 @@ export default function IoTPage() {
     return `Hace ${Math.floor(diff / 86400)}d`;
   };
 
-  // Mock data para gráficos
-  const temperatureData = Array.from({ length: 24 }, (_, i) => ({
-    time: `${i}:00`,
-    temp: 18 + Math.random() * 6,
-    target: 21,
-  }));
+  const temperatureData = devices
+    .filter((d: any) => d.tipo === 'termostato' || d.type === 'thermostat')
+    .slice(0, 1)
+    .flatMap((d: any) => {
+      const readings = d.readings || d.lecturas || [];
+      if (readings.length > 0) {
+        return readings.slice(-24).map((r: any, i: number) => ({
+          time: new Date(r.timestamp || r.fecha).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+          temp: r.value || r.valor || 0,
+          target: d.targetTemp || 21,
+        }));
+      }
+      return Array.from({ length: 24 }, (_, i) => ({
+        time: `${i}:00`,
+        temp: 0,
+        target: 21,
+      }));
+    });
 
-  const energyData = Array.from({ length: 7 }, (_, i) => ({
-    day: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'][i],
-    consumption: 15 + Math.random() * 10,
-  }));
+  const energyData = devices
+    .filter((d: any) => d.tipo === 'medidor_energia' || d.type === 'energy_meter')
+    .slice(0, 1)
+    .flatMap((d: any) => {
+      const readings = d.readings || d.lecturas || [];
+      if (readings.length > 0) {
+        return readings.slice(-7).map((r: any, i: number) => ({
+          day: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'][i % 7],
+          consumption: r.value || r.valor || 0,
+        }));
+      }
+      return Array.from({ length: 7 }, (_, i) => ({
+        day: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'][i],
+        consumption: 0,
+      }));
+    });
 
   if (status === 'unauthenticated') {
     router.push('/login');

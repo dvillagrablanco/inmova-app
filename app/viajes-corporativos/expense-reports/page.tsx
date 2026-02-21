@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -95,17 +95,30 @@ const ALERTAS_PRESUPUESTO = [
 export default function ViajesCorporativosExpenseReportsPage() {
   const [periodoSeleccionado, setPeriodoSeleccionado] = useState('enero-2026');
   const [vistaActiva, setVistaActiva] = useState<'resumen' | 'departamentos' | 'informes'>('resumen');
+  const [apiStats, setApiStats] = useState<any>(null);
 
-  const stats = {
-    gastoMes: 84500,
-    presupuestoMes: 100000,
-    ahorro: 15500,
-    ahorroVsMercado: 18,
-    viajesRealizados: 128,
-    costoPromedio: 660,
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch('/api/viajes-corporativos/stats');
+        if (res.ok) {
+          const data = await res.json();
+          setApiStats(data.data || data);
+        }
+      } catch { /* use defaults */ }
+    })();
+  }, []);
+
+  const stats = apiStats || {
+    gastoMes: 0,
+    presupuestoMes: 0,
+    ahorro: 0,
+    ahorroVsMercado: 0,
+    viajesRealizados: 0,
+    costoPromedio: 0,
   };
 
-  const porcentajePresupuesto = (stats.gastoMes / stats.presupuestoMes) * 100;
+  const porcentajePresupuesto = stats.presupuestoMes > 0 ? (stats.gastoMes / stats.presupuestoMes) * 100 : 0;
 
   const handleDescargarInforme = (informe: typeof INFORMES[0], formato: string) => {
     toast.success(`Descargando ${informe.nombre} en formato ${formato.toUpperCase()}`);

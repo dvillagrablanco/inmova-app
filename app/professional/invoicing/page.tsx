@@ -71,78 +71,30 @@ export default function ProfessionalInvoicingPage() {
   const loadInvoices = async () => {
     try {
       setLoading(true);
-      
-      // Mock data
-      setInvoices([
-        {
-          id: 'inv1',
-          number: 'FAC-2025-001',
-          clientId: 'c1',
-          clientName: 'María García López',
-          issueDate: '2025-12-01',
-          dueDate: '2025-12-15',
-          amount: 850,
-          status: 'paid',
-          items: [
-            { description: 'Gestión de 5 propiedades - Diciembre 2025', quantity: 1, unitPrice: 850, total: 850 },
-          ],
-        },
-        {
-          id: 'inv2',
-          number: 'FAC-2025-002',
-          clientId: 'c2',
-          clientName: 'Inversiones Urbanas SL',
-          issueDate: '2025-12-01',
-          dueDate: '2025-12-15',
-          amount: 2400,
-          status: 'paid',
-          items: [
-            { description: 'Gestión de 12 propiedades - Diciembre 2025', quantity: 1, unitPrice: 2400, total: 2400 },
-          ],
-        },
-        {
-          id: 'inv3',
-          number: 'FAC-2025-003',
-          clientId: 'c3',
-          clientName: 'Carlos Rodríguez',
-          issueDate: '2025-12-01',
-          dueDate: '2025-12-15',
-          amount: 450,
-          status: 'sent',
-          items: [
-            { description: 'Gestión de 3 propiedades - Diciembre 2025', quantity: 1, unitPrice: 450, total: 450 },
-          ],
-        },
-        {
-          id: 'inv4',
-          number: 'FAC-2025-004',
-          clientId: 'c5',
-          clientName: 'Propiedades del Sur SA',
-          issueDate: '2025-11-01',
-          dueDate: '2025-11-15',
-          amount: 1600,
-          status: 'overdue',
-          items: [
-            { description: 'Gestión de 8 propiedades - Noviembre 2025', quantity: 1, unitPrice: 1600, total: 1600 },
-          ],
-          notes: 'Pago vencido. Enviado recordatorio 3 veces.',
-        },
-        {
-          id: 'inv5',
-          number: 'FAC-2026-001',
-          clientId: 'c1',
-          clientName: 'María García López',
-          issueDate: '2026-01-01',
-          dueDate: '2026-01-15',
-          amount: 850,
-          status: 'draft',
-          items: [
-            { description: 'Gestión de 5 propiedades - Enero 2026', quantity: 1, unitPrice: 850, total: 850 },
-          ],
-        },
-      ]);
+      const response = await fetch('/api/b2b-billing/invoices');
+      if (!response.ok) throw new Error('Error loading invoices');
+      const data = await response.json();
+      const invoiceList = (data.data || data.invoices || []).map((inv: any) => ({
+        id: inv.id,
+        number: inv.numeroFactura || inv.number || '',
+        clientId: inv.companyId || '',
+        clientName: inv.company?.nombre || inv.clientName || '',
+        issueDate: inv.fechaEmision || inv.issueDate || '',
+        dueDate: inv.fechaVencimiento || inv.dueDate || '',
+        amount: inv.total || inv.amount || 0,
+        status: (inv.estado || inv.status || 'draft').toLowerCase().replace('pendiente', 'sent').replace('pagada', 'paid').replace('vencida', 'overdue').replace('cancelada', 'cancelled'),
+        items: (inv.conceptos || inv.items || []).map((item: any) => ({
+          description: item.descripcion || item.description || '',
+          quantity: item.cantidad || item.quantity || 1,
+          unitPrice: item.precioUnitario || item.unitPrice || 0,
+          total: item.total || 0,
+        })),
+        notes: inv.notas || inv.notes || '',
+      }));
+      setInvoices(invoiceList);
     } catch (error) {
-      toast.error('Error al cargar facturas');
+      console.error('Error loading invoices:', error);
+      setInvoices([]);
     } finally {
       setLoading(false);
     }
@@ -189,15 +141,17 @@ export default function ProfessionalInvoicingPage() {
     ? invoices 
     : invoices.filter(inv => inv.status === selectedTab);
 
-  // Mock chart data
-  const monthlyData = [
-    { month: 'Jul', amount: 4200 },
-    { month: 'Ago', amount: 4800 },
-    { month: 'Sep', amount: 5100 },
-    { month: 'Oct', amount: 4900 },
-    { month: 'Nov', amount: 5300 },
-    { month: 'Dic', amount: 5700 },
-  ];
+  const monthlyData = (() => {
+    const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    const grouped: Record<string, number> = {};
+    invoices.forEach(inv => {
+      if (!inv.issueDate) return;
+      const d = new Date(inv.issueDate);
+      const key = months[d.getMonth()] || '';
+      grouped[key] = (grouped[key] || 0) + inv.amount;
+    });
+    return Object.entries(grouped).map(([month, amount]) => ({ month, amount }));
+  })();
 
   if (status === 'unauthenticated') {
     router.push('/login');

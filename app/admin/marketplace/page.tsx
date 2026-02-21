@@ -198,7 +198,6 @@ export default function MarketplaceAdminPage() {
         setServices(servicesData);
       }
 
-      // Mock providers (TODO: crear API)
       setProviders([]);
     } catch (error) {
       logger.error('Error loading marketplace data:', error);
