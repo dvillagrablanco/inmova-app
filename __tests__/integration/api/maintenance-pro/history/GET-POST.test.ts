@@ -22,7 +22,7 @@ describe.skip('API: /maintenance-pro/history', () => {
     // authToken = data.token;
   });
 
-  describe('GET /maintenance-pro/history', () => {
+  describe.skip('GET /maintenance-pro/history', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/maintenance-pro/history`;
       
@@ -71,7 +71,7 @@ describe.skip('API: /maintenance-pro/history', () => {
     
   });
 
-  describe('POST /maintenance-pro/history', () => {
+  describe.skip('POST /maintenance-pro/history', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/maintenance-pro/history`;
       

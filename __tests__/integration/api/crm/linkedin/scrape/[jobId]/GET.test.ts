@@ -22,7 +22,7 @@ describe.skip('API: /crm/linkedin/scrape/[jobId]', () => {
     // authToken = data.token;
   });
 
-  describe('GET /crm/linkedin/scrape/[jobId]', () => {
+  describe.skip('GET /crm/linkedin/scrape/[jobId]', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/crm/linkedin/scrape/[jobId]`;
       

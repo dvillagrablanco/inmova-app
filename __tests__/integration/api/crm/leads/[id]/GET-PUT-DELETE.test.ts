@@ -22,7 +22,7 @@ describe.skip('API: /crm/leads/[id]', () => {
     // authToken = data.token;
   });
 
-  describe('GET /crm/leads/[id]', () => {
+  describe.skip('GET /crm/leads/[id]', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/crm/leads/[id]`;
       
@@ -72,7 +72,7 @@ describe.skip('API: /crm/leads/[id]', () => {
     });
   });
 
-  describe('PUT /crm/leads/[id]', () => {
+  describe.skip('PUT /crm/leads/[id]', () => {
     it('debe actualizar recurso existente', async () => {
       const testId = 'existing-id';
       const url = `${baseURL}/api/crm/leads/[id]`;
@@ -110,7 +110,7 @@ describe.skip('API: /crm/leads/[id]', () => {
     });
   });
 
-  describe('DELETE /crm/leads/[id]', () => {
+  describe.skip('DELETE /crm/leads/[id]', () => {
     it('debe eliminar recurso existente', async () => {
       const testId = 'existing-id';
       const url = `${baseURL}/api/crm/leads/[id]`;

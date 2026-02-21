@@ -22,7 +22,7 @@ describe.skip('API: /coliving/profiles', () => {
     // authToken = data.token;
   });
 
-  describe('GET /coliving/profiles', () => {
+  describe.skip('GET /coliving/profiles', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/coliving/profiles`;
       
@@ -71,7 +71,7 @@ describe.skip('API: /coliving/profiles', () => {
     
   });
 
-  describe('POST /coliving/profiles', () => {
+  describe.skip('POST /coliving/profiles', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/coliving/profiles`;
       
@@ -129,7 +129,7 @@ describe.skip('API: /coliving/profiles', () => {
     });
   });
 
-  describe('PATCH /coliving/profiles', () => {
+  describe.skip('PATCH /coliving/profiles', () => {
     it('debe actualizar recurso existente', async () => {
       const testId = 'existing-id';
       const url = `${baseURL}/api/coliving/profiles`;

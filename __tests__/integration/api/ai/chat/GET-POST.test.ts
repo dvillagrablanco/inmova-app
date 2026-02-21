@@ -22,7 +22,7 @@ describe.skip('API: /ai/chat', () => {
     // authToken = data.token;
   });
 
-  describe('GET /ai/chat', () => {
+  describe.skip('GET /ai/chat', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/ai/chat`;
       
@@ -71,7 +71,7 @@ describe.skip('API: /ai/chat', () => {
     
   });
 
-  describe('POST /ai/chat', () => {
+  describe.skip('POST /ai/chat', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/ai/chat`;
       

@@ -22,7 +22,7 @@ describe.skip('API: /user/switch-company', () => {
     // authToken = data.token;
   });
 
-  describe('POST /user/switch-company', () => {
+  describe.skip('POST /user/switch-company', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/user/switch-company`;
       

@@ -22,7 +22,7 @@ describe.skip('API: /open-banking/redsys/.disabled/consents', () => {
     // authToken = data.token;
   });
 
-  describe('GET /open-banking/redsys/.disabled/consents', () => {
+  describe.skip('GET /open-banking/redsys/.disabled/consents', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/open-banking/redsys/.disabled/consents`;
       
@@ -71,7 +71,7 @@ describe.skip('API: /open-banking/redsys/.disabled/consents', () => {
     
   });
 
-  describe('POST /open-banking/redsys/.disabled/consents', () => {
+  describe.skip('POST /open-banking/redsys/.disabled/consents', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/open-banking/redsys/.disabled/consents`;
       

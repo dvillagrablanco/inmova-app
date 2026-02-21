@@ -22,7 +22,7 @@ describe.skip('API: /ai/detect-business-model', () => {
     // authToken = data.token;
   });
 
-  describe('POST /ai/detect-business-model', () => {
+  describe.skip('POST /ai/detect-business-model', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/ai/detect-business-model`;
       

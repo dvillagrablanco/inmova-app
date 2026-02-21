@@ -22,7 +22,7 @@ describe.skip('API: /notifications/mark-all-read', () => {
     // authToken = data.token;
   });
 
-  describe('PATCH /notifications/mark-all-read', () => {
+  describe.skip('PATCH /notifications/mark-all-read', () => {
     it('debe actualizar recurso existente', async () => {
       const testId = 'existing-id';
       const url = `${baseURL}/api/notifications/mark-all-read`;

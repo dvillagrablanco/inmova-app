@@ -22,7 +22,7 @@ describe.skip('API: /ewoorker/compliance/upload', () => {
     // authToken = data.token;
   });
 
-  describe('POST /ewoorker/compliance/upload', () => {
+  describe.skip('POST /ewoorker/compliance/upload', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/ewoorker/compliance/upload`;
       

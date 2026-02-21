@@ -22,7 +22,7 @@ describe.skip('API: /audit/security-events', () => {
     // authToken = data.token;
   });
 
-  describe('GET /audit/security-events', () => {
+  describe.skip('GET /audit/security-events', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/audit/security-events`;
       
@@ -71,7 +71,7 @@ describe.skip('API: /audit/security-events', () => {
     
   });
 
-  describe('POST /audit/security-events', () => {
+  describe.skip('POST /audit/security-events', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/audit/security-events`;
       
@@ -129,7 +129,7 @@ describe.skip('API: /audit/security-events', () => {
     });
   });
 
-  describe('PATCH /audit/security-events', () => {
+  describe.skip('PATCH /audit/security-events', () => {
     it('debe actualizar recurso existente', async () => {
       const testId = 'existing-id';
       const url = `${baseURL}/api/audit/security-events`;

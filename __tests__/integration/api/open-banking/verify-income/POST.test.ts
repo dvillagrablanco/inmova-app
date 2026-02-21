@@ -22,7 +22,7 @@ describe.skip('API: /open-banking/verify-income', () => {
     // authToken = data.token;
   });
 
-  describe('POST /open-banking/verify-income', () => {
+  describe.skip('POST /open-banking/verify-income', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/open-banking/verify-income`;
       

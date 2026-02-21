@@ -22,7 +22,7 @@ describe.skip('API: /str/channels/disconnect', () => {
     // authToken = data.token;
   });
 
-  describe('POST /str/channels/disconnect', () => {
+  describe.skip('POST /str/channels/disconnect', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/str/channels/disconnect`;
       

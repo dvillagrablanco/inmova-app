@@ -22,7 +22,7 @@ describe.skip('API: /open-banking/redsys/.disabled/callback', () => {
     // authToken = data.token;
   });
 
-  describe('GET /open-banking/redsys/.disabled/callback', () => {
+  describe.skip('GET /open-banking/redsys/.disabled/callback', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/open-banking/redsys/.disabled/callback`;
       

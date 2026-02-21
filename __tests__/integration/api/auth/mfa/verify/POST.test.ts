@@ -22,7 +22,7 @@ describe.skip('API: /auth/mfa/verify', () => {
     // authToken = data.token;
   });
 
-  describe('POST /auth/mfa/verify', () => {
+  describe.skip('POST /auth/mfa/verify', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/auth/mfa/verify`;
       

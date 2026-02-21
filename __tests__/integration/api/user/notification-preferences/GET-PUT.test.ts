@@ -22,7 +22,7 @@ describe.skip('API: /user/notification-preferences', () => {
     // authToken = data.token;
   });
 
-  describe('GET /user/notification-preferences', () => {
+  describe.skip('GET /user/notification-preferences', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/user/notification-preferences`;
       
@@ -71,7 +71,7 @@ describe.skip('API: /user/notification-preferences', () => {
     
   });
 
-  describe('PUT /user/notification-preferences', () => {
+  describe.skip('PUT /user/notification-preferences', () => {
     it('debe actualizar recurso existente', async () => {
       const testId = 'existing-id';
       const url = `${baseURL}/api/user/notification-preferences`;

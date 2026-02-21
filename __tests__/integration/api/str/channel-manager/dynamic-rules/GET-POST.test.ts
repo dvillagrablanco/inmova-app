@@ -22,7 +22,7 @@ describe.skip('API: /str/channel-manager/dynamic-rules', () => {
     // authToken = data.token;
   });
 
-  describe('GET /str/channel-manager/dynamic-rules', () => {
+  describe.skip('GET /str/channel-manager/dynamic-rules', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/str/channel-manager/dynamic-rules`;
       
@@ -71,7 +71,7 @@ describe.skip('API: /str/channel-manager/dynamic-rules', () => {
     
   });
 
-  describe('POST /str/channel-manager/dynamic-rules', () => {
+  describe.skip('POST /str/channel-manager/dynamic-rules', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/str/channel-manager/dynamic-rules`;
       

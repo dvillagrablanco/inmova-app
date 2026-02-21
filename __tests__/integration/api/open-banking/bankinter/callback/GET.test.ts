@@ -22,7 +22,7 @@ describe.skip('API: /open-banking/bankinter/callback', () => {
     // authToken = data.token;
   });
 
-  describe('GET /open-banking/bankinter/callback', () => {
+  describe.skip('GET /open-banking/bankinter/callback', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/open-banking/bankinter/callback`;
       

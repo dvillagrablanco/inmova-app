@@ -22,7 +22,7 @@ describe.skip('API: /notifications/[id]/read', () => {
     // authToken = data.token;
   });
 
-  describe('PATCH /notifications/[id]/read', () => {
+  describe.skip('PATCH /notifications/[id]/read', () => {
     it('debe actualizar recurso existente', async () => {
       const testId = 'existing-id';
       const url = `${baseURL}/api/notifications/[id]/read`;

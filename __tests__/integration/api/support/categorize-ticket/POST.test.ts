@@ -22,7 +22,7 @@ describe.skip('API: /support/categorize-ticket', () => {
     // authToken = data.token;
   });
 
-  describe('POST /support/categorize-ticket', () => {
+  describe.skip('POST /support/categorize-ticket', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/support/categorize-ticket`;
       

@@ -22,7 +22,7 @@ describe.skip('API: /support/ai-ticket/[id]', () => {
     // authToken = data.token;
   });
 
-  describe('GET /support/ai-ticket/[id]', () => {
+  describe.skip('GET /support/ai-ticket/[id]', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/support/ai-ticket/[id]`;
       
@@ -72,7 +72,7 @@ describe.skip('API: /support/ai-ticket/[id]', () => {
     });
   });
 
-  describe('POST /support/ai-ticket/[id]', () => {
+  describe.skip('POST /support/ai-ticket/[id]', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/support/ai-ticket/[id]`;
       
@@ -130,7 +130,7 @@ describe.skip('API: /support/ai-ticket/[id]', () => {
     });
   });
 
-  describe('PATCH /support/ai-ticket/[id]', () => {
+  describe.skip('PATCH /support/ai-ticket/[id]', () => {
     it('debe actualizar recurso existente', async () => {
       const testId = 'existing-id';
       const url = `${baseURL}/api/support/ai-ticket/[id]`;

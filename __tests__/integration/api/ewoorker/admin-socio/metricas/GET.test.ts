@@ -22,7 +22,7 @@ describe.skip('API: /ewoorker/admin-socio/metricas', () => {
     // authToken = data.token;
   });
 
-  describe('GET /ewoorker/admin-socio/metricas', () => {
+  describe.skip('GET /ewoorker/admin-socio/metricas', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/ewoorker/admin-socio/metricas`;
       

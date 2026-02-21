@@ -22,7 +22,7 @@ describe.skip('API: /str/channels/[listingId]/sync', () => {
     // authToken = data.token;
   });
 
-  describe('POST /str/channels/[listingId]/sync', () => {
+  describe.skip('POST /str/channels/[listingId]/sync', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/str/channels/[listingId]/sync`;
       

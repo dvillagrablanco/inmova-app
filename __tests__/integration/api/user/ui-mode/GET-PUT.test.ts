@@ -22,7 +22,7 @@ describe.skip('API: /user/ui-mode', () => {
     // authToken = data.token;
   });
 
-  describe('GET /user/ui-mode', () => {
+  describe.skip('GET /user/ui-mode', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/user/ui-mode`;
       
@@ -71,7 +71,7 @@ describe.skip('API: /user/ui-mode', () => {
     
   });
 
-  describe('PUT /user/ui-mode', () => {
+  describe.skip('PUT /user/ui-mode', () => {
     it('debe actualizar recurso existente', async () => {
       const testId = 'existing-id';
       const url = `${baseURL}/api/user/ui-mode`;

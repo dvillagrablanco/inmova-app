@@ -22,7 +22,7 @@ describe.skip('API: /open-banking/bankinter/connect', () => {
     // authToken = data.token;
   });
 
-  describe('POST /open-banking/bankinter/connect', () => {
+  describe.skip('POST /open-banking/bankinter/connect', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/open-banking/bankinter/connect`;
       

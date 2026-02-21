@@ -22,7 +22,7 @@ describe.skip('API: /coliving/checkinout/[id]/complete', () => {
     // authToken = data.token;
   });
 
-  describe('POST /coliving/checkinout/[id]/complete', () => {
+  describe.skip('POST /coliving/checkinout/[id]/complete', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/coliving/checkinout/[id]/complete`;
       

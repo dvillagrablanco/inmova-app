@@ -22,7 +22,7 @@ describe.skip('API: /dashboard/stats-cached-example', () => {
     // authToken = data.token;
   });
 
-  describe('GET /dashboard/stats-cached-example', () => {
+  describe.skip('GET /dashboard/stats-cached-example', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/dashboard/stats-cached-example`;
       

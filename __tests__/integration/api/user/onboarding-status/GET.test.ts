@@ -22,7 +22,7 @@ describe.skip('API: /user/onboarding-status', () => {
     // authToken = data.token;
   });
 
-  describe('GET /user/onboarding-status', () => {
+  describe.skip('GET /user/onboarding-status', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/user/onboarding-status`;
       

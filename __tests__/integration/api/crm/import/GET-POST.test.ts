@@ -22,7 +22,7 @@ describe.skip('API: /crm/import', () => {
     // authToken = data.token;
   });
 
-  describe('GET /crm/import', () => {
+  describe.skip('GET /crm/import', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/crm/import`;
       
@@ -71,7 +71,7 @@ describe.skip('API: /crm/import', () => {
     
   });
 
-  describe('POST /crm/import', () => {
+  describe.skip('POST /crm/import', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/crm/import`;
       

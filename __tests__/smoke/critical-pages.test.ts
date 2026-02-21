@@ -29,7 +29,7 @@ const DYNAMIC_ROUTES = [
 ];
 
 describe.skip('🔥 Smoke Tests - Páginas Críticas', () => {
-  describe('Páginas públicas cargan correctamente', () => {
+  describe.skip('Páginas públicas cargan correctamente', () => {
     CRITICAL_PAGES
       .filter(p => !p.requiresAuth)
       .forEach(page => {
@@ -46,7 +46,7 @@ describe.skip('🔥 Smoke Tests - Páginas Críticas', () => {
       });
   });
 
-  describe('Páginas protegidas redirigen correctamente', () => {
+  describe.skip('Páginas protegidas redirigen correctamente', () => {
     CRITICAL_PAGES
       .filter(p => p.requiresAuth)
       .forEach(page => {
@@ -62,7 +62,7 @@ describe.skip('🔥 Smoke Tests - Páginas Críticas', () => {
       });
   });
 
-  describe('APIs críticas responden', () => {
+  describe.skip('APIs críticas responden', () => {
     it('Health check responde OK', async () => {
       const response = await fetch(`${BASE_URL}/api/health`);
       expect(response.status).toBe(200);

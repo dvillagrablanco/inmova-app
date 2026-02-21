@@ -22,7 +22,7 @@ describe.skip('API: /v1/api-keys', () => {
     // authToken = data.token;
   });
 
-  describe('GET /v1/api-keys', () => {
+  describe.skip('GET /v1/api-keys', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/v1/api-keys`;
       
@@ -71,7 +71,7 @@ describe.skip('API: /v1/api-keys', () => {
     
   });
 
-  describe('POST /v1/api-keys', () => {
+  describe.skip('POST /v1/api-keys', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/v1/api-keys`;
       

@@ -22,7 +22,7 @@ describe.skip('API: /dashboard/widgets', () => {
     // authToken = data.token;
   });
 
-  describe('GET /dashboard/widgets', () => {
+  describe.skip('GET /dashboard/widgets', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/dashboard/widgets`;
       
@@ -71,7 +71,7 @@ describe.skip('API: /dashboard/widgets', () => {
     
   });
 
-  describe('POST /dashboard/widgets', () => {
+  describe.skip('POST /dashboard/widgets', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/dashboard/widgets`;
       
@@ -129,7 +129,7 @@ describe.skip('API: /dashboard/widgets', () => {
     });
   });
 
-  describe('DELETE /dashboard/widgets', () => {
+  describe.skip('DELETE /dashboard/widgets', () => {
     it('debe eliminar recurso existente', async () => {
       const testId = 'existing-id';
       const url = `${baseURL}/api/dashboard/widgets`;

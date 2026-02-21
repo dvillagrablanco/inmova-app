@@ -22,7 +22,7 @@ describe.skip('API: /certificaciones/[id]', () => {
     // authToken = data.token;
   });
 
-  describe('GET /certificaciones/[id]', () => {
+  describe.skip('GET /certificaciones/[id]', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/certificaciones/[id]`;
       
@@ -72,7 +72,7 @@ describe.skip('API: /certificaciones/[id]', () => {
     });
   });
 
-  describe('DELETE /certificaciones/[id]', () => {
+  describe.skip('DELETE /certificaciones/[id]', () => {
     it('debe eliminar recurso existente', async () => {
       const testId = 'existing-id';
       const url = `${baseURL}/api/certificaciones/[id]`;
@@ -111,7 +111,7 @@ describe.skip('API: /certificaciones/[id]', () => {
     });
   });
 
-  describe('PATCH /certificaciones/[id]', () => {
+  describe.skip('PATCH /certificaciones/[id]', () => {
     it('debe actualizar recurso existente', async () => {
       const testId = 'existing-id';
       const url = `${baseURL}/api/certificaciones/[id]`;

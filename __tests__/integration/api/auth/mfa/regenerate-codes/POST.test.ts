@@ -22,7 +22,7 @@ describe.skip('API: /auth/mfa/regenerate-codes', () => {
     // authToken = data.token;
   });
 
-  describe('POST /auth/mfa/regenerate-codes', () => {
+  describe.skip('POST /auth/mfa/regenerate-codes', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/auth/mfa/regenerate-codes`;
       

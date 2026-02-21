@@ -22,7 +22,7 @@ describe.skip('API: /payments/receipt/[id]', () => {
     // authToken = data.token;
   });
 
-  describe('GET /payments/receipt/[id]', () => {
+  describe.skip('GET /payments/receipt/[id]', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/payments/receipt/[id]`;
       

@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Building2 } from 'lucide-react';
 
-describe.skip('EmptyState', () => {
+describe('EmptyState', () => {
   it('renders with icon, title, and description', () => {
     render(
       <EmptyState
@@ -19,7 +19,7 @@ describe.skip('EmptyState', () => {
   });
 
   it('renders action button when provided', () => {
-    const mockAction = jest.fn();
+    const mockAction = vi.fn();
     render(
       <EmptyState
         icon={<Building2 className="h-16 w-16" />}
@@ -38,7 +38,7 @@ describe.skip('EmptyState', () => {
 
   it('calls action onClick when button is clicked', async () => {
     const user = userEvent.setup();
-    const mockAction = jest.fn();
+    const mockAction = vi.fn();
     render(
       <EmptyState
         icon={<Building2 className="h-16 w-16" />}

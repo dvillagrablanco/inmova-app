@@ -22,7 +22,7 @@ describe.skip('API: /votaciones/[id]/votar', () => {
     // authToken = data.token;
   });
 
-  describe('POST /votaciones/[id]/votar', () => {
+  describe.skip('POST /votaciones/[id]/votar', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/votaciones/[id]/votar`;
       

@@ -22,7 +22,7 @@ describe.skip('API: /str/pricing/market-data', () => {
     // authToken = data.token;
   });
 
-  describe('GET /str/pricing/market-data', () => {
+  describe.skip('GET /str/pricing/market-data', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/str/pricing/market-data`;
       

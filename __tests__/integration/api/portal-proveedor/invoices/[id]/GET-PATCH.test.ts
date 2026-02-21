@@ -22,7 +22,7 @@ describe.skip('API: /portal-proveedor/invoices/[id]', () => {
     // authToken = data.token;
   });
 
-  describe('GET /portal-proveedor/invoices/[id]', () => {
+  describe.skip('GET /portal-proveedor/invoices/[id]', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/portal-proveedor/invoices/[id]`;
       
@@ -72,7 +72,7 @@ describe.skip('API: /portal-proveedor/invoices/[id]', () => {
     });
   });
 
-  describe('PATCH /portal-proveedor/invoices/[id]', () => {
+  describe.skip('PATCH /portal-proveedor/invoices/[id]', () => {
     it('debe actualizar recurso existente', async () => {
       const testId = 'existing-id';
       const url = `${baseURL}/api/portal-proveedor/invoices/[id]`;

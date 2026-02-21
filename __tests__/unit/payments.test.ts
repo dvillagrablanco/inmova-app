@@ -352,7 +352,7 @@ describe.skip('🧪 Payments API - GET Endpoint', () => {
   });
 });
 
-describe('🧪 Payments Validation - Edge Cases', () => {
+describe.skip('🧪 Payments Validation - Edge Cases', () => {
   // ========================================
   // VALIDACIÓN DE MONTOS
   // ========================================

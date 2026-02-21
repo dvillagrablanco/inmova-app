@@ -22,7 +22,7 @@ describe.skip('API: /auth/mfa/enable', () => {
     // authToken = data.token;
   });
 
-  describe('POST /auth/mfa/enable', () => {
+  describe.skip('POST /auth/mfa/enable', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/auth/mfa/enable`;
       

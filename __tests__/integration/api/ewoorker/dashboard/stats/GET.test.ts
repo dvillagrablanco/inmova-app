@@ -22,7 +22,7 @@ describe.skip('API: /ewoorker/dashboard/stats', () => {
     // authToken = data.token;
   });
 
-  describe('GET /ewoorker/dashboard/stats', () => {
+  describe.skip('GET /ewoorker/dashboard/stats', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/ewoorker/dashboard/stats`;
       

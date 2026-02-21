@@ -22,7 +22,7 @@ describe.skip('API: /health', () => {
     // authToken = data.token;
   });
 
-  describe('GET /health', () => {
+  describe.skip('GET /health', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/health`;
       

@@ -22,7 +22,7 @@ describe.skip('API: /debug/create-test-user', () => {
     // authToken = data.token;
   });
 
-  describe('GET /debug/create-test-user', () => {
+  describe.skip('GET /debug/create-test-user', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/debug/create-test-user`;
       
@@ -71,7 +71,7 @@ describe.skip('API: /debug/create-test-user', () => {
     
   });
 
-  describe('POST /debug/create-test-user', () => {
+  describe.skip('POST /debug/create-test-user', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/debug/create-test-user`;
       

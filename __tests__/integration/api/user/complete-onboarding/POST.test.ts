@@ -22,7 +22,7 @@ describe.skip('API: /user/complete-onboarding', () => {
     // authToken = data.token;
   });
 
-  describe('POST /user/complete-onboarding', () => {
+  describe.skip('POST /user/complete-onboarding', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/user/complete-onboarding`;
       

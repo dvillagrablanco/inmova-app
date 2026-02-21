@@ -22,7 +22,7 @@ describe.skip('API: /open-banking/bankinter/reconcile', () => {
     // authToken = data.token;
   });
 
-  describe('POST /open-banking/bankinter/reconcile', () => {
+  describe.skip('POST /open-banking/bankinter/reconcile', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/open-banking/bankinter/reconcile`;
       

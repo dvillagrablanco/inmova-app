@@ -109,8 +109,8 @@ export default defineConfig({
     testTimeout: 10000,
     hookTimeout: 10000,
 
-    // Bail early on errors (para CI/CD)
-    bail: 1,
+    // No bail - run all tests even if some fail
+    bail: 0,
 
     // Test exclusions
     exclude: [
@@ -133,12 +133,7 @@ export default defineConfig({
     restoreMocks: true,
 
     // Reporters
-    reporters: ['verbose', 'html'],
-
-    // Output
-    outputFile: {
-      html: './test-results/index.html',
-    },
+    reporters: ['verbose'],
   },
 
   resolve: {

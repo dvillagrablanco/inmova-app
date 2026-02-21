@@ -22,7 +22,7 @@ describe.skip('API: /user/preferences', () => {
     // authToken = data.token;
   });
 
-  describe('GET /user/preferences', () => {
+  describe.skip('GET /user/preferences', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/user/preferences`;
       
@@ -71,7 +71,7 @@ describe.skip('API: /user/preferences', () => {
     
   });
 
-  describe('PUT /user/preferences', () => {
+  describe.skip('PUT /user/preferences', () => {
     it('debe actualizar recurso existente', async () => {
       const testId = 'existing-id';
       const url = `${baseURL}/api/user/preferences`;

@@ -22,7 +22,7 @@ describe.skip('API: /units/[id]', () => {
     // authToken = data.token;
   });
 
-  describe('GET /units/[id]', () => {
+  describe.skip('GET /units/[id]', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/units/[id]`;
       
@@ -72,7 +72,7 @@ describe.skip('API: /units/[id]', () => {
     });
   });
 
-  describe('PUT /units/[id]', () => {
+  describe.skip('PUT /units/[id]', () => {
     it('debe actualizar recurso existente', async () => {
       const testId = 'existing-id';
       const url = `${baseURL}/api/units/[id]`;
@@ -110,7 +110,7 @@ describe.skip('API: /units/[id]', () => {
     });
   });
 
-  describe('DELETE /units/[id]', () => {
+  describe.skip('DELETE /units/[id]', () => {
     it('debe eliminar recurso existente', async () => {
       const testId = 'existing-id';
       const url = `${baseURL}/api/units/[id]`;

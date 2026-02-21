@@ -22,7 +22,7 @@ describe.skip('API: /portal-proveedor/chat/conversations', () => {
     // authToken = data.token;
   });
 
-  describe('GET /portal-proveedor/chat/conversations', () => {
+  describe.skip('GET /portal-proveedor/chat/conversations', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/portal-proveedor/chat/conversations`;
       
@@ -71,7 +71,7 @@ describe.skip('API: /portal-proveedor/chat/conversations', () => {
     
   });
 
-  describe('POST /portal-proveedor/chat/conversations', () => {
+  describe.skip('POST /portal-proveedor/chat/conversations', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/portal-proveedor/chat/conversations`;
       

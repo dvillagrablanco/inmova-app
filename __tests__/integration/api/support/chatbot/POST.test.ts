@@ -22,7 +22,7 @@ describe.skip('API: /support/chatbot', () => {
     // authToken = data.token;
   });
 
-  describe('POST /support/chatbot', () => {
+  describe.skip('POST /support/chatbot', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/support/chatbot`;
       

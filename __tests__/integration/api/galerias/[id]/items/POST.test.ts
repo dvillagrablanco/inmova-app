@@ -22,7 +22,7 @@ describe.skip('API: /galerias/[id]/items', () => {
     // authToken = data.token;
   });
 
-  describe('POST /galerias/[id]/items', () => {
+  describe.skip('POST /galerias/[id]/items', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/galerias/[id]/items`;
       

@@ -22,7 +22,7 @@ describe.skip('API: /portal-proveedor/availability', () => {
     // authToken = data.token;
   });
 
-  describe('GET /portal-proveedor/availability', () => {
+  describe.skip('GET /portal-proveedor/availability', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/portal-proveedor/availability`;
       
@@ -71,7 +71,7 @@ describe.skip('API: /portal-proveedor/availability', () => {
     
   });
 
-  describe('POST /portal-proveedor/availability', () => {
+  describe.skip('POST /portal-proveedor/availability', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/portal-proveedor/availability`;
       

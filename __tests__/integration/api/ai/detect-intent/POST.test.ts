@@ -22,7 +22,7 @@ describe.skip('API: /ai/detect-intent', () => {
     // authToken = data.token;
   });
 
-  describe('POST /ai/detect-intent', () => {
+  describe.skip('POST /ai/detect-intent', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/ai/detect-intent`;
       

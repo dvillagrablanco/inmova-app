@@ -22,7 +22,7 @@ describe.skip('API: /landing/capture-lead', () => {
     // authToken = data.token;
   });
 
-  describe('POST /landing/capture-lead', () => {
+  describe.skip('POST /landing/capture-lead', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/landing/capture-lead`;
       

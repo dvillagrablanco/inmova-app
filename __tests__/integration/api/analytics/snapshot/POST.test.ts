@@ -22,7 +22,7 @@ describe.skip('API: /analytics/snapshot', () => {
     // authToken = data.token;
   });
 
-  describe('POST /analytics/snapshot', () => {
+  describe.skip('POST /analytics/snapshot', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/analytics/snapshot`;
       

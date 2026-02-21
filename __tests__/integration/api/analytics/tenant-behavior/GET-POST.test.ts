@@ -22,7 +22,7 @@ describe.skip('API: /analytics/tenant-behavior', () => {
     // authToken = data.token;
   });
 
-  describe('GET /analytics/tenant-behavior', () => {
+  describe.skip('GET /analytics/tenant-behavior', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/analytics/tenant-behavior`;
       
@@ -71,7 +71,7 @@ describe.skip('API: /analytics/tenant-behavior', () => {
     
   });
 
-  describe('POST /analytics/tenant-behavior', () => {
+  describe.skip('POST /analytics/tenant-behavior', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/analytics/tenant-behavior`;
       

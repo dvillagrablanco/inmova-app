@@ -22,7 +22,7 @@ describe.skip('API: /analytics/web-vitals', () => {
     // authToken = data.token;
   });
 
-  describe('GET /analytics/web-vitals', () => {
+  describe.skip('GET /analytics/web-vitals', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/analytics/web-vitals`;
       
@@ -71,7 +71,7 @@ describe.skip('API: /analytics/web-vitals', () => {
     
   });
 
-  describe('POST /analytics/web-vitals', () => {
+  describe.skip('POST /analytics/web-vitals', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/analytics/web-vitals`;
       

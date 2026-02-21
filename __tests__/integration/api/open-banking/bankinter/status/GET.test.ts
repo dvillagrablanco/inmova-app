@@ -22,7 +22,7 @@ describe.skip('API: /open-banking/bankinter/status', () => {
     // authToken = data.token;
   });
 
-  describe('GET /open-banking/bankinter/status', () => {
+  describe.skip('GET /open-banking/bankinter/status', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/open-banking/bankinter/status`;
       

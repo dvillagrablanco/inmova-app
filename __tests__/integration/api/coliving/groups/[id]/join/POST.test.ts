@@ -22,7 +22,7 @@ describe.skip('API: /coliving/groups/[id]/join', () => {
     // authToken = data.token;
   });
 
-  describe('POST /coliving/groups/[id]/join', () => {
+  describe.skip('POST /coliving/groups/[id]/join', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/coliving/groups/[id]/join`;
       

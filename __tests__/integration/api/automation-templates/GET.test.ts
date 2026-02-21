@@ -22,7 +22,7 @@ describe.skip('API: /automation-templates', () => {
     // authToken = data.token;
   });
 
-  describe('GET /automation-templates', () => {
+  describe.skip('GET /automation-templates', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/automation-templates`;
       

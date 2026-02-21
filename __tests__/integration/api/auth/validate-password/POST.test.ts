@@ -22,7 +22,7 @@ describe.skip('API: /auth/validate-password', () => {
     // authToken = data.token;
   });
 
-  describe('POST /auth/validate-password', () => {
+  describe.skip('POST /auth/validate-password', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/auth/validate-password`;
       

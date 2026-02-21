@@ -22,7 +22,7 @@ describe.skip('API: /treasury/forecast', () => {
     // authToken = data.token;
   });
 
-  describe('GET /treasury/forecast', () => {
+  describe.skip('GET /treasury/forecast', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/treasury/forecast`;
       
@@ -71,7 +71,7 @@ describe.skip('API: /treasury/forecast', () => {
     
   });
 
-  describe('POST /treasury/forecast', () => {
+  describe.skip('POST /treasury/forecast', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/treasury/forecast`;
       

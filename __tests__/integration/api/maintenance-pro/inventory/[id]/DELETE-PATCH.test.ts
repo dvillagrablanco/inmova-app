@@ -22,7 +22,7 @@ describe.skip('API: /maintenance-pro/inventory/[id]', () => {
     // authToken = data.token;
   });
 
-  describe('DELETE /maintenance-pro/inventory/[id]', () => {
+  describe.skip('DELETE /maintenance-pro/inventory/[id]', () => {
     it('debe eliminar recurso existente', async () => {
       const testId = 'existing-id';
       const url = `${baseURL}/api/maintenance-pro/inventory/[id]`;
@@ -61,7 +61,7 @@ describe.skip('API: /maintenance-pro/inventory/[id]', () => {
     });
   });
 
-  describe('PATCH /maintenance-pro/inventory/[id]', () => {
+  describe.skip('PATCH /maintenance-pro/inventory/[id]', () => {
     it('debe actualizar recurso existente', async () => {
       const testId = 'existing-id';
       const url = `${baseURL}/api/maintenance-pro/inventory/[id]`;

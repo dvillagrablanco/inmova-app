@@ -28,12 +28,12 @@ vi.mock('@/lib/auth-options', () => ({
 
 import prisma from '@/lib/db';
 
-describe.skip('Buildings API Tests', () => {
+describe('Buildings API Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe.skip('GET /api/buildings', () => {
+  describe('GET /api/buildings', () => {
     it('should return list of buildings', async () => {
       const mockBuildings = [
         { id: '1', name: 'Building A', address: '123 Main St', units: 10 },
@@ -59,7 +59,7 @@ describe.skip('Buildings API Tests', () => {
     });
   });
 
-  describe.skip('GET /api/buildings/[id]', () => {
+  describe('GET /api/buildings/[id]', () => {
     it('should return building by id', async () => {
       const mockBuilding = {
         id: '1',
@@ -84,7 +84,7 @@ describe.skip('Buildings API Tests', () => {
     });
   });
 
-  describe.skip('POST /api/buildings', () => {
+  describe('POST /api/buildings', () => {
     it('should create a new building', async () => {
       const newBuilding = {
         name: 'New Building',
@@ -122,7 +122,7 @@ describe.skip('Buildings API Tests', () => {
     });
   });
 
-  describe.skip('PUT /api/buildings/[id]', () => {
+  describe('PUT /api/buildings/[id]', () => {
     it('should update building information', async () => {
       const mockBuilding = {
         id: '1',
@@ -140,7 +140,7 @@ describe.skip('Buildings API Tests', () => {
     });
   });
 
-  describe.skip('DELETE /api/buildings/[id]', () => {
+  describe('DELETE /api/buildings/[id]', () => {
     it('should delete a building', async () => {
       (prisma.building.delete as any).mockResolvedValue({ id: '1' });
 

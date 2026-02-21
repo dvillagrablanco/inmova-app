@@ -22,7 +22,7 @@ describe.skip('API: /maintenance/[id]/photos', () => {
     // authToken = data.token;
   });
 
-  describe('POST /maintenance/[id]/photos', () => {
+  describe.skip('POST /maintenance/[id]/photos', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/maintenance/[id]/photos`;
       
@@ -80,7 +80,7 @@ describe.skip('API: /maintenance/[id]/photos', () => {
     });
   });
 
-  describe('DELETE /maintenance/[id]/photos', () => {
+  describe.skip('DELETE /maintenance/[id]/photos', () => {
     it('debe eliminar recurso existente', async () => {
       const testId = 'existing-id';
       const url = `${baseURL}/api/maintenance/[id]/photos`;

@@ -22,7 +22,7 @@ describe.skip('API: /portal-proveedor/quotes/[id]', () => {
     // authToken = data.token;
   });
 
-  describe('GET /portal-proveedor/quotes/[id]', () => {
+  describe.skip('GET /portal-proveedor/quotes/[id]', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/portal-proveedor/quotes/[id]`;
       
@@ -72,7 +72,7 @@ describe.skip('API: /portal-proveedor/quotes/[id]', () => {
     });
   });
 
-  describe('PATCH /portal-proveedor/quotes/[id]', () => {
+  describe.skip('PATCH /portal-proveedor/quotes/[id]', () => {
     it('debe actualizar recurso existente', async () => {
       const testId = 'existing-id';
       const url = `${baseURL}/api/portal-proveedor/quotes/[id]`;

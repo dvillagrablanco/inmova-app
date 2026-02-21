@@ -22,7 +22,7 @@ describe.skip('API: /reviews', () => {
     // authToken = data.token;
   });
 
-  describe('GET /reviews', () => {
+  describe.skip('GET /reviews', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/reviews`;
       
@@ -71,7 +71,7 @@ describe.skip('API: /reviews', () => {
     
   });
 
-  describe('POST /reviews', () => {
+  describe.skip('POST /reviews', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/reviews`;
       
@@ -129,7 +129,7 @@ describe.skip('API: /reviews', () => {
     });
   });
 
-  describe('PATCH /reviews', () => {
+  describe.skip('PATCH /reviews', () => {
     it('debe actualizar recurso existente', async () => {
       const testId = 'existing-id';
       const url = `${baseURL}/api/reviews`;

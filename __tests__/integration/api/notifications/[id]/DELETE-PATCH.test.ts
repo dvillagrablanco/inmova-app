@@ -22,7 +22,7 @@ describe.skip('API: /notifications/[id]', () => {
     // authToken = data.token;
   });
 
-  describe('DELETE /notifications/[id]', () => {
+  describe.skip('DELETE /notifications/[id]', () => {
     it('debe eliminar recurso existente', async () => {
       const testId = 'existing-id';
       const url = `${baseURL}/api/notifications/[id]`;
@@ -61,7 +61,7 @@ describe.skip('API: /notifications/[id]', () => {
     });
   });
 
-  describe('PATCH /notifications/[id]', () => {
+  describe.skip('PATCH /notifications/[id]', () => {
     it('debe actualizar recurso existente', async () => {
       const testId = 'existing-id';
       const url = `${baseURL}/api/notifications/[id]`;

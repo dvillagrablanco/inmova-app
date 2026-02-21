@@ -22,7 +22,7 @@ describe.skip('API: /auth/mfa/status', () => {
     // authToken = data.token;
   });
 
-  describe('GET /auth/mfa/status', () => {
+  describe.skip('GET /auth/mfa/status', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/auth/mfa/status`;
       

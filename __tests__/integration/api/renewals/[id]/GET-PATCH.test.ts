@@ -22,7 +22,7 @@ describe.skip('API: /renewals/[id]', () => {
     // authToken = data.token;
   });
 
-  describe('GET /renewals/[id]', () => {
+  describe.skip('GET /renewals/[id]', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/renewals/[id]`;
       
@@ -72,7 +72,7 @@ describe.skip('API: /renewals/[id]', () => {
     });
   });
 
-  describe('PATCH /renewals/[id]', () => {
+  describe.skip('PATCH /renewals/[id]', () => {
     it('debe actualizar recurso existente', async () => {
       const testId = 'existing-id';
       const url = `${baseURL}/api/renewals/[id]`;

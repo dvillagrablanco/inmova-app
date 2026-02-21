@@ -22,7 +22,7 @@ describe.skip('API: /audit/reports', () => {
     // authToken = data.token;
   });
 
-  describe('GET /audit/reports', () => {
+  describe.skip('GET /audit/reports', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/audit/reports`;
       
@@ -71,7 +71,7 @@ describe.skip('API: /audit/reports', () => {
     
   });
 
-  describe('POST /audit/reports', () => {
+  describe.skip('POST /audit/reports', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/audit/reports`;
       

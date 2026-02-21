@@ -22,7 +22,7 @@ describe.skip('API: /sms/templates/[id]', () => {
     // authToken = data.token;
   });
 
-  describe('PUT /sms/templates/[id]', () => {
+  describe.skip('PUT /sms/templates/[id]', () => {
     it('debe actualizar recurso existente', async () => {
       const testId = 'existing-id';
       const url = `${baseURL}/api/sms/templates/[id]`;
@@ -60,7 +60,7 @@ describe.skip('API: /sms/templates/[id]', () => {
     });
   });
 
-  describe('DELETE /sms/templates/[id]', () => {
+  describe.skip('DELETE /sms/templates/[id]', () => {
     it('debe eliminar recurso existente', async () => {
       const testId = 'existing-id';
       const url = `${baseURL}/api/sms/templates/[id]`;

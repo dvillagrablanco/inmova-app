@@ -22,7 +22,7 @@ describe.skip('API: /coliving/feed/[id]/like', () => {
     // authToken = data.token;
   });
 
-  describe('POST /coliving/feed/[id]/like', () => {
+  describe.skip('POST /coliving/feed/[id]/like', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/coliving/feed/[id]/like`;
       

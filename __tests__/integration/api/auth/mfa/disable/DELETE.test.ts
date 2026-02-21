@@ -22,7 +22,7 @@ describe.skip('API: /auth/mfa/disable', () => {
     // authToken = data.token;
   });
 
-  describe('DELETE /auth/mfa/disable', () => {
+  describe.skip('DELETE /auth/mfa/disable', () => {
     it('debe eliminar recurso existente', async () => {
       const testId = 'existing-id';
       const url = `${baseURL}/api/auth/mfa/disable`;

@@ -22,7 +22,7 @@ describe.skip('API: /comunidades', () => {
     // authToken = data.token;
   });
 
-  describe('GET /comunidades', () => {
+  describe.skip('GET /comunidades', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/comunidades`;
       
@@ -71,7 +71,7 @@ describe.skip('API: /comunidades', () => {
     
   });
 
-  describe('POST /comunidades', () => {
+  describe.skip('POST /comunidades', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/comunidades`;
       

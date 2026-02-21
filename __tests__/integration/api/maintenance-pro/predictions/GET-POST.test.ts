@@ -22,7 +22,7 @@ describe.skip('API: /maintenance-pro/predictions', () => {
     // authToken = data.token;
   });
 
-  describe('GET /maintenance-pro/predictions', () => {
+  describe.skip('GET /maintenance-pro/predictions', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/maintenance-pro/predictions`;
       
@@ -71,7 +71,7 @@ describe.skip('API: /maintenance-pro/predictions', () => {
     
   });
 
-  describe('POST /maintenance-pro/predictions', () => {
+  describe.skip('POST /maintenance-pro/predictions', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/maintenance-pro/predictions`;
       

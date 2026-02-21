@@ -280,7 +280,7 @@ describe.skip('📊 Report Service', () => {
   // VALIDACIÓN DE ESTRUCTURA DE DATOS
   // ========================================
 
-  describe('Validación de datos', () => {
+  describe.skip('Validación de datos', () => {
     const minimalReportData = {
       tipo: 'morosidad',
       periodo: 'Test',
@@ -351,7 +351,7 @@ describe.skip('📊 Report Service', () => {
   // EDGE CASES ESPECÍFICOS
   // ========================================
 
-  describe('Edge Cases', () => {
+  describe.skip('Edge Cases', () => {
     test('⚠️ Debe manejar nombre de empresa muy largo', async () => {
       const reportData = {
         tipo: 'morosidad',
@@ -491,7 +491,7 @@ describe.skip('📊 Report Service', () => {
   // TIPOS DE REPORTES
   // ========================================
 
-  describe('Tipos de reportes', () => {
+  describe.skip('Tipos de reportes', () => {
     test('✅ Debe soportar reporte de mantenimiento', async () => {
       const reportData = {
         tipo: 'mantenimiento',

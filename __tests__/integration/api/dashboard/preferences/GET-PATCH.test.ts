@@ -22,7 +22,7 @@ describe.skip('API: /dashboard/preferences', () => {
     // authToken = data.token;
   });
 
-  describe('GET /dashboard/preferences', () => {
+  describe.skip('GET /dashboard/preferences', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/dashboard/preferences`;
       
@@ -71,7 +71,7 @@ describe.skip('API: /dashboard/preferences', () => {
     
   });
 
-  describe('PATCH /dashboard/preferences', () => {
+  describe.skip('PATCH /dashboard/preferences', () => {
     it('debe actualizar recurso existente', async () => {
       const testId = 'existing-id';
       const url = `${baseURL}/api/dashboard/preferences`;

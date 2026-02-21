@@ -22,7 +22,7 @@ describe.skip('API: /notifications/unread-count', () => {
     // authToken = data.token;
   });
 
-  describe('GET /notifications/unread-count', () => {
+  describe.skip('GET /notifications/unread-count', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/notifications/unread-count`;
       

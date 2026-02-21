@@ -22,7 +22,7 @@ describe.skip('API: /crm/linkedin/scrape', () => {
     // authToken = data.token;
   });
 
-  describe('GET /crm/linkedin/scrape', () => {
+  describe.skip('GET /crm/linkedin/scrape', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/crm/linkedin/scrape`;
       
@@ -71,7 +71,7 @@ describe.skip('API: /crm/linkedin/scrape', () => {
     
   });
 
-  describe('POST /crm/linkedin/scrape', () => {
+  describe.skip('POST /crm/linkedin/scrape', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/crm/linkedin/scrape`;
       

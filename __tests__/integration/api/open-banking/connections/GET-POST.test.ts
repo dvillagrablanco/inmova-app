@@ -22,7 +22,7 @@ describe.skip('API: /open-banking/connections', () => {
     // authToken = data.token;
   });
 
-  describe('GET /open-banking/connections', () => {
+  describe.skip('GET /open-banking/connections', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/open-banking/connections`;
       
@@ -71,7 +71,7 @@ describe.skip('API: /open-banking/connections', () => {
     
   });
 
-  describe('POST /open-banking/connections', () => {
+  describe.skip('POST /open-banking/connections', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/open-banking/connections`;
       

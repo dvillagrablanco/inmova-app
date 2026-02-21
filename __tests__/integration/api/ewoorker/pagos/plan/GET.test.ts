@@ -22,7 +22,7 @@ describe.skip('API: /ewoorker/pagos/plan', () => {
     // authToken = data.token;
   });
 
-  describe('GET /ewoorker/pagos/plan', () => {
+  describe.skip('GET /ewoorker/pagos/plan', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/ewoorker/pagos/plan`;
       

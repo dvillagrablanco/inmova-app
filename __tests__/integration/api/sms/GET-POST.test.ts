@@ -22,7 +22,7 @@ describe.skip('API: /sms', () => {
     // authToken = data.token;
   });
 
-  describe('GET /sms', () => {
+  describe.skip('GET /sms', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/sms`;
       
@@ -71,7 +71,7 @@ describe.skip('API: /sms', () => {
     
   });
 
-  describe('POST /sms', () => {
+  describe.skip('POST /sms', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/sms`;
       

@@ -22,7 +22,7 @@ describe.skip('API: /coliving/smartlocks/access', () => {
     // authToken = data.token;
   });
 
-  describe('GET /coliving/smartlocks/access', () => {
+  describe.skip('GET /coliving/smartlocks/access', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/coliving/smartlocks/access`;
       
@@ -71,7 +71,7 @@ describe.skip('API: /coliving/smartlocks/access', () => {
     
   });
 
-  describe('POST /coliving/smartlocks/access', () => {
+  describe.skip('POST /coliving/smartlocks/access', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/coliving/smartlocks/access`;
       
@@ -129,7 +129,7 @@ describe.skip('API: /coliving/smartlocks/access', () => {
     });
   });
 
-  describe('DELETE /coliving/smartlocks/access', () => {
+  describe.skip('DELETE /coliving/smartlocks/access', () => {
     it('debe eliminar recurso existente', async () => {
       const testId = 'existing-id';
       const url = `${baseURL}/api/coliving/smartlocks/access`;

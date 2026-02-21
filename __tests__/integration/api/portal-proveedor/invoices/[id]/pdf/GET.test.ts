@@ -22,7 +22,7 @@ describe.skip('API: /portal-proveedor/invoices/[id]/pdf', () => {
     // authToken = data.token;
   });
 
-  describe('GET /portal-proveedor/invoices/[id]/pdf', () => {
+  describe.skip('GET /portal-proveedor/invoices/[id]/pdf', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/portal-proveedor/invoices/[id]/pdf`;
       

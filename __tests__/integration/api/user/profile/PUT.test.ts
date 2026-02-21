@@ -22,7 +22,7 @@ describe.skip('API: /user/profile', () => {
     // authToken = data.token;
   });
 
-  describe('PUT /user/profile', () => {
+  describe.skip('PUT /user/profile', () => {
     it('debe actualizar recurso existente', async () => {
       const testId = 'existing-id';
       const url = `${baseURL}/api/user/profile`;

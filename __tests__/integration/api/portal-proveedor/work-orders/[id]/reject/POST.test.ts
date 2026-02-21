@@ -22,7 +22,7 @@ describe.skip('API: /portal-proveedor/work-orders/[id]/reject', () => {
     // authToken = data.token;
   });
 
-  describe('POST /portal-proveedor/work-orders/[id]/reject', () => {
+  describe.skip('POST /portal-proveedor/work-orders/[id]/reject', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/portal-proveedor/work-orders/[id]/reject`;
       

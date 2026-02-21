@@ -38,6 +38,26 @@ vi.mock('next-auth/react', () => ({
   SessionProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
+// Mock framer-motion
+vi.mock('framer-motion', () => ({
+  motion: new Proxy({}, {
+    get: (_target, prop) => {
+      if (typeof prop === 'string') {
+        return ({ children, ...props }: any) => {
+          const Tag = prop as any;
+          return <Tag {...props}>{children}</Tag>;
+        };
+      }
+      return undefined;
+    },
+  }),
+  AnimatePresence: ({ children }: any) => children,
+  useAnimation: () => ({ start: vi.fn(), stop: vi.fn() }),
+  useMotionValue: (val: any) => ({ get: () => val, set: vi.fn() }),
+  useTransform: (val: any) => val,
+  useInView: () => true,
+}));
+
 // Mock Next.js Image
 vi.mock('next/image', () => ({
   default: (props: any) => {
@@ -62,6 +82,32 @@ global.IntersectionObserver = class IntersectionObserver {
   }
   unobserve() {}
 } as any;
+
+// Mock PointerEvent for framer-motion
+if (typeof window !== 'undefined' && !window.PointerEvent) {
+  class MockPointerEvent extends MouseEvent {
+    readonly pointerId: number = 0;
+    readonly width: number = 1;
+    readonly height: number = 1;
+    readonly pressure: number = 0;
+    readonly tiltX: number = 0;
+    readonly tiltY: number = 0;
+    readonly pointerType: string = 'mouse';
+    readonly isPrimary: boolean = true;
+    constructor(type: string, params: any = {}) {
+      super(type, params);
+    }
+    getCoalescedEvents() { return []; }
+    getPredictedEvents() { return []; }
+  }
+  (window as any).PointerEvent = MockPointerEvent;
+}
+
+if (typeof Element !== 'undefined' && !Element.prototype.hasPointerCapture) {
+  Element.prototype.hasPointerCapture = vi.fn().mockReturnValue(false);
+  Element.prototype.setPointerCapture = vi.fn();
+  Element.prototype.releasePointerCapture = vi.fn();
+}
 
 Object.defineProperty(window, 'matchMedia', {
   writable: true,

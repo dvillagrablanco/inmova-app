@@ -22,7 +22,7 @@ describe.skip('API: /str/channels/[listingId]/status', () => {
     // authToken = data.token;
   });
 
-  describe('GET /str/channels/[listingId]/status', () => {
+  describe.skip('GET /str/channels/[listingId]/status', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/str/channels/[listingId]/status`;
       

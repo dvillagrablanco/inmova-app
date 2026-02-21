@@ -22,7 +22,7 @@ describe.skip('API: /notifications/mark-read', () => {
     // authToken = data.token;
   });
 
-  describe('POST /notifications/mark-read', () => {
+  describe.skip('POST /notifications/mark-read', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/notifications/mark-read`;
       

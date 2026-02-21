@@ -22,7 +22,7 @@ describe.skip('API: /ai/assistant', () => {
     // authToken = data.token;
   });
 
-  describe('POST /ai/assistant', () => {
+  describe.skip('POST /ai/assistant', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/ai/assistant`;
       

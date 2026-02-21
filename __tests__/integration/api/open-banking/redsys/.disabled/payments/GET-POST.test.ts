@@ -22,7 +22,7 @@ describe.skip('API: /open-banking/redsys/.disabled/payments', () => {
     // authToken = data.token;
   });
 
-  describe('GET /open-banking/redsys/.disabled/payments', () => {
+  describe.skip('GET /open-banking/redsys/.disabled/payments', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/open-banking/redsys/.disabled/payments`;
       
@@ -71,7 +71,7 @@ describe.skip('API: /open-banking/redsys/.disabled/payments', () => {
     
   });
 
-  describe('POST /open-banking/redsys/.disabled/payments', () => {
+  describe.skip('POST /open-banking/redsys/.disabled/payments', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/open-banking/redsys/.disabled/payments`;
       

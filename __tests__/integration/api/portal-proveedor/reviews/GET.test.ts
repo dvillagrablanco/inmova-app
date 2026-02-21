@@ -22,7 +22,7 @@ describe.skip('API: /portal-proveedor/reviews', () => {
     // authToken = data.token;
   });
 
-  describe('GET /portal-proveedor/reviews', () => {
+  describe.skip('GET /portal-proveedor/reviews', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/portal-proveedor/reviews`;
       

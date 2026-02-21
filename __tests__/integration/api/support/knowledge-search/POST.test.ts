@@ -22,7 +22,7 @@ describe.skip('API: /support/knowledge-search', () => {
     // authToken = data.token;
   });
 
-  describe('POST /support/knowledge-search', () => {
+  describe.skip('POST /support/knowledge-search', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/support/knowledge-search`;
       

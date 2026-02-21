@@ -22,7 +22,7 @@ describe.skip('API: /coliving/packages', () => {
     // authToken = data.token;
   });
 
-  describe('GET /coliving/packages', () => {
+  describe.skip('GET /coliving/packages', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/coliving/packages`;
       
@@ -71,7 +71,7 @@ describe.skip('API: /coliving/packages', () => {
     
   });
 
-  describe('POST /coliving/packages', () => {
+  describe.skip('POST /coliving/packages', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/coliving/packages`;
       

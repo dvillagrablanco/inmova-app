@@ -22,7 +22,7 @@ describe.skip('API: /backup/create', () => {
     // authToken = data.token;
   });
 
-  describe('POST /backup/create', () => {
+  describe.skip('POST /backup/create', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/backup/create`;
       

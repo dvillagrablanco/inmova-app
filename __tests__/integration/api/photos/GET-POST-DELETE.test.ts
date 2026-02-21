@@ -22,7 +22,7 @@ describe.skip('API: /photos', () => {
     // authToken = data.token;
   });
 
-  describe('GET /photos', () => {
+  describe.skip('GET /photos', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/photos`;
       
@@ -71,7 +71,7 @@ describe.skip('API: /photos', () => {
     
   });
 
-  describe('POST /photos', () => {
+  describe.skip('POST /photos', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/photos`;
       
@@ -129,7 +129,7 @@ describe.skip('API: /photos', () => {
     });
   });
 
-  describe('DELETE /photos', () => {
+  describe.skip('DELETE /photos', () => {
     it('debe eliminar recurso existente', async () => {
       const testId = 'existing-id';
       const url = `${baseURL}/api/photos`;

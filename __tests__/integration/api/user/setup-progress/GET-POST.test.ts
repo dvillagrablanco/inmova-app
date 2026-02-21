@@ -22,7 +22,7 @@ describe.skip('API: /user/setup-progress', () => {
     // authToken = data.token;
   });
 
-  describe('GET /user/setup-progress', () => {
+  describe.skip('GET /user/setup-progress', () => {
     it('debe retornar 200 con datos válidos', async () => {
       const url = `${baseURL}/api/user/setup-progress`;
       
@@ -71,7 +71,7 @@ describe.skip('API: /user/setup-progress', () => {
     
   });
 
-  describe('POST /user/setup-progress', () => {
+  describe.skip('POST /user/setup-progress', () => {
     it('debe crear recurso con datos válidos', async () => {
       const url = `${baseURL}/api/user/setup-progress`;
       
