@@ -1,35 +1,14 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { AccessibleIcon } from '@/components/ui/accessible-icon';
-
-describe.skip('AccessibleIcon', () => {
-  it('should render without crashing', () => {
-    const props = { /* TODO: Añadir props requeridas */ };
-    
-    render(<AccessibleIcon {...props} />);
-    
-    expect(screen.getByRole('main') || document.body).toBeTruthy();
+import { Home } from 'lucide-react';
+describe('AccessibleIcon', () => {
+  it('renders with required props', () => {
+    const { container } = render(<AccessibleIcon icon={Home} label="Home" />);
+    expect(container.querySelector('svg')).toBeTruthy();
   });
-
-  it('should render with props', () => {
-    const testProps = {
-      // TODO: Definir props de test
-      testProp: 'test value',
-    };
-    
-    render(<AccessibleIcon {...testProps} />);
-    
-    // TODO: Verificar que los props se renderizan correctamente
-    expect(screen.getByText(/test value/i)).toBeInTheDocument();
-  });
-
-  it('should be accessible', () => {
-    render(<AccessibleIcon />);
-    
-    // Verificar roles ARIA básicos
-    const element = screen.getByRole('main') || document.body;
-    expect(element).toBeTruthy();
-    
-    // TODO: Añadir más verificaciones de accesibilidad
+  it('renders as decorative', () => {
+    const { container } = render(<AccessibleIcon icon={Home} label="Home" decorative />);
+    expect(container).toBeTruthy();
   });
 });

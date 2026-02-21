@@ -1,35 +1,11 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect } from 'vitest';
+import { render } from '@testing-library/react';
 import { VirtualizedList } from '@/components/ui/virtualized-list';
-
-describe.skip('VirtualizedList', () => {
-  it('should render without crashing', () => {
-    const props = { /* TODO: Añadir props requeridas */ };
-    
-    render(<VirtualizedList {...props} />);
-    
-    expect(screen.getByRole('main') || document.body).toBeTruthy();
-  });
-
-  it('should render with props', () => {
-    const testProps = {
-      // TODO: Definir props de test
-      testProp: 'test value',
-    };
-    
-    render(<VirtualizedList {...testProps} />);
-    
-    // TODO: Verificar que los props se renderizan correctamente
-    expect(screen.getByText(/test value/i)).toBeInTheDocument();
-  });
-
-  it('should be accessible', () => {
-    render(<VirtualizedList />);
-    
-    // Verificar roles ARIA básicos
-    const element = screen.getByRole('main') || document.body;
-    expect(element).toBeTruthy();
-    
-    // TODO: Añadir más verificaciones de accesibilidad
+describe('VirtualizedList', () => {
+  it('renders with empty items', () => {
+    const { container } = render(
+      <VirtualizedList items={[]} itemHeight={40} renderRow={({index, style}: any) => <div key={index} style={style}>Row</div>} />
+    );
+    expect(container).toBeTruthy();
   });
 });
