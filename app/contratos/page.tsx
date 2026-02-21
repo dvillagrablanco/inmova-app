@@ -105,9 +105,6 @@ function ContratosPageContent() {
       try {
         setError(null);
         const response = await fetch('/api/contracts');
-        if (!response.ok) {
-      throw new Error(`Error ${response.status}: No se pudieron cargar los contratos`);
-        }
         const json = await response.json();
         const data = Array.isArray(json) ? json : (json.data || []);
         setContracts(data);

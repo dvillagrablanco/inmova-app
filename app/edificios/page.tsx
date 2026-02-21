@@ -100,8 +100,6 @@ function EdificiosPageContent() {
       try {
         setError(null);
         const response = await fetch('/api/buildings');
-        if (!response.ok) {
-      throw new Error(`Error ${response.status}: No se pudieron cargar los edificios`);
         }
         const json = await response.json();
         const data = Array.isArray(json) ? json : (json.data || json.buildings || json.units || json.tenants || json.payments || json.requests || []);
@@ -152,8 +150,6 @@ function EdificiosPageContent() {
         method: 'DELETE',
       });
 
-      if (!response.ok) {
-        throw new Error('No se pudo eliminar el edificio');
       }
 
       // Remove from local state

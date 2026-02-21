@@ -138,8 +138,12 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     logger.error('Error fetching contracts:', error);
-      Sentry.captureException(error);
-    return NextResponse.json({ error: 'Error al obtener contratos' }, { status: 500 });
+    Sentry.captureException(error);
+    return NextResponse.json({
+      data: [],
+      pagination: { page: 1, limit: 15, total: 0, totalPages: 0, hasMore: false },
+      error: 'Error al obtener contratos',
+    });
   }
 }
 

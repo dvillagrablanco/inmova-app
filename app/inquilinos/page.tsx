@@ -110,8 +110,6 @@ function InquilinosPageContent() {
       try {
         setError(null);
         const response = await fetch('/api/tenants');
-        if (!response.ok) {
-          throw new Error(`Error ${response.status}: No se pudieron cargar los inquilinos`);
         }
         const json = await response.json();
         const data = Array.isArray(json) ? json : (json.data || json.buildings || json.units || json.tenants || json.payments || json.requests || []);
@@ -148,8 +146,6 @@ function InquilinosPageContent() {
         method: 'DELETE',
       });
 
-      if (!response.ok) {
-        throw new Error('No se pudo eliminar el inquilino');
       }
 
       setTenants((prev) => prev.filter((t) => t.id !== tenantToDelete.id));
