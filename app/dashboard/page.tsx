@@ -39,6 +39,7 @@ import SmartOnboardingWizard from '@/components/automation/SmartOnboardingWizard
 import ProactiveSuggestions from '@/components/automation/ProactiveSuggestions';
 // IntelligentSupportChatbot se renderiza desde AuthenticatedLayout
 import InactiveModules from './components/InactiveModules';
+import { TutorialLauncher } from '@/components/onboarding/InteractiveTutorial';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { VerticalSpecificWidgets } from '@/components/dashboard/VerticalSpecificWidgets';
 import DemoDataGenerator from '@/components/automation/DemoDataGenerator';
@@ -321,6 +322,9 @@ function DashboardPageContent() {
         </div>
 
         {/* Proactive Suggestions - Sugerencias inteligentes personalizadas */}
+
+        {/* Tutoriales interactivos para nuevos usuarios */}
+        <TutorialLauncher className="mb-6" />
 
         {/* Inactive Modules - Módulos disponibles para activar */}
         <InactiveModules />
