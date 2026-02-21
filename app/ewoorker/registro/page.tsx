@@ -137,7 +137,7 @@ export default function EwoorkerRegistroPage() {
                         id="cif"
                         value={formData.cif}
                         onChange={(e) => setFormData({ ...formData, cif: e.target.value.toUpperCase() })}
-                        placeholder="B12345678"
+                        placeholder="B-19774660"
                         required
                       />
                     </div>

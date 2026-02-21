@@ -83,7 +83,7 @@ export class EmailService {
 
   constructor() {
     this.apiKey = process.env.SENDGRID_API_KEY || process.env.POSTMARK_API_KEY || '';
-    this.fromEmail = process.env.EMAIL_FROM || 'noreply@inmova.app';
+    this.fromEmail = process.env.EMAIL_FROM || 'inmovaapp@gmail.com';
     this.fromName = process.env.EMAIL_FROM_NAME || 'INMOVA';
   }
 
@@ -291,7 +291,7 @@ export class EmailService {
                 &nbsp;&nbsp;|
                 &nbsp;&nbsp;<a href="https://www.inmova.app/ayuda" style="color: #667eea; text-decoration: none;">📖 Centro de ayuda</a>
                 &nbsp;&nbsp;|
-                &nbsp;&nbsp;<a href="mailto:soporte@inmova.app" style="color: #667eea; text-decoration: none;">📧 Contactar soporte</a>
+                &nbsp;&nbsp;<a href="mailto:inmovaapp@gmail.com" style="color: #667eea; text-decoration: none;">📧 Contactar soporte</a>
               </p>
             </td>
           </tr>
@@ -340,7 +340,7 @@ Tutorial rápido: https://www.youtube.com/watch?v=zm55Gdl5G1Q
 Enlaces útiles:
 - Importar mis datos: ${process.env.NEXTAUTH_URL}/admin/importar
 - Centro de ayuda: https://www.inmova.app/ayuda
-- Contactar soporte: soporte@inmova.app
+- Contactar soporte: inmovaapp@gmail.com
 
 © ${new Date().getFullYear()} INMOVA. Todos los derechos reservados.
     `.trim();
@@ -389,7 +389,7 @@ Enlaces útiles:
               </table>
               
               <p style="margin: 20px 0 0; font-size: 14px; color: #6b7280; text-align: center;">
-                ¿Necesitas ayuda? <a href="mailto:soporte@inmova.app" style="color: #667eea;">Escríbenos</a>
+                ¿Necesitas ayuda? <a href="mailto:inmovaapp@gmail.com" style="color: #667eea;">Escríbenos</a>
               </p>
             </td>
           </tr>
@@ -419,7 +419,7 @@ Notamos que aún no has completado la configuración de tu cuenta. No te preocup
 
 Completar configuración: ${process.env.NEXTAUTH_URL}/home?reminder=true
 
-¿Necesitas ayuda? Escríbenos a soporte@inmova.app
+¿Necesitas ayuda? Escríbenos a inmovaapp@gmail.com
     `.trim();
   }
 

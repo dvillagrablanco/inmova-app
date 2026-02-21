@@ -372,7 +372,7 @@ async function sendOverageInvoiceEmail(
           </a>
         </div>
         <div class="footer">
-          <p>Si tienes dudas sobre esta factura, contacta con soporte@inmova.app</p>
+          <p>Si tienes dudas sobre esta factura, contacta con inmovaapp@gmail.com</p>
           <p>© ${new Date().getFullYear()} Inmova - Plataforma PropTech</p>
         </div>
       </div>
@@ -383,7 +383,7 @@ async function sendOverageInvoiceEmail(
   try {
     const transporter = getTransporter();
     await transporter.sendMail({
-      from: process.env.SMTP_FROM || 'noreply@inmova.app',
+      from: process.env.SMTP_FROM || 'inmovaapp@gmail.com',
       to: contactEmail,
       subject: `📄 Factura de Excesos - ${monthName}`,
       html,

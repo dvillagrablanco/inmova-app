@@ -65,7 +65,7 @@ export async function sendEmail(options: EmailOptions): Promise<SendGridResponse
 
   try {
     const apiKey = process.env.SENDGRID_API_KEY!;
-    const fromEmail = options.from || process.env.SENDGRID_FROM_EMAIL || 'noreply@inmova.app';
+    const fromEmail = options.from || process.env.SENDGRID_FROM_EMAIL || 'inmovaapp@gmail.com';
     const fromName = options.fromName || 'INMOVA';
 
     // Construir el payload para SendGrid

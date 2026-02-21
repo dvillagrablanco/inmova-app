@@ -701,7 +701,7 @@ export function generateCSVTemplate(entityType: ImportableEntity): string {
     },
     providers: {
       headers: ['nombre', 'email', 'telefono', 'cif', 'servicios', 'calificacion', 'certificaciones', 'activo'],
-      examples: ['Mantenimiento 24h SL', 'contacto@mant24h.com', '+34910123456', 'B12345678', 'fontaneria,electricidad,climatizacion', '4.5', 'ISO9001,ISO14001', 'true']
+      examples: ['Mantenimiento 24h SL', 'contacto@mant24h.com', '+34910123456', 'B-19774660', 'fontaneria,electricidad,climatizacion', '4.5', 'ISO9001,ISO14001', 'true']
     },
     expenses: {
       headers: ['concepto', 'categoria', 'monto', 'fecha', 'edificioNombre', 'metodoPago', 'proveedorNombre', 'notas', 'recurrente'],

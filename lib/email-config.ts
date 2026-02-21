@@ -92,7 +92,7 @@ export async function sendEmail(
   try {
     const transporter = createTransporter();
 
-    const from = options.from || process.env.SENDGRID_FROM_EMAIL || process.env.SMTP_FROM || 'noreply@inmova.app';
+    const from = options.from || process.env.SENDGRID_FROM_EMAIL || process.env.SMTP_FROM || 'inmovaapp@gmail.com';
     const fromName = process.env.SENDGRID_FROM_NAME || 'INMOVA';
 
     const mailOptions = {

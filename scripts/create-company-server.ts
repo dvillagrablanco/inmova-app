@@ -47,7 +47,7 @@ async function main() {
     const company = await prisma.company.create({
       data: {
         nombre: 'Validación PropTech S.L.',
-        cif: 'B12345678',
+        cif: 'B-19774660',
         direccion: 'Calle Ejemplo 123',
         ciudad: 'Madrid',
         codigoPostal: '28001',

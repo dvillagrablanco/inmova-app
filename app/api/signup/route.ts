@@ -93,7 +93,7 @@ async function handleSignup(req: NextRequest) {
       company = await prisma.company.create({
         data: {
           nombre: 'INMOVA',
-          cif: 'B12345678',
+          cif: 'B-19774660',
           direccion: 'Madrid, Espana',
           telefono: '+34 912 345 678',
           email: 'info@inmova.com',

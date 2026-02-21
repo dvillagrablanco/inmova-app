@@ -28,7 +28,7 @@ function emailTemplate(title: string, body: string, ctaText?: string, ctaUrl?: s
     <p style="color:#9ca3af;font-size:12px;margin-top:24px;text-align:center;">
       INMOVA · Gestión Inmobiliaria Profesional<br/>
       <a href="${APP_URL}/ayuda" style="color:#6366f1;">Centro de Ayuda</a> · 
-      <a href="mailto:soporte@inmova.app" style="color:#6366f1;">Soporte</a>
+      <a href="mailto:inmovaapp@gmail.com" style="color:#6366f1;">Soporte</a>
     </p>
   </div>
 </body></html>`;
@@ -99,7 +99,7 @@ export const WELCOME_EMAILS = [
        <ul>
          <li><strong>Centro de Ayuda:</strong> Guías paso a paso para todo</li>
          <li><strong>Chatbot IA:</strong> Pregunta lo que necesites, 24/7</li>
-         <li><strong>Email:</strong> soporte@inmova.app (respuesta en 24h)</li>
+         <li><strong>Email:</strong> inmovaapp@gmail.com (respuesta en 24h)</li>
        </ul>
        <p>Tu opinión nos importa mucho. Si hay algo que podríamos mejorar, simplemente responde a este email.</p>`,
       'Centro de Ayuda', `${APP_URL}/ayuda`

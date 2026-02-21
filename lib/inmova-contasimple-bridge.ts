@@ -45,13 +45,13 @@ const INMOVA_CONTASIMPLE_CONFIG = {
  * Datos fiscales de Inmova para las facturas
  */
 const INMOVA_FISCAL_DATA = {
-  nombre: 'INMOVA PROPTECH SL',
-  cif: process.env.INMOVA_CIF || 'B12345678',
+  nombre: 'Enxames Investments SL',
+  cif: process.env.INMOVA_CIF || 'B-19774660',
   direccion: process.env.INMOVA_DIRECCION || 'Calle Principal 123',
   ciudad: process.env.INMOVA_CIUDAD || 'Madrid',
   codigoPostal: process.env.INMOVA_CP || '28001',
   pais: 'España',
-  email: process.env.INMOVA_EMAIL || 'facturacion@inmova.app',
+  email: process.env.INMOVA_EMAIL || 'inmovaapp@gmail.com',
   telefono: process.env.INMOVA_TELEFONO || '+34 912 345 678',
 };
 

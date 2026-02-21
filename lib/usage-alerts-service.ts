@@ -268,7 +268,7 @@ async function sendUsageAlert(company: any, alert: UsageAlert): Promise<void> {
   
   try {
     await transporter.sendMail({
-      from: process.env.SMTP_FROM || 'noreply@inmova.app',
+      from: process.env.SMTP_FROM || 'inmovaapp@gmail.com',
       to: contactEmail,
       subject,
       html,
@@ -388,7 +388,7 @@ function getWarningEmailHTML(company: any, alert: UsageAlert, serviceName: strin
           </a>
         </div>
         <div class="footer">
-          <p>Este es un email automático. Si tienes dudas, contacta con soporte@inmova.app</p>
+          <p>Este es un email automático. Si tienes dudas, contacta con inmovaapp@gmail.com</p>
           <p>© ${new Date().getFullYear()} Inmova - Plataforma PropTech</p>
         </div>
       </div>
@@ -458,7 +458,7 @@ function getLimitReachedEmailHTML(company: any, alert: UsageAlert, serviceName: 
           </a>
         </div>
         <div class="footer">
-          <p>Este es un email automático. Si tienes dudas, contacta con soporte@inmova.app</p>
+          <p>Este es un email automático. Si tienes dudas, contacta con inmovaapp@gmail.com</p>
           <p>© ${new Date().getFullYear()} Inmova - Plataforma PropTech</p>
         </div>
       </div>

@@ -280,7 +280,7 @@ export default function ConfiguracionEmpresasPage() {
                         onChange={(e) =>
                           setFormData((prev) => ({ ...prev, cif: e.target.value }))
                         }
-                        placeholder="B12345678"
+                        placeholder="B-19774660"
                       />
                     </div>
                     <div className="space-y-2">

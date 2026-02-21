@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
     <p>Si tienes alguna pregunta, responde a este email directamente.</p>
     
     <p style="color:#9ca3af;font-size:12px;margin-top:24px;text-align:center;">
-      INMOVA PROPTECH SL · <a href="${APP_URL}" style="color:#6366f1;">inmovaapp.com</a>
+      Enxames Investments SL · <a href="${APP_URL}" style="color:#6366f1;">inmovaapp.com</a>
     </p>
   </div>
 </body></html>`,

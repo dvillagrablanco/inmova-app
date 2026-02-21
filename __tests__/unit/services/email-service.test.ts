@@ -47,7 +47,7 @@ describe('📧 Email Service - Unit Tests', () => {
 
   test('✅ Debe enviar un email simple exitosamente', async () => {
     const emailData = {
-      from: 'noreply@inmova.app',
+      from: 'inmovaapp@gmail.com',
       to: 'user@example.com',
       subject: 'Test Email',
       text: 'This is a test email',
@@ -62,7 +62,7 @@ describe('📧 Email Service - Unit Tests', () => {
 
   test('✅ Debe enviar email con HTML', async () => {
     const emailData = {
-      from: 'noreply@inmova.app',
+      from: 'inmovaapp@gmail.com',
       to: 'user@example.com',
       subject: 'Welcome to Inmova',
       html: '<h1>Welcome!</h1><p>Thanks for signing up.</p>',
@@ -80,7 +80,7 @@ describe('📧 Email Service - Unit Tests', () => {
 
   test('✅ Debe enviar email con adjuntos', async () => {
     const emailData = {
-      from: 'noreply@inmova.app',
+      from: 'inmovaapp@gmail.com',
       to: 'user@example.com',
       subject: 'Contract Document',
       text: 'Please find attached your contract.',
@@ -106,7 +106,7 @@ describe('📧 Email Service - Unit Tests', () => {
 
   test('✅ Debe enviar email a múltiples destinatarios', async () => {
     const emailData = {
-      from: 'noreply@inmova.app',
+      from: 'inmovaapp@gmail.com',
       to: ['user1@example.com', 'user2@example.com', 'user3@example.com'],
       subject: 'Team Notification',
       text: 'This is a team notification.',
@@ -128,7 +128,7 @@ describe('📧 Email Service - Unit Tests', () => {
 
   test('❌ Debe manejar error de servidor SMTP', async () => {
     const emailData = {
-      from: 'noreply@inmova.app',
+      from: 'inmovaapp@gmail.com',
       to: 'user@example.com',
       subject: 'Test',
       text: 'Test',
@@ -147,7 +147,7 @@ describe('📧 Email Service - Unit Tests', () => {
     });
 
     const result = await mockTransporter.sendMail({
-      from: 'noreply@inmova.app',
+      from: 'inmovaapp@gmail.com',
       to: 'invalid@example.com',
       subject: 'Test',
       text: 'Test',
@@ -162,7 +162,7 @@ describe('📧 Email Service - Unit Tests', () => {
 
     await expect(
       mockTransporter.sendMail({
-        from: 'noreply@inmova.app',
+        from: 'inmovaapp@gmail.com',
         to: 'user@example.com',
         subject: 'Test',
         text: 'Test',
@@ -176,7 +176,7 @@ describe('📧 Email Service - Unit Tests', () => {
 
   test('⚠️ Debe manejar email sin destinatario', async () => {
     const emailData = {
-      from: 'noreply@inmova.app',
+      from: 'inmovaapp@gmail.com',
       subject: 'Test',
       text: 'Test without recipient',
     };
@@ -188,7 +188,7 @@ describe('📧 Email Service - Unit Tests', () => {
 
   test('⚠️ Debe manejar email con subject vacío', async () => {
     const result = await mockTransporter.sendMail({
-      from: 'noreply@inmova.app',
+      from: 'inmovaapp@gmail.com',
       to: 'user@example.com',
       subject: '',
       text: 'Email without subject',
@@ -199,7 +199,7 @@ describe('📧 Email Service - Unit Tests', () => {
 
   test('⚠️ Debe manejar email con caracteres especiales en subject', async () => {
     const emailData = {
-      from: 'noreply@inmova.app',
+      from: 'inmovaapp@gmail.com',
       to: 'user@example.com',
       subject: '¡Bienvenido! 🎉 Welcome to Inmova 中文',
       text: 'Test',
@@ -211,7 +211,7 @@ describe('📧 Email Service - Unit Tests', () => {
 
   test('⚠️ Debe manejar HTML con scripts (potencial XSS)', async () => {
     const emailData = {
-      from: 'noreply@inmova.app',
+      from: 'inmovaapp@gmail.com',
       to: 'user@example.com',
       subject: 'Test',
       html: '<script>alert("XSS")</script><p>Safe content</p>',
@@ -224,7 +224,7 @@ describe('📧 Email Service - Unit Tests', () => {
 
   test('⚠️ Debe manejar adjuntos grandes', async () => {
     const emailData = {
-      from: 'noreply@inmova.app',
+      from: 'inmovaapp@gmail.com',
       to: 'user@example.com',
       subject: 'Large Attachment',
       text: 'File attached',
@@ -247,7 +247,7 @@ describe('📧 Email Service - Unit Tests', () => {
 
   test('✅ Debe generar email de bienvenida', () => {
     const welcomeEmail = {
-      from: 'noreply@inmova.app',
+      from: 'inmovaapp@gmail.com',
       to: 'newuser@example.com',
       subject: '¡Bienvenido a Inmova!',
       html: `
@@ -265,7 +265,7 @@ describe('📧 Email Service - Unit Tests', () => {
   test('✅ Debe generar email de reset de contraseña', () => {
     const token = 'abc123-reset-token';
     const resetEmail = {
-      from: 'noreply@inmova.app',
+      from: 'inmovaapp@gmail.com',
       to: 'user@example.com',
       subject: 'Restablecer contraseña - Inmova',
       html: `
@@ -282,7 +282,7 @@ describe('📧 Email Service - Unit Tests', () => {
 
   test('✅ Debe generar email de notificación de pago', () => {
     const paymentEmail = {
-      from: 'noreply@inmova.app',
+      from: 'inmovaapp@gmail.com',
       to: 'tenant@example.com',
       subject: 'Recordatorio de pago - Alquiler de Enero',
       html: `
@@ -305,7 +305,7 @@ describe('📧 Email Service - Unit Tests', () => {
 
     await expect(
       mockTransporter.sendMail({
-        from: 'noreply@inmova.app',
+        from: 'inmovaapp@gmail.com',
         to: 'user@example.com',
         subject: 'Test',
         text: 'Test',

@@ -209,7 +209,7 @@ export default function EmpresaConfiguracionPage() {
                 <Input
                   value={formData.cif}
                   onChange={(e) => setFormData({ ...formData, cif: e.target.value })}
-                  placeholder="B12345678"
+                  placeholder="B-19774660"
                 />
               </div>
             </div>

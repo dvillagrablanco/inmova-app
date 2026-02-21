@@ -56,7 +56,7 @@ export default function AyudaPage() {
             <CardContent className="pt-6">
               <p className="text-sm text-muted-foreground text-center">
                 ¿No encontraste lo que buscabas? Escríbenos a{' '}
-                <a href="mailto:soporte@inmova.app" className="text-primary font-medium">soporte@inmova.app</a>
+                <a href="mailto:inmovaapp@gmail.com" className="text-primary font-medium">inmovaapp@gmail.com</a>
               </p>
             </CardContent>
           </Card>
@@ -178,7 +178,7 @@ export default function AyudaPage() {
             <Mail className="h-8 w-8 text-indigo-600 mx-auto mb-3" />
             <h3 className="font-semibold text-lg mb-1">¿Necesitas más ayuda?</h3>
             <p className="text-sm text-muted-foreground mb-4">Nuestro equipo responde en menos de 24 horas</p>
-            <a href="mailto:soporte@inmova.app">
+            <a href="mailto:inmovaapp@gmail.com">
               <Button>Contactar soporte</Button>
             </a>
             <p className="text-xs text-muted-foreground mt-3">Lunes a Viernes, 9:00 - 18:00 (hora Madrid)</p>

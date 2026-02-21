@@ -865,13 +865,13 @@ async function sendInvoiceEmailDirect(
             <p style="margin:4px 0;font-size:18px;color:#4F46E5;">Total: <strong>€${Number(invoice.total).toFixed(2)}</strong></p>
           </div>
         </div>
-        <p style="color:#6b7280;font-size:13px;">Este cobro se ha realizado automáticamente a través de Stripe. Si tienes alguna pregunta, contacta con facturacion@inmova.app</p>
+        <p style="color:#6b7280;font-size:13px;">Este cobro se ha realizado automáticamente a través de Stripe. Si tienes alguna pregunta, contacta con inmovaapp@gmail.com</p>
         <div style="text-align:center;margin-top:20px;">
           <a href="${process.env.NEXTAUTH_URL || 'https://inmovaapp.com'}/dashboard/billing" style="background:#4F46E5;color:white;padding:12px 30px;text-decoration:none;border-radius:6px;display:inline-block;">Ver mis facturas</a>
         </div>
       </div>
       <div style="text-align:center;margin-top:20px;color:#9ca3af;font-size:12px;">
-        <p>INMOVA PROPTECH SL · CIF: ${process.env.INMOVA_CIF || 'B12345678'} · ${process.env.INMOVA_DIRECCION || 'Madrid, España'}</p>
+        <p>Enxames Investments SL · CIF: ${process.env.INMOVA_CIF || 'B-19774660'} · ${process.env.INMOVA_DIRECCION || 'Madrid, España'}</p>
       </div>
     </body></html>`;
 

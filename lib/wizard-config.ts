@@ -78,7 +78,7 @@ export const initialSetupWizard: WizardStep[] = [
         label: 'CIF/NIF',
         type: 'text',
         required: true,
-        placeholder: 'Ej: B12345678',
+        placeholder: 'Ej: B-19774660',
       },
       {
         name: 'address',

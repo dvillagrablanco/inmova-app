@@ -249,7 +249,7 @@ export default function ConfiguracionPage() {
                           disabled={!isAdmin}
                           required
                           className="pl-10"
-                          placeholder="B12345678"
+                          placeholder="B-19774660"
                         />
                       </div>
                     </div>

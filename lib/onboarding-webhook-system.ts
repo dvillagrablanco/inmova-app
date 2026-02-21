@@ -379,9 +379,9 @@ function getCelebrationIcon(type: string): string {
  * Trigger: Desbloquear trial premium
  */
 async function unlockPremiumTrial(userId: string, companyId: string): Promise<void> {
-  // Dar 14 días de trial premium al completar onboarding
+  // Dar 90 días de trial premium al completar onboarding
   const trialEnd = new Date();
-  trialEnd.setDate(trialEnd.getDate() + 14);
+  trialEnd.setDate(trialEnd.getDate() + 90);
   
   await prisma.company.update({
     where: { id: companyId },

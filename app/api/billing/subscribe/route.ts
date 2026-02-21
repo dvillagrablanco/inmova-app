@@ -196,11 +196,11 @@ export async function POST(request: NextRequest) {
     const successUrl = `${baseUrl}/dashboard/billing?success=true&plan=${plan.tier}${promoCoupon ? `&coupon=${promoCoupon.codigo}` : ''}`;
     const cancelUrl = `${baseUrl}/dashboard/billing?canceled=true`;
 
-    let trialDays = 14;
+    let trialDays = 90;
     if (promoCoupon?.tipo === 'TRIAL_EXTENSION') {
-      trialDays = 14 + promoCoupon.valor;
+      trialDays = 90 + promoCoupon.valor;
     } else if (promoCoupon?.tipo === 'FREE_MONTHS') {
-      trialDays = 14 + promoCoupon.valor * 30;
+      trialDays = 90 + (promoCoupon.valor * 30);
     }
 
     const checkoutOptions: Parameters<typeof stripeSubscriptionService.createCheckoutSession>[0] = {

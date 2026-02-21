@@ -43,7 +43,7 @@ describe('AI Document Agent Service', () => {
     });
 
     it('detecta CIFs similares', () => {
-      const cif1 = 'B12345678';
+      const cif1 = 'B-19774660';
       const cif2 = 'B12345679';
       const similarity = calculateStringSimilarity(cif1, cif2);
       expect(similarity).toBeGreaterThan(0.8);
