@@ -145,8 +145,6 @@ function InquilinosPageContent() {
         method: 'DELETE',
       });
 
-      }
-
       setTenants((prev) => prev.filter((t) => t.id !== tenantToDelete.id));
       toast.success(`Inquilino "${tenantToDelete.nombreCompleto}" eliminado correctamente`);
     } catch (error) {

@@ -148,9 +148,6 @@ function EdificiosPageContent() {
       const response = await fetch(`/api/buildings/${buildingToDelete.id}`, {
         method: 'DELETE',
       });
-
-      }
-
       // Remove from local state
       setBuildings((prev) => prev.filter((b) => b.id !== buildingToDelete.id));
       toast.success(`Edificio "${buildingToDelete.nombre}" eliminado correctamente`);
