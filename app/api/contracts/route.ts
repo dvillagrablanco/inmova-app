@@ -101,9 +101,10 @@ export async function GET(req: NextRequest) {
 
     // Calcular días hasta vencimiento y convertir valores Decimal
     const contractsWithExpiration = contracts.map(contract => {
-      const daysUntilExpiration = Math.ceil(
-        (new Date(contract.fechaFin).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
-      );
+      const fechaFin = contract.fechaFin ? new Date(contract.fechaFin) : null;
+      const daysUntilExpiration = fechaFin
+        ? Math.ceil((fechaFin.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+        : null;
       return {
         id: contract.id,
         unitId: contract.unitId,

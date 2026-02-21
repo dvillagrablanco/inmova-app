@@ -342,7 +342,7 @@ export async function cachedPayments(companyId: string) {
         fechaPago: payment.fechaPago,
         estado: payment.estado,
         metodoPago: payment.metodoPago,
-        notasAdicionales: payment.notasAdicionales,
+        reciboPdfPath: payment.reciboPdfPath,
         contract: payment.contract,
         createdAt: payment.createdAt,
         updatedAt: payment.updatedAt,
@@ -379,11 +379,10 @@ export async function cachedContracts(companyId: string) {
         orderBy: { createdAt: 'desc' },
       });
 
-      // Agregar días hasta el vencimiento y convertir valores Decimal
       const contractsWithExpiration = contracts.map((contract) => {
         const today = new Date();
-        const fechaFin = new Date(contract.fechaFin);
-        const diasHastaVencimiento = Math.ceil((fechaFin.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+        const fechaFin = contract.fechaFin ? new Date(contract.fechaFin) : null;
+        const diasHastaVencimiento = fechaFin ? Math.ceil((fechaFin.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)) : null;
         
         return {
           id: contract.id,
