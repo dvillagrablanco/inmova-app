@@ -69,7 +69,9 @@ export async function GET(req: NextRequest) {
     if (!usePagination && scope.scopeCompanyIds.length === 1) {
       // Usar datos cacheados
       const contractsWithExpiration = await cachedContracts(scope.activeCompanyId);
-      return NextResponse.json(contractsWithExpiration);
+      const resp = NextResponse.json(contractsWithExpiration);
+      resp.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+      return resp;
     }
 
     // Paginación activada: consulta directa
@@ -126,7 +128,7 @@ export async function GET(req: NextRequest) {
       };
     });
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       data: contractsWithExpiration,
       pagination: {
         page,
@@ -136,6 +138,8 @@ export async function GET(req: NextRequest) {
         hasMore: skip + limit < total,
       },
     });
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+    return response;
   } catch (error) {
     logger.error('Error fetching contracts:', error);
     Sentry.captureException(error);
