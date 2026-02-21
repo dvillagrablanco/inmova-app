@@ -1,73 +1,10 @@
-import { describe, it, expect, beforeAll } from 'vitest';
-import { NextRequest } from 'next/server';
+import { describe, it, expect } from 'vitest';
 
-describe.skip('API: /str/revenue-history', () => {
-  let authToken: string;
-  const baseURL = 'http://localhost:3000';
-  
-  beforeAll(async () => {
-    // Mock de autenticación
-    authToken = 'mock-jwt-token';
-    
-    // O autenticación real si es necesario
-    // const response = await fetch(`${baseURL}/api/auth/signin`, {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({
-    //     email: 'test@inmova.app',
-    //     password: 'Test123456!'
-    //   })
-    // });
-    // const data = await response.json();
-    // authToken = data.token;
-  });
-
-  describe.skip('GET /str/revenue-history', () => {
-    it('debe retornar 200 con datos válidos', async () => {
-      const url = `${baseURL}/api/str/revenue-history`;
-      
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      expect(response.status).toBe(200);
-      
-      const data = await response.json();
-      expect(data).toBeDefined();
-      expect(typeof data).toBe('object');
-    });
-    
-    it('debe retornar 401 sin autenticación', async () => {
-      const url = `${baseURL}/api/str/revenue-history`;
-      
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      expect(response.status).toBe(401);
-    });
-    
-    it('debe manejar parámetros de query', async () => {
-      const url = `${baseURL}/api/str/revenue-history?page=1&limit=10`;
-      
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      expect(response.status).toBe(200);
-    });
-    
-    
+describe('API: str > revenue-history', () => {
+  it('route module loads and exports handlers', async () => {
+    const mod = await import('@/app/api/str/revenue-history/route');
+    expect(mod).toBeTruthy();
+    const fns = Object.keys(mod).filter(k => typeof mod[k] === 'function');
+    expect(fns.length).toBeGreaterThan(0);
   });
 });

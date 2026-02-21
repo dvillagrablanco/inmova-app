@@ -100,10 +100,13 @@ export default defineConfig({
       cleanOnRerun: true,
     },
 
-    // Parallelization
-    threads: true,
-    maxThreads: 4,
-    minThreads: 1,
+    pool: 'forks',
+    poolOptions: {
+      forks: {
+        maxForks: 2,
+        minForks: 1,
+      },
+    },
 
     // Timeouts
     testTimeout: 10000,
