@@ -47,9 +47,20 @@ export async function GET(request: NextRequest) {
       tipoFilter = TIPO_MAPPING[categoria];
     }
 
+    const { resolveCompanyScope } = await import('@/lib/company-scope');
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: (session.user as any).role,
+      primaryCompanyId: session.user.companyId,
+      request,
+    });
+    const companyFilter = scope.scopeCompanyIds.length > 1
+      ? { in: scope.scopeCompanyIds }
+      : scope.activeCompanyId || session.user.companyId;
+
     const spaces = await prisma.commercialSpace.findMany({
       where: {
-        companyId: session.user.companyId,
+        companyId: companyFilter,
         ...(tipoFilter.length > 0 && { tipo: { in: tipoFilter as any } }),
         ...(estadoFilter && { estado: estadoFilter }),
       },
