@@ -27,13 +27,21 @@ export async function GET(request: NextRequest) {
     const queryCompanyId = searchParams.get('companyId');
     const userRole = (session.user as any).role;
 
-    const sessionCompanyId = (session.user as any).companyId;
-    const companyId =
-      queryCompanyId && userRole === 'super_admin' ? queryCompanyId : sessionCompanyId;
+    const { resolveCompanyScope } = await import('@/lib/company-scope');
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: userRole as any,
+      primaryCompanyId: (session.user as any).companyId,
+      request,
+    });
+
+    const companyFilter = scope.scopeCompanyIds.length > 1
+      ? { in: scope.scopeCompanyIds }
+      : scope.activeCompanyId || (session.user as any).companyId;
 
     const seguros = await prisma.insurance.findMany({
       where: {
-        companyId,
+        companyId: companyFilter,
         ...(buildingId && { buildingId }),
         ...(tipo && { tipo: tipo as any }),
         ...(estado && { estado: estado as any }),

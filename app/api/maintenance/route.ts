@@ -20,10 +20,21 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = session.user?.companyId;
-    if (!companyId) {
-      return NextResponse.json({ error: 'CompanyId no encontrado' }, { status: 400 });
+    const { resolveCompanyScope } = await import('@/lib/company-scope');
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: (session.user as any).role as any,
+      primaryCompanyId: session.user?.companyId,
+      request: req,
+    });
+
+    if (!scope.activeCompanyId) {
+      return NextResponse.json([]);
     }
+
+    const companyFilter = scope.scopeCompanyIds.length > 1
+      ? { in: scope.scopeCompanyIds }
+      : scope.activeCompanyId;
 
     const { searchParams } = new URL(req.url);
     const estado = searchParams.get('estado');
@@ -35,7 +46,7 @@ export async function GET(req: NextRequest) {
     const where: any = {
       unit: {
         building: {
-          companyId,
+          companyId: companyFilter,
         },
       },
     };
