@@ -165,7 +165,28 @@ export async function GET(req: NextRequest) {
         monto: Number(payment.monto || 0),
       }));
     } else {
-      paymentsResult = await cachedPayments(scope.activeCompanyId);
+      const payments = await prisma.payment.findMany({
+        where: {
+          contract: {
+            unit: {
+              building: { companyId: scope.activeCompanyId },
+            },
+          },
+        },
+        include: {
+          contract: {
+            include: {
+              unit: { include: { building: true } },
+              tenant: true,
+            },
+          },
+        },
+        orderBy: { fechaVencimiento: 'desc' },
+      });
+      paymentsResult = payments.map(payment => ({
+        ...payment,
+        monto: Number(payment.monto || 0),
+      }));
     }
 
     // Si no hay pagos operativos, hacer fallback a AccountingTransaction (ingresos contables)

@@ -35,18 +35,13 @@ export async function GET(req: NextRequest) {
       return NextResponse.json([]);
     }
 
-    // Si no hay paginación solicitada (página 1 con limit 10 o sin params), usar cache
-    const usePagination = searchParams.has('page') || searchParams.has('limit');
-    
-    if (!usePagination && scope.scopeCompanyIds.length === 1) {
-      const buildingsWithMetrics = await cachedBuildings(scope.activeCompanyId);
-      return NextResponse.json(buildingsWithMetrics);
-    }
-
     const whereClause =
       scope.scopeCompanyIds.length > 1
         ? { companyId: { in: scope.scopeCompanyIds } }
         : { companyId: scope.activeCompanyId };
+
+    const { searchParams: sp2 } = new URL(req.url);
+    const usePagination = sp2.has('page') || sp2.has('limit');
     
     const [buildings, total] = await Promise.all([
       prisma.building.findMany({

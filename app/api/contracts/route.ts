@@ -63,18 +63,7 @@ export async function GET(req: NextRequest) {
             },
           };
 
-    // Si no hay paginación solicitada, usar cache si tiene companyId
-    const usePagination = searchParams.has('page') || searchParams.has('limit');
-
-    if (!usePagination && scope.scopeCompanyIds.length === 1) {
-      // Usar datos cacheados
-      const contractsWithExpiration = await cachedContracts(scope.activeCompanyId);
-      const resp = NextResponse.json(contractsWithExpiration);
-      resp.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
-      return resp;
-    }
-
-    // Paginación activada: consulta directa
+    // Consulta directa (sin cache para evitar errores de build)
     const [contracts, total] = await Promise.all([
       prisma.contract.findMany({
         where: whereClause,
