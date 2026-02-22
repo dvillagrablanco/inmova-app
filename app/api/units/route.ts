@@ -199,8 +199,25 @@ export async function GET(req: NextRequest) {
       return NextResponse.json(transformedUnits);
     }
 
-    const units = await cachedUnits(scope.activeCompanyId);
-    return NextResponse.json(units);
+    const units = await prisma.unit.findMany({
+      where: { building: { companyId: scope.activeCompanyId } },
+      select: {
+        id: true, numero: true, tipo: true, estado: true, planta: true,
+        superficie: true, habitaciones: true, banos: true, rentaMensual: true,
+        createdAt: true,
+        building: { select: selectBuildingMinimal },
+        contracts: { where: { estado: 'activo' }, take: 1, include: { tenant: { select: selectTenantMinimal } } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+    const transformedUnits = units.map((unit) => ({
+      ...unit,
+      superficie: Number(unit.superficie || 0),
+      rentaMensual: Number(unit.rentaMensual || 0),
+      tenant: unit.contracts?.[0]?.tenant || null,
+      contracts: undefined,
+    }));
+    return NextResponse.json(transformedUnits);
   } catch (error) {
     logger.error('Error fetching units:', error);
       Sentry.captureException(error);
