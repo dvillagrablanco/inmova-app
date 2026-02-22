@@ -145,7 +145,8 @@ export default function OficinasPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <AuthenticatedLayout>
+        <div className="container mx-auto p-6 space-y-6">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-gray-600">
         <Link href="/comercial" className="hover:text-blue-600">Alquiler Comercial</Link>
@@ -301,8 +302,7 @@ export default function OficinasPage() {
                 {oficina.caracteristicas.map((car) => {
                   const CarIcon = caracteristicasIcons[car]?.icon || Zap;
                   return (
-                    <AuthenticatedLayout>
-                    <div
+                                        <div
                       key={car}
                       className="p-1.5 bg-gray-100 rounded"
                       title={caracteristicasIcons[car]?.label}
@@ -349,6 +349,7 @@ export default function OficinasPage() {
         </Card>
       )}
     </div>
-                    </AuthenticatedLayout>
+                    
+    </AuthenticatedLayout>
   );
 }

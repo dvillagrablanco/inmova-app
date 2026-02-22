@@ -136,7 +136,8 @@ export default function LocalesPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <AuthenticatedLayout>
+        <div className="container mx-auto p-6 space-y-6">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-gray-600">
         <Link href="/comercial" className="hover:text-blue-600">
@@ -258,8 +259,7 @@ export default function LocalesPage() {
           const ActividadIcon = local.actividad ? actividadIcons[local.actividad] || Store : Store;
 
           return (
-            <AuthenticatedLayout>
-            <Card key={local.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                        <Card key={local.id} className="overflow-hidden hover:shadow-lg transition-shadow">
               <div className="h-40 bg-gradient-to-br from-green-100 to-green-50 flex items-center justify-center">
                 <Store className="h-16 w-16 text-green-300" />
               </div>
@@ -350,6 +350,7 @@ export default function LocalesPage() {
         })}
       </div>
     </div>
-            </AuthenticatedLayout>
+            
+    </AuthenticatedLayout>
   );
 }

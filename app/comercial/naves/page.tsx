@@ -132,7 +132,7 @@ export default function NavesPage() {
 
   return (
     <AuthenticatedLayout>
-    <div className="container mx-auto p-6 space-y-6">
+        <div className="container mx-auto p-6 space-y-6">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-gray-600">
         <Link href="/comercial" className="hover:text-blue-600">

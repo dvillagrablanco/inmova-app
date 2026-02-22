@@ -176,7 +176,8 @@ export default function ComercialDashboardPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <AuthenticatedLayout>
+        <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
@@ -273,8 +274,7 @@ export default function ComercialDashboardPage() {
             const ocupacion = type.count > 0 ? Math.round((type.occupied / type.count) * 100) : 0;
             
             return (
-              <AuthenticatedLayout>
-              <Link key={type.id} href={`/comercial/${type.id}`}>
+                            <Link key={type.id} href={`/comercial/${type.id}`}>
                 <Card className="cursor-pointer hover:shadow-lg transition-shadow hover:border-blue-300">
                   <CardContent className="p-6">
                     <div className="flex items-center gap-4">
@@ -450,6 +450,7 @@ export default function ComercialDashboardPage() {
         </CardContent>
       </Card>
     </div>
-              </AuthenticatedLayout>
+              
+    </AuthenticatedLayout>
   );
 }
