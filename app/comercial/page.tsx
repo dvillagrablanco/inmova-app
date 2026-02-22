@@ -1,5 +1,7 @@
 'use client';
 
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
@@ -271,6 +273,7 @@ export default function ComercialDashboardPage() {
             const ocupacion = type.count > 0 ? Math.round((type.occupied / type.count) * 100) : 0;
             
             return (
+              <AuthenticatedLayout>
               <Link key={type.id} href={`/comercial/${type.id}`}>
                 <Card className="cursor-pointer hover:shadow-lg transition-shadow hover:border-blue-300">
                   <CardContent className="p-6">
@@ -447,5 +450,6 @@ export default function ComercialDashboardPage() {
         </CardContent>
       </Card>
     </div>
+              </AuthenticatedLayout>
   );
 }

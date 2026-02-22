@@ -1,5 +1,7 @@
 'use client';
 
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
@@ -129,6 +131,7 @@ export default function NavesPage() {
   }
 
   return (
+    <AuthenticatedLayout>
     <div className="container mx-auto p-6 space-y-6">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -380,5 +383,6 @@ export default function NavesPage() {
         ))}
       </div>
     </div>
+    </AuthenticatedLayout>
   );
 }

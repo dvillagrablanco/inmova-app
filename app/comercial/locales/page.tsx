@@ -1,5 +1,7 @@
 'use client';
 
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
@@ -256,6 +258,7 @@ export default function LocalesPage() {
           const ActividadIcon = local.actividad ? actividadIcons[local.actividad] || Store : Store;
 
           return (
+            <AuthenticatedLayout>
             <Card key={local.id} className="overflow-hidden hover:shadow-lg transition-shadow">
               <div className="h-40 bg-gradient-to-br from-green-100 to-green-50 flex items-center justify-center">
                 <Store className="h-16 w-16 text-green-300" />
@@ -347,5 +350,6 @@ export default function LocalesPage() {
         })}
       </div>
     </div>
+            </AuthenticatedLayout>
   );
 }

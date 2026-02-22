@@ -1,5 +1,7 @@
 'use client';
 
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
@@ -299,6 +301,7 @@ export default function OficinasPage() {
                 {oficina.caracteristicas.map((car) => {
                   const CarIcon = caracteristicasIcons[car]?.icon || Zap;
                   return (
+                    <AuthenticatedLayout>
                     <div
                       key={car}
                       className="p-1.5 bg-gray-100 rounded"
@@ -346,5 +349,6 @@ export default function OficinasPage() {
         </Card>
       )}
     </div>
+                    </AuthenticatedLayout>
   );
 }
