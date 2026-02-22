@@ -9,15 +9,48 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
-import { 
-  HardHat, Plus, Calendar, Euro, MapPin, AlertTriangle, 
-  CheckCircle2, Clock, Building2, Users, BarChart3, 
-  TrendingUp, TrendingDown, Eye, Ruler
+import {
+  HardHat,
+  Plus,
+  Calendar,
+  Euro,
+  MapPin,
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  Building2,
+  Users,
+  BarChart3,
+  TrendingUp,
+  TrendingDown,
+  Eye,
+  Ruler,
 } from 'lucide-react';
 
 interface ConstructionProject {
@@ -37,14 +70,15 @@ interface ConstructionProject {
   fechaFinPrevista: string;
   fechaFinReal?: string;
   arquitecto?: string;
-  direccionObra?: string;
-  contratistaPrincipal?: string;
+  aparejador?: string;
+  constructor?: string;
+  faseActual: string;
   estado: string;
   createdAt: string;
   // Computed
   avanceGeneral: number;
   desviacionPorcentaje: number;
-  diasRestantes?: number;
+  diasRestantes?: number | null;
   enRiesgo: boolean;
   numOrdenesTrabajo: number;
   ordenesCompletadas: number;
@@ -80,7 +114,7 @@ export default function ObrasPage() {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [detailProject, setDetailProject] = useState<ConstructionProject | null>(null);
-  const [filterEstado, setFilterEstado] = useState<string>('');
+  const [filterEstado, setFilterEstado] = useState<string>('todos');
 
   const [formData, setFormData] = useState({
     nombre: '',
@@ -94,8 +128,8 @@ export default function ObrasPage() {
     fechaInicio: '',
     fechaFinPrevista: '',
     arquitecto: '',
-    contratistaPrincipal: '',
-    estado: 'planificacion',
+    constructor: '',
+    faseActual: 'PLANIFICACION',
   });
 
   useEffect(() => {
@@ -106,11 +140,11 @@ export default function ObrasPage() {
     try {
       setLoading(true);
       const params = new URLSearchParams();
-      if (filterEstado) params.append('estado', filterEstado);
-      
+      if (filterEstado && filterEstado !== 'todos') params.append('estado', filterEstado);
+
       const response = await fetch(`/api/obras?${params}`);
       if (!response.ok) throw new Error('Error al cargar obras');
-      
+
       const data = await response.json();
       setProjects(data.data || []);
       setStats(data.stats || null);
@@ -124,7 +158,12 @@ export default function ObrasPage() {
 
   async function handleCreate() {
     try {
-      if (!formData.nombre || !formData.direccion || !formData.fechaInicio || !formData.fechaFinPrevista) {
+      if (
+        !formData.nombre ||
+        !formData.direccion ||
+        !formData.fechaInicio ||
+        !formData.fechaFinPrevista
+      ) {
         toast.error('Completa los campos obligatorios');
         return;
       }
@@ -154,8 +193,8 @@ export default function ObrasPage() {
         fechaInicio: '',
         fechaFinPrevista: '',
         arquitecto: '',
-        contratistaPrincipal: '',
-        estado: 'planificacion',
+        constructor: '',
+        faseActual: 'PLANIFICACION',
       });
       loadProjects();
     } catch (error: any) {
@@ -164,7 +203,10 @@ export default function ObrasPage() {
   }
 
   const getEstadoBadge = (estado: string) => {
-    const config: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
+    const config: Record<
+      string,
+      { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }
+    > = {
       planificacion: { label: 'Planificación', variant: 'outline' },
       licencias: { label: 'En Licencias', variant: 'secondary' },
       ejecucion: { label: 'En Ejecución', variant: 'default' },
@@ -202,7 +244,9 @@ export default function ObrasPage() {
         <div className="space-y-6">
           <Skeleton className="h-8 w-64" />
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-24" />)}
+            {[1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} className="h-24" />
+            ))}
           </div>
           <Skeleton className="h-96" />
         </div>
@@ -233,9 +277,7 @@ export default function ObrasPage() {
               <HardHat className="h-6 w-6 text-yellow-500" />
               Gestión de Obras
             </h1>
-            <p className="text-muted-foreground">
-              Coordinación y seguimiento de obras y reformas
-            </p>
+            <p className="text-muted-foreground">Coordinación y seguimiento de obras y reformas</p>
           </div>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
@@ -247,9 +289,7 @@ export default function ObrasPage() {
             <DialogContent className="max-w-lg">
               <DialogHeader>
                 <DialogTitle>Crear Obra</DialogTitle>
-                <DialogDescription>
-                  Registra un nuevo proyecto de construcción
-                </DialogDescription>
+                <DialogDescription>Registra un nuevo proyecto de construcción</DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4 max-h-96 overflow-y-auto">
                 <div className="space-y-2">
@@ -290,18 +330,19 @@ export default function ObrasPage() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Estado Inicial</Label>
+                    <Label>Fase Inicial</Label>
                     <Select
-                      value={formData.estado}
-                      onValueChange={(v) => setFormData({ ...formData, estado: v })}
+                      value={formData.faseActual}
+                      onValueChange={(v) => setFormData({ ...formData, faseActual: v })}
                     >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="planificacion">Planificación</SelectItem>
-                        <SelectItem value="licencias">En Licencias</SelectItem>
-                        <SelectItem value="ejecucion">En Ejecución</SelectItem>
+                        <SelectItem value="PLANIFICACION">Planificación</SelectItem>
+                        <SelectItem value="PERMISOS">En Permisos</SelectItem>
+                        <SelectItem value="CIMENTACION">Cimentación</SelectItem>
+                        <SelectItem value="ESTRUCTURA">Estructura</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -320,7 +361,9 @@ export default function ObrasPage() {
                     <Input
                       type="number"
                       value={formData.numViviendas}
-                      onChange={(e) => setFormData({ ...formData, numViviendas: parseInt(e.target.value) || 0 })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, numViviendas: parseInt(e.target.value) || 0 })
+                      }
                     />
                   </div>
                   <div className="space-y-2">
@@ -328,7 +371,12 @@ export default function ObrasPage() {
                     <Input
                       type="number"
                       value={formData.metrosConstruidos}
-                      onChange={(e) => setFormData({ ...formData, metrosConstruidos: parseFloat(e.target.value) || 0 })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          metrosConstruidos: parseFloat(e.target.value) || 0,
+                        })
+                      }
                     />
                   </div>
                   <div className="space-y-2">
@@ -336,7 +384,9 @@ export default function ObrasPage() {
                     <Input
                       type="number"
                       value={formData.numPlantas}
-                      onChange={(e) => setFormData({ ...formData, numPlantas: parseInt(e.target.value) || 0 })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, numPlantas: parseInt(e.target.value) || 0 })
+                      }
                     />
                   </div>
                 </div>
@@ -345,7 +395,12 @@ export default function ObrasPage() {
                   <Input
                     type="number"
                     value={formData.presupuestoTotal}
-                    onChange={(e) => setFormData({ ...formData, presupuestoTotal: parseFloat(e.target.value) || 0 })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        presupuestoTotal: parseFloat(e.target.value) || 0,
+                      })
+                    }
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -362,7 +417,9 @@ export default function ObrasPage() {
                     <Input
                       type="date"
                       value={formData.fechaFinPrevista}
-                      onChange={(e) => setFormData({ ...formData, fechaFinPrevista: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, fechaFinPrevista: e.target.value })
+                      }
                     />
                   </div>
                 </div>
@@ -378,8 +435,8 @@ export default function ObrasPage() {
                   <div className="space-y-2">
                     <Label>Contratista Principal</Label>
                     <Input
-                      value={formData.contratistaPrincipal}
-                      onChange={(e) => setFormData({ ...formData, contratistaPrincipal: e.target.value })}
+                      value={formData.constructor}
+                      onChange={(e) => setFormData({ ...formData, constructor: e.target.value })}
                       placeholder="Empresa contratista"
                     />
                   </div>
@@ -389,9 +446,7 @@ export default function ObrasPage() {
                 <Button variant="outline" onClick={() => setDialogOpen(false)}>
                   Cancelar
                 </Button>
-                <Button onClick={handleCreate}>
-                  Crear Obra
-                </Button>
+                <Button onClick={handleCreate}>Crear Obra</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -437,7 +492,7 @@ export default function ObrasPage() {
                 <SelectValue placeholder="Filtrar por estado" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos</SelectItem>
+                <SelectItem value="todos">Todos</SelectItem>
                 <SelectItem value="planificacion">Planificación</SelectItem>
                 <SelectItem value="licencias">En Licencias</SelectItem>
                 <SelectItem value="ejecucion">En Ejecución</SelectItem>
@@ -468,7 +523,10 @@ export default function ObrasPage() {
         ) : (
           <div className="space-y-4">
             {projects.map((project) => (
-              <Card key={project.id} className={`hover:shadow-md transition-shadow ${project.enRiesgo ? 'border-red-200' : ''}`}>
+              <Card
+                key={project.id}
+                className={`hover:shadow-md transition-shadow ${project.enRiesgo ? 'border-red-200' : ''}`}
+              >
                 <CardContent className="pt-6">
                   <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
                     <div className="flex-1 space-y-2">
@@ -504,12 +562,13 @@ export default function ObrasPage() {
                           </span>
                         )}
                         {project.diasRestantes !== null && project.diasRestantes !== undefined && (
-                          <span className={`flex items-center gap-1 ${project.diasRestantes < 0 ? 'text-red-600' : ''}`}>
+                          <span
+                            className={`flex items-center gap-1 ${project.diasRestantes < 0 ? 'text-red-600' : ''}`}
+                          >
                             <Calendar className="h-4 w-4" />
-                            {project.diasRestantes < 0 
+                            {project.diasRestantes < 0
                               ? `${Math.abs(project.diasRestantes)} días de retraso`
-                              : `${project.diasRestantes} días restantes`
-                            }
+                              : `${project.diasRestantes} días restantes`}
                           </span>
                         )}
                       </div>
@@ -525,17 +584,20 @@ export default function ObrasPage() {
 
                       {/* Desviación */}
                       <div className="text-center px-4">
-                        <div className={`text-lg font-bold flex items-center justify-center gap-1 ${project.desviacionPorcentaje > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                          {project.desviacionPorcentaje > 0 ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
+                        <div
+                          className={`text-lg font-bold flex items-center justify-center gap-1 ${project.desviacionPorcentaje > 0 ? 'text-red-600' : 'text-green-600'}`}
+                        >
+                          {project.desviacionPorcentaje > 0 ? (
+                            <TrendingUp className="h-4 w-4" />
+                          ) : (
+                            <TrendingDown className="h-4 w-4" />
+                          )}
                           {Math.abs(project.desviacionPorcentaje).toFixed(1)}%
                         </div>
                         <div className="text-xs text-muted-foreground">Desviación</div>
                       </div>
 
-                      <Button
-                        variant="outline"
-                        onClick={() => setDetailProject(project)}
-                      >
+                      <Button variant="outline" onClick={() => setDetailProject(project)}>
                         <Eye className="h-4 w-4 mr-2" />
                         Ver Detalles
                       </Button>
@@ -546,21 +608,27 @@ export default function ObrasPage() {
                   <div className="mt-4 pt-4 border-t grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                     <div>
                       <span className="text-muted-foreground">Presupuesto:</span>{' '}
-                      <span className="font-medium">{formatCurrency(project.presupuestoTotal)}</span>
+                      <span className="font-medium">
+                        {formatCurrency(project.presupuestoTotal)}
+                      </span>
                     </div>
                     <div>
                       <span className="text-muted-foreground">Gastado:</span>{' '}
-                      <span className={`font-medium ${project.gastosReales > project.presupuestoTotal ? 'text-red-600' : ''}`}>
+                      <span
+                        className={`font-medium ${project.gastosReales > project.presupuestoTotal ? 'text-red-600' : ''}`}
+                      >
                         {formatCurrency(project.gastosReales)}
                       </span>
                     </div>
                     <div>
                       <span className="text-muted-foreground">Órdenes:</span>{' '}
-                      <span className="font-medium">{project.ordenesCompletadas}/{project.numOrdenesTrabajo}</span>
+                      <span className="font-medium">
+                        {project.ordenesCompletadas}/{project.numOrdenesTrabajo}
+                      </span>
                     </div>
                     <div>
                       <span className="text-muted-foreground">Contratista:</span>{' '}
-                      <span className="font-medium">{project.contratistaPrincipal || '-'}</span>
+                      <span className="font-medium">{project.constructor || '-'}</span>
                     </div>
                   </div>
                 </CardContent>
@@ -589,13 +657,17 @@ export default function ObrasPage() {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <Card>
                       <CardContent className="pt-4 text-center">
-                        <div className="text-xl font-bold">{formatCurrency(detailProject.presupuestoTotal)}</div>
+                        <div className="text-xl font-bold">
+                          {formatCurrency(detailProject.presupuestoTotal)}
+                        </div>
                         <div className="text-xs text-muted-foreground">Presupuesto</div>
                       </CardContent>
                     </Card>
                     <Card>
                       <CardContent className="pt-4 text-center">
-                        <div className={`text-xl font-bold ${detailProject.gastosReales > detailProject.presupuestoTotal ? 'text-red-600' : ''}`}>
+                        <div
+                          className={`text-xl font-bold ${detailProject.gastosReales > detailProject.presupuestoTotal ? 'text-red-600' : ''}`}
+                        >
                           {formatCurrency(detailProject.gastosReales)}
                         </div>
                         <div className="text-xs text-muted-foreground">Gastado</div>
@@ -609,8 +681,11 @@ export default function ObrasPage() {
                     </Card>
                     <Card>
                       <CardContent className="pt-4 text-center">
-                        <div className={`text-xl font-bold ${detailProject.desviacionPorcentaje > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                          {detailProject.desviacionPorcentaje > 0 ? '+' : ''}{detailProject.desviacionPorcentaje.toFixed(1)}%
+                        <div
+                          className={`text-xl font-bold ${detailProject.desviacionPorcentaje > 0 ? 'text-red-600' : 'text-green-600'}`}
+                        >
+                          {detailProject.desviacionPorcentaje > 0 ? '+' : ''}
+                          {detailProject.desviacionPorcentaje.toFixed(1)}%
                         </div>
                         <div className="text-xs text-muted-foreground">Desviación</div>
                       </CardContent>
@@ -625,10 +700,10 @@ export default function ObrasPage() {
                         <span className="font-medium">{detailProject.arquitecto}</span>
                       </div>
                     )}
-                    {detailProject.contratistaPrincipal && (
+                    {detailProject.constructor && (
                       <div>
                         <span className="text-muted-foreground">Contratista:</span>{' '}
-                        <span className="font-medium">{detailProject.contratistaPrincipal}</span>
+                        <span className="font-medium">{detailProject.constructor}</span>
                       </div>
                     )}
                     <div>
@@ -652,7 +727,9 @@ export default function ObrasPage() {
                     {detailProject.metrosConstruidos && (
                       <div>
                         <span className="text-muted-foreground">Superficie:</span>{' '}
-                        <span className="font-medium">{detailProject.metrosConstruidos.toLocaleString('es-ES')} m²</span>
+                        <span className="font-medium">
+                          {detailProject.metrosConstruidos.toLocaleString('es-ES')} m²
+                        </span>
                       </div>
                     )}
                   </div>
@@ -663,7 +740,10 @@ export default function ObrasPage() {
                       <h4 className="font-semibold mb-3">Órdenes de Trabajo</h4>
                       <div className="space-y-2">
                         {detailProject.workOrders.map((wo) => (
-                          <div key={wo.id} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div
+                            key={wo.id}
+                            className="flex items-center justify-between p-3 border rounded-lg"
+                          >
                             <div className="flex items-center gap-3">
                               {wo.estado === 'completada' ? (
                                 <CheckCircle2 className="h-5 w-5 text-green-600" />
@@ -679,7 +759,9 @@ export default function ObrasPage() {
                               <Progress value={wo.porcentajeAvance} className="w-20 h-2" />
                               <span className="text-sm">{wo.porcentajeAvance}%</span>
                               <div className="text-right">
-                                <div className="font-medium">{formatCurrency(wo.costoReal || wo.presupuesto)}</div>
+                                <div className="font-medium">
+                                  {formatCurrency(wo.costoReal || wo.presupuesto)}
+                                </div>
                                 <div className="text-xs text-muted-foreground">
                                   Ppto: {formatCurrency(wo.presupuesto)}
                                 </div>
