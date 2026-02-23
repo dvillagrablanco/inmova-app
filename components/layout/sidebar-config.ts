@@ -5,8 +5,24 @@
 
 import type { LucideIcon } from 'lucide-react';
 
-export type UserRole = 'super_admin' | 'administrador' | 'gestor' | 'operador' | 'soporte' | 'community_manager';
-export type BusinessVertical = 'alquiler_tradicional' | 'str_vacacional' | 'coliving' | 'room_rental' | 'construccion' | 'flipping' | 'servicios_profesionales' | 'comunidades' | 'mixto' | 'alquiler_comercial';
+export type UserRole =
+  | 'super_admin'
+  | 'administrador'
+  | 'gestor'
+  | 'operador'
+  | 'soporte'
+  | 'community_manager';
+export type BusinessVertical =
+  | 'alquiler_tradicional'
+  | 'str_vacacional'
+  | 'coliving'
+  | 'room_rental'
+  | 'construccion'
+  | 'flipping'
+  | 'servicios_profesionales'
+  | 'comunidades'
+  | 'mixto'
+  | 'alquiler_comercial';
 
 export interface NavItem {
   name: string;
@@ -42,7 +58,7 @@ export const DEFAULT_EXPANDED_BY_ROLE: Record<UserRole, Record<string, boolean>>
     administradorEmpresa: false,
     finanzas: false,
     analytics: false,
-    operaciones: false,
+    operaciones: true,
     herramientasInversion: true, // NUEVO: Calculadoras y herramientas de inversión
     comunicaciones: false,
     documentosLegal: false,
@@ -75,7 +91,7 @@ export const DEFAULT_EXPANDED_BY_ROLE: Record<UserRole, Record<string, boolean>>
     comercial: false,
     alquilerComercial: false, // Nueva vertical: Oficinas, Locales, Naves
     adminFincas: false,
-    operaciones: false,
+    operaciones: true,
     comunicaciones: false,
     documentosLegal: false,
     crmMarketing: false,
@@ -281,39 +297,107 @@ export interface QuickAction {
 
 export const QUICK_ACTIONS_BY_ROLE: Record<UserRole, QuickAction[]> = {
   super_admin: [
-    { label: 'Nuevo Cliente', href: '/admin/clientes/nuevo', icon: 'Building2', tooltip: 'Agregar cliente B2B' },
-    { label: 'Ver Métricas', href: '/admin/dashboard', icon: 'BarChart2', tooltip: 'Métricas de plataforma' },
+    {
+      label: 'Nuevo Cliente',
+      href: '/admin/clientes/nuevo',
+      icon: 'Building2',
+      tooltip: 'Agregar cliente B2B',
+    },
+    {
+      label: 'Ver Métricas',
+      href: '/admin/dashboard',
+      icon: 'BarChart2',
+      tooltip: 'Métricas de plataforma',
+    },
   ],
   administrador: [
-    { label: 'Nueva Propiedad', href: '/propiedades/nueva', icon: 'Plus', tooltip: 'Agregar propiedad' },
-    { label: 'Nuevo Inquilino', href: '/inquilinos/nuevo', icon: 'UserPlus', tooltip: 'Registrar inquilino' },
-    { label: 'Ver Reportes', href: '/reportes', icon: 'FileBarChart', tooltip: 'Reportes ejecutivos' },
+    {
+      label: 'Nueva Propiedad',
+      href: '/propiedades/nueva',
+      icon: 'Plus',
+      tooltip: 'Agregar propiedad',
+    },
+    {
+      label: 'Nuevo Inquilino',
+      href: '/inquilinos/nuevo',
+      icon: 'UserPlus',
+      tooltip: 'Registrar inquilino',
+    },
+    {
+      label: 'Ver Reportes',
+      href: '/reportes',
+      icon: 'FileBarChart',
+      tooltip: 'Reportes ejecutivos',
+    },
   ],
   gestor: [
     { label: 'Nueva Tarea', href: '/tareas/nueva', icon: 'Plus', tooltip: 'Crear tarea' },
-    { label: 'Reportar Incidencia', href: '/incidencias/nueva', icon: 'AlertCircle', tooltip: 'Reportar problema' },
-    { label: 'Agendar Visita', href: '/visitas/nueva', icon: 'Calendar', tooltip: 'Programar visita' },
+    {
+      label: 'Reportar Incidencia',
+      href: '/incidencias/nueva',
+      icon: 'AlertCircle',
+      tooltip: 'Reportar problema',
+    },
+    {
+      label: 'Agendar Visita',
+      href: '/visitas/nueva',
+      icon: 'Calendar',
+      tooltip: 'Programar visita',
+    },
   ],
   operador: [
     { label: 'Check-in', href: '/operador/check-in', icon: 'Clock', tooltip: 'Registrar entrada' },
     { label: 'Subir Foto', href: '/operador/upload', icon: 'Camera', tooltip: 'Subir evidencia' },
-    { label: 'Reportar Problema', href: '/incidencias/nueva', icon: 'AlertCircle', tooltip: 'Reportar incidencia' },
+    {
+      label: 'Reportar Problema',
+      href: '/incidencias/nueva',
+      icon: 'AlertCircle',
+      tooltip: 'Reportar incidencia',
+    },
   ],
   soporte: [
-    { label: 'Nuevo Ticket', href: '/soporte/tickets/nuevo', icon: 'Plus', tooltip: 'Crear ticket' },
-    { label: 'Base de Conocimientos', href: '/knowledge-base', icon: 'BookOpen', tooltip: 'Buscar soluciones' },
+    {
+      label: 'Nuevo Ticket',
+      href: '/soporte/tickets/nuevo',
+      icon: 'Plus',
+      tooltip: 'Crear ticket',
+    },
+    {
+      label: 'Base de Conocimientos',
+      href: '/knowledge-base',
+      icon: 'BookOpen',
+      tooltip: 'Buscar soluciones',
+    },
   ],
   community_manager: [
-    { label: 'Nuevo Anuncio', href: '/anuncios/nuevo', icon: 'Megaphone', tooltip: 'Publicar anuncio' },
-    { label: 'Crear Evento', href: '/eventos/nuevo', icon: 'Calendar', tooltip: 'Organizar evento' },
-    { label: 'Publicar en RRSS', href: '/dashboard/social-media/nuevo', icon: 'Share2', tooltip: 'Publicar en redes' },
+    {
+      label: 'Nuevo Anuncio',
+      href: '/anuncios/nuevo',
+      icon: 'Megaphone',
+      tooltip: 'Publicar anuncio',
+    },
+    {
+      label: 'Crear Evento',
+      href: '/eventos/nuevo',
+      icon: 'Calendar',
+      tooltip: 'Organizar evento',
+    },
+    {
+      label: 'Publicar en RRSS',
+      href: '/dashboard/social-media/nuevo',
+      icon: 'Share2',
+      tooltip: 'Publicar en redes',
+    },
   ],
 };
 
 /**
  * HELPER: Obtener estado inicial de secciones expandidas
  */
-export function getInitialExpandedSections(role: UserRole, primaryVertical?: BusinessVertical): Record<string, boolean> {
+export function getInitialExpandedSections(
+  role: UserRole,
+  primaryVertical?: BusinessVertical
+): Record<string, boolean> {
   const baseExpanded = DEFAULT_EXPANDED_BY_ROLE[role] || {};
 
   // Si es administrador y hay vertical principal, expandirla
@@ -324,13 +408,16 @@ export function getInitialExpandedSections(role: UserRole, primaryVertical?: Bus
         ...baseExpanded,
         [verticalSection]: true,
         // Colapsar las otras verticales
-        ...Object.keys(VERTICAL_TO_SECTION).reduce((acc, v) => {
-          const section = VERTICAL_TO_SECTION[v as BusinessVertical];
-          if (section !== verticalSection) {
-            acc[section] = false;
-          }
-          return acc;
-        }, {} as Record<string, boolean>),
+        ...Object.keys(VERTICAL_TO_SECTION).reduce(
+          (acc, v) => {
+            const section = VERTICAL_TO_SECTION[v as BusinessVertical];
+            if (section !== verticalSection) {
+              acc[section] = false;
+            }
+            return acc;
+          },
+          {} as Record<string, boolean>
+        ),
       };
     }
   }

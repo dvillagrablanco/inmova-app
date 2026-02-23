@@ -120,28 +120,36 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
     if (!role || isInitialized) return;
 
     try {
-      // Intentar cargar preferencias del usuario desde localStorage
       const storedExpanded = safeLocalStorage.getItem('sidebar_expanded_sections');
+      const defaultState = getInitialExpandedSections(
+        role as UserRole,
+        primaryVertical as BusinessVertical
+      );
 
       if (storedExpanded) {
-        // Usuario tiene preferencias guardadas
-        setExpandedSections(JSON.parse(storedExpanded));
+        const parsed = JSON.parse(storedExpanded);
+        // Merge defaults para secciones no presentes en preferencias guardadas,
+        // y forzar expansión de secciones clave si el layout cambió (v2)
+        const layoutVersion = safeLocalStorage.getItem('sidebar_layout_version');
+        const CURRENT_LAYOUT_VERSION = '2';
+        let merged = { ...defaultState, ...parsed };
+        if (layoutVersion !== CURRENT_LAYOUT_VERSION) {
+          merged = { ...parsed, ...defaultState };
+          safeLocalStorage.setItem('sidebar_layout_version', CURRENT_LAYOUT_VERSION);
+          safeLocalStorage.setItem('sidebar_expanded_sections', JSON.stringify(merged));
+        }
+        setExpandedSections(merged);
       } else {
-        // Primera vez: usar configuración por defecto según rol
-        const initialState = getInitialExpandedSections(
-          role as UserRole,
-          primaryVertical as BusinessVertical
-        );
-        setExpandedSections(initialState);
+        setExpandedSections(defaultState);
       }
 
       setIsInitialized(true);
     } catch (error) {
       logger.error('Error initializing expanded sections:', error);
-      // Fallback a estado vacío (todo colapsado)
       setExpandedSections({
         favorites: true,
         dashboard: true,
+        operaciones: true,
       });
       setIsInitialized(true);
     }
@@ -390,7 +398,10 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
   const filteredEwoorkerItems = filterItems(ewoorkerNavItems, useCompanyModules);
   const filteredComercialItems = filterItems(comercialNavItems, useCompanyModules);
   const filteredAlquilerComercialItems = filterItems(alquilerComercialNavItems, useCompanyModules);
-  const filteredPatrimonioTerciarioItems = filterItems(patrimonioTerciarioNavItems, useCompanyModules);
+  const filteredPatrimonioTerciarioItems = filterItems(
+    patrimonioTerciarioNavItems,
+    useCompanyModules
+  );
   const filteredEspaciosFlexiblesItems = filterItems(espaciosFlexiblesNavItems, useCompanyModules);
   const filteredHospitalityItems = filterItems(hospitalityNavItems, useCompanyModules);
   const filteredAdminFincasItems = filterItems(adminFincasItems, useCompanyModules);
