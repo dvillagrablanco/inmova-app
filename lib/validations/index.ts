@@ -21,17 +21,17 @@ export const buildingCreateSchema = z.object({
     .max(500, 'La dirección no puede exceder 500 caracteres')
     .trim(),
   ciudad: z.string()
-    .min(1, 'La ciudad es requerida')
     .max(100, 'La ciudad no puede exceder 100 caracteres')
-    .trim(),
+    .trim()
+    .optional(),
   codigoPostal: z.string()
     .regex(/^\d{5}$/, 'El código postal debe tener 5 dígitos')
     .optional()
     .or(z.literal('')),
   pais: z.string()
-    .min(1, 'El país es requerido')
     .max(100, 'El país no puede exceder 100 caracteres')
     .trim()
+    .optional()
     .default('España'),
   numeroUnidades: z.number()
     .int('Debe ser un número entero')
