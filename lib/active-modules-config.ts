@@ -63,6 +63,14 @@ export const MODULES_CONFIG: Record<string, ModuleConfig> = {
   crm: { status: 'beta', name: 'CRM' },
   leads: { status: 'beta', name: 'Leads' },
   firma_digital: { status: 'beta', name: 'Firma Digital' },
+  tareas: { status: 'active', name: 'Gestión de Tareas' },
+  candidatos: { status: 'active', name: 'Candidatos' },
+  open_banking: { status: 'active', name: 'Open Banking (PSD2)' },
+  inspecciones: { status: 'active', name: 'Inspecciones' },
+  certificaciones: { status: 'active', name: 'Certificaciones' },
+  visitas: { status: 'active', name: 'Visitas' },
+  ordenes_trabajo: { status: 'active', name: 'Órdenes de Trabajo' },
+  ocr: { status: 'active', name: 'OCR Documental' },
   
   // ============================================
   // STR - SHORT TERM RENTALS - ACTIVOS
