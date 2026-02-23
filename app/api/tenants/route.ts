@@ -194,9 +194,71 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // Send welcome email with portal credentials if password was set
+    if (hashedPassword && validatedData.email) {
+      try {
+        const nodemailer = await import('nodemailer');
+        const transporter = nodemailer.default.createTransport({
+          host: process.env.SMTP_HOST || 'smtp.gmail.com',
+          port: parseInt(process.env.SMTP_PORT || '587'),
+          secure: process.env.SMTP_SECURE === 'true',
+          auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASSWORD,
+          },
+        });
+
+        const company = await prisma.company.findUnique({
+          where: { id: scope.activeCompanyId },
+          select: { nombre: true },
+        });
+
+        await transporter.sendMail({
+          from: process.env.SMTP_FROM || process.env.SMTP_USER,
+          to: validatedData.email,
+          subject: `Bienvenido a ${company?.nombre || 'Inmova'} - Acceso a tu Portal de Inquilino`,
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+              <div style="background: linear-gradient(135deg, #4F46E5, #7C3AED); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">
+                <h1 style="color: white; margin: 0; font-size: 24px;">🏠 Portal del Inquilino</h1>
+                <p style="color: rgba(255,255,255,0.9); margin: 8px 0 0;">Tu acceso está listo</p>
+              </div>
+              <div style="background: #f8fafc; padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
+                <p style="color: #334155; font-size: 16px;">Hola <strong>${nombreCompletoFinal}</strong>,</p>
+                <p style="color: #475569;">Se ha creado tu acceso al Portal del Inquilino de <strong>${company?.nombre || 'Inmova'}</strong>. Aquí podrás consultar tus pagos, contrato, comunicarte con tu administrador y mucho más.</p>
+                
+                <div style="background: white; border: 2px solid #4F46E5; border-radius: 8px; padding: 20px; margin: 20px 0;">
+                  <h3 style="color: #4F46E5; margin: 0 0 12px;">Tus credenciales de acceso:</h3>
+                  <p style="margin: 4px 0; color: #334155;">📧 <strong>Email:</strong> ${validatedData.email}</p>
+                  <p style="margin: 4px 0; color: #334155;">🔑 <strong>Contraseña:</strong> ${body.portalPassword}</p>
+                  <p style="margin: 12px 0 0; font-size: 13px; color: #64748b;">⚠️ Te recomendamos cambiar tu contraseña después del primer acceso.</p>
+                </div>
+                
+                <div style="text-align: center; margin: 24px 0;">
+                  <a href="https://inmovaapp.com/portal-inquilino/login" 
+                     style="background: #4F46E5; color: white; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">
+                    Acceder al Portal
+                  </a>
+                </div>
+                
+                <p style="color: #94a3b8; font-size: 12px; text-align: center; margin-top: 24px;">
+                  Este email fue enviado por ${company?.nombre || 'Inmova'}. Si no esperabas este mensaje, puedes ignorarlo.
+                </p>
+              </div>
+            </div>
+          `,
+        });
+        logger.info('Welcome email sent to tenant', { email: validatedData.email, tenantId: tenant.id });
+      } catch (emailError: any) {
+        // Don't fail tenant creation if email fails
+        logger.error('Failed to send welcome email:', { error: emailError.message, email: validatedData.email });
+      }
+    }
+
     return NextResponse.json({
       ...tenant,
       portalAccessEnabled: !!hashedPassword,
+      welcomeEmailSent: !!hashedPassword,
     }, { status: 201 });
   } catch (error: any) {
     if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) { return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 }); }
