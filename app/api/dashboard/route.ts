@@ -428,7 +428,14 @@ export async function GET(request: NextRequest) {
     const ingresosNetos = ingresosTotalesMensuales - gastosTotales;
     const margenNeto =
       ingresosTotalesMensuales > 0 ? (ingresosNetos / ingresosTotalesMensuales) * 100 : 0;
-    const tasaOcupacion = totalUnits > 0 ? (activeContracts / totalUnits) * 100 : 0;
+    // Ocupación basada en unidades únicas con contrato activo (no contar múltiples contratos por unidad)
+    const occupiedUnitsCount = await prisma.unit.count({
+      where: {
+        building: { companyId: companyFilter },
+        contracts: { some: { estado: 'activo' } },
+      },
+    });
+    const tasaOcupacion = totalUnits > 0 ? Math.min((occupiedUnitsCount / totalUnits) * 100, 100) : 0;
 
     // Calcular morosidad (pagos vencidos no pagados)
     const overduePayments = await prisma.payment.count({
