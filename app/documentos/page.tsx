@@ -330,7 +330,7 @@ export default function DocumentosPage() {
 
   return (
     <AuthenticatedLayout>
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-6 px-4 sm:px-6">
         {/* Botón Volver y Breadcrumbs */}
         <div className="flex items-center gap-4">
       <Button
