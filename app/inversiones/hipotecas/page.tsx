@@ -7,7 +7,12 @@ import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Landmark, Euro, Percent, Calendar, Building2, AlertTriangle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Landmark, Euro, Percent, Calendar, Building2, AlertTriangle, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function HipotecasPage() {
@@ -16,6 +21,58 @@ export default function HipotecasPage() {
   const [loading, setLoading] = useState(true);
   const [mortgages, setMortgages] = useState<any[]>([]);
   const [summary, setSummary] = useState<any>(null);
+  const [showCreate, setShowCreate] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({
+    entidad: '', capitalInicial: '', capitalPendiente: '', tipoInteres: 'fijo',
+    interes: '', cuotaMensual: '', fechaInicio: '', fechaFin: '', notas: '',
+  });
+
+  const resetForm = () => setForm({
+    entidad: '', capitalInicial: '', capitalPendiente: '', tipoInteres: 'fijo',
+    interes: '', cuotaMensual: '', fechaInicio: '', fechaFin: '', notas: '',
+  });
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const res = await fetch('/api/investment/mortgages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          entidad: form.entidad,
+          capitalInicial: parseFloat(form.capitalInicial) || 0,
+          capitalPendiente: parseFloat(form.capitalPendiente || form.capitalInicial) || 0,
+          tipoInteres: form.tipoInteres,
+          interes: parseFloat(form.interes) || 0,
+          cuotaMensual: parseFloat(form.cuotaMensual) || 0,
+          fechaInicio: form.fechaInicio || undefined,
+          fechaFin: form.fechaFin || undefined,
+          notas: form.notas || undefined,
+        }),
+      });
+      if (res.ok) {
+        toast.success('Hipoteca creada');
+        setShowCreate(false);
+        resetForm();
+        loadData();
+      } else {
+        const err = await res.json();
+        toast.error(err.error || 'Error al crear');
+      }
+    } catch { toast.error('Error de conexión'); }
+    finally { setSaving(false); }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('¿Eliminar esta hipoteca?')) return;
+    try {
+      const res = await fetch(`/api/investment/mortgages/${id}`, { method: 'DELETE' });
+      if (res.ok) { toast.success('Hipoteca eliminada'); loadData(); }
+      else toast.error('Error al eliminar');
+    } catch { toast.error('Error de conexión'); }
+  };
 
   useEffect(() => {
     if (status === 'unauthenticated') { router.push('/login'); return; }
@@ -58,9 +115,41 @@ export default function HipotecasPage() {
   return (
     <AuthenticatedLayout>
       <div className="space-y-6 p-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Hipotecas del Grupo</h1>
-          <p className="text-gray-500">Tracking de financiacion inmobiliaria</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Hipotecas del Grupo</h1>
+            <p className="text-gray-500">Tracking de financiación inmobiliaria</p>
+          </div>
+          <Dialog open={showCreate} onOpenChange={setShowCreate}>
+            <DialogTrigger asChild>
+              <Button><Plus className="h-4 w-4 mr-2" /> Nueva Hipoteca</Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-lg">
+              <DialogHeader><DialogTitle>Nueva Hipoteca</DialogTitle></DialogHeader>
+              <form onSubmit={handleCreate} className="space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <div><Label>Entidad *</Label><Input value={form.entidad} onChange={e => setForm(p => ({...p, entidad: e.target.value}))} placeholder="Bankinter" required /></div>
+                  <div><Label>Tipo interés</Label>
+                    <Select value={form.tipoInteres} onValueChange={v => setForm(p => ({...p, tipoInteres: v}))}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent><SelectItem value="fijo">Fijo</SelectItem><SelectItem value="variable">Variable</SelectItem><SelectItem value="mixto">Mixto</SelectItem></SelectContent>
+                    </Select>
+                  </div>
+                  <div><Label>Capital inicial (€) *</Label><Input type="number" value={form.capitalInicial} onChange={e => setForm(p => ({...p, capitalInicial: e.target.value}))} required /></div>
+                  <div><Label>Capital pendiente (€)</Label><Input type="number" value={form.capitalPendiente} onChange={e => setForm(p => ({...p, capitalPendiente: e.target.value}))} /></div>
+                  <div><Label>Interés (%)</Label><Input type="number" step="0.01" value={form.interes} onChange={e => setForm(p => ({...p, interes: e.target.value}))} /></div>
+                  <div><Label>Cuota mensual (€)</Label><Input type="number" value={form.cuotaMensual} onChange={e => setForm(p => ({...p, cuotaMensual: e.target.value}))} /></div>
+                  <div><Label>Fecha inicio</Label><Input type="date" value={form.fechaInicio} onChange={e => setForm(p => ({...p, fechaInicio: e.target.value}))} /></div>
+                  <div><Label>Fecha fin</Label><Input type="date" value={form.fechaFin} onChange={e => setForm(p => ({...p, fechaFin: e.target.value}))} /></div>
+                </div>
+                <div><Label>Notas</Label><Input value={form.notas} onChange={e => setForm(p => ({...p, notas: e.target.value}))} /></div>
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" type="button" onClick={() => setShowCreate(false)}>Cancelar</Button>
+                  <Button type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Crear Hipoteca'}</Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
 
         {/* KPIs */}
@@ -105,7 +194,7 @@ export default function HipotecasPage() {
               <Card key={m.id}>
                 <CardContent className="p-4 space-y-3">
                   <div className="flex items-start justify-between">
-                    <div>
+                    <div className="flex-1">
                       <div className="font-medium text-gray-900">{m.entidadFinanciera}</div>
                       <div className="text-sm text-gray-500 flex items-center gap-1">
                         <Building2 className="h-3 w-3" />
@@ -119,6 +208,9 @@ export default function HipotecasPage() {
                         )}
                       </div>
                     </div>
+                    <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700" onClick={() => handleDelete(m.id)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                     <div className="text-right">
                       <div className="text-sm text-gray-500">Capital pendiente</div>
                       <div className="text-lg font-bold text-red-600">{fmt(m.capitalPendiente)}</div>
