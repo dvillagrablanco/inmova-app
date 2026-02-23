@@ -35,13 +35,19 @@ type AccountingCategory = typeof ACCOUNTING_CATEGORIES[number];
 
 const KEY_ALIASES = {
   fecha: ['fecha', 'date', 'fechaoperacion', 'fechavalor', 'fecha_contable', 'fechamovimiento'],
-  concepto: ['concepto', 'descripcion', 'detalle', 'description', 'concept', 'asunto'],
-  categoria: ['categoria', 'category', 'tipo', 'tipogasto', 'naturaleza', 'clasificacion'],
-  tipo: ['tipo', 'tipo_movimiento', 'ingresogasto', 'naturaleza', 'debehaber'],
+  concepto: ['concepto', 'descripcion', 'detalle', 'description', 'concept', 'asunto', 'titulodesubcuenta'],
+  categoria: ['categoria', 'category', 'tipogasto', 'naturaleza', 'clasificacion'],
+  tipo: ['tipo', 'tipo_movimiento', 'ingresogasto', 'naturaleza'],
   monto: ['monto', 'importe', 'cantidad', 'amount', 'total', 'valor'],
   debe: ['debe', 'debit', 'cargo'],
   haber: ['haber', 'credit', 'abono'],
-  referencia: ['referencia', 'ref', 'referencia_interna', 'id', 'documento', 'asiento'],
+  referencia: ['referencia', 'ref', 'referencia_interna', 'documento'],
+  // Zucchetti-specific fields
+  asiento: ['asiento', 'numasiento', 'asientocontable'],
+  apunte: ['apunte', 'numapunte', 'lineaapunte'],
+  subcuenta: ['subcuenta', 'cuenta', 'codigosubcuenta', 'cuentacontable'],
+  contrapartida: ['contrapartida', 'contapartida', 'cuentacontrapartida'],
+  factura: ['factura', 'numfactura', 'nofactura', 'numerofactura'],
   edificio: ['edificio', 'building', 'inmueble', 'propiedad', 'property'],
   unidad: ['unidad', 'unit', 'piso', 'numero', 'unitnumber'],
   notas: ['notas', 'nota', 'observaciones', 'comments'],
@@ -205,6 +211,45 @@ function normalizeCategory(
   return 'gasto_otro';
 }
 
+/**
+ * Classify transaction by PGC subcuenta code (Plan General Contable)
+ * Spanish accounting chart: 4xx=Deudores/Acreedores, 6xx=Gastos, 7xx=Ingresos
+ */
+function classifyBySubcuenta(tipo: TransactionType, subcuenta: string, concepto: string): AccountingCategory {
+  const p2 = subcuenta.substring(0, 2);
+  const p3 = subcuenta.substring(0, 3);
+  const p4 = subcuenta.substring(0, 4);
+
+  // Grupo 7 = Ingresos
+  if (p2 === '75') return 'ingreso_renta';
+  if (p2 === '70' || p2 === '71') return 'ingreso_otro';
+  if (p2 === '76') return 'ingreso_otro';
+  if (p2 === '77') return 'ingreso_otro';
+
+  // Grupo 6 = Gastos
+  if (p4 === '6210') return 'gasto_arrendamiento';
+  if (p4 === '6220') return 'gasto_reparacion';
+  if (p4 === '6230') return 'gasto_servicio';
+  if (p3 === '625' || p4 === '6280') return 'gasto_seguro';
+  if (p4 === '6260') return 'gasto_bancario';
+  if (p4 === '6270') return 'gasto_administracion';
+  if (p2 === '63') return 'gasto_impuesto';
+  if (p2 === '64') return 'gasto_personal';
+  if (p2 === '66') return 'gasto_bancario';
+  if (p2 === '68') return 'gasto_amortizacion';
+  if (p2 === '67' || p2 === '60' || p2 === '61') return 'gasto_otro';
+
+  // Grupo 4 = Cuentas con terceros
+  if (p3 === '477' || p3 === '472' || p3 === '473' || p3 === '475') return 'gasto_impuesto';
+  if (p3 === '430') return tipo === 'ingreso' ? 'ingreso_renta' : 'ingreso_otro';
+  if (p3 === '410') return 'gasto_otro';
+
+  // Grupo 5 = Cuentas financieras
+  if (p2 === '57') return tipo === 'ingreso' ? 'ingreso_otro' : 'gasto_bancario';
+
+  return normalizeCategory(tipo, undefined, concepto);
+}
+
 function normalizeAmount(
   amount: number | null,
   debit: number | null,
@@ -341,6 +386,12 @@ export async function POST(request: NextRequest) {
       const rawBuilding = getValue(normalized, KEY_ALIASES.edificio);
       const rawUnit = getValue(normalized, KEY_ALIASES.unidad);
       const rawNotes = getValue(normalized, KEY_ALIASES.notas);
+      // Zucchetti-specific
+      const rawAsiento = getValue(normalized, KEY_ALIASES.asiento);
+      const rawApunte = getValue(normalized, KEY_ALIASES.apunte);
+      const rawSubcuenta = getValue(normalized, KEY_ALIASES.subcuenta);
+      const rawContrapartida = getValue(normalized, KEY_ALIASES.contrapartida);
+      const rawFactura = getValue(normalized, KEY_ALIASES.factura);
 
       const debit = parseNumber(rawDebit);
       const credit = parseNumber(rawCredit);
@@ -368,8 +419,14 @@ export async function POST(request: NextRequest) {
         return;
       }
 
+      // Build concepto: prefer explicit concepto, fallback to Zucchetti titulodesubcuenta
       const concepto = rawConcept ? String(rawConcept).trim() : 'Movimiento importado';
-      const categoria = normalizeCategory(tipo, rawCategory, concepto);
+      
+      // Use subcuenta (PGC account code) to improve category classification
+      const subcuentaStr = rawSubcuenta ? String(rawSubcuenta).trim() : '';
+      const categoria = subcuentaStr
+        ? classifyBySubcuenta(tipo, subcuentaStr, concepto)
+        : normalizeCategory(tipo, rawCategory, concepto);
 
       let buildingId: string | undefined;
       if (rawBuilding) {
@@ -395,6 +452,21 @@ export async function POST(request: NextRequest) {
         }
       }
 
+      // Build referencia: Zucchetti Asiento-Apunte is the most unique identifier
+      let referencia = rawReference ? String(rawReference).trim() : undefined;
+      if (rawAsiento && rawApunte) {
+        referencia = `A${rawAsiento}-L${rawApunte}` + (rawFactura ? `-${String(rawFactura).trim()}` : '') + (referencia ? `-${referencia}` : '');
+      } else if (rawFactura && !referencia) {
+        referencia = String(rawFactura).trim();
+      }
+
+      // Build notas with extra Zucchetti context
+      let notas = rawNotes ? String(rawNotes).trim() : undefined;
+      if (subcuentaStr) {
+        const extra = `Subcuenta: ${subcuentaStr}` + (rawContrapartida ? `, Contrapartida: ${String(rawContrapartida).trim()}` : '');
+        notas = notas ? `${notas} | ${extra}` : extra;
+      }
+
       transactionsToCreate.push({
         companyId,
         buildingId,
@@ -404,8 +476,8 @@ export async function POST(request: NextRequest) {
         concepto,
         monto,
         fecha,
-        referencia: rawReference ? String(rawReference).trim() : undefined,
-        notas: rawNotes ? String(rawNotes).trim() : undefined,
+        referencia,
+        notas,
       });
     });
 
