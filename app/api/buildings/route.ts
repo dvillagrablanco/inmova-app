@@ -166,19 +166,22 @@ export async function POST(req: NextRequest) {
 
     const validatedData = validationResult.data;
 
-    const building = await prisma.building.create({
-      data: {
-        companyId: scope.activeCompanyId,
-        nombre: validatedData.nombre,
-        direccion: validatedData.direccion,
-        ciudad: validatedData.ciudad,
-        pais: validatedData.pais || 'España',
-        tipo: (validatedData.tipo && ['residencial', 'mixto', 'comercial'].includes(validatedData.tipo)) ? validatedData.tipo as 'residencial' | 'mixto' | 'comercial' : 'residencial',
-        anoConstructor: validatedData.anoConstructor || new Date().getFullYear(),
-        numeroUnidades: validatedData.numeroUnidades || 0,
-        codigoPostal: validatedData.codigoPostal || null,
-      },
-    });
+    // Build create data with only fields that exist in the DB schema
+    const createData: any = {
+      companyId: scope.activeCompanyId,
+      nombre: validatedData.nombre,
+      direccion: validatedData.direccion,
+      tipo: (validatedData.tipo && ['residencial', 'mixto', 'comercial'].includes(validatedData.tipo)) ? validatedData.tipo as 'residencial' | 'mixto' | 'comercial' : 'residencial',
+      anoConstructor: validatedData.anoConstructor || new Date().getFullYear(),
+      numeroUnidades: validatedData.numeroUnidades || 0,
+    };
+
+    // Optional fields — only add if present in schema (ciudad/pais may not exist in older schemas)
+    if (validatedData.estadoConservacion) createData.estadoConservacion = validatedData.estadoConservacion;
+    if (validatedData.ascensor !== undefined) createData.ascensor = validatedData.ascensor;
+    if (validatedData.garaje !== undefined) createData.garaje = validatedData.garaje;
+
+    const building = await prisma.building.create({ data: createData });
 
     // Invalidar cachés relacionados
     await invalidateBuildingsCache(scope.activeCompanyId);
