@@ -41,10 +41,10 @@ export function useSelectedCompany() {
     try {
       if (company) {
         safeLocalStorage.setItem(STORAGE_KEY, JSON.stringify(company));
-        logger.info('Empresa seleccionada guardada', { companyId: company.id, nombre: company.nombre });
+        document.cookie = `activeCompanyId=${company.id};path=/;max-age=${60 * 60 * 24 * 365}`;
       } else {
         safeLocalStorage.removeItem(STORAGE_KEY);
-        logger.info('Empresa seleccionada eliminada');
+        document.cookie = 'activeCompanyId=;path=/;max-age=0';
       }
     } catch (error) {
       logger.error('Error al guardar empresa seleccionada:', error);
