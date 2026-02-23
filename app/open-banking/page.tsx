@@ -277,7 +277,11 @@ export default function OpenBankingPage() {
               Conecta tus cuentas bancarias para automatizar pagos, conciliaciones y análisis financiero
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={() => router.push('/banco/importar')}>
+              <FileText className="mr-2 h-4 w-4" />
+              Importar Norma 43
+            </Button>
             <Button variant="outline" onClick={handleSync} disabled={isSyncing}>
               <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
               Sincronizar
@@ -286,7 +290,7 @@ export default function OpenBankingPage() {
               <ArrowRightLeft className="mr-2 h-4 w-4" />
               Conciliación
             </Button>
-            <Button onClick={() => router.push('/admin/integraciones-banca')}>
+            <Button variant="outline" onClick={() => router.push('/admin/integraciones-banca')}>
               <Settings className="mr-2 h-4 w-4" />
               Configuración
             </Button>
