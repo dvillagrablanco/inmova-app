@@ -173,6 +173,7 @@ export default function ModulosAdminPage() {
       }
 
       toast.success(activo ? 'Módulo activado' : 'Módulo desactivado');
+      window.dispatchEvent(new Event('modules-changed'));
       await loadData();
     } catch (error: any) {
       logger.error('Error toggling module:', error);

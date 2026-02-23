@@ -16,7 +16,7 @@ import {
   Loader2,
   Settings,
 } from 'lucide-react';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import { Input } from '@/components/ui/input';
@@ -188,28 +188,32 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
   }, [pathname]); // Añadir pathname como dependencia para restaurar después de navegación
 
   // Cargar módulos activos de la empresa del usuario actual
-  useEffect(() => {
-    async function loadActiveModules() {
-      try {
-        const res = await fetch('/api/modules/active');
-        if (res.ok) {
-          const data = await res.json();
-          // Asegurar que siempre sea un array
-          const modules = Array.isArray(data.activeModules)
-            ? data.activeModules
-            : Array.isArray(data)
-              ? data
-              : [];
-          setActiveModules(modules);
-        }
-      } catch (error) {
-        logger.error('Error loading active modules:', error);
-      } finally {
-        setModulesLoaded(true);
+  const loadActiveModules = useCallback(async () => {
+    try {
+      const res = await fetch('/api/modules/active');
+      if (res.ok) {
+        const data = await res.json();
+        const modules = Array.isArray(data.activeModules)
+          ? data.activeModules
+          : Array.isArray(data)
+            ? data
+            : [];
+        setActiveModules(modules);
       }
+    } catch (error) {
+      logger.error('Error loading active modules:', error);
+    } finally {
+      setModulesLoaded(true);
     }
-    loadActiveModules();
   }, []);
+
+  useEffect(() => {
+    loadActiveModules();
+
+    const handleModulesChanged = () => loadActiveModules();
+    window.addEventListener('modules-changed', handleModulesChanged);
+    return () => window.removeEventListener('modules-changed', handleModulesChanged);
+  }, [loadActiveModules]);
 
   // Cargar módulos de la empresa seleccionada
   useEffect(() => {
