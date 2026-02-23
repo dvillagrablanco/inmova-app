@@ -32,6 +32,9 @@ async function withCache<T>(
 }
 
 const cacheService = {
+  delete: (key: string) => {
+    memoryCache.delete(key);
+  },
   invalidate: (pattern: string) => {
     for (const key of memoryCache.keys()) {
       if (key.includes(pattern)) {
