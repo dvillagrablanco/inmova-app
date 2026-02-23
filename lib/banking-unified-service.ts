@@ -80,7 +80,9 @@ export interface UnifiedReconciliationResult {
 /**
  * Obtener estado de la configuración bancaria para una sociedad
  */
-export async function getCompanyBankingStatus(companyId: string): Promise<CompanyBankingConfig | null> {
+export async function getCompanyBankingStatus(
+  companyId: string
+): Promise<CompanyBankingConfig | null> {
   const prisma = getPrismaClient();
 
   const company = await prisma.company.findUnique({
@@ -95,7 +97,9 @@ export async function getCompanyBankingStatus(companyId: string): Promise<Compan
     prisma.sepaMandate.count({ where: { companyId } }),
     prisma.sepaMandate.count({ where: { companyId, status: 'active' } }),
     prisma.sepaPayment.count({ where: { companyId } }),
-    prisma.sepaPayment.count({ where: { companyId, conciliado: false, status: { in: ['confirmed', 'paid_out'] } } }),
+    prisma.sepaPayment.count({
+      where: { companyId, conciliado: false, status: { in: ['confirmed', 'paid_out'] } },
+    }),
   ]);
 
   // Nordigen/bank connection
@@ -108,8 +112,8 @@ export async function getCompanyBankingStatus(companyId: string): Promise<Compan
     select: { id: true, ultimaSync: true, proveedor: true },
   });
 
-  const sociedad = Object.values(SOCIEDADES).find(s =>
-    s.searchNames.some(n => company.nombre?.toUpperCase().includes(n))
+  const sociedad = Object.values(SOCIEDADES).find((s) =>
+    s.searchNames.some((n) => company.nombre?.toUpperCase().includes(n))
   );
 
   return {
@@ -334,11 +338,12 @@ export async function unifiedReconcile(companyId: string): Promise<UnifiedReconc
 
     for (const candidate of candidates) {
       const tenantName = candidate.contract.tenant.nombreCompleto.toUpperCase();
-      const txText = `${tx.debtorName || ''} ${tx.descripcion || ''} ${tx.creditorName || ''}`.toUpperCase();
+      const txText =
+        `${tx.debtorName || ''} ${tx.descripcion || ''} ${tx.creditorName || ''}`.toUpperCase();
 
       // Match por nombre del inquilino en la descripción de la transacción
-      const nameParts = tenantName.split(' ').filter(p => p.length > 2);
-      const nameMatches = nameParts.filter(part => txText.includes(part)).length;
+      const nameParts = tenantName.split(' ').filter((p) => p.length > 2);
+      const nameMatches = nameParts.filter((part) => txText.includes(part)).length;
 
       if (nameMatches >= 2 || (nameParts.length === 1 && nameMatches === 1)) {
         await prisma.$transaction([
@@ -369,10 +374,160 @@ export async function unifiedReconcile(companyId: string): Promise<UnifiedReconc
 
   logger.info(
     `[UnifiedReconcile] ${company?.nombre}: ` +
-    `SEPA→Pay: ${result.sepaToPayment.matched}/${result.sepaToPayment.total}, ` +
-    `Payout→BankTx: ${result.payoutToBankTx.matched}/${result.payoutToBankTx.total}, ` +
-    `BankTx→Pay: ${result.bankTxToPayment.matched}/${result.bankTxToPayment.total}`
+      `SEPA→Pay: ${result.sepaToPayment.matched}/${result.sepaToPayment.total}, ` +
+      `Payout→BankTx: ${result.payoutToBankTx.matched}/${result.payoutToBankTx.total}, ` +
+      `BankTx→Pay: ${result.bankTxToPayment.matched}/${result.bankTxToPayment.total}`
   );
+
+  return result;
+}
+
+// ============================================================================
+// SYNC NORDIGEN BANK TRANSACTIONS
+// ============================================================================
+
+/**
+ * Descarga movimientos bancarios nuevos desde Nordigen (Open Banking)
+ * para todas las conexiones activas de una sociedad.
+ *
+ * Busca las BankConnection con proveedor='nordigen' y estado='conectado',
+ * lee las transacciones de los últimos 90 días (o desde última sync),
+ * y las inserta/actualiza en BankTransaction.
+ */
+export async function syncNordigenTransactions(companyId: string): Promise<{
+  connections: number;
+  newTransactions: number;
+  updatedTransactions: number;
+  errors: string[];
+}> {
+  const prisma = getPrismaClient();
+  const result = {
+    connections: 0,
+    newTransactions: 0,
+    updatedTransactions: 0,
+    errors: [] as string[],
+  };
+
+  const { isNordigenConfigured, getTransactions, getAccountBalances } =
+    await import('@/lib/nordigen-service');
+  if (!isNordigenConfigured()) {
+    logger.info('[NordigenSync] Nordigen no configurado, saltando sync de movimientos bancarios');
+    return result;
+  }
+
+  const connections = await prisma.bankConnection.findMany({
+    where: {
+      companyId,
+      proveedor: { in: ['nordigen', 'gocardless'] },
+      estado: 'conectado',
+      accessToken: { not: null },
+    },
+    select: {
+      id: true,
+      accessToken: true,
+      ultimaSync: true,
+      nombreBanco: true,
+    },
+  });
+
+  result.connections = connections.length;
+  if (connections.length === 0) {
+    logger.info(`[NordigenSync] No hay conexiones Nordigen activas para company ${companyId}`);
+    return result;
+  }
+
+  for (const conn of connections) {
+    try {
+      const accountIds = (conn.accessToken || '').split(',').filter(Boolean);
+      if (accountIds.length === 0) continue;
+
+      // Calcular rango de fechas: desde última sync o últimos 90 días
+      const dateFrom = conn.ultimaSync
+        ? new Date(conn.ultimaSync.getTime() - 2 * 24 * 60 * 60 * 1000) // 2 días antes de última sync para solapamiento
+        : new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
+      const dateFromStr = dateFrom.toISOString().split('T')[0];
+      const dateToStr = new Date().toISOString().split('T')[0];
+
+      for (const accountId of accountIds) {
+        const txResult = await getTransactions(accountId, dateFromStr, dateToStr);
+        if (!txResult) continue;
+
+        const allTx = [...txResult.booked, ...(txResult.pending || [])];
+        for (const tx of allTx) {
+          const txId =
+            tx.transactionId || `${accountId}_${tx.bookingDate}_${tx.transactionAmount.amount}`;
+          const amount = parseFloat(tx.transactionAmount.amount);
+          const desc =
+            tx.remittanceInformationUnstructured ||
+            tx.remittanceInformationStructured ||
+            tx.creditorName ||
+            tx.debtorName ||
+            'Sin descripción';
+
+          try {
+            const existing = await prisma.bankTransaction.findUnique({
+              where: { proveedorTxId: txId },
+              select: { id: true },
+            });
+
+            if (existing) {
+              await prisma.bankTransaction.update({
+                where: { proveedorTxId: txId },
+                data: {
+                  descripcion: desc,
+                  monto: amount,
+                  creditorName: tx.creditorName || undefined,
+                  debtorName: tx.debtorName || undefined,
+                  creditorIban: tx.creditorAccount?.iban || undefined,
+                  debtorIban: tx.debtorAccount?.iban || undefined,
+                },
+              });
+              result.updatedTransactions++;
+            } else {
+              await prisma.bankTransaction.create({
+                data: {
+                  companyId,
+                  connectionId: conn.id,
+                  proveedorTxId: txId,
+                  fecha: new Date(tx.bookingDate),
+                  fechaContable: tx.valueDate ? new Date(tx.valueDate) : null,
+                  descripcion: desc,
+                  monto: amount,
+                  moneda: tx.transactionAmount.currency || 'EUR',
+                  categoria: tx.bankTransactionCode || null,
+                  creditorName: tx.creditorName || null,
+                  debtorName: tx.debtorName || null,
+                  creditorIban: tx.creditorAccount?.iban || null,
+                  debtorIban: tx.debtorAccount?.iban || null,
+                  tipoTransaccion: tx.bankTransactionCode || null,
+                  rawData: tx as any,
+                  estado: 'pendiente_revision',
+                },
+              });
+              result.newTransactions++;
+            }
+          } catch (e: any) {
+            if (!e.message?.includes('Unique constraint')) {
+              result.errors.push(`Tx ${txId}: ${e.message}`);
+            }
+          }
+        }
+      }
+
+      // Actualizar última sincronización
+      await prisma.bankConnection.update({
+        where: { id: conn.id },
+        data: { ultimaSync: new Date() },
+      });
+
+      logger.info(
+        `[NordigenSync] ${conn.nombreBanco || conn.id}: ${result.newTransactions} nuevas, ${result.updatedTransactions} actualizadas`
+      );
+    } catch (e: any) {
+      logger.error(`[NordigenSync] Error en conexión ${conn.id}:`, e);
+      result.errors.push(`Connection ${conn.id}: ${e.message}`);
+    }
+  }
 
   return result;
 }
@@ -383,24 +538,44 @@ export async function unifiedReconcile(companyId: string): Promise<UnifiedReconc
 
 /**
  * Sincronización completa para una sociedad:
- * 1. Sync pagos desde GoCardless API
- * 2. Sync payouts desde GoCardless API
- * 3. Conciliación unificada
+ * 1. Sync movimientos bancarios desde Nordigen (Open Banking)
+ * 2. Sync pagos SEPA desde GoCardless API
+ * 3. Sync payouts desde GoCardless API
+ * 4. Conciliación unificada de 3 capas
  */
 export async function fullSyncAndReconcile(companyId: string): Promise<{
-  sync: { payments: number; payouts: number };
+  sync: {
+    payments: number;
+    payouts: number;
+    bankTransactions: number;
+    newBankTransactions: number;
+  };
   reconciliation: UnifiedReconciliationResult;
 }> {
   const gc = getGCClient();
-  const prisma = getPrismaClient();
 
   let syncPayments = 0;
   let syncPayouts = 0;
+  let syncBankTx = 0;
+  let newBankTx = 0;
 
-  // 1. Sync payments from GC
+  // 1. Sync bank transactions from Nordigen (Open Banking)
+  try {
+    const nordigenResult = await syncNordigenTransactions(companyId);
+    syncBankTx = nordigenResult.newTransactions + nordigenResult.updatedTransactions;
+    newBankTx = nordigenResult.newTransactions;
+    if (nordigenResult.errors.length > 0) {
+      logger.warn(`[FullSync] Nordigen sync warnings: ${nordigenResult.errors.join('; ')}`);
+    }
+  } catch (e) {
+    logger.warn(`[FullSync] Nordigen sync error for ${companyId}:`, e);
+  }
+
+  // 2. Sync payments from GC
   if (gc) {
     try {
-      const { syncPaymentsFromGC, syncPayoutsFromGC } = await import('@/lib/gocardless-reconciliation');
+      const { syncPaymentsFromGC, syncPayoutsFromGC } =
+        await import('@/lib/gocardless-reconciliation');
       const pResult = await syncPaymentsFromGC(companyId);
       syncPayments = pResult.created + pResult.updated;
       const poResult = await syncPayoutsFromGC(companyId);
@@ -410,11 +585,16 @@ export async function fullSyncAndReconcile(companyId: string): Promise<{
     }
   }
 
-  // 2. Run unified reconciliation
+  // 3. Run unified reconciliation
   const reconciliation = await unifiedReconcile(companyId);
 
   return {
-    sync: { payments: syncPayments, payouts: syncPayouts },
+    sync: {
+      payments: syncPayments,
+      payouts: syncPayouts,
+      bankTransactions: syncBankTx,
+      newBankTransactions: newBankTx,
+    },
     reconciliation,
   };
 }

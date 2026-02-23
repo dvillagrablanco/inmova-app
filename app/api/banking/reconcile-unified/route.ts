@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
           action: 'full-sync',
           sync: result.sync,
           reconciliation: result.reconciliation,
-          message: `Sync: ${result.sync.payments} pagos, ${result.sync.payouts} payouts. Conciliación: ${totalMatched} registros.`,
+          message: `Sync: ${result.sync.newBankTransactions} nuevos movimientos, ${result.sync.payments} pagos, ${result.sync.payouts} payouts. Conciliación: ${totalMatched} registros.`,
         });
       }
 

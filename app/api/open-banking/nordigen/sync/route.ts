@@ -48,11 +48,15 @@ export async function POST(request: NextRequest) {
       const txResult = await getTransactions(accountId, dateFrom, dateTo);
       if (txResult) {
         for (const tx of [...txResult.booked, ...txResult.pending]) {
-          const txId = tx.transactionId || `${accountId}_${tx.bookingDate}_${tx.transactionAmount.amount}`;
+          const txId =
+            tx.transactionId || `${accountId}_${tx.bookingDate}_${tx.transactionAmount.amount}`;
           const amount = parseFloat(tx.transactionAmount.amount);
-          const desc = tx.remittanceInformationUnstructured ||
+          const desc =
+            tx.remittanceInformationUnstructured ||
             tx.remittanceInformationStructured ||
-            tx.creditorName || tx.debtorName || 'Sin descripción';
+            tx.creditorName ||
+            tx.debtorName ||
+            'Sin descripción';
 
           try {
             await prisma.bankTransaction.upsert({
@@ -89,10 +93,12 @@ export async function POST(request: NextRequest) {
     // Update last sync
     await prisma.bankConnection.update({
       where: { id: connection.id },
-      data: { ultimaSincronizacion: new Date() },
+      data: { ultimaSync: new Date() },
     });
 
-    logger.info(`[Nordigen Sync] ${connection.id}: ${totalAdded} transacciones de ${accountIds.length} cuentas`);
+    logger.info(
+      `[Nordigen Sync] ${connection.id}: ${totalAdded} transacciones de ${accountIds.length} cuentas`
+    );
 
     return NextResponse.json({
       success: true,

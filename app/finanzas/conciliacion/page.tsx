@@ -4,7 +4,14 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -136,7 +143,7 @@ interface Pagination {
 export default function ConciliacionBancariaPage() {
   const { data: _session, status } = useSession();
   const router = useRouter();
-  
+
   const [activeTab, setActiveTab] = useState('movimientos');
   const [selectedAccount, setSelectedAccount] = useState<string>('all');
   const [selectedCompany, setSelectedCompany] = useState<string>('all');
@@ -144,10 +151,20 @@ export default function ConciliacionBancariaPage() {
   const [transactions, setTransactions] = useState<BankTransaction[]>([]);
   const [companies, setCompanies] = useState<CompanyOption[]>([]);
   const [stats, setStats] = useState<Stats>({
-    totalIncome: 0, totalExpense: 0, incomeCount: 0, expenseCount: 0,
-    pendingCount: 0, matchedCount: 0, totalTransactions: 0,
+    totalIncome: 0,
+    totalExpense: 0,
+    incomeCount: 0,
+    expenseCount: 0,
+    pendingCount: 0,
+    matchedCount: 0,
+    totalTransactions: 0,
   });
-  const [pagination, setPagination] = useState<Pagination>({ page: 1, limit: 50, total: 0, pages: 0 });
+  const [pagination, setPagination] = useState<Pagination>({
+    page: 1,
+    limit: 50,
+    total: 0,
+    pages: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -161,19 +178,21 @@ export default function ConciliacionBancariaPage() {
     matched: number;
     reconciled: number;
   }>({ active: false, phase: '', current: 0, total: 0, matched: 0, reconciled: 0 });
-  const [aiResults, setAiResults] = useState<Array<{
-    txId: string;
-    match: {
-      tenantId: string | null;
-      tenantName: string | null;
-      contractId: string | null;
-      unitId: string | null;
-      unitLabel: string | null;
-      confidence: number;
-      reasoning: string;
-      method: string;
-    };
-  }>>([]);
+  const [aiResults, setAiResults] = useState<
+    Array<{
+      txId: string;
+      match: {
+        tenantId: string | null;
+        tenantName: string | null;
+        contractId: string | null;
+        unitId: string | null;
+        unitLabel: string | null;
+        confidence: number;
+        reasoning: string;
+        method: string;
+      };
+    }>
+  >([]);
 
   // Cargar datos desde API - accepts explicit params to avoid stale closures
   const fetchData = async (
@@ -202,10 +221,17 @@ export default function ConciliacionBancariaPage() {
         setAccounts(result.data?.accounts || []);
         setTransactions(result.data?.transactions || []);
         setCompanies(result.data?.companies || []);
-        setStats(result.data?.stats || {
-          totalIncome: 0, totalExpense: 0, incomeCount: 0, expenseCount: 0,
-          pendingCount: 0, matchedCount: 0, totalTransactions: 0,
-        });
+        setStats(
+          result.data?.stats || {
+            totalIncome: 0,
+            totalExpense: 0,
+            incomeCount: 0,
+            expenseCount: 0,
+            pendingCount: 0,
+            matchedCount: 0,
+            totalTransactions: 0,
+          }
+        );
         setPagination(result.data?.pagination || { page: 1, limit: 50, total: 0, pages: 0 });
       }
     } catch (error) {
@@ -223,7 +249,7 @@ export default function ConciliacionBancariaPage() {
     } else if (status === 'authenticated') {
       fetchData(1);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status]);
 
   // Debounced filter changes
@@ -238,16 +264,18 @@ export default function ConciliacionBancariaPage() {
       });
     }, 300);
     return () => clearTimeout(timeout);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchTerm, selectedCompany, statusFilter, typeFilter]);
 
   // Filtrar cuentas por empresa seleccionada
-  const filteredAccounts = selectedCompany === 'all' 
-    ? accounts 
-    : accounts.filter(a => a.companyId === selectedCompany);
+  const filteredAccounts =
+    selectedCompany === 'all' ? accounts : accounts.filter((a) => a.companyId === selectedCompany);
 
   // Conciliar movimiento
-  const handleConciliar = async (transactionId: string, action: 'conciliar' | 'descartar' | 'revertir') => {
+  const handleConciliar = async (
+    transactionId: string,
+    action: 'conciliar' | 'descartar' | 'revertir'
+  ) => {
     try {
       const response = await fetch('/api/finanzas/conciliacion', {
         method: 'POST',
@@ -257,9 +285,11 @@ export default function ConciliacionBancariaPage() {
 
       if (response.ok) {
         toast.success(
-          action === 'conciliar' ? 'Movimiento conciliado' : 
-          action === 'descartar' ? 'Movimiento descartado' : 
-          'Conciliación revertida'
+          action === 'conciliar'
+            ? 'Movimiento conciliado'
+            : action === 'descartar'
+              ? 'Movimiento descartado'
+              : 'Conciliación revertida'
         );
         fetchData(pagination.page, {
           company: selectedCompany,
@@ -285,7 +315,14 @@ export default function ConciliacionBancariaPage() {
 
     try {
       // 1. Obtener total de ingresos pendientes
-      setAiProgress({ active: true, phase: 'Contando movimientos pendientes...', current: 0, total: 0, matched: 0, reconciled: 0 });
+      setAiProgress({
+        active: true,
+        phase: 'Contando movimientos pendientes...',
+        current: 0,
+        total: 0,
+        matched: 0,
+        reconciled: 0,
+      });
       setAiResults([]);
 
       const countRes = await fetch('/api/banking/smart-reconcile', {
@@ -297,12 +334,16 @@ export default function ConciliacionBancariaPage() {
       const totalPending = Math.min(countData.count || 0, useAI ? 50 : 200);
 
       if (totalPending === 0) {
-        setAiProgress(p => ({ ...p, active: false, phase: 'Sin movimientos pendientes' }));
+        setAiProgress((p) => ({ ...p, active: false, phase: 'Sin movimientos pendientes' }));
         toast.info('No hay ingresos pendientes de conciliar');
         return;
       }
 
-      setAiProgress(p => ({ ...p, total: totalPending, phase: useAI ? 'Analizando con IA...' : 'Analizando por reglas...' }));
+      setAiProgress((p) => ({
+        ...p,
+        total: totalPending,
+        phase: useAI ? 'Analizando con IA...' : 'Analizando por reglas...',
+      }));
 
       // 2. Procesar en mini-batches
       let processed = 0;
@@ -326,7 +367,7 @@ export default function ConciliacionBancariaPage() {
         totalReconciled += data.reconciled || 0;
         if (data.results) allResults = [...allResults, ...data.results];
 
-        setAiProgress(p => ({
+        setAiProgress((p) => ({
           ...p,
           current: Math.min(processed, totalPending),
           matched: totalMatched,
@@ -342,7 +383,7 @@ export default function ConciliacionBancariaPage() {
 
       // 3. Finalizar
       setAiResults(allResults);
-      setAiProgress(p => ({
+      setAiProgress((p) => ({
         ...p,
         active: false,
         current: p.total,
@@ -360,7 +401,7 @@ export default function ConciliacionBancariaPage() {
         search: searchTerm,
       });
     } catch (e: any) {
-      setAiProgress(p => ({ ...p, active: false, phase: 'Error' }));
+      setAiProgress((p) => ({ ...p, active: false, phase: 'Error' }));
       toast.error(e?.name === 'AbortError' ? 'Timeout' : 'Error de conexión');
     }
   };
@@ -371,19 +412,29 @@ export default function ConciliacionBancariaPage() {
     try {
       const companyParam = selectedCompany !== 'all' ? selectedCompany : undefined;
 
-      // Paso 1: Sync GC + conciliación unificada
+      toast.info('Descargando movimientos bancarios...');
+
+      // Paso 1: Full sync (Nordigen bank tx + GC payments/payouts + conciliación)
       const res1 = await fetch('/api/banking/reconcile-unified', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'full-sync', companyId: companyParam }),
       });
       const d1 = await res1.json();
+
+      if (!d1.success) {
+        toast.error(d1.error || 'Error sincronizando movimientos');
+        return;
+      }
+
+      const newBankTx = d1.sync?.newBankTransactions || 0;
+      const totalBankTx = d1.sync?.bankTransactions || 0;
       const unifiedMatched =
         (d1.reconciliation?.sepaToPayment?.matched || 0) +
         (d1.reconciliation?.payoutToBankTx?.matched || 0) +
         (d1.reconciliation?.bankTxToPayment?.matched || 0);
 
-      // Paso 2: Conciliación inteligente (solo reglas, rápido)
+      // Paso 2: Conciliación inteligente (reglas automáticas)
       const ctrl2 = new AbortController();
       const t2 = setTimeout(() => ctrl2.abort(), 45000);
       let d2: any = {};
@@ -401,22 +452,29 @@ export default function ConciliacionBancariaPage() {
         clearTimeout(t2);
       }
       const smartReconciled = d2.reconciled || 0;
+      const totalReconciled = unifiedMatched + smartReconciled;
 
-      const total = unifiedMatched + smartReconciled;
-      if (total > 0) {
-        toast.success(`Conciliado: ${unifiedMatched} (GC/banco) + ${smartReconciled} (IA) = ${total} pagos`);
+      // Construir mensaje de resultado
+      const parts: string[] = [];
+      if (newBankTx > 0) parts.push(`${newBankTx} nuevos movimientos`);
+      if (totalBankTx > 0 && newBankTx === 0) parts.push(`${totalBankTx} movimientos actualizados`);
+      if (totalReconciled > 0) parts.push(`${totalReconciled} conciliados`);
+
+      if (parts.length > 0) {
+        toast.success(`Sincronización completada: ${parts.join(', ')}`);
       } else {
-        toast.info('Sincronización completada. No hay nuevos registros para conciliar.');
+        toast.info('Sincronización completada. No hay nuevos movimientos.');
       }
 
-      fetchData(pagination.page, {
+      // Recargar datos desde página 1 para mostrar los más recientes
+      fetchData(1, {
         company: selectedCompany,
         status: statusFilter,
         type: typeFilter,
         search: searchTerm,
       });
     } catch (error) {
-      toast.error('Error de conexión');
+      toast.error('Error de conexión al sincronizar');
     } finally {
       setIsSyncing(false);
     }
@@ -433,7 +491,7 @@ export default function ConciliacionBancariaPage() {
     return category
       .replace(/_/g, ' ')
       .replace(/^(ingreso|gasto|transferencia)\s/, '')
-      .replace(/^\w/, c => c.toUpperCase());
+      .replace(/^\w/, (c) => c.toUpperCase());
   };
 
   if (status === 'loading') {
@@ -490,18 +548,18 @@ export default function ConciliacionBancariaPage() {
                   <SelectValue placeholder="Todas las sociedades" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">
-                    Todas las sociedades ({companies.length})
-                  </SelectItem>
-                  {companies.map(c => (
-                    <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>
+                  <SelectItem value="all">Todas las sociedades ({companies.length})</SelectItem>
+                  {companies.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.nombre}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             )}
             <Button variant="outline" onClick={handleSyncBanks} disabled={isSyncing}>
               <RefreshCw className={`h-4 w-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
-              {isSyncing ? 'Sincronizando...' : 'Sync + Conciliar'}
+              {isSyncing ? 'Descargando movimientos...' : 'Actualizar Movimientos'}
             </Button>
           </div>
         </div>
@@ -541,7 +599,9 @@ export default function ConciliacionBancariaPage() {
                   <ArrowDownLeft className="h-5 w-5 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-sm md:text-xl">+{formatCurrency(stats.totalIncome)}</p>
+                  <p className="text-2xl font-bold text-sm md:text-xl">
+                    +{formatCurrency(stats.totalIncome)}
+                  </p>
                   <p className="text-xs text-muted-foreground">Ingresos ({stats.incomeCount})</p>
                 </div>
               </div>
@@ -554,7 +614,9 @@ export default function ConciliacionBancariaPage() {
                   <ArrowUpRight className="h-5 w-5 text-red-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-sm md:text-xl">-{formatCurrency(stats.totalExpense)}</p>
+                  <p className="text-2xl font-bold text-sm md:text-xl">
+                    -{formatCurrency(stats.totalExpense)}
+                  </p>
                   <p className="text-xs text-muted-foreground">Gastos ({stats.expenseCount})</p>
                 </div>
               </div>
@@ -575,27 +637,35 @@ export default function ConciliacionBancariaPage() {
             </CardHeader>
             <CardContent>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredAccounts.map(account => (
+                {filteredAccounts.map((account) => (
                   <div
                     key={account.id}
                     className={`p-4 border rounded-lg cursor-pointer transition-all ${
-                      selectedAccount === account.id ? 'border-primary bg-primary/5' : 'hover:border-primary/50'
+                      selectedAccount === account.id
+                        ? 'border-primary bg-primary/5'
+                        : 'hover:border-primary/50'
                     }`}
-                    onClick={() => setSelectedAccount(selectedAccount === account.id ? 'all' : account.id)}
+                    onClick={() =>
+                      setSelectedAccount(selectedAccount === account.id ? 'all' : account.id)
+                    }
                   >
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
                         <Building className="h-5 w-5 text-muted-foreground" />
                         <span className="font-medium">{account.bankName}</span>
                       </div>
-                      <Badge variant={account.status === 'connected' ? 'default' : 'secondary'} className={account.status === 'connected' ? 'bg-green-500' : ''}>
+                      <Badge
+                        variant={account.status === 'connected' ? 'default' : 'secondary'}
+                        className={account.status === 'connected' ? 'bg-green-500' : ''}
+                      >
                         {account.status === 'connected' ? 'Conectado' : 'Pendiente'}
                       </Badge>
                     </div>
                     <p className="text-sm font-medium text-primary">{account.companyName}</p>
                     <p className="text-sm text-muted-foreground mb-1">{account.iban}</p>
                     <p className="text-xs text-muted-foreground">
-                      Última sync: {format(parseISO(account.lastSync), "d MMM HH:mm", { locale: es })}
+                      Última sync:{' '}
+                      {format(parseISO(account.lastSync), 'd MMM HH:mm', { locale: es })}
                     </p>
                   </div>
                 ))}
@@ -686,12 +756,17 @@ export default function ConciliacionBancariaPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {transactions.map(tx => (
-                        <TableRow key={tx.id} className={tx.reconciliationStatus === 'ignored' ? 'opacity-50' : ''}>
+                      {transactions.map((tx) => (
+                        <TableRow
+                          key={tx.id}
+                          className={tx.reconciliationStatus === 'ignored' ? 'opacity-50' : ''}
+                        >
                           <TableCell>
-                            <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
-                              tx.type === 'income' ? 'bg-green-100' : 'bg-red-100'
-                            }`}>
+                            <div
+                              className={`h-8 w-8 rounded-full flex items-center justify-center ${
+                                tx.type === 'income' ? 'bg-green-100' : 'bg-red-100'
+                              }`}
+                            >
                               {tx.type === 'income' ? (
                                 <ArrowDownLeft className="h-4 w-4 text-green-600" />
                               ) : (
@@ -701,7 +776,7 @@ export default function ConciliacionBancariaPage() {
                           </TableCell>
                           <TableCell>
                             <div className="text-sm whitespace-nowrap">
-                              {format(parseISO(tx.date), "d MMM yyyy", { locale: es })}
+                              {format(parseISO(tx.date), 'd MMM yyyy', { locale: es })}
                             </div>
                           </TableCell>
                           {selectedCompany === 'all' && companies.length > 1 && (
@@ -715,10 +790,14 @@ export default function ConciliacionBancariaPage() {
                             <div>
                               <p className="font-medium text-sm line-clamp-1">{tx.description}</p>
                               {tx.beneficiary && (
-                                <p className="text-xs text-muted-foreground line-clamp-1">{tx.beneficiary}</p>
+                                <p className="text-xs text-muted-foreground line-clamp-1">
+                                  {tx.beneficiary}
+                                </p>
                               )}
                               {tx.reference && (
-                                <p className="text-xs text-muted-foreground/70 line-clamp-1">{tx.reference}</p>
+                                <p className="text-xs text-muted-foreground/70 line-clamp-1">
+                                  {tx.reference}
+                                </p>
                               )}
                             </div>
                           </TableCell>
@@ -728,8 +807,11 @@ export default function ConciliacionBancariaPage() {
                             </span>
                           </TableCell>
                           <TableCell className="text-right">
-                            <span className={`font-semibold ${tx.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
-                              {tx.type === 'income' ? '+' : ''}{formatCurrency(tx.amount)}
+                            <span
+                              className={`font-semibold ${tx.type === 'income' ? 'text-green-600' : 'text-red-600'}`}
+                            >
+                              {tx.type === 'income' ? '+' : ''}
+                              {formatCurrency(tx.amount)}
                             </span>
                           </TableCell>
                           <TableCell>
@@ -768,24 +850,33 @@ export default function ConciliacionBancariaPage() {
                               <DropdownMenuContent align="end">
                                 {tx.reconciliationStatus === 'pending' && (
                                   <>
-                                    <DropdownMenuItem onClick={() => handleConciliar(tx.id, 'conciliar')}>
+                                    <DropdownMenuItem
+                                      onClick={() => handleConciliar(tx.id, 'conciliar')}
+                                    >
                                       <CheckCircle2 className="h-4 w-4 mr-2" />
                                       Conciliar
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => handleConciliar(tx.id, 'descartar')}>
+                                    <DropdownMenuItem
+                                      onClick={() => handleConciliar(tx.id, 'descartar')}
+                                    >
                                       <XCircle className="h-4 w-4 mr-2" />
                                       Descartar
                                     </DropdownMenuItem>
                                   </>
                                 )}
-                                {(tx.reconciliationStatus === 'matched' || tx.reconciliationStatus === 'manual') && (
-                                  <DropdownMenuItem onClick={() => handleConciliar(tx.id, 'revertir')}>
+                                {(tx.reconciliationStatus === 'matched' ||
+                                  tx.reconciliationStatus === 'manual') && (
+                                  <DropdownMenuItem
+                                    onClick={() => handleConciliar(tx.id, 'revertir')}
+                                  >
                                     <Unlink className="h-4 w-4 mr-2" />
                                     Revertir conciliación
                                   </DropdownMenuItem>
                                 )}
                                 {tx.reconciliationStatus === 'ignored' && (
-                                  <DropdownMenuItem onClick={() => handleConciliar(tx.id, 'revertir')}>
+                                  <DropdownMenuItem
+                                    onClick={() => handleConciliar(tx.id, 'revertir')}
+                                  >
                                     <RefreshCw className="h-4 w-4 mr-2" />
                                     Restaurar
                                   </DropdownMenuItem>
@@ -803,19 +894,23 @@ export default function ConciliacionBancariaPage() {
               {pagination.pages > 1 && (
                 <CardFooter className="flex items-center justify-between py-3 border-t">
                   <p className="text-sm text-muted-foreground">
-                    Mostrando {((pagination.page - 1) * pagination.limit) + 1}-{Math.min(pagination.page * pagination.limit, pagination.total)} de {pagination.total.toLocaleString('es-ES')} movimientos
+                    Mostrando {(pagination.page - 1) * pagination.limit + 1}-
+                    {Math.min(pagination.page * pagination.limit, pagination.total)} de{' '}
+                    {pagination.total.toLocaleString('es-ES')} movimientos
                   </p>
                   <div className="flex items-center gap-2">
                     <Button
                       variant="outline"
                       size="sm"
                       disabled={pagination.page <= 1}
-                      onClick={() => fetchData(pagination.page - 1, {
-                        company: selectedCompany,
-                        status: statusFilter,
-                        type: typeFilter,
-                        search: searchTerm,
-                      })}
+                      onClick={() =>
+                        fetchData(pagination.page - 1, {
+                          company: selectedCompany,
+                          status: statusFilter,
+                          type: typeFilter,
+                          search: searchTerm,
+                        })
+                      }
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
@@ -826,12 +921,14 @@ export default function ConciliacionBancariaPage() {
                       variant="outline"
                       size="sm"
                       disabled={pagination.page >= pagination.pages}
-                      onClick={() => fetchData(pagination.page + 1, {
-                        company: selectedCompany,
-                        status: statusFilter,
-                        type: typeFilter,
-                        search: searchTerm,
-                      })}
+                      onClick={() =>
+                        fetchData(pagination.page + 1, {
+                          company: selectedCompany,
+                          status: statusFilter,
+                          type: typeFilter,
+                          search: searchTerm,
+                        })
+                      }
                     >
                       <ChevronRight className="h-4 w-4" />
                     </Button>
@@ -847,8 +944,8 @@ export default function ConciliacionBancariaPage() {
               <Sparkles className="h-4 w-4 text-purple-600" />
               <AlertDescription className="text-purple-800 dark:text-purple-200">
                 <strong>Conciliación Inteligente:</strong> La IA analiza cada movimiento pendiente,
-                identifica el inquilino y la unidad correspondiente, y concilia automáticamente
-                los pagos con confianza alta (&ge;70%).
+                identifica el inquilino y la unidad correspondiente, y concilia automáticamente los
+                pagos con confianza alta (&ge;70%).
               </AlertDescription>
             </Alert>
 
@@ -862,8 +959,8 @@ export default function ConciliacionBancariaPage() {
                 <CardDescription>
                   {stats.pendingCount > 0
                     ? `${stats.pendingCount.toLocaleString('es-ES')} movimientos pendientes (${stats.incomeCount.toLocaleString('es-ES')} ingresos analizables, ${stats.expenseCount.toLocaleString('es-ES')} gastos).`
-                    : 'No hay movimientos pendientes.'}
-                  {' '}La IA analiza los ingresos para identificar pagos de alquiler.
+                    : 'No hay movimientos pendientes.'}{' '}
+                  La IA analiza los ingresos para identificar pagos de alquiler.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -879,7 +976,9 @@ export default function ConciliacionBancariaPage() {
                     ) : (
                       <Sparkles className="h-4 w-4 mr-2" />
                     )}
-                    {aiProgress.active ? 'Analizando...' : `Analizar ${stats.incomeCount > 0 ? stats.incomeCount.toLocaleString('es-ES') + ' ingresos' : ''} con IA`}
+                    {aiProgress.active
+                      ? 'Analizando...'
+                      : `Analizar ${stats.incomeCount > 0 ? stats.incomeCount.toLocaleString('es-ES') + ' ingresos' : ''} con IA`}
                   </Button>
                   <Button
                     variant="outline"
@@ -899,18 +998,30 @@ export default function ConciliacionBancariaPage() {
                     <div className="flex items-center justify-between text-sm">
                       <span className="font-medium">{aiProgress.phase}</span>
                       <span className="text-muted-foreground">
-                        {aiProgress.current}/{aiProgress.total} ({aiProgress.total > 0 ? Math.round((aiProgress.current / aiProgress.total) * 100) : 0}%)
+                        {aiProgress.current}/{aiProgress.total} (
+                        {aiProgress.total > 0
+                          ? Math.round((aiProgress.current / aiProgress.total) * 100)
+                          : 0}
+                        %)
                       </span>
                     </div>
                     <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
                       <div
                         className="h-full rounded-full transition-all duration-500 ease-out bg-gradient-to-r from-cyan-500 to-purple-500"
-                        style={{ width: `${aiProgress.total > 0 ? Math.round((aiProgress.current / aiProgress.total) * 100) : 0}%` }}
+                        style={{
+                          width: `${aiProgress.total > 0 ? Math.round((aiProgress.current / aiProgress.total) * 100) : 0}%`,
+                        }}
                       />
                     </div>
                     <div className="flex gap-4 text-xs text-muted-foreground">
-                      <span>Identificados: <strong className="text-foreground">{aiProgress.matched}</strong></span>
-                      <span>Conciliados: <strong className="text-green-600">{aiProgress.reconciled}</strong></span>
+                      <span>
+                        Identificados:{' '}
+                        <strong className="text-foreground">{aiProgress.matched}</strong>
+                      </span>
+                      <span>
+                        Conciliados:{' '}
+                        <strong className="text-green-600">{aiProgress.reconciled}</strong>
+                      </span>
                     </div>
                   </div>
                 )}
@@ -918,19 +1029,27 @@ export default function ConciliacionBancariaPage() {
                 {/* Stats */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="p-4 bg-muted rounded-lg text-center">
-                    <p className="text-2xl font-bold">{stats.totalTransactions.toLocaleString('es-ES')}</p>
+                    <p className="text-2xl font-bold">
+                      {stats.totalTransactions.toLocaleString('es-ES')}
+                    </p>
                     <p className="text-xs text-muted-foreground">Total movimientos</p>
                   </div>
                   <div className="p-4 bg-amber-50 dark:bg-amber-950 rounded-lg text-center">
-                    <p className="text-2xl font-bold text-amber-600">{stats.pendingCount.toLocaleString('es-ES')}</p>
+                    <p className="text-2xl font-bold text-amber-600">
+                      {stats.pendingCount.toLocaleString('es-ES')}
+                    </p>
                     <p className="text-xs text-muted-foreground">Pendientes</p>
                   </div>
                   <div className="p-4 bg-green-50 dark:bg-green-950 rounded-lg text-center">
-                    <p className="text-2xl font-bold text-green-600">{stats.matchedCount.toLocaleString('es-ES')}</p>
+                    <p className="text-2xl font-bold text-green-600">
+                      {stats.matchedCount.toLocaleString('es-ES')}
+                    </p>
                     <p className="text-xs text-muted-foreground">Conciliados</p>
                   </div>
                   <div className="p-4 bg-green-50 dark:bg-green-950 rounded-lg text-center">
-                    <p className="text-2xl font-bold text-green-600">{stats.incomeCount.toLocaleString('es-ES')}</p>
+                    <p className="text-2xl font-bold text-green-600">
+                      {stats.incomeCount.toLocaleString('es-ES')}
+                    </p>
                     <p className="text-xs text-muted-foreground">Ingresos</p>
                   </div>
                 </div>
@@ -943,9 +1062,14 @@ export default function ConciliacionBancariaPage() {
                 <CardHeader>
                   <CardTitle className="text-lg">Resultados del análisis IA</CardTitle>
                   <CardDescription>
-                    {aiResults.filter(r => r.match.confidence >= 70).length} identificados con alta confianza,{' '}
-                    {aiResults.filter(r => r.match.confidence > 0 && r.match.confidence < 70).length} con baja confianza,{' '}
-                    {aiResults.filter(r => r.match.confidence === 0).length} sin match
+                    {aiResults.filter((r) => r.match.confidence >= 70).length} identificados con
+                    alta confianza,{' '}
+                    {
+                      aiResults.filter((r) => r.match.confidence > 0 && r.match.confidence < 70)
+                        .length
+                    }{' '}
+                    con baja confianza, {aiResults.filter((r) => r.match.confidence === 0).length}{' '}
+                    sin match
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="p-0">
@@ -962,52 +1086,64 @@ export default function ConciliacionBancariaPage() {
                     </TableHeader>
                     <TableBody>
                       {aiResults
-                        .filter(r => r.match.confidence > 0)
+                        .filter((r) => r.match.confidence > 0)
                         .sort((a, b) => b.match.confidence - a.match.confidence)
                         .slice(0, 50)
                         .map((r, idx) => (
-                        <TableRow key={idx}>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <div className={`h-3 w-3 rounded-full ${
-                                r.match.confidence >= 70 ? 'bg-green-500' :
-                                r.match.confidence >= 40 ? 'bg-amber-500' : 'bg-red-500'
-                              }`} />
-                              <span className="text-sm font-medium">{r.match.confidence}%</span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-sm font-medium">{r.match.tenantName || '-'}</TableCell>
-                          <TableCell className="text-sm">{r.match.unitLabel || '-'}</TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className="text-xs">
-                              {r.match.method === 'exact_amount_name' ? 'Nombre+Monto' :
-                               r.match.method === 'fuzzy_name' ? 'Nombre parcial' :
-                               r.match.method === 'reference_code' ? 'Referencia' :
-                               r.match.method === 'ai_inference' ? 'IA Claude' :
-                               r.match.method === 'gocardless_metadata' ? 'GoCardless' :
-                               r.match.method}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-xs text-muted-foreground max-w-[200px] truncate">
-                            {r.match.reasoning}
-                          </TableCell>
-                          <TableCell>
-                            {r.match.confidence >= 70 ? (
-                              <Badge className="bg-green-500 text-xs">Conciliado</Badge>
-                            ) : (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="text-xs h-7"
-                                onClick={() => handleConciliar(r.txId, 'conciliar')}
-                              >
-                                Aprobar
-                              </Button>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                      {aiResults.filter(r => r.match.confidence > 0).length === 0 && (
+                          <TableRow key={idx}>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <div
+                                  className={`h-3 w-3 rounded-full ${
+                                    r.match.confidence >= 70
+                                      ? 'bg-green-500'
+                                      : r.match.confidence >= 40
+                                        ? 'bg-amber-500'
+                                        : 'bg-red-500'
+                                  }`}
+                                />
+                                <span className="text-sm font-medium">{r.match.confidence}%</span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-sm font-medium">
+                              {r.match.tenantName || '-'}
+                            </TableCell>
+                            <TableCell className="text-sm">{r.match.unitLabel || '-'}</TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className="text-xs">
+                                {r.match.method === 'exact_amount_name'
+                                  ? 'Nombre+Monto'
+                                  : r.match.method === 'fuzzy_name'
+                                    ? 'Nombre parcial'
+                                    : r.match.method === 'reference_code'
+                                      ? 'Referencia'
+                                      : r.match.method === 'ai_inference'
+                                        ? 'IA Claude'
+                                        : r.match.method === 'gocardless_metadata'
+                                          ? 'GoCardless'
+                                          : r.match.method}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-xs text-muted-foreground max-w-[200px] truncate">
+                              {r.match.reasoning}
+                            </TableCell>
+                            <TableCell>
+                              {r.match.confidence >= 70 ? (
+                                <Badge className="bg-green-500 text-xs">Conciliado</Badge>
+                              ) : (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="text-xs h-7"
+                                  onClick={() => handleConciliar(r.txId, 'conciliar')}
+                                >
+                                  Aprobar
+                                </Button>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      {aiResults.filter((r) => r.match.confidence > 0).length === 0 && (
                         <TableRow>
                           <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
                             No se encontraron coincidencias en los movimientos analizados
@@ -1037,7 +1173,7 @@ export default function ConciliacionBancariaPage() {
                     { label: 'Bancarios', icon: '🏦', filter: 'bancario' },
                     { label: 'Personal', icon: '👤', filter: 'nomina' },
                     { label: 'Transferencias', icon: '🔄', filter: 'transferencia' },
-                  ].map(cat => (
+                  ].map((cat) => (
                     <Button
                       key={cat.filter}
                       variant="outline"
