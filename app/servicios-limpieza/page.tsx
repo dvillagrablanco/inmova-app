@@ -5,17 +5,28 @@ import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
-import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { toast } from 'sonner';
-import { 
-  Sparkles, Plus, Calendar, Clock, User, CheckCircle2, 
-  AlertCircle, PlayCircle, XCircle, Home, Filter, Search
+import {
+  Sparkles,
+  Plus,
+  Calendar,
+  Clock,
+  User,
+  CheckCircle2,
+  PlayCircle,
+  XCircle,
+  Home,
+  Filter,
+  Search,
+  RefreshCw,
 } from 'lucide-react';
 
 interface CleaningTask {
@@ -61,19 +72,8 @@ export default function ServiciosLimpiezaPage() {
   const [tasks, setTasks] = useState<CleaningTask[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [dialogOpen, setDialogOpen] = useState(false);
   const [filterStatus, setFilterStatus] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
-
-  // Form state
-  const [formData, setFormData] = useState({
-    tipo: 'check_out',
-    fechaProgramada: '',
-    prioridad: 0,
-    notas: '',
-    instruccionesEspeciales: '',
-    tiempoEstimadoMin: 60,
-  });
 
   useEffect(() => {
     loadTasks();
@@ -84,10 +84,10 @@ export default function ServiciosLimpiezaPage() {
       setLoading(true);
       const params = new URLSearchParams();
       if (filterStatus) params.append('status', filterStatus);
-      
+
       const response = await fetch(`/api/servicios-limpieza?${params}`);
       if (!response.ok) throw new Error('Error al cargar tareas');
-      
+
       const data = await response.json();
       setTasks(data.data || []);
       setStats(data.stats || null);
@@ -99,46 +99,31 @@ export default function ServiciosLimpiezaPage() {
     }
   }
 
-  async function handleCreate() {
-    try {
-      if (!formData.fechaProgramada) {
-        toast.error('Selecciona una fecha programada');
-        return;
-      }
-
-      const response = await fetch('/api/servicios-limpieza', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Error al crear tarea');
-      }
-
-      toast.success('Tarea de limpieza programada');
-      setDialogOpen(false);
-      setFormData({
-        tipo: 'check_out',
-        fechaProgramada: '',
-        prioridad: 0,
-        notas: '',
-        instruccionesEspeciales: '',
-        tiempoEstimadoMin: 60,
-      });
-      loadTasks();
-    } catch (error: any) {
-      toast.error(error.message);
-    }
-  }
-
   const getStatusBadge = (status: string) => {
-    const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: React.ReactNode }> = {
+    const statusConfig: Record<
+      string,
+      {
+        label: string;
+        variant: 'default' | 'secondary' | 'destructive' | 'outline';
+        icon: React.ReactNode;
+      }
+    > = {
       pendiente: { label: 'Pendiente', variant: 'outline', icon: <Clock className="h-3 w-3" /> },
-      en_progreso: { label: 'En Progreso', variant: 'default', icon: <PlayCircle className="h-3 w-3" /> },
-      completada: { label: 'Completada', variant: 'secondary', icon: <CheckCircle2 className="h-3 w-3" /> },
-      cancelada: { label: 'Cancelada', variant: 'destructive', icon: <XCircle className="h-3 w-3" /> },
+      en_progreso: {
+        label: 'En Progreso',
+        variant: 'default',
+        icon: <PlayCircle className="h-3 w-3" />,
+      },
+      completada: {
+        label: 'Completada',
+        variant: 'secondary',
+        icon: <CheckCircle2 className="h-3 w-3" />,
+      },
+      cancelada: {
+        label: 'Cancelada',
+        variant: 'destructive',
+        icon: <XCircle className="h-3 w-3" />,
+      },
     };
     const config = statusConfig[status] || statusConfig.pendiente;
     return (
@@ -167,10 +152,12 @@ export default function ServiciosLimpiezaPage() {
       2: { label: 'Urgente', color: 'bg-red-100 text-red-700' },
     };
     const config = prioridadConfig[prioridad] || prioridadConfig[0];
-    return <span className={`px-2 py-0.5 text-xs rounded-full ${config.color}`}>{config.label}</span>;
+    return (
+      <span className={`px-2 py-0.5 text-xs rounded-full ${config.color}`}>{config.label}</span>
+    );
   };
 
-  const filteredTasks = tasks.filter(task => {
+  const filteredTasks = tasks.filter((task) => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
     return (
@@ -183,12 +170,8 @@ export default function ServiciosLimpiezaPage() {
   if (loading) {
     return (
       <AuthenticatedLayout>
-        <div className="space-y-6">
-          <Skeleton className="h-8 w-64" />
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-24" />)}
-          </div>
-          <Skeleton className="h-96" />
+        <div className="flex items-center justify-center min-h-[400px]">
+          <RefreshCw className="h-8 w-8 animate-spin text-primary" />
         </div>
       </AuthenticatedLayout>
     );
@@ -197,19 +180,6 @@ export default function ServiciosLimpiezaPage() {
   return (
     <AuthenticatedLayout>
       <div className="space-y-6">
-        {/* Breadcrumbs */}
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Servicios de Limpieza</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
@@ -217,102 +187,12 @@ export default function ServiciosLimpiezaPage() {
               <Sparkles className="h-6 w-6 text-blue-500" />
               Servicios de Limpieza
             </h1>
-            <p className="text-muted-foreground">
-              Gestión de tareas de limpieza y mantenimiento
-            </p>
+            <p className="text-muted-foreground">Gestión de tareas de limpieza y mantenimiento</p>
           </div>
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Nueva Tarea
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>Programar Limpieza</DialogTitle>
-                <DialogDescription>
-                  Crea una nueva tarea de limpieza
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label>Tipo de Limpieza</Label>
-                  <Select
-                    value={formData.tipo}
-                    onValueChange={(v) => setFormData({ ...formData, tipo: v })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="check_out">Check-out</SelectItem>
-                      <SelectItem value="check_in">Check-in</SelectItem>
-                      <SelectItem value="profunda">Limpieza Profunda</SelectItem>
-                      <SelectItem value="mantenimiento">Mantenimiento</SelectItem>
-                      <SelectItem value="rapida">Rápida</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Fecha Programada</Label>
-                  <Input
-                    type="datetime-local"
-                    value={formData.fechaProgramada}
-                    onChange={(e) => setFormData({ ...formData, fechaProgramada: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Prioridad</Label>
-                  <Select
-                    value={String(formData.prioridad)}
-                    onValueChange={(v) => setFormData({ ...formData, prioridad: parseInt(v) })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="0">Normal</SelectItem>
-                      <SelectItem value="1">Alta</SelectItem>
-                      <SelectItem value="2">Urgente</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Tiempo Estimado (minutos)</Label>
-                  <Input
-                    type="number"
-                    value={formData.tiempoEstimadoMin}
-                    onChange={(e) => setFormData({ ...formData, tiempoEstimadoMin: parseInt(e.target.value) || 60 })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Notas</Label>
-                  <Textarea
-                    value={formData.notas}
-                    onChange={(e) => setFormData({ ...formData, notas: e.target.value })}
-                    placeholder="Notas adicionales..."
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Instrucciones Especiales</Label>
-                  <Textarea
-                    value={formData.instruccionesEspeciales}
-                    onChange={(e) => setFormData({ ...formData, instruccionesEspeciales: e.target.value })}
-                    placeholder="Instrucciones específicas para esta limpieza..."
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                  Cancelar
-                </Button>
-                <Button onClick={handleCreate}>
-                  Programar
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <Button onClick={() => toast.info('Funcionalidad de creación disponible próximamente')}>
+            <Plus className="h-4 w-4 mr-2" />
+            Nueva Tarea
+          </Button>
         </div>
 
         {/* Stats */}
@@ -385,19 +265,17 @@ export default function ServiciosLimpiezaPage() {
         <Card>
           <CardHeader>
             <CardTitle>Tareas Programadas</CardTitle>
-            <CardDescription>
-              {filteredTasks.length} tarea(s) encontrada(s)
-            </CardDescription>
+            <CardDescription>{filteredTasks.length} tarea(s) encontrada(s)</CardDescription>
           </CardHeader>
           <CardContent>
             {filteredTasks.length === 0 ? (
               <div className="text-center py-12">
                 <Sparkles className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <h3 className="font-medium text-lg">No hay tareas de limpieza</h3>
-                <p className="text-muted-foreground mb-4">
-                  Programa tu primera tarea para empezar
-                </p>
-                <Button onClick={() => setDialogOpen(true)}>
+                <p className="text-muted-foreground mb-4">Programa tu primera tarea para empezar</p>
+                <Button
+                  onClick={() => toast.info('Funcionalidad de creación disponible próximamente')}
+                >
                   <Plus className="h-4 w-4 mr-2" />
                   Nueva Tarea
                 </Button>
