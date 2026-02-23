@@ -171,9 +171,12 @@ export async function POST(req: NextRequest) {
         companyId: scope.activeCompanyId,
         nombre: validatedData.nombre,
         direccion: validatedData.direccion,
+        ciudad: validatedData.ciudad,
+        pais: validatedData.pais || 'España',
         tipo: (validatedData.tipo && ['residencial', 'mixto', 'comercial'].includes(validatedData.tipo)) ? validatedData.tipo as 'residencial' | 'mixto' | 'comercial' : 'residencial',
         anoConstructor: validatedData.anoConstructor || new Date().getFullYear(),
         numeroUnidades: validatedData.numeroUnidades || 0,
+        codigoPostal: validatedData.codigoPostal || null,
       },
     });
 
@@ -204,7 +207,7 @@ export async function POST(req: NextRequest) {
       } catch (socialError) {
         // No queremos que falle la creación si falla la publicación social
         logger.error('Error en autopublicación de edificio:', socialError);
-      Sentry.captureException(error);
+        Sentry.captureException(socialError);
       }
     })();
 
