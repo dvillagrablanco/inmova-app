@@ -1,0 +1,225 @@
+{
+  "testDate": "2026-02-23T13:46:55.087Z",
+  "targetUrl": "https://inmovaapp.com",
+  "totalSteps": 12,
+  "passed": 0,
+  "warnings": 11,
+  "failed": 1,
+  "results": [
+    {
+      "step": "1. Navigate to Login Page",
+      "url": "https://inmovaapp.com/login",
+      "status": "WARNING",
+      "screenshot": "01-login-page.png",
+      "observations": [
+        "Page title: \"inmovaapp.com | 502: Bad gateway\"",
+        "Current URL: https://inmovaapp.com/login"
+      ],
+      "errors": [
+        "Page contains \"error\" text",
+        "Email input NOT found",
+        "Password input NOT found",
+        "Submit button NOT found"
+      ],
+      "timestamp": "2026-02-23T13:45:20.280Z",
+      "loadTimeMs": 1169
+    },
+    {
+      "step": "2. Login with credentials",
+      "url": "https://inmovaapp.com/login",
+      "status": "FAIL",
+      "screenshot": "02-after-login-error.png",
+      "observations": [],
+      "errors": [
+        "Exception: page.fill: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('input[name=\"email\"], input[type=\"email\"]')\n"
+      ],
+      "timestamp": "2026-02-23T13:45:23.612Z",
+      "loadTimeMs": 30002
+    },
+    {
+      "step": "3. Dashboard - Verify KPIs and Charts",
+      "url": "https://inmovaapp.com/dashboard",
+      "status": "WARNING",
+      "screenshot": "03-dashboard.png",
+      "observations": [
+        "Page title: \"inmovaapp.com | 502: Bad gateway\"",
+        "Current URL: https://inmovaapp.com/dashboard",
+        "Found 0 card-like elements",
+        "Found 0 chart-like elements"
+      ],
+      "errors": [
+        "Page contains \"error\" text",
+        "No numeric KPI values detected on dashboard"
+      ],
+      "timestamp": "2026-02-23T13:45:53.669Z",
+      "loadTimeMs": 3727
+    },
+    {
+      "step": "4. Edificios (Buildings)",
+      "url": "https://inmovaapp.com/dashboard/edificios",
+      "status": "WARNING",
+      "screenshot": "04-edificios.png",
+      "observations": [
+        "Page title: \"inmovaapp.com | 502: Bad gateway\"",
+        "Current URL: https://inmovaapp.com/dashboard/edificios",
+        "Tables: 0, List/Grid layouts: 0",
+        "Data rows found: 1",
+        "Final URL: https://inmovaapp.com/dashboard/edificios"
+      ],
+      "errors": [
+        "Page contains \"error\" text",
+        "Section appears empty - no data rows or tables found"
+      ],
+      "timestamp": "2026-02-23T13:45:59.522Z",
+      "loadTimeMs": 3640
+    },
+    {
+      "step": "5. Inquilinos (Tenants)",
+      "url": "https://inmovaapp.com/dashboard/inquilinos",
+      "status": "WARNING",
+      "screenshot": "05-inquilinos.png",
+      "observations": [
+        "Page title: \"inmovaapp.com | 502: Bad gateway\"",
+        "Current URL: https://inmovaapp.com/dashboard/inquilinos",
+        "Tables: 0, List/Grid layouts: 0",
+        "Data rows found: 1",
+        "Final URL: https://inmovaapp.com/dashboard/inquilinos"
+      ],
+      "errors": [
+        "Page contains \"error\" text",
+        "Section appears empty - no data rows or tables found"
+      ],
+      "timestamp": "2026-02-23T13:46:05.286Z",
+      "loadTimeMs": 3236
+    },
+    {
+      "step": "6. Contratos (Contracts)",
+      "url": "https://inmovaapp.com/dashboard/contratos",
+      "status": "WARNING",
+      "screenshot": "06-contratos.png",
+      "observations": [
+        "Page title: \"inmovaapp.com | 502: Bad gateway\"",
+        "Current URL: https://inmovaapp.com/dashboard/contratos",
+        "Tables: 0, List/Grid layouts: 0",
+        "Data rows found: 1",
+        "Final URL: https://inmovaapp.com/dashboard/contratos"
+      ],
+      "errors": [
+        "Page contains \"error\" text",
+        "Section appears empty - no data rows or tables found"
+      ],
+      "timestamp": "2026-02-23T13:46:10.661Z",
+      "loadTimeMs": 3238
+    },
+    {
+      "step": "7. Pagos (Payments)",
+      "url": "https://inmovaapp.com/dashboard/pagos",
+      "status": "WARNING",
+      "screenshot": "07-pagos.png",
+      "observations": [
+        "Page title: \"inmovaapp.com | 502: Bad gateway\"",
+        "Current URL: https://inmovaapp.com/dashboard/pagos",
+        "Tables: 0, List/Grid layouts: 0",
+        "Data rows found: 1",
+        "Final URL: https://inmovaapp.com/dashboard/pagos"
+      ],
+      "errors": [
+        "Page contains \"error\" text",
+        "Section appears empty - no data rows or tables found"
+      ],
+      "timestamp": "2026-02-23T13:46:16.024Z",
+      "loadTimeMs": 3237
+    },
+    {
+      "step": "8. Inversiones (Investments)",
+      "url": "https://inmovaapp.com/dashboard/inversiones",
+      "status": "WARNING",
+      "screenshot": "08-inversiones.png",
+      "observations": [
+        "Page title: \"inmovaapp.com | 502: Bad gateway\"",
+        "Current URL: https://inmovaapp.com/dashboard/inversiones",
+        "Tables: 0, List/Grid layouts: 0",
+        "Data rows found: 1",
+        "Final URL: https://inmovaapp.com/dashboard/inversiones"
+      ],
+      "errors": [
+        "Page contains \"error\" text",
+        "Section appears empty - no data rows or tables found"
+      ],
+      "timestamp": "2026-02-23T13:46:21.387Z",
+      "loadTimeMs": 3236
+    },
+    {
+      "step": "9. Seguros (Insurance)",
+      "url": "https://inmovaapp.com/dashboard/seguros",
+      "status": "WARNING",
+      "screenshot": "09-seguros.png",
+      "observations": [
+        "Page title: \"inmovaapp.com | 502: Bad gateway\"",
+        "Current URL: https://inmovaapp.com/dashboard/seguros",
+        "Tables: 0, List/Grid layouts: 0",
+        "Data rows found: 1",
+        "Final URL: https://inmovaapp.com/dashboard/seguros"
+      ],
+      "errors": [
+        "Page contains \"error\" text",
+        "Section appears empty - no data rows or tables found"
+      ],
+      "timestamp": "2026-02-23T13:46:26.751Z",
+      "loadTimeMs": 3235
+    },
+    {
+      "step": "10. Comercial (Commercial)",
+      "url": "https://inmovaapp.com/dashboard/comercial",
+      "status": "WARNING",
+      "screenshot": "10-comercial.png",
+      "observations": [
+        "Page title: \"inmovaapp.com | 502: Bad gateway\"",
+        "Current URL: https://inmovaapp.com/dashboard/comercial",
+        "Tables: 0, List/Grid layouts: 0",
+        "Data rows found: 1",
+        "Final URL: https://inmovaapp.com/dashboard/comercial"
+      ],
+      "errors": [
+        "Page contains \"error\" text",
+        "Section appears empty - no data rows or tables found"
+      ],
+      "timestamp": "2026-02-23T13:46:32.115Z",
+      "loadTimeMs": 3239
+    },
+    {
+      "step": "11. Company Selector - Open and verify companies",
+      "url": "https://inmovaapp.com/dashboard",
+      "status": "WARNING",
+      "screenshot": "11-company-selector.png",
+      "observations": [
+        "Page title: \"inmovaapp.com | 502: Bad gateway\"",
+        "Current URL: https://inmovaapp.com/dashboard"
+      ],
+      "errors": [
+        "Page contains \"error\" text",
+        "Company \"Vidaro Inversiones\" NOT visible",
+        "Company \"Rovida\" NOT visible",
+        "Company \"Viroda Inversiones\" NOT visible"
+      ],
+      "timestamp": "2026-02-23T13:46:37.485Z",
+      "loadTimeMs": 4766
+    },
+    {
+      "step": "12. Switch to Rovida S.L. and verify data changes",
+      "url": "https://inmovaapp.com/dashboard/edificios",
+      "status": "WARNING",
+      "screenshot": "12-rovida-buildings.png",
+      "observations": [
+        "Page title: \"inmovaapp.com | 502: Bad gateway\"",
+        "Current URL: https://inmovaapp.com/dashboard/edificios",
+        "Data rows visible: 1"
+      ],
+      "errors": [
+        "Page contains \"error\" text"
+      ],
+      "timestamp": "2026-02-23T13:46:44.362Z",
+      "loadTimeMs": 8555
+    }
+  ]
+}

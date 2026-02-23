@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import { resolveCompanyScope } from '@/lib/company-scope';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -20,10 +21,19 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: session.user.role as any,
+      primaryCompanyId: session.user.companyId,
+      request,
+    });
+
     const seguro = await prisma.insurance.findFirst({
       where: {
         id: params.id,
-        companyId: session.user.companyId,
+        companyId: scope.scopeCompanyIds.length > 1
+          ? { in: scope.scopeCompanyIds }
+          : scope.activeCompanyId || session.user.companyId,
       },
       include: {
         building: {
@@ -65,13 +75,22 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: session.user.role as any,
+      primaryCompanyId: session.user.companyId,
+      request,
+    });
+
     const body = await request.json();
 
-    // Verify ownership
+    // Verify ownership within scope
     const existing = await prisma.insurance.findFirst({
       where: {
         id: params.id,
-        companyId: session.user.companyId,
+        companyId: scope.scopeCompanyIds.length > 1
+          ? { in: scope.scopeCompanyIds }
+          : scope.activeCompanyId || session.user.companyId,
       },
     });
 
@@ -103,11 +122,20 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    // Verify ownership
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: session.user.role as any,
+      primaryCompanyId: session.user.companyId,
+      request,
+    });
+
+    // Verify ownership within scope
     const existing = await prisma.insurance.findFirst({
       where: {
         id: params.id,
-        companyId: session.user.companyId,
+        companyId: scope.scopeCompanyIds.length > 1
+          ? { in: scope.scopeCompanyIds }
+          : scope.activeCompanyId || session.user.companyId,
       },
     });
 
