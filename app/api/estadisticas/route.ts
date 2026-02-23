@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
   const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.companyId) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
@@ -45,20 +45,23 @@ export async function GET(request: NextRequest) {
     });
 
     // Calcular estadísticas por tipo de propiedad
-    const unitsByType = buildings.reduce((acc: Record<string, { count: number; occupied: number; income: number }>, building) => {
-      building.units.forEach(unit => {
-        const tipo = unit.tipo || 'otros';
-        if (!acc[tipo]) {
-          acc[tipo] = { count: 0, occupied: 0, income: 0 };
-        }
-        acc[tipo].count++;
-        if (unit.estado === 'ocupada') {
-          acc[tipo].occupied++;
-          acc[tipo].income += unit.rentaMensual || 0;
-        }
-      });
-      return acc;
-    }, {});
+    const unitsByType = buildings.reduce(
+      (acc: Record<string, { count: number; occupied: number; income: number }>, building) => {
+        building.units.forEach((unit) => {
+          const tipo = unit.tipo || 'otros';
+          if (!acc[tipo]) {
+            acc[tipo] = { count: 0, occupied: 0, income: 0 };
+          }
+          acc[tipo].count++;
+          if (unit.estado === 'ocupada') {
+            acc[tipo].occupied++;
+            acc[tipo].income += unit.rentaMensual || 0;
+          }
+        });
+        return acc;
+      },
+      {}
+    );
 
     const tipoLabels: Record<string, string> = {
       apartamento: 'Apartamentos',
@@ -81,13 +84,14 @@ export async function GET(request: NextRequest) {
 
     // Top edificios por ingresos
     const topProperties = buildings
-      .map(b => {
-        const occupiedUnits = b.units.filter(u => u.estado === 'ocupada');
+      .map((b) => {
+        const occupiedUnits = b.units.filter((u) => u.estado === 'ocupada');
         const totalIncome = occupiedUnits.reduce((sum, u) => sum + (u.rentaMensual || 0), 0);
         return {
           nombre: b.nombre,
           unidades: b.units.length,
-          ocupacion: b.units.length > 0 ? Math.round((occupiedUnits.length / b.units.length) * 100) : 0,
+          ocupacion:
+            b.units.length > 0 ? Math.round((occupiedUnits.length / b.units.length) * 100) : 0,
           ingresos: totalIncome,
         };
       })
@@ -98,7 +102,20 @@ export async function GET(request: NextRequest) {
     // DATOS MENSUALES - Cascada: Payment → AccountingTransaction → BankTransaction
     // ================================================================
     const now = new Date();
-    const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    const monthNames = [
+      'Ene',
+      'Feb',
+      'Mar',
+      'Abr',
+      'May',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dic',
+    ];
 
     // Verificar fuentes de datos disponibles
     const sixMonthsAgo = subMonths(now, 6);
@@ -124,16 +141,22 @@ export async function GET(request: NextRequest) {
       bankCount = await prisma.bankTransaction.count({
         where: { companyId: { in: companyIds }, monto: { gt: 0 }, fecha: { gte: sixMonthsAgo } },
       });
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
 
-    const incomeSource = paymentCount > 0 ? 'payment'
-      : accountingCount > 0 ? 'accounting'
-      : bankCount > 0 ? 'bank'
-      : 'none';
+    const incomeSource =
+      paymentCount > 0
+        ? 'payment'
+        : accountingCount > 0
+          ? 'accounting'
+          : bankCount > 0
+            ? 'bank'
+            : 'none';
 
     const totalUnits = buildings.reduce((sum, b) => sum + b.units.length, 0);
     const occupiedUnits = buildings.reduce(
-      (sum, b) => sum + b.units.filter(u => u.estado === 'ocupada').length,
+      (sum, b) => sum + b.units.filter((u) => u.estado === 'ocupada').length,
       0
     );
     const baseOcupacion = totalUnits > 0 ? Math.round((occupiedUnits / totalUnits) * 100) : 0;
@@ -173,23 +196,33 @@ export async function GET(request: NextRequest) {
           },
           select: { tipo: true, monto: true },
         });
-        ingresos = txs.filter(t => t.tipo === 'ingreso').reduce((s, t) => s + t.monto, 0);
-        gastos = txs.filter(t => t.tipo === 'gasto').reduce((s, t) => s + t.monto, 0);
+        ingresos = txs.filter((t) => t.tipo === 'ingreso').reduce((s, t) => s + t.monto, 0);
+        gastos = txs.filter((t) => t.tipo === 'gasto').reduce((s, t) => s + t.monto, 0);
       } else if (incomeSource === 'bank') {
         try {
           const [inc, exp] = await Promise.all([
             prisma.bankTransaction.aggregate({
-              where: { companyId: { in: companyIds }, monto: { gt: 0 }, fecha: { gte: mStart, lte: mEnd } },
+              where: {
+                companyId: { in: companyIds },
+                monto: { gt: 0 },
+                fecha: { gte: mStart, lte: mEnd },
+              },
               _sum: { monto: true },
             }),
             prisma.bankTransaction.aggregate({
-              where: { companyId: { in: companyIds }, monto: { lt: 0 }, fecha: { gte: mStart, lte: mEnd } },
+              where: {
+                companyId: { in: companyIds },
+                monto: { lt: 0 },
+                fecha: { gte: mStart, lte: mEnd },
+              },
               _sum: { monto: true },
             }),
           ]);
           ingresos = Number(inc._sum.monto || 0);
           gastos = Math.abs(Number(exp._sum.monto || 0));
-        } catch { /* ignore */ }
+        } catch {
+          /* ignore */
+        }
       }
 
       totalIncome += ingresos;
@@ -203,10 +236,39 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // KPIs calculados
-    const avgPaymentDays = paymentCount > 0 ? 3.2 : 0; // TODO: calcular desde Payment.fechaPago vs fechaVencimiento
+    // KPIs calculados - tiempo medio entre vencimiento y pago
+    let avgPaymentDays = 0;
+    if (paymentCount > 0) {
+      try {
+        const paidPayments = await prisma.payment.findMany({
+          where: {
+            contract: { unit: { building: { companyId: { in: companyIds } } } },
+            estado: 'pagado',
+            fechaPago: { not: null },
+            fechaVencimiento: { not: null },
+          },
+          select: { fechaPago: true, fechaVencimiento: true },
+          take: 500,
+          orderBy: { fechaPago: 'desc' },
+        });
+        if (paidPayments.length > 0) {
+          const totalDays = paidPayments.reduce((sum, p) => {
+            const diff =
+              (new Date(p.fechaPago!).getTime() - new Date(p.fechaVencimiento).getTime()) /
+              (1000 * 60 * 60 * 24);
+            return sum + Math.max(0, diff);
+          }, 0);
+          avgPaymentDays = parseFloat((totalDays / paidPayments.length).toFixed(1));
+        }
+      } catch {
+        avgPaymentDays = 0;
+      }
+    }
     const contractRenewalRate = await calculateRenewalRate(prisma, companyIds);
-    const roi = totalIncome > 0 ? parseFloat(((totalIncome - totalExpenses) / totalIncome * 100).toFixed(1)) : 0;
+    const roi =
+      totalIncome > 0
+        ? parseFloat((((totalIncome - totalExpenses) / totalIncome) * 100).toFixed(1))
+        : 0;
 
     return NextResponse.json({
       success: true,
