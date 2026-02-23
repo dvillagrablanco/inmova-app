@@ -3,7 +3,7 @@
  */
 
 import { Metadata } from 'next';
-import { prisma } from '@/lib/db';
+import { getPrismaClient } from '@/lib/db';
 import { generatePropertyMetaTags } from '@/lib/seo-utils';
 import {
   generatePropertySchema,
@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = params;
 
   try {
-    const unit = await prisma.unit.findUnique({
+    const unit = await getPrismaClient().unit.findUnique({
       where: { id },
       include: {
         building: true,
@@ -70,7 +70,7 @@ export default async function UnidadDetailLayout({ params, children }: Props) {
   const { id } = params;
 
   try {
-    const unit = await prisma.unit.findUnique({
+    const unit = await getPrismaClient().unit.findUnique({
       where: { id },
       include: {
         building: true,
