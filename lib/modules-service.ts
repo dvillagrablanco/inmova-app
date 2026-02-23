@@ -727,6 +727,118 @@ export const MODULOS_CATALOGO = [
     esCore: false,
     orden: 90
   },
+
+  // ============================================
+  // MÓDULOS ADICIONALES (añadidos para completar toggles)
+  // ============================================
+  {
+    codigo: 'tareas',
+    nombre: 'Gestión de Tareas',
+    descripcion: 'Asignación y seguimiento de tareas para el equipo de gestión',
+    categoria: 'gestion',
+    icono: 'CheckSquare',
+    ruta: '/tareas',
+    requiereModulos: [],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 91
+  },
+  {
+    codigo: 'candidatos',
+    nombre: 'Candidatos e Inquilinos Potenciales',
+    descripcion: 'Gestión de candidatos a inquilino, solicitudes y proceso de selección',
+    categoria: 'gestion',
+    icono: 'UserPlus',
+    ruta: '/candidatos',
+    requiereModulos: ['inquilinos'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 92
+  },
+  {
+    codigo: 'firma_digital',
+    nombre: 'Firma Digital de Contratos',
+    descripcion: 'Firma electrónica avanzada de contratos vía DocuSign o Signaturit',
+    categoria: 'avanzado',
+    icono: 'FileSignature',
+    ruta: '/firma-digital',
+    requiereModulos: ['contratos'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 93
+  },
+  {
+    codigo: 'open_banking',
+    nombre: 'Open Banking (PSD2)',
+    descripcion: 'Conexión directa con cuentas bancarias vía Redsys/GoCardless para cobros y conciliación',
+    categoria: 'financiero',
+    icono: 'Landmark',
+    ruta: '/open-banking',
+    requiereModulos: ['pagos'],
+    tiersIncluido: ['empresarial'],
+    esCore: false,
+    orden: 94
+  },
+  {
+    codigo: 'inspecciones',
+    nombre: 'Inspecciones de Inmuebles',
+    descripcion: 'Inspecciones técnicas (ITE, IEE), check-in/check-out y estado de conservación',
+    categoria: 'gestion',
+    icono: 'ClipboardList',
+    ruta: '/inspecciones',
+    requiereModulos: ['edificios'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 95
+  },
+  {
+    codigo: 'certificaciones',
+    nombre: 'Certificaciones y Cumplimiento',
+    descripcion: 'Certificados energéticos, cédulas de habitabilidad, licencias y cumplimiento normativo',
+    categoria: 'gestion',
+    icono: 'Award',
+    ruta: '/certificaciones',
+    requiereModulos: ['edificios'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 96
+  },
+  {
+    codigo: 'visitas',
+    nombre: 'Gestión de Visitas',
+    descripcion: 'Programación y seguimiento de visitas a inmuebles para candidatos e inquilinos',
+    categoria: 'gestion',
+    icono: 'Eye',
+    ruta: '/visitas',
+    requiereModulos: ['edificios'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 97
+  },
+  {
+    codigo: 'ordenes_trabajo',
+    nombre: 'Órdenes de Trabajo',
+    descripcion: 'Creación, asignación y seguimiento de órdenes de trabajo para mantenimiento y reparaciones',
+    categoria: 'gestion',
+    icono: 'Wrench',
+    ruta: '/ordenes-trabajo',
+    requiereModulos: ['mantenimiento'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 98
+  },
+  {
+    codigo: 'ocr',
+    nombre: 'OCR e Importación Documental',
+    descripcion: 'Digitalización automática de facturas y documentos con reconocimiento óptico (OCR)',
+    categoria: 'avanzado',
+    icono: 'Scan',
+    ruta: '/ocr',
+    requiereModulos: ['documentos'],
+    tiersIncluido: ['empresarial'],
+    esCore: false,
+    orden: 99
+  },
 ];
 
 /**
