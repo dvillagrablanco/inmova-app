@@ -174,6 +174,13 @@ export async function POST(req: NextRequest) {
     // Combinar nombre y apellidos de vuelta a nombreCompleto para la BD
     const nombreCompletoFinal = `${validatedData.nombre} ${validatedData.apellidos}`.trim();
 
+    // Hash password if provided (for tenant portal access)
+    let hashedPassword: string | undefined;
+    if (body.portalPassword) {
+      const bcrypt = await import('bcryptjs');
+      hashedPassword = await bcrypt.hash(body.portalPassword, 10);
+    }
+
     const tenant = await prisma.tenant.create({
       data: {
         companyId: scope.activeCompanyId,
@@ -183,10 +190,14 @@ export async function POST(req: NextRequest) {
         telefono: validatedData.telefono,
         fechaNacimiento: validatedData.fechaNacimiento ? new Date(validatedData.fechaNacimiento) : new Date(),
         notas: validatedData.notasInternas || '',
+        ...(hashedPassword && { password: hashedPassword }),
       },
     });
 
-    return NextResponse.json(tenant, { status: 201 });
+    return NextResponse.json({
+      ...tenant,
+      portalAccessEnabled: !!hashedPassword,
+    }, { status: 201 });
   } catch (error: any) {
     if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) { return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 }); }
     logger.error('Error creating tenant:', error);
