@@ -416,16 +416,45 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    await prisma.accountingTransaction.createMany({
-      data: transactionsToCreate,
+    // Deduplication: check for existing transactions with same fecha+monto+concepto+tipo
+    // to prevent duplicates when re-importing the same file
+    const existingTransactions = await prisma.accountingTransaction.findMany({
+      where: { companyId },
+      select: { fecha: true, monto: true, concepto: true, tipo: true, referencia: true },
     });
+
+    const existingKeys = new Set(
+      existingTransactions.map((t) => {
+        const dateStr = t.fecha.toISOString().substring(0, 10);
+        return `${dateStr}|${t.monto}|${t.tipo}|${(t.referencia || t.concepto || '').substring(0, 40)}`;
+      })
+    );
+
+    const uniqueTransactions = transactionsToCreate.filter((t) => {
+      const dateStr = t.fecha.toISOString().substring(0, 10);
+      const key = `${dateStr}|${t.monto}|${t.tipo}|${(t.referencia || t.concepto || '').substring(0, 40)}`;
+      return !existingKeys.has(key);
+    });
+
+    const skipped = transactionsToCreate.length - uniqueTransactions.length;
+
+    if (uniqueTransactions.length > 0) {
+      await prisma.accountingTransaction.createMany({
+        data: uniqueTransactions,
+      });
+    }
 
     return NextResponse.json({
       success: true,
       totalRows: rows.length,
-      imported: transactionsToCreate.length,
+      imported: uniqueTransactions.length,
+      skipped,
+      duplicates: skipped,
       failed: errors.length,
-      errors,
+      errors: errors.slice(0, 20),
+      message: skipped > 0
+        ? `${uniqueTransactions.length} movimientos importados, ${skipped} duplicados omitidos`
+        : `${uniqueTransactions.length} movimientos importados correctamente`,
     });
   } catch (error: any) {
     logger.error('[Accounting Import] Error:', error);
