@@ -37,9 +37,8 @@ export async function GET(req: NextRequest) {
     if (!companyId) {
       return NextResponse.json({ error: 'Sin empresa' }, { status: 403 });
     }
-    const companyFilter = scope.scopeCompanyIds.length > 1
-      ? { in: scope.scopeCompanyIds }
-      : companyId;
+    const companyFilter =
+      scope.scopeCompanyIds.length > 1 ? { in: scope.scopeCompanyIds } : companyId;
 
     const now = new Date();
     const startDate = subMonths(now, periodo);
@@ -76,12 +75,18 @@ export async function GET(req: NextRequest) {
       totalBankIncome = await prisma.bankTransaction.count({
         where: { companyId: companyFilter, monto: { gt: 0 }, fecha: { gte: startDate } },
       });
-    } catch { /* model might not exist */ }
+    } catch {
+      /* model might not exist */
+    }
 
-    const incomeSource = totalPayments > 0 ? 'payment'
-      : totalAccountingIncome > 0 ? 'accounting'
-      : totalBankIncome > 0 ? 'bank'
-      : 'none';
+    const incomeSource =
+      totalPayments > 0
+        ? 'payment'
+        : totalAccountingIncome > 0
+          ? 'accounting'
+          : totalBankIncome > 0
+            ? 'bank'
+            : 'none';
 
     for (let i = 0; i < periodo; i++) {
       const monthStart = startOfMonth(subMonths(now, periodo - i - 1));
@@ -123,11 +128,17 @@ export async function GET(req: NextRequest) {
       } else if (incomeSource === 'bank') {
         try {
           const bankTxs = await prisma.bankTransaction.findMany({
-            where: { companyId: companyFilter, monto: { gt: 0 }, fecha: { gte: monthStart, lte: monthEnd } },
+            where: {
+              companyId: companyFilter,
+              monto: { gt: 0 },
+              fecha: { gte: monthStart, lte: monthEnd },
+            },
             select: { monto: true },
           });
           rentas = bankTxs.reduce((sum: number, tx: any) => sum + Number(tx.monto || 0), 0);
-        } catch { /* ignore */ }
+        } catch {
+          /* ignore */
+        }
       }
 
       ingresos.push({
@@ -180,7 +191,9 @@ export async function GET(req: NextRequest) {
           bankExpenses.forEach((tx: any) => {
             gastosPorCategoria['banco'] = (gastosPorCategoria['banco'] || 0) + Math.abs(tx.monto);
           });
-        } catch { /* ignore */ }
+        } catch {
+          /* ignore */
+        }
       }
     }
 
@@ -253,15 +266,22 @@ export async function GET(req: NextRequest) {
 
       morosidad.push({
         mes: format(monthStart, 'MMM yyyy', { locale: es }),
-        morosidad: parseFloat(paymentsOverdue.reduce((sum: number, p: any) => sum + Number(p.monto || 0), 0).toFixed(2)),
-        recuperado: parseFloat(paymentsPaidLate.reduce((sum: number, p: any) => sum + Number(p.monto || 0), 0).toFixed(2)),
+        morosidad: parseFloat(
+          paymentsOverdue.reduce((sum: number, p: any) => sum + Number(p.monto || 0), 0).toFixed(2)
+        ),
+        recuperado: parseFloat(
+          paymentsPaidLate.reduce((sum: number, p: any) => sum + Number(p.monto || 0), 0).toFixed(2)
+        ),
       });
     }
 
     // ================================================================
     // 5. RENTABILIDAD
     // ================================================================
-    const totalIngresos = ingresos.reduce((sum, item) => sum + item.rentas + item.servicios + item.otros, 0);
+    const totalIngresos = ingresos.reduce(
+      (sum, item) => sum + item.rentas + item.servicios + item.otros,
+      0
+    );
     const totalGastosCalc = gastos.reduce((sum, item) => sum + item.monto, 0);
     const ingresosNetos = totalIngresos - totalGastosCalc;
 
@@ -274,14 +294,27 @@ export async function GET(req: NextRequest) {
     const totalMorosidad = morosidad.reduce((sum, item) => sum + item.morosidad, 0);
     const tasaMorosidad = totalIngresos > 0 ? (totalMorosidad / totalIngresos) * 100 : 0;
 
+    // Calcular variaciones: segunda mitad vs primera mitad del período
+    const half = Math.floor(ingresos.length / 2);
+    const firstHalfIncome = ingresos
+      .slice(0, half)
+      .reduce((s, m) => s + m.rentas + m.servicios + m.otros, 0);
+    const secondHalfIncome = ingresos
+      .slice(half)
+      .reduce((s, m) => s + m.rentas + m.servicios + m.otros, 0);
+    const incomeVariation =
+      firstHalfIncome > 0 ? ((secondHalfIncome - firstHalfIncome) / firstHalfIncome) * 100 : 0;
+
+    const margenNeto = totalIngresos > 0 ? (ingresosNetos / totalIngresos) * 100 : 0;
+
     const rentabilidad = {
       ingresosTotales: parseFloat(totalIngresos.toFixed(2)),
       gastosTotales: parseFloat(totalGastosCalc.toFixed(2)),
       ingresosNetos: parseFloat(ingresosNetos.toFixed(2)),
-      margenNeto: totalIngresos > 0 ? parseFloat(((ingresosNetos / totalIngresos) * 100).toFixed(2)) : 0,
+      margenNeto: parseFloat(margenNeto.toFixed(2)),
       tasaOcupacion: parseFloat(tasaOcupacion.toFixed(1)),
       tasaMorosidad: parseFloat(tasaMorosidad.toFixed(1)),
-      roiPromedio: totalIngresos > 0 ? parseFloat(((ingresosNetos / totalIngresos) * 100).toFixed(2)) : 0,
+      variacionIngresos: parseFloat(incomeVariation.toFixed(1)),
     };
 
     // ================================================================
