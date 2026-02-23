@@ -435,13 +435,14 @@ export const MODULOS_CATALOGO = [
     esCore: false,
     orden: 60
   },
+  // portal_propietario eliminado — los propietarios acceden como administradores
   {
     codigo: 'portal_propietario',
-    nombre: 'Portal del Propietario',
-    descripcion: 'Portal para propietarios de inmuebles',
+    nombre: 'Portal del Propietario (Integrado en Admin)',
+    descripcion: 'Los propietarios acceden directamente como administradores del sistema',
     categoria: 'portales',
     icono: 'Briefcase',
-    ruta: '/portal-propietario',
+    ruta: '/dashboard',
     requiereModulos: ['edificios'],
     tiersIncluido: ['empresarial'],
     esCore: false,
@@ -918,7 +919,7 @@ export const BUSINESS_MODEL_MODULES: Record<string, string[]> = {
     'mantenimiento', 'proveedores', 'gastos',
     'crm', 'valoraciones', 'galerias', 'tours_virtuales',
     'reportes', 'analytics', 'bi', 'notificaciones',
-    'firma_digital', 'legal', 'portal_propietario'
+    'firma_digital', 'legal'
   ]
 };
 
