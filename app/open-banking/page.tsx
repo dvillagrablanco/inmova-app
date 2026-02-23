@@ -1,17 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Progress } from '@/components/ui/progress';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -22,211 +19,164 @@ import {
 } from '@/components/ui/breadcrumb';
 import {
   Check,
-  ExternalLink,
-  Settings,
   RefreshCw,
-  AlertCircle,
   CheckCircle2,
-  Link as LinkIcon,
-  Unlink,
   Building,
-  Lock,
-  TrendingUp,
-  CreditCard,
   Shield,
   Wallet,
   ArrowRightLeft,
-  FileText,
   Home,
   ArrowLeft,
-  Globe,
-  Zap,
   BarChart3,
   Clock,
   Euro,
-  PiggyBank,
+  Settings,
+  ExternalLink,
+  CreditCard,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
-interface BankIntegration {
+interface BankAccount {
   id: string;
-  name: string;
-  description: string;
-  icon: React.ReactNode;
-  status: 'connected' | 'disconnected' | 'pending';
-  features: string[];
-  banks?: string[];
-  region: string;
-  configFields: Array<{
-    name: string;
-    label: string;
-    type: 'text' | 'password';
-    placeholder: string;
-    required: boolean;
-  }>;
-  docsUrl?: string;
-  pricing?: string;
+  bankName: string;
+  accountNumber: string;
+  iban: string;
+  balance: number;
+  currency: string;
+  lastSync: string;
+  status: 'connected' | 'pending' | 'error';
+  companyId: string;
+  companyName: string;
+  transactionCount?: number;
 }
 
-const bankIntegrations: BankIntegration[] = [
-  {
-    id: 'openbanking-psd2',
-    name: 'Open Banking (PSD2)',
-    description: 'Conexión directa con bancos españoles y europeos mediante APIs reguladas bajo la normativa PSD2.',
-    icon: <Building className="h-8 w-8 text-blue-600" />,
-    status: 'disconnected',
-    region: 'Europa',
-    features: [
-      'Saldos en tiempo real',
-      'Historial de movimientos (90 días)',
-      'Conciliación automática de pagos',
-      'Iniciación de pagos (PIS)',
-      'Cumplimiento normativo PSD2',
-    ],
-    banks: ['Santander', 'BBVA', 'CaixaBank', 'Sabadell', 'Bankinter', 'ING', 'Openbank', 'Revolut'],
-    configFields: [
-      { name: 'OB_CLIENT_ID', label: 'Client ID', type: 'text', placeholder: 'Tu Client ID', required: true },
-      { name: 'OB_CLIENT_SECRET', label: 'Client Secret', type: 'password', placeholder: 'Tu Client Secret', required: true },
-      { name: 'OB_REDIRECT_URI', label: 'Redirect URI', type: 'text', placeholder: 'https://tuapp.com/callback', required: true },
-    ],
-    docsUrl: 'https://www.berlin-group.org/',
-    pricing: 'Gratis (API directa con bancos)',
-  },
-  {
-    id: 'plaid',
-    name: 'Plaid',
-    description: 'Agregador bancario internacional líder. Conecta con más de 11.000 instituciones financieras.',
-    icon: <Globe className="h-8 w-8 text-green-600" />,
-    status: 'disconnected',
-    region: 'Global',
-    features: [
-      'Multi-banco internacional',
-      'Verificación de cuentas',
-      'Historial financiero completo',
-      'Categorización automática IA',
-      'Verificación de identidad',
-    ],
-    banks: ['Chase', 'Bank of America', 'Wells Fargo', 'Citibank', 'Capital One', '+11.000 más'],
-    configFields: [
-      { name: 'PLAID_CLIENT_ID', label: 'Client ID', type: 'text', placeholder: 'Tu Client ID de Plaid', required: true },
-      { name: 'PLAID_SECRET', label: 'Secret', type: 'password', placeholder: 'Tu Secret de Plaid', required: true },
-      { name: 'PLAID_ENV', label: 'Entorno', type: 'text', placeholder: 'sandbox, development, production', required: true },
-    ],
-    docsUrl: 'https://plaid.com/docs/',
-    pricing: 'Desde $500/mes',
-  },
-  {
-    id: 'tink',
-    name: 'Tink',
-    description: 'Plataforma de Open Banking europea. Propiedad de Visa, conexión con 3.400+ bancos en Europa.',
-    icon: <Zap className="h-8 w-8 text-purple-600" />,
-    status: 'disconnected',
-    region: 'Europa',
-    features: [
-      'Cobertura europea amplia',
-      'Agregación de cuentas',
-      'Iniciación de pagos',
-      'Verificación de ingresos',
-      'Análisis financiero',
-    ],
-    banks: ['Bancos europeos principales'],
-    configFields: [
-      { name: 'TINK_CLIENT_ID', label: 'Client ID', type: 'text', placeholder: 'Tu Client ID', required: true },
-      { name: 'TINK_CLIENT_SECRET', label: 'Client Secret', type: 'password', placeholder: 'Tu Client Secret', required: true },
-    ],
-    docsUrl: 'https://docs.tink.com/',
-    pricing: 'Contactar para pricing',
-  },
-  {
-    id: 'salt-edge',
-    name: 'Salt Edge',
-    description: 'Solución de Open Banking con cobertura en 50+ países y 5.000+ conexiones bancarias.',
-    icon: <ArrowRightLeft className="h-8 w-8 text-orange-600" />,
-    status: 'disconnected',
-    region: 'Global',
-    features: [
-      'Cobertura global',
-      'API unificada',
-      'Widget de conexión',
-      'Sincronización automática',
-      'Compliance multi-jurisdicción',
-    ],
-    configFields: [
-      { name: 'SALTEDGE_APP_ID', label: 'App ID', type: 'text', placeholder: 'Tu App ID', required: true },
-      { name: 'SALTEDGE_SECRET', label: 'Secret', type: 'password', placeholder: 'Tu Secret', required: true },
-    ],
-    docsUrl: 'https://docs.saltedge.com/',
-    pricing: 'Desde €300/mes',
-  },
-  {
-    id: 'afterbanks',
-    name: 'Afterbanks',
-    description: 'Especializado en el mercado español y LATAM. Conexión con todos los bancos españoles.',
-    icon: <Euro className="h-8 w-8 text-indigo-600" />,
-    status: 'disconnected',
-    region: 'España/LATAM',
-    features: [
-      'Especializado en España',
-      'Cobertura LATAM',
-      'Soporte en español',
-      'API sencilla',
-      'Documentación en español',
-    ],
-    banks: ['Todos los bancos españoles', 'Bancos LATAM principales'],
-    configFields: [
-      { name: 'AFTERBANKS_SERVICE_KEY', label: 'Service Key', type: 'password', placeholder: 'Tu Service Key', required: true },
-    ],
-    docsUrl: 'https://www.afterbanks.com/docs',
-    pricing: 'Desde €100/mes',
-  },
-];
+interface CompanyBanking {
+  companyId: string;
+  companyName: string;
+  iban: string;
+  banco: string;
+  gcConfigured: boolean;
+  nordigenConnected: boolean;
+  bankConnectionId?: string;
+  totalMandates: number;
+  activeMandates: number;
+  totalPayments: number;
+  pendingReconciliation: number;
+  lastSync?: string;
+}
 
-// Estadísticas simuladas
-const stats = {
-  cuentasConectadas: 0,
-  transaccionesSincronizadas: 0,
-  ultimaSincronizacion: null as Date | null,
-  conciliacionesPendientes: 0,
-};
+interface Stats {
+  cuentasConectadas: number;
+  transaccionesSincronizadas: number;
+  conciliacionesPendientes: number;
+  conciliadas: number;
+  ultimaSincronizacion: string | null;
+}
 
 export default function OpenBankingPage() {
   const { data: _session, status } = useSession();
   const router = useRouter();
-  const [selectedIntegration, setSelectedIntegration] = useState<BankIntegration | null>(null);
-  const [configValues, setConfigValues] = useState<Record<string, string>>({});
-  const [connectedBanks, setConnectedBanks] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [accounts, setAccounts] = useState<BankAccount[]>([]);
+  const [companies, setCompanies] = useState<CompanyBanking[]>([]);
+  const [stats, setStats] = useState<Stats>({
+    cuentasConectadas: 0,
+    transaccionesSincronizadas: 0,
+    conciliacionesPendientes: 0,
+    conciliadas: 0,
+    ultimaSincronizacion: null,
+  });
   const [isSyncing, setIsSyncing] = useState(false);
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login');
+  const loadData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const [bankingRes, concilRes] = await Promise.all([
+        fetch('/api/banking/reconcile-unified?all=true'),
+        fetch('/api/finanzas/conciliacion?page=1&limit=1'),
+      ]);
+
+      if (bankingRes.ok) {
+        const bankingData = await bankingRes.json();
+        setCompanies(bankingData.companies || []);
+      }
+
+      if (concilRes.ok) {
+        const concilData = await concilRes.json();
+        const accts: BankAccount[] = concilData.data?.accounts || [];
+        setAccounts(accts);
+
+        const s = concilData.data?.stats || {};
+        const latestSync = accts
+          .map((a) => a.lastSync)
+          .filter(Boolean)
+          .sort()
+          .pop();
+
+        setStats({
+          cuentasConectadas: accts.length,
+          transaccionesSincronizadas: s.totalTransactionsGlobal || s.totalTransactions || 0,
+          conciliacionesPendientes: s.pendingCount || 0,
+          conciliadas: s.matchedCount || 0,
+          ultimaSincronizacion: latestSync || null,
+        });
+      }
+    } catch (error) {
+      console.error('Error loading open banking data:', error);
+    } finally {
+      setLoading(false);
     }
-  }, [status, router]);
+  }, []);
 
-  const handleSaveConfig = async () => {
-    toast.success('Configuración guardada correctamente.');
-    setSelectedIntegration(null);
-    setConfigValues({});
-  };
+  useEffect(() => {
+    if (status === 'unauthenticated') router.push('/login');
+    else if (status === 'authenticated') loadData();
+  }, [status, router, loadData]);
 
-  const handleConnectBank = () => {
-    toast.info('Iniciando conexión bancaria...');
-    // OAuth flow simulation
-  };
-
-  const handleSync = () => {
+  const handleSync = async () => {
     setIsSyncing(true);
-    setTimeout(() => {
+    toast.info('Sincronizando movimientos bancarios...');
+    try {
+      const res = await fetch('/api/banking/reconcile-unified', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'full-sync' }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        const newTx = data.sync?.newBankTransactions || 0;
+        const matched =
+          (data.reconciliation?.sepaToPayment?.matched || 0) +
+          (data.reconciliation?.payoutToBankTx?.matched || 0) +
+          (data.reconciliation?.bankTxToPayment?.matched || 0);
+
+        const parts: string[] = [];
+        if (newTx > 0) parts.push(`${newTx} nuevos movimientos`);
+        if (matched > 0) parts.push(`${matched} conciliados`);
+        toast.success(
+          parts.length > 0
+            ? `Sincronización completada: ${parts.join(', ')}`
+            : 'Sincronización completada. Sin nuevos movimientos.'
+        );
+        loadData();
+      } else {
+        toast.error(data.error || 'Error en sincronización');
+      }
+    } catch {
+      toast.error('Error de conexión');
+    } finally {
       setIsSyncing(false);
-      toast.success('Sincronización completada');
-    }, 2000);
+    }
   };
 
-  if (status === 'loading') {
+  if (status === 'loading' || loading) {
     return (
       <AuthenticatedLayout>
         <div className="flex items-center justify-center min-h-[400px]">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <RefreshCw className="h-8 w-8 animate-spin text-primary" />
         </div>
       </AuthenticatedLayout>
     );
@@ -235,7 +185,6 @@ export default function OpenBankingPage() {
   return (
     <AuthenticatedLayout>
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* Navigation */}
         <div className="mb-2 flex items-center gap-2">
           <Button
             variant="ghost"
@@ -266,7 +215,6 @@ export default function OpenBankingPage() {
           </BreadcrumbList>
         </Breadcrumb>
 
-        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-3">
@@ -274,35 +222,30 @@ export default function OpenBankingPage() {
               Open Banking
             </h1>
             <p className="text-muted-foreground mt-2">
-              Conecta tus cuentas bancarias para automatizar pagos, conciliaciones y análisis financiero
+              Cuentas bancarias conectadas, transacciones y conciliación automática
             </p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={handleSync} disabled={isSyncing}>
               <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
-              Sincronizar
+              {isSyncing ? 'Sincronizando...' : 'Sincronizar'}
             </Button>
             <Button variant="outline" onClick={() => router.push('/finanzas/conciliacion')}>
               <ArrowRightLeft className="mr-2 h-4 w-4" />
               Conciliación
             </Button>
-            <Button onClick={() => router.push('/admin/integraciones-banca')}>
-              <Settings className="mr-2 h-4 w-4" />
-              Configuración
-            </Button>
           </div>
         </div>
 
-        {/* Security Alert */}
         <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-950/30 dark:border-blue-900">
           <Shield className="h-4 w-4 text-blue-600" />
           <AlertDescription className="text-blue-800 dark:text-blue-200">
-            <strong>Conexión segura PSD2:</strong> Usamos protocolos bancarios regulados por la Unión Europea. 
-            Nunca almacenamos tus credenciales bancarias. La conexión se realiza directamente con tu banco mediante OAuth.
+            <strong>Conexión segura PSD2:</strong> Usamos protocolos bancarios regulados por la
+            Unión Europea (GoCardless / Nordigen). Nunca almacenamos tus credenciales bancarias.
           </AlertDescription>
         </Alert>
 
-        {/* Stats Dashboard */}
+        {/* Stats */}
         <div className="grid gap-4 md:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -311,29 +254,35 @@ export default function OpenBankingPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats.cuentasConectadas}</div>
-              <p className="text-xs text-muted-foreground">De múltiples bancos</p>
+              <p className="text-xs text-muted-foreground">
+                {companies.length} sociedad{companies.length !== 1 ? 'es' : ''}
+              </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Transacciones Sync</CardTitle>
+              <CardTitle className="text-sm font-medium">Transacciones</CardTitle>
               <ArrowRightLeft className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.transaccionesSincronizadas}</div>
-              <p className="text-xs text-muted-foreground">Últimos 30 días</p>
+              <div className="text-2xl font-bold">
+                {stats.transaccionesSincronizadas.toLocaleString('es-ES')}
+              </div>
+              <p className="text-xs text-muted-foreground">Total sincronizadas</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Conciliaciones</CardTitle>
-              <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">Conciliadas</CardTitle>
+              <CheckCircle2 className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.conciliacionesPendientes}</div>
-              <p className="text-xs text-muted-foreground">Pendientes de revisar</p>
+              <div className="text-2xl font-bold">{stats.conciliadas}</div>
+              <p className="text-xs text-muted-foreground">
+                {stats.conciliacionesPendientes.toLocaleString('es-ES')} pendientes
+              </p>
             </CardContent>
           </Card>
 
@@ -343,195 +292,185 @@ export default function OpenBankingPage() {
               <Clock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">-</div>
-              <p className="text-xs text-muted-foreground">Conecta una cuenta</p>
+              <div className="text-2xl font-bold">
+                {stats.ultimaSincronizacion
+                  ? format(new Date(stats.ultimaSincronizacion), 'dd MMM HH:mm', { locale: es })
+                  : '-'}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {stats.ultimaSincronizacion ? 'Sincronización automática' : 'Sin sincronizar'}
+              </p>
             </CardContent>
           </Card>
         </div>
 
-        <Tabs defaultValue="integraciones" className="w-full">
+        <Tabs defaultValue="cuentas" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="integraciones">Integraciones</TabsTrigger>
             <TabsTrigger value="cuentas">Cuentas Conectadas</TabsTrigger>
+            <TabsTrigger value="sociedades">Sociedades</TabsTrigger>
             <TabsTrigger value="funcionalidades">Funcionalidades</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="integraciones" className="space-y-4 mt-4">
-            {selectedIntegration ? (
+          {/* Cuentas Conectadas */}
+          <TabsContent value="cuentas" className="space-y-4 mt-4">
+            {accounts.length === 0 ? (
               <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      {selectedIntegration.icon}
-                      <div>
-                        <CardTitle>{selectedIntegration.name}</CardTitle>
-                        <CardDescription>{selectedIntegration.description}</CardDescription>
-                      </div>
-                    </div>
-                    <Button variant="ghost" onClick={() => setSelectedIntegration(null)}>
-                      Cerrar
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div>
-                      <h4 className="font-semibold mb-2">Características</h4>
-                      <ul className="space-y-2">
-                        {selectedIntegration.features.map((feature, i) => (
-                          <li key={i} className="flex items-center gap-2 text-sm">
-                            <Check className="h-4 w-4 text-green-600" />
-                            {feature}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    {selectedIntegration.banks && (
-                      <div>
-                        <h4 className="font-semibold mb-2">Bancos Soportados</h4>
-                        <div className="flex flex-wrap gap-2">
-                          {selectedIntegration.banks.map((bank, i) => (
-                            <Badge key={i} variant="secondary">{bank}</Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="border-t pt-4">
-                    <h4 className="font-semibold mb-4">Configuración</h4>
-                    <div className="grid gap-4 md:grid-cols-2">
-                      {selectedIntegration.configFields.map((field) => (
-                        <div key={field.name} className="space-y-2">
-                          <Label htmlFor={field.name}>
-                            {field.label} {field.required && <span className="text-red-500">*</span>}
-                          </Label>
-                          <Input
-                            id={field.name}
-                            type={field.type}
-                            placeholder={field.placeholder}
-                            value={configValues[field.name] || ''}
-                            onChange={(e) => setConfigValues(prev => ({ ...prev, [field.name]: e.target.value }))}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="flex justify-between items-center pt-4 border-t">
-                    <div className="flex gap-2">
-                      {selectedIntegration.docsUrl && (
-                        <Button variant="outline" size="sm" asChild>
-                          <a href={selectedIntegration.docsUrl} target="_blank" rel="noopener noreferrer">
-                            <FileText className="mr-2 h-4 w-4" />
-                            Documentación
-                          </a>
-                        </Button>
-                      )}
-                      {selectedIntegration.pricing && (
-                        <Badge variant="outline">{selectedIntegration.pricing}</Badge>
-                      )}
-                    </div>
-                    <div className="flex gap-2">
-                      <Button variant="outline" onClick={() => setSelectedIntegration(null)}>
-                        Cancelar
-                      </Button>
-                      <Button onClick={handleSaveConfig}>
-                        <Check className="mr-2 h-4 w-4" />
-                        Guardar Configuración
-                      </Button>
-                    </div>
-                  </div>
+                <CardContent className="text-center py-12">
+                  <CreditCard className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No hay cuentas conectadas</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Conecta tu primera cuenta bancaria para empezar a sincronizar
+                  </p>
                 </CardContent>
               </Card>
             ) : (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {bankIntegrations.map((integration) => (
-                  <Card key={integration.id} className="hover:shadow-md transition-shadow">
-                    <CardHeader>
+              <div className="grid gap-4 md:grid-cols-2">
+                {accounts.map((account) => (
+                  <Card key={account.id} className="hover:shadow-md transition-shadow">
+                    <CardHeader className="pb-3">
                       <div className="flex items-center justify-between">
-                        {integration.icon}
-                        <Badge variant={integration.status === 'connected' ? 'default' : 'secondary'}>
-                          {integration.status === 'connected' ? 'Conectado' : 'No configurado'}
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                            <Building className="h-5 w-5 text-blue-600" />
+                          </div>
+                          <div>
+                            <CardTitle className="text-base">{account.bankName}</CardTitle>
+                            <CardDescription>{account.companyName}</CardDescription>
+                          </div>
+                        </div>
+                        <Badge
+                          variant={account.status === 'connected' ? 'default' : 'secondary'}
+                          className={
+                            account.status === 'connected'
+                              ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                              : ''
+                          }
+                        >
+                          {account.status === 'connected' ? 'Conectado' : account.status}
                         </Badge>
                       </div>
-                      <CardTitle className="mt-2">{integration.name}</CardTitle>
-                      <CardDescription className="text-sm">{integration.description}</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-                        <Globe className="h-4 w-4" />
-                        {integration.region}
+                      <div className="space-y-2 text-sm">
+                        {account.iban && (
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">IBAN</span>
+                            <span className="font-mono">{account.iban}</span>
+                          </div>
+                        )}
+                        {account.accountNumber && !account.iban && (
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Cuenta</span>
+                            <span className="font-mono">{account.accountNumber}</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Moneda</span>
+                          <span>{account.currency}</span>
+                        </div>
+                        {account.transactionCount !== undefined && account.transactionCount > 0 && (
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Transacciones</span>
+                            <span>{account.transactionCount.toLocaleString('es-ES')}</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Última sync</span>
+                          <span>
+                            {account.lastSync
+                              ? format(new Date(account.lastSync), 'dd MMM yyyy HH:mm', {
+                                  locale: es,
+                                })
+                              : '-'}
+                          </span>
+                        </div>
                       </div>
-                      <ul className="space-y-1 text-sm">
-                        {integration.features.slice(0, 3).map((feature, i) => (
-                          <li key={i} className="flex items-center gap-2">
-                            <Check className="h-3 w-3 text-green-600" />
-                            {feature}
-                          </li>
-                        ))}
-                        {integration.features.length > 3 && (
-                          <li className="text-muted-foreground">
-                            +{integration.features.length - 3} más...
-                          </li>
-                        )}
-                      </ul>
                     </CardContent>
-                    <CardFooter>
-                      <Button 
-                        className="w-full" 
-                        variant={integration.status === 'connected' ? 'outline' : 'default'}
-                        onClick={() => setSelectedIntegration(integration)}
-                      >
-                        {integration.status === 'connected' ? (
-                          <>
-                            <Settings className="mr-2 h-4 w-4" />
-                            Configurar
-                          </>
-                        ) : (
-                          <>
-                            <LinkIcon className="mr-2 h-4 w-4" />
-                            Conectar
-                          </>
-                        )}
-                      </Button>
-                    </CardFooter>
                   </Card>
                 ))}
               </div>
             )}
           </TabsContent>
 
-          <TabsContent value="cuentas" className="space-y-4 mt-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Cuentas Bancarias Conectadas</CardTitle>
-                <CardDescription>
-                  Gestiona las cuentas bancarias vinculadas a tu plataforma
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {connectedBanks.length === 0 ? (
-                  <div className="text-center py-12">
-                    <PiggyBank className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">No hay cuentas conectadas</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Conecta tu primera cuenta bancaria para empezar a sincronizar transacciones
-                    </p>
-                    <Button onClick={() => setSelectedIntegration(bankIntegrations[0])}>
-                      <LinkIcon className="mr-2 h-4 w-4" />
-                      Conectar cuenta
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {/* Lista de cuentas conectadas */}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+          {/* Sociedades */}
+          <TabsContent value="sociedades" className="space-y-4 mt-4">
+            {companies.length === 0 ? (
+              <Card>
+                <CardContent className="text-center py-12">
+                  <Building className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No hay sociedades configuradas</h3>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
+                {companies.map((company) => (
+                  <Card key={company.companyId}>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <CardTitle className="text-lg">{company.companyName}</CardTitle>
+                          <CardDescription>
+                            {company.banco} · {company.iban}
+                          </CardDescription>
+                        </div>
+                        <div className="flex gap-1">
+                          {company.gcConfigured && (
+                            <Badge
+                              variant="outline"
+                              className="border-green-300 text-green-700 dark:text-green-400"
+                            >
+                              GoCardless
+                            </Badge>
+                          )}
+                          {company.nordigenConnected && (
+                            <Badge
+                              variant="outline"
+                              className="border-blue-300 text-blue-700 dark:text-blue-400"
+                            >
+                              Nordigen
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        <div>
+                          <p className="text-muted-foreground">Mandatos SEPA</p>
+                          <p className="text-lg font-semibold">
+                            {company.activeMandates}/{company.totalMandates}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground">Pagos GC</p>
+                          <p className="text-lg font-semibold">{company.totalPayments}</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground">Pendientes</p>
+                          <p className="text-lg font-semibold">{company.pendingReconciliation}</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground">Estado</p>
+                          <Badge
+                            variant={company.nordigenConnected ? 'default' : 'secondary'}
+                            className={
+                              company.nordigenConnected
+                                ? 'bg-green-100 text-green-800 dark:bg-green-900/30'
+                                : ''
+                            }
+                          >
+                            {company.nordigenConnected ? 'Conectado' : 'Sin conexión'}
+                          </Badge>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </TabsContent>
 
+          {/* Funcionalidades */}
           <TabsContent value="funcionalidades" className="space-y-4 mt-4">
             <div className="grid gap-4 md:grid-cols-2">
               <Card>
@@ -543,8 +482,8 @@ export default function OpenBankingPage() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground mb-4">
-                    Concilia automáticamente los pagos recibidos con las facturas y alquileres pendientes.
-                    El sistema identifica pagos por importe, referencia y fecha.
+                    Concilia automáticamente los pagos recibidos con las facturas y alquileres
+                    pendientes por importe, referencia y fecha.
                   </p>
                   <ul className="space-y-2 text-sm">
                     <li className="flex items-center gap-2">
@@ -560,6 +499,13 @@ export default function OpenBankingPage() {
                       Historial de conciliaciones
                     </li>
                   </ul>
+                  <Button
+                    variant="outline"
+                    className="mt-4 w-full"
+                    onClick={() => router.push('/finanzas/conciliacion')}
+                  >
+                    Ir a Conciliación
+                  </Button>
                 </CardContent>
               </Card>
 
@@ -567,13 +513,13 @@ export default function OpenBankingPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Euro className="h-5 w-5 text-green-600" />
-                    Pagos SEPA
+                    Pagos SEPA (GoCardless)
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground mb-4">
-                    Emite y gestiona domiciliaciones SEPA para el cobro automático de alquileres.
-                    Compatible con la normativa europea de pagos.
+                    Domiciliaciones SEPA para el cobro automático de alquileres. Compatible con la
+                    normativa europea de pagos.
                   </p>
                   <ul className="space-y-2 text-sm">
                     <li className="flex items-center gap-2">
@@ -601,8 +547,8 @@ export default function OpenBankingPage() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground mb-4">
-                    Obtén insights sobre tu flujo de caja, morosidad y proyecciones
-                    basadas en datos bancarios reales.
+                    Insights sobre flujo de caja, morosidad y proyecciones basadas en datos
+                    bancarios reales.
                   </p>
                   <ul className="space-y-2 text-sm">
                     <li className="flex items-center gap-2">
@@ -618,6 +564,13 @@ export default function OpenBankingPage() {
                       Proyecciones de ingresos
                     </li>
                   </ul>
+                  <Button
+                    variant="outline"
+                    className="mt-4 w-full"
+                    onClick={() => router.push('/bi')}
+                  >
+                    Ir a Business Intelligence
+                  </Button>
                 </CardContent>
               </Card>
 
@@ -625,26 +578,26 @@ export default function OpenBankingPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Shield className="h-5 w-5 text-orange-600" />
-                    Verificación de Inquilinos
+                    Open Banking (Nordigen)
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground mb-4">
-                    Verifica la solvencia de potenciales inquilinos analizando su historial
-                    bancario (con su consentimiento).
+                    Lectura de movimientos bancarios via Open Banking PSD2 (Nordigen/GoCardless Bank
+                    Account Data). Gratuito hasta 250 conexiones/día.
                   </p>
                   <ul className="space-y-2 text-sm">
                     <li className="flex items-center gap-2">
                       <Check className="h-4 w-4 text-green-600" />
-                      Verificación de ingresos
+                      Saldos en tiempo real
                     </li>
                     <li className="flex items-center gap-2">
                       <Check className="h-4 w-4 text-green-600" />
-                      Análisis de gastos
+                      Historial de movimientos (hasta 2 años)
                     </li>
                     <li className="flex items-center gap-2">
                       <Check className="h-4 w-4 text-green-600" />
-                      Score de solvencia
+                      Bancos españoles: Bankinter, BBVA, CaixaBank, Santander...
                     </li>
                   </ul>
                 </CardContent>
@@ -652,28 +605,6 @@ export default function OpenBankingPage() {
             </div>
           </TabsContent>
         </Tabs>
-
-        {/* CTA Section */}
-        <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-blue-200 dark:border-blue-900">
-          <CardContent className="py-6">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-              <div>
-                <h3 className="text-lg font-semibold">¿Necesitas ayuda con la integración?</h3>
-                <p className="text-muted-foreground">
-                  Nuestro equipo técnico puede ayudarte a configurar la conexión bancaria
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <Button variant="outline">
-                  Ver documentación
-                </Button>
-                <Button>
-                  Contactar soporte
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </AuthenticatedLayout>
   );
