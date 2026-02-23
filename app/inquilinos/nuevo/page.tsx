@@ -66,6 +66,17 @@ export default function NuevoInquilinoPage() {
     profesion: '',
     ingresosMensuales: '0',
   });
+  const [enablePortalAccess, setEnablePortalAccess] = useState(false);
+  const [portalPassword, setPortalPassword] = useState('');
+
+  const generateSecurePassword = () => {
+    const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%';
+    let password = '';
+    for (let i = 0; i < 12; i++) {
+      password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setPortalPassword(password);
+  };
 
   const handleDocumentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -178,6 +189,7 @@ export default function NuevoInquilinoPage() {
           estadoCivil: formData.estadoCivil,
           profesion: formData.profesion,
           ingresosMensuales: parseFloat(formData.ingresosMensuales),
+          ...(enablePortalAccess && portalPassword && { portalPassword }),
         }),
       });
 
@@ -597,6 +609,93 @@ export default function NuevoInquilinoPage() {
                             {formData.tipoDocumento.toUpperCase()} - {formData.documentoIdentidad}
                           </p>
                         </div>
+                      </div>
+                    )}
+                  </div>
+                ),
+              },
+              {
+                id: 'portal',
+                title: 'Acceso al Portal',
+                description: 'Credenciales para el Portal del Inquilino',
+                fields: (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <h4 className="font-medium">Crear acceso al Portal del Inquilino</h4>
+                        <p className="text-sm text-muted-foreground">
+                          El inquilino podrá acceder a su portal con su email y contraseña
+                        </p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={enablePortalAccess}
+                          onChange={(e) => {
+                            setEnablePortalAccess(e.target.checked);
+                            if (e.target.checked && !portalPassword) {
+                              generateSecurePassword();
+                            }
+                          }}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                      </label>
+                    </div>
+
+                    {enablePortalAccess && (
+                      <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
+                        <div className="space-y-2">
+                          <Label>Email de acceso</Label>
+                          <Input
+                            value={formData.email || 'Introduce primero el email del inquilino'}
+                            disabled
+                            className="bg-muted"
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            Se usará el email del inquilino como usuario
+                          </p>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="portalPassword">Contraseña del Portal *</Label>
+                          <div className="flex gap-2">
+                            <Input
+                              id="portalPassword"
+                              type="text"
+                              value={portalPassword}
+                              onChange={(e) => setPortalPassword(e.target.value)}
+                              placeholder="Contraseña segura"
+                              className="font-mono"
+                            />
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={generateSecurePassword}
+                              className="whitespace-nowrap"
+                            >
+                              Generar
+                            </Button>
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            Mínimo 8 caracteres. Comparte estas credenciales con el inquilino.
+                          </p>
+                        </div>
+
+                        {portalPassword && (
+                          <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                            <p className="text-sm font-medium text-green-800 dark:text-green-200">
+                              Credenciales del Portal:
+                            </p>
+                            <div className="mt-1 text-sm font-mono">
+                              <p>📧 Email: <strong>{formData.email || '(pendiente)'}</strong></p>
+                              <p>🔑 Contraseña: <strong>{portalPassword}</strong></p>
+                              <p className="mt-1 text-xs text-green-600 dark:text-green-400">
+                                Portal: inmovaapp.com/portal-inquilino/login
+                              </p>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
