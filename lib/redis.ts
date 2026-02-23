@@ -61,7 +61,7 @@ export function getRedisClient(): Redis | null {
 
     redisClient.on('error', (error) => {
       if (!warnedConnectError) {
-        logger.warn('[Redis] Error:', error);
+        logger.info('[Redis] No disponible, usando fallback en memoria');
         warnedConnectError = true;
       }
     });
@@ -71,9 +71,9 @@ export function getRedisClient(): Redis | null {
     });
 
     // Conectar
-    redisClient.connect().catch((error) => {
+    redisClient.connect().catch(() => {
       if (!warnedConnectError) {
-        logger.warn('[Redis] Error al conectar:', error);
+        logger.info('[Redis] No disponible, usando fallback en memoria');
         warnedConnectError = true;
       }
       redisClient = null;

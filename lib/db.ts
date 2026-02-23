@@ -77,16 +77,21 @@ function createPrismaClient(): PrismaClient {
     logger.error('Prisma error:', e);
   });
 
-  // Manejar cierre graceful
-  if (typeof process !== 'undefined') {
+  // Manejar cierre graceful - usar flag global para evitar registrar listeners duplicados
+  if (typeof process !== 'undefined' && !(global as any).__prismaShutdownRegistered) {
+    (global as any).__prismaShutdownRegistered = true;
     const gracefulShutdown = async (signal: string) => {
       logger.info(`Received ${signal}, disconnecting Prisma...`);
-      await client.$disconnect();
-      logger.info('Prisma disconnected successfully');
+      try {
+        await client.$disconnect();
+        logger.info('Prisma disconnected successfully');
+      } catch (e) {
+        // Ignore disconnect errors during shutdown
+      }
     };
 
-    process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
-    process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+    process.once('SIGTERM', () => gracefulShutdown('SIGTERM'));
+    process.once('SIGINT', () => gracefulShutdown('SIGINT'));
   }
 
   return client;

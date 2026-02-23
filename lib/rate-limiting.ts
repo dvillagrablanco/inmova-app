@@ -122,7 +122,7 @@ async function checkRateLimitRedis(
       reset: ttl > 0 ? ttl : windowSec,
     };
   } catch (error) {
-    logger.warn('[RateLimit] Redis error, fallback a memoria:', error);
+    logger.info('[RateLimit] Redis no disponible, usando fallback en memoria');
     // Fallback a memoria si Redis falla
     return checkRateLimitMemory(identifier, config);
   }
