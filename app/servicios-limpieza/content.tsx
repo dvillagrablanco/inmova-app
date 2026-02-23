@@ -244,13 +244,16 @@ export default function ServiciosLimpiezaContent() {
                   className="pl-10"
                 />
               </div>
-              <Select value={filterStatus} onValueChange={setFilterStatus}>
+              <Select
+                value={filterStatus || 'all'}
+                onValueChange={(v) => setFilterStatus(v === 'all' ? '' : v)}
+              >
                 <SelectTrigger className="w-full md:w-48">
                   <Filter className="h-4 w-4 mr-2" />
                   <SelectValue placeholder="Filtrar por estado" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos</SelectItem>
+                  <SelectItem value="all">Todos</SelectItem>
                   <SelectItem value="pendiente">Pendientes</SelectItem>
                   <SelectItem value="en_progreso">En Progreso</SelectItem>
                   <SelectItem value="completada">Completadas</SelectItem>
