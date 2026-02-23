@@ -78,6 +78,15 @@ export default function ProveedoresPage() {
     rating: '',
     notas: '',
   });
+  const [enablePortalAccess, setEnablePortalAccess] = useState(false);
+  const [portalPassword, setPortalPassword] = useState('');
+
+  const generateSecurePassword = () => {
+    const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%';
+    let pw = '';
+    for (let i = 0; i < 12; i++) pw += chars.charAt(Math.floor(Math.random() * chars.length));
+    setPortalPassword(pw);
+  };
   const [editForm, setEditForm] = useState({
     nombre: '',
     tipo: '',
@@ -130,6 +139,7 @@ export default function ProveedoresPage() {
         body: JSON.stringify({
           ...form,
           rating: form.rating ? parseFloat(form.rating) : null,
+          ...(enablePortalAccess && portalPassword && { portalPassword }),
         }),
       });
 
@@ -367,6 +377,33 @@ export default function ProveedoresPage() {
                       value={form.notas}
                       onChange={(e) => setForm({ ...form, notas: e.target.value })}
                     />
+                  </div>
+                  {/* Acceso al Portal */}
+                  <div className="border rounded-lg p-3 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-sm">Acceso al Portal del Proveedor</p>
+                        <p className="text-xs text-muted-foreground">Credenciales para gestionar órdenes, facturas y presupuestos</p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" checked={enablePortalAccess} onChange={(e) => { setEnablePortalAccess(e.target.checked); if (e.target.checked && !portalPassword) generateSecurePassword(); }} className="sr-only peer" />
+                        <div className="w-10 h-5 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+                      </label>
+                    </div>
+                    {enablePortalAccess && (
+                      <div className="space-y-2">
+                        <div className="flex gap-2">
+                          <Input value={portalPassword} onChange={(e) => setPortalPassword(e.target.value)} placeholder="Contraseña" className="font-mono text-sm" />
+                          <Button type="button" variant="outline" size="sm" onClick={generateSecurePassword}>Generar</Button>
+                        </div>
+                        {portalPassword && form.email && (
+                          <div className="p-2 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded text-xs">
+                            <p>📧 {form.email} | 🔑 {portalPassword}</p>
+                            <p className="text-emerald-600 dark:text-emerald-400 mt-1">Portal: inmovaapp.com/portal-proveedor/login</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                   <div className="flex justify-end gap-2">
                     <Button type="button" variant="outline" onClick={() => setOpenDialog(false)}>
