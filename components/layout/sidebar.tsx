@@ -92,6 +92,8 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
   const [primaryVertical, setPrimaryVertical] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [editModulesMode, setEditModulesMode] = useState(false);
+  const [togglingModule, setTogglingModule] = useState<string | null>(null);
 
   // Hook para empresa seleccionada (Super Admin)
   const { selectedCompany, selectCompany: handleCompanySelect } = useSelectedCompany();
@@ -297,6 +299,35 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isMobileMenuOpen]);
 
+  // Toggle de módulo desde sidebar
+  const handleSidebarModuleToggle = async (moduloCodigo: string, currentlyActive: boolean) => {
+    setTogglingModule(moduloCodigo);
+    try {
+      const res = await fetch('/api/modules/toggle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ moduloCodigo, activo: !currentlyActive }),
+      });
+      if (res.ok) {
+        if (!currentlyActive) {
+          setActiveModules((prev) => [...prev, moduloCodigo]);
+        } else {
+          setActiveModules((prev) => prev.filter((m) => m !== moduloCodigo));
+        }
+        window.dispatchEvent(new Event('modules-changed'));
+      } else {
+        const err = await res.json();
+        logger.error('Error toggling module:', err);
+      }
+    } catch (error) {
+      logger.error('Error toggling module:', error);
+    } finally {
+      setTogglingModule(null);
+    }
+  };
+
+  const isModuleEditable = role === 'super_admin' || role === 'administrador';
+
   // Guardar favoritos en localStorage de forma segura
   const saveFavorites = (newFavorites: string[]) => {
     setFavorites(newFavorites);
@@ -359,17 +390,17 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
       // Si skipModuleCheck es true, no verificar módulos activos
       if (skipModuleCheck) return true;
 
+      // En modo edición de módulos, mostrar todos (activos e inactivos)
+      if (editModulesMode) return true;
+
       // Verificar si el módulo está activo
       const moduleCode = ROUTE_TO_MODULE[item.href];
-      if (!moduleCode) return true; // Si no hay mapeo, mostrar por defecto
+      if (!moduleCode) return true;
 
-      // Si hay módulos cargados, verificar si este módulo está en la lista activa.
-      // Esto respeta desactivaciones explícitas del admin, incluso para módulos core.
       if (modulesToCheck.length > 0) {
         return modulesToCheck.includes(moduleCode);
       }
 
-      // Fallback: si no hay módulos cargados, mostrar core por defecto
       return CORE_MODULES.includes(moduleCode);
     });
 
@@ -522,6 +553,41 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
   }) => {
     const isActive = pathname?.startsWith(item.href) ?? false;
     const isFavorite = favorites.includes(item.href);
+    const moduleCode = ROUTE_TO_MODULE[item.href];
+    const isModActive = moduleCode ? activeModules.includes(moduleCode) : true;
+    const isToggling = togglingModule === moduleCode;
+
+    if (editModulesMode && moduleCode) {
+      return (
+        <div className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm">
+          <item.icon size={16} className="text-gray-400 flex-shrink-0" />
+          <span
+            className={cn(
+              'flex-1 truncate',
+              isModActive ? 'text-gray-200' : 'text-gray-500 line-through'
+            )}
+          >
+            {item.name}
+          </span>
+          <button
+            onClick={() => moduleCode && handleSidebarModuleToggle(moduleCode, isModActive)}
+            disabled={isToggling}
+            className={cn(
+              'w-9 h-5 rounded-full relative transition-colors flex-shrink-0',
+              isToggling ? 'opacity-50' : '',
+              isModActive ? 'bg-green-500' : 'bg-gray-600'
+            )}
+          >
+            <span
+              className={cn(
+                'absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform',
+                isModActive ? 'translate-x-4' : 'translate-x-0.5'
+              )}
+            />
+          </button>
+        </div>
+      );
+    }
 
     return (
       <div className="relative group">
@@ -529,7 +595,6 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
           href={item.href}
           prefetch={true}
           onClick={() => {
-            // Cerrar el menú móvil
             setIsMobileMenuOpen(false);
             onNavigate?.();
           }}
@@ -544,7 +609,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
           <item.icon size={18} />
           <span className="flex-1">{item.name}</span>
         </Link>
-        {showFavoriteButton && (
+        {showFavoriteButton && !editModulesMode && (
           <button
             onClick={(e) => {
               e.preventDefault();
@@ -718,6 +783,24 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
               </button>
             )}
           </div>
+
+          {/* Edit Modules Button */}
+          {isModuleEditable && (
+            <div className="px-4 pb-2">
+              <button
+                onClick={() => setEditModulesMode(!editModulesMode)}
+                className={cn(
+                  'w-full flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
+                  editModulesMode
+                    ? 'bg-green-600 text-white hover:bg-green-700'
+                    : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'
+                )}
+              >
+                <Settings size={14} />
+                {editModulesMode ? 'Guardar cambios' : 'Editar Módulos'}
+              </button>
+            </div>
+          )}
 
           {/* Navigation - Mejorado para scroll en móviles */}
           <nav
