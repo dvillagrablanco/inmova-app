@@ -133,15 +133,21 @@ export default function InsuranceDetailPage() {
         provider: seguro.aseguradora || seguro.provider || '',
         policyNumber: seguro.numeroPoliza || seguro.policyNumber || '',
         status: seguro.estado || seguro.status || 'ACTIVE',
-        startDate: seguro.fechaInicio || seguro.startDate || '',
-        endDate: seguro.fechaFin || seguro.endDate || '',
+        startDate: seguro.fechaInicio || seguro.startDate || new Date().toISOString(),
+        endDate:
+          seguro.fechaVencimiento || seguro.fechaFin || seguro.endDate || new Date().toISOString(),
         annualPremium: seguro.primaAnual || seguro.annualPremium || 0,
-        coverage: seguro.cobertura || seguro.coverage || 0,
-        propertyAddress: seguro.building?.direccion || seguro.propertyAddress || '',
+        coverage:
+          seguro.sumaAsegurada || seguro.coberturaTotal || seguro.cobertura || seguro.coverage || 0,
+        propertyAddress:
+          seguro.building?.nombre ||
+          seguro.building?.direccion ||
+          seguro.propertyAddress ||
+          'Sin asignar',
         propertyId: seguro.buildingId || seguro.propertyId || '',
-        contactName: seguro.contactoNombre || seguro.contactName || '',
-        contactPhone: seguro.contactoTelefono || seguro.contactPhone || '',
-        contactEmail: seguro.contactoEmail || seguro.contactEmail || '',
+        contactName: seguro.contactoAgente || seguro.nombreAsegurado || seguro.contactName || '',
+        contactPhone: seguro.telefonoAseguradora || seguro.contactPhone || '',
+        contactEmail: seguro.emailAseguradora || seguro.contactEmail || '',
         notes: seguro.notas || seguro.notes || '',
         documents: (seguro.documents || []).map((d: any) => ({
           id: d.id,
@@ -172,8 +178,8 @@ export default function InsuranceDetailPage() {
 
   const handleDelete = async () => {
     try {
-      // TODO: Llamar a API real
-      // await fetch(`/api/insurances/${insuranceId}`, { method: 'DELETE' });
+      const res = await fetch(`/api/seguros/${insuranceId}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Error');
       toast.success('Seguro eliminado correctamente');
       router.push('/seguros');
     } catch (error) {
@@ -317,7 +323,7 @@ export default function InsuranceDetailPage() {
             </div>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => router.push(`/seguros/${insuranceId}/edit`)}>
+            <Button variant="outline" onClick={() => router.push(`/seguros/${insuranceId}/editar`)}>
               <Edit className="h-4 w-4 mr-2" />
               Editar
             </Button>
@@ -400,7 +406,11 @@ export default function InsuranceDetailPage() {
               <Separator />
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Cobertura:</span>
-                <span className="font-medium">€{insurance.coverage.toLocaleString()}</span>
+                <span className="font-medium">
+                  {typeof insurance.coverage === 'number'
+                    ? `€${insurance.coverage.toLocaleString()}`
+                    : insurance.coverage || 'No especificada'}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Prima Mensual:</span>
