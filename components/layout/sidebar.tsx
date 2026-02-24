@@ -37,6 +37,7 @@ import { useSelectedCompany } from '@/lib/hooks/admin/useSelectedCompany';
 import {
   ROUTE_TO_MODULE,
   CORE_MODULES,
+  SECTION_TO_MODULES,
   dashboardNavItems,
   alquilerResidencialItems,
   strNavItems,
@@ -94,6 +95,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
   const [isInitialized, setIsInitialized] = useState(false);
   const [editModulesMode, setEditModulesMode] = useState(false);
   const [togglingModule, setTogglingModule] = useState<string | null>(null);
+  const [togglingSection, setTogglingSection] = useState<string | null>(null);
 
   // Hook para empresa seleccionada (Super Admin)
   const { selectedCompany, selectCompany: handleCompanySelect } = useSelectedCompany();
@@ -324,6 +326,52 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
     } finally {
       setTogglingModule(null);
     }
+  };
+
+  // Toggle de sección completa (activar/desactivar todos los módulos de una sección)
+  const handleSectionToggle = async (sectionId: string, activate: boolean) => {
+    const sectionModules = SECTION_TO_MODULES[sectionId];
+    if (!sectionModules || sectionModules.length === 0) return;
+
+    setTogglingSection(sectionId);
+    try {
+      const res = await fetch('/api/modules/toggle-batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ modules: sectionModules, activo: activate }),
+      });
+      if (res.ok) {
+        if (activate) {
+          setActiveModules((prev) => [...new Set([...prev, ...sectionModules])]);
+        } else {
+          setActiveModules((prev) => prev.filter((m) => !sectionModules.includes(m)));
+        }
+        window.dispatchEvent(new Event('modules-changed'));
+      } else {
+        const err = await res.json();
+        logger.error('Error toggling section:', err);
+      }
+    } catch (error) {
+      logger.error('Error toggling section:', error);
+    } finally {
+      setTogglingSection(null);
+    }
+  };
+
+  // Calcular si una sección está activa (mayoría de módulos activos)
+  const isSectionActive = (sectionId: string): boolean => {
+    const sectionModules = SECTION_TO_MODULES[sectionId];
+    if (!sectionModules || sectionModules.length === 0) return true;
+    const activeCount = sectionModules.filter((m) => activeModules.includes(m)).length;
+    return activeCount > sectionModules.length / 2;
+  };
+
+  // Contar módulos activos en una sección
+  const getSectionActiveCount = (sectionId: string): { active: number; total: number } => {
+    const sectionModules = SECTION_TO_MODULES[sectionId];
+    if (!sectionModules) return { active: 0, total: 0 };
+    const active = sectionModules.filter((m) => activeModules.includes(m)).length;
+    return { active, total: sectionModules.length };
   };
 
   const isModuleEditable = role === 'super_admin' || role === 'administrador';
@@ -708,6 +756,97 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
     );
   };
 
+  // Componente reutilizable para header de sección con toggle de módulo completo
+  const SectionHeader = ({
+    sectionId,
+    title,
+    className: headerClassName,
+  }: {
+    sectionId: string;
+    title: string;
+    className?: string;
+  }) => {
+    const sectionActive = isSectionActive(sectionId);
+    const { active: sectionActiveCount, total: sectionTotal } = getSectionActiveCount(sectionId);
+    const isSectionToggling = togglingSection === sectionId;
+    const hasSectionModules = !!SECTION_TO_MODULES[sectionId];
+
+    return (
+      <div className="flex items-center justify-between w-full">
+        <button
+          onClick={() => toggleSection(sectionId)}
+          className={cn(
+            'flex items-center justify-between flex-1 px-2 py-2 text-xs font-semibold uppercase hover:text-white transition-colors',
+            headerClassName || 'text-gray-400'
+          )}
+        >
+          <span>{title}</span>
+          {!editModulesMode && (
+            expandedSections[sectionId] ? (
+              <ChevronDown size={16} />
+            ) : (
+              <ChevronRight size={16} />
+            )
+          )}
+        </button>
+        {editModulesMode && isModuleEditable && hasSectionModules && (
+          <div className="flex items-center gap-1.5 pr-1 flex-shrink-0">
+            <span className="text-[9px] text-gray-500">
+              {sectionActiveCount}/{sectionTotal}
+            </span>
+            <button
+              onClick={() => handleSectionToggle(sectionId, !sectionActive)}
+              disabled={isSectionToggling}
+              className={cn(
+                'w-9 h-5 rounded-full relative transition-colors flex-shrink-0',
+                isSectionToggling ? 'opacity-50' : '',
+                sectionActive ? 'bg-green-500' : 'bg-gray-600'
+              )}
+              title={sectionActive ? 'Desactivar todo el módulo' : 'Activar todo el módulo'}
+            >
+              <span
+                className={cn(
+                  'absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform',
+                  sectionActive ? 'translate-x-4' : 'translate-x-0.5'
+                )}
+              />
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Componente reutilizable para secciones simples del sidebar
+  const SidebarSection = ({
+    sectionId,
+    title,
+    items,
+    companyId,
+    headerClassName,
+  }: {
+    sectionId: string;
+    title: string;
+    items: SidebarItem[];
+    companyId?: string;
+    headerClassName?: string;
+  }) => {
+    if (items.length === 0) return null;
+
+    return (
+      <div className="mb-4">
+        <SectionHeader sectionId={sectionId} title={title} className={headerClassName} />
+        {(expandedSections[sectionId] || editModulesMode) && (
+          <div className="space-y-1 mt-1">
+            {items.map((item) => (
+              <NavItemWithSubs key={item.href} item={item as SidebarItem} companyId={companyId} />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <>
       {/* Mobile menu button - Fixed en la parte superior izquierda */}
@@ -840,28 +979,11 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
             )}
 
             {/* Dashboard Section */}
-            {filteredDashboardItems.length > 0 && (
-              <div className="mb-4">
-                <button
-                  onClick={() => toggleSection('dashboard')}
-                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
-                >
-                  <span>🏠 Inicio</span>
-                  {expandedSections.dashboard ? (
-                    <ChevronDown size={16} />
-                  ) : (
-                    <ChevronRight size={16} />
-                  )}
-                </button>
-                {expandedSections.dashboard && (
-                  <div className="space-y-1 mt-1">
-                    {filteredDashboardItems.map((item) => (
-                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+            <SidebarSection
+              sectionId="dashboard"
+              title="🏠 Inicio"
+              items={filteredDashboardItems}
+            />
 
             {/* ============================================================== */}
             {/* SUPER ADMIN - GESTIÓN DE PLATAFORMA (PRIMERO para Super Admin) */}
@@ -1011,24 +1133,12 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
               filteredCoLivingItems.length > 0 ||
               filteredStudentHousingItems.length > 0) && (
               <div className="mb-4">
-                <button
-                  onClick={() => toggleSection('alquilerResidencial')}
-                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
-                >
-                  <span>🏠 Living Residencial</span>
-                  {expandedSections.alquilerResidencial ? (
-                    <ChevronDown size={16} />
-                  ) : (
-                    <ChevronRight size={16} />
-                  )}
-                </button>
-                {expandedSections.alquilerResidencial && (
+                <SectionHeader sectionId="alquilerResidencial" title="🏠 Living Residencial" />
+                {(expandedSections.alquilerResidencial || editModulesMode) && (
                   <div className="space-y-1 mt-1">
-                    {/* Alquiler Tradicional */}
                     {filteredAlquilerResidencialItems.map((item) => (
                       <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
-                    {/* Coliving / Habitaciones */}
                     {filteredCoLivingItems.length > 0 && (
                       <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">
                         Coliving
@@ -1037,7 +1147,6 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                     {filteredCoLivingItems.map((item) => (
                       <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
-                    {/* Student Housing */}
                     {filteredStudentHousingItems.length > 0 && (
                       <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">
                         Student Housing
@@ -1054,19 +1163,12 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
             {/* 2. ALQUILER TURÍSTICO Y HOSPITALITY (STR + Hospitality) */}
             {(filteredStrItems.length > 0 || filteredHospitalityItems.length > 0) && (
               <div className="mb-4">
-                <button
-                  onClick={() => toggleSection('str')}
-                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
-                >
-                  <span>🏖️ Turístico y Hospitality</span>
-                  {expandedSections.str ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                </button>
-                {expandedSections.str && (
+                <SectionHeader sectionId="str" title="🏖️ Turístico y Hospitality" />
+                {(expandedSections.str || editModulesMode) && (
                   <div className="space-y-1 mt-1">
                     {filteredStrItems.map((item) => (
                       <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
-                    {/* Hospitality */}
                     {filteredHospitalityItems.length > 0 && (
                       <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">
                         Hospitality
@@ -1089,20 +1191,9 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
               filteredEwoorkerItems.length > 0 ||
               filteredRealEstateDeveloperItems.length > 0) && (
               <div className="mb-4">
-                <button
-                  onClick={() => toggleSection('construccion')}
-                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
-                >
-                  <span>🏗️ Construcción / Promoción</span>
-                  {expandedSections.construccion ? (
-                    <ChevronDown size={16} />
-                  ) : (
-                    <ChevronRight size={16} />
-                  )}
-                </button>
-                {expandedSections.construccion && (
+                <SectionHeader sectionId="construccion" title="🏗️ Construcción / Promoción" />
+                {(expandedSections.construccion || editModulesMode) && (
                   <div className="space-y-1 mt-1">
-                    {/* Proyectos de Obra */}
                     {filteredConstruccionItems.length > 0 && (
                       <div className="ml-2 mt-1 mb-1 text-[9px] text-gray-500 uppercase">
                         Obra Nueva / Reformas
@@ -1114,7 +1205,6 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                     {filteredBuildToRentItems.map((item) => (
                       <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
-                    {/* Flipping */}
                     {filteredFlippingItems.length > 0 && (
                       <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">
                         House Flipping
@@ -1123,7 +1213,6 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                     {filteredFlippingItems.map((item) => (
                       <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
-                    {/* Promociones Inmobiliarias */}
                     {filteredRealEstateDeveloperItems.length > 0 && (
                       <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">
                         Promociones
@@ -1132,7 +1221,6 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                     {filteredRealEstateDeveloperItems.map((item) => (
                       <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
-                    {/* eWoorker - Marketplace B2B */}
                     {filteredEwoorkerItems.length > 0 && (
                       <div className="ml-2 mt-2 mb-1 text-[9px] text-amber-500 uppercase">
                         🔧 eWoorker (B2B)
@@ -1151,24 +1239,12 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
               filteredEspaciosFlexiblesItems.length > 0 ||
               filteredWarehouseItems.length > 0) && (
               <div className="mb-4">
-                <button
-                  onClick={() => toggleSection('comercial')}
-                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
-                >
-                  <span>🏢 Patrimonio Terciario</span>
-                  {expandedSections.comercial ? (
-                    <ChevronDown size={16} />
-                  ) : (
-                    <ChevronRight size={16} />
-                  )}
-                </button>
-                {expandedSections.comercial && (
+                <SectionHeader sectionId="comercial" title="🏢 Patrimonio Terciario" />
+                {(expandedSections.comercial || editModulesMode) && (
                   <div className="space-y-1 mt-1">
-                    {/* Locales, Oficinas, Naves, Garajes/Trasteros */}
                     {filteredPatrimonioTerciarioItems.map((item) => (
                       <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
-                    {/* Espacios Flexibles */}
                     {filteredEspaciosFlexiblesItems.length > 0 && (
                       <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">
                         Espacios Flexibles
@@ -1177,8 +1253,6 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                     {filteredEspaciosFlexiblesItems.map((item) => (
                       <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
-                    {/* Naves y Logística */}
-                    {/* Logística / Almacenes */}
                     {filteredWarehouseItems.length > 0 && (
                       <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">
                         Logística / Almacenes
@@ -1211,54 +1285,18 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
               )}
 
             {/* COMUNIDADES DE PROPIETARIOS */}
-            {filteredAdminFincasItems.length > 0 && (
-              <div className="mb-4">
-                <button
-                  onClick={() => toggleSection('adminFincas')}
-                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
-                >
-                  <span>🏘️ Comunidades de Propietarios</span>
-                  {expandedSections.adminFincas ? (
-                    <ChevronDown size={16} />
-                  ) : (
-                    <ChevronRight size={16} />
-                  )}
-                </button>
-                {expandedSections.adminFincas && (
-                  <div className="space-y-1 mt-1">
-                    {filteredAdminFincasItems.map((item) => (
-                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Viajes Corporativos - ELIMINADO (No es PropTech) */}
+            <SidebarSection
+              sectionId="adminFincas"
+              title="🏘️ Comunidades de Propietarios"
+              items={filteredAdminFincasItems}
+            />
 
             {/* 7. VIVIENDA SOCIAL / RESIDENCIAS */}
-            {filteredViviendaSocialItems.length > 0 && (
-              <div className="mb-4">
-                <button
-                  onClick={() => toggleSection('viviendaSocial')}
-                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
-                >
-                  <span>🏛️ Vivienda Social / Residencias</span>
-                  {expandedSections.viviendaSocial ? (
-                    <ChevronDown size={16} />
-                  ) : (
-                    <ChevronRight size={16} />
-                  )}
-                </button>
-                {expandedSections.viviendaSocial && (
-                  <div className="space-y-1 mt-1">
-                    {filteredViviendaSocialItems.map((item) => (
-                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+            <SidebarSection
+              sectionId="viviendaSocial"
+              title="🏛️ Vivienda Social / Residencias"
+              items={filteredViviendaSocialItems}
+            />
 
             {/* Estructura simplificada:
                 - Living: Alquiler + Coliving + Student Housing
@@ -1273,26 +1311,12 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                     🏛️ Holding / Grupo
                   </h3>
                 </div>
-                <div className="mb-4">
-                  <button
-                    onClick={() => toggleSection('holdingGrupo')}
-                    className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-amber-400/80 uppercase hover:text-amber-300 transition-colors"
-                  >
-                    <span>🏛️ Inversiones Grupo</span>
-                    {expandedSections.holdingGrupo ? (
-                      <ChevronDown className="h-3 w-3" />
-                    ) : (
-                      <ChevronRight className="h-3 w-3" />
-                    )}
-                  </button>
-                  {expandedSections.holdingGrupo && (
-                    <div className="space-y-1 mt-1">
-                      {filteredHoldingGrupoItems.map((item) => (
-                        <NavItemWithSubs key={item.href} item={item as SidebarItem} />
-                      ))}
-                    </div>
-                  )}
-                </div>
+                <SidebarSection
+                  sectionId="holdingGrupo"
+                  title="🏛️ Inversiones Grupo"
+                  items={filteredHoldingGrupoItems}
+                  headerClassName="text-amber-400/80"
+                />
               </>
             )}
 
@@ -1320,272 +1344,49 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
             )}
 
             {/* Finanzas */}
-            {filteredFinanzasItems.length > 0 && (
-              <div className="mb-4">
-                <button
-                  onClick={() => toggleSection('finanzas')}
-                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
-                >
-                  <span>💰 Finanzas</span>
-                  {expandedSections.finanzas ? (
-                    <ChevronDown size={16} />
-                  ) : (
-                    <ChevronRight size={16} />
-                  )}
-                </button>
-                {expandedSections.finanzas && (
-                  <div className="space-y-1 mt-1">
-                    {filteredFinanzasItems.map((item) => (
-                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+            <SidebarSection sectionId="finanzas" title="💰 Finanzas" items={filteredFinanzasItems} />
 
             {/* Analytics */}
-            {filteredAnalyticsItems.length > 0 && (
-              <div className="mb-4">
-                <button
-                  onClick={() => toggleSection('analytics')}
-                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
-                >
-                  <span>📊 Analytics e IA</span>
-                  {expandedSections.analytics ? (
-                    <ChevronDown size={16} />
-                  ) : (
-                    <ChevronRight size={16} />
-                  )}
-                </button>
-                {expandedSections.analytics && (
-                  <div className="space-y-1 mt-1">
-                    {filteredAnalyticsItems.map((item) => (
-                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+            <SidebarSection sectionId="analytics" title="📊 Analytics e IA" items={filteredAnalyticsItems} />
 
             {/* Operaciones */}
-            {filteredOperacionesItems.length > 0 && (
-              <div className="mb-4">
-                <button
-                  onClick={() => toggleSection('operaciones')}
-                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
-                >
-                  <span>⚙️ Operaciones</span>
-                  {expandedSections.operaciones ? (
-                    <ChevronDown size={16} />
-                  ) : (
-                    <ChevronRight size={16} />
-                  )}
-                </button>
-                {expandedSections.operaciones && (
-                  <div className="space-y-1 mt-1">
-                    {filteredOperacionesItems.map((item) => (
-                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+            <SidebarSection sectionId="operaciones" title="⚙️ Operaciones" items={filteredOperacionesItems} />
 
-            {/* Herramientas de Inversión (NUEVO) */}
-            {filteredHerramientasInversionItems.length > 0 && (
-              <div className="mb-4">
-                <button
-                  onClick={() => toggleSection('herramientasInversion')}
-                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
-                >
-                  <span>🧮 Inversión</span>
-                  {expandedSections.herramientasInversion ? (
-                    <ChevronDown size={16} />
-                  ) : (
-                    <ChevronRight size={16} />
-                  )}
-                </button>
-                {expandedSections.herramientasInversion && (
-                  <div className="space-y-1 mt-1">
-                    {filteredHerramientasInversionItems.map((item) => (
-                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+            {/* Herramientas de Inversión */}
+            <SidebarSection sectionId="herramientasInversion" title="🧮 Inversión" items={filteredHerramientasInversionItems} />
 
             {/* Comunicaciones */}
-            {filteredComunicacionesItems.length > 0 && (
-              <div className="mb-4">
-                <button
-                  onClick={() => toggleSection('comunicaciones')}
-                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
-                >
-                  <span>💬 Comunicaciones</span>
-                  {expandedSections.comunicaciones ? (
-                    <ChevronDown size={16} />
-                  ) : (
-                    <ChevronRight size={16} />
-                  )}
-                </button>
-                {expandedSections.comunicaciones && (
-                  <div className="space-y-1 mt-1">
-                    {filteredComunicacionesItems.map((item) => (
-                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+            <SidebarSection sectionId="comunicaciones" title="💬 Comunicaciones" items={filteredComunicacionesItems} />
 
             {/* Documentos y Legal */}
-            {filteredDocumentosLegalItems.length > 0 && (
-              <div className="mb-4">
-                <button
-                  onClick={() => toggleSection('documentosLegal')}
-                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
-                >
-                  <span>📄 Documentos y Legal</span>
-                  {expandedSections.documentosLegal ? (
-                    <ChevronDown size={16} />
-                  ) : (
-                    <ChevronRight size={16} />
-                  )}
-                </button>
-                {expandedSections.documentosLegal && (
-                  <div className="space-y-1 mt-1">
-                    {filteredDocumentosLegalItems.map((item) => (
-                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+            <SidebarSection sectionId="documentosLegal" title="📄 Documentos y Legal" items={filteredDocumentosLegalItems} />
 
-            {/* CRM INMOBILIARIO (Herramienta Horizontal) */}
-            {filteredCrmMarketingItems.length > 0 && (
-              <div className="mb-4">
-                <button
-                  onClick={() => toggleSection('crmMarketing')}
-                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
-                >
-                  <span>📇 CRM Inmobiliario</span>
-                  {expandedSections.crmMarketing ? (
-                    <ChevronDown size={16} />
-                  ) : (
-                    <ChevronRight size={16} />
-                  )}
-                </button>
-                {expandedSections.crmMarketing && (
-                  <div className="space-y-1 mt-1">
-                    {filteredCrmMarketingItems.map((item) => (
-                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+            {/* CRM Inmobiliario */}
+            <SidebarSection sectionId="crmMarketing" title="📇 CRM Inmobiliario" items={filteredCrmMarketingItems} />
 
             {/* Automatización */}
-            {filteredAutomatizacionItems.length > 0 && (
-              <div className="mb-4">
-                <button
-                  onClick={() => toggleSection('automatizacion')}
-                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
-                >
-                  <span>⚡ Automatización</span>
-                  {expandedSections.automatizacion ? (
-                    <ChevronDown size={16} />
-                  ) : (
-                    <ChevronRight size={16} />
-                  )}
-                </button>
-                {expandedSections.automatizacion && (
-                  <div className="space-y-1 mt-1">
-                    {filteredAutomatizacionItems.map((item) => (
-                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+            <SidebarSection sectionId="automatizacion" title="⚡ Automatización" items={filteredAutomatizacionItems} />
 
             {/* Innovación */}
-            {filteredInnovacionItems.length > 0 && (
-              <div className="mb-4">
-                <button
-                  onClick={() => toggleSection('innovacion')}
-                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
-                >
-                  <span>🚀 Innovación</span>
-                  {expandedSections.innovacion ? (
-                    <ChevronDown size={16} />
-                  ) : (
-                    <ChevronRight size={16} />
-                  )}
-                </button>
-                {expandedSections.innovacion && (
-                  <div className="space-y-1 mt-1">
-                    {filteredInnovacionItems.map((item) => (
-                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+            <SidebarSection sectionId="innovacion" title="🚀 Innovación" items={filteredInnovacionItems} />
 
             {/* Soporte */}
-            {filteredSoporteItems.length > 0 && (
-              <div className="mb-4">
-                <button
-                  onClick={() => toggleSection('soporte')}
-                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
-                >
-                  <span>🎧 Soporte</span>
-                  {expandedSections.soporte ? (
-                    <ChevronDown size={16} />
-                  ) : (
-                    <ChevronRight size={16} />
-                  )}
-                </button>
-                {expandedSections.soporte && (
-                  <div className="space-y-1 mt-1">
-                    {filteredSoporteItems.map((item) => (
-                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+            <SidebarSection sectionId="soporte" title="🎧 Soporte" items={filteredSoporteItems} />
 
             {/* OPERADOR DE CAMPO - Solo visible para operadores */}
             {filteredOperadorItems.length > 0 && (
-              <div className="mb-4">
+              <>
                 <div className="px-2 py-3 mb-2 border-t border-gray-800">
                   <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
                     👷 Operador de Campo
                   </h3>
                 </div>
-                <button
-                  onClick={() => toggleSection('operador')}
-                  className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
-                >
-                  <span>Dashboard Operador</span>
-                  {expandedSections.operador ? (
-                    <ChevronDown size={16} />
-                  ) : (
-                    <ChevronRight size={16} />
-                  )}
-                </button>
-                {expandedSections.operador && (
-                  <div className="space-y-1 mt-1">
-                    {filteredOperadorItems.map((item) => (
-                      <NavItemWithSubs key={item.href} item={item as SidebarItem} />
-                    ))}
-                  </div>
-                )}
-              </div>
+                <SidebarSection
+                  sectionId="operador"
+                  title="Dashboard Operador"
+                  items={filteredOperadorItems}
+                />
+              </>
             )}
 
             {/* ADMINISTRACIÓN DE EMPRESA (Solo para Administrador - NO Super Admin) */}
@@ -1598,26 +1399,11 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                       ⚙️ Configuración de Mi Empresa
                     </h3>
                   </div>
-                  <div className="mb-4">
-                    <button
-                      onClick={() => toggleSection('administradorEmpresa')}
-                      className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-gray-400 uppercase hover:text-white transition-colors"
-                    >
-                      <span>🏢 Gestión de Empresa</span>
-                      {expandedSections.administradorEmpresa ? (
-                        <ChevronDown size={16} />
-                      ) : (
-                        <ChevronRight size={16} />
-                      )}
-                    </button>
-                    {expandedSections.administradorEmpresa && (
-                      <div className="space-y-1 mt-1">
-                        {filteredAdministradorEmpresaItems.map((item) => (
-                          <NavItemWithSubs key={item.href} item={item as SidebarItem} />
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                  <SidebarSection
+                    sectionId="administradorEmpresa"
+                    title="🏢 Gestión de Empresa"
+                    items={filteredAdministradorEmpresaItems}
+                  />
                 </>
               )}
 
