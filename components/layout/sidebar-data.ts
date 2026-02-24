@@ -276,6 +276,169 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/warehouse/inventory': 'warehouse',
   '/warehouse/locations': 'warehouse',
   '/warehouse/movements': 'warehouse',
+
+  // ============================================
+  // RUTAS ADICIONALES - Completar cobertura total
+  // ============================================
+
+  // Alquiler Residencial - Dashboard
+  '/traditional-rental': 'alquiler_residencial',
+  '/garantias': 'garantias',
+
+  // STR - Dashboard y Reviews
+  '/str': 'str',
+  '/str/reviews': 'str_reviews',
+
+  // Hospitality
+  '/hospitality': 'hospitality',
+  '/hospitality/check-in': 'hospitality',
+  '/hospitality/housekeeping': 'hospitality',
+  '/hospitality/servicios': 'hospitality',
+
+  // Coliving (sub-rutas)
+  '/coliving/propiedades': 'coliving',
+  '/coliving/comunidad': 'coliving',
+  '/coliving/emparejamiento': 'coliving',
+  '/coliving/eventos': 'coliving',
+  '/coliving/reservas': 'coliving',
+
+  // Construcción (sub-rutas faltantes)
+  '/construction/gantt': 'construction_projects',
+  '/construction/quality-control': 'construction_projects',
+  '/obras': 'construccion_projects',
+  '/licitaciones': 'licitaciones',
+  '/proyectos-renovacion': 'construccion_projects',
+
+  // Flipping (sub-rutas faltantes)
+  '/flipping/dashboard': 'flipping_projects',
+  '/flipping/timeline': 'flipping_projects',
+  '/flipping/calculator': 'flipping_projects',
+  '/flipping/comparator': 'flipping_projects',
+
+  // Holding / Grupo Societario
+  '/inversiones': 'holding_grupo',
+  '/inversiones/analisis': 'holding_grupo',
+  '/inversiones/comparativa': 'holding_grupo',
+  '/inversiones/activos': 'holding_grupo',
+  '/inversiones/hipotecas': 'holding_grupo',
+  '/inversiones/fiscal': 'holding_grupo',
+  '/inversiones/pyl': 'holding_grupo',
+  '/inversiones/fianzas': 'holding_grupo',
+  '/inversiones/export': 'holding_grupo',
+
+  // Finanzas (rutas faltantes)
+  '/finanzas': 'finanzas',
+  '/contabilidad': 'contabilidad',
+  '/estadisticas': 'estadisticas',
+  '/presupuestos': 'presupuestos',
+  '/facturacion': 'facturacion',
+
+  // Analytics (sub-rutas faltantes)
+  '/reportes/financieros': 'reportes',
+  '/reportes/operacionales': 'reportes',
+  '/informes': 'informes',
+  '/asistente-ia': 'ai_assistant',
+
+  // Operaciones (rutas faltantes)
+  '/servicios-limpieza': 'servicios_limpieza',
+
+  // Documentos y Legal (rutas faltantes)
+  '/plantillas': 'plantillas',
+
+  // CRM y Marketing (rutas faltantes)
+  '/portal-comercial': 'portal_comercial',
+  '/promociones': 'promociones',
+  '/reviews': 'reviews',
+  '/red-agentes': 'red_agentes',
+
+  // Automatización
+  '/automatizacion': 'automatizacion',
+  '/automatizacion/resumen': 'automatizacion',
+  '/workflows': 'workflows',
+  '/sincronizacion': 'sincronizacion',
+  '/sincronizacion-avanzada': 'sincronizacion_avanzada',
+  '/recordatorios': 'recordatorios',
+
+  // Innovación (rutas faltantes)
+  '/energia': 'energia',
+  '/energia-solar': 'energia',
+  '/puntos-carga': 'puntos_carga',
+  '/economia-circular/huertos': 'economia_circular',
+  '/economia-circular/residuos': 'economia_circular',
+  '/huerto-urbano': 'economia_circular',
+  '/instalaciones-deportivas': 'instalaciones_deportivas',
+
+  // Soporte
+  '/soporte': 'soporte',
+  '/knowledge-base': 'knowledge_base',
+  '/sugerencias': 'sugerencias',
+
+  // Herramientas de Inversión
+  '/dashboard/herramientas': 'herramientas_inversion',
+
+  // Servicios Profesionales (sub-rutas faltantes)
+  '/professional/clients': 'professional_projects',
+  '/professional/invoicing': 'professional_projects',
+
+  // Admin - Herramientas Empresa e Impuestos
+  '/admin/herramientas-empresa': 'configuracion',
+  '/admin/impuestos': 'configuracion',
+};
+
+// ============================================================================
+// MAPEO DE SECCIONES DEL SIDEBAR A MÓDULOS
+// Permite activar/desactivar verticales y horizontales completas
+// ============================================================================
+const SECTION_TO_MODULES: Record<string, string[]> = {
+  // === Verticales de Negocio ===
+  alquilerResidencial: [
+    'alquiler_residencial', 'gestion_inmobiliaria', 'edificios', 'inquilinos',
+    'matching', 'contratos', 'candidatos', 'garantias', 'valoracion_ia',
+    'inspecciones', 'certificaciones',
+  ],
+  str: ['str', 'str_listings', 'str_bookings', 'str_channels', 'str_housekeeping', 'str_reviews'],
+  hospitality: ['hospitality'],
+  coLiving: ['room_rental', 'coliving'],
+  studentHousing: ['student_housing'],
+  construccion: ['construction_projects', 'construccion_dashboard', 'construccion_projects', 'licitaciones'],
+  ewoorker: ['ewoorker'],
+  flipping: ['flipping_projects'],
+  comercial: ['alquiler_comercial'],
+  adminFincas: ['admin_fincas'],
+  viviendaSocial: ['vivienda_social'],
+  realEstateDeveloper: ['real_estate_developer'],
+  workspace: ['workspace'],
+  warehouse: ['warehouse'],
+  viajesCorporativos: ['viajes_corporativos'],
+
+  // === Holding / Grupo ===
+  holdingGrupo: ['holding_grupo'],
+
+  // === Herramientas Horizontales ===
+  finanzas: [
+    'pagos', 'gastos', 'finanzas', 'contabilidad', 'bi',
+    'estadisticas', 'presupuestos', 'facturacion', 'open_banking',
+  ],
+  analytics: ['analytics', 'reportes', 'informes', 'ai_assistant'],
+  operaciones: [
+    'mantenimiento', 'proveedores', 'incidencias', 'tareas',
+    'calendario', 'visitas', 'servicios_limpieza', 'servicios',
+  ],
+  herramientasInversion: ['herramientas_inversion'],
+  comunicaciones: ['chat', 'notificaciones', 'sms', 'redes_sociales'],
+  documentosLegal: [
+    'ia_documental', 'documentos', 'plantillas', 'firma_digital', 'legal', 'seguros',
+  ],
+  crmMarketing: [
+    'crm', 'portal_comercial', 'promociones', 'reviews',
+    'red_agentes', 'marketplace', 'tours_virtuales',
+  ],
+  automatizacion: ['automatizacion', 'workflows', 'sincronizacion', 'sincronizacion_avanzada', 'recordatorios'],
+  innovacion: [
+    'esg', 'energia', 'iot', 'blockchain', 'economia_circular',
+    'puntos_carga', 'instalaciones_deportivas',
+  ],
+  soporte: ['soporte', 'knowledge_base', 'sugerencias'],
 };
 
 // Módulos core que siempre deben mostrarse (esCore: true)
@@ -1922,6 +2085,7 @@ const superAdminPlatformItems: SidebarItem[] = [
 export {
   ROUTE_TO_MODULE,
   CORE_MODULES,
+  SECTION_TO_MODULES,
   dashboardNavItems,
   alquilerResidencialItems,
   strNavItems,
