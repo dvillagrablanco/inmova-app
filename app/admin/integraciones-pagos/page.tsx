@@ -47,7 +47,7 @@ const paymentMethods: PaymentMethod[] = [
     available: true,
     enabled: true,
     features: ['Visa, Mastercard, Amex', '3D Secure automático', 'Apple Pay / Google Pay'],
-    fees: '1.4% + 0.25€ (EEE) / 2.9% + 0.25€ (Internacional)',
+    fees: '—',
     processingTime: 'Instantáneo',
   },
   {
@@ -58,7 +58,7 @@ const paymentMethods: PaymentMethod[] = [
     available: false,
     enabled: false,
     features: ['Débito directo SEPA', 'Cobros recurrentes', 'Bajo coste'],
-    fees: '1% + 0.20€ (máx. 2€ por transacción)',
+    fees: '—',
     processingTime: '3-5 días hábiles',
   },
   {
@@ -69,7 +69,7 @@ const paymentMethods: PaymentMethod[] = [
     available: false,
     enabled: false,
     features: ['Pago instantáneo', 'Sin tarjeta', 'Popular en España'],
-    fees: '0.5% (negociable)',
+    fees: '—',
     processingTime: 'Instantáneo',
   },
   {
@@ -80,7 +80,7 @@ const paymentMethods: PaymentMethod[] = [
     available: false,
     enabled: false,
     features: ['TPV Virtual tradicional', 'Todas las tarjetas', 'Bancos españoles'],
-    fees: 'Según contrato bancario',
+    fees: '—',
     processingTime: '1-2 días hábiles',
   },
 ];
@@ -98,14 +98,12 @@ export default function IntegracionesPagosPage() {
   }, [status, router]);
 
   const toggleMethod = (methodId: string) => {
-    setMethods(prev => prev.map(m => 
-      m.id === methodId ? { ...m, enabled: !m.enabled } : m
-    ));
+    setMethods((prev) => prev.map((m) => (m.id === methodId ? { ...m, enabled: !m.enabled } : m)));
     toast.success('Configuración actualizada');
   };
 
-  const enabledCount = methods.filter(m => m.enabled).length;
-  const availableCount = methods.filter(m => m.available).length;
+  const enabledCount = methods.filter((m) => m.enabled).length;
+  const availableCount = methods.filter((m) => m.available).length;
 
   if (status === 'loading') {
     return (
@@ -137,8 +135,9 @@ export default function IntegracionesPagosPage() {
         <Alert className="border-blue-200 bg-blue-50">
           <Info className="h-4 w-4 text-blue-600" />
           <AlertDescription className="text-blue-800">
-            <strong>Integración centralizada:</strong> Las pasarelas de pago están configuradas por INMOVA. 
-            Tú eliges qué métodos ofrecer a tus inquilinos. Los costes de transacción se deducen automáticamente.
+            <strong>Integración centralizada:</strong> Las pasarelas de pago están configuradas por
+            INMOVA. Tú eliges qué métodos ofrecer a tus inquilinos. Los costes de transacción se
+            deducen automáticamente.
           </AlertDescription>
         </Alert>
 
@@ -162,13 +161,16 @@ export default function IntegracionesPagosPage() {
             {/* Métodos de pago disponibles */}
             <div className="grid md:grid-cols-2 gap-6">
               {methods.map((method) => (
-                <Card 
-                  key={method.id} 
+                <Card
+                  key={method.id}
                   className={`relative ${method.enabled ? 'border-green-200 bg-green-50/30' : ''} ${!method.available ? 'opacity-60' : ''}`}
                 >
                   {!method.available && (
                     <div className="absolute top-2 right-2">
-                      <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300">
+                      <Badge
+                        variant="outline"
+                        className="bg-yellow-100 text-yellow-800 border-yellow-300"
+                      >
                         Próximamente
                       </Badge>
                     </div>
@@ -270,7 +272,7 @@ export default function IntegracionesPagosPage() {
                     </div>
                     <Switch defaultChecked />
                   </div>
-                  
+
                   <div className="flex items-center justify-between p-4 border rounded-lg">
                     <div>
                       <Label className="text-base">Recordatorios de pago</Label>
@@ -280,7 +282,7 @@ export default function IntegracionesPagosPage() {
                     </div>
                     <Switch defaultChecked />
                   </div>
-                  
+
                   <div className="flex items-center justify-between p-4 border rounded-lg">
                     <div>
                       <Label className="text-base">Recibos automáticos</Label>
@@ -308,11 +310,11 @@ export default function IntegracionesPagosPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold">€12,450</div>
-                  <p className="text-sm text-green-600">+15% vs mes anterior</p>
+                  <div className="text-3xl font-bold">—</div>
+                  <p className="text-sm text-muted-foreground">Sin datos</p>
                 </CardContent>
               </Card>
-              
+
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -320,11 +322,11 @@ export default function IntegracionesPagosPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold">47</div>
+                  <div className="text-3xl font-bold">—</div>
                   <p className="text-sm text-muted-foreground">Este mes</p>
                 </CardContent>
               </Card>
-              
+
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -332,7 +334,7 @@ export default function IntegracionesPagosPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold">€185</div>
+                  <div className="text-3xl font-bold">—</div>
                   <p className="text-sm text-muted-foreground">Este mes</p>
                 </CardContent>
               </Card>
@@ -350,8 +352,8 @@ export default function IntegracionesPagosPage() {
                       <span>Tarjetas (Stripe)</span>
                     </div>
                     <div className="text-right">
-                      <div className="font-bold">€10,200</div>
-                      <div className="text-sm text-muted-foreground">82% del total</div>
+                      <div className="font-bold">—</div>
+                      <div className="text-sm text-muted-foreground">Sin datos</div>
                     </div>
                   </div>
                   <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
@@ -360,8 +362,8 @@ export default function IntegracionesPagosPage() {
                       <span>Transferencia manual</span>
                     </div>
                     <div className="text-right">
-                      <div className="font-bold">€2,250</div>
-                      <div className="text-sm text-muted-foreground">18% del total</div>
+                      <div className="font-bold">—</div>
+                      <div className="text-sm text-muted-foreground">Sin datos</div>
                     </div>
                   </div>
                 </div>
