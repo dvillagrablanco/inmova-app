@@ -250,29 +250,16 @@ export default function PartnersEscuelasPage() {
           </div>
         </div>
 
-        {/* Case Study */}
+        {/* Case Study - empty state until partner API */}
         <div className="py-16 bg-gray-50">
           <div className="container mx-auto px-4 max-w-4xl">
-            <Badge className="mb-4 mx-auto block w-fit">Caso Real</Badge>
-            <h2 className="text-3xl font-bold text-center mb-8">
-              IE Business School - Resultados Año 1
-            </h2>
-            <Card className="border-2 border-purple-200">
-              <CardContent className="pt-6">
-                <div className="grid md:grid-cols-3 gap-6 text-center">
-                  <div>
-                    <p className="text-4xl font-bold text-purple-600 mb-2">350</p>
-                    <p className="text-sm text-muted-foreground">Estudiantes formados</p>
-                  </div>
-                  <div>
-                    <p className="text-4xl font-bold text-green-600 mb-2">52</p>
-                    <p className="text-sm text-muted-foreground">Alumni convertidos (15%)</p>
-                  </div>
-                  <div>
-                    <p className="text-4xl font-bold text-blue-600 mb-2">€29K</p>
-                    <p className="text-sm text-muted-foreground">Ingresos generados año 1</p>
-                  </div>
-                </div>
+            <h2 className="text-3xl font-bold text-center mb-8">Casos de Éxito</h2>
+            <Card className="border-2 border-dashed border-muted-foreground/30">
+              <CardContent className="flex flex-col items-center justify-center py-16">
+                <Award className="h-12 w-12 text-muted-foreground mb-4" />
+                <p className="text-muted-foreground text-center max-w-md">
+                  Datos no disponibles — Módulo en desarrollo
+                </p>
               </CardContent>
             </Card>
           </div>

@@ -155,35 +155,6 @@ const benefits = [
   'Equity options (nivel Diamond)',
 ];
 
-const testimonials = [
-  {
-    name: 'Carlos M.',
-    role: 'Director, Banco Regional',
-    level: 'Diamond',
-    avatar: '👨‍💼',
-    quote:
-      '€203,000 en el primer año. Increíble cómo una simple recomendación se convierte en ingresos pasivos.',
-    earnings: '€9,000/mes',
-  },
-  {
-    name: 'Laura S.',
-    role: 'Directora MBA, IE Business School',
-    level: 'Gold',
-    avatar: '👩‍🎓',
-    quote: 'Mis alumnos usan software real y yo genero ingresos adicionales. Win-win perfecto.',
-    earnings: '€2,011/mes',
-  },
-  {
-    name: 'Miguel P.',
-    role: 'CEO, Inmobiliaria Premium',
-    level: 'Silver',
-    avatar: '👨‍💻',
-    quote:
-      'Uso el software gratis y además gano €820/mes refiriendo a propietarios. Mejor imposible.',
-    earnings: '€820/mes',
-  },
-];
-
 export default function PartnersPage() {
   const router = useRouter();
   const [registerDialogOpen, setRegisterDialogOpen] = useState(false);
@@ -236,7 +207,7 @@ export default function PartnersPage() {
               </Badge>
 
               <h1 className="text-5xl md:text-7xl font-bold leading-tight">
-                Gana hasta <span className="text-yellow-300">€203,000/año</span>
+                Gana con <span className="text-yellow-300">comisiones recurrentes</span>
                 <br />
                 prescribiendo Inmova
               </h1>
@@ -267,22 +238,22 @@ export default function PartnersPage() {
                 </Button>
               </div>
 
-              {/* Stats */}
+              {/* Stats - placeholder until partner API available */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto pt-12">
                 <div className="text-center">
-                  <div className="text-4xl font-bold">40%</div>
+                  <div className="text-4xl font-bold">—</div>
                   <div className="text-white/80 mt-1">Comisión máxima</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-4xl font-bold">€50K</div>
+                  <div className="text-4xl font-bold">—</div>
                   <div className="text-white/80 mt-1">Bono trimestral</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-4xl font-bold">100+</div>
+                  <div className="text-4xl font-bold">—</div>
                   <div className="text-white/80 mt-1">Partners activos</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-4xl font-bold">24h</div>
+                  <div className="text-4xl font-bold">—</div>
                   <div className="text-white/80 mt-1">Setup rápido</div>
                 </div>
               </div>
@@ -404,7 +375,7 @@ export default function PartnersPage() {
           </div>
         </section>
 
-        {/* Testimonials */}
+        {/* Testimonials - empty state until partner API */}
         <section className="py-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
@@ -414,31 +385,14 @@ export default function PartnersPage() {
               </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-8">
-              {testimonials.map((testimonial, index) => (
-                <Card key={index} className="hover:shadow-xl transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-center gap-4">
-                      <div className="text-4xl">{testimonial.avatar}</div>
-                      <div>
-                        <CardTitle className="text-lg">{testimonial.name}</CardTitle>
-                        <div className="text-sm text-muted-foreground">{testimonial.role}</div>
-                        <Badge className="mt-1">{testimonial.level}</Badge>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <p className="italic text-muted-foreground">"{testimonial.quote}"</p>
-                    <div className="flex items-center justify-between pt-4 border-t">
-                      <span className="text-sm text-muted-foreground">Ingresos mensuales:</span>
-                      <span className="text-xl font-bold text-green-600">
-                        {testimonial.earnings}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <Card className="border-dashed">
+              <CardContent className="flex flex-col items-center justify-center py-16">
+                <Users className="h-12 w-12 text-muted-foreground mb-4" />
+                <p className="text-muted-foreground text-center max-w-md">
+                  Datos no disponibles — Módulo en desarrollo
+                </p>
+              </CardContent>
+            </Card>
           </div>
         </section>
 
