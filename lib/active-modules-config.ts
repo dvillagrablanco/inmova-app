@@ -142,6 +142,72 @@ export const MODULES_CONFIG: Record<string, ModuleConfig> = {
   marketplace_proveedores: { status: 'beta', name: 'Marketplace Proveedores' },
   
   // ============================================
+  // MÓDULOS ADICIONALES - Cobertura completa sidebar
+  // ============================================
+
+  // Alquiler Residencial
+  alquiler_residencial: { status: 'active', name: 'Alquiler Residencial - Dashboard' },
+  garantias: { status: 'active', name: 'Garantías de Alquiler' },
+
+  // STR
+  str: { status: 'active', name: 'STR Dashboard' },
+  str_reviews: { status: 'active', name: 'Reviews STR' },
+
+  // Coliving
+  coliving: { status: 'active', name: 'Coliving' },
+
+  // Holding / Grupo Societario
+  holding_grupo: { status: 'active', name: 'Holding / Grupo Societario' },
+
+  // Finanzas
+  finanzas: { status: 'active', name: 'Panel de Finanzas' },
+  contabilidad: { status: 'active', name: 'Contabilidad' },
+  estadisticas: { status: 'active', name: 'Estadísticas' },
+  presupuestos: { status: 'active', name: 'Presupuestos' },
+  facturacion: { status: 'active', name: 'Facturación' },
+
+  // Analytics
+  informes: { status: 'active', name: 'Informes' },
+  ai_assistant: { status: 'active', name: 'Asistente IA' },
+
+  // Operaciones
+  servicios_limpieza: { status: 'active', name: 'Servicios de Limpieza' },
+  servicios: { status: 'active', name: 'Marketplace de Servicios' },
+
+  // Documentos
+  plantillas: { status: 'active', name: 'Plantillas de Documentos' },
+  ia_documental: { status: 'active', name: 'IA Documental' },
+
+  // CRM y Marketing
+  portal_comercial: { status: 'active', name: 'Portal Comercial' },
+  promociones: { status: 'active', name: 'Promociones' },
+  reviews: { status: 'active', name: 'Reviews' },
+  red_agentes: { status: 'active', name: 'Red de Agentes' },
+
+  // Automatización
+  automatizacion: { status: 'active', name: 'Automatización' },
+  workflows: { status: 'active', name: 'Workflows' },
+  sincronizacion: { status: 'active', name: 'Sincronización' },
+  sincronizacion_avanzada: { status: 'active', name: 'Sincronización Avanzada' },
+  recordatorios: { status: 'active', name: 'Recordatorios' },
+
+  // Innovación
+  energia: { status: 'active', name: 'Gestión de Energía' },
+  puntos_carga: { status: 'active', name: 'Puntos de Carga EV' },
+  instalaciones_deportivas: { status: 'active', name: 'Instalaciones Deportivas' },
+
+  // Soporte
+  soporte: { status: 'active', name: 'Soporte' },
+  knowledge_base: { status: 'active', name: 'Base de Conocimientos' },
+  sugerencias: { status: 'active', name: 'Sugerencias' },
+
+  // Herramientas
+  herramientas_inversion: { status: 'active', name: 'Herramientas de Inversión' },
+  matching: { status: 'active', name: 'Matching Inteligente' },
+  gestion_inmobiliaria: { status: 'active', name: 'Gestión de Propiedades' },
+  redes_sociales: { status: 'active', name: 'Redes Sociales' },
+
+  // ============================================
   // MÓDULOS OCULTOS - NO MOSTRAR EN SIDEBAR
   // ============================================
   suscripciones: { status: 'hidden', name: 'Suscripciones' },
