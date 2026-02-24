@@ -121,9 +121,9 @@ function ContratosPageContent() {
     const fetchContracts = async () => {
       try {
         setError(null);
-        const response = await fetch('/api/contracts');
+        const response = await fetch('/api/contracts?limit=500');
         const json = await response.json();
-        const data = Array.isArray(json) ? json : (json.data || []);
+        const data = Array.isArray(json) ? json : (json.data || json.contracts || []);
         setContracts(data);
         setFilteredContracts(data);
       } catch (error) {

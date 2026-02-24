@@ -105,7 +105,7 @@ function PagosPage() {
   useEffect(() => {
     const fetchPayments = async () => {
       try {
-        const response = await fetch('/api/payments');
+        const response = await fetch('/api/payments?limit=500');
         if (response.ok) {
           const json = await response.json();
         const data = Array.isArray(json) ? json : (json.data || json.buildings || json.units || json.tenants || json.payments || json.requests || []);
