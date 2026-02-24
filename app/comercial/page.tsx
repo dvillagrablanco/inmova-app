@@ -215,7 +215,17 @@ export default function ComercialDashboardPage() {
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalEspacios}</div>
             <p className="text-xs text-muted-foreground">
-              {stats.espaciosOcupados} ocupados · {stats.espaciosDisponibles} disponibles
+              {stats.espaciosOcupados} ocupados ·{' '}
+              {stats.espaciosDisponibles > 0 ? (
+                <Link
+                  href="/unidades?estado=disponible"
+                  className="text-amber-600 hover:text-amber-700 hover:underline font-medium"
+                >
+                  {stats.espaciosDisponibles} disponibles
+                </Link>
+              ) : (
+                <span>{stats.espaciosDisponibles} disponibles</span>
+              )}
             </p>
           </CardContent>
         </Card>
@@ -288,7 +298,11 @@ export default function ComercialDashboardPage() {
                           <Badge variant={ocupacion >= 80 ? 'default' : ocupacion >= 60 ? 'secondary' : 'destructive'}>
                             {ocupacion}% ocupado
                           </Badge>
-                        </div>
+                          {type.count - type.occupied > 0 && (
+                            <Badge variant="outline" className="text-amber-600 border-amber-300">
+                              {type.count - type.occupied} disp.
+                            </Badge>
+                          )}</div>
                       </div>
                       <ChevronRight className="h-5 w-5 text-gray-400" />
                     </div>
