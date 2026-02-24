@@ -6,7 +6,18 @@ import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import dynamic from 'next/dynamic';
 
-import { Users, Home, ArrowLeft, Save, Upload, FileText, X, Loader2, Brain, Sparkles } from 'lucide-react';
+import {
+  Users,
+  Home,
+  ArrowLeft,
+  Save,
+  Upload,
+  FileText,
+  X,
+  Loader2,
+  Brain,
+  Sparkles,
+} from 'lucide-react';
 
 // Cargar el asistente de IA de forma dinámica para evitar problemas de SSR
 const TenantFormAIAssistant = dynamic(
@@ -65,6 +76,14 @@ export default function NuevoInquilinoPage() {
     estadoCivil: 'soltero',
     profesion: '',
     ingresosMensuales: '0',
+    personaContacto: '',
+    iban: '',
+    bic: '',
+    metodoPago: '',
+    ciudad: '',
+    codigoPostal: '',
+    provincia: '',
+    pais: '',
   });
   const [enablePortalAccess, setEnablePortalAccess] = useState(false);
   const [portalPassword, setPortalPassword] = useState('');
@@ -189,6 +208,14 @@ export default function NuevoInquilinoPage() {
           estadoCivil: formData.estadoCivil,
           profesion: formData.profesion,
           ingresosMensuales: parseFloat(formData.ingresosMensuales),
+          personaContacto: formData.personaContacto || undefined,
+          iban: formData.iban || undefined,
+          bic: formData.bic || undefined,
+          metodoPago: formData.metodoPago || undefined,
+          ciudad: formData.ciudad || undefined,
+          codigoPostal: formData.codigoPostal || undefined,
+          provincia: formData.provincia || undefined,
+          pais: formData.pais || undefined,
           ...(enablePortalAccess && portalPassword && { portalPassword }),
         }),
       });
@@ -316,6 +343,18 @@ export default function NuevoInquilinoPage() {
                         placeholder="+34 600 123 456"
                       />
                     </div>
+
+                    {/* Persona de Contacto */}
+                    <div className="space-y-2">
+                      <Label htmlFor="personaContacto">Persona de Contacto</Label>
+                      <Input
+                        id="personaContacto"
+                        name="personaContacto"
+                        value={formData.personaContacto}
+                        onChange={handleChange}
+                        placeholder="Nombre y teléfono de contacto de emergencia"
+                      />
+                    </div>
                   </div>
                 ),
               },
@@ -401,24 +440,31 @@ export default function NuevoInquilinoPage() {
                         autoSaveDocument={true}
                         onApplyData={(data) => {
                           const updates: Partial<typeof formData> = {};
-                          
+
                           // Nombre completo
-                          const nombre = data.nombreCompleto || data.nombre || data.fullName || data.name;
+                          const nombre =
+                            data.nombreCompleto || data.nombre || data.fullName || data.name;
                           if (nombre) {
                             updates.nombre = nombre;
                           }
-                          
+
                           // Documento de identidad
-                          const docIdentidad = data.dni || data.nie || data.numeroDocumento || data.documentoIdentidad || data.documentNumber;
+                          const docIdentidad =
+                            data.dni ||
+                            data.nie ||
+                            data.numeroDocumento ||
+                            data.documentoIdentidad ||
+                            data.documentNumber;
                           if (docIdentidad) {
                             updates.documentoIdentidad = docIdentidad;
                           }
-                          
+
                           // Fecha de nacimiento
-                          const fechaRaw = data.fechaNacimiento || data.birthDate || data.dateOfBirth;
+                          const fechaRaw =
+                            data.fechaNacimiento || data.birthDate || data.dateOfBirth;
                           if (fechaRaw) {
                             let fechaFormateada = fechaRaw;
-                            
+
                             if (/^\d{4}-\d{2}-\d{2}$/.test(fechaRaw)) {
                               fechaFormateada = fechaRaw;
                             } else if (/^\d{2}[/-]\d{2}[/-]\d{4}$/.test(fechaRaw)) {
@@ -432,49 +478,58 @@ export default function NuevoInquilinoPage() {
                             }
                             updates.fechaNacimiento = fechaFormateada;
                           }
-                          
+
                           // Nacionalidad
                           if (data.nacionalidad || data.nationality) {
                             updates.nacionalidad = data.nacionalidad || data.nationality;
                           }
-                          
+
                           // Tipo de documento
                           if (data.tipoDocumento || data.documentType) {
-                            const tipo = (data.tipoDocumento || data.documentType || '').toLowerCase();
+                            const tipo = (
+                              data.tipoDocumento ||
+                              data.documentType ||
+                              ''
+                            ).toLowerCase();
                             if (['dni', 'nie', 'pasaporte'].includes(tipo)) {
                               updates.tipoDocumento = tipo;
                             }
                           }
-                          
+
                           // Email
                           if (data.email || data.correo) {
                             updates.email = data.email || data.correo;
                           }
-                          
+
                           // Teléfono
                           if (data.telefono || data.phone) {
                             updates.telefono = data.telefono || data.phone;
                           }
-                          
+
                           if (Object.keys(updates).length > 0) {
                             setFormData((prev) => {
                               const newData = { ...prev, ...updates };
                               return newData;
                             });
-                            toast.success(`${Object.keys(updates).length} campos aplicados al formulario`);
+                            toast.success(
+                              `${Object.keys(updates).length} campos aplicados al formulario`
+                            );
                           } else {
                             toast.warning('No se encontraron campos para aplicar');
                           }
                         }}
                         onDocumentSaved={(documentId, file) => {
-                          setDocuments((prev) => [...prev, {
-                            id: documentId,
-                            name: file.name,
-                            type: file.type,
-                            url: `/api/documents/${documentId}/download`,
-                            uploading: false,
-                            progress: 100,
-                          }]);
+                          setDocuments((prev) => [
+                            ...prev,
+                            {
+                              id: documentId,
+                              name: file.name,
+                              type: file.type,
+                              url: `/api/documents/${documentId}/download`,
+                              uploading: false,
+                              progress: 100,
+                            },
+                          ]);
                         }}
                       />
 
@@ -589,6 +644,99 @@ export default function NuevoInquilinoPage() {
                       />
                     </div>
 
+                    {/* Datos Bancarios y de Pago */}
+                    <div className="space-y-4 pt-4 border-t">
+                      <h4 className="font-medium text-sm">Datos Bancarios y de Pago</h4>
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="space-y-2 sm:col-span-2">
+                          <Label htmlFor="iban">IBAN</Label>
+                          <Input
+                            id="iban"
+                            name="iban"
+                            value={formData.iban}
+                            onChange={handleChange}
+                            placeholder="ES00 0000 0000 0000 0000 0000"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="bic">BIC</Label>
+                          <Input
+                            id="bic"
+                            name="bic"
+                            value={formData.bic}
+                            onChange={handleChange}
+                            placeholder="BSCHESMM"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="metodoPago">Método de Pago</Label>
+                          <Select
+                            value={formData.metodoPago || ''}
+                            onValueChange={(value) =>
+                              setFormData({ ...formData, metodoPago: value })
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Seleccionar" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="recibo">Recibo</SelectItem>
+                              <SelectItem value="transferencia">Transferencia</SelectItem>
+                              <SelectItem value="efectivo">Efectivo</SelectItem>
+                              <SelectItem value="domiciliacion">Domiciliación</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Dirección */}
+                    <div className="space-y-4 pt-4 border-t">
+                      <h4 className="font-medium text-sm">Dirección</h4>
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label htmlFor="ciudad">Ciudad</Label>
+                          <Input
+                            id="ciudad"
+                            name="ciudad"
+                            value={formData.ciudad}
+                            onChange={handleChange}
+                            placeholder="Madrid"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="codigoPostal">Código Postal</Label>
+                          <Input
+                            id="codigoPostal"
+                            name="codigoPostal"
+                            value={formData.codigoPostal}
+                            onChange={handleChange}
+                            placeholder="28001"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="provincia">Provincia</Label>
+                          <Input
+                            id="provincia"
+                            name="provincia"
+                            value={formData.provincia}
+                            onChange={handleChange}
+                            placeholder="Madrid"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="pais">País</Label>
+                          <Input
+                            id="pais"
+                            name="pais"
+                            value={formData.pais}
+                            onChange={handleChange}
+                            placeholder="España"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
                     {/* Resumen */}
                     {formData.nombre && formData.email && (
                       <div className="mt-4 p-4 bg-muted/50 rounded-lg space-y-2">
@@ -688,8 +836,12 @@ export default function NuevoInquilinoPage() {
                               Credenciales del Portal:
                             </p>
                             <div className="mt-1 text-sm font-mono">
-                              <p>📧 Email: <strong>{formData.email || '(pendiente)'}</strong></p>
-                              <p>🔑 Contraseña: <strong>{portalPassword}</strong></p>
+                              <p>
+                                📧 Email: <strong>{formData.email || '(pendiente)'}</strong>
+                              </p>
+                              <p>
+                                🔑 Contraseña: <strong>{portalPassword}</strong>
+                              </p>
                               <p className="mt-1 text-xs text-green-600 dark:text-green-400">
                                 Portal: inmovaapp.com/portal-inquilino/login
                               </p>
@@ -732,7 +884,7 @@ export default function NuevoInquilinoPage() {
 
         {/* Asistente IA para el formulario - Oculto en móvil para evitar solapamiento */}
         <TenantFormAIAssistant formData={formData} />
-        
+
         {/* Nota: AIDocumentAssistant ahora está integrado en la sección de Documentos del formulario (variant="inline") */}
       </div>
     </AuthenticatedLayout>
