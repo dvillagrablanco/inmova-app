@@ -506,11 +506,11 @@ export async function updateStreak(tenantId: string): Promise<number> {
  * Calcula el ranking del inquilino
  */
 export async function calculateRanking(tenantId: string): Promise<{
-  const prisma = await getPrisma();
   edificio?: number;
   ciudad?: number;
   global?: number;
 }> {
+  const prisma = await getPrisma();
   // Obtener reputación del inquilino
   const reputation = await prisma.tenantReputation.findUnique({
     where: { tenantId },

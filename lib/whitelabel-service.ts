@@ -238,7 +238,6 @@ body {
  * Obtiene metadata para SEO/headers basado en whitelabel
  */
 export async function getWhitelabelMetadata(companyId: string): Promise<{
-  const prisma = await getPrisma();
   title: string;
   description: string;
   logo?: string;
