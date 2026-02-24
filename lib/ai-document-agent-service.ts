@@ -216,26 +216,48 @@ PARA ESCRITURAS/NOTAS SIMPLES:
 
 PARA CONTRATOS:
 - Datos del arrendador (nombre, CIF/DNI)
-- Datos del arrendatario (nombre, DNI, email, teléfono)
+- Datos del arrendatario (nombre, DNI, email, teléfono, IBAN, BIC)
 - Dirección del inmueble
 - Renta mensual
 - Fecha inicio y fin
-- Fianza
+- Fianza/depósito
+- Método de pago (recibo, transferencia, domiciliación, efectivo)
+- Persona de contacto
+- Código operación contable (si aparece)
+- Suministros provisionales (importe mensual)
+- IBI repercutido (importe mensual)
 - Condiciones especiales
+- Dirección del inquilino (ciudad, CP, provincia, país)
 
-PARA DNI/NIE:
+PARA DNI/NIE/PASAPORTE:
 - Nombre completo
 - Número de documento
 - Fecha de nacimiento
 - Fecha de caducidad
 - Nacionalidad
+- Dirección (si aparece)
 
-PARA FACTURAS:
-- Proveedor (nombre, CIF)
-- Número de factura
+PARA FACTURAS/RECIBOS DE ALQUILER:
+- Emisor (nombre, CIF)
+- Destinatario (nombre, NIF/DNI)
+- Número de factura (referencia)
 - Fecha
+- Concepto detallado
+- Base imponible
+- Tipo de IVA y importe IVA
+- IRPF (retención, si aplica)
+- Total
+- IBAN del pagador (si aparece)
+- Código operación contable (si aparece)
+
+PARA RECIBOS SEPA/DOMICILIACIÓN BANCARIA:
+- IBAN del deudor
+- IBAN del acreedor
+- BIC
+- Referencia del mandato
+- Importe
 - Concepto
-- Importe (base, IVA, total)
+- Fecha
 
 PARA SEGUROS:
 - Aseguradora
@@ -268,9 +290,10 @@ MAPEO A ENTIDADES DEL SISTEMA:
 - Company: CIF, nombre, dirección de empresa
 - Building: nombre edificio, dirección, año, características
 - Unit: número, tipo, superficie, habitaciones, baños, planta
-- Tenant: nombre, DNI, email, teléfono, nacionalidad
-- Contract: fechas, renta, fianza, condiciones
-- Provider: nombre, CIF, servicios
+- Tenant: nombre, DNI, email, teléfono, nacionalidad, IBAN, BIC, metodoPago, personaContacto, ciudad, codigoPostal, provincia, pais, direccionActual
+- Contract: fechas, renta, fianza, condiciones, codigoOperacion, suministrosProvisionales, ibiRepercutido
+- Payment: monto, concepto, referencia (nº factura), baseImponible, iva, irpf, periodo, metodoPago
+- Provider: nombre, CIF, servicios, IBAN
 - Insurance: póliza, coberturas, prima
 
 RESPONDE EN JSON:

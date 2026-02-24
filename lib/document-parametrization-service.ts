@@ -28,6 +28,7 @@ export interface ParametrizationResult {
     contracts: { created: number; updated: number };
     providers: { created: number; updated: number };
     insurances: { created: number; updated: number };
+    payments: { created: number; updated: number };
   };
 }
 
@@ -84,6 +85,7 @@ export async function applyBatchParametrization(
       contracts: { created: 0, updated: 0 },
       providers: { created: 0, updated: 0 },
       insurances: { created: 0, updated: 0 },
+      payments: { created: 0, updated: 0 },
     },
   };
 
@@ -292,6 +294,8 @@ async function processEntityData(
       return processProvider(fieldMap, documentId, companyId);
     case 'Insurance':
       return processInsurance(fieldMap, documentId, companyId);
+    case 'Payment':
+      return processPayment(fieldMap, documentId, companyId);
     default:
       throw new Error(`Tipo de entidad no soportado: ${entityType}`);
   }
@@ -479,6 +483,16 @@ async function processTenant(
     empresa: fields.employer || fields.empresa || null,
     puesto: fields.job_title || fields.puesto || null,
     ingresosMensuales: parseFloat(fields.monthly_income || fields.ingresos) || null,
+    // Campos financieros y bancarios
+    iban: fields.iban || fields.account_number || null,
+    bic: fields.bic || fields.swift || null,
+    metodoPago: fields.metodo_pago || fields.payment_method || null,
+    personaContacto: fields.persona_contacto || fields.contact_person || null,
+    // Dirección estructurada
+    ciudad: fields.ciudad || fields.city || null,
+    codigoPostal: fields.codigo_postal || fields.postal_code || fields.cp || null,
+    provincia: fields.provincia || fields.province || fields.state || null,
+    pais: fields.pais || fields.country || null,
   };
 
   // Buscar inquilino existente por DNI o email
@@ -564,6 +578,9 @@ async function processContract(
     throw new Error('No se pudo identificar la unidad para el contrato');
   }
 
+  const rentaMensual = parseFloat(fields.monthly_rent || fields.renta_mensual) || 0;
+  const deposito = parseFloat(fields.deposit || fields.fianza || fields.deposito) || rentaMensual * 2;
+  
   const contractData = {
     fechaInicio: fields.start_date || fields.fecha_inicio
       ? new Date(fields.start_date || fields.fecha_inicio)
@@ -571,13 +588,18 @@ async function processContract(
     fechaFin: fields.end_date || fields.fecha_fin
       ? new Date(fields.end_date || fields.fecha_fin)
       : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // +1 año
-    rentaMensual: parseFloat(fields.monthly_rent || fields.renta_mensual) || 0,
-    fianza: parseFloat(fields.deposit || fields.fianza) || 0,
-    diaVencimiento: parseInt(fields.payment_day || fields.dia_pago) || 1,
+    rentaMensual,
+    deposito,
+    depositoGarantia: deposito,
+    diaPago: parseInt(fields.payment_day || fields.dia_pago) || 1,
     estado: 'activo' as const,
-    tipo: 'residencial' as const,
-    actualizacionAnual: fields.annual_update || fields.actualizacion || 'IPC',
-    clausulasEspeciales: fields.special_clauses || fields.clausulas || null,
+    tipo: (fields.contract_type === 'comercial' ? 'comercial' : 
+           fields.contract_type === 'temporal' ? 'temporal' : 'residencial') as any,
+    clausulasAdicionales: fields.special_clauses || fields.clausulas || null,
+    // Campos contables y cargos adicionales
+    codigoOperacion: fields.codigo_operacion || fields.accounting_code || null,
+    suministrosProvisionales: parseFloat(fields.suministros_provisionales || fields.provisional_supplies) || null,
+    ibiRepercutido: parseFloat(fields.ibi_repercutido || fields.ibi) || null,
   };
 
   // Verificar si existe contrato para esta unidad
@@ -756,6 +778,107 @@ async function processInsurance(
       sourceDocumentId: documentId,
     };
   }
+}
+
+/**
+ * Procesa datos de pago/factura extraídos de documentos
+ */
+async function processPayment(
+  fields: Record<string, string>,
+  documentId: string,
+  companyId: string
+): Promise<EntityResult> {
+  // Buscar inquilino por NIF/DNI
+  const tenantNif = fields.tenant_dni || fields.nif_cliente || fields.client_nif;
+  let contractId: string | null = null;
+
+  if (tenantNif) {
+    const tenant = await prisma.tenant.findFirst({
+      where: { companyId, dni: tenantNif },
+      select: {
+        id: true,
+        contracts: {
+          where: { estado: 'activo' },
+          select: { id: true },
+          take: 1,
+        },
+      },
+    });
+    contractId = tenant?.contracts[0]?.id || null;
+  }
+
+  if (!contractId) {
+    throw new Error('No se encontró contrato activo para asociar el pago');
+  }
+
+  const monto = parseFloat(fields.total || fields.monto || fields.amount) || 0;
+  const baseImponible = parseFloat(fields.base_imponible || fields.base || fields.subtotal) || null;
+  const iva = parseFloat(fields.iva_importe || fields.iva_amount || fields.vat_amount) || null;
+  const irpf = parseFloat(fields.irpf_importe || fields.irpf || fields.withholding) || null;
+  
+  // Fecha
+  const fechaStr = fields.fecha || fields.date || fields.invoice_date;
+  const fecha = fechaStr ? new Date(fechaStr) : new Date();
+  
+  // Periodo: extraer de fecha (YYYY-MM)
+  const periodo = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}`;
+
+  // Verificar si ya existe un pago con esta referencia
+  const referencia = fields.referencia || fields.numero_factura || fields.invoice_number || null;
+  if (referencia) {
+    const existing = await prisma.payment.findFirst({
+      where: { contractId, referencia },
+    });
+    if (existing) {
+      // Actualizar con desglose fiscal si falta
+      const updateData: any = {};
+      if (!existing.concepto && fields.concepto) updateData.concepto = fields.concepto;
+      if (!existing.baseImponible && baseImponible) updateData.baseImponible = baseImponible;
+      if (!existing.iva && iva) updateData.iva = iva;
+      if (!existing.irpf && irpf) updateData.irpf = irpf;
+
+      if (Object.keys(updateData).length > 0) {
+        await prisma.payment.update({
+          where: { id: existing.id },
+          data: updateData,
+        });
+      }
+
+      return {
+        entityType: 'Payment',
+        entityId: existing.id,
+        action: 'updated',
+        fields: Object.keys(updateData),
+        sourceDocumentId: documentId,
+      };
+    }
+  }
+
+  // Crear nuevo pago
+  const payment = await prisma.payment.create({
+    data: {
+      contractId,
+      monto: Math.abs(monto),
+      periodo,
+      fechaVencimiento: fecha,
+      fechaPago: fecha,
+      estado: 'pagado',
+      metodoPago: fields.metodo_pago || fields.payment_method || 'transferencia',
+      concepto: fields.concepto || fields.concept || fields.description || null,
+      referencia,
+      baseImponible,
+      iva,
+      irpf,
+    },
+  });
+
+  return {
+    entityType: 'Payment',
+    entityId: payment.id,
+    action: 'created',
+    fields: ['monto', 'periodo', 'concepto', 'referencia', 'baseImponible', 'iva', 'irpf'],
+    sourceDocumentId: documentId,
+  };
 }
 
 // ============================================================================
