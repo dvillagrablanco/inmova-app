@@ -4,9 +4,6 @@ import { ReactNode, useState, useEffect } from 'react';
 import { Sidebar } from './sidebar';
 import { Header } from './header';
 import { BottomNavigation } from './bottom-navigation';
-import { TourAutoStarter } from '@/components/tours/TourAutoStarter';
-import { FloatingTourButton } from '@/components/tours/FloatingTourButton';
-import { ContextualHelp } from '@/components/help/ContextualHelp';
 import { OnboardingChecklist } from '@/components/tutorials/OnboardingChecklist';
 import { FirstTimeSetupWizard } from '@/components/tutorials/FirstTimeSetupWizard';
 import { usePathname, useRouter } from 'next/navigation';
@@ -143,15 +140,6 @@ export function AuthenticatedLayout({
     setShowChecklist(false);
   };
 
-  // Determinar página para ayuda contextual
-  const getPageForHelp = () => {
-    if (pathname?.includes('/edificios')) return 'edificios';
-    if (pathname?.includes('/inquilinos')) return 'inquilinos';
-    if (pathname?.includes('/contratos')) return 'contratos';
-    if (pathname?.includes('/configuracion')) return 'configuracion';
-    return 'dashboard';
-  };
-
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Skip Link para accesibilidad */}
@@ -193,17 +181,6 @@ export function AuthenticatedLayout({
         {/* Bottom Navigation - Solo en móvil */}
         <BottomNavigation />
       </div>
-
-      {/* Tour Auto-Starter - Sistema de tours virtuales (NO para superadmin) */}
-      {session?.user?.role !== 'super_admin' && <TourAutoStarter />}
-
-      {/* Floating Tour Button - Acceso rápido a tours (NO para superadmin) */}
-      {session?.user?.role !== 'super_admin' && <FloatingTourButton />}
-
-      {/* Contextual Help - Ayuda específica según página (NO para superadmin) */}
-      {session?.user?.role !== 'super_admin' && (
-        <ContextualHelp page={getPageForHelp()} />
-      )}
 
       {/* Setup Wizard - Primera vez (NO para superadmin) */}
       {showSetupWizard && session?.user?.role !== 'super_admin' && (
