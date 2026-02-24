@@ -82,6 +82,12 @@ interface Contract {
   diasHastaVencimiento?: number;
 }
 
+interface BuildingUnit {
+  id: string;
+  numero: string;
+  buildingNombre: string;
+}
+
 function ContratosPageContent() {
   const router = useRouter();
   const { data: session, status } = useSession() || {};
@@ -98,6 +104,7 @@ function ContratosPageContent() {
     Array<{ id: string; label: string; value: string }>
   >([]);
   const [externalDocs, setExternalDocs] = useState<any[]>([]);
+  const [allUnits, setAllUnits] = useState<BuildingUnit[]>([]);
 
   // Delete confirmation dialog state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -131,8 +138,28 @@ function ContratosPageContent() {
       }
     };
 
+    const fetchUnits = async () => {
+      try {
+        const response = await fetch('/api/units');
+        if (response.ok) {
+          const json = await response.json();
+          const data = Array.isArray(json) ? json : (json.data || json.units || []);
+          setAllUnits(
+            data.map((u: any) => ({
+              id: u.id,
+              numero: u.numero,
+              buildingNombre: u.building?.nombre || '',
+            }))
+          );
+        }
+      } catch (error) {
+        logger.error('Error fetching units for filter:', error);
+      }
+    };
+
     if (status === 'authenticated') {
       fetchContracts();
+      fetchUnits();
       loadExternalContractDocs();
     }
   }, [status]);
@@ -188,20 +215,25 @@ function ContratosPageContent() {
     }
   };
 
-  // Extraer edificios y unidades únicos de los contratos
+  // Extraer edificios únicos de TODAS las unidades (no solo contratos)
   const edificiosUnicos = Array.from(
-    new Map(
-      contracts.map((c) => [c.unit.building.nombre, c.unit.building.nombre])
-    ).values()
+    new Set([
+      ...allUnits.map((u) => u.buildingNombre),
+      ...contracts.map((c) => c.unit.building.nombre),
+    ].filter(Boolean))
   ).sort();
 
+  // Unidades del edificio seleccionado — de TODAS las unidades, no solo las con contrato
   const unidadesPorEdificio = edificioFilter !== 'all'
     ? Array.from(
-        new Set(
-          contracts
+        new Set([
+          ...allUnits
+            .filter((u) => u.buildingNombre === edificioFilter)
+            .map((u) => u.numero),
+          ...contracts
             .filter((c) => c.unit.building.nombre === edificioFilter)
-            .map((c) => c.unit.numero)
-        )
+            .map((c) => c.unit.numero),
+        ])
       ).sort()
     : [];
 
@@ -442,11 +474,16 @@ function ContratosPageContent() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todas las unidades</SelectItem>
-                  {unidadesPorEdificio.map((numero) => (
-                    <SelectItem key={numero} value={numero}>
-                      Unidad {numero}
-                    </SelectItem>
-                  ))}
+                  {unidadesPorEdificio.map((numero) => {
+                    const hasContract = contracts.some(
+                      (c) => c.unit.building.nombre === edificioFilter && c.unit.numero === numero
+                    );
+                    return (
+                      <SelectItem key={numero} value={numero}>
+                        Unidad {numero}{hasContract ? '' : ' (sin contrato)'}
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
 
