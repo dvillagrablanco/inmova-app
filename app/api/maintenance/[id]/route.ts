@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import logger, { logError } from '@/lib/logger';
+import * as Sentry from '@sentry/nextjs';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -39,6 +40,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     return NextResponse.json(maintenanceRequest);
   } catch (error) {
     logger.error('Error fetching maintenance request:', error);
+    Sentry.captureException(error);
     return NextResponse.json({ error: 'Error al obtener solicitud de mantenimiento' }, { status: 500 });
   }
 }
@@ -72,6 +74,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     return NextResponse.json(maintenanceRequest);
   } catch (error) {
     logger.error('Error updating maintenance request:', error);
+    Sentry.captureException(error);
     return NextResponse.json({ error: 'Error al actualizar solicitud de mantenimiento' }, { status: 500 });
   }
 }
@@ -91,6 +94,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     return NextResponse.json({ message: 'Solicitud de mantenimiento eliminada' });
   } catch (error) {
     logger.error('Error deleting maintenance request:', error);
+    Sentry.captureException(error);
     return NextResponse.json({ error: 'Error al eliminar solicitud de mantenimiento' }, { status: 500 });
   }
 }

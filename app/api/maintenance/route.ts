@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import logger, { logError } from '@/lib/logger';
+import * as Sentry from '@sentry/nextjs';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -104,6 +105,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(maintenanceRequests);
   } catch (error) {
     logger.error('Error fetching maintenance requests:', error);
+    Sentry.captureException(error);
     return NextResponse.json({ error: 'Error al obtener solicitudes de mantenimiento' }, { status: 500 });
   }
 }
@@ -139,6 +141,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(maintenanceRequest, { status: 201 });
   } catch (error) {
     logger.error('Error creating maintenance request:', error);
+    Sentry.captureException(error);
     return NextResponse.json({ error: 'Error al crear solicitud de mantenimiento' }, { status: 500 });
   }
 }
