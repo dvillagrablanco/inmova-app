@@ -626,6 +626,19 @@ model Tenant {
   nivelRiesgo           RiskLevel         @default(medio)
   password              String?
   notas                 String?           @db.Text
+
+  // Datos bancarios y de pago
+  iban            String?  // Cuenta bancaria (IBAN)
+  bic             String?  // Código BIC/SWIFT
+  metodoPago      String?  // "recibo", "transferencia", "efectivo", "domiciliacion"
+  personaContacto String?  // Persona de contacto alternativa
+
+  // Dirección estructurada
+  ciudad       String?
+  codigoPostal String?
+  provincia    String?
+  pais         String?  @default("España")
+
   // Integraciones de Contabilidad
   contasimpleCustomerId String?
   isDemo                Boolean           @default(false) // Marca datos de demostración - excluir de estadísticas
@@ -1349,6 +1362,12 @@ model Contract {
   contractPdfPath      String?
   legalTemplateId      String?
   contasimpleInvoiceId String?
+
+  // Datos contables y cargos adicionales
+  codigoOperacion          String?  // Referencia contable: "7520004005"
+  suministrosProvisionales Float?   // Cargo mensual suministros provisionales
+  ibiRepercutido           Float?   // IBI mensualizado repercutido al inquilino
+
   isDemo               Boolean        @default(false) // Marca datos de demostración - excluir de estadísticas
   createdAt            DateTime       @default(now())
   updatedAt            DateTime       @updatedAt
@@ -1452,6 +1471,13 @@ model Payment {
   metodoPago       String?
   reciboPdfPath    String?
   nivelRiesgo      RiskLevel     @default(bajo)
+
+  // Desglose fiscal y trazabilidad
+  concepto      String?  @db.Text // "Renta Viv. C/Candelaria Mora 12-14, 3ºB"
+  referencia    String?  // Nº factura: "R_VP-5", "RP-920"
+  baseImponible Float?   // Base antes de IVA
+  iva           Float?   // Importe IVA
+  irpf          Float?   // Retención IRPF
 
   // Stripe integration fields
   stripePaymentIntentId String?              @unique
