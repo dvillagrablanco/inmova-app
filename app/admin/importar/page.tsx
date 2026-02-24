@@ -53,9 +53,12 @@ import {
   CheckCircle2,
   Info,
   ArrowRight,
+  Sparkles,
+  Bot,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import logger, { logError } from '@/lib/logger';
+import { DocumentOnboardingWizard } from '@/components/onboarding/DocumentOnboardingWizard';
 
 type ImportStep = 'select' | 'validate' | 'preview' | 'import' | 'results';
 
@@ -779,18 +782,60 @@ export default function ImportarPage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold gradient-text mb-2">Migración desde Otros Sistemas</h1>
           <p className="text-muted-foreground">
-            Importa tus datos desde Excel, CSV o cualquier sistema de gestión existente de
-            gestión
+            Importa datos desde CSV, Excel o deja que la IA analice tus documentos automáticamente
           </p>
         </div>
 
-        {renderStepIndicator()}
+        <Tabs defaultValue="ia-documental" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="ia-documental" className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4" />
+              IA Documental
+            </TabsTrigger>
+            <TabsTrigger value="csv" className="flex items-center gap-2">
+              <FileSpreadsheet className="h-4 w-4" />
+              CSV / Excel
+            </TabsTrigger>
+          </TabsList>
 
-        {currentStep === 'select' && renderSelectStep()}
-        {currentStep === 'validate' && renderValidateStep()}
-        {currentStep === 'preview' && renderPreviewStep()}
-        {currentStep === 'import' && renderImportStep()}
-        {currentStep === 'results' && renderResultsStep()}
+          {/* Tab IA Documental */}
+          <TabsContent value="ia-documental">
+            <Card className="mb-6 border-indigo-200 bg-gradient-to-r from-indigo-50 to-purple-50">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Bot className="h-5 w-5 text-indigo-600" />
+                  Importación Inteligente con IA
+                </CardTitle>
+                <CardDescription>
+                  Sube contratos, escrituras, facturas, DNIs o cualquier documento en PDF, Word o imagen.
+                  Nuestra IA extraerá automáticamente los datos de propiedades, inquilinos, contratos y más.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            <DocumentOnboardingWizard
+              onComplete={() => {
+                toast.success('Importación con IA completada');
+                router.push('/dashboard');
+              }}
+              onSkip={() => {
+                // Cambiar a tab CSV como alternativa manual
+                const csvTab = document.querySelector('[data-state="inactive"][value="csv"]') as HTMLElement;
+                if (csvTab) csvTab.click();
+              }}
+            />
+          </TabsContent>
+
+          {/* Tab CSV / Excel */}
+          <TabsContent value="csv">
+            {renderStepIndicator()}
+
+            {currentStep === 'select' && renderSelectStep()}
+            {currentStep === 'validate' && renderValidateStep()}
+            {currentStep === 'preview' && renderPreviewStep()}
+            {currentStep === 'import' && renderImportStep()}
+            {currentStep === 'results' && renderResultsStep()}
+          </TabsContent>
+        </Tabs>
       </div>
     </AuthenticatedLayout>
   );
