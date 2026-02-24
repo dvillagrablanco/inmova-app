@@ -68,6 +68,9 @@ interface Contract {
   estado: string;
   tipo: string;
   notas?: string;
+  codigoOperacion?: string | null;
+  suministrosProvisionales?: number | null;
+  ibiRepercutido?: number | null;
   unit?: {
     id: string;
     numero: string;
@@ -285,7 +288,10 @@ export default function ContractDetailPage() {
               </div>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => router.push(`/contratos/${contractId}/editar`)}>
+              <Button
+                variant="outline"
+                onClick={() => router.push(`/contratos/${contractId}/editar`)}
+              >
                 <Edit className="h-4 w-4 mr-2" />
                 Editar
               </Button>
@@ -304,12 +310,16 @@ export default function ContractDetailPage() {
                   <AlertDialogHeader>
                     <AlertDialogTitle>¿Eliminar contrato?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      Esta acción no se puede deshacer. Se eliminarán todos los datos asociados al contrato.
+                      Esta acción no se puede deshacer. Se eliminarán todos los datos asociados al
+                      contrato.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
+                    <AlertDialogAction
+                      onClick={handleDelete}
+                      className="bg-red-600 hover:bg-red-700"
+                    >
                       Eliminar
                     </AlertDialogAction>
                   </AlertDialogFooter>
@@ -366,6 +376,40 @@ export default function ContractDetailPage() {
                       <div>
                         <p className="text-sm text-muted-foreground">Notas</p>
                         <p className="text-sm mt-1">{contract.notas}</p>
+                      </div>
+                    </>
+                  )}
+                  {(contract.codigoOperacion ||
+                    contract.suministrosProvisionales != null ||
+                    contract.ibiRepercutido != null) && (
+                    <>
+                      <Separator />
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium">Datos Contables</p>
+                        {contract.codigoOperacion && (
+                          <div>
+                            <p className="text-sm text-muted-foreground">Código operación</p>
+                            <p className="font-medium">{contract.codigoOperacion}</p>
+                          </div>
+                        )}
+                        {contract.suministrosProvisionales != null && (
+                          <div>
+                            <p className="text-sm text-muted-foreground">
+                              Suministros provisionales
+                            </p>
+                            <p className="font-medium">
+                              {formatCurrency(contract.suministrosProvisionales)}/mes
+                            </p>
+                          </div>
+                        )}
+                        {contract.ibiRepercutido != null && (
+                          <div>
+                            <p className="text-sm text-muted-foreground">IBI repercutido</p>
+                            <p className="font-medium">
+                              {formatCurrency(contract.ibiRepercutido)}/mes
+                            </p>
+                          </div>
+                        )}
                       </div>
                     </>
                   )}
@@ -429,7 +473,9 @@ export default function ContractDetailPage() {
                       <div>
                         <p className="text-sm text-muted-foreground">Nombre</p>
                         <p className="font-medium">
-                          {contract.tenant.nombreCompleto || `${contract.tenant.nombre || ''} ${contract.tenant.apellido || ''}`.trim() || 'Sin nombre'}
+                          {contract.tenant.nombreCompleto ||
+                            `${contract.tenant.nombre || ''} ${contract.tenant.apellido || ''}`.trim() ||
+                            'Sin nombre'}
                         </p>
                       </div>
                       <div>
@@ -493,9 +539,7 @@ export default function ContractDetailPage() {
                   <Euro className="h-5 w-5" />
                   Historial de Pagos
                 </CardTitle>
-                <CardDescription>
-                  Pagos asociados a este contrato
-                </CardDescription>
+                <CardDescription>Pagos asociados a este contrato</CardDescription>
               </CardHeader>
               <CardContent>
                 {contract.payments && contract.payments.length > 0 ? (
@@ -542,9 +586,7 @@ export default function ContractDetailPage() {
                   <FileText className="h-5 w-5" />
                   Documentos del Contrato
                 </CardTitle>
-                <CardDescription>
-                  Documentos adjuntos y firma digital
-                </CardDescription>
+                <CardDescription>Documentos adjuntos y firma digital</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="text-center py-8 text-muted-foreground">

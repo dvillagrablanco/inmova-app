@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -48,6 +49,11 @@ export default function NuevoPagoPage() {
     fechaPago: '',
     estado: 'pendiente',
     metodoPago: 'transferencia',
+    concepto: '',
+    referencia: '',
+    baseImponible: '',
+    iva: '',
+    irpf: '',
   });
 
   useEffect(() => {
@@ -84,6 +90,11 @@ export default function NuevoPagoPage() {
           fechaPago: formData.fechaPago ? new Date(formData.fechaPago).toISOString() : null,
           estado: formData.estado,
           metodoPago: formData.metodoPago,
+          concepto: formData.concepto || undefined,
+          referencia: formData.referencia || undefined,
+          baseImponible: formData.baseImponible ? parseFloat(formData.baseImponible) : undefined,
+          iva: formData.iva ? parseFloat(formData.iva) : undefined,
+          irpf: formData.irpf ? parseFloat(formData.irpf) : undefined,
         }),
       });
 
@@ -102,7 +113,7 @@ export default function NuevoPagoPage() {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -279,6 +290,72 @@ export default function NuevoPagoPage() {
                       <SelectItem value="domiciliacion">Domiciliación</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+
+                {/* Desglose Fiscal (opcional) */}
+                <div className="space-y-4 pt-4 border-t md:col-span-2">
+                  <h4 className="text-sm font-medium">Desglose Fiscal (opcional)</h4>
+                  <div className="space-y-2">
+                    <Label htmlFor="concepto">Concepto</Label>
+                    <Textarea
+                      id="concepto"
+                      name="concepto"
+                      value={formData.concepto}
+                      onChange={handleChange}
+                      placeholder="Descripción del concepto"
+                      rows={2}
+                      className="resize-none"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="referencia">Referencia / Nº factura</Label>
+                    <Input
+                      id="referencia"
+                      name="referencia"
+                      type="text"
+                      value={formData.referencia}
+                      onChange={handleChange}
+                      placeholder="Opcional"
+                    />
+                  </div>
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="baseImponible">Base imponible (€)</Label>
+                      <Input
+                        id="baseImponible"
+                        name="baseImponible"
+                        type="number"
+                        step="0.01"
+                        value={formData.baseImponible}
+                        onChange={handleChange}
+                        placeholder="Opcional"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="iva">IVA (€)</Label>
+                      <Input
+                        id="iva"
+                        name="iva"
+                        type="number"
+                        step="0.01"
+                        value={formData.iva}
+                        onChange={handleChange}
+                        placeholder="Opcional"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="irpf">IRPF (€)</Label>
+                      <Input
+                        id="irpf"
+                        name="irpf"
+                        type="number"
+                        step="0.01"
+                        value={formData.irpf}
+                        onChange={handleChange}
+                        placeholder="Opcional"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
 

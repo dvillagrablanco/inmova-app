@@ -7,7 +7,16 @@ import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Euro, Calendar, User, Building2, FileText, CreditCard } from 'lucide-react';
+import {
+  ArrowLeft,
+  Euro,
+  Calendar,
+  User,
+  Building2,
+  FileText,
+  CreditCard,
+  Receipt,
+} from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -21,6 +30,11 @@ interface Payment {
   fechaPago?: string;
   estado: string;
   metodoPago?: string;
+  concepto?: string | null;
+  referencia?: string | null;
+  baseImponible?: number | null;
+  iva?: number | null;
+  irpf?: number | null;
   contract?: {
     id: string;
     rentaMensual: number;
@@ -99,7 +113,9 @@ export default function PagoDetallePage() {
 
         {!payment ? (
           <Card>
-            <CardContent className="pt-6 text-center text-muted-foreground">Pago no encontrado</CardContent>
+            <CardContent className="pt-6 text-center text-muted-foreground">
+              Pago no encontrado
+            </CardContent>
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -111,7 +127,9 @@ export default function PagoDetallePage() {
               </CardHeader>
               <CardContent>
                 <p className="text-4xl font-bold text-green-600">
-                  {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(payment.monto)}
+                  {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(
+                    payment.monto
+                  )}
                 </p>
                 {payment.metodoPago && (
                   <p className="text-sm text-muted-foreground mt-2 flex items-center gap-1">
@@ -130,12 +148,18 @@ export default function PagoDetallePage() {
               <CardContent className="space-y-3">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Vencimiento</span>
-                  <span>{payment.fechaVencimiento ? format(new Date(payment.fechaVencimiento), 'dd MMM yyyy', { locale: es }) : '-'}</span>
+                  <span>
+                    {payment.fechaVencimiento
+                      ? format(new Date(payment.fechaVencimiento), 'dd MMM yyyy', { locale: es })
+                      : '-'}
+                  </span>
                 </div>
                 {payment.fechaPago && (
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Fecha pago</span>
-                    <span className="text-green-600 font-medium">{format(new Date(payment.fechaPago), 'dd MMM yyyy', { locale: es })}</span>
+                    <span className="text-green-600 font-medium">
+                      {format(new Date(payment.fechaPago), 'dd MMM yyyy', { locale: es })}
+                    </span>
                   </div>
                 )}
                 <div className="flex justify-between">
@@ -144,6 +168,63 @@ export default function PagoDetallePage() {
                 </div>
               </CardContent>
             </Card>
+
+            {(payment.baseImponible != null || payment.iva != null) && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Receipt className="h-5 w-5" /> Desglose Fiscal
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {payment.concepto && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Concepto</span>
+                      <span className="text-sm">{payment.concepto}</span>
+                    </div>
+                  )}
+                  {payment.referencia && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Referencia / Nº factura</span>
+                      <span className="font-medium">{payment.referencia}</span>
+                    </div>
+                  )}
+                  {payment.baseImponible != null && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Base imponible</span>
+                      <span className="font-medium">
+                        {new Intl.NumberFormat('es-ES', {
+                          style: 'currency',
+                          currency: 'EUR',
+                        }).format(payment.baseImponible)}
+                      </span>
+                    </div>
+                  )}
+                  {payment.iva != null && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">IVA</span>
+                      <span className="font-medium">
+                        {new Intl.NumberFormat('es-ES', {
+                          style: 'currency',
+                          currency: 'EUR',
+                        }).format(payment.iva)}
+                      </span>
+                    </div>
+                  )}
+                  {payment.irpf != null && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">IRPF</span>
+                      <span className="font-medium">
+                        {new Intl.NumberFormat('es-ES', {
+                          style: 'currency',
+                          currency: 'EUR',
+                        }).format(payment.irpf)}
+                      </span>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
             {payment.contract?.tenant && (
               <Card>
@@ -154,8 +235,14 @@ export default function PagoDetallePage() {
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <p className="font-medium">{payment.contract.tenant.nombreCompleto}</p>
-                  {payment.contract.tenant.email && <p className="text-sm text-muted-foreground">{payment.contract.tenant.email}</p>}
-                  {payment.contract.tenant.telefono && <p className="text-sm text-muted-foreground">{payment.contract.tenant.telefono}</p>}
+                  {payment.contract.tenant.email && (
+                    <p className="text-sm text-muted-foreground">{payment.contract.tenant.email}</p>
+                  )}
+                  {payment.contract.tenant.telefono && (
+                    <p className="text-sm text-muted-foreground">
+                      {payment.contract.tenant.telefono}
+                    </p>
+                  )}
                   <Link href={`/contratos/${payment.contract.id}`}>
                     <Button variant="outline" size="sm" className="mt-2">
                       <FileText className="h-4 w-4 mr-1" /> Ver Contrato
@@ -183,7 +270,9 @@ export default function PagoDetallePage() {
                         <span className="text-muted-foreground">Edificio</span>
                         <span>{payment.contract.unit.building.nombre}</span>
                       </div>
-                      <p className="text-sm text-muted-foreground">{payment.contract.unit.building.direccion}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {payment.contract.unit.building.direccion}
+                      </p>
                     </>
                   )}
                 </CardContent>
