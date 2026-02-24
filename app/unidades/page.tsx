@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
@@ -71,14 +71,19 @@ interface Unit {
 
 export default function UnidadesPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session, status } = useSession() || {};
   const { canCreate } = usePermissions();
   const [units, setUnits] = useState<Unit[]>([]);
   const [filteredUnits, setFilteredUnits] = useState<Unit[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [estadoFilter, setEstadoFilter] = useState<string>('all');
-  const [tipoFilter, setTipoFilter] = useState<string>('all');
+  const [estadoFilter, setEstadoFilter] = useState<string>(
+    searchParams?.get('estado') || 'all'
+  );
+  const [tipoFilter, setTipoFilter] = useState<string>(
+    searchParams?.get('tipo') || 'all'
+  );
   const [activeFilters, setActiveFilters] = useState<
     Array<{ id: string; label: string; value: string }>
   >([]);
