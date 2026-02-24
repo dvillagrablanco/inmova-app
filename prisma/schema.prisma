@@ -1897,6 +1897,9 @@ model Company {
   zucchettiSyncErrors    Int       @default(0) // Contador de errores consecutivos
   zucchettiWebhookSecret String? // Secret para validar webhooks de Zucchetti
 
+  // Configuración de alertas de contratos
+  contractExpirationAlertDays Int @default(30) // Días antes de expiración para alertar
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

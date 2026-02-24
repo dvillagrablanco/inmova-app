@@ -59,17 +59,27 @@ export async function PATCH(req: NextRequest) {
     const companyId = user.companyId;
     const body = await req.json();
 
+    const updateData: any = {
+      nombre: body.nombre,
+      cif: body.cif,
+      direccion: body.direccion,
+      telefono: body.telefono,
+      email: body.email,
+      ciudad: body.ciudad,
+      codigoPostal: body.codigoPostal,
+    };
+
+    // Configuración de alertas de contratos (días antes de expiración)
+    if (body.contractExpirationAlertDays !== undefined) {
+      const days = parseInt(body.contractExpirationAlertDays);
+      if (!isNaN(days) && days >= 7 && days <= 365) {
+        updateData.contractExpirationAlertDays = days;
+      }
+    }
+
     const company = await prisma.company.update({
       where: { id: companyId },
-      data: {
-        nombre: body.nombre,
-        cif: body.cif,
-        direccion: body.direccion,
-        telefono: body.telefono,
-        email: body.email,
-        ciudad: body.ciudad,
-        codigoPostal: body.codigoPostal,
-      },
+      data: updateData,
     });
 
     return NextResponse.json(company);
