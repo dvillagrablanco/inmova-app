@@ -230,6 +230,7 @@ async function main() {
           fechaInicio,
           fechaFin,
           rentaMensual: c.rentaMensual,
+          deposito: c.rentaMensual * 2,
           depositoGarantia: c.rentaMensual * 2,
           estado: 'activo',
           tipo: 'alquiler',
