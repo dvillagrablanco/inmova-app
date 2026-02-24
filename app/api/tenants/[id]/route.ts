@@ -15,7 +15,6 @@ async function getPrisma() {
   return getPrismaClient();
 }
 
-
 // Schema de validación para actualizar inquilino
 const tenantUpdateSchema = z.object({
   nombreCompleto: z
@@ -32,7 +31,9 @@ const tenantUpdateSchema = z.object({
     .optional(),
   nacionalidad: z.string().optional(),
   estadoCivil: z.enum(['soltero', 'casado', 'divorciado', 'viudo']).optional(),
-  situacionLaboral: z.enum(['empleado', 'autonomo', 'estudiante', 'jubilado', 'desempleado']).optional(),
+  situacionLaboral: z
+    .enum(['empleado', 'autonomo', 'estudiante', 'jubilado', 'desempleado'])
+    .optional(),
   empresa: z.string().optional(),
   puesto: z.string().optional(),
   ingresosMensuales: z.number().nonnegative().optional(),
@@ -45,6 +46,14 @@ const tenantUpdateSchema = z.object({
     }),
   nivelRiesgo: z.enum(['bajo', 'medio', 'alto', 'critico']).optional(),
   notas: z.string().optional(),
+  iban: z.string().max(34).optional(),
+  bic: z.string().max(11).optional(),
+  metodoPago: z.string().max(50).optional(),
+  personaContacto: z.string().max(200).optional(),
+  ciudad: z.string().max(100).optional(),
+  codigoPostal: z.string().max(20).optional(),
+  provincia: z.string().max(100).optional(),
+  pais: z.string().max(100).optional(),
 });
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
@@ -112,9 +121,28 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     }
 
     const {
-      nombreCompleto, dni, email, telefono, fechaNacimiento,
-      nacionalidad, estadoCivil, situacionLaboral, empresa, puesto, ingresosMensuales,
-      scoring, nivelRiesgo, notas,
+      nombreCompleto,
+      dni,
+      email,
+      telefono,
+      fechaNacimiento,
+      nacionalidad,
+      estadoCivil,
+      situacionLaboral,
+      empresa,
+      puesto,
+      ingresosMensuales,
+      scoring,
+      nivelRiesgo,
+      notas,
+      iban,
+      bic,
+      metodoPago,
+      personaContacto,
+      ciudad,
+      codigoPostal,
+      provincia,
+      pais,
     } = validationResult.data;
 
     const tenant = await prisma.tenant.update({
@@ -134,6 +162,14 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         scoring,
         nivelRiesgo,
         notas,
+        iban,
+        bic,
+        metodoPago,
+        personaContacto,
+        ciudad,
+        codigoPostal,
+        provincia,
+        pais,
       },
     });
 
