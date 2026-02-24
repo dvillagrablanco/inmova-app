@@ -226,7 +226,7 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/comercial/naves': 'alquiler_comercial',
   '/comercial/contratos': 'alquiler_comercial',
   '/comercial/leads': 'alquiler_comercial',
-  '/garajes-trasteros': 'alquiler_comercial',
+  '/comercial/garajes-trasteros': 'alquiler_comercial',
   // Espacios Flexibles - Coworking, Salas, Workspace
   '/comercial/coworking': 'alquiler_comercial',
   '/espacios-coworking': 'alquiler_comercial',

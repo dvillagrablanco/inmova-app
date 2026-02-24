@@ -17,6 +17,7 @@ import { z } from 'zod';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const pricingRequestSchema = z.object({
   inmueble: z.object({
