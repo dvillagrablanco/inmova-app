@@ -196,6 +196,7 @@ export function NavigationTutorial() {
   };
 
   const handleSkip = () => {
+    localStorage.setItem(DONT_SHOW_KEY, 'true');
     setIsOpen(false);
     setCurrentStep(0);
   };

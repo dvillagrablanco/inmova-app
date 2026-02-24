@@ -127,6 +127,19 @@ export function AuthenticatedLayout({
         return;
       }
 
+      // Verificar localStorage primero (más rápido, evita flash)
+      const hasSkippedWizard = localStorage.getItem('skipped-setup-wizard');
+      const hasDismissedChecklist = localStorage.getItem('dismissed-onboarding-checklist');
+      const hasCompletedSetup = localStorage.getItem('completed-setup-wizard');
+
+      // Si ya se completó o descartó localmente, no mostrar
+      if (hasCompletedSetup || hasSkippedWizard) {
+        setShowSetupWizard(false);
+      }
+      if (hasDismissedChecklist || hasCompletedSetup) {
+        setShowChecklist(false);
+      }
+
       try {
         const response = await fetch('/api/user/onboarding-status');
         if (!response.ok) return;
@@ -134,17 +147,24 @@ export function AuthenticatedLayout({
         const data = await response.json();
         setIsNewUser(data.isNewUser);
 
-        // Si es usuario nuevo Y nunca completó onboarding
+        // Si ya completó en BD, no mostrar nada
+        if (data.hasCompletedOnboarding) {
+          setShowSetupWizard(false);
+          setShowChecklist(false);
+          return;
+        }
+
+        // Si es usuario nuevo Y nunca completó onboarding Y no descartó
         if (!data.hasCompletedOnboarding && data.isNewUser) {
-          // Mostrar wizard si nunca lo saltó
-          const hasSkippedWizard = localStorage.getItem('skipped-setup-wizard');
-          if (!hasSkippedWizard) {
+          if (!hasSkippedWizard && !hasCompletedSetup) {
             setShowSetupWizard(true);
           }
         }
 
-        // Checklist visible hasta completar todo
-        setShowChecklist(!data.hasCompletedOnboarding);
+        // Checklist visible solo si no se ha descartado ni completado
+        if (!hasDismissedChecklist && !hasCompletedSetup) {
+          setShowChecklist(!data.hasCompletedOnboarding);
+        }
       } catch (error) {
         console.error('Error checking onboarding:', error);
       }
@@ -153,20 +173,33 @@ export function AuthenticatedLayout({
     checkOnboarding();
   }, [session]);
 
-  // Handlers para wizard
+  // Handlers para wizard — persistir en localStorage Y en BD
+  const markOnboardingComplete = async () => {
+    try {
+      await fetch('/api/user/onboarding-status', { method: 'POST' });
+    } catch (error) {
+      console.error('Error marking onboarding complete:', error);
+    }
+  };
+
   const handleCompleteSetup = () => {
     setShowSetupWizard(false);
-    setShowChecklist(true);
+    setShowChecklist(false);
+    localStorage.setItem('completed-setup-wizard', 'true');
+    markOnboardingComplete();
   };
 
   const handleSkipSetup = () => {
     setShowSetupWizard(false);
-    setShowChecklist(true);
+    setShowChecklist(false);
     localStorage.setItem('skipped-setup-wizard', 'true');
+    markOnboardingComplete();
   };
 
   const handleDismissChecklist = () => {
     setShowChecklist(false);
+    localStorage.setItem('dismissed-onboarding-checklist', 'true');
+    markOnboardingComplete();
   };
 
   return (
