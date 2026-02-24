@@ -113,37 +113,33 @@ async function importClients(filePath: string, companyId: string, companyName: s
       },
     });
 
-    const tenantData = {
-      nombreCompleto,
-      dni: nif,
-      email: email || existing?.email || null,
-      telefono: telefono || existing?.telefono || null,
-      direccion: direccion || existing?.direccion || null,
-      ciudad: poblacion || existing?.ciudad || null,
-      provincia: provincia || existing?.provincia || null,
-      codigoPostal: codigoPostal || existing?.codigoPostal || null,
-      pais: pais,
-      activo,
-      notas: [
-        medioPago ? `Medio de pago: ${medioPago}` : '',
-        iban ? `IBAN: ${iban}` : '',
-        bic ? `BIC: ${bic}` : '',
-        personaContacto ? `Contacto: ${personaContacto}` : '',
-      ].filter(Boolean).join(' | ') || null,
-    };
+    // Construir dirección completa para el campo direccionActual
+    const direccionCompleta = [
+      direccion,
+      codigoPostal ? codigoPostal : '',
+      poblacion ? poblacion : '',
+      provincia && provincia !== poblacion ? `(${provincia})` : '',
+      pais && pais !== 'ESPAÑA' ? pais : '',
+    ].filter(Boolean).join(', ');
+
+    // Construir notas con datos bancarios y de pago
+    const notasStr = [
+      medioPago ? `Medio de pago: ${medioPago}` : '',
+      iban ? `IBAN: ${iban}` : '',
+      bic ? `BIC: ${bic}` : '',
+      personaContacto ? `Contacto: ${personaContacto}` : '',
+    ].filter(Boolean).join(' | ') || null;
 
     if (existing) {
-      // Actualizar solo campos que estén vacíos o mejorar datos
+      // Actualizar solo campos vacíos
       const updateData: any = {};
-      if (!existing.dni && nif) updateData.dni = nif;
       if (!existing.email && email) updateData.email = email;
       if (!existing.telefono && telefono) updateData.telefono = telefono;
-      if (!existing.direccion && direccion) updateData.direccion = direccion;
-      if (!existing.ciudad && poblacion) updateData.ciudad = poblacion;
-      if (!existing.provincia && provincia) updateData.provincia = provincia;
-      if (!existing.codigoPostal && codigoPostal) updateData.codigoPostal = codigoPostal;
-      if (iban && (!existing.notas || !existing.notas.includes('IBAN'))) {
-        updateData.notas = tenantData.notas;
+      if (!existing.direccionActual && direccionCompleta) updateData.direccionActual = direccionCompleta;
+      if (notasStr && (!existing.notas || !existing.notas.includes('IBAN'))) {
+        updateData.notas = existing.notas 
+          ? `${existing.notas} | ${notasStr}` 
+          : notasStr;
       }
 
       if (Object.keys(updateData).length > 0) {
@@ -157,17 +153,26 @@ async function importClients(filePath: string, companyId: string, companyName: s
       }
     } else {
       // Crear nuevo inquilino
+      // Email y DNI son unique+required - generar email placeholder si no hay
+      const emailToUse = email || `${nif.toLowerCase().replace(/[^a-z0-9]/g, '')}@pendiente.inmova.app`;
+      
       try {
         await prisma.tenant.create({
           data: {
-            ...tenantData,
             companyId,
+            nombreCompleto,
+            dni: nif,
+            email: emailToUse,
+            telefono: telefono || 'Pendiente',
+            fechaNacimiento: new Date(1990, 0, 1), // Placeholder
+            direccionActual: direccionCompleta || null,
+            notas: notasStr,
           },
         });
         created++;
       } catch (error: any) {
         if (error.code === 'P2002') {
-          skipped++; // Duplicate
+          skipped++; // Duplicate DNI or email
         } else {
           console.error(`  ❌ Error creando ${nombreCompleto}: ${error.message}`);
           skipped++;
@@ -260,7 +265,7 @@ async function processInvoice(factura: any, companyId: string): Promise<string> 
   
   if (!tenant) return 'skipped';
 
-  // Buscar contrato activo del inquilino
+  // Buscar contrato activo del inquilino (obligatorio para Payment)
   const contract = await prisma.contract.findFirst({
     where: {
       tenantId: tenant.id,
@@ -268,6 +273,9 @@ async function processInvoice(factura: any, companyId: string): Promise<string> 
     },
     select: { id: true, unitId: true },
   });
+
+  // Sin contrato activo no podemos crear Payment (contractId es obligatorio)
+  if (!contract) return 'skipped';
 
   // Parsear fecha
   let fechaPago: Date;
@@ -278,11 +286,14 @@ async function processInvoice(factura: any, companyId: string): Promise<string> 
     fechaPago = new Date(2026, 1, 1); // Feb 2026 default
   }
 
-  // Verificar si ya existe el pago con este nº de factura
+  // Periodo: "2026-02" format
+  const periodo = `${fechaPago.getFullYear()}-${String(fechaPago.getMonth() + 1).padStart(2, '0')}`;
+
+  // Verificar si ya existe pago para este contrato y periodo
   const existingPayment = await prisma.payment.findFirst({
     where: {
-      companyId,
-      referencia: factura.numero,
+      contractId: contract.id,
+      periodo,
     },
   });
 
@@ -292,23 +303,13 @@ async function processInvoice(factura: any, companyId: string): Promise<string> 
   try {
     await prisma.payment.create({
       data: {
-        companyId,
-        tenantId: tenant.id,
-        contractId: contract?.id || null,
-        unitId: contract?.unitId || null,
+        contractId: contract.id,
         monto: factura.total,
-        montoBase: factura.baseImporte,
-        iva: factura.iva,
-        concepto: factura.concepto || `Factura ${factura.numero}`,
-        referencia: factura.numero,
+        periodo,
         estado: 'pagado',
         fechaVencimiento: fechaPago,
         fechaPago: fechaPago,
         metodoPago: 'transferencia',
-        notas: [
-          `Operación: ${factura.operacion}`,
-          factura.lineas.length > 1 ? `${factura.lineas.length} líneas de detalle` : '',
-        ].filter(Boolean).join(' | '),
       },
     });
     return 'created';
