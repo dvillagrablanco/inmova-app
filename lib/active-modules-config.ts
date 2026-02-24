@@ -1,12 +1,12 @@
 /**
  * CONFIGURACIÓN DE MÓDULOS ACTIVOS
- * 
+ *
  * Este archivo define qué módulos están completamente funcionales vs en desarrollo.
  * Se usa para:
  * 1. Filtrar rutas en el sidebar
  * 2. Mostrar badges de "Próximamente" en lugar de ocultar
  * 3. Controlar acceso a funcionalidades
- * 
+ *
  * STATUS:
  * - 'active': Módulo completamente funcional
  * - 'beta': Funcional pero con limitaciones
@@ -43,7 +43,7 @@ export const MODULES_CONFIG: Record<string, ModuleConfig> = {
   notificaciones: { status: 'active', name: 'Notificaciones' },
   matching: { status: 'active', name: 'Matching Inteligente' },
   seguros: { status: 'active', name: 'Seguros' },
-  
+
   // ============================================
   // ADMINISTRACIÓN - ACTIVOS
   // ============================================
@@ -53,7 +53,7 @@ export const MODULES_CONFIG: Record<string, ModuleConfig> = {
   gestion_clientes: { status: 'active', name: 'Gestión Clientes' },
   admin_planes: { status: 'active', name: 'Planes' },
   admin_cupones: { status: 'active', name: 'Cupones' },
-  
+
   // ============================================
   // MÓDULOS BETA - FUNCIONALES CON LIMITACIONES
   // ============================================
@@ -71,7 +71,7 @@ export const MODULES_CONFIG: Record<string, ModuleConfig> = {
   visitas: { status: 'active', name: 'Visitas' },
   ordenes_trabajo: { status: 'active', name: 'Órdenes de Trabajo' },
   ocr: { status: 'active', name: 'OCR Documental' },
-  
+
   // ============================================
   // STR - SHORT TERM RENTALS - ACTIVOS
   // ============================================
@@ -79,7 +79,7 @@ export const MODULES_CONFIG: Record<string, ModuleConfig> = {
   str_bookings: { status: 'active', name: 'Reservas STR' },
   str_channels: { status: 'beta', name: 'Canales STR' },
   str_housekeeping: { status: 'beta', name: 'Housekeeping' },
-  
+
   // ============================================
   // COLIVING - ACTIVO
   // ============================================
@@ -90,31 +90,47 @@ export const MODULES_CONFIG: Record<string, ModuleConfig> = {
   coliving_eventos: { status: 'active', name: 'Eventos' },
   coliving_reservas: { status: 'active', name: 'Reservas Coliving' },
   coliving_paquetes: { status: 'active', name: 'Paquetería' },
-  
+
   // ============================================
   // MÓDULOS COMING SOON - NO FUNCIONALES
   // ============================================
-  
+
   // Partners Portal
-  partners_integraciones: { status: 'coming_soon', name: 'Integraciones Partners', expectedDate: 'Q2 2026' },
+  partners_integraciones: {
+    status: 'coming_soon',
+    name: 'Integraciones Partners',
+    expectedDate: 'Q2 2026',
+  },
   partners_soporte: { status: 'coming_soon', name: 'Soporte Partners', expectedDate: 'Q2 2026' },
-  partners_marketing: { status: 'coming_soon', name: 'Marketing Partners', expectedDate: 'Q2 2026' },
-  partners_analiticas: { status: 'coming_soon', name: 'Analytics Partners', expectedDate: 'Q2 2026' },
-  partners_capacitacion: { status: 'coming_soon', name: 'Capacitación Partners', expectedDate: 'Q2 2026' },
+  partners_marketing: {
+    status: 'coming_soon',
+    name: 'Marketing Partners',
+    expectedDate: 'Q2 2026',
+  },
+  partners_analiticas: {
+    status: 'coming_soon',
+    name: 'Analytics Partners',
+    expectedDate: 'Q2 2026',
+  },
+  partners_capacitacion: {
+    status: 'coming_soon',
+    name: 'Capacitación Partners',
+    expectedDate: 'Q2 2026',
+  },
   partners_recursos: { status: 'coming_soon', name: 'Recursos Partners', expectedDate: 'Q2 2026' },
-  
+
   // Verticales Especializadas - IMPLEMENTADAS
   student_housing: { status: 'active', name: 'Student Housing' },
   vivienda_social: { status: 'active', name: 'Vivienda Social' },
   real_estate_developer: { status: 'active', name: 'Real Estate Developer' },
   viajes_corporativos: { status: 'active', name: 'Viajes Corporativos' },
   workspace: { status: 'active', name: 'Workspace/Coworking' },
-  
+
   // Verticales Especializadas - IMPLEMENTADAS
   warehouse: { status: 'active', name: 'Warehouse' },
   hospitality: { status: 'active', name: 'Hospitality' },
   retail: { status: 'active', name: 'Retail' },
-  
+
   // Módulos Avanzados - YA DESARROLLADOS
   tours_virtuales: { status: 'beta', name: 'Tours Virtuales' },
   economia_circular: { status: 'beta', name: 'Economía Circular' },
@@ -122,7 +138,7 @@ export const MODULES_CONFIG: Record<string, ModuleConfig> = {
   blockchain: { status: 'beta', name: 'Blockchain' },
   iot: { status: 'beta', name: 'IoT' },
   esg: { status: 'beta', name: 'ESG' },
-  
+
   // Herramientas - YA DESARROLLADAS
   licitaciones: { status: 'active', name: 'Licitaciones' },
   salas_reuniones: { status: 'active', name: 'Salas de Reuniones' },
@@ -131,7 +147,7 @@ export const MODULES_CONFIG: Record<string, ModuleConfig> = {
   verificacion_inquilinos: { status: 'active', name: 'Verificación Inquilinos' },
   informes: { status: 'active', name: 'Informes' },
   proyectos_renovacion: { status: 'active', name: 'Proyectos Renovación' },
-  
+
   // Herramientas - IMPLEMENTADAS
   subastas: { status: 'active', name: 'Subastas' },
   servicios_concierge: { status: 'active', name: 'Servicios Concierge' },
@@ -140,7 +156,7 @@ export const MODULES_CONFIG: Record<string, ModuleConfig> = {
   warranty_management: { status: 'active', name: 'Gestión Garantías' },
   microtransacciones: { status: 'active', name: 'Microtransacciones' },
   marketplace_proveedores: { status: 'beta', name: 'Marketplace Proveedores' },
-  
+
   // ============================================
   // MÓDULOS ADICIONALES - Cobertura completa sidebar
   // ============================================
@@ -167,11 +183,9 @@ export const MODULES_CONFIG: Record<string, ModuleConfig> = {
   facturacion: { status: 'active', name: 'Facturación' },
 
   // Analytics
-  informes: { status: 'active', name: 'Informes' },
   ai_assistant: { status: 'active', name: 'Asistente IA' },
 
   // Operaciones
-  servicios_limpieza: { status: 'active', name: 'Servicios de Limpieza' },
   servicios: { status: 'active', name: 'Marketplace de Servicios' },
 
   // Documentos
@@ -188,7 +202,6 @@ export const MODULES_CONFIG: Record<string, ModuleConfig> = {
   automatizacion: { status: 'active', name: 'Automatización' },
   workflows: { status: 'active', name: 'Workflows' },
   sincronizacion: { status: 'active', name: 'Sincronización' },
-  sincronizacion_avanzada: { status: 'active', name: 'Sincronización Avanzada' },
   recordatorios: { status: 'active', name: 'Recordatorios' },
 
   // Innovación
@@ -203,7 +216,6 @@ export const MODULES_CONFIG: Record<string, ModuleConfig> = {
 
   // Herramientas
   herramientas_inversion: { status: 'active', name: 'Herramientas de Inversión' },
-  matching: { status: 'active', name: 'Matching Inteligente' },
   gestion_inmobiliaria: { status: 'active', name: 'Gestión de Propiedades' },
   redes_sociales: { status: 'active', name: 'Redes Sociales' },
 
@@ -248,14 +260,14 @@ export const BETA_ROUTES: string[] = [
  * Verifica si una ruta debe ocultarse
  */
 export function shouldHideRoute(path: string): boolean {
-  return HIDDEN_ROUTES.some(route => path === route || path.startsWith(route + '/'));
+  return HIDDEN_ROUTES.some((route) => path === route || path.startsWith(route + '/'));
 }
 
 /**
  * Verifica si una ruta está en beta
  */
 export function isRouteBeta(path: string): boolean {
-  return BETA_ROUTES.some(route => path === route || path.startsWith(route + '/'));
+  return BETA_ROUTES.some((route) => path === route || path.startsWith(route + '/'));
 }
 
 /**
