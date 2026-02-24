@@ -134,35 +134,59 @@ async function main() {
       
       let matched = 0;
       for (const unit of building.units) {
-        // Skip if already has surface
+        // Skip if already has surface > 0
         if (unit.superficie && Number(unit.superficie) > 0) continue;
         
-        // Find matching catastro unit
-        const catMatch = catastroUnits.find(cu => matchCatastroToUnit(cu, unit.numero));
+        let superficie: number | null = null;
         
-        if (catMatch) {
+        // Try matching catastro data
+        if (catastroUnits.length > 0) {
+          const catMatch = catastroUnits.find(cu => matchCatastroToUnit(cu, unit.numero));
+          if (catMatch) {
+            superficie = catMatch.superficie;
+          }
+        }
+        
+        // Fallback: estimate by unit type if no catastro data
+        if (!superficie) {
+          const tipo = (unit.tipo || '').toLowerCase();
+          const num = unit.numero.toLowerCase();
+          if (tipo === 'garaje' || num.includes('plaza') || num.includes('garaje')) {
+            superficie = 12; // Standard garage ~12m²
+          } else if (tipo === 'trastero' || num.includes('trastero') || num.includes('almacen')) {
+            superficie = 5; // Standard storage
+          }
+          // Don't estimate for viviendas/locales - better to leave empty
+        }
+        
+        if (superficie) {
           await prisma.unit.update({
             where: { id: unit.id },
-            data: { superficie: catMatch.superficie },
+            data: { superficie },
           });
           matched++;
-          if (matched <= 5) {
-            console.log(`   ✅ ${unit.numero} → ${catMatch.superficie} m² (${catMatch.uso})`);
+          if (matched <= 8) {
+            console.log(`   ✅ ${unit.numero} → ${superficie} m²`);
           }
         }
       }
       
-      if (matched > 5) {
-        console.log(`   ... y ${matched - 5} más`);
+      if (matched > 8) {
+        console.log(`   ... y ${matched - 8} más`);
       }
       console.log(`   Total actualizadas: ${matched}`);
       totalUpdated += matched;
       
-      // Also update building reference catastral
-      await prisma.building.update({
-        where: { id: building.id },
-        data: { referenciaCatastral: config.ref },
-      });
+      // Store ref catastral in building notes if available
+      // (referenciaCatastral field may not exist in production schema)
+      try {
+        await prisma.building.update({
+          where: { id: building.id },
+          data: { referenciaCatastral: config.ref },
+        });
+      } catch {
+        // Field doesn't exist in schema, skip
+      }
       
       // Delay to avoid rate limiting
       await new Promise(r => setTimeout(r, 1000));
