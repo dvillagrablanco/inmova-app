@@ -36,6 +36,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -84,6 +91,9 @@ function ContratosPageContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [edificioFilter, setEdificioFilter] = useState<string>('all');
+  const [unidadFilter, setUnidadFilter] = useState<string>('all');
+  const [estadoFilter, setEstadoFilter] = useState<string>('all');
   const [activeFilters, setActiveFilters] = useState<
     Array<{ id: string; label: string; value: string }>
   >([]);
@@ -178,43 +188,91 @@ function ContratosPageContent() {
     }
   };
 
+  // Extraer edificios y unidades únicos de los contratos
+  const edificiosUnicos = Array.from(
+    new Map(
+      contracts.map((c) => [c.unit.building.nombre, c.unit.building.nombre])
+    ).values()
+  ).sort();
+
+  const unidadesPorEdificio = edificioFilter !== 'all'
+    ? Array.from(
+        new Set(
+          contracts
+            .filter((c) => c.unit.building.nombre === edificioFilter)
+            .map((c) => c.unit.numero)
+        )
+      ).sort()
+    : [];
+
+  // Reset unidad filter cuando cambia edificio
   useEffect(() => {
+    setUnidadFilter('all');
+  }, [edificioFilter]);
+
+  // Filtrado combinado
+  useEffect(() => {
+    let filtered = contracts;
+
     if (searchTerm) {
-      const filtered = contracts.filter(
+      filtered = filtered.filter(
         (contract) =>
-      contract.tenant.nombreCompleto.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      contract.unit.building.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      contract.unit.numero.toLowerCase().includes(searchTerm.toLowerCase())
+          contract.tenant.nombreCompleto.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          contract.unit.building.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          contract.unit.numero.toLowerCase().includes(searchTerm.toLowerCase())
       );
-      setFilteredContracts(filtered);
-    } else {
-      setFilteredContracts(contracts);
     }
-  }, [searchTerm, contracts]);
+
+    if (edificioFilter !== 'all') {
+      filtered = filtered.filter((c) => c.unit.building.nombre === edificioFilter);
+    }
+
+    if (unidadFilter !== 'all') {
+      filtered = filtered.filter((c) => c.unit.numero === unidadFilter);
+    }
+
+    if (estadoFilter !== 'all') {
+      filtered = filtered.filter((c) => c.estado.toLowerCase() === estadoFilter);
+    }
+
+    setFilteredContracts(filtered);
+  }, [searchTerm, edificioFilter, unidadFilter, estadoFilter, contracts]);
 
   // Actualizar filtros activos
   useEffect(() => {
     const filters: Array<{ id: string; label: string; value: string }> = [];
 
     if (searchTerm) {
-      filters.push({
-        id: 'search',
-        label: 'Búsqueda',
-        value: searchTerm,
-      });
+      filters.push({ id: 'search', label: 'Búsqueda', value: searchTerm });
+    }
+    if (edificioFilter !== 'all') {
+      filters.push({ id: 'edificio', label: 'Edificio', value: edificioFilter });
+    }
+    if (unidadFilter !== 'all') {
+      filters.push({ id: 'unidad', label: 'Unidad', value: unidadFilter });
+    }
+    if (estadoFilter !== 'all') {
+      const estadoLabels: Record<string, string> = {
+        activo: 'Activo', finalizado: 'Finalizado', cancelado: 'Cancelado', pendiente: 'Pendiente',
+      };
+      filters.push({ id: 'estado', label: 'Estado', value: estadoLabels[estadoFilter] || estadoFilter });
     }
 
     setActiveFilters(filters);
-  }, [searchTerm]);
+  }, [searchTerm, edificioFilter, unidadFilter, estadoFilter]);
 
   const clearFilter = (id: string) => {
-    if (id === 'search') {
-      setSearchTerm('');
-    }
+    if (id === 'search') setSearchTerm('');
+    if (id === 'edificio') { setEdificioFilter('all'); setUnidadFilter('all'); }
+    if (id === 'unidad') setUnidadFilter('all');
+    if (id === 'estado') setEstadoFilter('all');
   };
 
   const clearAllFilters = () => {
     setSearchTerm('');
+    setEdificioFilter('all');
+    setUnidadFilter('all');
+    setEstadoFilter('all');
   };
 
   if (status === 'loading' || isLoading) {
@@ -350,16 +408,62 @@ function ContratosPageContent() {
       </Card>
         )}
 
-        {/* Search Bar */}
+        {/* Search Bar and Filters */}
         <Card>
-      <CardContent className="pt-6">
-        <SearchInput
-        value={searchTerm}
-        onChange={setSearchTerm}
-        placeholder="Buscar por inquilino, edificio o unidad..."
-        aria-label="Buscar contratos por inquilino, edificio o unidad"
-        />
-      </CardContent>
+          <CardContent className="pt-6 space-y-4">
+            <SearchInput
+              value={searchTerm}
+              onChange={setSearchTerm}
+              placeholder="Buscar por inquilino, edificio o unidad..."
+              aria-label="Buscar contratos por inquilino, edificio o unidad"
+            />
+            <div className="grid gap-3 sm:grid-cols-3">
+              <Select value={edificioFilter} onValueChange={setEdificioFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Filtrar por edificio" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los edificios</SelectItem>
+                  {edificiosUnicos.map((nombre) => (
+                    <SelectItem key={nombre} value={nombre}>
+                      {nombre}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select
+                value={unidadFilter}
+                onValueChange={setUnidadFilter}
+                disabled={edificioFilter === 'all'}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={edificioFilter === 'all' ? 'Selecciona edificio primero' : 'Filtrar por unidad'} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas las unidades</SelectItem>
+                  {unidadesPorEdificio.map((numero) => (
+                    <SelectItem key={numero} value={numero}>
+                      Unidad {numero}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={estadoFilter} onValueChange={setEstadoFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Filtrar por estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los estados</SelectItem>
+                  <SelectItem value="activo">Activo</SelectItem>
+                  <SelectItem value="finalizado">Finalizado</SelectItem>
+                  <SelectItem value="cancelado">Cancelado</SelectItem>
+                  <SelectItem value="pendiente">Pendiente</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
         </Card>
 
         {/* Active Filters */}
