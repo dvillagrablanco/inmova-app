@@ -629,6 +629,17 @@ model Tenant {
   // Integraciones de Contabilidad
   contasimpleCustomerId String?
   isDemo                Boolean           @default(false) // Marca datos de demostración - excluir de estadísticas
+
+  // Datos bancarios y dirección (migration 20260224000000_add_financial_fields)
+  iban            String?
+  bic             String?
+  metodoPago      String?
+  personaContacto String?
+  ciudad          String?
+  codigoPostal    String?
+  provincia       String?
+  pais            String?  @default("España")
+
   createdAt             DateTime          @default(now())
   updatedAt             DateTime          @updatedAt
 

@@ -17,6 +17,8 @@ import {
   Euro,
   Globe,
   Heart,
+  CreditCard,
+  Building2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -65,6 +67,14 @@ export default function EditarInquilinoPage() {
     scoring: '',
     nivelRiesgo: 'medio',
     notas: '',
+    personaContacto: '',
+    iban: '',
+    bic: '',
+    metodoPago: '',
+    ciudad: '',
+    codigoPostal: '',
+    provincia: '',
+    pais: '',
   });
 
   useEffect(() => {
@@ -99,6 +109,14 @@ export default function EditarInquilinoPage() {
             scoring: tenant.scoring?.toString() || '50',
             nivelRiesgo: tenant.nivelRiesgo || 'medio',
             notas: tenant.notas || '',
+            personaContacto: tenant.personaContacto || '',
+            iban: tenant.iban || '',
+            bic: tenant.bic || '',
+            metodoPago: tenant.metodoPago || '',
+            ciudad: tenant.ciudad || '',
+            codigoPostal: tenant.codigoPostal || '',
+            provincia: tenant.provincia || '',
+            pais: tenant.pais || '',
           });
         } else if (response.status === 404) {
           toast.error('Inquilino no encontrado');
@@ -184,6 +202,30 @@ export default function EditarInquilinoPage() {
       if (formData.notas.trim()) {
         payload.notas = formData.notas.trim();
       }
+      if (formData.personaContacto.trim()) {
+        payload.personaContacto = formData.personaContacto.trim();
+      }
+      if (formData.iban.trim()) {
+        payload.iban = formData.iban.trim();
+      }
+      if (formData.bic.trim()) {
+        payload.bic = formData.bic.trim();
+      }
+      if (formData.metodoPago) {
+        payload.metodoPago = formData.metodoPago;
+      }
+      if (formData.ciudad.trim()) {
+        payload.ciudad = formData.ciudad.trim();
+      }
+      if (formData.codigoPostal.trim()) {
+        payload.codigoPostal = formData.codigoPostal.trim();
+      }
+      if (formData.provincia.trim()) {
+        payload.provincia = formData.provincia.trim();
+      }
+      if (formData.pais.trim()) {
+        payload.pais = formData.pais.trim();
+      }
 
       const response = await fetch(`/api/tenants/${tenantId}`, {
         method: 'PUT',
@@ -255,9 +297,7 @@ export default function EditarInquilinoPage() {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink href={`/inquilinos/${tenantId}`}>
-                  Detalles
-                </BreadcrumbLink>
+                <BreadcrumbLink href={`/inquilinos/${tenantId}`}>Detalles</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
@@ -270,9 +310,7 @@ export default function EditarInquilinoPage() {
         {/* Header */}
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Editar Inquilino</h1>
-          <p className="text-muted-foreground">
-            Actualiza la información del inquilino
-          </p>
+          <p className="text-muted-foreground">Actualiza la información del inquilino</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -397,6 +435,16 @@ export default function EditarInquilinoPage() {
                     </SelectContent>
                   </Select>
                 </div>
+
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="personaContacto">Persona de Contacto</Label>
+                  <Input
+                    id="personaContacto"
+                    placeholder="Nombre y teléfono de contacto de emergencia"
+                    value={formData.personaContacto}
+                    onChange={(e) => handleInputChange('personaContacto', e.target.value)}
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -463,6 +511,105 @@ export default function EditarInquilinoPage() {
                     placeholder="2500.00"
                     value={formData.ingresosMensuales}
                     onChange={(e) => handleInputChange('ingresosMensuales', e.target.value)}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Datos Bancarios y de Pago */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CreditCard className="h-5 w-5" />
+                Datos Bancarios y de Pago
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="iban">IBAN</Label>
+                  <Input
+                    id="iban"
+                    placeholder="ES00 0000 0000 0000 0000 0000"
+                    value={formData.iban}
+                    onChange={(e) => handleInputChange('iban', e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="bic">BIC</Label>
+                  <Input
+                    id="bic"
+                    placeholder="BSCHESMM"
+                    value={formData.bic}
+                    onChange={(e) => handleInputChange('bic', e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="metodoPago">Método de Pago</Label>
+                  <Select
+                    value={formData.metodoPago || ''}
+                    onValueChange={(value) => handleInputChange('metodoPago', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="recibo">Recibo</SelectItem>
+                      <SelectItem value="transferencia">Transferencia</SelectItem>
+                      <SelectItem value="efectivo">Efectivo</SelectItem>
+                      <SelectItem value="domiciliacion">Domiciliación</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Dirección */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building2 className="h-5 w-5" />
+                Dirección
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="ciudad">Ciudad</Label>
+                  <Input
+                    id="ciudad"
+                    placeholder="Madrid"
+                    value={formData.ciudad}
+                    onChange={(e) => handleInputChange('ciudad', e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="codigoPostal">Código Postal</Label>
+                  <Input
+                    id="codigoPostal"
+                    placeholder="28001"
+                    value={formData.codigoPostal}
+                    onChange={(e) => handleInputChange('codigoPostal', e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="provincia">Provincia</Label>
+                  <Input
+                    id="provincia"
+                    placeholder="Madrid"
+                    value={formData.provincia}
+                    onChange={(e) => handleInputChange('provincia', e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="pais">País</Label>
+                  <Input
+                    id="pais"
+                    placeholder="España"
+                    value={formData.pais}
+                    onChange={(e) => handleInputChange('pais', e.target.value)}
                   />
                 </div>
               </div>

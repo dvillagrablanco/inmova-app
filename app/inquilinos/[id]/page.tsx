@@ -16,6 +16,8 @@ import {
   Home,
   Edit,
   Trash2,
+  CreditCard,
+  Building2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -44,6 +46,14 @@ interface Tenant {
   nacionalidad?: string;
   profesion?: string;
   estado?: string;
+  personaContacto?: string;
+  iban?: string;
+  bic?: string;
+  metodoPago?: string;
+  ciudad?: string;
+  codigoPostal?: string;
+  provincia?: string;
+  pais?: string;
   units?: Array<{
     numero: string;
     building: {
@@ -204,9 +214,118 @@ export default function TenantDetailPage() {
                       </div>
                     </div>
                   )}
+
+                  {tenant.personaContacto && (
+                    <div className="flex items-start gap-3">
+                      <User className="h-5 w-5 text-muted-foreground mt-0.5" />
+                      <div>
+                        <div className="text-sm font-medium">Persona de Contacto</div>
+                        <div className="text-sm text-muted-foreground">
+                          {tenant.personaContacto}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
+
+            {(tenant.iban || tenant.bic || tenant.metodoPago) && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <CreditCard className="h-5 w-5" />
+                    Datos Bancarios
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {tenant.iban && (
+                      <div className="flex items-start gap-3">
+                        <CreditCard className="h-5 w-5 text-muted-foreground mt-0.5" />
+                        <div>
+                          <div className="text-sm font-medium">IBAN</div>
+                          <div className="text-sm text-muted-foreground font-mono">
+                            {tenant.iban.length >= 4 ? `****${tenant.iban.slice(-4)}` : '****'}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    {tenant.bic && (
+                      <div className="flex items-start gap-3">
+                        <CreditCard className="h-5 w-5 text-muted-foreground mt-0.5" />
+                        <div>
+                          <div className="text-sm font-medium">BIC</div>
+                          <div className="text-sm text-muted-foreground">{tenant.bic}</div>
+                        </div>
+                      </div>
+                    )}
+                    {tenant.metodoPago && (
+                      <div className="flex items-start gap-3">
+                        <Euro className="h-5 w-5 text-muted-foreground mt-0.5" />
+                        <div>
+                          <div className="text-sm font-medium">Método de Pago</div>
+                          <div className="text-sm text-muted-foreground capitalize">
+                            {tenant.metodoPago}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {(tenant.ciudad || tenant.codigoPostal || tenant.provincia || tenant.pais) && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Building2 className="h-5 w-5" />
+                    Dirección
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {tenant.ciudad && (
+                      <div className="flex items-start gap-3">
+                        <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
+                        <div>
+                          <div className="text-sm font-medium">Ciudad</div>
+                          <div className="text-sm text-muted-foreground">{tenant.ciudad}</div>
+                        </div>
+                      </div>
+                    )}
+                    {tenant.codigoPostal && (
+                      <div className="flex items-start gap-3">
+                        <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
+                        <div>
+                          <div className="text-sm font-medium">Código Postal</div>
+                          <div className="text-sm text-muted-foreground">{tenant.codigoPostal}</div>
+                        </div>
+                      </div>
+                    )}
+                    {tenant.provincia && (
+                      <div className="flex items-start gap-3">
+                        <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
+                        <div>
+                          <div className="text-sm font-medium">Provincia</div>
+                          <div className="text-sm text-muted-foreground">{tenant.provincia}</div>
+                        </div>
+                      </div>
+                    )}
+                    {tenant.pais && (
+                      <div className="flex items-start gap-3">
+                        <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
+                        <div>
+                          <div className="text-sm font-medium">País</div>
+                          <div className="text-sm text-muted-foreground">{tenant.pais}</div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {tenant.units && tenant.units.length > 0 && (
               <Card>
