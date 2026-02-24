@@ -840,6 +840,504 @@ export const MODULOS_CATALOGO = [
     esCore: false,
     orden: 99
   },
+
+  // ============================================
+  // MÓDULOS ADICIONALES - Cobertura completa sidebar
+  // ============================================
+
+  // Alquiler Residencial
+  {
+    codigo: 'alquiler_residencial',
+    nombre: 'Alquiler Residencial - Dashboard',
+    descripcion: 'Panel principal de la vertical de alquiler residencial tradicional',
+    categoria: 'gestion',
+    icono: 'Home',
+    ruta: '/traditional-rental',
+    requiereModulos: ['edificios', 'inquilinos'],
+    tiersIncluido: ['basico', 'profesional', 'empresarial'],
+    esCore: false,
+    orden: 100
+  },
+  {
+    codigo: 'garantias',
+    nombre: 'Garantías de Alquiler',
+    descripcion: 'Gestión de fianzas, avales y garantías de los contratos de arrendamiento',
+    categoria: 'gestion',
+    icono: 'Shield',
+    ruta: '/garantias',
+    requiereModulos: ['contratos'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 101
+  },
+
+  // STR
+  {
+    codigo: 'str',
+    nombre: 'STR Dashboard',
+    descripcion: 'Panel principal de alquiler turístico de corta estancia',
+    categoria: 'gestion',
+    icono: 'Hotel',
+    ruta: '/str',
+    requiereModulos: ['edificios'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 102
+  },
+  {
+    codigo: 'str_reviews',
+    nombre: 'Reviews STR',
+    descripcion: 'Gestión de reseñas y valoraciones de huéspedes',
+    categoria: 'gestion',
+    icono: 'Star',
+    ruta: '/str/reviews',
+    requiereModulos: ['str_listings'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 103
+  },
+
+  // Hospitality
+  {
+    codigo: 'hospitality',
+    nombre: 'Hospitality',
+    descripcion: 'Gestión de apart-hotels, B&B y serviced apartments con check-in/out y servicios al huésped',
+    categoria: 'gestion',
+    icono: 'Hotel',
+    ruta: '/hospitality',
+    requiereModulos: ['edificios'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 104
+  },
+
+  // Coliving
+  {
+    codigo: 'coliving',
+    nombre: 'Coliving',
+    descripcion: 'Gestión de espacios coliving: propiedades, comunidad, matching y eventos',
+    categoria: 'gestion',
+    icono: 'Users2',
+    ruta: '/coliving/propiedades',
+    requiereModulos: ['edificios', 'inquilinos'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 105
+  },
+
+  // Holding / Grupo Societario
+  {
+    codigo: 'holding_grupo',
+    nombre: 'Holding / Grupo Societario',
+    descripcion: 'Consolidación de sociedades patrimoniales, análisis de inversiones, comparativa, hipotecas y fiscal del grupo',
+    categoria: 'financiero',
+    icono: 'Crown',
+    ruta: '/inversiones',
+    requiereModulos: [],
+    tiersIncluido: ['empresarial'],
+    esCore: false,
+    orden: 106
+  },
+
+  // Finanzas
+  {
+    codigo: 'finanzas',
+    nombre: 'Panel de Finanzas',
+    descripcion: 'Panel principal financiero con overview de pagos, gastos y flujo de caja',
+    categoria: 'financiero',
+    icono: 'Euro',
+    ruta: '/finanzas',
+    requiereModulos: ['pagos'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 107
+  },
+  {
+    codigo: 'contabilidad',
+    nombre: 'Contabilidad',
+    descripcion: 'Módulo de contabilidad integrada con plan de cuentas y asientos',
+    categoria: 'financiero',
+    icono: 'FileBarChart',
+    ruta: '/contabilidad',
+    requiereModulos: ['pagos', 'gastos'],
+    tiersIncluido: ['empresarial'],
+    esCore: false,
+    orden: 108
+  },
+  {
+    codigo: 'estadisticas',
+    nombre: 'Estadísticas',
+    descripcion: 'Estadísticas generales de rendimiento y ocupación',
+    categoria: 'financiero',
+    icono: 'TrendingUp',
+    ruta: '/estadisticas',
+    requiereModulos: ['pagos'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 109
+  },
+  {
+    codigo: 'presupuestos',
+    nombre: 'Presupuestos',
+    descripcion: 'Creación y seguimiento de presupuestos anuales y por propiedad',
+    categoria: 'financiero',
+    icono: 'DollarSign',
+    ruta: '/presupuestos',
+    requiereModulos: ['pagos', 'gastos'],
+    tiersIncluido: ['empresarial'],
+    esCore: false,
+    orden: 110
+  },
+  {
+    codigo: 'facturacion',
+    nombre: 'Facturación',
+    descripcion: 'Emisión y gestión de facturas para servicios y alquileres',
+    categoria: 'financiero',
+    icono: 'FileText',
+    ruta: '/facturacion',
+    requiereModulos: ['pagos'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 111
+  },
+
+  // Analytics
+  {
+    codigo: 'informes',
+    nombre: 'Informes',
+    descripcion: 'Generación de informes personalizados y exportación de datos',
+    categoria: 'financiero',
+    icono: 'FileText',
+    ruta: '/informes',
+    requiereModulos: ['reportes'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 112
+  },
+  {
+    codigo: 'ai_assistant',
+    nombre: 'Asistente IA Conversacional',
+    descripcion: 'Chatbot inteligente para consultas, automatización de tareas y análisis de datos',
+    categoria: 'avanzado',
+    icono: 'Bot',
+    ruta: '/asistente-ia',
+    requiereModulos: ['usuarios'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 113
+  },
+
+  // Operaciones
+  {
+    codigo: 'servicios_limpieza',
+    nombre: 'Servicios de Limpieza',
+    descripcion: 'Programación y seguimiento de servicios de limpieza para propiedades',
+    categoria: 'gestion',
+    icono: 'ClipboardList',
+    ruta: '/servicios-limpieza',
+    requiereModulos: ['mantenimiento'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 114
+  },
+  {
+    codigo: 'servicios',
+    nombre: 'Marketplace de Servicios',
+    descripcion: 'Servicios adicionales contratables por inquilinos y propietarios',
+    categoria: 'avanzado',
+    icono: 'ShoppingBag',
+    ruta: '/dashboard/servicios',
+    requiereModulos: ['inquilinos'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 115
+  },
+
+  // Documentos y Legal
+  {
+    codigo: 'plantillas',
+    nombre: 'Plantillas de Documentos',
+    descripcion: 'Plantillas reutilizables para contratos, actas y documentos legales',
+    categoria: 'gestion',
+    icono: 'FileText',
+    ruta: '/plantillas',
+    requiereModulos: ['documentos'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 116
+  },
+
+  // CRM y Marketing
+  {
+    codigo: 'portal_comercial',
+    nombre: 'Portal Comercial',
+    descripcion: 'Portal de venta y alquiler de propiedades para clientes externos',
+    categoria: 'avanzado',
+    icono: 'Briefcase',
+    ruta: '/portal-comercial',
+    requiereModulos: ['crm'],
+    tiersIncluido: ['empresarial'],
+    esCore: false,
+    orden: 117
+  },
+  {
+    codigo: 'promociones',
+    nombre: 'Promociones',
+    descripcion: 'Gestión de ofertas, descuentos y promociones para captación de inquilinos',
+    categoria: 'avanzado',
+    icono: 'Tag',
+    ruta: '/promociones',
+    requiereModulos: ['crm'],
+    tiersIncluido: ['empresarial'],
+    esCore: false,
+    orden: 118
+  },
+  {
+    codigo: 'reviews',
+    nombre: 'Reviews',
+    descripcion: 'Gestión de reseñas y valoraciones de propiedades e inquilinos',
+    categoria: 'avanzado',
+    icono: 'Star',
+    ruta: '/reviews',
+    requiereModulos: ['inquilinos'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 119
+  },
+  {
+    codigo: 'red_agentes',
+    nombre: 'Red de Agentes',
+    descripcion: 'Gestión de agentes inmobiliarios colaboradores y comisiones',
+    categoria: 'avanzado',
+    icono: 'Users2',
+    ruta: '/red-agentes',
+    requiereModulos: ['crm'],
+    tiersIncluido: ['empresarial'],
+    esCore: false,
+    orden: 120
+  },
+
+  // Automatización
+  {
+    codigo: 'automatizacion',
+    nombre: 'Automatización',
+    descripcion: 'Panel de automatización de procesos, reglas y triggers',
+    categoria: 'avanzado',
+    icono: 'Zap',
+    ruta: '/automatizacion',
+    requiereModulos: [],
+    tiersIncluido: ['empresarial'],
+    esCore: false,
+    orden: 121
+  },
+  {
+    codigo: 'workflows',
+    nombre: 'Workflows',
+    descripcion: 'Diseño y ejecución de flujos de trabajo automatizados',
+    categoria: 'avanzado',
+    icono: 'Zap',
+    ruta: '/workflows',
+    requiereModulos: ['automatizacion'],
+    tiersIncluido: ['empresarial'],
+    esCore: false,
+    orden: 122
+  },
+  {
+    codigo: 'sincronizacion',
+    nombre: 'Sincronización',
+    descripcion: 'Sincronización de datos con plataformas externas',
+    categoria: 'avanzado',
+    icono: 'Share2',
+    ruta: '/sincronizacion',
+    requiereModulos: [],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 123
+  },
+  {
+    codigo: 'sincronizacion_avanzada',
+    nombre: 'Sincronización Avanzada',
+    descripcion: 'Sincronización bidireccional avanzada con portales y ERPs',
+    categoria: 'avanzado',
+    icono: 'Share2',
+    ruta: '/sincronizacion-avanzada',
+    requiereModulos: ['sincronizacion'],
+    tiersIncluido: ['empresarial'],
+    esCore: false,
+    orden: 124
+  },
+  {
+    codigo: 'recordatorios',
+    nombre: 'Recordatorios',
+    descripcion: 'Sistema de recordatorios automáticos para vencimientos, pagos y tareas',
+    categoria: 'avanzado',
+    icono: 'Bell',
+    ruta: '/recordatorios',
+    requiereModulos: [],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 125
+  },
+
+  // Innovación
+  {
+    codigo: 'energia',
+    nombre: 'Gestión de Energía',
+    descripcion: 'Control y análisis de consumo energético, solar y puntos de carga',
+    categoria: 'avanzado',
+    icono: 'Zap',
+    ruta: '/energia',
+    requiereModulos: ['edificios'],
+    tiersIncluido: ['empresarial'],
+    esCore: false,
+    orden: 126
+  },
+  {
+    codigo: 'puntos_carga',
+    nombre: 'Puntos de Carga EV',
+    descripcion: 'Gestión de estaciones de carga para vehículos eléctricos',
+    categoria: 'avanzado',
+    icono: 'Zap',
+    ruta: '/puntos-carga',
+    requiereModulos: ['edificios'],
+    tiersIncluido: ['empresarial'],
+    esCore: false,
+    orden: 127
+  },
+  {
+    codigo: 'instalaciones_deportivas',
+    nombre: 'Instalaciones Deportivas',
+    descripcion: 'Gestión de piscinas, gimnasios, pistas y espacios deportivos comunitarios',
+    categoria: 'comunidad',
+    icono: 'Activity',
+    ruta: '/instalaciones-deportivas',
+    requiereModulos: ['edificios'],
+    tiersIncluido: ['empresarial'],
+    esCore: false,
+    orden: 128
+  },
+
+  // Soporte
+  {
+    codigo: 'soporte',
+    nombre: 'Soporte',
+    descripcion: 'Centro de soporte y asistencia técnica',
+    categoria: 'admin',
+    icono: 'HeadphonesIcon',
+    ruta: '/soporte',
+    requiereModulos: [],
+    tiersIncluido: ['basico', 'profesional', 'empresarial'],
+    esCore: false,
+    orden: 129
+  },
+  {
+    codigo: 'knowledge_base',
+    nombre: 'Base de Conocimientos',
+    descripcion: 'Artículos de ayuda, guías y documentación para usuarios',
+    categoria: 'admin',
+    icono: 'BookOpen',
+    ruta: '/knowledge-base',
+    requiereModulos: [],
+    tiersIncluido: ['basico', 'profesional', 'empresarial'],
+    esCore: false,
+    orden: 130
+  },
+  {
+    codigo: 'sugerencias',
+    nombre: 'Sugerencias',
+    descripcion: 'Buzón de sugerencias y feedback de usuarios',
+    categoria: 'admin',
+    icono: 'MessageCircle',
+    ruta: '/sugerencias',
+    requiereModulos: [],
+    tiersIncluido: ['basico', 'profesional', 'empresarial'],
+    esCore: false,
+    orden: 131
+  },
+
+  // Herramientas de Inversión
+  {
+    codigo: 'herramientas_inversion',
+    nombre: 'Herramientas de Inversión',
+    descripcion: 'Calculadoras de rentabilidad, hipotecas y gastos de compraventa',
+    categoria: 'financiero',
+    icono: 'Calculator',
+    ruta: '/dashboard/herramientas',
+    requiereModulos: [],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 132
+  },
+
+  // Licitaciones
+  {
+    codigo: 'licitaciones',
+    nombre: 'Licitaciones',
+    descripcion: 'Gestión de licitaciones y concursos para obras y servicios',
+    categoria: 'gestion',
+    icono: 'FileText',
+    ruta: '/licitaciones',
+    requiereModulos: ['construction_projects'],
+    tiersIncluido: ['empresarial'],
+    esCore: false,
+    orden: 133
+  },
+
+  // Matching Inteligente
+  {
+    codigo: 'matching',
+    nombre: 'Matching Inteligente',
+    descripcion: 'Algoritmos de emparejamiento inquilino-propiedad basados en preferencias y scoring',
+    categoria: 'avanzado',
+    icono: 'UserCheck',
+    ruta: '/matching',
+    requiereModulos: ['inquilinos', 'unidades'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 134
+  },
+
+  // IA Documental
+  {
+    codigo: 'ia_documental',
+    nombre: 'IA Documental',
+    descripcion: 'Procesamiento inteligente de documentos con OCR e IA para extracción automática de datos',
+    categoria: 'avanzado',
+    icono: 'Bot',
+    ruta: '/onboarding/documents',
+    requiereModulos: ['documentos'],
+    tiersIncluido: ['empresarial'],
+    esCore: false,
+    orden: 135
+  },
+
+  // Redes Sociales
+  {
+    codigo: 'redes_sociales',
+    nombre: 'Redes Sociales',
+    descripcion: 'Publicación y gestión de contenido en redes sociales y portales inmobiliarios',
+    categoria: 'avanzado',
+    icono: 'Share2',
+    ruta: '/dashboard/social-media',
+    requiereModulos: [],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 136
+  },
+
+  // Gestión Inmobiliaria
+  {
+    codigo: 'gestion_inmobiliaria',
+    nombre: 'Gestión de Propiedades',
+    descripcion: 'Panel de gestión de propiedades inmobiliarias',
+    categoria: 'core',
+    icono: 'Building2',
+    ruta: '/propiedades',
+    requiereModulos: ['edificios'],
+    tiersIncluido: ['basico', 'profesional', 'empresarial'],
+    esCore: false,
+    orden: 137
+  },
 ];
 
 /**
