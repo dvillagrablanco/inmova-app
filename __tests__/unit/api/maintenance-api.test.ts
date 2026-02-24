@@ -7,7 +7,7 @@ import { describe, test, expect, vi, beforeEach } from 'vitest';
 import { NextRequest, NextResponse } from 'next/server';
 
 // Mock de dependencias
-const { mockPrismaInstance } = vi.hoisted(() => ({
+const { mockPrismaInstance, mockResolveCompanyScope } = vi.hoisted(() => ({
   mockPrismaInstance: {
     maintenanceRequest: {
       findMany: vi.fn(),
@@ -18,11 +18,16 @@ const { mockPrismaInstance } = vi.hoisted(() => ({
       delete: vi.fn(),
     },
   },
+  mockResolveCompanyScope: vi.fn(),
 }));
 
 vi.mock('@/lib/db', () => ({
   prisma: mockPrismaInstance,
   getPrismaClient: () => mockPrismaInstance,
+}));
+
+vi.mock('@/lib/company-scope', () => ({
+  resolveCompanyScope: mockResolveCompanyScope,
 }));
 
 vi.mock('next-auth', () => ({
@@ -106,6 +111,10 @@ describe('🔧 Maintenance API - GET Endpoint', () => {
     vi.clearAllMocks();
     (getServerSession as ReturnType<typeof vi.fn>).mockResolvedValue({
       user: mockUser,
+    });
+    mockResolveCompanyScope.mockResolvedValue({
+      activeCompanyId: 'company-123',
+      scopeCompanyIds: ['company-123'],
     });
   });
 
@@ -211,15 +220,21 @@ describe('🔧 Maintenance API - GET Endpoint', () => {
     expect(response.status).toBe(401);
   });
 
-  test('❌ Debe retornar 400 sin companyId', async () => {
+  test('❌ Debe retornar lista vacía sin companyId activo', async () => {
     (getServerSession as ReturnType<typeof vi.fn>).mockResolvedValue({
-      user: { id: 'user-123' }, // Sin companyId
+      user: { id: 'user-123' },
+    });
+    mockResolveCompanyScope.mockResolvedValue({
+      activeCompanyId: null,
+      scopeCompanyIds: [],
     });
 
     const req = new NextRequest('http://localhost:3000/api/maintenance');
     const response = await GET(req);
+    const data = await response.json();
 
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(200);
+    expect(data).toEqual([]);
   });
 
   test('❌ Debe manejar error de base de datos', async () => {
@@ -315,6 +330,10 @@ describe('🔧 Maintenance API - POST Endpoint', () => {
     vi.clearAllMocks();
     (getServerSession as ReturnType<typeof vi.fn>).mockResolvedValue({
       user: mockUser,
+    });
+    mockResolveCompanyScope.mockResolvedValue({
+      activeCompanyId: 'company-123',
+      scopeCompanyIds: ['company-123'],
     });
   });
 

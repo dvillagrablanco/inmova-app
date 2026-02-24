@@ -1,8 +1,8 @@
 /**
  * Tests unitarios para el AI Document Agent Service
- * 
+ *
  * Tests que no requieren el mock de Anthropic SDK
- * 
+ *
  * @module __tests__/unit/services/ai-document-agent.test.ts
  */
 
@@ -43,7 +43,7 @@ describe('AI Document Agent Service', () => {
     });
 
     it('detecta CIFs similares', () => {
-      const cif1 = 'B-19774660';
+      const cif1 = 'B12345678';
       const cif2 = 'B12345679';
       const similarity = calculateStringSimilarity(cif1, cif2);
       expect(similarity).toBeGreaterThan(0.8);
