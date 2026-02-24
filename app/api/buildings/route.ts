@@ -1,8 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth, getUserCompany, requirePermission, forbiddenResponse, badRequestResponse } from '@/lib/permissions';
+import {
+  requireAuth,
+  getUserCompany,
+  requirePermission,
+  forbiddenResponse,
+  badRequestResponse,
+} from '@/lib/permissions';
 import logger, { logError } from '@/lib/logger';
 import { buildingCreateSchema } from '@/lib/validations';
-import { cachedBuildings, invalidateBuildingsCache, invalidateDashboardCache } from '@/lib/api-cache-helpers';
+import {
+  cachedBuildings,
+  invalidateBuildingsCache,
+  invalidateDashboardCache,
+} from '@/lib/api-cache-helpers';
 import { resolveCompanyScope } from '@/lib/company-scope';
 import * as Sentry from '@sentry/nextjs';
 
@@ -42,7 +52,7 @@ export async function GET(req: NextRequest) {
 
     const { searchParams: sp2 } = new URL(req.url);
     const usePagination = sp2.has('page') || sp2.has('limit');
-    
+
     const [buildings, total] = await Promise.all([
       prisma.building.findMany({
         where: whereClause,
@@ -70,7 +80,7 @@ export async function GET(req: NextRequest) {
     ]);
 
     // Calcular métricas para cada edificio
-    const buildingsWithMetrics = buildings.map(building => {
+    const buildingsWithMetrics = buildings.map((building) => {
       const totalUnits = building.units.length;
       const occupiedUnits = building.units.filter((u: any) => u.estado === 'ocupada').length;
       const ocupacionPct = totalUnits > 0 ? (occupiedUnits / totalUnits) * 100 : 0;
@@ -87,6 +97,7 @@ export async function GET(req: NextRequest) {
         numeroUnidades: building.numeroUnidades,
         companyId: building.companyId,
         company: (building as any).company,
+        ibiAnual: (building as { ibiAnual?: number | null }).ibiAnual ?? null,
         createdAt: building.createdAt,
         updatedAt: building.updatedAt,
         totalUnidades: totalUnits,
@@ -116,19 +127,27 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error: any) {
-    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) { return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 }); }
+    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) {
+      return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 });
+    }
     const errorMessage = error?.message || 'Error desconocido';
     const errorStack = error?.stack || '';
-    logger.error('Error fetching buildings:', { message: errorMessage, stack: errorStack.slice(0, 500) });
-      Sentry.captureException(error);
-    
+    logger.error('Error fetching buildings:', {
+      message: errorMessage,
+      stack: errorStack.slice(0, 500),
+    });
+    Sentry.captureException(error);
+
     if (errorMessage === 'No autenticado') {
       return NextResponse.json({ error: errorMessage }, { status: 401 });
     }
     if (errorMessage === 'Usuario inactivo') {
       return NextResponse.json({ error: errorMessage }, { status: 403 });
     }
-    return NextResponse.json({ error: 'Error al obtener edificios', details: errorMessage }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Error al obtener edificios', details: errorMessage },
+      { status: 500 }
+    );
   }
 }
 
@@ -148,20 +167,17 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    
+
     // Validación con Zod
     const validationResult = buildingCreateSchema.safeParse(body);
-    
+
     if (!validationResult.success) {
-      const errors = validationResult.error.errors.map(err => ({
+      const errors = validationResult.error.errors.map((err) => ({
         field: err.path.join('.'),
-        message: err.message
+        message: err.message,
       }));
       logger.warn('Validation error creating building:', { errors });
-      return NextResponse.json(
-        { error: 'Datos inv\u00e1lidos', details: errors },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Datos inv\u00e1lidos', details: errors }, { status: 400 });
     }
 
     const validatedData = validationResult.data;
@@ -171,13 +187,17 @@ export async function POST(req: NextRequest) {
       companyId: scope.activeCompanyId,
       nombre: validatedData.nombre,
       direccion: validatedData.direccion,
-      tipo: (validatedData.tipo && ['residencial', 'mixto', 'comercial'].includes(validatedData.tipo)) ? validatedData.tipo as 'residencial' | 'mixto' | 'comercial' : 'residencial',
+      tipo:
+        validatedData.tipo && ['residencial', 'mixto', 'comercial'].includes(validatedData.tipo)
+          ? (validatedData.tipo as 'residencial' | 'mixto' | 'comercial')
+          : 'residencial',
       anoConstructor: validatedData.anoConstructor || new Date().getFullYear(),
       numeroUnidades: validatedData.numeroUnidades || 0,
     };
 
     // Optional fields — only add if present in schema (ciudad/pais may not exist in older schemas)
-    if (validatedData.estadoConservacion) createData.estadoConservacion = validatedData.estadoConservacion;
+    if (validatedData.estadoConservacion)
+      createData.estadoConservacion = validatedData.estadoConservacion;
     if (validatedData.ascensor !== undefined) createData.ascensor = validatedData.ascensor;
     if (validatedData.garaje !== undefined) createData.garaje = validatedData.garaje;
 
@@ -187,7 +207,10 @@ export async function POST(req: NextRequest) {
     await invalidateBuildingsCache(scope.activeCompanyId);
     await invalidateDashboardCache(scope.activeCompanyId);
 
-    logger.info('Building created successfully', { buildingId: building.id, companyId: scope.activeCompanyId });
+    logger.info('Building created successfully', {
+      buildingId: building.id,
+      companyId: scope.activeCompanyId,
+    });
 
     // 🚀 AUTO-PUBLICACIÓN EN REDES SOCIALES (async, no bloqueante)
     const userId = user.id;
@@ -204,7 +227,7 @@ export async function POST(req: NextRequest) {
             address: building.direccion || undefined,
           },
           {
-            scheduleMinutesDelay: 5 // Publicar en 5 minutos para permitir agregar foto
+            scheduleMinutesDelay: 5, // Publicar en 5 minutos para permitir agregar foto
           }
         );
       } catch (socialError) {
@@ -216,7 +239,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(building, { status: 201 });
   } catch (error: any) {
-    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) { return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 }); }
+    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) {
+      return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 });
+    }
     logError(error, { context: 'Error creating building' });
     if (error.message?.includes('permiso')) {
       return forbiddenResponse(error.message);
