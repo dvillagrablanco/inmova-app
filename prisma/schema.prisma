@@ -626,19 +626,6 @@ model Tenant {
   nivelRiesgo           RiskLevel         @default(medio)
   password              String?
   notas                 String?           @db.Text
-
-  // Datos bancarios y de pago
-  iban            String?  // Cuenta bancaria (IBAN)
-  bic             String?  // Código BIC/SWIFT
-  metodoPago      String?  // "recibo", "transferencia", "efectivo", "domiciliacion"
-  personaContacto String?  // Persona de contacto alternativa
-
-  // Dirección estructurada
-  ciudad       String?
-  codigoPostal String?
-  provincia    String?
-  pais         String?  @default("España")
-
   // Integraciones de Contabilidad
   contasimpleCustomerId String?
   isDemo                Boolean           @default(false) // Marca datos de demostración - excluir de estadísticas
@@ -1362,12 +1349,6 @@ model Contract {
   contractPdfPath      String?
   legalTemplateId      String?
   contasimpleInvoiceId String?
-
-  // Datos contables y cargos adicionales
-  codigoOperacion          String?  // Referencia contable: "7520004005"
-  suministrosProvisionales Float?   // Cargo mensual suministros provisionales
-  ibiRepercutido           Float?   // IBI mensualizado repercutido al inquilino
-
   isDemo               Boolean        @default(false) // Marca datos de demostración - excluir de estadísticas
   createdAt            DateTime       @default(now())
   updatedAt            DateTime       @updatedAt
@@ -1418,6 +1399,11 @@ model Contract {
   documentoMotivoPath  String? // Path al documento que justifica la temporalidad
   checklistEntradaPath String? // PDF del checklist de entrada firmado
   checklistSalidaPath  String? // PDF del checklist de salida firmado
+
+  // Campos adicionales
+  codigoOperacion       String? // Código de operación (registro, etc.)
+  suministrosProvisionales Float? // Importe suministros provisionales
+  ibiRepercutido        Float? // IBI repercutido al inquilino (€)
 
   unit                  Unit                  @relation(fields: [unitId], references: [id], onDelete: Cascade)
   tenant                Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
@@ -1472,12 +1458,12 @@ model Payment {
   reciboPdfPath    String?
   nivelRiesgo      RiskLevel     @default(bajo)
 
-  // Desglose fiscal y trazabilidad
-  concepto      String?  @db.Text // "Renta Viv. C/Candelaria Mora 12-14, 3ºB"
-  referencia    String?  // Nº factura: "R_VP-5", "RP-920"
-  baseImponible Float?   // Base antes de IVA
-  iva           Float?   // Importe IVA
-  irpf          Float?   // Retención IRPF
+  // Facturación / detalles fiscales
+  concepto      String?
+  referencia    String?
+  baseImponible Float?
+  iva          Float?
+  irpf         Float?
 
   // Stripe integration fields
   stripePaymentIntentId String?              @unique

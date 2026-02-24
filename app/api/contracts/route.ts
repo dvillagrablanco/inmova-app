@@ -3,11 +3,11 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import logger, { logError } from '@/lib/logger';
 import { contractCreateSchema } from '@/lib/validations';
-import { 
-  cachedContracts, 
-  invalidateContractsCache, 
-  invalidateUnitsCache, 
-  invalidateDashboardCache 
+import {
+  cachedContracts,
+  invalidateContractsCache,
+  invalidateUnitsCache,
+  invalidateDashboardCache,
 } from '@/lib/api-cache-helpers';
 import { resolveCompanyScope } from '@/lib/company-scope';
 import * as Sentry from '@sentry/nextjs';
@@ -91,7 +91,7 @@ export async function GET(req: NextRequest) {
     ]);
 
     // Calcular días hasta vencimiento y convertir valores Decimal
-    const contractsWithExpiration = contracts.map(contract => {
+    const contractsWithExpiration = contracts.map((contract) => {
       const fechaFin = contract.fechaFin ? new Date(contract.fechaFin) : null;
       const daysUntilExpiration = fechaFin
         ? Math.ceil((fechaFin.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
@@ -109,6 +109,12 @@ export async function GET(req: NextRequest) {
         diaPago: contract.diaPago,
         clausulasAdicionales: contract.clausulasAdicionales,
         renovacionAutomatica: contract.renovacionAutomatica,
+        codigoOperacion: contract.codigoOperacion,
+        suministrosProvisionales:
+          contract.suministrosProvisionales != null
+            ? Number(contract.suministrosProvisionales)
+            : null,
+        ibiRepercutido: contract.ibiRepercutido != null ? Number(contract.ibiRepercutido) : null,
         unit: contract.unit,
         tenant: contract.tenant,
         createdAt: contract.createdAt,
@@ -149,20 +155,17 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    
+
     // Validación con Zod
     const validationResult = contractCreateSchema.safeParse(body);
-    
+
     if (!validationResult.success) {
-      const errors = validationResult.error.errors.map(err => ({
+      const errors = validationResult.error.errors.map((err) => ({
         field: err.path.join('.'),
-        message: err.message
+        message: err.message,
       }));
       logger.warn('Validation error creating contract:', { errors });
-      return NextResponse.json(
-        { error: 'Datos inv\u00e1lidos', details: errors },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Datos inv\u00e1lidos', details: errors }, { status: 400 });
     }
 
     const validatedData = validationResult.data;
@@ -189,6 +192,9 @@ export async function POST(req: NextRequest) {
         diaPago: validatedData.diaCobranza || 1,
         clausulasAdicionales: validatedData.clausulasEspeciales || '',
         renovacionAutomatica: validatedData.renovacionAutomatica || false,
+        codigoOperacion: validatedData.codigoOperacion,
+        suministrosProvisionales: validatedData.suministrosProvisionales,
+        ibiRepercutido: validatedData.ibiRepercutido,
       },
     });
 

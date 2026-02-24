@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { requireAuth, requirePermission, forbiddenResponse, badRequestResponse } from '@/lib/permissions';
+import {
+  requireAuth,
+  requirePermission,
+  forbiddenResponse,
+  badRequestResponse,
+} from '@/lib/permissions';
 import logger, { logError } from '@/lib/logger';
 import { tenantCreateSchema } from '@/lib/validations';
 import { resolveCompanyScope } from '@/lib/company-scope';
@@ -14,7 +19,6 @@ async function getPrisma() {
   const { getPrismaClient } = await import('@/lib/db');
   return getPrismaClient();
 }
-
 
 export async function GET(req: NextRequest) {
   const prisma = await getPrisma();
@@ -103,19 +107,27 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error: any) {
-    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) { return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 }); }
+    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) {
+      return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 });
+    }
     const errorMessage = error?.message || 'Error desconocido';
     const errorStack = error?.stack || '';
-    logger.error('Error fetching tenants:', { message: errorMessage, stack: errorStack.slice(0, 500) });
-      Sentry.captureException(error);
-    
+    logger.error('Error fetching tenants:', {
+      message: errorMessage,
+      stack: errorStack.slice(0, 500),
+    });
+    Sentry.captureException(error);
+
     if (errorMessage === 'No autenticado') {
       return NextResponse.json({ error: errorMessage }, { status: 401 });
     }
     if (errorMessage === 'Usuario inactivo') {
       return NextResponse.json({ error: errorMessage }, { status: 403 });
     }
-    return NextResponse.json({ error: 'Error al obtener inquilinos', details: errorMessage }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Error al obtener inquilinos', details: errorMessage },
+      { status: 500 }
+    );
   }
 }
 
@@ -135,10 +147,10 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    
+
     // Preparar datos: convertir nombre completo a nombre/apellidos si es necesario
     let dataToValidate = { ...body };
-    
+
     // Si viene nombreCompleto o nombre contiene espacios y no hay apellidos
     const nombreCompleto = body.nombreCompleto || body.nombre;
     if (nombreCompleto && !body.apellidos) {
@@ -153,24 +165,21 @@ export async function POST(req: NextRequest) {
         dataToValidate.apellidos = nombreCompleto;
       }
     }
-    
+
     // Validación con Zod
     const validationResult = tenantCreateSchema.safeParse(dataToValidate);
-    
+
     if (!validationResult.success) {
-      const errors = validationResult.error.errors.map(err => ({
+      const errors = validationResult.error.errors.map((err) => ({
         field: err.path.join('.'),
-        message: err.message
+        message: err.message,
       }));
       logger.warn('Validation error creating tenant:', { errors });
-      return NextResponse.json(
-        { error: 'Datos inv\u00e1lidos', details: errors },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Datos inv\u00e1lidos', details: errors }, { status: 400 });
     }
 
     const validatedData = validationResult.data;
-    
+
     // Combinar nombre y apellidos de vuelta a nombreCompleto para la BD
     const nombreCompletoFinal = `${validatedData.nombre} ${validatedData.apellidos}`.trim();
 
@@ -188,8 +197,18 @@ export async function POST(req: NextRequest) {
         dni: validatedData.dni || '',
         email: validatedData.email,
         telefono: validatedData.telefono,
-        fechaNacimiento: validatedData.fechaNacimiento ? new Date(validatedData.fechaNacimiento) : new Date(),
+        fechaNacimiento: validatedData.fechaNacimiento
+          ? new Date(validatedData.fechaNacimiento)
+          : new Date(),
         notas: validatedData.notasInternas || '',
+        iban: validatedData.iban,
+        bic: validatedData.bic,
+        metodoPago: validatedData.metodoPago,
+        personaContacto: validatedData.personaContacto,
+        ciudad: validatedData.ciudad,
+        codigoPostal: validatedData.codigoPostal,
+        provincia: validatedData.provincia,
+        pais: validatedData.pais,
         ...(hashedPassword && { password: hashedPassword }),
       },
     });
@@ -248,22 +267,33 @@ export async function POST(req: NextRequest) {
             </div>
           `,
         });
-        logger.info('Welcome email sent to tenant', { email: validatedData.email, tenantId: tenant.id });
+        logger.info('Welcome email sent to tenant', {
+          email: validatedData.email,
+          tenantId: tenant.id,
+        });
       } catch (emailError: any) {
         // Don't fail tenant creation if email fails
-        logger.error('Failed to send welcome email:', { error: emailError.message, email: validatedData.email });
+        logger.error('Failed to send welcome email:', {
+          error: emailError.message,
+          email: validatedData.email,
+        });
       }
     }
 
-    return NextResponse.json({
-      ...tenant,
-      portalAccessEnabled: !!hashedPassword,
-      welcomeEmailSent: !!hashedPassword,
-    }, { status: 201 });
+    return NextResponse.json(
+      {
+        ...tenant,
+        portalAccessEnabled: !!hashedPassword,
+        welcomeEmailSent: !!hashedPassword,
+      },
+      { status: 201 }
+    );
   } catch (error: any) {
-    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) { return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 }); }
+    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) {
+      return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 });
+    }
     logger.error('Error creating tenant:', error);
-      Sentry.captureException(error);
+    Sentry.captureException(error);
     if (error.message?.includes('permiso')) {
       return forbiddenResponse(error.message);
     }
