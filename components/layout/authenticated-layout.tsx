@@ -85,6 +85,35 @@ export function AuthenticatedLayout({
     '4xl': 'max-w-4xl',
   };
 
+  // Ocultar Crisp Chat en páginas autenticadas (usamos IntelligentSupportChatbot propio)
+  useEffect(() => {
+    const hideCrisp = () => {
+      try {
+        const w = window as any;
+        if (w.$crisp) {
+          w.$crisp.push(['do', 'chat:hide']);
+        }
+        // También ocultar via CSS por si el JS de Crisp carga después
+        const crispEl = document.getElementById('crisp-chatbox');
+        if (crispEl) {
+          crispEl.style.display = 'none';
+        }
+      } catch {
+        // Ignorar si Crisp no está cargado
+      }
+    };
+
+    // Ejecutar inmediatamente y también con delay (Crisp puede cargar async)
+    hideCrisp();
+    const timer = setTimeout(hideCrisp, 2000);
+    const timer2 = setTimeout(hideCrisp, 5000);
+
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(timer2);
+    };
+  }, []);
+
   // Verificar estado de onboarding
   useEffect(() => {
     const checkOnboarding = async () => {
