@@ -516,18 +516,6 @@ export const MODULOS_CATALOGO = [
     orden: 73
   },
   {
-    codigo: 'marketplace',
-    nombre: 'Marketplace de Servicios',
-    descripcion: 'Plataforma B2C para que inquilinos contraten servicios verificados (limpieza, reparaciones, internet, seguros) con programa de fidelización',
-    categoria: 'avanzado',
-    icono: 'ShoppingBag',
-    ruta: '/marketplace-servicios',
-    requiereModulos: ['inquilinos'],
-    tiersIncluido: ['profesional', 'empresarial'],
-    esCore: false,
-    orden: 74
-  },
-  {
     codigo: 'tours_virtuales',
     nombre: 'Tours Virtuales AR/VR',
     descripcion: 'Tours 360° inmersivos, visualización AR de reformas, decoración virtual y medición de engagement para maximizar conversiones',
@@ -953,18 +941,6 @@ export const MODULOS_CATALOGO = [
     orden: 107
   },
   {
-    codigo: 'contabilidad',
-    nombre: 'Contabilidad',
-    descripcion: 'Módulo de contabilidad integrada con plan de cuentas y asientos',
-    categoria: 'financiero',
-    icono: 'FileBarChart',
-    ruta: '/contabilidad',
-    requiereModulos: ['pagos', 'gastos'],
-    tiersIncluido: ['empresarial'],
-    esCore: false,
-    orden: 108
-  },
-  {
     codigo: 'estadisticas',
     nombre: 'Estadísticas',
     descripcion: 'Estadísticas generales de rendimiento y ocupación',
@@ -1013,18 +989,6 @@ export const MODULOS_CATALOGO = [
     tiersIncluido: ['profesional', 'empresarial'],
     esCore: false,
     orden: 112
-  },
-  {
-    codigo: 'ai_assistant',
-    nombre: 'Asistente IA Conversacional',
-    descripcion: 'Chatbot inteligente para consultas, automatización de tareas y análisis de datos',
-    categoria: 'avanzado',
-    icono: 'Bot',
-    ruta: '/asistente-ia',
-    requiereModulos: ['usuarios'],
-    tiersIncluido: ['profesional', 'empresarial'],
-    esCore: false,
-    orden: 113
   },
 
   // Operaciones
@@ -1181,18 +1145,6 @@ export const MODULOS_CATALOGO = [
 
   // Innovación
   {
-    codigo: 'energia',
-    nombre: 'Gestión de Energía',
-    descripcion: 'Control y análisis de consumo energético, solar y puntos de carga',
-    categoria: 'avanzado',
-    icono: 'Zap',
-    ruta: '/energia',
-    requiereModulos: ['edificios'],
-    tiersIncluido: ['empresarial'],
-    esCore: false,
-    orden: 126
-  },
-  {
     codigo: 'puntos_carga',
     nombre: 'Puntos de Carga EV',
     descripcion: 'Gestión de estaciones de carga para vehículos eléctricos',
@@ -1337,6 +1289,422 @@ export const MODULOS_CATALOGO = [
     tiersIncluido: ['basico', 'profesional', 'empresarial'],
     esCore: false,
     orden: 137
+  },
+
+  // ============================================
+  // VERTICALES DE NEGOCIO - Sincronización sidebar ↔ admin/modulos
+  // ============================================
+  {
+    codigo: 'ewoorker',
+    nombre: 'eWoorker - Marketplace B2B',
+    descripcion: 'Marketplace de profesionales de construcción y mantenimiento: trabajadores, asignaciones, obras, pagos y compliance',
+    categoria: 'vertical',
+    icono: 'Users2',
+    ruta: '/ewoorker',
+    requiereModulos: [],
+    tiersIncluido: ['empresarial'],
+    esCore: false,
+    orden: 140
+  },
+  {
+    codigo: 'warehouse',
+    nombre: 'Gestión de Almacenes',
+    descripcion: 'Inventario, ubicaciones y movimientos de mercancía en naves logísticas',
+    categoria: 'vertical',
+    icono: 'Package',
+    ruta: '/warehouse',
+    requiereModulos: ['edificios'],
+    tiersIncluido: ['empresarial'],
+    esCore: false,
+    orden: 141
+  },
+  {
+    codigo: 'workspace',
+    nombre: 'Workspace / Coworking',
+    descripcion: 'Gestión de espacios de trabajo compartidos: coworking, reservas y miembros',
+    categoria: 'vertical',
+    icono: 'Users2',
+    ruta: '/workspace',
+    requiereModulos: ['edificios'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 142
+  },
+  {
+    codigo: 'real_estate_developer',
+    nombre: 'Promotoras Inmobiliarias',
+    descripcion: 'Gestión de promociones inmobiliarias: proyectos, ventas, marketing y comercialización',
+    categoria: 'vertical',
+    icono: 'Building2',
+    ruta: '/real-estate-developer',
+    requiereModulos: ['edificios'],
+    tiersIncluido: ['empresarial'],
+    esCore: false,
+    orden: 143
+  },
+  {
+    codigo: 'student_housing',
+    nombre: 'Student Housing',
+    descripcion: 'Residencias de estudiantes: habitaciones, residentes, aplicaciones, actividades y pagos',
+    categoria: 'vertical',
+    icono: 'Home',
+    ruta: '/student-housing',
+    requiereModulos: ['edificios', 'inquilinos'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 144
+  },
+  {
+    codigo: 'viajes_corporativos',
+    nombre: 'Viajes Corporativos',
+    descripcion: 'Corporate travel management: reservas, huéspedes, informes de gastos y políticas',
+    categoria: 'vertical',
+    icono: 'Briefcase',
+    ruta: '/viajes-corporativos',
+    requiereModulos: [],
+    tiersIncluido: ['empresarial'],
+    esCore: false,
+    orden: 145
+  },
+  {
+    codigo: 'vivienda_social',
+    nombre: 'Vivienda Social',
+    descripcion: 'Gestión de vivienda protegida: solicitudes, elegibilidad, compliance y reportes',
+    categoria: 'vertical',
+    icono: 'Home',
+    ruta: '/vivienda-social',
+    requiereModulos: ['edificios'],
+    tiersIncluido: ['empresarial'],
+    esCore: false,
+    orden: 146
+  },
+  {
+    codigo: 'media_estancia',
+    nombre: 'Media Estancia',
+    descripcion: 'Alquiler de media estancia: calendario, scoring de huéspedes y analytics',
+    categoria: 'vertical',
+    icono: 'Calendar',
+    ruta: '/media-estancia',
+    requiereModulos: ['contratos', 'inquilinos'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 147
+  },
+  {
+    codigo: 'construccion_dashboard',
+    nombre: 'Construcción - Dashboard',
+    descripcion: 'Panel principal de la vertical de construcción y reformas',
+    categoria: 'vertical',
+    icono: 'HardHat',
+    ruta: '/construccion',
+    requiereModulos: ['edificios'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 148
+  },
+  {
+    codigo: 'construccion_projects',
+    nombre: 'Proyectos de Construcción',
+    descripcion: 'Gestión de proyectos de obra nueva, reformas y rehabilitaciones',
+    categoria: 'vertical',
+    icono: 'HardHat',
+    ruta: '/construccion/proyectos',
+    requiereModulos: ['edificios'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 149
+  },
+  {
+    codigo: 'str_housekeeping',
+    nombre: 'Housekeeping STR',
+    descripcion: 'Gestión de limpieza y preparación de propiedades de alquiler turístico',
+    categoria: 'gestion',
+    icono: 'ClipboardList',
+    ruta: '/str-housekeeping',
+    requiereModulos: ['str_listings'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 150
+  },
+  {
+    codigo: 'str_advanced',
+    nombre: 'STR Avanzado',
+    descripcion: 'Channel manager, revenue management, guest experience y gestión legal STR',
+    categoria: 'gestion',
+    icono: 'Hotel',
+    ruta: '/str-advanced',
+    requiereModulos: ['str_listings'],
+    tiersIncluido: ['empresarial'],
+    esCore: false,
+    orden: 151
+  },
+  {
+    codigo: 'valoracion_ia',
+    nombre: 'Valoración IA',
+    descripcion: 'Valoración automática de propiedades con inteligencia artificial y datos del mercado',
+    categoria: 'avanzado',
+    icono: 'Brain',
+    ruta: '/valoracion-ia',
+    requiereModulos: ['edificios'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 152
+  },
+  {
+    codigo: 'community_management',
+    nombre: 'Gestión de Comunidad',
+    descripcion: 'Dashboard de comunidad para eventos, comunicación y engagement de residentes',
+    categoria: 'comunidad',
+    icono: 'Users',
+    ruta: '/dashboard/community',
+    requiereModulos: ['inquilinos'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 153
+  },
+  {
+    codigo: 'admin_fincas',
+    nombre: 'Administración de Fincas',
+    descripcion: 'Gestión integral de comunidades de propietarios: cuotas, actas, votaciones, incidencias y más',
+    categoria: 'vertical',
+    icono: 'Building2',
+    ruta: '/comunidades',
+    requiereModulos: ['edificios'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 154
+  },
+
+  // ============================================
+  // PLATAFORMA - Módulos de administración Super Admin
+  // ============================================
+  {
+    codigo: 'admin_dashboard',
+    nombre: 'Dashboard Administración',
+    descripcion: 'Panel principal de administración de la plataforma',
+    categoria: 'plataforma',
+    icono: 'LayoutDashboard',
+    ruta: '/admin/dashboard',
+    requiereModulos: [],
+    tiersIncluido: ['basico', 'profesional', 'empresarial'],
+    esCore: false,
+    orden: 200
+  },
+  {
+    codigo: 'gestion_clientes',
+    nombre: 'Gestión de Clientes B2B',
+    descripcion: 'Administración de empresas clientes de la plataforma',
+    categoria: 'plataforma',
+    icono: 'Building2',
+    ruta: '/admin/clientes',
+    requiereModulos: [],
+    tiersIncluido: ['basico', 'profesional', 'empresarial'],
+    esCore: false,
+    orden: 201
+  },
+  {
+    codigo: 'admin_planes',
+    nombre: 'Gestión de Planes',
+    descripcion: 'Administración de planes de suscripción y precios',
+    categoria: 'plataforma',
+    icono: 'Package',
+    ruta: '/admin/planes',
+    requiereModulos: [],
+    tiersIncluido: ['basico', 'profesional', 'empresarial'],
+    esCore: false,
+    orden: 202
+  },
+  {
+    codigo: 'admin_cupones',
+    nombre: 'Cupones y Descuentos',
+    descripcion: 'Gestión de cupones promocionales y descuentos',
+    categoria: 'plataforma',
+    icono: 'Tag',
+    ruta: '/admin/cupones',
+    requiereModulos: [],
+    tiersIncluido: ['basico', 'profesional', 'empresarial'],
+    esCore: false,
+    orden: 203
+  },
+  {
+    codigo: 'admin_ewoorker_planes',
+    nombre: 'Planes eWoorker',
+    descripcion: 'Gestión de planes específicos para la plataforma eWoorker',
+    categoria: 'plataforma',
+    icono: 'Package',
+    ruta: '/admin/ewoorker-planes',
+    requiereModulos: [],
+    tiersIncluido: ['empresarial'],
+    esCore: false,
+    orden: 204
+  },
+  {
+    codigo: 'admin_facturacion_b2b',
+    nombre: 'Facturación B2B',
+    descripcion: 'Facturación y cobros a empresas clientes de la plataforma',
+    categoria: 'plataforma',
+    icono: 'DollarSign',
+    ruta: '/admin/facturacion-b2b',
+    requiereModulos: [],
+    tiersIncluido: ['basico', 'profesional', 'empresarial'],
+    esCore: false,
+    orden: 205
+  },
+  {
+    codigo: 'admin_personalizacion',
+    nombre: 'Personalización / Branding',
+    descripcion: 'Configuración de marca blanca, logos y colores de la plataforma',
+    categoria: 'plataforma',
+    icono: 'Palette',
+    ruta: '/admin/personalizacion',
+    requiereModulos: [],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 206
+  },
+  {
+    codigo: 'admin_activity',
+    nombre: 'Actividad del Sistema',
+    descripcion: 'Log de actividad y eventos del sistema en tiempo real',
+    categoria: 'plataforma',
+    icono: 'Activity',
+    ruta: '/admin/activity',
+    requiereModulos: [],
+    tiersIncluido: ['basico', 'profesional', 'empresarial'],
+    esCore: false,
+    orden: 207
+  },
+  {
+    codigo: 'admin_alertas',
+    nombre: 'Alertas del Sistema',
+    descripcion: 'Configuración y gestión de alertas automáticas',
+    categoria: 'plataforma',
+    icono: 'Bell',
+    ruta: '/admin/alertas',
+    requiereModulos: [],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 208
+  },
+  {
+    codigo: 'admin_portales_externos',
+    nombre: 'Portales Externos',
+    descripcion: 'Integración con portales inmobiliarios externos (Idealista, Fotocasa, etc.)',
+    categoria: 'plataforma',
+    icono: 'Share2',
+    ruta: '/admin/portales-externos',
+    requiereModulos: [],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 209
+  },
+  {
+    codigo: 'admin_aprobaciones',
+    nombre: 'Aprobaciones',
+    descripcion: 'Flujo de aprobaciones para operaciones sensibles',
+    categoria: 'plataforma',
+    icono: 'CheckSquare',
+    ruta: '/admin/aprobaciones',
+    requiereModulos: [],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 210
+  },
+  {
+    codigo: 'admin_reportes_programados',
+    nombre: 'Reportes Programados',
+    descripcion: 'Configuración de reportes automáticos enviados por email',
+    categoria: 'plataforma',
+    icono: 'FileBarChart',
+    ruta: '/admin/reportes-programados',
+    requiereModulos: [],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 211
+  },
+  {
+    codigo: 'admin_importar',
+    nombre: 'Importación de Datos',
+    descripcion: 'Herramienta de importación masiva de datos desde Excel/CSV',
+    categoria: 'plataforma',
+    icono: 'Upload',
+    ruta: '/admin/importar',
+    requiereModulos: [],
+    tiersIncluido: ['basico', 'profesional', 'empresarial'],
+    esCore: false,
+    orden: 212
+  },
+  {
+    codigo: 'admin_ocr_import',
+    nombre: 'OCR Import',
+    descripcion: 'Importación de documentos con reconocimiento óptico de caracteres',
+    categoria: 'plataforma',
+    icono: 'Scan',
+    ruta: '/admin/ocr-import',
+    requiereModulos: [],
+    tiersIncluido: ['empresarial'],
+    esCore: false,
+    orden: 213
+  },
+  {
+    codigo: 'admin_logs',
+    nombre: 'Logs del Sistema',
+    descripcion: 'Visor de logs del sistema para diagnóstico y debugging',
+    categoria: 'plataforma',
+    icono: 'FileText',
+    ruta: '/admin/system-logs',
+    requiereModulos: [],
+    tiersIncluido: ['empresarial'],
+    esCore: false,
+    orden: 214
+  },
+  {
+    codigo: 'admin_onboarding',
+    nombre: 'Onboarding de Clientes',
+    descripcion: 'Gestión del proceso de onboarding de nuevos clientes',
+    categoria: 'plataforma',
+    icono: 'UserPlus',
+    ruta: '/admin/onboarding',
+    requiereModulos: [],
+    tiersIncluido: ['basico', 'profesional', 'empresarial'],
+    esCore: false,
+    orden: 215
+  },
+  {
+    codigo: 'admin_notificaciones',
+    nombre: 'Notificaciones Masivas',
+    descripcion: 'Envío de notificaciones masivas a usuarios de la plataforma',
+    categoria: 'plataforma',
+    icono: 'Bell',
+    ruta: '/admin/notificaciones-masivas',
+    requiereModulos: [],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 216
+  },
+  {
+    codigo: 'api_docs',
+    nombre: 'Documentación API',
+    descripcion: 'Documentación interactiva de la API REST de la plataforma',
+    categoria: 'plataforma',
+    icono: 'Code',
+    ruta: '/api-docs',
+    requiereModulos: [],
+    tiersIncluido: ['empresarial'],
+    esCore: false,
+    orden: 217
+  },
+  {
+    codigo: 'admin_sales_team',
+    nombre: 'Equipo de Ventas',
+    descripcion: 'Gestión del equipo comercial y seguimiento de ventas',
+    categoria: 'plataforma',
+    icono: 'Users',
+    ruta: '/admin/sales-team',
+    requiereModulos: [],
+    tiersIncluido: ['empresarial'],
+    esCore: false,
+    orden: 218
   },
 ];
 

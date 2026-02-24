@@ -85,6 +85,7 @@ interface CurrentPlan {
 
 const CATEGORIAS = {
   core: { nombre: 'Módulos Esenciales', icono: Package, color: 'bg-blue-100 text-blue-800' },
+  vertical: { nombre: 'Verticales de Negocio', icono: Building2, color: 'bg-cyan-100 text-cyan-800' },
   gestion: { nombre: 'Gestión Básica', icono: Building2, color: 'bg-green-100 text-green-800' },
   financiero: { nombre: 'Financiero', icono: DollarSign, color: 'bg-purple-100 text-purple-800' },
   comunicacion: {
@@ -96,6 +97,7 @@ const CATEGORIAS = {
   comunidad: { nombre: 'Comunidad', icono: Users, color: 'bg-teal-100 text-teal-800' },
   portales: { nombre: 'Portales', icono: Zap, color: 'bg-indigo-100 text-indigo-800' },
   admin: { nombre: 'Administración', icono: Shield, color: 'bg-gray-100 text-gray-800' },
+  plataforma: { nombre: 'Plataforma (Super Admin)', icono: Shield, color: 'bg-slate-100 text-slate-800' },
 };
 
 export default function ModulosAdminPage() {
