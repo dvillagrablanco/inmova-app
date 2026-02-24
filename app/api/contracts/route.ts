@@ -109,6 +109,9 @@ export async function GET(req: NextRequest) {
         diaPago: contract.diaPago,
         clausulasAdicionales: contract.clausulasAdicionales,
         renovacionAutomatica: contract.renovacionAutomatica,
+        codigoOperacion: contract.codigoOperacion,
+        suministrosProvisionales: contract.suministrosProvisionales != null ? Number(contract.suministrosProvisionales) : null,
+        ibiRepercutido: contract.ibiRepercutido != null ? Number(contract.ibiRepercutido) : null,
         unit: contract.unit,
         tenant: contract.tenant,
         createdAt: contract.createdAt,
@@ -189,6 +192,9 @@ export async function POST(req: NextRequest) {
         diaPago: validatedData.diaCobranza || 1,
         clausulasAdicionales: validatedData.clausulasEspeciales || '',
         renovacionAutomatica: validatedData.renovacionAutomatica || false,
+        codigoOperacion: validatedData.codigoOperacion,
+        suministrosProvisionales: validatedData.suministrosProvisionales,
+        ibiRepercutido: validatedData.ibiRepercutido,
       },
     });
 

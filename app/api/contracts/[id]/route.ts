@@ -47,6 +47,9 @@ const contractUpdateSchema = z.object({
     }),
   estado: z.enum(['activo', 'vencido', 'cancelado']).optional(),
   tipo: z.enum(['residencial', 'comercial', 'temporal']).optional(),
+  codigoOperacion: z.string().max(100).optional(),
+  suministrosProvisionales: z.number().nonnegative().optional(),
+  ibiRepercutido: z.number().nonnegative().optional(),
 });
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
@@ -123,7 +126,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       return NextResponse.json({ error: 'Datos inválidos', details: errors }, { status: 400 });
     }
 
-    const { fechaInicio, fechaFin, rentaMensual, deposito, estado, tipo } = validationResult.data;
+    const { fechaInicio, fechaFin, rentaMensual, deposito, estado, tipo, codigoOperacion, suministrosProvisionales, ibiRepercutido } = validationResult.data;
 
     const contract = await prisma.contract.update({
       where: { id: params.id },
@@ -134,6 +137,9 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         deposito,
         estado,
         tipo,
+        codigoOperacion,
+        suministrosProvisionales,
+        ibiRepercutido,
       },
     });
 

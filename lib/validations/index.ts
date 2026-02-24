@@ -196,6 +196,9 @@ const contractBaseSchema = z.object({
     .max(5000, 'Las cláusulas especiales no pueden exceder 5000 caracteres')
     .optional(),
   renovacionAutomatica: z.boolean().optional().default(false),
+  codigoOperacion: z.string().max(100).optional(),
+  suministrosProvisionales: z.number().nonnegative().optional(),
+  ibiRepercutido: z.number().nonnegative().optional(),
 });
 
 export const contractCreateSchema = contractBaseSchema.refine(

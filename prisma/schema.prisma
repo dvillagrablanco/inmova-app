@@ -1400,6 +1400,11 @@ model Contract {
   checklistEntradaPath String? // PDF del checklist de entrada firmado
   checklistSalidaPath  String? // PDF del checklist de salida firmado
 
+  // Campos adicionales
+  codigoOperacion       String? // Código de operación (registro, etc.)
+  suministrosProvisionales Float? // Importe suministros provisionales
+  ibiRepercutido        Float? // IBI repercutido al inquilino (€)
+
   unit                  Unit                  @relation(fields: [unitId], references: [id], onDelete: Cascade)
   tenant                Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   legalTemplate         LegalTemplate?        @relation(fields: [legalTemplateId], references: [id], onDelete: SetNull)
