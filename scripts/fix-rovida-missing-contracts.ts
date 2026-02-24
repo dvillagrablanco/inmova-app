@@ -188,7 +188,6 @@ async function main() {
           fechaFin: new Date(2025, 11, 31),
           rentaMensual: bc.renta,
           deposito: bc.renta * 2,
-          depositoGarantia: bc.renta * 2,
           estado: 'activo',
           tipo: 'residencial',
         },
