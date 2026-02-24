@@ -166,6 +166,42 @@ export async function GET(request: NextRequest) {
       prisma.bankTransaction.count({ where: txWhere }),
     ]);
 
+    // Buscar sugerencias de matching por IBAN del inquilino
+    // Extraemos IBANs de las transacciones no conciliadas para buscar inquilinos
+    const debtorIbans = transactions
+      .filter(tx => tx.debtorIban && !tx.paymentId && !tx.expenseId)
+      .map(tx => tx.debtorIban!)
+      .filter((v, i, a) => a.indexOf(v) === i); // unique
+
+    const tenantsByIban: Record<string, { id: string; nombre: string; contractId?: string }> = {};
+    if (debtorIbans.length > 0) {
+      const matchedTenants = await prisma.tenant.findMany({
+        where: {
+          iban: { in: debtorIbans },
+          companyId: { in: queryCompanyIds },
+        },
+        select: {
+          id: true,
+          nombreCompleto: true,
+          iban: true,
+          contracts: {
+            where: { estado: 'activo' },
+            select: { id: true },
+            take: 1,
+          },
+        },
+      });
+      for (const t of matchedTenants) {
+        if (t.iban) {
+          tenantsByIban[t.iban] = {
+            id: t.id,
+            nombre: t.nombreCompleto,
+            contractId: t.contracts[0]?.id,
+          };
+        }
+      }
+    }
+
     // Map transactions to response format
     const transactionResponses = transactions.map(tx => {
       const statusMap: Record<string, 'pending' | 'matched' | 'manual' | 'unmatched'> = {
@@ -199,6 +235,16 @@ export async function GET(request: NextRequest) {
         companyId: tx.companyId,
         companyName: tx.connection?.company?.nombre || '',
         bankName: tx.connection?.nombreBanco || '',
+        // Sugerencia de match por IBAN del inquilino
+        matchSuggestion: tx.debtorIban && tenantsByIban[tx.debtorIban] && !tx.paymentId
+          ? {
+              tenantId: tenantsByIban[tx.debtorIban].id,
+              tenantName: tenantsByIban[tx.debtorIban].nombre,
+              contractId: tenantsByIban[tx.debtorIban].contractId,
+              matchType: 'iban',
+              confidence: 95,
+            }
+          : undefined,
       };
     });
 
