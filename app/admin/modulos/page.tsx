@@ -37,6 +37,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import logger, { logError } from '@/lib/logger';
+import { SECTION_TO_MODULES } from '@/components/layout/sidebar-data';
 
 interface ModuloDefinicion {
   codigo: string;
@@ -181,6 +182,53 @@ export default function ModulosAdminPage() {
     } finally {
       setUpdating(null);
     }
+  }
+
+  const [updatingSection, setUpdatingSection] = useState<string | null>(null);
+
+  async function toggleSectionModules(sectionId: string, activo: boolean) {
+    const sectionModules = SECTION_TO_MODULES[sectionId];
+    if (!sectionModules || sectionModules.length === 0) return;
+
+    try {
+      setUpdatingSection(sectionId);
+      const res = await fetch('/api/modules/toggle-batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ modules: sectionModules, activo }),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || 'Error al modificar módulos');
+      }
+
+      const result = await res.json();
+      toast.success(
+        activo
+          ? `${result.toggled?.length || 0} módulos activados`
+          : `${result.toggled?.length || 0} módulos desactivados`
+      );
+      window.dispatchEvent(new Event('modules-changed'));
+      await loadData();
+    } catch (error: any) {
+      logger.error('Error toggling section:', error);
+      toast.error(error.message || 'Error al modificar módulos');
+    } finally {
+      setUpdatingSection(null);
+    }
+  }
+
+  function getSectionActiveCount(sectionId: string): { active: number; total: number } {
+    const sectionModules = SECTION_TO_MODULES[sectionId];
+    if (!sectionModules) return { active: 0, total: 0 };
+    const active = sectionModules.filter((m) => isModuleActive(m)).length;
+    return { active, total: sectionModules.length };
+  }
+
+  function isSectionFullyActive(sectionId: string): boolean {
+    const { active, total } = getSectionActiveCount(sectionId);
+    return active > total / 2;
   }
 
   function isModuleActive(codigo: string): boolean {
@@ -384,6 +432,7 @@ export default function ModulosAdminPage() {
           <Tabs defaultValue="modulos" className="space-y-6">
             <TabsList>
               <TabsTrigger value="modulos">Módulos Disponibles</TabsTrigger>
+              <TabsTrigger value="verticales">Por Verticales / Módulos</TabsTrigger>
               <TabsTrigger value="packs">Packs de Suscripción</TabsTrigger>
             </TabsList>
 
@@ -497,6 +546,180 @@ export default function ModulosAdminPage() {
                   </Card>
                 );
               })}
+            </TabsContent>
+
+            {/* Tab de Verticales / Módulos */}
+            <TabsContent value="verticales" className="space-y-6">
+              {/* Verticales de Negocio */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Building2 className="h-5 w-5" />
+                    Verticales de Negocio
+                  </CardTitle>
+                  <CardDescription>
+                    Activa o desactiva módulos verticales completos de un solo clic
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {[
+                    { id: 'alquilerResidencial', label: '🏠 Living Residencial', desc: 'Alquiler tradicional, coliving, student housing' },
+                    { id: 'str', label: '🏖️ Turístico y Hospitality', desc: 'Short-term rentals, channel manager, reviews' },
+                    { id: 'hospitality', label: '🏨 Hospitality', desc: 'Apart-hotels, B&B, check-in/out, servicios' },
+                    { id: 'coLiving', label: '🛏️ Coliving', desc: 'Habitaciones, comunidad, matching, eventos' },
+                    { id: 'studentHousing', label: '🎓 Student Housing', desc: 'Residencias de estudiantes' },
+                    { id: 'construccion', label: '🏗️ Construcción / Promoción', desc: 'Obra nueva, reformas, Gantt, licitaciones' },
+                    { id: 'ewoorker', label: '🔧 eWoorker', desc: 'Marketplace de trabajadores B2B' },
+                    { id: 'flipping', label: '📈 House Flipping', desc: 'Proyectos, timeline, calculadora ROI' },
+                    { id: 'comercial', label: '🏢 Patrimonio Terciario', desc: 'Oficinas, locales, naves, garajes' },
+                    { id: 'adminFincas', label: '🏘️ Comunidades', desc: 'Administración de fincas, propietarios, cuotas' },
+                    { id: 'viviendaSocial', label: '🏛️ Vivienda Social', desc: 'Solicitudes, elegibilidad, compliance' },
+                    { id: 'realEstateDeveloper', label: '🏗️ Promotoras', desc: 'Proyectos, ventas, marketing inmobiliario' },
+                    { id: 'workspace', label: '💼 Workspace', desc: 'Coworking, reservas, miembros' },
+                    { id: 'warehouse', label: '📦 Warehouse', desc: 'Inventario, ubicaciones, movimientos' },
+                    { id: 'holdingGrupo', label: '🏛️ Holding / Grupo', desc: 'Consolidación societaria, inversiones, fiscal' },
+                  ].map((section) => {
+                    const { active, total } = getSectionActiveCount(section.id);
+                    const isActive = isSectionFullyActive(section.id);
+                    const isToggling = updatingSection === section.id;
+
+                    return (
+                      <div
+                        key={section.id}
+                        className={`p-4 border rounded-lg transition-all ${
+                          isActive ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h4 className="font-semibold text-sm">{section.label}</h4>
+                              <Badge variant="outline" className="text-xs">
+                                {active}/{total} activos
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-muted-foreground">{section.desc}</p>
+                          </div>
+                          <div className="flex flex-col items-center gap-1 flex-shrink-0">
+                            <Switch
+                              checked={isActive}
+                              disabled={isToggling}
+                              onCheckedChange={(checked) =>
+                                toggleSectionModules(section.id, checked)
+                              }
+                              className="data-[state=checked]:bg-green-600"
+                            />
+                            <span className="text-[10px] font-medium text-muted-foreground">
+                              {isToggling ? 'Procesando...' : isActive ? 'Activo' : 'Inactivo'}
+                            </span>
+                          </div>
+                        </div>
+                        {/* Barra de progreso visual */}
+                        <div className="mt-2 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-green-500 rounded-full transition-all duration-300"
+                            style={{ width: total > 0 ? `${(active / total) * 100}%` : '0%' }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </CardContent>
+              </Card>
+
+              {/* Herramientas Horizontales */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Zap className="h-5 w-5" />
+                    Herramientas Horizontales
+                  </CardTitle>
+                  <CardDescription>
+                    Herramientas transversales aplicables a todas las verticales
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {[
+                    { id: 'finanzas', label: '💰 Finanzas', desc: 'Pagos, gastos, contabilidad, BI, presupuestos' },
+                    { id: 'analytics', label: '📊 Analytics e IA', desc: 'Reportes, informes, asistente IA' },
+                    { id: 'operaciones', label: '⚙️ Operaciones', desc: 'Mantenimiento, proveedores, tareas, calendario' },
+                    { id: 'herramientasInversion', label: '🧮 Inversión', desc: 'Calculadoras de rentabilidad, hipotecas' },
+                    { id: 'comunicaciones', label: '💬 Comunicaciones', desc: 'Chat, notificaciones, SMS, redes sociales' },
+                    { id: 'documentosLegal', label: '📄 Documentos y Legal', desc: 'IA documental, firma digital, compliance' },
+                    { id: 'crmMarketing', label: '📇 CRM Inmobiliario', desc: 'CRM, portal comercial, tours virtuales' },
+                    { id: 'automatizacion', label: '⚡ Automatización', desc: 'Workflows, sincronización, recordatorios' },
+                    { id: 'innovacion', label: '🚀 Innovación', desc: 'ESG, IoT, blockchain, economía circular' },
+                    { id: 'soporte', label: '🎧 Soporte', desc: 'Centro de ayuda, base de conocimientos' },
+                  ].map((section) => {
+                    const { active, total } = getSectionActiveCount(section.id);
+                    const isActive = isSectionFullyActive(section.id);
+                    const isToggling = updatingSection === section.id;
+
+                    return (
+                      <div
+                        key={section.id}
+                        className={`p-4 border rounded-lg transition-all ${
+                          isActive ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h4 className="font-semibold text-sm">{section.label}</h4>
+                              <Badge variant="outline" className="text-xs">
+                                {active}/{total} activos
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-muted-foreground">{section.desc}</p>
+                          </div>
+                          <div className="flex flex-col items-center gap-1 flex-shrink-0">
+                            <Switch
+                              checked={isActive}
+                              disabled={isToggling}
+                              onCheckedChange={(checked) =>
+                                toggleSectionModules(section.id, checked)
+                              }
+                              className="data-[state=checked]:bg-green-600"
+                            />
+                            <span className="text-[10px] font-medium text-muted-foreground">
+                              {isToggling ? 'Procesando...' : isActive ? 'Activo' : 'Inactivo'}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="mt-2 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-green-500 rounded-full transition-all duration-300"
+                            style={{ width: total > 0 ? `${(active / total) * 100}%` : '0%' }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </CardContent>
+              </Card>
+
+              <Card className="bg-blue-50 border-blue-200">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <AlertCircle className="h-5 w-5 text-blue-600" />
+                    Información
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2 text-sm text-muted-foreground">
+                  <p>
+                    • Al <strong>activar</strong> un módulo completo, se activan todas las páginas asociadas.
+                  </p>
+                  <p>
+                    • Al <strong>desactivar</strong>, se desactivan todas las páginas del módulo y desaparecen del sidebar.
+                  </p>
+                  <p>
+                    • Puedes ajustar páginas individuales en la pestaña &quot;Módulos Disponibles&quot;.
+                  </p>
+                  <p>
+                    • Los cambios se reflejan inmediatamente en el sidebar de navegación.
+                  </p>
+                </CardContent>
+              </Card>
             </TabsContent>
 
             {/* Tab de Packs */}
