@@ -225,18 +225,18 @@ export const paymentCreateSchema = z.object({
     .positive('El monto debe ser mayor a 0')
     .max(10000000, 'El monto no puede exceder 10,000,000'),
   fechaVencimiento: z.string().datetime({ message: 'Fecha de vencimiento inválida' }).or(z.date()),
-  concepto: z
-    .string()
-    .min(1, 'El concepto es requerido')
-    .max(500, 'El concepto no puede exceder 500 caracteres')
-    .trim(),
+  concepto: z.string().max(500, 'El concepto no puede exceder 500 caracteres').trim().optional(),
   estado: z.enum(['pendiente', 'pagado', 'atrasado']).optional().default('pendiente'),
   metodoPago: z
     .enum(['efectivo', 'transferencia', 'tarjeta', 'cheque', 'domiciliacion', 'otro'])
     .optional(),
   fechaPago: z.string().datetime({ message: 'Fecha de pago inválida' }).or(z.date()).optional(),
   referencia: z.string().max(200, 'La referencia no puede exceder 200 caracteres').optional(),
+  baseImponible: z.number().optional(),
+  iva: z.number().optional(),
+  irpf: z.number().optional(),
   notas: z.string().max(2000, 'Las notas no pueden exceder 2000 caracteres').optional(),
+  periodo: z.string().max(200).optional(),
 });
 
 export const paymentUpdateSchema = paymentCreateSchema.partial().omit({ contractId: true });

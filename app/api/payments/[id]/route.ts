@@ -43,6 +43,11 @@ const paymentUpdateSchema = z.object({
   estado: z.enum(['pendiente', 'pagado', 'atrasado']).optional(),
   metodoPago: z.string().optional().nullable(),
   nivelRiesgo: z.enum(['bajo', 'medio', 'alto', 'critico']).optional().nullable(),
+  concepto: z.string().max(500).optional().nullable(),
+  referencia: z.string().max(200).optional().nullable(),
+  baseImponible: z.number().optional().nullable(),
+  iva: z.number().optional().nullable(),
+  irpf: z.number().optional().nullable(),
 });
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
@@ -76,7 +81,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     return NextResponse.json(payment);
   } catch (error) {
     logger.error('Error fetching payment:', error);
-      Sentry.captureException(error);
+    Sentry.captureException(error);
     return NextResponse.json({ error: 'Error al obtener pago' }, { status: 500 });
   }
 }
@@ -103,8 +108,20 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       return NextResponse.json({ error: 'Datos inválidos', details: errors }, { status: 400 });
     }
 
-    const { periodo, monto, fechaVencimiento, fechaPago, estado, metodoPago, nivelRiesgo } =
-      validationResult.data;
+    const {
+      periodo,
+      monto,
+      fechaVencimiento,
+      fechaPago,
+      estado,
+      metodoPago,
+      nivelRiesgo,
+      concepto,
+      referencia,
+      baseImponible,
+      iva,
+      irpf,
+    } = validationResult.data;
 
     // Obtener el pago actual antes de actualizar
     const currentPayment = await prisma.payment.findUnique({
@@ -149,6 +166,11 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         estado,
         metodoPago,
         nivelRiesgo: nivelRiesgo ?? undefined,
+        concepto: concepto ?? undefined,
+        referencia: referencia ?? undefined,
+        baseImponible: baseImponible ?? undefined,
+        iva: iva ?? undefined,
+        irpf: irpf ?? undefined,
       },
       include: {
         contract: {
@@ -243,7 +265,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         logger.info(`✅ Recibo generado y enviado para pago ${payment.id}`);
       } catch (emailError) {
         logger.error('Error generando recibo o enviando email:', emailError);
-      Sentry.captureException(error);
+        Sentry.captureException(error);
         // No fallar la actualización del pago si falla el email
       }
     }
@@ -258,7 +280,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     return NextResponse.json(payment);
   } catch (error) {
     logger.error('Error updating payment:', error);
-      Sentry.captureException(error);
+    Sentry.captureException(error);
     return NextResponse.json({ error: 'Error al actualizar pago' }, { status: 500 });
   }
 }
@@ -286,7 +308,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     return NextResponse.json({ message: 'Pago eliminado' });
   } catch (error) {
     logger.error('Error deleting payment:', error);
-      Sentry.captureException(error);
+    Sentry.captureException(error);
     return NextResponse.json({ error: 'Error al eliminar pago' }, { status: 500 });
   }
 }

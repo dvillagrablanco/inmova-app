@@ -1453,6 +1453,13 @@ model Payment {
   reciboPdfPath    String?
   nivelRiesgo      RiskLevel     @default(bajo)
 
+  // Facturación / detalles fiscales
+  concepto      String?
+  referencia    String?
+  baseImponible Float?
+  iva          Float?
+  irpf         Float?
+
   // Stripe integration fields
   stripePaymentIntentId String?              @unique
   stripePaymentStatus   StripePaymentStatus?
