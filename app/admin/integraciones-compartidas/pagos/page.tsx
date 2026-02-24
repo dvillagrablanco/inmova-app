@@ -10,16 +10,16 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  ArrowLeft, 
-  CheckCircle2, 
+import {
+  ArrowLeft,
+  CheckCircle2,
   XCircle,
   Settings,
   RefreshCw,
   ExternalLink,
   CreditCard,
   Building2,
-  Smartphone
+  Smartphone,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -33,7 +33,11 @@ export default function PagosCompartidosPage() {
     }
     const allowedRoles = ['super_admin', 'SUPER_ADMIN', 'superadmin', 'admin', 'ADMIN'];
     const userRole = session?.user?.role?.toLowerCase();
-    if (status === 'authenticated' && userRole && !allowedRoles.map(r => r.toLowerCase()).includes(userRole)) {
+    if (
+      status === 'authenticated' &&
+      userRole &&
+      !allowedRoles.map((r) => r.toLowerCase()).includes(userRole)
+    ) {
       router.push('/unauthorized');
     }
   }, [status, session, router]);
@@ -52,10 +56,10 @@ export default function PagosCompartidosPage() {
       status: 'connected',
       mode: 'live',
       stats: {
-        transactions: 1234,
-        volume: '€45,230',
-        fee: '1.4% + €0.25'
-      }
+        transactions: '—',
+        volume: '—',
+        fee: '—',
+      },
     },
     {
       id: 'gocardless',
@@ -66,10 +70,10 @@ export default function PagosCompartidosPage() {
       status: 'connected',
       mode: 'live',
       stats: {
-        transactions: 456,
-        volume: '€89,340',
-        fee: '1% + €0.20'
-      }
+        transactions: '—',
+        volume: '—',
+        fee: '—',
+      },
     },
     {
       id: 'redsys',
@@ -80,10 +84,10 @@ export default function PagosCompartidosPage() {
       status: 'connected',
       mode: 'live',
       stats: {
-        transactions: 890,
-        volume: '€34,560',
-        fee: '0.5% - 1.5%'
-      }
+        transactions: '—',
+        volume: '—',
+        fee: '—',
+      },
     },
   ];
 
@@ -91,7 +95,10 @@ export default function PagosCompartidosPage() {
     <div className="container mx-auto py-6 px-4 max-w-5xl">
       {/* Header */}
       <div className="mb-6">
-        <Link href="/admin/integraciones-compartidas" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4">
+        <Link
+          href="/admin/integraciones-compartidas"
+          className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4"
+        >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Volver a Integraciones Compartidas
         </Link>
@@ -101,7 +108,9 @@ export default function PagosCompartidosPage() {
           </div>
           <div>
             <h1 className="text-3xl font-bold">Pasarelas de Pago</h1>
-            <p className="text-muted-foreground">Stripe, GoCardless y Redsys - Configuración centralizada de Inmova</p>
+            <p className="text-muted-foreground">
+              Stripe, GoCardless y Redsys - Configuración centralizada de Inmova
+            </p>
           </div>
         </div>
       </div>
@@ -110,9 +119,9 @@ export default function PagosCompartidosPage() {
       <Card className="mb-6 border-blue-200 bg-blue-50 dark:bg-blue-950">
         <CardContent className="pt-4">
           <p className="text-sm text-blue-800 dark:text-blue-200">
-            <strong>ℹ️ Nota:</strong> Estas integraciones son configuradas por Inmova a nivel de plataforma. 
-            Las empresas clientes pueden activar/desactivar los métodos de pago disponibles desde su panel, 
-            pero la configuración de credenciales es centralizada.
+            <strong>ℹ️ Nota:</strong> Estas integraciones son configuradas por Inmova a nivel de
+            plataforma. Las empresas clientes pueden activar/desactivar los métodos de pago
+            disponibles desde su panel, pero la configuración de credenciales es centralizada.
           </p>
         </CardContent>
       </Card>
@@ -127,20 +136,20 @@ export default function PagosCompartidosPage() {
           <div className="grid gap-4 md:grid-cols-4">
             <div className="p-4 border rounded-lg">
               <p className="text-sm text-muted-foreground">Transacciones Totales</p>
-              <p className="text-2xl font-bold">2,580</p>
+              <p className="text-2xl font-bold">—</p>
               <p className="text-xs text-muted-foreground">Este mes</p>
             </div>
             <div className="p-4 border rounded-lg">
               <p className="text-sm text-muted-foreground">Volumen Total</p>
-              <p className="text-2xl font-bold text-green-600">€169,130</p>
+              <p className="text-2xl font-bold text-muted-foreground">—</p>
             </div>
             <div className="p-4 border rounded-lg">
               <p className="text-sm text-muted-foreground">Comisiones</p>
-              <p className="text-2xl font-bold text-red-500">€2,340</p>
+              <p className="text-2xl font-bold text-muted-foreground">—</p>
             </div>
             <div className="p-4 border rounded-lg">
               <p className="text-sm text-muted-foreground">Tasa de Éxito</p>
-              <p className="text-2xl font-bold">98.7%</p>
+              <p className="text-2xl font-bold">—</p>
             </div>
           </div>
         </CardContent>
@@ -160,7 +169,9 @@ export default function PagosCompartidosPage() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <div className={`h-12 w-12 rounded-lg bg-gradient-to-br ${provider.color} flex items-center justify-center`}>
+                    <div
+                      className={`h-12 w-12 rounded-lg bg-gradient-to-br ${provider.color} flex items-center justify-center`}
+                    >
                       <provider.icon className="h-6 w-6 text-white" />
                     </div>
                     <div>
@@ -169,7 +180,9 @@ export default function PagosCompartidosPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline">{provider.mode === 'live' ? '🟢 Live' : '🟡 Test'}</Badge>
+                    <Badge variant="outline">
+                      {provider.mode === 'live' ? '🟢 Live' : '🟡 Test'}
+                    </Badge>
                     <Badge variant="default">
                       <CheckCircle2 className="h-3 w-3 mr-1" />
                       Conectado
@@ -186,7 +199,9 @@ export default function PagosCompartidosPage() {
                   </div>
                   <div className="p-4 border rounded-lg">
                     <p className="text-sm text-muted-foreground">Volumen</p>
-                    <p className="text-2xl font-bold text-green-600">{provider.stats.volume}</p>
+                    <p className="text-2xl font-bold text-muted-foreground">
+                      {provider.stats.volume}
+                    </p>
                   </div>
                   <div className="p-4 border rounded-lg">
                     <p className="text-sm text-muted-foreground">Comisión</p>
@@ -273,23 +288,7 @@ export default function PagosCompartidosPage() {
           <CardDescription>Clientes de Inmova que usan estas pasarelas</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {[
-              { name: 'Inmobiliaria García', methods: ['Stripe', 'GoCardless'], transactions: 234 },
-              { name: 'Gestiones López', methods: ['Stripe'], transactions: 156 },
-              { name: 'Alquileres Madrid', methods: ['Stripe', 'Redsys'], transactions: 89 },
-            ].map((company, idx) => (
-              <div key={idx} className="flex items-center justify-between p-4 border rounded-lg">
-                <div>
-                  <p className="font-medium">{company.name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {company.methods.join(', ')}
-                  </p>
-                </div>
-                <Badge variant="outline">{company.transactions} transacciones</Badge>
-              </div>
-            ))}
-          </div>
+          <div className="py-8 text-center text-muted-foreground">Sin datos</div>
         </CardContent>
       </Card>
     </div>

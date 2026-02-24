@@ -2,7 +2,7 @@
 
 /**
  * Partners - Marketing
- * 
+ *
  * Herramientas y campañas de marketing para partners
  */
 
@@ -32,57 +32,6 @@ import { toast } from 'sonner';
 const PARTNER_LINK = 'https://inmovaapp.com/?ref=PARTNER123';
 const REFERRAL_CODE = 'PARTNER123';
 
-const CAMPAIGNS = [
-  {
-    id: '1',
-    nombre: 'Campaña Q1 2026',
-    tipo: 'email',
-    estado: 'activa',
-    clicks: 1250,
-    conversiones: 45,
-    iniciada: '2026-01-01',
-  },
-  {
-    id: '2',
-    nombre: 'Landing Inmobiliarias',
-    tipo: 'landing',
-    estado: 'activa',
-    clicks: 890,
-    conversiones: 32,
-    iniciada: '2025-12-15',
-  },
-  {
-    id: '3',
-    nombre: 'Redes Sociales Diciembre',
-    tipo: 'social',
-    estado: 'finalizada',
-    clicks: 2340,
-    conversiones: 89,
-    iniciada: '2025-12-01',
-  },
-];
-
-const EMAIL_TEMPLATES = [
-  {
-    id: '1',
-    nombre: 'Introducción a Inmova',
-    asunto: 'Simplifica la gestión de tus propiedades',
-    preview: 'Descubre cómo Inmova puede ayudarte a gestionar tus propiedades de forma más eficiente...',
-  },
-  {
-    id: '2',
-    nombre: 'Caso de Éxito',
-    asunto: 'Cómo [Cliente] redujo un 40% su tiempo de gestión',
-    preview: 'Te contamos cómo uno de nuestros clientes transformó su negocio inmobiliario...',
-  },
-  {
-    id: '3',
-    nombre: 'Promoción Especial',
-    asunto: '20% de descuento en tu primer año',
-    preview: 'Aprovecha esta oferta exclusiva para nuevos clientes referidos por partners...',
-  },
-];
-
 export default function PartnersMarketingPage() {
   const [activeTab, setActiveTab] = useState('links');
 
@@ -92,10 +41,10 @@ export default function PartnersMarketingPage() {
   };
 
   const stats = {
-    totalClicks: 4480,
-    conversiones: 166,
-    tasaConversion: 3.7,
-    ingresoGenerado: 8250,
+    totalClicks: null as number | null,
+    conversiones: null as number | null,
+    tasaConversion: null as number | null,
+    ingresoGenerado: null as number | null,
   };
 
   return (
@@ -103,19 +52,19 @@ export default function PartnersMarketingPage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold">Marketing</h1>
-        <p className="text-muted-foreground">
-          Herramientas y campañas para promocionar Inmova
-        </p>
+        <p className="text-muted-foreground">Herramientas y campañas para promocionar Inmova</p>
       </div>
 
-      {/* Stats */}
+      {/* Stats - empty state until partner API */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Total Clicks</p>
-                <p className="text-2xl font-bold">{stats.totalClicks.toLocaleString()}</p>
+                <p className="text-2xl font-bold">
+                  {stats.totalClicks != null ? stats.totalClicks.toLocaleString() : '—'}
+                </p>
               </div>
               <MousePointer className="h-8 w-8 text-blue-500 opacity-80" />
             </div>
@@ -127,7 +76,9 @@ export default function PartnersMarketingPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Conversiones</p>
-                <p className="text-2xl font-bold">{stats.conversiones}</p>
+                <p className="text-2xl font-bold">
+                  {stats.conversiones != null ? stats.conversiones : '—'}
+                </p>
               </div>
               <UserPlus className="h-8 w-8 text-green-500 opacity-80" />
             </div>
@@ -139,7 +90,9 @@ export default function PartnersMarketingPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Tasa Conversión</p>
-                <p className="text-2xl font-bold">{stats.tasaConversion}%</p>
+                <p className="text-2xl font-bold">
+                  {stats.tasaConversion != null ? `${stats.tasaConversion}%` : '—'}
+                </p>
               </div>
               <TrendingUp className="h-8 w-8 text-purple-500 opacity-80" />
             </div>
@@ -151,7 +104,11 @@ export default function PartnersMarketingPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Comisiones</p>
-                <p className="text-2xl font-bold">€{stats.ingresoGenerado.toLocaleString()}</p>
+                <p className="text-2xl font-bold">
+                  {stats.ingresoGenerado != null
+                    ? `€${stats.ingresoGenerado.toLocaleString()}`
+                    : '—'}
+                </p>
               </div>
               <BarChart3 className="h-8 w-8 text-yellow-500 opacity-80" />
             </div>
@@ -196,10 +153,7 @@ export default function PartnersMarketingPage() {
                 <label className="text-sm font-medium">URL de Referido</label>
                 <div className="flex gap-2">
                   <Input value={PARTNER_LINK} readOnly className="font-mono text-sm" />
-                  <Button
-                    variant="outline"
-                    onClick={() => copyToClipboard(PARTNER_LINK, 'Link')}
-                  >
+                  <Button variant="outline" onClick={() => copyToClipboard(PARTNER_LINK, 'Link')}>
                     <Copy className="h-4 w-4 mr-2" />
                     Copiar
                   </Button>
@@ -285,44 +239,9 @@ export default function PartnersMarketingPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {CAMPAIGNS.map((campaign) => (
-                  <div
-                    key={campaign.id}
-                    className="flex flex-col md:flex-row md:items-center justify-between p-4 border rounded-lg gap-4"
-                  >
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="font-medium">{campaign.nombre}</h3>
-                        <Badge variant={campaign.estado === 'activa' ? 'default' : 'secondary'}>
-                          {campaign.estado}
-                        </Badge>
-                        <Badge variant="outline" className="capitalize">
-                          {campaign.tipo}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        Iniciada: {campaign.iniciada}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-6">
-                      <div className="text-center">
-                        <p className="text-2xl font-bold">{campaign.clicks.toLocaleString()}</p>
-                        <p className="text-xs text-muted-foreground">Clicks</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-2xl font-bold text-green-600">{campaign.conversiones}</p>
-                        <p className="text-xs text-muted-foreground">Conversiones</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-2xl font-bold text-blue-600">
-                          {((campaign.conversiones / campaign.clicks) * 100).toFixed(1)}%
-                        </p>
-                        <p className="text-xs text-muted-foreground">CVR</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <Megaphone className="h-12 w-12 text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">Datos no disponibles — Módulo en desarrollo</p>
               </div>
             </CardContent>
           </Card>
@@ -336,40 +255,12 @@ export default function PartnersMarketingPage() {
                 <Mail className="h-5 w-5" />
                 Plantillas de Email
               </CardTitle>
-              <CardDescription>
-                Emails pre-diseñados para tus campañas de marketing
-              </CardDescription>
+              <CardDescription>Emails pre-diseñados para tus campañas de marketing</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {EMAIL_TEMPLATES.map((template) => (
-                  <div
-                    key={template.id}
-                    className="p-4 border rounded-lg space-y-2"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h3 className="font-medium">{template.nombre}</h3>
-                        <p className="text-sm font-medium text-primary">
-                          Asunto: {template.asunto}
-                        </p>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
-                          <Eye className="h-4 w-4 mr-2" />
-                          Vista previa
-                        </Button>
-                        <Button size="sm">
-                          <Copy className="h-4 w-4 mr-2" />
-                          Usar
-                        </Button>
-                      </div>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      {template.preview}
-                    </p>
-                  </div>
-                ))}
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <Mail className="h-12 w-12 text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">Datos no disponibles — Módulo en desarrollo</p>
               </div>
             </CardContent>
           </Card>
@@ -383,9 +274,7 @@ export default function PartnersMarketingPage() {
                 <Globe className="h-5 w-5" />
                 Tu Landing Page Personalizada
               </CardTitle>
-              <CardDescription>
-                Landing page con tu branding para captar leads
-              </CardDescription>
+              <CardDescription>Landing page con tu branding para captar leads</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="p-4 bg-muted rounded-lg">
@@ -403,9 +292,7 @@ export default function PartnersMarketingPage() {
                         Ver
                       </a>
                     </Button>
-                    <Button size="sm">
-                      Personalizar
-                    </Button>
+                    <Button size="sm">Personalizar</Button>
                   </div>
                 </div>
               </div>
@@ -413,17 +300,17 @@ export default function PartnersMarketingPage() {
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="p-4 border rounded-lg text-center">
                   <Eye className="h-8 w-8 mx-auto text-blue-500 mb-2" />
-                  <p className="text-2xl font-bold">3,450</p>
+                  <p className="text-2xl font-bold">—</p>
                   <p className="text-sm text-muted-foreground">Visitas totales</p>
                 </div>
                 <div className="p-4 border rounded-lg text-center">
                   <UserPlus className="h-8 w-8 mx-auto text-green-500 mb-2" />
-                  <p className="text-2xl font-bold">128</p>
+                  <p className="text-2xl font-bold">—</p>
                   <p className="text-sm text-muted-foreground">Registros</p>
                 </div>
                 <div className="p-4 border rounded-lg text-center">
                   <TrendingUp className="h-8 w-8 mx-auto text-purple-500 mb-2" />
-                  <p className="text-2xl font-bold">3.7%</p>
+                  <p className="text-2xl font-bold">—</p>
                   <p className="text-sm text-muted-foreground">Tasa de conversión</p>
                 </div>
               </div>

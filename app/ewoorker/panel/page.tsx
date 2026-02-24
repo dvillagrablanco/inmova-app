@@ -6,12 +6,12 @@ import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  HardHat, 
-  Building2, 
-  Hammer, 
-  Users, 
-  FileText, 
+import {
+  HardHat,
+  Building2,
+  Hammer,
+  Users,
+  FileText,
   TrendingUp,
   ClipboardCheck,
   Euro,
@@ -29,25 +29,66 @@ export default function EwoorkerPanelPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<{
+    obrasActivas: number;
+    ofertasPendientes: number;
+    contratosVigentes: number;
+    documentosVencer: number;
+    facturacionMes: number;
+    calificacionMedia: number;
+  } | null>(null);
+  const [statsLoading, setStatsLoading] = useState(true);
 
   useEffect(() => {
     if (status === 'loading') return;
-    
+
     if (status === 'unauthenticated') {
       router.push('/ewoorker/login');
       return;
     }
 
-    // Verificar que es un usuario de eWoorker
     const ewoorkerRoles = ['socio_ewoorker', 'contratista_ewoorker', 'subcontratista_ewoorker'];
     if (session?.user?.role && !ewoorkerRoles.includes(session.user.role)) {
-      // No es usuario de eWoorker, redirigir al dashboard normal
       router.push('/dashboard');
       return;
     }
 
     setLoading(false);
   }, [session, status, router]);
+
+  useEffect(() => {
+    if (status !== 'authenticated') return;
+    async function fetchStats() {
+      try {
+        const res = await fetch('/api/ewoorker/dashboard/stats');
+        if (res.ok) {
+          const data = await res.json();
+          setStats(data);
+        } else {
+          setStats({
+            obrasActivas: 0,
+            ofertasPendientes: 0,
+            contratosVigentes: 0,
+            documentosVencer: 0,
+            facturacionMes: 0,
+            calificacionMedia: 0,
+          });
+        }
+      } catch {
+        setStats({
+          obrasActivas: 0,
+          ofertasPendientes: 0,
+          contratosVigentes: 0,
+          documentosVencer: 0,
+          facturacionMes: 0,
+          calificacionMedia: 0,
+        });
+      } finally {
+        setStatsLoading(false);
+      }
+    }
+    fetchStats();
+  }, [status]);
 
   if (loading || status === 'loading') {
     return (
@@ -64,7 +105,10 @@ export default function EwoorkerPanelPage() {
   const userName = session?.user?.name || 'Usuario';
 
   // Configuración según rol
-  const roleConfig: Record<string, { title: string; color: string; icon: any; quickActions: any[] }> = {
+  const roleConfig: Record<
+    string,
+    { title: string; color: string; icon: any; quickActions: any[] }
+  > = {
     socio_ewoorker: {
       title: 'Panel de Socio',
       color: 'from-emerald-500 to-emerald-600',
@@ -103,28 +147,45 @@ export default function EwoorkerPanelPage() {
   const config = roleConfig[userRole] || roleConfig.subcontratista_ewoorker;
   const RoleIcon = config.icon;
 
-  // Stats según rol
+  const s = stats ?? {
+    obrasActivas: 0,
+    ofertasPendientes: 0,
+    contratosVigentes: 0,
+    documentosVencer: 0,
+    facturacionMes: 0,
+    calificacionMedia: 0,
+  };
+
+  const formatEur = (n: number) =>
+    n >= 1000
+      ? `€${(n / 1000).toFixed(0)}K`
+      : new Intl.NumberFormat('es-ES', {
+          style: 'currency',
+          currency: 'EUR',
+          maximumFractionDigits: 0,
+        }).format(n);
+
   const getStats = () => {
     if (userRole === 'socio_ewoorker') {
       return [
-        { label: 'Empresas Activas', value: '156', change: '+12%' },
-        { label: 'Obras en Curso', value: '45', change: '+8%' },
-        { label: 'Ingresos Mes', value: '€12,450', change: '+23%' },
-        { label: 'Comisiones', value: '€2,890', change: '+15%' },
+        { label: 'Obras en Curso', value: String(s.obrasActivas), change: '' },
+        { label: 'Ofertas Pendientes', value: String(s.ofertasPendientes), change: '' },
+        { label: 'Ingresos Mes', value: formatEur(s.facturacionMes), change: '' },
+        { label: 'Contratos Vigentes', value: String(s.contratosVigentes), change: '' },
       ];
     } else if (userRole === 'contratista_ewoorker') {
       return [
-        { label: 'Obras Activas', value: '8', change: '' },
-        { label: 'Subcontratistas', value: '24', change: '' },
-        { label: 'Ofertas Pendientes', value: '12', change: '' },
-        { label: 'Contratos Mes', value: '€145K', change: '' },
+        { label: 'Obras Activas', value: String(s.obrasActivas), change: '' },
+        { label: 'Ofertas Pendientes', value: String(s.ofertasPendientes), change: '' },
+        { label: 'Contratos Vigentes', value: String(s.contratosVigentes), change: '' },
+        { label: 'Facturado Mes', value: formatEur(s.facturacionMes), change: '' },
       ];
     } else {
       return [
-        { label: 'Obras Disponibles', value: '34', change: '' },
-        { label: 'Ofertas Enviadas', value: '5', change: '' },
-        { label: 'Contratos Activos', value: '2', change: '' },
-        { label: 'Facturado Mes', value: '€18,500', change: '' },
+        { label: 'Obras Disponibles', value: String(s.obrasActivas), change: '' },
+        { label: 'Ofertas Enviadas', value: String(s.ofertasPendientes), change: '' },
+        { label: 'Contratos Activos', value: String(s.contratosVigentes), change: '' },
+        { label: 'Facturado Mes', value: formatEur(s.facturacionMes), change: '' },
       ];
     }
   };
@@ -180,19 +241,26 @@ export default function EwoorkerPanelPage() {
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          {getStats().map((stat, i) => (
-            <Card key={i}>
-              <CardContent className="py-4">
-                <p className="text-sm text-gray-500">{stat.label}</p>
-                <div className="flex items-baseline space-x-2">
-                  <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-                  {stat.change && (
-                    <span className="text-sm text-green-600">{stat.change}</span>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+          {statsLoading
+            ? [1, 2, 3, 4].map((i) => (
+                <Card key={i}>
+                  <CardContent className="py-4">
+                    <div className="h-4 w-24 bg-gray-200 rounded animate-pulse mb-2" />
+                    <div className="h-8 w-16 bg-gray-200 rounded animate-pulse" />
+                  </CardContent>
+                </Card>
+              ))
+            : getStats().map((stat, i) => (
+                <Card key={i}>
+                  <CardContent className="py-4">
+                    <p className="text-sm text-gray-500">{stat.label}</p>
+                    <div className="flex items-baseline space-x-2">
+                      <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                      {stat.change && <span className="text-sm text-green-600">{stat.change}</span>}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
         </div>
 
         {/* Quick Actions */}
@@ -243,18 +311,14 @@ export default function EwoorkerPanelPage() {
                   <Button variant="outline">Ver todas</Button>
                 </Link>
               </CardTitle>
-              <CardDescription>
-                Obras que coinciden con tus especialidades
-              </CardDescription>
+              <CardDescription>Obras que coinciden con tus especialidades</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-center py-8 text-gray-500">
                 <Search className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                 <p>Explora las obras disponibles en tu zona</p>
                 <Link href="/ewoorker/obras">
-                  <Button className="mt-4 bg-orange-600 hover:bg-orange-700">
-                    Buscar Obras
-                  </Button>
+                  <Button className="mt-4 bg-orange-600 hover:bg-orange-700">Buscar Obras</Button>
                 </Link>
               </div>
             </CardContent>
@@ -265,25 +329,25 @@ export default function EwoorkerPanelPage() {
           <Card className="mb-8">
             <CardHeader>
               <CardTitle>Resumen de Plataforma</CardTitle>
-              <CardDescription>
-                Vista general de la actividad de eWoorker
-              </CardDescription>
+              <CardDescription>Vista general de la actividad de eWoorker</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <Building2 className="h-8 w-8 mx-auto text-orange-600 mb-2" />
-                  <p className="text-2xl font-bold">156</p>
-                  <p className="text-sm text-gray-500">Contratistas</p>
+                  <p className="text-2xl font-bold">{statsLoading ? '—' : s.obrasActivas}</p>
+                  <p className="text-sm text-gray-500">Obras Activas</p>
                 </div>
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <Hammer className="h-8 w-8 mx-auto text-yellow-600 mb-2" />
-                  <p className="text-2xl font-bold">489</p>
-                  <p className="text-sm text-gray-500">Subcontratistas</p>
+                  <p className="text-2xl font-bold">{statsLoading ? '—' : s.contratosVigentes}</p>
+                  <p className="text-sm text-gray-500">Contratos Vigentes</p>
                 </div>
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <FileText className="h-8 w-8 mx-auto text-emerald-600 mb-2" />
-                  <p className="text-2xl font-bold">€1.2M</p>
+                  <p className="text-2xl font-bold">
+                    {statsLoading ? '—' : formatEur(s.facturacionMes)}
+                  </p>
                   <p className="text-sm text-gray-500">Volumen Mes</p>
                 </div>
               </div>

@@ -66,12 +66,12 @@ export default function PartnersProgramPage() {
   ];
 
   const commissionTiers = [
-    { clients: '1-10', commission: '20%', example: '€29.80/cliente' },
-    { clients: '11-25', commission: '30%', example: '€44.70/cliente' },
-    { clients: '26-50', commission: '40%', example: '€59.60/cliente' },
-    { clients: '51-100', commission: '50%', example: '€74.50/cliente' },
-    { clients: '101-250', commission: '60%', example: '€89.40/cliente' },
-    { clients: '251+', commission: '70%', example: '€104.30/cliente' },
+    { clients: '1-10', commission: '20%', example: '—' },
+    { clients: '11-25', commission: '30%', example: '—' },
+    { clients: '26-50', commission: '40%', example: '—' },
+    { clients: '51-100', commission: '50%', example: '—' },
+    { clients: '101-250', commission: '60%', example: '—' },
+    { clients: '251+', commission: '70%', example: '—' },
   ];
 
   const features = [
@@ -240,20 +240,23 @@ export default function PartnersProgramPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
                 <div>
                   <p className="text-primary-foreground/80 mb-2">Con 50 Clientes</p>
-                  <p className="text-4xl font-bold mb-2">€2,980</p>
+                  <p className="text-4xl font-bold mb-2">—</p>
                   <p className="text-primary-foreground/80 text-sm">por mes</p>
                 </div>
                 <div>
                   <p className="text-primary-foreground/80 mb-2">Con 100 Clientes</p>
-                  <p className="text-4xl font-bold mb-2">€7,450</p>
+                  <p className="text-4xl font-bold mb-2">—</p>
                   <p className="text-primary-foreground/80 text-sm">por mes</p>
                 </div>
                 <div>
                   <p className="text-primary-foreground/80 mb-2">Con 250 Clientes</p>
-                  <p className="text-4xl font-bold mb-2">€22,350</p>
+                  <p className="text-4xl font-bold mb-2">—</p>
                   <p className="text-primary-foreground/80 text-sm">por mes</p>
                 </div>
               </div>
+              <p className="text-center text-primary-foreground/80 text-sm mt-4">
+                Módulo en desarrollo
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -340,8 +343,7 @@ export default function PartnersProgramPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl font-bold mb-6">¿Listo para convertirte en Partner?</h2>
           <p className="text-xl text-primary-foreground/90 mb-8">
-            Únete a los Partners que ya están generando ingresos recurrentes con INMOVA. Sin
-            inversión inicial, sin riesgo.
+            Módulo en desarrollo. Sin inversión inicial, sin riesgo.
           </p>
           <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
             <Link href="/partners/register">
