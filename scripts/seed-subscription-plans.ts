@@ -1,4 +1,9 @@
 /**
+ * @deprecated Use `scripts/sync-plans-landing.ts` instead.
+ * This script has outdated plan definitions that don't match the landing page.
+ * Run: npx tsx scripts/sync-plans-landing.ts
+ */
+/**
  * Script para poblar planes de suscripción según el plan de negocio 2026
  * Ejecutar: npx tsx scripts/seed-subscription-plans.ts
  */
@@ -8,7 +13,8 @@ import prisma from '../lib/db';
 const PLANES_NEGOCIO_2026 = [
   {
     nombre: 'Basic',
-    descripcion: 'Plan perfecto para empezar a digitalizar tu gestión inmobiliaria. Ideal para propietarios con pocas propiedades.',
+    descripcion:
+      'Plan perfecto para empezar a digitalizar tu gestión inmobiliaria. Ideal para propietarios con pocas propiedades.',
     tier: 'basico',
     precioMensual: 49,
     maxUsuarios: 2,
@@ -18,7 +24,7 @@ const PLANES_NEGOCIO_2026 = [
       'Gestión de Propiedades',
       'Portal Inquilino Básico',
       'Contratos Digitales',
-      'Notificaciones Email'
+      'Notificaciones Email',
     ],
     features: [
       'Dashboard básico',
@@ -28,13 +34,14 @@ const PLANES_NEGOCIO_2026 = [
       'Soporte por email (48h)',
       'Portal inquilino web',
       'Documentos básicos',
-      'App móvil'
+      'App móvil',
     ],
-    activo: true
+    activo: true,
   },
   {
     nombre: 'Professional',
-    descripcion: 'Plan avanzado para gestores profesionales. Incluye herramientas de CRM, automatización y análisis.',
+    descripcion:
+      'Plan avanzado para gestores profesionales. Incluye herramientas de CRM, automatización y análisis.',
     tier: 'profesional',
     precioMensual: 149,
     maxUsuarios: 10,
@@ -49,7 +56,7 @@ const PLANES_NEGOCIO_2026 = [
       'Informes y Analytics',
       'Notificaciones Multi-canal',
       'API Access (Básico)',
-      '1 Módulo Transversal GRATIS'
+      '1 Módulo Transversal GRATIS',
     ],
     features: [
       'Todo lo de Basic',
@@ -62,13 +69,14 @@ const PLANES_NEGOCIO_2026 = [
       'Soporte prioritario (24h)',
       '1 módulo add-on gratis',
       'Integraciones con terceros',
-      'Firma digital de contratos'
+      'Firma digital de contratos',
     ],
-    activo: true
+    activo: true,
   },
   {
     nombre: 'Business',
-    descripcion: 'Solución completa para empresas y gestoras grandes. Multi-vertical, usuarios ilimitados, y todos los módulos premium.',
+    descripcion:
+      'Solución completa para empresas y gestoras grandes. Multi-vertical, usuarios ilimitados, y todos los módulos premium.',
     tier: 'empresarial',
     precioMensual: 349,
     maxUsuarios: null, // Ilimitado
@@ -87,7 +95,7 @@ const PLANES_NEGOCIO_2026 = [
       'Notificaciones Multi-canal',
       'API Access (Completo)',
       'Automatizaciones Avanzadas',
-      '3 Módulos Transversales INCLUIDOS'
+      '3 Módulos Transversales INCLUIDOS',
     ],
     features: [
       'Todo lo de Professional',
@@ -101,13 +109,14 @@ const PLANES_NEGOCIO_2026 = [
       'Integraciones avanzadas',
       'Soporte 24/7',
       'Account manager dedicado',
-      'Capacitación incluida'
+      'Capacitación incluida',
     ],
-    activo: true
+    activo: true,
   },
   {
     nombre: 'Enterprise',
-    descripcion: 'Solución enterprise con desarrollo a medida, SLA premium, y soporte white-label. Para grandes corporaciones y fondos de inversión.',
+    descripcion:
+      'Solución enterprise con desarrollo a medida, SLA premium, y soporte white-label. Para grandes corporaciones y fondos de inversión.',
     tier: 'premium',
     precioMensual: 2000,
     maxUsuarios: null, // Ilimitado
@@ -122,7 +131,7 @@ const PLANES_NEGOCIO_2026 = [
       'Capacitación On-site',
       'TODOS los Módulos Transversales',
       'Prioridad en Roadmap',
-      'Infraestructura Dedicada (Opcional)'
+      'Infraestructura Dedicada (Opcional)',
     ],
     features: [
       'Todo lo de Business',
@@ -136,14 +145,15 @@ const PLANES_NEGOCIO_2026 = [
       'Account manager senior',
       'Acceso anticipado a nuevas features',
       'Integraciones custom',
-      'Capacitación ilimitada'
+      'Capacitación ilimitada',
     ],
-    activo: true
+    activo: true,
   },
   // Plan para Partners (referencia)
   {
     nombre: 'Partner Referral',
-    descripcion: 'Plan especial para clientes referidos por partners. Precio negociado según acuerdo con partner.',
+    descripcion:
+      'Plan especial para clientes referidos por partners. Precio negociado según acuerdo con partner.',
     tier: 'profesional',
     precioMensual: 149,
     maxUsuarios: 10,
@@ -152,20 +162,21 @@ const PLANES_NEGOCIO_2026 = [
     modulosIncluidos: [
       'Según configuración de Partner',
       'Comisión 20% para Partner',
-      'Co-branding opcional'
+      'Co-branding opcional',
     ],
     features: [
       'Características según tier Professional',
       'Comisión recurrente al partner',
       'Descuentos por volumen disponibles',
-      'Soporte compartido'
+      'Soporte compartido',
     ],
-    activo: false // No visible públicamente
+    activo: false, // No visible públicamente
   },
   // Plan Demo (para demostraciones del superadmin)
   {
     nombre: 'Demo',
-    descripcion: 'Plan especial para demostraciones a potenciales clientes. Incluye todas las funcionalidades y datos de ejemplo.',
+    descripcion:
+      'Plan especial para demostraciones a potenciales clientes. Incluye todas las funcionalidades y datos de ejemplo.',
     tier: 'premium',
     precioMensual: 0, // Gratis
     maxUsuarios: null, // Ilimitado
@@ -177,7 +188,7 @@ const PLANES_NEGOCIO_2026 = [
       'Acceso completo a todos los módulos',
       'Todos los verticales activos',
       'Todos los módulos transversales',
-      'Sin limitaciones'
+      'Sin limitaciones',
     ],
     features: [
       'Todas las características Enterprise',
@@ -185,10 +196,10 @@ const PLANES_NEGOCIO_2026 = [
       'Perfecto para demostraciones',
       'Acceso completo e ilimitado',
       'Sin costo',
-      'Solo para uso interno'
+      'Solo para uso interno',
     ],
-    activo: false // No visible públicamente, solo para superadmin
-  }
+    activo: false, // No visible públicamente, solo para superadmin
+  },
 ];
 
 async function main() {
@@ -202,7 +213,7 @@ async function main() {
     try {
       // Verificar si el plan ya existe por nombre
       const existingPlan = await prisma.subscriptionPlan.findFirst({
-        where: { nombre: planData.nombre }
+        where: { nombre: planData.nombre },
       });
 
       if (existingPlan) {
@@ -216,10 +227,10 @@ async function main() {
             maxUsuarios: planData.maxUsuarios,
             maxPropiedades: planData.maxPropiedades,
             modulosIncluidos: planData.modulosIncluidos,
-            activo: planData.activo
-          }
+            activo: planData.activo,
+          },
         });
-        
+
         console.log(`✅ Plan "${planData.nombre}" actualizado - €${planData.precioMensual}/mes`);
         updated++;
       } else {
@@ -233,10 +244,10 @@ async function main() {
             maxUsuarios: planData.maxUsuarios,
             maxPropiedades: planData.maxPropiedades,
             modulosIncluidos: planData.modulosIncluidos,
-            activo: planData.activo
-          }
+            activo: planData.activo,
+          },
         });
-        
+
         console.log(`🆕 Plan "${planData.nombre}" creado - €${planData.precioMensual}/mes`);
         created++;
       }
@@ -255,11 +266,11 @@ async function main() {
   // Mostrar planes activos
   const activeePlans = await prisma.subscriptionPlan.findMany({
     where: { activo: true },
-    orderBy: { precioMensual: 'asc' }
+    orderBy: { precioMensual: 'asc' },
   });
 
   console.log('📋 Planes activos en el sistema:');
-  activeePlans.forEach(plan => {
+  activeePlans.forEach((plan) => {
     const propiedades = plan.maxPropiedades ? `${plan.maxPropiedades} props` : 'Ilimitado';
     const usuarios = plan.maxUsuarios ? `${plan.maxUsuarios} users` : 'Ilimitado';
     console.log(`  • ${plan.nombre} - €${plan.precioMensual}/mes (${propiedades}, ${usuarios})`);

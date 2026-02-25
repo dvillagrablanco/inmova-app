@@ -1,5 +1,10 @@
 #!/usr/bin/env node
 /**
+ * @deprecated Use `scripts/sync-plans-landing.ts` instead.
+ * This script has outdated plan definitions that don't match the landing page.
+ * Run: npx tsx scripts/sync-plans-landing.ts
+ */
+/**
  * Script para:
  * 1. Cargar planes de suscripción en la BD
  * 2. Reset de onboarding para usuarios de prueba
@@ -111,7 +116,7 @@ async function seedPlans() {
 
   // Verificar si ya existen planes
   const existingPlans = await prisma.subscriptionPlan.count();
-  
+
   if (existingPlans > 0) {
     console.log(`⚠️  Ya existen ${existingPlans} planes en la BD`);
     console.log('   ¿Deseas eliminarlos y recrearlos? (NO - solo se añadirán los faltantes)\n');
@@ -140,7 +145,9 @@ async function seedPlans() {
 
       console.log(`✅ Creado: ${plan.nombre} - €${plan.precioMensual}/mes`);
       console.log(`   Tier: ${plan.tier}`);
-      console.log(`   Límites: ${plan.signaturesIncludedMonth || '∞'} firmas, ${plan.storageIncludedGB || '∞'}GB storage`);
+      console.log(
+        `   Límites: ${plan.signaturesIncludedMonth || '∞'} firmas, ${plan.storageIncludedGB || '∞'}GB storage`
+      );
       console.log();
 
       created++;
@@ -161,11 +168,7 @@ async function fixOnboarding() {
   console.log('\n🔧 Configurando onboarding para usuarios de prueba...\n');
 
   // Usuario de test común
-  const testEmails = [
-    'admin@inmova.app',
-    'test@inmova.app',
-    'demo@inmova.app',
-  ];
+  const testEmails = ['admin@inmova.app', 'test@inmova.app', 'demo@inmova.app'];
 
   let updated = 0;
 
@@ -247,9 +250,9 @@ async function assignDefaultPlans() {
 }
 
 async function main() {
-  console.log('=' .repeat(70));
+  console.log('='.repeat(70));
   console.log('🚀 SEED: PLANES DE FACTURACIÓN Y FIX ONBOARDING');
-  console.log('=' .repeat(70));
+  console.log('='.repeat(70));
   console.log();
 
   try {
@@ -262,9 +265,9 @@ async function main() {
     // 3. Fix onboarding
     await fixOnboarding();
 
-    console.log('\n' + '=' .repeat(70));
+    console.log('\n' + '='.repeat(70));
     console.log('✅ PROCESO COMPLETADO EXITOSAMENTE');
-    console.log('=' .repeat(70));
+    console.log('='.repeat(70));
     console.log();
     console.log('Próximos pasos:');
     console.log('  1. Verificar planes: https://inmovaapp.com/planes');
@@ -275,7 +278,6 @@ async function main() {
     console.log('  - Si el tutorial no aparece, limpia localStorage del navegador');
     console.log('  - O ejecuta en DevTools: localStorage.clear()');
     console.log();
-
   } catch (error: any) {
     console.error('\n❌ ERROR FATAL:', error);
     console.error(error.stack);
