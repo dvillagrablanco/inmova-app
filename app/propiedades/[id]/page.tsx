@@ -527,12 +527,26 @@ export default function PropiedadDetallesPage() {
                   variant="outline"
                   className="w-full justify-start"
                   onClick={() => {
-                    const roi = property?.price
-                      ? `ROI estimado: ${(((property.price * 12 * 0.85) / (property.price * 120)) * 100).toFixed(2)}% anual`
-                      : 'Sin datos de precio';
-                    toast.success(roi, {
-                      description: 'Cálculo basado en ocupación del 85% y precio mensual actual.',
-                    });
+                    const renta = property?.rentaMensual || property?.price || 0;
+                    if (renta > 0) {
+                      const ingresosAnuales = renta * 12;
+                      const gastosEstimados = ingresosAnuales * 0.15; // 15% gastos
+                      const beneficioNeto = ingresosAnuales - gastosEstimados;
+                      const sup = property?.superficie || 1;
+                      const precioM2Madrid = 4500; // €/m² estimado
+                      const valorEstimado = sup * precioM2Madrid;
+                      const roi = ((beneficioNeto / valorEstimado) * 100).toFixed(2);
+                      const rentaM2 = (renta / sup).toFixed(2);
+                      
+                      toast.success(`ROI estimado: ${roi}% anual`, {
+                        description: `Renta: ${renta.toLocaleString('es-ES')}€/mes | ${rentaM2}€/m² | Ingreso anual: ${ingresosAnuales.toLocaleString('es-ES')}€ | Valor est.: ${valorEstimado.toLocaleString('es-ES')}€`,
+                        duration: 8000,
+                      });
+                    } else {
+                      toast.info('Sin datos de renta para calcular rentabilidad', {
+                        description: 'Asigna una renta mensual al inmueble para ver el análisis.',
+                      });
+                    }
                   }}
                 >
                   <TrendingUp className="mr-2 h-4 w-4" />
