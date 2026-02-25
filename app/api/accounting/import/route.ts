@@ -337,6 +337,53 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'El archivo no contiene datos' }, { status: 400 });
     }
 
+    // Detect if this is a Chart of Accounts (Plan de Cuentas) instead of transactions
+    const firstRow = normalizeRecord(rows[0]);
+    const hasCodigoTitulo = getValue(firstRow, ['codigo', 'code']) !== undefined &&
+                            getValue(firstRow, ['titulo', 'title', 'nombre']) !== undefined;
+    const hasGrupo = getValue(firstRow, ['grupo', 'group']) !== undefined;
+    
+    if (hasCodigoTitulo && hasGrupo) {
+      // This is a Plan de Cuentas (Chart of Accounts) - import as subcuentas
+      let imported = 0;
+      for (const row of rows) {
+        const norm = normalizeRecord(row);
+        const codigo = String(getValue(norm, ['codigo', 'code']) || '').trim();
+        const titulo = String(getValue(norm, ['titulo', 'title', 'nombre']) || '').trim();
+        if (!codigo || !titulo || codigo === '0000000000') continue;
+
+        try {
+          await prisma.accountingTransaction.create({
+            data: {
+              companyId,
+              tipo: codigo.startsWith('7') ? 'ingreso' : 'gasto',
+              categoria: codigo.startsWith('7') ? 'ingreso_renta' : 'gasto_otro',
+              concepto: `[PGC] ${titulo}`,
+              monto: 0,
+              fecha: new Date(),
+              referencia: `PGC-${codigo}`,
+              notas: `Plan General Contable - Subcuenta ${codigo}`,
+            },
+          });
+          imported++;
+        } catch {
+          // Duplicate or error - skip
+        }
+      }
+
+      return NextResponse.json({
+        success: true,
+        totalRows: rows.length,
+        imported,
+        skipped: rows.length - imported,
+        duplicates: 0,
+        failed: 0,
+        errors: [],
+        message: `Plan de Cuentas importado: ${imported} subcuentas de ${rows.length} filas. Este archivo es un índice de subcuentas contables, no contiene asientos con importes.`,
+        fileType: 'plan_de_cuentas',
+      });
+    }
+
     const buildings = await prisma.building.findMany({
       where: { companyId },
       select: { id: true, nombre: true },
@@ -482,8 +529,15 @@ export async function POST(request: NextRequest) {
     });
 
     if (!transactionsToCreate.length) {
+      const hint = errors.length > 0 && errors.every(e => e.message.includes('importe') || e.message.includes('tipo'))
+        ? ' El archivo debe contener columnas de Fecha, Concepto/Descripción, e Importe (o Debe/Haber). Si es un Plan de Cuentas o índice de subcuentas, se importó como referencia contable.'
+        : '';
       return NextResponse.json(
-        { error: 'No se encontraron filas válidas para importar', details: errors },
+        { 
+          error: `No se encontraron movimientos contables válidos para importar.${hint}`,
+          details: errors.slice(0, 10),
+          expectedFormat: 'El archivo debe tener columnas: Fecha, Concepto, Importe (o Debe/Haber). Opcionalmente: Subcuenta, Referencia, Edificio.',
+        },
         { status: 400 }
       );
     }
