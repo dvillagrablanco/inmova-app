@@ -16,7 +16,7 @@ const s3Client = new S3Client({
   },
 });
 
-const BUCKET_NAME = process.env.AWS_S3_BUCKET || 'inmova-properties';
+const BUCKET_NAME = process.env.AWS_S3_BUCKET || process.env.AWS_BUCKET_NAME || process.env.AWS_BUCKET || 'inmova';
 const CDN_URL = process.env.AWS_CLOUDFRONT_URL || '';
 
 interface UploadResult {

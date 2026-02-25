@@ -1,250 +1,214 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useRef } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Camera, Upload, Trash2, X, Loader2, ImageIcon, ZoomIn } from 'lucide-react';
 import { toast } from 'sonner';
-import { Upload, X, Star, Trash2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import Image from 'next/image';
-import logger, { logError } from '@/lib/logger';
-
-interface Photo {
-  id: string;
-  key: string;
-  url: string;
-  isPortada: boolean;
-}
 
 interface PhotoGalleryProps {
-  entityType: 'unit' | 'building';
-  entityId: string;
-  canEdit?: boolean;
+  images: string[];
+  onImagesChange: (images: string[]) => void;
+  folder?: string;
+  title?: string;
+  description?: string;
+  maxPhotos?: number;
+  editable?: boolean;
+  className?: string;
 }
 
-export function PhotoGallery({ entityType, entityId, canEdit = false }: PhotoGalleryProps) {
-  const [photos, setPhotos] = useState<Photo[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [openUpload, setOpenUpload] = useState(false);
+export function PhotoGallery({
+  images,
+  onImagesChange,
+  folder = 'properties',
+  title = 'Fotos del activo',
+  description = 'Sube fotos para documentar el estado del inmueble',
+  maxPhotos = 20,
+  editable = true,
+  className,
+}: PhotoGalleryProps) {
   const [uploading, setUploading] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [isPortada, setIsPortada] = useState(false);
-  const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    fetchPhotos();
-  }, [entityType, entityId]);
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
 
-  const fetchPhotos = async () => {
-    try {
-      const res = await fetch(`/api/photos?entityType=${entityType}&entityId=${entityId}`);
-      if (!res.ok) throw new Error('Error al cargar fotos');
-      const data = await res.json();
-      setPhotos(data.photos || []);
-    } catch (error) {
-      logger.error('Error:', error);
-      toast.error('Error al cargar las fotos');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleUpload = async () => {
-    if (!selectedFile) {
-      toast.error('Por favor selecciona una foto');
+    if (images.length + files.length > maxPhotos) {
+      toast.error(`Máximo ${maxPhotos} fotos por activo`);
       return;
     }
 
     setUploading(true);
-    try {
-      const formData = new FormData();
-      formData.append('file', selectedFile);
-      formData.append('entityType', entityType);
-      formData.append('entityId', entityId);
-      formData.append('isPortada', isPortada.toString());
+    const newUrls: string[] = [];
 
-      const res = await fetch('/api/photos', {
-        method: 'POST',
-        body: formData,
-      });
+    for (const file of Array.from(files)) {
+      if (!file.type.startsWith('image/')) {
+        toast.error(`${file.name} no es una imagen válida`);
+        continue;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error(`${file.name} supera el límite de 10MB`);
+        continue;
+      }
 
-      if (!res.ok) throw new Error('Error al subir foto');
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('folder', folder);
 
-      toast.success('Foto subida correctamente');
-      setOpenUpload(false);
-      setSelectedFile(null);
-      setIsPortada(false);
-      fetchPhotos();
-    } catch (error) {
-      logger.error('Error:', error);
-      toast.error('Error al subir la foto');
-    } finally {
-      setUploading(false);
+        const res = await fetch('/api/upload/photos', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data.url) {
+            newUrls.push(data.url);
+          }
+        } else {
+          toast.error(`Error subiendo ${file.name}`);
+        }
+      } catch {
+        toast.error(`Error subiendo ${file.name}`);
+      }
     }
+
+    if (newUrls.length > 0) {
+      onImagesChange([...images, ...newUrls]);
+      toast.success(`${newUrls.length} foto${newUrls.length > 1 ? 's' : ''} subida${newUrls.length > 1 ? 's' : ''}`);
+    }
+
+    setUploading(false);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  const handleDelete = async (photoKey: string) => {
-    if (!confirm('¿Estás seguro de eliminar esta foto?')) return;
-
-    try {
-      const res = await fetch(
-        `/api/photos?entityType=${entityType}&entityId=${entityId}&photoKey=${encodeURIComponent(photoKey)}`,
-        { method: 'DELETE' }
-      );
-
-      if (!res.ok) throw new Error('Error al eliminar foto');
-
-      toast.success('Foto eliminada correctamente');
-      fetchPhotos();
-    } catch (error) {
-      logger.error('Error:', error);
-      toast.error('Error al eliminar la foto');
-    }
+  const handleDelete = (url: string) => {
+    onImagesChange(images.filter(img => img !== url));
+    toast.success('Foto eliminada');
   };
-
-  if (isLoading) {
-    return <div className="text-center text-sm text-muted-foreground">Cargando fotos...</div>;
-  }
 
   return (
-    <div className="space-y-4">
-      {canEdit && (
-        <Button onClick={() => setOpenUpload(true)}>
-          <Upload className="mr-2 h-4 w-4" />
-          Subir Foto
-        </Button>
-      )}
-
-      {photos.length === 0 ? (
-        <p className="text-center text-sm text-muted-foreground">
-          No hay fotos disponibles
-        </p>
-      ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-          {photos.map((photo) => (
-            <Card key={photo.id} className="group relative overflow-hidden">
-              <CardContent className="p-0">
-                <div 
-                  className="relative aspect-video cursor-pointer bg-muted"
-                  onClick={() => setSelectedPhoto(photo)}
+    <>
+      <Card className={className}>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Camera className="h-5 w-5" />
+                {title}
+              </CardTitle>
+              <CardDescription>{description}</CardDescription>
+            </div>
+            {editable && (
+              <div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={handleUpload}
+                />
+                <Button
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading || images.length >= maxPhotos}
+                >
+                  {uploading ? (
+                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Subiendo...</>
+                  ) : (
+                    <><Upload className="h-4 w-4 mr-2" /> Subir Fotos</>
+                  )}
+                </Button>
+              </div>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent>
+          {images.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+              {images.map((url, idx) => (
+                <div
+                  key={idx}
+                  className="relative group aspect-square rounded-lg overflow-hidden border bg-muted cursor-pointer"
+                  onClick={() => setPreviewUrl(url)}
                 >
                   <Image
-                    src={photo.url}
-                    alt="Foto de propiedad"
+                    src={url}
+                    alt={`Foto ${idx + 1}`}
                     fill
-                    className="object-cover transition-transform group-hover:scale-105"
-                    sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                    className="object-cover"
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                   />
-                  {photo.isPortada && (
-                    <div className="absolute left-2 top-2">
-                      <div className="flex items-center gap-1 rounded-full bg-yellow-500 px-2 py-1 text-xs font-semibold text-white">
-                        <Star className="h-3 w-3 fill-white" />
-                        Portada
-                      </div>
-                    </div>
-                  )}
-                  {canEdit && (
-                    <div className="absolute right-2 top-2 opacity-0 transition-opacity group-hover:opacity-100">
-                      <Button
-                        size="icon"
-                        variant="destructive"
-                        className="h-8 w-8"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(photo.key);
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+                    <ZoomIn className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                  {editable && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleDelete(url); }}
+                      className="absolute top-2 right-2 p-1.5 rounded-full bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </button>
                   )}
                 </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
-
-      {/* Dialog para Upload */}
-      <Dialog open={openUpload} onOpenChange={setOpenUpload}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Subir Foto</DialogTitle>
-            <DialogDescription>
-              Selecciona una foto para agregar a la galería
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="photo">Archivo</Label>
-              <Input
-                id="photo"
-                type="file"
-                accept="image/*"
-                onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-              />
+              ))}
+              {editable && images.length < maxPhotos && (
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="aspect-square rounded-lg border-2 border-dashed border-gray-300 hover:border-indigo-400 flex flex-col items-center justify-center text-muted-foreground hover:text-indigo-600 transition-colors"
+                >
+                  <Camera className="h-8 w-8 mb-1" />
+                  <span className="text-xs">Añadir</span>
+                </button>
+              )}
             </div>
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="portada"
-                checked={isPortada}
-                onChange={(e) => setIsPortada(e.target.checked)}
-                className="h-4 w-4"
-              />
-              <Label htmlFor="portada" className="cursor-pointer">
-                Establecer como foto de portada
-              </Label>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setOpenUpload(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleUpload} disabled={uploading}>
-              {uploading ? 'Subiendo...' : 'Subir Foto'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Dialog para Vista Completa */}
-      <Dialog open={!!selectedPhoto} onOpenChange={() => setSelectedPhoto(null)}>
-        <DialogContent className="max-w-4xl">
-          <DialogHeader>
-            <div className="flex items-center justify-between">
-              <DialogTitle>Vista de Foto</DialogTitle>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setSelectedPhoto(null)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          </DialogHeader>
-          {selectedPhoto && (
-            <div className="relative aspect-video w-full bg-muted">
-              <Image
-                src={selectedPhoto.url}
-                alt="Foto de propiedad"
-                fill
-                className="object-contain"
-                sizes="(max-width: 1200px) 100vw, 1200px"
-              />
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              <ImageIcon className="h-12 w-12 mx-auto mb-3 opacity-20" />
+              <p className="text-sm">No hay fotos</p>
+              {editable && (
+                <p className="text-xs mt-1">Sube fotos para documentar el estado del activo</p>
+              )}
             </div>
           )}
-        </DialogContent>
-      </Dialog>
-    </div>
+          {images.length > 0 && (
+            <p className="text-xs text-muted-foreground mt-3 text-right">
+              {images.length}/{maxPhotos} fotos
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Fullscreen preview */}
+      {previewUrl && (
+        <div
+          className="fixed inset-0 z-[200] bg-black/90 flex items-center justify-center p-4"
+          onClick={() => setPreviewUrl(null)}
+        >
+          <button
+            className="absolute top-4 right-4 p-2 rounded-full bg-white/20 hover:bg-white/40 text-white"
+            onClick={() => setPreviewUrl(null)}
+          >
+            <X className="h-6 w-6" />
+          </button>
+          <div className="relative max-w-[90vw] max-h-[90vh] w-full h-full">
+            <Image
+              src={previewUrl}
+              alt="Vista previa"
+              fill
+              className="object-contain"
+              sizes="90vw"
+            />
+          </div>
+        </div>
+      )}
+    </>
   );
 }
