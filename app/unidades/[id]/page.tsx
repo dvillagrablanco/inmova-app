@@ -54,6 +54,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+import { PhotoGallery } from '@/components/ui/photo-gallery';
 
 interface Tenant {
   id: string;
@@ -113,6 +114,7 @@ export default function UnitDetailPage() {
   const [unit, setUnit] = useState<Unit | null>(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
+  const [images, setImages] = useState<string[]>([]);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -142,6 +144,7 @@ export default function UnitDetailPage() {
 
       const data = await response.json();
       setUnit(data);
+      setImages(data?.imagenes || []);
     } catch (error: any) {
       console.error('Error fetching unit:', error);
       toast.error(error.message || 'Error al cargar la unidad');
@@ -171,6 +174,24 @@ export default function UnitDetailPage() {
       toast.error(error.message || 'Error al eliminar la unidad');
     } finally {
       setDeleting(false);
+    }
+  };
+
+  const handleImagesChange = async (newImages: string[]) => {
+    setImages(newImages);
+    try {
+      const response = await fetch(`/api/units/${unitId}`, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imagenes: newImages }),
+      });
+      if (!response.ok) throw new Error('Error al guardar las fotos');
+      setUnit((prev) => (prev ? { ...prev, imagenes: newImages } : null));
+      toast.success('Fotos actualizadas');
+    } catch (error: any) {
+      toast.error(error.message || 'Error al guardar las fotos');
+      setImages(unit?.imagenes || []);
     }
   };
 
@@ -221,9 +242,7 @@ export default function UnitDetailPage() {
             <p className="text-muted-foreground mb-4">
               La unidad que buscas no existe o no tienes acceso.
             </p>
-            <Button onClick={() => router.push('/unidades')}>
-              Volver a Unidades
-            </Button>
+            <Button onClick={() => router.push('/unidades')}>Volver a Unidades</Button>
           </div>
         </div>
       </AuthenticatedLayout>
@@ -282,10 +301,7 @@ export default function UnitDetailPage() {
                 <Brain className="h-4 w-4 mr-2" />
                 Valorar con IA
               </Button>
-              <Button
-                variant="outline"
-                onClick={() => router.push(`/unidades/${unit.id}/editar`)}
-              >
+              <Button variant="outline" onClick={() => router.push(`/unidades/${unit.id}/editar`)}>
                 <Edit className="h-4 w-4 mr-2" />
                 Editar
               </Button>
@@ -300,8 +316,8 @@ export default function UnitDetailPage() {
                   <AlertDialogHeader>
                     <AlertDialogTitle>¿Eliminar unidad?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      Esta acción no se puede deshacer. Se eliminarán todos los datos
-                      asociados a esta unidad.
+                      Esta acción no se puede deshacer. Se eliminarán todos los datos asociados a
+                      esta unidad.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
@@ -473,7 +489,9 @@ export default function UnitDetailPage() {
                       ) : (
                         <XCircle className="h-5 w-5 text-gray-300" />
                       )}
-                      <span className={unit.amueblado ? '' : 'text-muted-foreground'}>Amueblado</span>
+                      <span className={unit.amueblado ? '' : 'text-muted-foreground'}>
+                        Amueblado
+                      </span>
                     </div>
                   </div>
                 </CardContent>
@@ -530,6 +548,18 @@ export default function UnitDetailPage() {
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Galería de fotos */}
+              <div className="md:col-span-2">
+                <PhotoGallery
+                  images={images}
+                  onImagesChange={handleImagesChange}
+                  folder="units"
+                  title="Fotos de la unidad"
+                  description="Sube fotos para documentar el estado de la unidad"
+                  editable={true}
+                />
+              </div>
             </div>
           </TabsContent>
 
@@ -537,9 +567,7 @@ export default function UnitDetailPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Inquilino actual</CardTitle>
-                <CardDescription>
-                  Información del inquilino asignado a esta unidad
-                </CardDescription>
+                <CardDescription>Información del inquilino asignado a esta unidad</CardDescription>
               </CardHeader>
               <CardContent>
                 {unit.tenant ? (
@@ -666,4 +694,3 @@ export default function UnitDetailPage() {
     </AuthenticatedLayout>
   );
 }
-

@@ -34,6 +34,7 @@ const buildingUpdateSchema = z.object({
     .refine((val) => val === undefined || val >= 0, {
       message: 'El número de unidades debe ser positivo',
     }),
+  imagenes: z.array(z.string()).optional(),
 });
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
@@ -63,7 +64,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     return NextResponse.json(building);
   } catch (error) {
     logger.error('Error fetching building:', error);
-      Sentry.captureException(error);
+    Sentry.captureException(error);
     return NextResponse.json({ error: 'Error al obtener edificio' }, { status: 500 });
   }
 }
@@ -91,16 +92,18 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       return NextResponse.json({ error: 'Datos inválidos', details: errors }, { status: 400 });
     }
 
-    const { nombre, direccion, tipo, anoConstructor, numeroUnidades } = validationResult.data;
+    const { nombre, direccion, tipo, anoConstructor, numeroUnidades, imagenes } =
+      validationResult.data;
 
     const building = await prisma.building.update({
       where: { id: params.id },
       data: {
-        nombre,
-        direccion,
-        tipo,
-        anoConstructor,
-        numeroUnidades,
+        ...(nombre !== undefined && { nombre }),
+        ...(direccion !== undefined && { direccion }),
+        ...(tipo !== undefined && { tipo }),
+        ...(anoConstructor !== undefined && { anoConstructor }),
+        ...(numeroUnidades !== undefined && { numeroUnidades }),
+        ...(imagenes !== undefined && { imagenes }),
       },
     });
 
@@ -113,7 +116,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     return NextResponse.json(building);
   } catch (error) {
     logger.error('Error updating building:', error);
-      Sentry.captureException(error);
+    Sentry.captureException(error);
     return NextResponse.json({ error: 'Error al actualizar edificio' }, { status: 500 });
   }
 }
@@ -141,7 +144,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     return NextResponse.json({ message: 'Edificio eliminado' });
   } catch (error) {
     logger.error('Error deleting building:', error);
-      Sentry.captureException(error);
+    Sentry.captureException(error);
     return NextResponse.json({ error: 'Error al eliminar edificio' }, { status: 500 });
   }
 }
