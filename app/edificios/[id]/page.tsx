@@ -16,7 +16,6 @@ import {
   TrendingUp,
   Check,
   X as XIcon,
-  Image as ImageIcon,
   Users,
   Warehouse,
   Car,
@@ -43,7 +42,6 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
-import Image from 'next/image';
 import { DeleteConfirmationDialog } from '@/components/ui/delete-confirmation-dialog';
 import {
   DropdownMenu,
@@ -60,6 +58,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import Link from 'next/link';
+import { PhotoGallery } from '@/components/ui/photo-gallery';
 
 interface Unit {
   id: string;
@@ -115,6 +114,7 @@ export default function EdificioDetallesPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [images, setImages] = useState<string[]>([]);
 
   const buildingId = params?.id as string;
 
@@ -148,6 +148,7 @@ export default function EdificioDetallesPage() {
             jardin: data.jardin ?? false,
           };
           setBuilding(normalizedData);
+          setImages(data.imagenes || []);
         } else if (response.status === 404) {
           setError('Edificio no encontrado');
           toast.error('Edificio no encontrado');
@@ -192,8 +193,28 @@ export default function EdificioDetallesPage() {
     }
   };
 
+  const handleImagesChange = async (newImages: string[]) => {
+    setImages(newImages);
+    try {
+      const response = await fetch(`/api/buildings/${buildingId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imagenes: newImages }),
+      });
+      if (!response.ok) throw new Error('Error al guardar las fotos');
+      setBuilding((prev) => (prev ? { ...prev, imagenes: newImages } : null));
+      toast.success('Fotos actualizadas');
+    } catch (error) {
+      toast.error('Error al guardar las fotos');
+      setImages(building?.imagenes || []);
+    }
+  };
+
   const getTipoBadge = (tipo: string) => {
-    const badges: Record<string, { variant: 'default' | 'secondary' | 'outline' | 'destructive'; label: string }> = {
+    const badges: Record<
+      string,
+      { variant: 'default' | 'secondary' | 'outline' | 'destructive'; label: string }
+    > = {
       residencial: { variant: 'default', label: 'Residencial' },
       comercial: { variant: 'secondary', label: 'Comercial' },
       mixto: { variant: 'outline', label: 'Mixto' },
@@ -203,7 +224,10 @@ export default function EdificioDetallesPage() {
   };
 
   const getEstadoUnidadBadge = (estado: string) => {
-    const badges: Record<string, { variant: 'default' | 'secondary' | 'outline' | 'destructive'; label: string }> = {
+    const badges: Record<
+      string,
+      { variant: 'default' | 'secondary' | 'outline' | 'destructive'; label: string }
+    > = {
       ocupada: { variant: 'default', label: 'Ocupada' },
       disponible: { variant: 'secondary', label: 'Disponible' },
       en_mantenimiento: { variant: 'outline', label: 'Mantenimiento' },
@@ -215,14 +239,16 @@ export default function EdificioDetallesPage() {
   // Calcular métricas
   const calculateMetrics = () => {
     if (!building?.units) return { ocupadas: 0, disponibles: 0, ingresos: 0, ocupacionPct: 0 };
-    
-    const ocupadas = building.units.filter(u => u.estado?.toLowerCase() === 'ocupada').length;
-    const disponibles = building.units.filter(u => u.estado?.toLowerCase() === 'disponible').length;
+
+    const ocupadas = building.units.filter((u) => u.estado?.toLowerCase() === 'ocupada').length;
+    const disponibles = building.units.filter(
+      (u) => u.estado?.toLowerCase() === 'disponible'
+    ).length;
     const ingresos = building.units
-      .filter(u => u.estado?.toLowerCase() === 'ocupada')
+      .filter((u) => u.estado?.toLowerCase() === 'ocupada')
       .reduce((acc, u) => acc + (u.rentaMensual || 0), 0);
     const ocupacionPct = building.units.length > 0 ? (ocupadas / building.units.length) * 100 : 0;
-    
+
     return { ocupadas, disponibles, ingresos, ocupacionPct };
   };
 
@@ -356,7 +382,10 @@ export default function EdificioDetallesPage() {
           </div>
 
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => router.push(`/edificios/${building.id}/editar`)}>
+            <Button
+              variant="outline"
+              onClick={() => router.push(`/edificios/${building.id}/editar`)}
+            >
               <Edit className="mr-2 h-4 w-4" />
               Editar
             </Button>
@@ -379,7 +408,9 @@ export default function EdificioDetallesPage() {
               <Home className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{building.units?.length || building.numeroUnidades}</div>
+              <div className="text-2xl font-bold">
+                {building.units?.length || building.numeroUnidades}
+              </div>
               <p className="text-xs text-muted-foreground">En este edificio</p>
             </CardContent>
           </Card>
@@ -391,7 +422,9 @@ export default function EdificioDetallesPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-600">{metrics.ocupadas}</div>
-              <p className="text-xs text-muted-foreground">{metrics.ocupacionPct.toFixed(1)}% ocupación</p>
+              <p className="text-xs text-muted-foreground">
+                {metrics.ocupacionPct.toFixed(1)}% ocupación
+              </p>
             </CardContent>
           </Card>
 
@@ -424,25 +457,14 @@ export default function EdificioDetallesPage() {
           {/* Columna Principal */}
           <div className="lg:col-span-2 space-y-6">
             {/* Galería de Imágenes */}
-            <Card>
-              <CardContent className="p-0">
-                <div className="relative aspect-video bg-muted">
-                  {building.imagenes && building.imagenes.length > 0 ? (
-                    <Image
-                      src={building.imagenes[0]}
-                      alt={`Edificio ${building.nombre}`}
-                      fill
-                      className="object-cover rounded-t-lg"
-                    />
-                  ) : (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground">
-                      <Building2 className="h-16 w-16 mb-2" />
-                      <p className="text-sm">Sin imágenes disponibles</p>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+            <PhotoGallery
+              images={images}
+              onImagesChange={handleImagesChange}
+              folder="buildings"
+              title="Fotos del edificio"
+              description="Sube fotos para documentar el estado del edificio"
+              editable={true}
+            />
 
             {/* Lista de Unidades */}
             <Card>
@@ -483,10 +505,12 @@ export default function EdificioDetallesPage() {
                               <Badge variant={estadoBadge.variant}>{estadoBadge.label}</Badge>
                             </TableCell>
                             <TableCell>{unit.superficie}m²</TableCell>
-                            <TableCell>€{unit.rentaMensual?.toLocaleString('es-ES') || 0}</TableCell>
+                            <TableCell>
+                              €{unit.rentaMensual?.toLocaleString('es-ES') || 0}
+                            </TableCell>
                             <TableCell>
                               {unit.tenant ? (
-                                <Link 
+                                <Link
                                   href={`/inquilinos/${unit.tenant.id}`}
                                   className="text-primary hover:underline"
                                 >
@@ -529,7 +553,7 @@ export default function EdificioDetallesPage() {
                     <Home className="h-12 w-12 mx-auto mb-3 opacity-50" />
                     <p className="font-medium">No hay unidades registradas</p>
                     <p className="text-sm">Crea la primera unidad de este edificio</p>
-                    <Button 
+                    <Button
                       className="mt-4"
                       onClick={() => router.push(`/propiedades/crear?buildingId=${building.id}`)}
                     >
@@ -557,8 +581,13 @@ export default function EdificioDetallesPage() {
                   ].map((item) => {
                     const Icon = item.icon;
                     return (
-                      <div key={item.label} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                        <Icon className={`h-5 w-5 ${item.value ? 'text-green-600' : 'text-muted-foreground'}`} />
+                      <div
+                        key={item.label}
+                        className="flex items-center gap-3 p-3 rounded-lg bg-muted/50"
+                      >
+                        <Icon
+                          className={`h-5 w-5 ${item.value ? 'text-green-600' : 'text-muted-foreground'}`}
+                        />
                         {item.value ? (
                           <Check className="h-4 w-4 text-green-600" />
                         ) : (
@@ -678,7 +707,7 @@ export default function EdificioDetallesPage() {
                     const gastos = (building.gastosComunidad || 0) * 12 + (building.ibiAnual || 0);
                     const netAnual = rentaAnual - gastos;
                     toast.success(`Rentabilidad Neta Estimada`, {
-                      description: `Ingresos: €${rentaAnual.toLocaleString('es-ES')}/año - Gastos: €${gastos.toLocaleString('es-ES')}/año = €${netAnual.toLocaleString('es-ES')}/año neto`
+                      description: `Ingresos: €${rentaAnual.toLocaleString('es-ES')}/año - Gastos: €${gastos.toLocaleString('es-ES')}/año = €${netAnual.toLocaleString('es-ES')}/año neto`,
                     });
                   }}
                 >

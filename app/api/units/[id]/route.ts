@@ -23,7 +23,17 @@ async function getPrisma() {
 const unitUpdateSchema = z.object({
   buildingId: z.string().cuid().optional(),
   numero: z.string().min(1).max(50).optional(),
-  tipo: z.enum(['vivienda', 'local', 'garaje', 'trastero', 'oficina', 'nave_industrial', 'coworking_space']).optional(),
+  tipo: z
+    .enum([
+      'vivienda',
+      'local',
+      'garaje',
+      'trastero',
+      'oficina',
+      'nave_industrial',
+      'coworking_space',
+    ])
+    .optional(),
   estado: z.enum(['disponible', 'ocupada', 'en_mantenimiento']).optional(),
   superficie: z.number().positive().optional(),
   superficieUtil: z.number().positive().nullable().optional(),
@@ -40,12 +50,10 @@ const unitUpdateSchema = z.object({
   gastosComunidad: z.number().nonnegative().nullable().optional(),
   ibiAnual: z.number().nonnegative().nullable().optional(),
   tourVirtual: z.string().nullable().optional(),
+  imagenes: z.array(z.string()).optional(),
 });
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
@@ -105,15 +113,12 @@ export async function GET(
     return NextResponse.json(unit);
   } catch (error) {
     logger.error('Error fetching unit:', error);
-      Sentry.captureException(error);
+    Sentry.captureException(error);
     return NextResponse.json({ error: 'Error al obtener la unidad' }, { status: 500 });
   }
 }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
@@ -167,10 +172,7 @@ export async function PUT(
       });
 
       if (!targetBuilding) {
-        return NextResponse.json(
-          { error: 'Edificio no encontrado o sin acceso' },
-          { status: 403 }
-        );
+        return NextResponse.json({ error: 'Edificio no encontrado o sin acceso' }, { status: 403 });
       }
     }
 
@@ -216,15 +218,12 @@ export async function PUT(
     return NextResponse.json(updatedUnit);
   } catch (error) {
     logger.error('Error updating unit:', error);
-      Sentry.captureException(error);
+    Sentry.captureException(error);
     return NextResponse.json({ error: 'Error al actualizar la unidad' }, { status: 500 });
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
@@ -267,7 +266,7 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (error) {
     logger.error('Error deleting unit:', error);
-      Sentry.captureException(error);
+    Sentry.captureException(error);
     return NextResponse.json({ error: 'Error al eliminar la unidad' }, { status: 500 });
   }
 }

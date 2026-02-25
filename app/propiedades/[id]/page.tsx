@@ -21,7 +21,6 @@ import {
   TrendingUp,
   Check,
   X as XIcon,
-  Image as ImageIcon,
   ExternalLink,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -38,10 +37,10 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
-import Image from 'next/image';
 import { PropertyMap } from '@/components/property/PropertyMap';
 import { ValuationCard } from '@/components/property/ValuationCard';
 import { DeletePropertyDialog } from '@/components/property/DeletePropertyDialog';
+import { PhotoGallery } from '@/components/ui/photo-gallery';
 
 interface PropertyDetails {
   id: string;
@@ -93,6 +92,7 @@ export default function PropiedadDetallesPage() {
   const { data: session, status } = useSession();
   const [property, setProperty] = useState<PropertyDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [images, setImages] = useState<string[]>([]);
 
   const propertyId = params?.id as string;
 
@@ -113,6 +113,7 @@ export default function PropiedadDetallesPage() {
         if (response.ok) {
           const data = await response.json();
           setProperty(data);
+          setImages(data?.imagenes || []);
         } else if (response.status === 404) {
           toast.error('Propiedad no encontrada');
           router.push('/propiedades');
@@ -129,6 +130,23 @@ export default function PropiedadDetallesPage() {
 
     fetchProperty();
   }, [status, propertyId, router]);
+
+  const handleImagesChange = async (newImages: string[]) => {
+    setImages(newImages);
+    try {
+      const response = await fetch(`/api/units/${propertyId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imagenes: newImages }),
+      });
+      if (!response.ok) throw new Error('Error al guardar las fotos');
+      setProperty((prev) => (prev ? { ...prev, imagenes: newImages } : null));
+      toast.success('Fotos actualizadas');
+    } catch {
+      toast.error('Error al guardar las fotos');
+      setImages(property?.imagenes || []);
+    }
+  };
 
   const getEstadoBadge = (estado: string) => {
     const badges: Record<string, { variant: any; label: string }> = {
@@ -246,7 +264,10 @@ export default function PropiedadDetallesPage() {
           </div>
 
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => router.push(`/propiedades/${property.id}/editar`)}>
+            <Button
+              variant="outline"
+              onClick={() => router.push(`/propiedades/${property.id}/editar`)}
+            >
               <Edit className="mr-2 h-4 w-4" />
               Editar
             </Button>
@@ -263,25 +284,14 @@ export default function PropiedadDetallesPage() {
           {/* Columna Principal */}
           <div className="lg:col-span-2 space-y-6">
             {/* Galería de Imágenes */}
-            <Card>
-              <CardContent className="p-0">
-                <div className="relative aspect-video bg-muted">
-                  {property.imagenes && property.imagenes.length > 0 ? (
-                    <Image
-                      src={property.imagenes[0]}
-                      alt={`Propiedad ${property.numero}`}
-                      fill
-                      className="object-cover rounded-t-lg"
-                    />
-                  ) : (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground">
-                      <ImageIcon className="h-16 w-16 mb-2" />
-                      <p className="text-sm">Sin imágenes disponibles</p>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+            <PhotoGallery
+              images={images}
+              onImagesChange={handleImagesChange}
+              folder="properties"
+              title="Fotos de la propiedad"
+              description="Sube fotos para documentar el estado de la propiedad"
+              editable={true}
+            />
 
             {/* Características Principales */}
             <Card>
@@ -517,11 +527,11 @@ export default function PropiedadDetallesPage() {
                   variant="outline"
                   className="w-full justify-start"
                   onClick={() => {
-                    const roi = property?.price 
-                      ? `ROI estimado: ${((property.price * 12 * 0.85) / (property.price * 120) * 100).toFixed(2)}% anual` 
+                    const roi = property?.price
+                      ? `ROI estimado: ${(((property.price * 12 * 0.85) / (property.price * 120)) * 100).toFixed(2)}% anual`
                       : 'Sin datos de precio';
                     toast.success(roi, {
-                      description: 'Cálculo basado en ocupación del 85% y precio mensual actual.'
+                      description: 'Cálculo basado en ocupación del 85% y precio mensual actual.',
                     });
                   }}
                 >
