@@ -8,8 +8,8 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 interface PhotoGalleryProps {
-  images: string[];
-  onImagesChange: (images: string[]) => void;
+  images?: string[];
+  onImagesChange?: (images: string[]) => void;
   folder?: string;
   title?: string;
   description?: string;
@@ -19,7 +19,7 @@ interface PhotoGalleryProps {
 }
 
 export function PhotoGallery({
-  images,
+  images: rawImages,
   onImagesChange,
   folder = 'properties',
   title = 'Fotos del activo',
@@ -28,6 +28,7 @@ export function PhotoGallery({
   editable = true,
   className,
 }: PhotoGalleryProps) {
+  const images = rawImages || [];
   const [uploading, setUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -128,7 +129,7 @@ export function PhotoGallery({
     }
 
     if (newUrls.length > 0) {
-      onImagesChange([...images, ...newUrls]);
+      onImagesChange?.([...images, ...newUrls]);
       toast.success(`${newUrls.length} foto${newUrls.length > 1 ? 's' : ''} subida${newUrls.length > 1 ? 's' : ''}`);
     }
 
@@ -137,7 +138,7 @@ export function PhotoGallery({
   };
 
   const handleDelete = (url: string) => {
-    onImagesChange(images.filter(img => img !== url));
+    onImagesChange?.(images.filter(img => img !== url));
     toast.success('Foto eliminada');
   };
 

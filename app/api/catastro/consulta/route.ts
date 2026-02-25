@@ -13,6 +13,7 @@ import { authOptions } from '@/lib/auth-options';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 interface CatastroUnit {
   uso: string;
