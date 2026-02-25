@@ -61,6 +61,19 @@ export async function GET(req: NextRequest) {
       lastSync: company.zucchettiLastSync?.toISOString() || null,
       syncErrors: company.zucchettiSyncErrors,
       needsCredentials: company.zucchettiEnabled && !altaiConfigured,
+      features: [
+        'Sincronización automática de asientos contables',
+        'Envío de facturas de alquiler',
+        'Conciliación bancaria automática',
+        'Plan General Contable (PGC) integrado',
+        'Exportación de modelos fiscales (303, 390, 347)',
+        'Sincronización bidireccional de clientes',
+      ],
+      message: company.zucchettiEnabled && !altaiConfigured
+        ? 'Zucchetti está habilitado para esta empresa pero las credenciales del servidor no están configuradas. Contacta con el administrador de la plataforma.'
+        : !company.zucchettiEnabled
+        ? 'Activa Zucchetti en la configuración de la empresa.'
+        : 'Integración activa y funcionando.',
     });
   } catch (error) {
     logger.error('[Zucchetti Status]', error);
