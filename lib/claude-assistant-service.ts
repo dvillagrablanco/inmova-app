@@ -317,7 +317,72 @@ const tools: Anthropic.Messages.Tool[] = [
         }
       }
     }
-  }
+  },
+  // === HERRAMIENTAS DE ACCIÓN (Premium) ===
+  {
+    name: 'analyze_document',
+    description: 'Analiza un documento (PDF, Excel, imagen) subido por el usuario. Extrae datos como inquilinos, contratos, importes, fechas, direcciones. Usar cuando el usuario sube un archivo.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        documentText: {
+          type: 'string',
+          description: 'Texto extraído del documento'
+        },
+        documentType: {
+          type: 'string',
+          description: 'Tipo de documento detectado',
+          enum: ['contrato', 'factura', 'dni', 'escritura', 'certificado', 'contabilidad', 'catastro', 'otro']
+        },
+        action: {
+          type: 'string',
+          description: 'Qué hacer con los datos extraídos',
+          enum: ['extract_data', 'import_to_system', 'summarize', 'validate']
+        }
+      },
+      required: ['documentText', 'documentType']
+    }
+  },
+  {
+    name: 'valuate_property',
+    description: 'Valora un activo inmobiliario por dirección o referencia catastral. Estima valor de venta, alquiler, ROI. Usar cuando el usuario pide valorar un inmueble.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        direccion: { type: 'string', description: 'Dirección del inmueble' },
+        ciudad: { type: 'string', description: 'Ciudad' },
+        superficie: { type: 'number', description: 'Superficie en m²' },
+        tipo: { type: 'string', description: 'Tipo de activo', enum: ['vivienda', 'local', 'oficina', 'nave', 'garaje', 'edificio'] },
+        habitaciones: { type: 'number', description: 'Número de habitaciones (si vivienda)' },
+        refCatastral: { type: 'string', description: 'Referencia catastral (si disponible)' },
+      },
+      required: ['direccion', 'tipo']
+    }
+  },
+  {
+    name: 'search_catastro',
+    description: 'Consulta el Catastro público español por referencia catastral o dirección. Devuelve superficie, uso, año de construcción.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        refCatastral: { type: 'string', description: 'Referencia catastral (14-20 caracteres)' },
+        provincia: { type: 'string', description: 'Provincia (para búsqueda por dirección)' },
+        municipio: { type: 'string', description: 'Municipio' },
+        via: { type: 'string', description: 'Nombre de la vía' },
+        numero: { type: 'string', description: 'Número' },
+      }
+    }
+  },
+  {
+    name: 'get_financial_summary',
+    description: 'Obtiene un resumen financiero de la empresa: ingresos, gastos, ocupación, morosidad, contratos próximos a vencer.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        periodo: { type: 'string', description: 'Periodo: "mes_actual", "trimestre", "año"', enum: ['mes_actual', 'trimestre', 'año'] }
+      }
+    }
+  },
 ];
 
 // ============================================================================
@@ -368,6 +433,18 @@ async function executeTool(
       
       case 'search_units':
         return await searchUnits(toolInput, context);
+
+      case 'analyze_document':
+        return await analyzeDocument(toolInput, context);
+
+      case 'valuate_property':
+        return await valuateProperty(toolInput, context);
+
+      case 'search_catastro':
+        return await searchCatastroTool(toolInput);
+
+      case 'get_financial_summary':
+        return await getFinancialSummary(toolInput, context);
       
       default:
         return { error: `Unknown tool: ${toolName}` };
@@ -392,8 +469,15 @@ Tus capacidades:
 - Responder preguntas sobre edificios, inquilinos, contratos y pagos
 - Crear y gestionar solicitudes de mantenimiento
 - Crear tareas y recordatorios
-- Proporcionar estadísticas y reportes
+- Proporcionar estadísticas y reportes financieros
 - Ayudar con consultas administrativas
+- ANALIZAR DOCUMENTOS: Si el usuario sube un PDF, Excel o imagen, extrae datos automáticamente
+- VALORAR ACTIVOS: Estima valor de venta/alquiler de cualquier inmueble por dirección o ref. catastral
+- CONSULTAR CATASTRO: Busca datos catastrales (superficie, uso, año) por referencia o dirección
+- IMPORTAR DATOS: Analiza archivos de contabilidad, facturación o contratos y extrae información
+
+Cuando el usuario suba un documento, analízalo automáticamente y sugiere acciones.
+Responde siempre en español. Sé conciso y útil.
 
 Contexto del usuario:
 - Nombre: ${context.userName}
@@ -1115,5 +1199,180 @@ async function searchUnits(input: any, context: AssistantContext) {
     success: true,
     count: units.length,
     units
+  };
+}
+
+// ============================================================================
+// HERRAMIENTAS DE ACCIÓN (Premium)
+// ============================================================================
+
+async function analyzeDocument(input: any, context: AssistantContext) {
+  const { documentText, documentType, action = 'extract_data' } = input;
+  
+  // Use Claude to analyze the document content
+  const analysisPrompt = `Analiza este documento de tipo "${documentType}" y extrae todos los datos estructurados relevantes para gestión inmobiliaria.
+
+DOCUMENTO:
+${documentText.substring(0, 8000)}
+
+Extrae en formato JSON:
+- Si es contrato: inquilino, dirección, renta, fechas inicio/fin, fianza, condiciones
+- Si es factura: proveedor, importe, base, IVA, concepto, fecha
+- Si es DNI: nombre, número, fecha nacimiento, nacionalidad
+- Si es contabilidad: asientos con fecha, concepto, debe, haber, subcuenta
+- Si es catastro: referencia, dirección, superficie, uso, año
+
+Responde SOLO con JSON válido.`;
+
+  try {
+    const response = await anthropic.messages.create({
+      model: CLAUDE_MODEL,
+      max_tokens: 2000,
+      messages: [{ role: 'user', content: analysisPrompt }],
+    });
+
+    const text = response.content[0].type === 'text' ? response.content[0].text : '';
+    
+    return {
+      success: true,
+      documentType,
+      action,
+      extractedData: text,
+      message: `Documento analizado. Tipo: ${documentType}. Datos extraídos del documento.`,
+    };
+  } catch (error) {
+    return { success: false, error: 'Error analizando documento' };
+  }
+}
+
+async function valuateProperty(input: any, context: AssistantContext) {
+  const { direccion, ciudad, superficie, tipo, habitaciones, refCatastral } = input;
+  
+  // Get catastro data if reference provided
+  let catastroInfo = '';
+  if (refCatastral) {
+    try {
+      const res = await fetch(`http://ovc.catastro.meh.es/ovcservweb/OVCSWLocalizacionRC/OVCCallejero.asmx/Consulta_DNPRC?Provincia=&Municipio=&RC=${refCatastral}`);
+      if (res.ok) {
+        const text = await res.text();
+        const sfc = text.match(/<sfc>(\d+)<\/sfc>/)?.[1];
+        const luso = text.match(/<luso>([^<]+)<\/luso>/)?.[1];
+        const ant = text.match(/<ant>(\d+)<\/ant>/)?.[1];
+        catastroInfo = `Datos catastro: ${sfc}m², uso: ${luso}, año: ${ant}`;
+      }
+    } catch {}
+  }
+
+  const valuationPrompt = `Eres un tasador inmobiliario experto en España. Valora este activo:
+
+Dirección: ${direccion}
+Ciudad: ${ciudad || 'Madrid'}
+Tipo: ${tipo}
+Superficie: ${superficie || 'desconocida'}m²
+Habitaciones: ${habitaciones || 'N/A'}
+${catastroInfo}
+
+Proporciona estimación en JSON:
+{
+  "valorVenta": número en euros,
+  "valorAlquiler": número euros/mes,
+  "precioM2Venta": número,
+  "precioM2Alquiler": número,
+  "roi": porcentaje anual,
+  "confianza": 0-100,
+  "razonamiento": "explicación breve",
+  "comparables": "zona y precios similares",
+  "tendencia": "alcista/estable/bajista"
+}`;
+
+  try {
+    const response = await anthropic.messages.create({
+      model: CLAUDE_MODEL,
+      max_tokens: 1500,
+      messages: [{ role: 'user', content: valuationPrompt }],
+    });
+
+    return {
+      success: true,
+      valuation: response.content[0].type === 'text' ? response.content[0].text : '',
+      direccion,
+      tipo,
+    };
+  } catch {
+    return { success: false, error: 'Error valorando propiedad' };
+  }
+}
+
+async function searchCatastroTool(input: any) {
+  const { refCatastral, provincia, municipio, via, numero } = input;
+  
+  try {
+    let url = '';
+    if (refCatastral) {
+      url = `http://ovc.catastro.meh.es/ovcservweb/OVCSWLocalizacionRC/OVCCallejero.asmx/Consulta_DNPRC?Provincia=&Municipio=&RC=${refCatastral}`;
+    } else if (provincia && municipio && via && numero) {
+      url = `http://ovc.catastro.meh.es/ovcservweb/OVCSWLocalizacionRC/OVCCallejero.asmx/ConsultaNumero?Provincia=${encodeURIComponent(provincia)}&Municipio=${encodeURIComponent(municipio)}&TipoVia=CL&NomVia=${encodeURIComponent(via)}&Numero=${encodeURIComponent(numero)}`;
+    } else {
+      return { success: false, error: 'Proporciona referencia catastral o dirección completa' };
+    }
+
+    const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
+    const text = await res.text();
+    
+    const direccion = text.match(/<ldt>([^<]+)<\/ldt>/)?.[1] || '';
+    const superficie = text.match(/<sfc>(\d+)<\/sfc>/)?.[1] || '';
+    const uso = text.match(/<luso>([^<]+)<\/luso>/)?.[1] || '';
+    const ano = text.match(/<ant>(\d+)<\/ant>/)?.[1] || '';
+    const cp = text.match(/<dp>(\d+)<\/dp>/)?.[1] || '';
+
+    return {
+      success: true,
+      datos: { direccion, superficie: superficie + 'm²', uso, anoConstruccion: ano, codigoPostal: cp },
+    };
+  } catch {
+    return { success: false, error: 'Error consultando catastro' };
+  }
+}
+
+async function getFinancialSummary(input: any, context: AssistantContext) {
+  const contracts = await prisma.contract.findMany({
+    where: { estado: 'activo', unit: { building: { companyId: context.companyId } } },
+    select: { rentaMensual: true, fechaFin: true },
+  });
+
+  const payments = await prisma.payment.findMany({
+    where: { contract: { unit: { building: { companyId: context.companyId } } }, periodo: { startsWith: new Date().getFullYear().toString() } },
+    select: { monto: true, estado: true },
+  });
+
+  const units = await prisma.unit.findMany({
+    where: { building: { companyId: context.companyId } },
+    select: { estado: true },
+  });
+
+  const ingresosMensuales = contracts.reduce((s, c) => s + (Number(c.rentaMensual) || 0), 0);
+  const totalUnits = units.length;
+  const ocupadas = units.filter(u => u.estado === 'ocupada').length;
+  const pagados = payments.filter(p => p.estado === 'pagado').reduce((s, p) => s + p.monto, 0);
+  const pendientes = payments.filter(p => p.estado === 'pendiente').reduce((s, p) => s + p.monto, 0);
+  
+  const now = new Date();
+  const in60Days = new Date(now.getTime() + 60 * 24 * 60 * 60 * 1000);
+  const proxVencer = contracts.filter(c => new Date(c.fechaFin) <= in60Days && new Date(c.fechaFin) >= now).length;
+
+  return {
+    success: true,
+    resumen: {
+      ingresosMensuales: Math.round(ingresosMensuales),
+      ingresosAnuales: Math.round(ingresosMensuales * 12),
+      totalUnidades: totalUnits,
+      ocupadas,
+      disponibles: totalUnits - ocupadas,
+      tasaOcupacion: totalUnits > 0 ? Math.round((ocupadas / totalUnits) * 100) : 0,
+      pagadoEsteAño: Math.round(pagados),
+      pendienteCobro: Math.round(pendientes),
+      contratosProximosVencer: proxVencer,
+      contratosActivos: contracts.length,
+    },
   };
 }
