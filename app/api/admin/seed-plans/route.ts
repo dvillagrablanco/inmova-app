@@ -13,9 +13,7 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-const normalizeTier = (
-  tier: string
-): 'STARTER' | 'PROFESSIONAL' | 'BUSINESS' | 'ENTERPRISE' => {
+const normalizeTier = (tier: string): 'STARTER' | 'PROFESSIONAL' | 'BUSINESS' | 'ENTERPRISE' => {
   const normalized = tier.trim().toLowerCase();
   if (normalized === 'profesional' || normalized === 'professional') return 'PROFESSIONAL';
   if (normalized === 'empresarial' || normalized === 'business') return 'BUSINESS';
@@ -23,125 +21,126 @@ const normalizeTier = (
   return 'STARTER';
 };
 
+/**
+ * PLANES SINCRONIZADOS CON LANDING /landing/precios
+ * Starter €35, Profesional €59, Business €129, Enterprise €299
+ * + Owner €0 (interno, acceso total)
+ */
 const PLANES_DATA = [
-  // Plan interno gratuito para empresas del owner
   {
     nombre: 'Owner',
-    descripcion: 'Plan interno gratuito para empresas del propietario de la plataforma. Todas las funcionalidades sin límites.',
-    tier: 'premium',
+    descripcion: 'Plan especial para propietarios de la plataforma. Acceso completo sin coste.',
+    tier: 'enterprise',
     precioMensual: 0,
     maxUsuarios: 999,
     maxPropiedades: 9999,
     modulosIncluidos: [
-      'Todas las funcionalidades',
+      'Acceso completo a todos los módulos',
       'Sin límites',
-      'Soporte prioritario',
+      'Todos los add-ons incluidos',
     ],
     activo: true,
-    esInterno: true, // ← NO visible en landing ni registro
+    esInterno: true,
     signaturesIncludedMonth: 9999,
-    storageIncludedGB: 1000,
-    aiTokensIncludedMonth: 10000000,
-    smsIncludedMonth: 10000,
+    storageIncludedGB: 999,
+    aiTokensIncludedMonth: 1000000,
+    smsIncludedMonth: 9999,
   },
   {
-    nombre: 'Básico',
-    descripcion: 'Plan inicial para pequeñas inmobiliarias o propietarios individuales',
-    tier: 'basico',
-    precioMensual: 49,
-    maxUsuarios: 2,
-    maxPropiedades: 50,
+    nombre: 'Starter',
+    descripcion: 'Perfecto para propietarios particulares',
+    tier: 'starter',
+    precioMensual: 35,
+    maxUsuarios: 1,
+    maxPropiedades: 5,
     modulosIncluidos: [
-      'Dashboard básico',
-      'Gestión de propiedades',
-      'Gestión de inquilinos',
-      'Contratos digitales',
-      'Notificaciones por email',
+      'Hasta 5 propiedades',
+      'Gestión básica de inquilinos',
+      'Contratos simples',
+      '5 firmas digitales/mes',
+      '2GB almacenamiento',
+      'Soporte por email',
     ],
     activo: true,
     esInterno: false,
-    signaturesIncludedMonth: 10,
-    storageIncludedGB: 5,
+    signaturesIncludedMonth: 5,
+    storageIncludedGB: 2,
+    aiTokensIncludedMonth: 0,
+    smsIncludedMonth: 0,
+  },
+  {
+    nombre: 'Profesional',
+    descripcion: 'Para propietarios activos y pequeñas agencias',
+    tier: 'professional',
+    precioMensual: 59,
+    maxUsuarios: 3,
+    maxPropiedades: 25,
+    modulosIncluidos: [
+      'Hasta 25 propiedades',
+      '20 firmas digitales/mes',
+      '10GB almacenamiento',
+      'Cobro automático de rentas',
+      'Informes financieros',
+      'Recordatorios automáticos',
+      'Soporte prioritario',
+    ],
+    activo: true,
+    esInterno: false,
+    signaturesIncludedMonth: 20,
+    storageIncludedGB: 10,
     aiTokensIncludedMonth: 10000,
     smsIncludedMonth: 50,
   },
   {
-    nombre: 'Profesional',
-    descripcion: 'Para agentes inmobiliarios y gestores profesionales',
-    tier: 'profesional',
-    precioMensual: 149,
+    nombre: 'Business',
+    descripcion: 'Para gestoras profesionales y agencias',
+    tier: 'business',
+    precioMensual: 129,
     maxUsuarios: 10,
-    maxPropiedades: 200,
+    maxPropiedades: 100,
     modulosIncluidos: [
-      'Todo lo del plan Básico',
-      'CRM con pipeline de ventas',
-      'Automatizaciones básicas',
-      'Informes personalizados',
-      'Portal para inquilinos',
-      'Integraciones con terceros',
-      'Firma digital de contratos',
-      'API access básico',
-      'Soporte prioritario 24h',
+      'Hasta 100 propiedades',
+      'Multi-propietario',
+      '50 firmas digitales/mes',
+      '50GB almacenamiento',
+      'CRM integrado',
+      'API de integración',
+      '7 verticales inmobiliarios',
+      'Reportes avanzados',
+      'Multi-idioma',
+      'Account manager dedicado',
     ],
     activo: true,
     esInterno: false,
     signaturesIncludedMonth: 50,
-    storageIncludedGB: 25,
+    storageIncludedGB: 50,
     aiTokensIncludedMonth: 50000,
     smsIncludedMonth: 200,
   },
   {
-    nombre: 'Empresarial',
-    descripcion: 'Para gestoras y empresas inmobiliarias',
-    tier: 'empresarial',
-    precioMensual: 499,
+    nombre: 'Enterprise',
+    descripcion: 'Para grandes empresas y SOCIMIs',
+    tier: 'enterprise',
+    precioMensual: 299,
     maxUsuarios: null,
     maxPropiedades: null,
     modulosIncluidos: [
-      'Todo lo del plan Profesional',
-      'Multi-empresa',
-      'Workflows personalizados',
-      'Integraciones avanzadas',
-      'White-label opcional',
-      'API access completo',
-      'Soporte 24/7',
-      'Account manager dedicado',
-      'Capacitación incluida',
-      'SLA 99.9%',
-    ],
-    activo: true,
-    esInterno: false,
-    signaturesIncludedMonth: 200,
-    storageIncludedGB: 100,
-    aiTokensIncludedMonth: 200000,
-    smsIncludedMonth: 1000,
-  },
-  {
-    nombre: 'Premium',
-    descripcion: 'Solución enterprise con características a medida',
-    tier: 'premium',
-    precioMensual: 999,
-    maxUsuarios: null,
-    maxPropiedades: null,
-    modulosIncluidos: [
-      'Todo lo del plan Empresarial',
-      'Desarrollo a medida',
+      'Todo de Business',
+      'Propiedades ilimitadas',
+      'Firmas digitales ilimitadas',
+      'Almacenamiento ilimitado',
       'White-label completo',
-      'Infraestructura dedicada',
+      'API ilimitada',
+      'SLA 99.9%',
       'Todos los add-ons incluidos',
-      'Consultoría estratégica',
-      'Soporte premium 24/7',
-      'Account manager senior',
-      'Acceso anticipado a features',
-      'Integraciones custom',
-      'Capacitación ilimitada',
+      'Soporte 24/7 dedicado',
     ],
     activo: true,
     esInterno: false,
-    signaturesIncludedMonth: null,
-    storageIncludedGB: 500,
+    signaturesIncludedMonth: 9999,
+    storageIncludedGB: 999,
     aiTokensIncludedMonth: 1000000,
-    smsIncludedMonth: 5000,
+    smsIncludedMonth: 9999,
   },
 ];
 
@@ -149,20 +148,14 @@ export async function GET(request: NextRequest) {
   try {
     // 1. Verificar autenticación y permisos
     const session = await getServerSession(authOptions);
-    
+
     if (!session) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     // Solo superadmin puede ejecutar seed
     if (session.user.role !== 'super_admin') {
-      return NextResponse.json(
-        { error: 'Permisos insuficientes' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Permisos insuficientes' }, { status: 403 });
     }
 
     // 2. Verificar planes existentes (usar nombre en vez de tier porque Owner y Premium comparten tier)
@@ -170,8 +163,8 @@ export async function GET(request: NextRequest) {
       select: { tier: true, nombre: true },
     });
 
-    const existingNames = new Set(existingPlans.map(p => p.nombre));
-    
+    const existingNames = new Set(existingPlans.map((p) => p.nombre));
+
     let created = 0;
     let skipped = 0;
     const results = [];
@@ -259,7 +252,6 @@ export async function GET(request: NextRequest) {
       },
       plans: results,
     });
-
   } catch (error: any) {
     logger.error('[Seed Plans API Error]:', error);
     return NextResponse.json(

@@ -35,64 +35,67 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    // Añadir información adicional según tier
+    // Añadir features según tier (sincronizado con landing /landing/precios)
     const planesConFeatures = planes.map(plan => {
       let features: string[] = [];
+      const tier = plan.tier?.toUpperCase();
 
-      switch (plan.tier) {
-        case 'basico':
+      switch (tier) {
+        case 'STARTER':
+        case 'FREE':
           features = [
-            'Dashboard básico',
-            'Portal inquilino web',
-            'Contratos digitales',
-            'Soporte por email (48h)',
-            'App móvil',
-            'Notificaciones email'
+            'Hasta 5 propiedades',
+            'Gestión básica de inquilinos',
+            'Contratos simples',
+            '5 firmas digitales/mes incluidas',
+            '2GB almacenamiento',
+            'Soporte por email',
           ];
           break;
-        case 'profesional':
+        case 'PROFESSIONAL':
           features = [
-            'Todo lo de Basic',
-            'CRM con pipeline de ventas',
-            'Automatizaciones básicas',
-            'Informes personalizados',
-            'Soporte prioritario (24h)',
-            '1 módulo add-on gratis',
-            'Integraciones con terceros',
-            'Firma digital de contratos',
-            'API access básico'
+            'Hasta 25 propiedades',
+            'Gestión avanzada de inquilinos',
+            'Contratos con firma digital',
+            '20 firmas digitales/mes incluidas',
+            '10GB almacenamiento',
+            'Cobro automático de rentas',
+            'Informes financieros',
+            'Recordatorios automáticos',
+            'Soporte prioritario',
           ];
           break;
-        case 'empresarial':
+        case 'BUSINESS':
           features = [
-            'Todo lo de Professional',
-            'Multi-empresa',
-            'Workflows personalizados',
-            'Integraciones avanzadas',
-            'Soporte 24/7',
+            'Hasta 100 propiedades',
+            'Multi-propietario',
+            '50 firmas digitales/mes incluidas',
+            '50GB almacenamiento',
+            'CRM integrado',
+            'API de integración',
+            'Los 7 verticales inmobiliarios',
+            'Reportes avanzados',
+            'Multi-idioma',
             'Account manager dedicado',
-            'Capacitación incluida',
-            '3 módulos add-on incluidos',
-            'API access completo',
-            'White-label opcional'
           ];
           break;
         case 'ENTERPRISE':
-        case 'personalizado':
           features = [
-            'Todo lo de Business',
-            'Desarrollo a medida',
+            'Todo de Business',
+            'Propiedades ilimitadas',
+            'Firmas digitales ilimitadas',
+            'Almacenamiento ilimitado',
             'White-label completo',
-            'SLA 99.9% garantizado',
-            'Infraestructura dedicada',
+            'API ilimitada',
+            'SLA garantizado 99.9%',
+            'Integraciones personalizadas',
             'Todos los add-ons incluidos',
-            'Consultoría estratégica',
-            'Soporte 24/7 premium',
-            'Account manager senior',
-            'Acceso anticipado a features',
-            'Integraciones custom',
-            'Capacitación ilimitada'
+            'Soporte 24/7 dedicado',
           ];
+          break;
+        default:
+          // Legacy tiers fallback
+          features = plan.modulosIncluidos as string[] || [];
           break;
       }
 
