@@ -43,6 +43,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Verify plan access - Owner and premium plans have full access
+    const companyId = session.user?.companyId;
+    if (companyId) {
+      const { getPrismaClient } = await import('@/lib/db');
+      const prisma = getPrismaClient();
+      const company = await prisma.company.findUnique({
+        where: { id: companyId },
+        select: { subscriptionPlan: { select: { tier: true, nombre: true } } },
+      });
+      const tier = company?.subscriptionPlan?.tier?.toLowerCase() || '';
+      const premiumTiers = ['enterprise', 'owner', 'business', 'empresarial', 'premium', 'personalizado'];
+      if (!premiumTiers.some(t => tier.includes(t))) {
+        return NextResponse.json({
+          type: 'text',
+          content: `El Asistente IA está disponible para planes premium. Tu plan actual es "${company?.subscriptionPlan?.nombre || 'Sin plan'}". Contacta con tu administrador para hacer upgrade.`,
+          requiresUpgrade: true,
+        });
+      }
+    }
+
     // Accept both JSON and FormData (for file uploads)
     let message = '';
     let conversationHistory: any[] = [];
