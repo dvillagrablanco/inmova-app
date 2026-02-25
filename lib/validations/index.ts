@@ -57,7 +57,7 @@ export const buildingUpdateSchema = buildingCreateSchema.partial();
 // ====================================
 
 export const unitCreateSchema = z.object({
-  buildingId: z.string().uuid('ID de edificio inválido'),
+  buildingId: z.string().min(1, 'ID de edificio requerido'),
   numero: z
     .string()
     .min(1, 'El número de unidad es requerido')
@@ -135,9 +135,16 @@ export const tenantCreateSchema = z.object({
     .trim(),
   dni: z
     .string()
-    .regex(/^[0-9]{8}[A-Z]$/, 'DNI/NIE inválido (formato: 12345678A)')
-    .toUpperCase()
     .trim()
+    .toUpperCase()
+    .refine(
+      (val) =>
+        !val ||
+        /^[0-9]{8}[A-Z]$/.test(val) || // Spanish DNI: 8 digits + 1 letter
+        /^[XYZ][0-9]{7}[A-Z]$/.test(val) || // NIE: X/Y/Z + 7 digits + 1 letter
+        /^[A-Z0-9]{5,20}$/.test(val), // Passport or alphanumeric 5-20 chars
+      'DNI/NIE/Pasaporte: formato 12345678A, X1234567L, o alfanumérico 5-20 caracteres'
+    )
     .optional()
     .or(z.literal('')),
   fechaNacimiento: z.string().datetime({ message: 'Fecha inválida' }).or(z.date()).optional(),

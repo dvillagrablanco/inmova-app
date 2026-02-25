@@ -199,7 +199,7 @@ export default function NuevoInquilinoPage() {
           nombre: formData.nombre,
           email: formData.email,
           telefono: formData.telefono,
-          documentoIdentidad: formData.documentoIdentidad,
+          dni: formData.documentoIdentidad,
           tipoDocumento: formData.tipoDocumento,
           fechaNacimiento: formData.fechaNacimiento
             ? new Date(formData.fechaNacimiento).toISOString()
@@ -386,14 +386,13 @@ export default function NuevoInquilinoPage() {
 
                     {/* Documento de Identidad */}
                     <div className="space-y-2">
-                      <Label htmlFor="documentoIdentidad">Número de Documento *</Label>
+                      <Label htmlFor="documentoIdentidad">Número de Documento</Label>
                       <Input
                         id="documentoIdentidad"
                         name="documentoIdentidad"
                         value={formData.documentoIdentidad}
                         onChange={handleChange}
-                        required
-                        placeholder="12345678A"
+                        placeholder="12345678A, X1234567L o pasaporte"
                       />
                     </div>
 

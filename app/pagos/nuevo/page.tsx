@@ -33,7 +33,7 @@ import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
 interface Contract {
   id: string;
   unit: { numero: string; building: { nombre: string } };
-  tenant: { nombre: string };
+  tenant: { nombreCompleto?: string; nombre?: string };
 }
 
 export default function NuevoPagoPage() {
@@ -61,8 +61,9 @@ export default function NuevoPagoPage() {
       try {
         const response = await fetch('/api/contracts');
         if (response.ok) {
-          const data = await response.json();
-          setContracts(data.filter((c: any) => c.estado === 'activo'));
+          const result = await response.json();
+          const contractsList = Array.isArray(result) ? result : result.data || [];
+          setContracts(contractsList.filter((c: any) => c.estado === 'activo'));
         }
       } catch (error) {
         logger.error('Error fetching contracts:', error);
@@ -195,7 +196,7 @@ export default function NuevoPagoPage() {
                       {contracts.map((contract) => (
                         <SelectItem key={contract.id} value={contract.id}>
                           {contract.unit.building.nombre} - {contract.unit.numero} (
-                          {contract.tenant.nombre})
+                          {contract.tenant?.nombreCompleto ?? contract.tenant?.nombre ?? '-'})
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -268,7 +269,7 @@ export default function NuevoPagoPage() {
                     <SelectContent>
                       <SelectItem value="pendiente">Pendiente</SelectItem>
                       <SelectItem value="pagado">Pagado</SelectItem>
-                      <SelectItem value="vencido">Vencido</SelectItem>
+                      <SelectItem value="atrasado">Vencido</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
