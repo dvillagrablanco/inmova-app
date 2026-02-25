@@ -139,7 +139,7 @@ const CARACTERISTICAS = [
 export default function ValoracionIAPage() {
   const { data: _session, status } = useSession();
   const router = useRouter();
-  
+
   // Estados
   const [loading, setLoading] = useState(true);
   const [valorando, setValorando] = useState(false);
@@ -148,7 +148,18 @@ export default function ValoracionIAPage() {
   const [selectedAsset, setSelectedAsset] = useState<string>('manual');
   const [assetType, setAssetType] = useState<'unit' | 'building'>('unit');
   const [resultado, setResultado] = useState<ValoracionResult | null>(null);
-  
+
+  // Valoración de Mercado
+  const [activeTab, setActiveTab] = useState<'mis-activos' | 'mercado'>('mis-activos');
+  const [refCatastral, setRefCatastral] = useState('');
+  const [catastroData, setCatastroData] = useState<any>(null);
+  const [buscandoCatastro, setBuscandoCatastro] = useState(false);
+  const [searchProvincia, setSearchProvincia] = useState('');
+  const [searchMunicipio, setSearchMunicipio] = useState('');
+  const [searchTipoVia, setSearchTipoVia] = useState('CL');
+  const [searchVia, setSearchVia] = useState('');
+  const [searchNumero, setSearchNumero] = useState('');
+
   // Datos del formulario
   const [formData, setFormData] = useState({
     superficie: '',
@@ -161,6 +172,7 @@ export default function ValoracionIAPage() {
     finalidad: 'venta',
     caracteristicas: [] as string[],
     descripcionAdicional: '',
+    tipoActivo: 'vivienda' as string,
   });
 
   // Cargar datos al iniciar
@@ -178,12 +190,12 @@ export default function ValoracionIAPage() {
         fetch('/api/units'),
         fetch('/api/buildings'),
       ]);
-      
+
       if (unitsRes.ok) {
         const unitsData = await unitsRes.json();
         setUnits(Array.isArray(unitsData) ? unitsData : []);
       }
-      
+
       if (buildingsRes.ok) {
         const buildingsData = await buildingsRes.json();
         const normalizedBuildings = Array.isArray(buildingsData)
@@ -204,16 +216,16 @@ export default function ValoracionIAPage() {
   // Cuando se selecciona un activo, rellenar datos automáticamente
   const handleAssetSelect = (assetId: string) => {
     setSelectedAsset(assetId);
-    
+
     // Si es "manual", no rellenar datos automáticamente
     if (assetId === 'manual') {
       return;
     }
-    
+
     if (assetType === 'unit') {
-      const unit = units.find(u => u.id === assetId);
+      const unit = units.find((u) => u.id === assetId);
       if (unit) {
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
           superficie: unit.superficie?.toString() || '',
           habitaciones: unit.habitaciones?.toString() || '',
@@ -223,12 +235,63 @@ export default function ValoracionIAPage() {
     }
   };
 
+  // Búsqueda Catastro (Valoración de Mercado)
+  const handleBuscarCatastro = async () => {
+    const hasRC = refCatastral.trim().length >= 14 && refCatastral.trim().length <= 20;
+    const hasAddress =
+      searchProvincia.trim() && searchMunicipio.trim() && searchVia.trim() && searchNumero.trim();
+
+    if (!hasRC && !hasAddress) {
+      toast.error(
+        'Introduce referencia catastral (14-20 chars) o completa todos los campos de dirección'
+      );
+      return;
+    }
+
+    setBuscandoCatastro(true);
+    setCatastroData(null);
+
+    try {
+      let url = '/api/catastro/consulta?';
+      if (hasRC) {
+        url += `rc=${encodeURIComponent(refCatastral.trim())}`;
+      } else {
+        url += `provincia=${encodeURIComponent(searchProvincia)}&municipio=${encodeURIComponent(searchMunicipio)}&tipoVia=${encodeURIComponent(searchTipoVia)}&via=${encodeURIComponent(searchVia)}&numero=${encodeURIComponent(searchNumero)}`;
+      }
+
+      const res = await fetch(url);
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || err.message || 'Error consultando catastro');
+      }
+
+      const data = await res.json();
+      setCatastroData(data);
+
+      // Auto-fill form fields
+      const anoActual = new Date().getFullYear();
+      const antiguedad = data.anoConstruccion ? String(anoActual - data.anoConstruccion) : '';
+      setFormData((prev) => ({
+        ...prev,
+        superficie: String(data.superficieTotal || data.superficie || prev.superficie),
+        antiguedad: antiguedad || prev.antiguedad,
+      }));
+
+      toast.success('Datos del Catastro cargados correctamente');
+    } catch (error: any) {
+      logger.error('Error consultando catastro:', error);
+      toast.error(error.message || 'No se encontraron datos catastrales');
+    } finally {
+      setBuscandoCatastro(false);
+    }
+  };
+
   // Toggle característica
   const toggleCaracteristica = (id: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       caracteristicas: prev.caracteristicas.includes(id)
-        ? prev.caracteristicas.filter(c => c !== id)
+        ? prev.caracteristicas.filter((c) => c !== id)
         : [...prev.caracteristicas, id],
     }));
   };
@@ -244,16 +307,21 @@ export default function ValoracionIAPage() {
     setResultado(null);
 
     try {
-      // Obtener datos del activo seleccionado
+      // Obtener datos del activo seleccionado (o catastro para mercado)
       let direccion = '';
       let ciudad = '';
-      
-      if (selectedAsset && selectedAsset !== 'manual' && assetType === 'unit') {
-        const unit = units.find(u => u.id === selectedAsset);
+      let unitId: string | undefined;
+
+      if (activeTab === 'mercado' && catastroData) {
+        direccion = catastroData.direccion || '';
+        ciudad = catastroData.municipio || 'Madrid';
+      } else if (selectedAsset && selectedAsset !== 'manual' && assetType === 'unit') {
+        const unit = units.find((u) => u.id === selectedAsset);
         direccion = unit?.building?.direccion || '';
         ciudad = unit?.building?.ciudad || 'Madrid';
+        unitId = selectedAsset;
       } else if (selectedAsset && selectedAsset !== 'manual' && assetType === 'building') {
-        const building = buildings.find(b => b.id === selectedAsset);
+        const building = buildings.find((b) => b.id === selectedAsset);
         direccion = building?.direccion || '';
         ciudad = building?.ciudad || 'Madrid';
       }
@@ -270,8 +338,9 @@ export default function ValoracionIAPage() {
           planta: parseInt(formData.planta) || 0,
           direccion,
           ciudad,
-          codigoPostal: '',
-          unitId: assetType === 'unit' && selectedAsset !== 'manual' ? selectedAsset : undefined,
+          codigoPostal:
+            activeTab === 'mercado' && catastroData?.codigoPostal ? catastroData.codigoPostal : '',
+          unitId: activeTab === 'mis-activos' ? unitId : undefined,
         }),
       });
 
@@ -283,7 +352,6 @@ export default function ValoracionIAPage() {
       const data = await response.json();
       setResultado(data);
       toast.success('Valoración completada con éxito');
-      
     } catch (error: any) {
       logger.error('Error en valoración:', error);
       toast.error(error.message || 'Error al realizar la valoración con IA');
@@ -323,13 +391,16 @@ export default function ValoracionIAPage() {
       let unitId: string | undefined;
       let buildingId: string | undefined;
 
-      if (selectedAsset && selectedAsset !== 'manual' && assetType === 'unit') {
-        const unit = units.find(u => u.id === selectedAsset);
+      if (activeTab === 'mercado' && catastroData) {
+        direccion = catastroData.direccion || '';
+        ciudad = catastroData.municipio || '';
+      } else if (selectedAsset && selectedAsset !== 'manual' && assetType === 'unit') {
+        const unit = units.find((u) => u.id === selectedAsset);
         direccion = unit?.building?.direccion || '';
         ciudad = unit?.building?.ciudad || '';
         unitId = selectedAsset;
       } else if (selectedAsset && selectedAsset !== 'manual' && assetType === 'building') {
-        const building = buildings.find(b => b.id === selectedAsset);
+        const building = buildings.find((b) => b.id === selectedAsset);
         direccion = building?.direccion || '';
         ciudad = building?.ciudad || '';
         buildingId = selectedAsset;
@@ -387,7 +458,9 @@ export default function ValoracionIAPage() {
       `Estado: ${formData.estadoConservacion}`,
       `Orientación: ${formData.orientacion}`,
       `Finalidad: ${formData.finalidad}`,
-      formData.caracteristicas.length > 0 ? `Características: ${formData.caracteristicas.join(', ')}` : '',
+      formData.caracteristicas.length > 0
+        ? `Características: ${formData.caracteristicas.join(', ')}`
+        : '',
       '',
       '── VALORACIÓN ESTIMADA ─────────────────────────────────',
       `Valor estimado: ${formatCurrency(resultado.valorEstimado)}`,
@@ -404,19 +477,19 @@ export default function ValoracionIAPage() {
         '── RENTABILIDAD ────────────────────────────────────────',
         `Alquiler mensual estimado: ${formatCurrency(resultado.alquilerEstimado)}/mes`,
         `Rentabilidad bruta: ${resultado.rentabilidadAlquiler.toFixed(2)}%`,
-        '',
+        ''
       );
     }
 
     if (resultado.factoresPositivos.length > 0) {
       lines.push('── FACTORES POSITIVOS ──────────────────────────────────');
-      resultado.factoresPositivos.forEach(f => lines.push(`  + ${f}`));
+      resultado.factoresPositivos.forEach((f) => lines.push(`  + ${f}`));
       lines.push('');
     }
 
     if (resultado.factoresNegativos.length > 0) {
       lines.push('── FACTORES NEGATIVOS ──────────────────────────────────');
-      resultado.factoresNegativos.forEach(f => lines.push(`  - ${f}`));
+      resultado.factoresNegativos.forEach((f) => lines.push(`  - ${f}`));
       lines.push('');
     }
 
@@ -430,7 +503,9 @@ export default function ValoracionIAPage() {
       lines.push('── PROPIEDADES COMPARABLES ─────────────────────────────');
       resultado.comparables.forEach((c, i) => {
         lines.push(`  ${i + 1}. ${c.direccion}`);
-        lines.push(`     Precio: ${formatCurrency(c.precio)} | ${c.superficie}m² | ${formatCurrency(c.precioM2)}/m² | Similitud: ${Math.round(c.similitud * 100)}%`);
+        lines.push(
+          `     Precio: ${formatCurrency(c.precio)} | ${c.superficie}m² | ${formatCurrency(c.precioM2)}/m² | Similitud: ${Math.round(c.similitud * 100)}%`
+        );
       });
       lines.push('');
     }
@@ -534,69 +609,226 @@ export default function ValoracionIAPage() {
         <div className="grid lg:grid-cols-2 gap-6">
           {/* Panel de Formulario */}
           <div className="space-y-6">
-            {/* Selección de Activo */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Building2 className="h-5 w-5" />
-                  Seleccionar Activo a Valorar
-                </CardTitle>
-                <CardDescription>
-                  Elige un inmueble de tu cartera o introduce datos manualmente
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Tipo de activo */}
+            {/* Tabs: Mis Activos | Valoración de Mercado */}
+            <Tabs
+              value={activeTab}
+              onValueChange={(v) => setActiveTab(v as 'mis-activos' | 'mercado')}
+            >
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="mis-activos" className="gap-2">
+                  <Building2 className="h-4 w-4" />
+                  Mis Activos
+                </TabsTrigger>
+                <TabsTrigger value="mercado" className="gap-2">
+                  <MapPin className="h-4 w-4" />
+                  Valoración de Mercado
+                </TabsTrigger>
+              </TabsList>
+
+              {/* Tab: Mis Activos (existente) */}
+              <TabsContent value="mis-activos" className="mt-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Building2 className="h-5 w-5" />
+                      Seleccionar Activo a Valorar
+                    </CardTitle>
+                    <CardDescription>
+                      Elige un inmueble de tu cartera o introduce datos manualmente
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Tipo de activo */}
+                    <div className="space-y-2">
+                      <Label>Tipo de Activo</Label>
+                      <Select
+                        value={assetType}
+                        onValueChange={(v: 'unit' | 'building') => {
+                          setAssetType(v);
+                          setSelectedAsset('manual');
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="unit">Unidades / Viviendas</SelectItem>
+                          <SelectItem value="building">Edificios</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Selector de activo */}
+                    <div className="space-y-2">
+                      <Label>Seleccionar Activo</Label>
+                      <Select value={selectedAsset} onValueChange={handleAssetSelect}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecciona un activo de tu cartera..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="manual">-- Introducir datos manualmente --</SelectItem>
+                          {assetType === 'unit'
+                            ? units.map((unit) => (
+                                <SelectItem key={unit.id} value={unit.id}>
+                                  {unit.building?.nombre || 'Sin edificio'} - Unidad {unit.numero}
+                                  {unit.superficie && ` (${unit.superficie}m²)`}
+                                </SelectItem>
+                              ))
+                            : buildings.map((building) => (
+                                <SelectItem key={building.id} value={building.id}>
+                                  {building.nombre || building.direccion || 'Sin dirección'}
+                                  {building.numeroUnidades
+                                    ? ` (${building.numeroUnidades} unidades)`
+                                    : ''}
+                                </SelectItem>
+                              ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Tab: Valoración de Mercado */}
+              <TabsContent value="mercado" className="mt-4 space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <MapPin className="h-5 w-5" />
+                      Búsqueda en Catastro
+                    </CardTitle>
+                    <CardDescription>
+                      Consulta datos oficiales para valorar cualquier inmueble
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Búsqueda por Referencia Catastral */}
+                    <div className="space-y-2">
+                      <Label>Referencia Catastral</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Ej: 1234567VK1234N0001W (14-20 caracteres)"
+                          value={refCatastral}
+                          onChange={(e) => setRefCatastral(e.target.value)}
+                        />
+                        <Button
+                          variant="secondary"
+                          onClick={handleBuscarCatastro}
+                          disabled={buscandoCatastro}
+                        >
+                          {buscandoCatastro ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            'Consultar Catastro'
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+
+                    <Separator />
+
+                    {/* Búsqueda por Dirección */}
+                    <div className="space-y-2">
+                      <Label>O busca por dirección</Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Input
+                          placeholder="Provincia"
+                          value={searchProvincia}
+                          onChange={(e) => setSearchProvincia(e.target.value)}
+                        />
+                        <Input
+                          placeholder="Municipio"
+                          value={searchMunicipio}
+                          onChange={(e) => setSearchMunicipio(e.target.value)}
+                        />
+                        <Select value={searchTipoVia} onValueChange={setSearchTipoVia}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="CL">Calle (CL)</SelectItem>
+                            <SelectItem value="AV">Avenida (AV)</SelectItem>
+                            <SelectItem value="PZ">Plaza (PZ)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Input
+                          placeholder="Nombre vía"
+                          value={searchVia}
+                          onChange={(e) => setSearchVia(e.target.value)}
+                        />
+                        <Input
+                          placeholder="Número"
+                          value={searchNumero}
+                          onChange={(e) => setSearchNumero(e.target.value)}
+                          className="col-span-2"
+                        />
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleBuscarCatastro}
+                        disabled={buscandoCatastro}
+                      >
+                        {buscandoCatastro ? (
+                          <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                        ) : null}
+                        Buscar
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Resultado Catastro */}
+                {catastroData && (
+                  <Card className="border-2 border-violet-200 bg-violet-50/50">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="flex items-center justify-between text-base">
+                        <span className="flex items-center gap-2">
+                          <Building2 className="h-5 w-5 text-violet-600" />
+                          Datos del Catastro
+                        </span>
+                        <Badge variant="secondary">Datos del Catastro</Badge>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2 text-sm">
+                      <p className="font-medium">{catastroData.direccion}</p>
+                      <div className="grid grid-cols-2 gap-2 text-muted-foreground">
+                        <span>{catastroData.superficieTotal} m²</span>
+                        <span>Uso: {catastroData.uso}</span>
+                        {catastroData.anoConstruccion ? (
+                          <span>Año: {catastroData.anoConstruccion}</span>
+                        ) : null}
+                        {catastroData.inmuebles?.length ? (
+                          <span>{catastroData.inmuebles.length} inmueble(s)</span>
+                        ) : null}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Tipo de activo (solo para mercado) */}
                 <div className="space-y-2">
-                  <Label>Tipo de Activo</Label>
-                  <Select 
-                    value={assetType} 
-                    onValueChange={(v: 'unit' | 'building') => {
-                      setAssetType(v);
-                      setSelectedAsset('manual');
-                    }}
+                  <Label>Tipo de activo</Label>
+                  <Select
+                    value={formData.tipoActivo}
+                    onValueChange={(v) => setFormData((prev) => ({ ...prev, tipoActivo: v }))}
                   >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="unit">Unidades / Viviendas</SelectItem>
-                      <SelectItem value="building">Edificios</SelectItem>
+                      <SelectItem value="vivienda">Vivienda</SelectItem>
+                      <SelectItem value="local_comercial">Local comercial</SelectItem>
+                      <SelectItem value="oficina">Oficina</SelectItem>
+                      <SelectItem value="nave_industrial">Nave industrial</SelectItem>
+                      <SelectItem value="garaje">Garaje</SelectItem>
+                      <SelectItem value="edificio_completo">Edificio completo</SelectItem>
+                      <SelectItem value="solar">Solar</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-
-                {/* Selector de activo */}
-                <div className="space-y-2">
-                  <Label>Seleccionar Activo</Label>
-                  <Select value={selectedAsset} onValueChange={handleAssetSelect}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecciona un activo de tu cartera..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="manual">-- Introducir datos manualmente --</SelectItem>
-                      {assetType === 'unit' ? (
-                        units.map((unit) => (
-                          <SelectItem key={unit.id} value={unit.id}>
-                            {unit.building?.nombre || 'Sin edificio'} - Unidad {unit.numero}
-                            {unit.superficie && ` (${unit.superficie}m²)`}
-                          </SelectItem>
-                        ))
-                      ) : (
-                        buildings.map((building) => (
-                          <SelectItem key={building.id} value={building.id}>
-                            {building.nombre || building.direccion || 'Sin dirección'}
-                            {building.numeroUnidades
-                              ? ` (${building.numeroUnidades} unidades)`
-                              : ''}
-                          </SelectItem>
-                        ))
-                      )}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </CardContent>
-            </Card>
+              </TabsContent>
+            </Tabs>
 
             {/* Características del Inmueble */}
             <Card>
@@ -604,6 +836,11 @@ export default function ValoracionIAPage() {
                 <CardTitle className="flex items-center gap-2">
                   <Ruler className="h-5 w-5" />
                   Características del Inmueble
+                  {activeTab === 'mercado' && catastroData && (
+                    <Badge variant="outline" className="text-xs">
+                      Datos del Catastro
+                    </Badge>
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -660,7 +897,7 @@ export default function ValoracionIAPage() {
                   </div>
                   <div className="space-y-2">
                     <Label>Estado</Label>
-                    <Select 
+                    <Select
                       value={formData.estadoConservacion}
                       onValueChange={(v) => setFormData({ ...formData, estadoConservacion: v })}
                     >
@@ -681,7 +918,7 @@ export default function ValoracionIAPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Orientación</Label>
-                    <Select 
+                    <Select
                       value={formData.orientacion}
                       onValueChange={(v) => setFormData({ ...formData, orientacion: v })}
                     >
@@ -698,7 +935,7 @@ export default function ValoracionIAPage() {
                   </div>
                   <div className="space-y-2">
                     <Label>Finalidad</Label>
-                    <Select 
+                    <Select
                       value={formData.finalidad}
                       onValueChange={(v) => setFormData({ ...formData, finalidad: v })}
                     >
@@ -745,13 +982,15 @@ export default function ValoracionIAPage() {
                     id="descripcion"
                     placeholder="Describe características especiales, reformas recientes, vistas, etc."
                     value={formData.descripcionAdicional}
-                    onChange={(e) => setFormData({ ...formData, descripcionAdicional: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, descripcionAdicional: e.target.value })
+                    }
                     rows={3}
                   />
                 </div>
 
                 {/* Botón de valorar */}
-                <Button 
+                <Button
                   className="w-full bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600"
                   size="lg"
                   onClick={handleValorar}
@@ -783,8 +1022,8 @@ export default function ValoracionIAPage() {
                   </div>
                   <h3 className="text-xl font-semibold mb-2">Valoración Inteligente</h3>
                   <p className="text-muted-foreground max-w-sm mx-auto mb-6">
-                    Completa los datos del inmueble y obtén una valoración profesional 
-                    basada en análisis de mercado con inteligencia artificial.
+                    Completa los datos del inmueble y obtén una valoración profesional basada en
+                    análisis de mercado con inteligencia artificial.
                   </p>
                   <div className="flex flex-wrap justify-center gap-2">
                     <Badge variant="secondary">
@@ -814,8 +1053,8 @@ export default function ValoracionIAPage() {
                   </div>
                   <h3 className="text-xl font-semibold mb-2">Analizando con IA</h3>
                   <p className="text-muted-foreground max-w-sm mx-auto">
-                    Claude está analizando el mercado, comparando propiedades similares 
-                    y calculando el valor óptimo...
+                    Claude está analizando el mercado, comparando propiedades similares y calculando
+                    el valor óptimo...
                   </p>
                   <div className="mt-6 space-y-2 text-sm text-left max-w-xs mx-auto">
                     <div className="flex items-center gap-2 text-muted-foreground">
@@ -848,8 +1087,11 @@ export default function ValoracionIAPage() {
                       <Badge className={getTrendColor(resultado.tendenciaMercado)}>
                         {getTrendIcon(resultado.tendenciaMercado)}
                         <span className="ml-1">
-                          {resultado.tendenciaMercado === 'alcista' ? '+' : 
-                           resultado.tendenciaMercado === 'bajista' ? '-' : ''}
+                          {resultado.tendenciaMercado === 'alcista'
+                            ? '+'
+                            : resultado.tendenciaMercado === 'bajista'
+                              ? '-'
+                              : ''}
                           {resultado.porcentajeTendencia}%
                         </span>
                       </Badge>
@@ -861,10 +1103,11 @@ export default function ValoracionIAPage() {
                         {formatCurrency(resultado.valorEstimado)}
                       </p>
                       <p className="text-sm text-muted-foreground mt-2">
-                        Rango: {formatCurrency(resultado.valorMinimo)} - {formatCurrency(resultado.valorMaximo)}
+                        Rango: {formatCurrency(resultado.valorMinimo)} -{' '}
+                        {formatCurrency(resultado.valorMaximo)}
                       </p>
                     </div>
-                    
+
                     <div className="grid grid-cols-3 gap-4 pt-4 border-t">
                       <div className="text-center">
                         <p className="text-2xl font-bold">{formatCurrency(resultado.precioM2)}</p>
@@ -933,7 +1176,10 @@ export default function ValoracionIAPage() {
                       <AccordionContent>
                         <div className="space-y-2">
                           {resultado.comparables.map((comp, idx) => (
-                            <div key={idx} className="p-3 bg-muted/50 rounded-lg flex items-center justify-between">
+                            <div
+                              key={idx}
+                              className="p-3 bg-muted/50 rounded-lg flex items-center justify-between"
+                            >
                               <div>
                                 <p className="font-medium text-sm">{comp.direccion}</p>
                                 <p className="text-xs text-muted-foreground">
@@ -970,7 +1216,10 @@ export default function ValoracionIAPage() {
                           </p>
                           <ul className="space-y-1">
                             {resultado.factoresPositivos.map((f, i) => (
-                              <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
+                              <li
+                                key={i}
+                                className="text-sm text-muted-foreground flex items-start gap-2"
+                              >
                                 <span className="text-green-500 mt-1">+</span>
                                 {f}
                               </li>
@@ -984,7 +1233,10 @@ export default function ValoracionIAPage() {
                           </p>
                           <ul className="space-y-1">
                             {resultado.factoresNegativos.map((f, i) => (
-                              <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
+                              <li
+                                key={i}
+                                className="text-sm text-muted-foreground flex items-start gap-2"
+                              >
                                 <span className="text-red-500 mt-1">-</span>
                                 {f}
                               </li>
@@ -1055,21 +1307,21 @@ export default function ValoracionIAPage() {
       </div>
 
       {/* Asistente IA de Documentos - Para subir documentación de la propiedad */}
-      <AIDocumentAssistant 
+      <AIDocumentAssistant
         context="propiedades"
         variant="floating"
         position="bottom-right"
         onAnalysisComplete={(analysis) => {
           // Si se detectan datos de superficie, habitaciones, etc., aplicarlos
           const fields = analysis.extractedFields;
-          const superficie = fields.find(f => f.fieldName.toLowerCase().includes('superficie'));
-          const habitaciones = fields.find(f => f.fieldName.toLowerCase().includes('habitacion'));
-          
+          const superficie = fields.find((f) => f.fieldName.toLowerCase().includes('superficie'));
+          const habitaciones = fields.find((f) => f.fieldName.toLowerCase().includes('habitacion'));
+
           if (superficie) {
-            setFormData(prev => ({ ...prev, superficie: superficie.fieldValue }));
+            setFormData((prev) => ({ ...prev, superficie: superficie.fieldValue }));
           }
           if (habitaciones) {
-            setFormData(prev => ({ ...prev, habitaciones: habitaciones.fieldValue }));
+            setFormData((prev) => ({ ...prev, habitaciones: habitaciones.fieldValue }));
           }
         }}
       />
