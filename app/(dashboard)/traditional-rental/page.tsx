@@ -75,7 +75,7 @@ export default function TraditionalRentalDashboard() {
       try {
         const [unitsRes, contractsRes, paymentsRes, tenantsRes] = await Promise.all([
           fetch('/api/units').then((r) => (r.ok ? r.json() : [])),
-          fetch('/api/contracts').then((r) => (r.ok ? r.json() : [])),
+          fetch('/api/contracts?limit=500').then((r) => (r.ok ? r.json() : [])),
           fetch('/api/payments').then((r) => (r.ok ? r.json() : [])),
           fetch('/api/tenants').then((r) => (r.ok ? r.json() : [])),
         ]);

@@ -76,7 +76,7 @@ export default function ContractsPage() {
   const fetchContracts = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/contracts');
+      const response = await fetch('/api/contracts?limit=500');
       if (response.ok) {
         const data = await response.json();
         setContracts(Array.isArray(data) ? data : data.data || []);

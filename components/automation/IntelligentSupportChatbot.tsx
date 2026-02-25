@@ -87,36 +87,60 @@ export default function IntelligentSupportChatbot() {
     scrollToBottom();
   }, [messages]);
 
+  const [attachedFile, setAttachedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const handleSendMessage = async () => {
-    if (!inputValue.trim()) return;
+    if (!inputValue.trim() && !attachedFile) return;
+
+    const userText = attachedFile
+      ? `${inputValue || 'Analiza este archivo'} 📎 ${attachedFile.name}`
+      : inputValue;
 
     const userMessage: Message = {
       id: Date.now().toString(),
       sender: 'user',
-      text: inputValue,
+      text: userText,
       timestamp: new Date()
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const currentInput = inputValue;
+    const currentFile = attachedFile;
     setInputValue('');
+    setAttachedFile(null);
     setIsTyping(true);
 
     try {
-      // Preparar historial de conversación para análisis de contexto
-      const conversationHistory = messages.map(msg => ({
-        sender: msg.sender,
-        text: msg.text
+      const conversationHistory = messages.slice(-10).map(msg => ({
+        role: msg.sender === 'user' ? 'user' : 'assistant',
+        content: msg.text
       }));
 
-      const res = await fetch('/api/support/chatbot', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'ask',
-          question: inputValue,
-          conversationHistory
-        })
-      });
+      let res;
+      
+      if (currentFile) {
+        // Send with file via FormData to AI assistant
+        const formData = new FormData();
+        formData.append('message', currentInput || `Analiza este archivo: ${currentFile.name}`);
+        formData.append('file', currentFile);
+        formData.append('conversationHistory', JSON.stringify(conversationHistory));
+        
+        res = await fetch('/api/ai/assistant', {
+          method: 'POST',
+          body: formData,
+        });
+      } else {
+        // Text-only message to AI assistant
+        res = await fetch('/api/ai/assistant', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: currentInput,
+            conversationHistory
+          })
+        });
+      }
 
       if (res.ok) {
         const data = await res.json();
@@ -124,12 +148,11 @@ export default function IntelligentSupportChatbot() {
         const botMessage: Message = {
           id: (Date.now() + 1).toString(),
           sender: 'bot',
-          text: data.message,
+          text: data.content || data.message || 'Respuesta recibida.',
           timestamp: new Date(),
           confidence: data.confidence,
           suggestedActions: data.suggestedActions,
           relatedArticles: data.relatedArticles,
-          sentimentAnalysis: data.sentimentAnalysis
         };
 
         setMessages(prev => [...prev, botMessage]);
@@ -141,7 +164,7 @@ export default function IntelligentSupportChatbot() {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         sender: 'bot',
-        text: 'Lo siento, he tenido un problema. ¿Podrías intentarlo de nuevo?',
+        text: 'Lo siento, he tenido un problema procesando tu mensaje. ¿Podrías intentarlo de nuevo?',
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorMessage]);
@@ -490,13 +513,40 @@ export default function IntelligentSupportChatbot() {
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    placeholder="Escribe tu pregunta..."
+                    placeholder={attachedFile ? `📎 ${attachedFile.name}` : "Escribe tu pregunta o adjunta un archivo..."}
                     className="flex-1"
                     disabled={isTyping}
                   />
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    className="hidden"
+                    accept=".pdf,.xlsx,.xls,.csv,.jpg,.jpeg,.png,.webp,.doc,.docx,.txt,.json,.xml"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) {
+                        if (f.size > 15 * 1024 * 1024) {
+                          toast.error('Archivo demasiado grande (máx 15MB)');
+                        } else {
+                          setAttachedFile(f);
+                          toast.success(`📎 ${f.name} adjuntado`);
+                        }
+                      }
+                      e.target.value = '';
+                    }}
+                  />
+                  <Button
+                    onClick={() => fileInputRef.current?.click()}
+                    variant={attachedFile ? "default" : "ghost"}
+                    size="icon"
+                    disabled={isTyping}
+                    title="Adjuntar archivo"
+                  >
+                    <Zap className="h-4 w-4" />
+                  </Button>
                   <Button
                     onClick={handleSendMessage}
-                    disabled={!inputValue.trim() || isTyping}
+                    disabled={(!inputValue.trim() && !attachedFile) || isTyping}
                     size="icon"
                   >
                     {isTyping ? (

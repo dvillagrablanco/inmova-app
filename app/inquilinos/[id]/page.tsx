@@ -33,6 +33,7 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { EntityDocuments } from '@/components/ui/entity-documents';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -438,6 +439,12 @@ export default function TenantDetailPage() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        <EntityDocuments
+          entityType="tenant"
+          entityId={params.id as string}
+          className="mt-6"
+        />
       </div>
     </AuthenticatedLayout>
   );

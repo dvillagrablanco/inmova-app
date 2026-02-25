@@ -4,9 +4,6 @@ import { ReactNode, useState, useEffect } from 'react';
 import { Sidebar } from './sidebar';
 import { Header } from './header';
 import { BottomNavigation } from './bottom-navigation';
-import { TourAutoStarter } from '@/components/tours/TourAutoStarter';
-import { FloatingTourButton } from '@/components/tours/FloatingTourButton';
-import { ContextualHelp } from '@/components/help/ContextualHelp';
 import { OnboardingChecklist } from '@/components/tutorials/OnboardingChecklist';
 import { FirstTimeSetupWizard } from '@/components/tutorials/FirstTimeSetupWizard';
 import { usePathname, useRouter } from 'next/navigation';
@@ -88,6 +85,35 @@ export function AuthenticatedLayout({
     '4xl': 'max-w-4xl',
   };
 
+  // Ocultar Crisp Chat en páginas autenticadas (usamos IntelligentSupportChatbot propio)
+  useEffect(() => {
+    const hideCrisp = () => {
+      try {
+        const w = window as any;
+        if (w.$crisp) {
+          w.$crisp.push(['do', 'chat:hide']);
+        }
+        // También ocultar via CSS por si el JS de Crisp carga después
+        const crispEl = document.getElementById('crisp-chatbox');
+        if (crispEl) {
+          crispEl.style.display = 'none';
+        }
+      } catch {
+        // Ignorar si Crisp no está cargado
+      }
+    };
+
+    // Ejecutar inmediatamente y también con delay (Crisp puede cargar async)
+    hideCrisp();
+    const timer = setTimeout(hideCrisp, 2000);
+    const timer2 = setTimeout(hideCrisp, 5000);
+
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(timer2);
+    };
+  }, []);
+
   // Verificar estado de onboarding
   useEffect(() => {
     const checkOnboarding = async () => {
@@ -101,6 +127,19 @@ export function AuthenticatedLayout({
         return;
       }
 
+      // Verificar localStorage primero (más rápido, evita flash)
+      const hasSkippedWizard = localStorage.getItem('skipped-setup-wizard');
+      const hasDismissedChecklist = localStorage.getItem('dismissed-onboarding-checklist');
+      const hasCompletedSetup = localStorage.getItem('completed-setup-wizard');
+
+      // Si ya se completó o descartó localmente, no mostrar
+      if (hasCompletedSetup || hasSkippedWizard) {
+        setShowSetupWizard(false);
+      }
+      if (hasDismissedChecklist || hasCompletedSetup) {
+        setShowChecklist(false);
+      }
+
       try {
         const response = await fetch('/api/user/onboarding-status');
         if (!response.ok) return;
@@ -108,17 +147,24 @@ export function AuthenticatedLayout({
         const data = await response.json();
         setIsNewUser(data.isNewUser);
 
-        // Si es usuario nuevo Y nunca completó onboarding
+        // Si ya completó en BD, no mostrar nada
+        if (data.hasCompletedOnboarding) {
+          setShowSetupWizard(false);
+          setShowChecklist(false);
+          return;
+        }
+
+        // Si es usuario nuevo Y nunca completó onboarding Y no descartó
         if (!data.hasCompletedOnboarding && data.isNewUser) {
-          // Mostrar wizard si nunca lo saltó
-          const hasSkippedWizard = localStorage.getItem('skipped-setup-wizard');
-          if (!hasSkippedWizard) {
+          if (!hasSkippedWizard && !hasCompletedSetup) {
             setShowSetupWizard(true);
           }
         }
 
-        // Checklist visible hasta completar todo
-        setShowChecklist(!data.hasCompletedOnboarding);
+        // Checklist visible solo si no se ha descartado ni completado
+        if (!hasDismissedChecklist && !hasCompletedSetup) {
+          setShowChecklist(!data.hasCompletedOnboarding);
+        }
       } catch (error) {
         console.error('Error checking onboarding:', error);
       }
@@ -127,29 +173,33 @@ export function AuthenticatedLayout({
     checkOnboarding();
   }, [session]);
 
-  // Handlers para wizard
+  // Handlers para wizard — persistir en localStorage Y en BD
+  const markOnboardingComplete = async () => {
+    try {
+      await fetch('/api/user/onboarding-status', { method: 'POST' });
+    } catch (error) {
+      console.error('Error marking onboarding complete:', error);
+    }
+  };
+
   const handleCompleteSetup = () => {
     setShowSetupWizard(false);
-    setShowChecklist(true);
+    setShowChecklist(false);
+    localStorage.setItem('completed-setup-wizard', 'true');
+    markOnboardingComplete();
   };
 
   const handleSkipSetup = () => {
     setShowSetupWizard(false);
-    setShowChecklist(true);
+    setShowChecklist(false);
     localStorage.setItem('skipped-setup-wizard', 'true');
+    markOnboardingComplete();
   };
 
   const handleDismissChecklist = () => {
     setShowChecklist(false);
-  };
-
-  // Determinar página para ayuda contextual
-  const getPageForHelp = () => {
-    if (pathname?.includes('/edificios')) return 'edificios';
-    if (pathname?.includes('/inquilinos')) return 'inquilinos';
-    if (pathname?.includes('/contratos')) return 'contratos';
-    if (pathname?.includes('/configuracion')) return 'configuracion';
-    return 'dashboard';
+    localStorage.setItem('dismissed-onboarding-checklist', 'true');
+    markOnboardingComplete();
   };
 
   return (
@@ -193,17 +243,6 @@ export function AuthenticatedLayout({
         {/* Bottom Navigation - Solo en móvil */}
         <BottomNavigation />
       </div>
-
-      {/* Tour Auto-Starter - Sistema de tours virtuales (NO para superadmin) */}
-      {session?.user?.role !== 'super_admin' && <TourAutoStarter />}
-
-      {/* Floating Tour Button - Acceso rápido a tours (NO para superadmin) */}
-      {session?.user?.role !== 'super_admin' && <FloatingTourButton />}
-
-      {/* Contextual Help - Ayuda específica según página (NO para superadmin) */}
-      {session?.user?.role !== 'super_admin' && (
-        <ContextualHelp page={getPageForHelp()} />
-      )}
 
       {/* Setup Wizard - Primera vez (NO para superadmin) */}
       {showSetupWizard && session?.user?.role !== 'super_admin' && (

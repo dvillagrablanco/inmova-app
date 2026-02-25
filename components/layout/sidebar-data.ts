@@ -400,7 +400,10 @@ const SECTION_TO_MODULES: Record<string, string[]> = {
   hospitality: ['hospitality'],
   coLiving: ['room_rental', 'coliving'],
   studentHousing: ['student_housing'],
-  construccion: ['construction_projects', 'construccion_dashboard', 'construccion_projects', 'licitaciones'],
+  construccion: [
+    'construction_projects', 'construccion_dashboard', 'construccion_projects',
+    'licitaciones', 'ordenes_trabajo', 'flipping_projects', 'ewoorker', 'real_estate_developer',
+  ],
   ewoorker: ['ewoorker'],
   flipping: ['flipping_projects'],
   comercial: ['alquiler_comercial'],

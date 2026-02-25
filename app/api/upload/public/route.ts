@@ -96,19 +96,36 @@ export async function POST(req: NextRequest) {
     const extension = file.name.split('.').pop();
     const fileName = `${folder}/${timestamp}-${randomStr}.${extension}`;
 
-    // 5. Convertir a Buffer
-    const buffer = Buffer.from(await file.arrayBuffer());
+    // 5. Convertir a Buffer y comprimir si es posible
+    const rawBuffer = Buffer.from(await file.arrayBuffer());
+    
+    // Compress compressible types (PDFs, text) - skip images (already compressed)
+    let uploadBuffer = rawBuffer;
+    let contentEncoding: string | undefined;
+    const isCompressible = ['application/pdf', 'text/', 'application/json', 'application/csv'].some(t => file.type.includes(t));
+    if (isCompressible && rawBuffer.length > 10240) {
+      try {
+        const { gzipSync } = require('zlib');
+        const compressed = gzipSync(rawBuffer, { level: 6 });
+        if (compressed.length < rawBuffer.length * 0.95) {
+          uploadBuffer = compressed;
+          contentEncoding = 'gzip';
+        }
+      } catch {}
+    }
 
     // 6. Upload a S3
     const command = new PutObjectCommand({
-      Bucket: process.env.AWS_BUCKET!, // inmova (público)
+      Bucket: process.env.AWS_BUCKET!,
       Key: fileName,
-      Body: buffer,
+      Body: uploadBuffer,
       ContentType: file.type,
+      ...(contentEncoding ? { ContentEncoding: contentEncoding } : {}),
       Metadata: {
         uploadedBy: session.user.id,
         originalName: file.name,
         uploadedAt: new Date().toISOString(),
+        originalSize: String(rawBuffer.length),
       },
     });
 

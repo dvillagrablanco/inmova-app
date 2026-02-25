@@ -319,14 +319,23 @@ export default function ContabilidadPage() {
 
   const handleSyncZucchetti = async () => {
     try {
+      if (!zucchettiStatus?.configured) {
+        toast.error('Zucchetti/Altai no está configurado. Las credenciales (CLIENT_ID, CLIENT_SECRET) deben configurarse en el servidor.', { duration: 6000 });
+        return;
+      }
+      
       setLoading(true);
+      toast.info('Sincronizando con Zucchetti/Altai...');
       const res = await fetch('/api/accounting/sync-zucchetti', { method: 'POST' });
 
       if (res.ok) {
         const data = await res.json();
 
-        if (data.configured) {
-          toast.success('Sincronización con Zucchetti completada');
+        if (data.configured && data.success) {
+          toast.success(`Sincronización completada: ${data.summary?.synced || 0} asientos enviados`);
+          loadFinancialData();
+        } else if (data.configured) {
+          toast.warning(data.message || 'Sincronización completada con advertencias');
           loadFinancialData();
         } else {
           toast.warning(data.message || 'La integración con Zucchetti no está configurada');
@@ -418,6 +427,17 @@ export default function ContabilidadPage() {
   // Funciones genéricas para los nuevos sistemas
   const handleSyncCustomersSystem = async (system: string) => {
     try {
+      // Verificar que el sistema esté configurado
+      const statusMap: Record<string, any> = {
+        sage: sageStatus, holded: holdedStatus, a3: a3Status, alegra: alegraStatus,
+        contasimple: contaSimpleStatus, zucchetti: zucchettiStatus,
+      };
+      if (!statusMap[system]?.configured) {
+        toast.error(`${system.toUpperCase()} no está configurado. Ve a Herramientas e Integraciones para conectarlo.`, { duration: 5000 });
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       toast.info(`Sincronizando clientes con ${system.toUpperCase()}...`);
 
@@ -441,6 +461,16 @@ export default function ContabilidadPage() {
 
   const handleCreateInvoiceSystem = async (system: string) => {
     try {
+      const statusMap: Record<string, any> = {
+        sage: sageStatus, holded: holdedStatus, a3: a3Status, alegra: alegraStatus,
+        contasimple: contaSimpleStatus, zucchetti: zucchettiStatus,
+      };
+      if (!statusMap[system]?.configured) {
+        toast.error(`${system.toUpperCase()} no está configurado. Ve a Herramientas e Integraciones para conectarlo.`, { duration: 5000 });
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       toast.info(`Creando facturas en ${system.toUpperCase()}...`);
 

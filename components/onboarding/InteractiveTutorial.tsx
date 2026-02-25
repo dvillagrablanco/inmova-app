@@ -145,10 +145,16 @@ export function TutorialLauncher({ className }: TutorialLauncherProps) {
   const [activeTutorial, setActiveTutorial] = useState<string | null>(null);
   const [completedTutorials, setCompletedTutorials] = useState<string[]>([]);
 
+  const [dismissed, setDismissed] = useState(false);
+
   useEffect(() => {
     try {
       const stored = localStorage.getItem('completed_tutorials');
       if (stored) setCompletedTutorials(JSON.parse(stored));
+      const onboardingDone = localStorage.getItem('completed-setup-wizard');
+      const skipped = localStorage.getItem('skipped-setup-wizard');
+      const tutsDismissed = localStorage.getItem('tutorials-dismissed');
+      if (onboardingDone || skipped || tutsDismissed) setDismissed(true);
     } catch {}
   }, []);
 
@@ -157,13 +163,27 @@ export function TutorialLauncher({ className }: TutorialLauncherProps) {
     setCompletedTutorials(updated);
     try { localStorage.setItem('completed_tutorials', JSON.stringify(updated)); } catch {}
     setActiveTutorial(null);
+    if (updated.length >= TUTORIALS.length) {
+      setDismissed(true);
+      try { localStorage.setItem('tutorials-dismissed', 'true'); } catch {}
+    }
   };
+
+  const handleDismiss = () => {
+    setDismissed(true);
+    try { localStorage.setItem('tutorials-dismissed', 'true'); } catch {}
+  };
+
+  if (dismissed || completedTutorials.length >= TUTORIALS.length) return null;
 
   return (
     <>
       <Card className={className}>
         <CardContent className="pt-6">
-          <h3 className="font-semibold text-lg mb-1">Tutoriales interactivos</h3>
+          <div className="flex items-center justify-between mb-1">
+            <h3 className="font-semibold text-lg">Tutoriales interactivos</h3>
+            <button onClick={handleDismiss} className="text-xs text-muted-foreground hover:text-foreground">No mostrar más</button>
+          </div>
           <p className="text-sm text-muted-foreground mb-4">Aprende a usar INMOVA paso a paso</p>
           <div className="space-y-3">
             {TUTORIALS.map(t => {

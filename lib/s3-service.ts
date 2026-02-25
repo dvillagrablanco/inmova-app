@@ -5,6 +5,7 @@
 
 import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { gzipSync } from 'zlib';
 
 import logger from '@/lib/logger';
 // Cliente S3 configurado con variables de entorno
@@ -16,7 +17,7 @@ const s3Client = new S3Client({
   },
 });
 
-const BUCKET_NAME = process.env.AWS_S3_BUCKET || 'inmova-properties';
+const BUCKET_NAME = process.env.AWS_S3_BUCKET || process.env.AWS_BUCKET_NAME || process.env.AWS_BUCKET || 'inmova';
 const CDN_URL = process.env.AWS_CLOUDFRONT_URL || '';
 
 interface UploadResult {
@@ -27,6 +28,60 @@ interface UploadResult {
 }
 
 export class S3Service {
+  /**
+   * Compress file before S3 upload based on content type
+   * - Images: already compressed client-side (WebP), skip further compression
+   * - PDFs, text, JSON, CSV, XML: gzip compress (30-80% savings)
+   * - Already compressed formats (zip, gz): skip
+   */
+  private static compressForUpload(
+    buffer: Buffer,
+    contentType: string
+  ): { body: Buffer; encoding: string | null } {
+    // Skip compression for small files (<10KB) or already-compressed formats
+    if (buffer.length < 10 * 1024) {
+      return { body: buffer, encoding: null };
+    }
+
+    // Skip for images (already compressed as WebP/JPEG/PNG)
+    if (contentType.startsWith('image/')) {
+      return { body: buffer, encoding: null };
+    }
+
+    // Skip for already-compressed formats
+    const skipTypes = [
+      'application/zip', 'application/gzip', 'application/x-rar',
+      'application/x-7z-compressed', 'video/', 'audio/',
+    ];
+    if (skipTypes.some(t => contentType.includes(t))) {
+      return { body: buffer, encoding: null };
+    }
+
+    // Gzip compress PDFs, text, JSON, CSV, XML, DOCX, etc.
+    const compressibleTypes = [
+      'application/pdf',
+      'text/', 'application/json', 'application/xml',
+      'application/csv', 'text/csv',
+      'application/vnd.openxmlformats', // DOCX, XLSX
+      'application/msword',
+      'application/vnd.ms-excel',
+    ];
+
+    if (compressibleTypes.some(t => contentType.includes(t))) {
+      try {
+        const compressed = gzipSync(buffer, { level: 6 }); // Level 6 = good balance
+        // Only use compressed if it's actually smaller
+        if (compressed.length < buffer.length * 0.95) {
+          return { body: compressed, encoding: 'gzip' };
+        }
+      } catch {
+        // Fallback to uncompressed
+      }
+    }
+
+    return { body: buffer, encoding: null };
+  }
+
   private static isConfigured(): boolean {
     return Boolean(
       process.env.AWS_ACCESS_KEY_ID &&
@@ -66,14 +121,28 @@ export class S3Service {
       // Detectar content type
       const contentType = this.getContentType(filename);
 
+      // Compress file before upload to minimize S3 storage
+      const { body: uploadBody, encoding } = this.compressForUpload(file, contentType);
+      
+      const originalSize = file.length;
+      const compressedSize = uploadBody.length;
+      if (originalSize > 10000) {
+        const savings = ((1 - compressedSize / originalSize) * 100).toFixed(0);
+        logger.info(`📦 S3 upload: ${filename} ${(originalSize/1024).toFixed(0)}KB → ${(compressedSize/1024).toFixed(0)}KB (${savings}% savings)`);
+      }
+
       // Upload a S3
       const command = new PutObjectCommand({
         Bucket: BUCKET_NAME,
         Key: key,
-        Body: file,
+        Body: uploadBody,
         ContentType: contentType,
-        // ACL público para que las imágenes sean accesibles
-        // ACL: 'public-read', // Comentado por seguridad, usar CloudFront
+        ...(encoding ? { ContentEncoding: encoding } : {}),
+        // Metadata for lifecycle management
+        Metadata: {
+          'original-size': String(originalSize),
+          'compressed': encoding ? 'gzip' : 'none',
+        },
       });
 
       await s3Client.send(command);

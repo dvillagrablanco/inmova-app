@@ -51,7 +51,7 @@ export default function AnalyticsPage() {
         fetch('/api/buildings'),
         fetch('/api/units'),
         fetch('/api/tenants'),
-        fetch('/api/contracts'),
+        fetch('/api/contracts?limit=500'),
       ]);
 
       const buildings = buildingsRes.ok ? await buildingsRes.json() : [];

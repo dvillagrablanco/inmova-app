@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import {
-  activateModuleForCompany,
-  deactivateModuleForCompany,
-} from '@/lib/modules-service';
+import { activateModuleForCompany, deactivateModuleForCompany } from '@/lib/modules-service';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -50,10 +47,7 @@ export async function POST(req: NextRequest) {
     const userId = session.user.id;
 
     if (!companyId) {
-      return NextResponse.json(
-        { error: 'No se pudo determinar la empresa' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No se pudo determinar la empresa' }, { status: 400 });
     }
 
     // Verificar plan de suscripción si se quieren activar
@@ -72,21 +66,18 @@ export async function POST(req: NextRequest) {
         const planTier = company.subscriptionPlan.tier?.toLowerCase();
         const modulosIncluidos = (company.subscriptionPlan.modulosIncluidos as string[]) || [];
         const tieneAccesoTotal =
-          ['empresarial', 'enterprise', 'premium', 'personalizado', 'business'].includes(planTier) ||
-          modulosIncluidos.includes('*');
+          ['enterprise', 'business', 'empresarial', 'premium', 'personalizado'].includes(
+            planTier
+          ) || modulosIncluidos.includes('*');
 
         if (!tieneAccesoTotal) {
-          blockedModules = modules.filter(
-            (m: string) => !modulosIncluidos.includes(m)
-          );
+          blockedModules = modules.filter((m: string) => !modulosIncluidos.includes(m));
         }
       }
     }
 
     // Filtrar módulos que se pueden procesar
-    const processableModules = modules.filter(
-      (m: string) => !blockedModules.includes(m)
-    );
+    const processableModules = modules.filter((m: string) => !blockedModules.includes(m));
 
     // Procesar cada módulo
     const toggled: string[] = [];

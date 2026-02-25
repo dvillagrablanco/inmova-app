@@ -18,66 +18,82 @@ interface RenewalAlert {
 }
 
 /**
- * Detecta contratos que necesitan renovación y genera alertas automáticas
+ * Detecta contratos que necesitan renovación y genera alertas automáticas.
+ * Usa el campo configurable `contractExpirationAlertDays` de cada empresa.
  */
 export async function detectContractsForRenewal(companyId?: string): Promise<RenewalAlert[]> {
   const now = new Date();
-  const in90Days = addDays(now, 90);
-  
-  const contractWhere: any = {
-    estado: 'activo',
-    fechaFin: {
-      lte: in90Days,
-      gte: now,
-    },
-  };
-  
-  if (companyId) {
-    contractWhere.tenant = {
-      companyId,
-    };
-  }
 
-  const contracts = await prisma.contract.findMany({
-    where: contractWhere,
-    include: {
-      tenant: true,
-      unit: {
-        include: {
-          building: true,
-        },
-      },
-    },
+  // Obtener empresas con su configuración de alerta
+  const companyWhere: any = { activo: true };
+  if (companyId) companyWhere.id = companyId;
+
+  const companies = await prisma.company.findMany({
+    where: companyWhere,
+    select: { id: true, contractExpirationAlertDays: true },
   });
 
   const alerts: RenewalAlert[] = [];
 
-  for (const contract of contracts) {
-    const daysUntilExpiry = differenceInDays(new Date(contract.fechaFin), now);
-    
-    let stage: RenewalAlert['stage'];
-    let priority: RenewalAlert['priority'];
-    
-    if (daysUntilExpiry <= 15) {
-      stage = 'critical';
-      priority = 'alto';
-    } else if (daysUntilExpiry <= 30) {
-      stage = 'urgent';
-      priority = 'alto';
-    } else if (daysUntilExpiry <= 60) {
-      stage = 'followup';
-      priority = 'medio';
-    } else {
-      stage = 'initial';
-      priority = 'bajo';
-    }
+  for (const company of companies) {
+    const alertDays = company.contractExpirationAlertDays || 30;
+    const alertDate = addDays(now, alertDays);
 
-    alerts.push({
-      contractId: contract.id,
-      daysUntilExpiry,
-      priority,
-      stage,
+    const contracts = await prisma.contract.findMany({
+      where: {
+        estado: 'activo',
+        fechaFin: {
+          lte: alertDate,
+          gte: now,
+        },
+        unit: {
+          building: {
+            companyId: company.id,
+          },
+        },
+      },
+      include: {
+        tenant: true,
+        unit: {
+          include: {
+            building: true,
+          },
+        },
+      },
     });
+
+    for (const contract of contracts) {
+      const daysUntilExpiry = differenceInDays(new Date(contract.fechaFin), now);
+
+      // Etapas relativas al período de alerta configurado
+      let stage: RenewalAlert['stage'];
+      let priority: RenewalAlert['priority'];
+
+      const criticalThreshold = Math.max(Math.floor(alertDays * 0.15), 7); // ~15% o mínimo 7 días
+      const urgentThreshold = Math.max(Math.floor(alertDays * 0.35), 14); // ~35% o mínimo 14 días
+      const followupThreshold = Math.max(Math.floor(alertDays * 0.65), 21); // ~65% o mínimo 21 días
+
+      if (daysUntilExpiry <= criticalThreshold) {
+        stage = 'critical';
+        priority = 'alto';
+      } else if (daysUntilExpiry <= urgentThreshold) {
+        stage = 'urgent';
+        priority = 'alto';
+      } else if (daysUntilExpiry <= followupThreshold) {
+        stage = 'followup';
+        priority = 'medio';
+      } else {
+        stage = 'initial';
+        priority = 'bajo';
+      }
+
+      alerts.push({
+        contractId: contract.id,
+        daysUntilExpiry,
+        priority,
+        stage,
+      });
+    }
   }
 
   return alerts;
@@ -219,12 +235,14 @@ function getAlertMessage(alert: RenewalAlert, contract: any): string {
 async function sendRenewalEmail(contract: any, alert: RenewalAlert): Promise<void> {
   if (!contract.unit?.building?.companyId) return;
 
-  // Obtener administradores de la empresa
-  const admins = await prisma.user.findMany({
+  // Obtener TODOS los usuarios activos de la empresa (admin, gestores, operadores)
+  const users = await prisma.user.findMany({
     where: {
       companyId: contract.unit.building.companyId,
-      role: 'administrador',
+      activo: true,
+      role: { in: ['administrador', 'super_admin', 'gestor'] },
     },
+    select: { email: true, name: true },
   });
 
   const subject = getAlertTitle(alert, contract);
@@ -593,12 +611,30 @@ async function sendRenewalEmail(contract: any, alert: RenewalAlert): Promise<voi
     </html>
   `;
 
-  // Enviar el email
-  await sendEmail({
-    to: contract.unit.building.company.emailContacto || contract.unit.building.company.email || 'admin@inmova.app',
-    subject,
-    html: htmlContent
-  });
+  // Enviar email a todos los usuarios de la empresa
+  const recipients = users
+    .map(u => u.email)
+    .filter((email): email is string => !!email && !email.includes('@pendiente.inmova'));
+
+  if (recipients.length === 0) {
+    // Fallback al email de la empresa
+    const fallback = contract.unit.building.company?.emailContacto || 
+                     contract.unit.building.company?.email || 
+                     'admin@inmova.app';
+    recipients.push(fallback);
+  }
+
+  for (const recipientEmail of recipients) {
+    try {
+      await sendEmail({
+        to: recipientEmail,
+        subject,
+        html: htmlContent,
+      });
+    } catch (err) {
+      logger.error(`Error enviando email de renovación a ${recipientEmail}:`, err);
+    }
+  }
 }
 
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
@@ -33,16 +33,18 @@ import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
 interface Unit {
   id: string;
   numero: string;
-  building: { nombre: string };
+  building: { id: string; nombre: string };
 }
 
 export default function NuevaMantenimientoPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session, status } = useSession() || {};
   const [isLoading, setIsLoading] = useState(false);
   const [units, setUnits] = useState<Unit[]>([]);
+  const [edificioFilter, setEdificioFilter] = useState<string>('all');
   const [formData, setFormData] = useState({
-    unitId: '',
+    unitId: searchParams?.get('unitId') || '',
     titulo: '',
     descripcion: '',
     prioridad: 'media',
@@ -52,10 +54,20 @@ export default function NuevaMantenimientoPage() {
   useEffect(() => {
     const fetchUnits = async () => {
       try {
-        const response = await fetch('/api/units');
+        const response = await fetch('/api/units?limit=500');
         if (response.ok) {
-          const data = await response.json();
+          const json = await response.json();
+          const data = Array.isArray(json) ? json : (json.data || json.units || []);
           setUnits(data);
+          
+          // Si viene unitId en URL, auto-seleccionar el edificio
+          const preselectedId = searchParams?.get('unitId');
+          if (preselectedId) {
+            const preUnit = data.find((u: Unit) => u.id === preselectedId);
+            if (preUnit?.building?.id) {
+              setEdificioFilter(preUnit.building.id);
+            }
+          }
         }
       } catch (error) {
         logger.error('Error fetching units:', error);
@@ -65,7 +77,7 @@ export default function NuevaMantenimientoPage() {
     if (status === 'authenticated') {
       fetchUnits();
     }
-  }, [status]);
+  }, [status, searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -168,22 +180,53 @@ export default function NuevaMantenimientoPage() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid gap-6 md:grid-cols-2">
+                {/* Edificio */}
+                <div className="space-y-2">
+                  <Label>Edificio *</Label>
+                  <Select
+                    value={edificioFilter}
+                    onValueChange={(value) => {
+                      setEdificioFilter(value);
+                      setFormData({ ...formData, unitId: '' });
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona un edificio" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos los edificios</SelectItem>
+                      {Array.from(new Map(units.map(u => [u.building?.id, u.building])).values())
+                        .filter(Boolean)
+                        .sort((a: any, b: any) => (a.nombre || '').localeCompare(b.nombre || ''))
+                        .map((building: any) => (
+                          <SelectItem key={building.id} value={building.id}>
+                            {building.nombre}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 {/* Unidad */}
-                <div className="space-y-2 md:col-span-2">
+                <div className="space-y-2">
                   <Label htmlFor="unitId">Unidad Afectada *</Label>
                   <Select
                     value={formData.unitId}
                     onValueChange={(value) => setFormData({ ...formData, unitId: value })}
+                    disabled={edificioFilter === 'all'}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecciona una unidad" />
+                      <SelectValue placeholder={edificioFilter === 'all' ? 'Selecciona edificio primero' : 'Selecciona una unidad'} />
                     </SelectTrigger>
                     <SelectContent>
-                      {units.map((unit) => (
-                        <SelectItem key={unit.id} value={unit.id}>
-                          {unit.building.nombre} - {unit.numero}
-                        </SelectItem>
-                      ))}
+                      {units
+                        .filter(u => edificioFilter === 'all' || u.building?.id === edificioFilter)
+                        .sort((a, b) => a.numero.localeCompare(b.numero))
+                        .map((unit) => (
+                          <SelectItem key={unit.id} value={unit.id}>
+                            {unit.numero}
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                 </div>

@@ -32,16 +32,95 @@ import {
   Globe
 } from 'lucide-react';
 
+interface CompanyIntegration {
+  id: string;
+  provider: string;
+  category: string;
+  enabled: boolean;
+  isConfigured: boolean;
+  testStatus?: string;
+  lastSyncAt?: string;
+}
+
+interface PlatformStatusData {
+  plataforma?: any;
+  compartidas?: any;
+}
+
 export default function HerramientasEmpresaPage() {
   const { data: _session, status } = useSession();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('propias');
+  const [companyIntegrations, setCompanyIntegrations] = useState<CompanyIntegration[]>([]);
+  const [platformStatus, setPlatformStatus] = useState<PlatformStatusData>({});
+  const [loadingIntegrations, setLoadingIntegrations] = useState(true);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login');
     }
   }, [status, router]);
+
+  // Cargar integraciones reales de la empresa y estado de plataforma
+  useEffect(() => {
+    if (status !== 'authenticated') return;
+
+    async function loadIntegrationStatus() {
+      setLoadingIntegrations(true);
+      try {
+        // Cargar integraciones de la empresa (BD)
+        const companyRes = await fetch('/api/integrations');
+        if (companyRes.ok) {
+          const companyData = await companyRes.json();
+          setCompanyIntegrations(companyData.data || []);
+        }
+
+        // Cargar estado de plataforma (env vars)
+        const platformRes = await fetch('/api/admin/integraciones/status');
+        if (platformRes.ok) {
+          const platformData = await platformRes.json();
+          setPlatformStatus(platformData);
+        }
+      } catch (error) {
+        console.error('Error loading integration status:', error);
+      } finally {
+        setLoadingIntegrations(false);
+      }
+    }
+
+    loadIntegrationStatus();
+  }, [status]);
+
+  // Determinar estado real de una integración propia
+  const getProviderStatus = (providerId: string): 'connected' | 'disconnected' => {
+    // Buscar en integraciones de la empresa (BD)
+    const companyInteg = companyIntegrations.find(
+      (i) => i.provider === providerId || i.provider.toLowerCase() === providerId.toLowerCase()
+    );
+    if (companyInteg && companyInteg.isConfigured && companyInteg.enabled) {
+      return 'connected';
+    }
+
+    // Buscar en status de plataforma (env vars) para integraciones que se configuran a nivel servidor
+    const platformContab = platformStatus?.plataforma?.contabilidad?.[providerId];
+    if (platformContab?.configured) {
+      return 'connected';
+    }
+
+    return 'disconnected';
+  };
+
+  // Determinar estado real de una integración compartida
+  const getSharedProviderStatus = (providerId: string, type: 'pagos' | 'firma'): boolean => {
+    const shared = platformStatus?.compartidas?.[type]?.[providerId];
+    if (shared?.configured) return true;
+
+    // Fallback a integraciones de empresa
+    const companyInteg = companyIntegrations.find(
+      (i) => i.provider === providerId
+    );
+    return !!(companyInteg?.isConfigured && companyInteg?.enabled);
+  };
 
   if (status === 'loading') {
     return (
@@ -62,7 +141,7 @@ export default function HerramientasEmpresaPage() {
         description: 'Contabilidad simplificada',
         icon: Euro, 
         color: 'from-blue-500 to-blue-600',
-        status: 'disconnected',
+        get status() { return getProviderStatus('contasimple'); },
         config: { apiKey: '', companyId: '' }
       },
       { 
@@ -71,7 +150,7 @@ export default function HerramientasEmpresaPage() {
         description: 'ERP y contabilidad',
         icon: Euro, 
         color: 'from-purple-500 to-purple-600',
-        status: 'disconnected',
+        get status() { return getProviderStatus('holded'); },
       },
       { 
         id: 'a3', 
@@ -79,7 +158,7 @@ export default function HerramientasEmpresaPage() {
         description: 'Contabilidad profesional',
         icon: Euro, 
         color: 'from-green-500 to-green-600',
-        status: 'disconnected',
+        get status() { return getProviderStatus('a3'); },
       },
       { 
         id: 'sage', 
@@ -87,7 +166,7 @@ export default function HerramientasEmpresaPage() {
         description: 'Gestión empresarial',
         icon: Euro, 
         color: 'from-teal-500 to-teal-600',
-        status: 'disconnected',
+        get status() { return getProviderStatus('sage'); },
       },
       { 
         id: 'alegra', 
@@ -95,7 +174,7 @@ export default function HerramientasEmpresaPage() {
         description: 'Facturación y contabilidad',
         icon: Euro, 
         color: 'from-orange-500 to-orange-600',
-        status: 'disconnected',
+        get status() { return getProviderStatus('alegra'); },
       },
       { 
         id: 'zucchetti', 
@@ -103,7 +182,7 @@ export default function HerramientasEmpresaPage() {
         description: 'Software de gestión',
         icon: Euro, 
         color: 'from-red-500 to-red-600',
-        status: 'disconnected',
+        get status() { return getProviderStatus('zucchetti'); },
       },
     ],
     banca: [
@@ -113,7 +192,7 @@ export default function HerramientasEmpresaPage() {
         description: 'Conexión bancaria PSD2',
         icon: Building, 
         color: 'from-blue-600 to-indigo-600',
-        status: 'disconnected',
+        get status() { return getProviderStatus('openbanking'); },
       },
       { 
         id: 'plaid', 
@@ -121,7 +200,7 @@ export default function HerramientasEmpresaPage() {
         description: 'Agregador bancario',
         icon: Link2, 
         color: 'from-black to-gray-700',
-        status: 'disconnected',
+        get status() { return getProviderStatus('plaid'); },
       },
     ],
     portales: [
@@ -131,7 +210,7 @@ export default function HerramientasEmpresaPage() {
         description: 'Portal líder en España',
         icon: Globe, 
         color: 'from-green-500 to-green-600',
-        status: 'disconnected',
+        get status() { return getProviderStatus('idealista'); },
       },
       { 
         id: 'fotocasa', 
@@ -139,7 +218,7 @@ export default function HerramientasEmpresaPage() {
         description: 'Portal inmobiliario',
         icon: Globe, 
         color: 'from-red-500 to-red-600',
-        status: 'disconnected',
+        get status() { return getProviderStatus('fotocasa'); },
       },
       { 
         id: 'habitaclia', 
@@ -147,7 +226,7 @@ export default function HerramientasEmpresaPage() {
         description: 'Portal de Cataluña',
         icon: Globe, 
         color: 'from-blue-500 to-blue-600',
-        status: 'disconnected',
+        get status() { return getProviderStatus('habitaclia'); },
       },
       { 
         id: 'pisos', 
@@ -155,7 +234,7 @@ export default function HerramientasEmpresaPage() {
         description: 'Buscador de pisos',
         icon: Globe, 
         color: 'from-orange-500 to-orange-600',
-        status: 'disconnected',
+        get status() { return getProviderStatus('pisos'); },
       },
       { 
         id: 'yaencontre', 
@@ -163,7 +242,7 @@ export default function HerramientasEmpresaPage() {
         description: 'Portal inmobiliario',
         icon: Globe, 
         color: 'from-purple-500 to-purple-600',
-        status: 'disconnected',
+        get status() { return getProviderStatus('yaencontre'); },
       },
     ],
   };
@@ -179,7 +258,7 @@ export default function HerramientasEmpresaPage() {
         description: 'Acepta tarjetas de crédito/débito',
         icon: CreditCard, 
         color: 'from-purple-500 to-indigo-600',
-        enabled: true,
+        get enabled() { return getSharedProviderStatus('stripe', 'pagos'); },
         fee: '1.4% + €0.25',
         configuredByInmova: true,
       },
@@ -189,7 +268,7 @@ export default function HerramientasEmpresaPage() {
         description: 'Cobro por domiciliación bancaria',
         icon: Building2, 
         color: 'from-cyan-500 to-blue-600',
-        enabled: true,
+        get enabled() { return getSharedProviderStatus('gocardless', 'pagos'); },
         fee: '1% + €0.20',
         configuredByInmova: true,
       },
@@ -199,7 +278,7 @@ export default function HerramientasEmpresaPage() {
         description: 'Pagos instantáneos con móvil',
         icon: Smartphone, 
         color: 'from-green-500 to-teal-600',
-        enabled: false,
+        get enabled() { return getSharedProviderStatus('redsys', 'pagos'); },
         fee: '0.5%',
         configuredByInmova: true,
       },
@@ -209,7 +288,7 @@ export default function HerramientasEmpresaPage() {
         description: 'Terminal punto de venta',
         icon: CreditCard, 
         color: 'from-red-500 to-orange-500',
-        enabled: false,
+        get enabled() { return getSharedProviderStatus('redsys', 'pagos'); },
         fee: '0.5% - 1.5%',
         configuredByInmova: true,
       },
@@ -221,7 +300,7 @@ export default function HerramientasEmpresaPage() {
         description: 'Firma electrónica avanzada',
         icon: FileSignature, 
         color: 'from-yellow-500 to-amber-600',
-        enabled: true,
+        get enabled() { return getSharedProviderStatus('docusign', 'firma'); },
         compliance: ['eIDAS', 'ESIGN'],
         configuredByInmova: true,
         usage: { sent: 45, signed: 42 },
@@ -232,7 +311,7 @@ export default function HerramientasEmpresaPage() {
         description: 'Firma cualificada España',
         icon: Shield, 
         color: 'from-blue-500 to-blue-600',
-        enabled: false,
+        get enabled() { return getSharedProviderStatus('signaturit', 'firma'); },
         compliance: ['eIDAS QES'],
         configuredByInmova: true,
         usage: { sent: 0, signed: 0 },

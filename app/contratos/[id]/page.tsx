@@ -104,6 +104,127 @@ interface Contract {
   };
 }
 
+function ContractDocuments({ contractId, buildingId }: { contractId: string; buildingId?: string }) {
+  const [docs, setDocs] = useState<any[]>([]);
+  const [uploading, setUploading] = useState(false);
+
+  useEffect(() => {
+    async function loadDocs() {
+      try {
+        const res = await fetch(`/api/documents?contractId=${contractId}`);
+        if (res.ok) {
+          const data = await res.json();
+          setDocs(Array.isArray(data) ? data : data.data || []);
+        }
+      } catch {}
+    }
+    loadDocs();
+  }, [contractId]);
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('nombre', file.name);
+      formData.append('tipo', 'contrato');
+      formData.append('contractId', contractId);
+      if (buildingId) formData.append('buildingId', buildingId);
+
+      const res = await fetch('/api/documents', { method: 'POST', body: formData });
+      if (res.ok) {
+        const newDoc = await res.json();
+        setDocs(prev => [newDoc, ...prev]);
+        toast.success('Documento subido correctamente');
+      } else {
+        toast.error('Error al subir documento');
+      }
+    } catch {
+      toast.error('Error al subir documento');
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Documentos del Contrato
+            </CardTitle>
+            <CardDescription>Documentos adjuntos y firma digital</CardDescription>
+          </div>
+          <div>
+            <input
+              type="file"
+              id="doc-upload"
+              className="hidden"
+              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+              onChange={handleUpload}
+            />
+            <Button
+              variant="outline"
+              onClick={() => document.getElementById('doc-upload')?.click()}
+              disabled={uploading}
+            >
+              {uploading ? (
+                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Subiendo...</>
+              ) : (
+                <><Download className="h-4 w-4 mr-2" /> Subir Documento</>
+              )}
+            </Button>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {docs.length > 0 ? (
+          <div className="space-y-3">
+            {docs.map((doc: any) => (
+              <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50">
+                <div className="flex items-center gap-3">
+                  <FileText className="h-5 w-5 text-blue-600" />
+                  <div>
+                    <p className="font-medium text-sm">{doc.nombre}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {doc.fechaSubida ? format(new Date(doc.fechaSubida), 'dd MMM yyyy', { locale: es }) : ''}
+                      {doc.tags?.length > 0 && ` · ${doc.tags.join(', ')}`}
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    if (doc.cloudStoragePath?.startsWith('http')) {
+                      window.open(doc.cloudStoragePath, '_blank');
+                    } else {
+                      window.open(`/api/documents/${doc.id}/download`, '_blank');
+                    }
+                  }}
+                >
+                  <Download className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8 text-muted-foreground">
+            <FileText className="h-12 w-12 mx-auto mb-4 opacity-20" />
+            <p>No hay documentos adjuntos</p>
+            <p className="text-sm mt-1">Sube contratos, adendas o documentación relacionada</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function ContractDetailPage() {
   const { data: _session, status } = useSession();
   const router = useRouter();
@@ -580,25 +701,7 @@ export default function ContractDetailPage() {
           </TabsContent>
 
           <TabsContent value="documentos" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5" />
-                  Documentos del Contrato
-                </CardTitle>
-                <CardDescription>Documentos adjuntos y firma digital</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  <FileText className="h-12 w-12 mx-auto mb-4 opacity-20" />
-                  <p>No hay documentos adjuntos</p>
-                  <Button variant="outline" className="mt-4">
-                    <Download className="h-4 w-4 mr-2" />
-                    Generar Contrato PDF
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <ContractDocuments contractId={contractId} buildingId={contract.unit?.building?.id} />
           </TabsContent>
         </Tabs>
       </div>

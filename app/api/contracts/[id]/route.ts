@@ -98,7 +98,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     return NextResponse.json(contract);
   } catch (error) {
     logger.error('Error fetching contract:', error);
-      Sentry.captureException(error);
+    Sentry.captureException(error);
     return NextResponse.json({ error: 'Error al obtener contrato' }, { status: 500 });
   }
 }
@@ -126,7 +126,17 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       return NextResponse.json({ error: 'Datos inválidos', details: errors }, { status: 400 });
     }
 
-    const { fechaInicio, fechaFin, rentaMensual, deposito, estado, tipo, codigoOperacion, suministrosProvisionales, ibiRepercutido } = validationResult.data;
+    const {
+      fechaInicio,
+      fechaFin,
+      rentaMensual,
+      deposito,
+      estado,
+      tipo,
+      codigoOperacion,
+      suministrosProvisionales,
+      ibiRepercutido,
+    } = validationResult.data;
 
     const contract = await prisma.contract.update({
       where: { id: params.id },
@@ -153,7 +163,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     return NextResponse.json(contract);
   } catch (error) {
     logger.error('Error updating contract:', error);
-      Sentry.captureException(error);
+    Sentry.captureException(error);
     return NextResponse.json({ error: 'Error al actualizar contrato' }, { status: 500 });
   }
 }
@@ -182,7 +192,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     return NextResponse.json({ message: 'Contrato eliminado' });
   } catch (error) {
     logger.error('Error deleting contract:', error);
-      Sentry.captureException(error);
+    Sentry.captureException(error);
     return NextResponse.json({ error: 'Error al eliminar contrato' }, { status: 500 });
   }
 }

@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -97,10 +98,10 @@ export function OccupancyByTypeCard({
             <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">Ocupadas</p>
             <p className="text-2xl font-bold text-green-600">{totalOcupadas}</p>
           </div>
-          <div className="flex-1">
-            <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">Disponibles</p>
-            <p className="text-2xl font-bold text-amber-600">{totalUnidades - totalOcupadas}</p>
-          </div>
+          <Link href="/unidades?estado=disponible" className="flex-1 group cursor-pointer">
+            <p className="text-xs text-gray-500 uppercase tracking-wide font-medium group-hover:text-amber-600 transition-colors">Disponibles</p>
+            <p className="text-2xl font-bold text-amber-600 group-hover:underline">{totalUnidades - totalOcupadas}</p>
+          </Link>
         </div>
 
         {/* Per-type breakdown */}
@@ -110,14 +111,11 @@ export function OccupancyByTypeCard({
             const colors = typeColors[item.tipo] || typeColors.vivienda;
             const status = getStatusBadge(item.tasa);
             const isMinorType = ['garaje', 'trastero'].includes(item.tipo);
+            const hasDisponibles = item.disponibles > 0;
+            const filterUrl = `/unidades?estado=disponible&tipo=${item.tipo}`;
 
-            return (
-              <div
-                key={item.tipo}
-                className={`flex items-center gap-3 p-2.5 rounded-lg transition-colors ${
-                  isMinorType ? 'bg-gray-50/50' : colors.bg
-                }`}
-              >
+            const rowContent = (
+              <>
                 {/* Icon */}
                 <div className={`flex-shrink-0 p-1.5 rounded-md ${isMinorType ? 'bg-gray-100' : colors.bg}`}>
                   <Icon className={`h-4 w-4 ${isMinorType ? 'text-gray-500' : colors.text}`} />
@@ -133,6 +131,11 @@ export function OccupancyByTypeCard({
                       <span className="text-xs text-gray-500">
                         {item.ocupadas}/{item.total}
                       </span>
+                      {hasDisponibles && (
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-amber-600 border-amber-300">
+                          {item.disponibles} disp.
+                        </Badge>
+                      )}
                       {!compact && (
                         <Badge variant={status.variant} className={`text-[10px] px-1.5 py-0 ${status.className}`}>
                           {status.label}
@@ -159,6 +162,28 @@ export function OccupancyByTypeCard({
                     {item.tasa.toFixed(0)}%
                   </span>
                 </div>
+              </>
+            );
+
+            return hasDisponibles ? (
+              <Link
+                key={item.tipo}
+                href={filterUrl}
+                className={`flex items-center gap-3 p-2.5 rounded-lg transition-colors hover:ring-2 hover:ring-amber-300 cursor-pointer ${
+                  isMinorType ? 'bg-gray-50/50' : colors.bg
+                }`}
+                title={`Ver ${item.disponibles} ${item.label.toLowerCase()} disponibles`}
+              >
+                {rowContent}
+              </Link>
+            ) : (
+              <div
+                key={item.tipo}
+                className={`flex items-center gap-3 p-2.5 rounded-lg transition-colors ${
+                  isMinorType ? 'bg-gray-50/50' : colors.bg
+                }`}
+              >
+                {rowContent}
               </div>
             );
           })}
