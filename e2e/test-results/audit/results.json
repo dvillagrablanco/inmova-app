@@ -1,0 +1,1011 @@
+{
+  "config": {
+    "configFile": "/workspace/e2e/playwright-audit.config.ts",
+    "rootDir": "/workspace/e2e",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "test-results/audit/results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/workspace/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/workspace/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "gestor-workflow-audit.spec.ts"
+        ],
+        "timeout": 90000
+      }
+    ],
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.57.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "gestor-workflow-audit.spec.ts",
+      "file": "gestor-workflow-audit.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Auditoría Completa del Gestor",
+          "file": "gestor-workflow-audit.spec.ts",
+          "line": 230,
+          "column": 15,
+          "specs": [
+            {
+              "title": "01 - Login",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5020,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "Login successful, redirected to: https://inmovaapp.com/dashboard\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-25T23:24:04.095Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "840c517ff1273ae659fe-8248ff3240fe62124ac8",
+              "file": "gestor-workflow-audit.spec.ts",
+              "line": 281,
+              "column": 7
+            },
+            {
+              "title": "02 - Dashboard /traditional-rental",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5883,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-25T23:24:09.342Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "840c517ff1273ae659fe-99b4face933c86d93a1d",
+              "file": "gestor-workflow-audit.spec.ts",
+              "line": 313,
+              "column": 7
+            },
+            {
+              "title": "03 - Edificios lista",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2696,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-25T23:24:15.233Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "840c517ff1273ae659fe-187dc642d1786aaee0aa",
+              "file": "gestor-workflow-audit.spec.ts",
+              "line": 336,
+              "column": 7
+            },
+            {
+              "title": "04 - Edificio detalle (first building)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2047,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-25T23:24:17.938Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "840c517ff1273ae659fe-1337c6783af22c53f36f",
+              "file": "gestor-workflow-audit.spec.ts",
+              "line": 361,
+              "column": 7
+            },
+            {
+              "title": "05 - Unidades lista",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2741,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-25T23:24:19.995Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "840c517ff1273ae659fe-91cb45f672a87a559a75",
+              "file": "gestor-workflow-audit.spec.ts",
+              "line": 455,
+              "column": 7
+            },
+            {
+              "title": "06 - Inquilinos lista",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2712,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-25T23:24:22.743Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "840c517ff1273ae659fe-101da391af650d60a434",
+              "file": "gestor-workflow-audit.spec.ts",
+              "line": 478,
+              "column": 7
+            },
+            {
+              "title": "07 - Inquilino nuevo (form fields)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2777,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-25T23:24:25.463Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "840c517ff1273ae659fe-a412bd501dde3587759a",
+              "file": "gestor-workflow-audit.spec.ts",
+              "line": 504,
+              "column": 7
+            },
+            {
+              "title": "08 - Contratos lista",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2970,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-25T23:24:28.245Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "840c517ff1273ae659fe-016271e070905f77fbec",
+              "file": "gestor-workflow-audit.spec.ts",
+              "line": 540,
+              "column": 7
+            },
+            {
+              "title": "09 - Contrato nuevo (cascading filter)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2659,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-25T23:24:31.221Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "840c517ff1273ae659fe-247bfe5ad58489fbc5b0",
+              "file": "gestor-workflow-audit.spec.ts",
+              "line": 565,
+              "column": 7
+            },
+            {
+              "title": "10 - Pagos lista",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 7070,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-25T23:24:33.886Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "840c517ff1273ae659fe-25b8c53e429027ee4070",
+              "file": "gestor-workflow-audit.spec.ts",
+              "line": 610,
+              "column": 7
+            },
+            {
+              "title": "11 - Pago nuevo (contract dropdown)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2675,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-25T23:24:40.963Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "840c517ff1273ae659fe-99d2285a01787e569113",
+              "file": "gestor-workflow-audit.spec.ts",
+              "line": 637,
+              "column": 7
+            },
+            {
+              "title": "12 - Mantenimiento nuevo (building→unit filter)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2650,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-25T23:24:43.646Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "840c517ff1273ae659fe-9574ca4ea26834dd113f",
+              "file": "gestor-workflow-audit.spec.ts",
+              "line": 666,
+              "column": 7
+            },
+            {
+              "title": "13 - Valoración IA (both tabs)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4336,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-25T23:24:46.303Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "840c517ff1273ae659fe-704d855be30645322433",
+              "file": "gestor-workflow-audit.spec.ts",
+              "line": 700,
+              "column": 7
+            },
+            {
+              "title": "14 - Reportes financieros",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3176,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-25T23:24:50.649Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "840c517ff1273ae659fe-8423878cfe5b78611346",
+              "file": "gestor-workflow-audit.spec.ts",
+              "line": 740,
+              "column": 7
+            },
+            {
+              "title": "15 - Impuestos",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2657,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-25T23:24:53.830Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "840c517ff1273ae659fe-3d2e991829ea08ad85fd",
+              "file": "gestor-workflow-audit.spec.ts",
+              "line": 771,
+              "column": 7
+            },
+            {
+              "title": "16 - Admin módulos",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3666,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-25T23:24:56.493Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "840c517ff1273ae659fe-a16895d0fa8d31f6d36a",
+              "file": "gestor-workflow-audit.spec.ts",
+              "line": 786,
+              "column": 7
+            },
+            {
+              "title": "17 - Propiedades lista",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3121,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-25T23:25:00.165Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "840c517ff1273ae659fe-b74b40bcd78a360bee04",
+              "file": "gestor-workflow-audit.spec.ts",
+              "line": 808,
+              "column": 7
+            },
+            {
+              "title": "18 - Propiedad detalle (map)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2119,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-25T23:25:03.293Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "840c517ff1273ae659fe-01c6a049b50c2d42207d",
+              "file": "gestor-workflow-audit.spec.ts",
+              "line": 823,
+              "column": 7
+            },
+            {
+              "title": "19 - Gastos",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2799,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-25T23:25:05.419Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "840c517ff1273ae659fe-aa2f80b9ebbf0e375ed3",
+              "file": "gestor-workflow-audit.spec.ts",
+              "line": 913,
+              "column": 7
+            },
+            {
+              "title": "20 - Documentos",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2620,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-25T23:25:08.225Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "840c517ff1273ae659fe-3e6848323392fc2d25f0",
+              "file": "gestor-workflow-audit.spec.ts",
+              "line": 920,
+              "column": 7
+            },
+            {
+              "title": "21 - Calendario",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2640,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-25T23:25:10.851Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "840c517ff1273ae659fe-2b913da9ebaa1958affc",
+              "file": "gestor-workflow-audit.spec.ts",
+              "line": 934,
+              "column": 7
+            },
+            {
+              "title": "22 - Contabilidad",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4922,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-25T23:25:13.497Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "840c517ff1273ae659fe-c59fbfcbd10a85251367",
+              "file": "gestor-workflow-audit.spec.ts",
+              "line": 950,
+              "column": 7
+            },
+            {
+              "title": "23 - Conciliación bancaria",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2650,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-25T23:25:18.428Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "840c517ff1273ae659fe-80794dbcea2cbda68acf",
+              "file": "gestor-workflow-audit.spec.ts",
+              "line": 962,
+              "column": 7
+            },
+            {
+              "title": "24 - Comercial",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2593,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "\nAudit report saved to: test-results/audit/audit-report.json\n"
+                        },
+                        {
+                          "text": "\n================================================================================\n"
+                        },
+                        {
+                          "text": "  AUDIT SUMMARY\n"
+                        },
+                        {
+                          "text": "================================================================================\n"
+                        },
+                        {
+                          "text": "\n  OK:       0 pages\n"
+                        },
+                        {
+                          "text": "  ERRORS:   0 pages\n"
+                        },
+                        {
+                          "text": "  WARNINGS: 2 pages\n"
+                        },
+                        {
+                          "text": "  404:      21 pages\n"
+                        },
+                        {
+                          "text": "\n  WARNING PAGES:\n"
+                        },
+                        {
+                          "text": "    - 04-edificio-detail: No buildings found to click into\n"
+                        },
+                        {
+                          "text": "    - 18-propiedad-detail: No properties found to click into\n"
+                        },
+                        {
+                          "text": "\n  NOT FOUND:\n"
+                        },
+                        {
+                          "text": "    - 02-dashboard-traditional-rental: https://inmovaapp.com/traditional-rental\n"
+                        },
+                        {
+                          "text": "    - 03-edificios-list: https://inmovaapp.com/edificios\n"
+                        },
+                        {
+                          "text": "    - 05-unidades-list: https://inmovaapp.com/unidades\n"
+                        },
+                        {
+                          "text": "    - 06-inquilinos-list: https://inmovaapp.com/inquilinos\n"
+                        },
+                        {
+                          "text": "    - 07-inquilino-nuevo: https://inmovaapp.com/inquilinos/nuevo\n"
+                        },
+                        {
+                          "text": "    - 08-contratos-list: https://inmovaapp.com/contratos\n"
+                        },
+                        {
+                          "text": "    - 09-contrato-nuevo: https://inmovaapp.com/contratos/nuevo\n"
+                        },
+                        {
+                          "text": "    - 10-pagos-list: https://inmovaapp.com/pagos\n"
+                        },
+                        {
+                          "text": "    - 11-pago-nuevo: https://inmovaapp.com/pagos/nuevo\n"
+                        },
+                        {
+                          "text": "    - 12-mantenimiento-nuevo: https://inmovaapp.com/mantenimiento/nuevo\n"
+                        },
+                        {
+                          "text": "    - 13-valoracion-ia: https://inmovaapp.com/valoracion-ia\n"
+                        },
+                        {
+                          "text": "    - 14-reportes-financieros: https://inmovaapp.com/reportes/financieros\n"
+                        },
+                        {
+                          "text": "    - 15-impuestos: https://inmovaapp.com/impuestos\n"
+                        },
+                        {
+                          "text": "    - 16-admin-modulos: https://inmovaapp.com/admin/modulos\n"
+                        },
+                        {
+                          "text": "    - 17-propiedades-list: https://inmovaapp.com/propiedades\n"
+                        },
+                        {
+                          "text": "    - 19-gastos: https://inmovaapp.com/gastos\n"
+                        },
+                        {
+                          "text": "    - 20-documentos: https://inmovaapp.com/documentos\n"
+                        },
+                        {
+                          "text": "    - 21-calendario: https://inmovaapp.com/calendario\n"
+                        },
+                        {
+                          "text": "    - 22-contabilidad: https://inmovaapp.com/contabilidad\n"
+                        },
+                        {
+                          "text": "    - 23-conciliacion: https://inmovaapp.com/finanzas/conciliacion\n"
+                        },
+                        {
+                          "text": "    - 24-comercial: https://inmovaapp.com/comercial\n"
+                        },
+                        {
+                          "text": "\n================================================================================\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-25T23:25:21.084Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "840c517ff1273ae659fe-5053f5188397617978e0",
+              "file": "gestor-workflow-audit.spec.ts",
+              "line": 974,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-02-25T23:24:03.512Z",
+    "duration": 80251.208,
+    "expected": 24,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}
