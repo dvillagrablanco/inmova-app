@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Camera, Upload, Trash2, X, Loader2, ImageIcon, ZoomIn } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import Image from 'next/image';
 
 interface PhotoGalleryProps {
   images: string[];
@@ -33,6 +32,52 @@ export function PhotoGallery({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Compress image client-side before upload (max 1920px, quality 0.8, WebP)
+  const compressImage = (file: File): Promise<File> => {
+    return new Promise((resolve) => {
+      const img = document.createElement('img');
+      const canvas = document.createElement('canvas');
+      const url = URL.createObjectURL(file);
+      
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const MAX_SIZE = 1920;
+        let { width, height } = img;
+        
+        if (width > MAX_SIZE || height > MAX_SIZE) {
+          if (width > height) {
+            height = Math.round((height * MAX_SIZE) / width);
+            width = MAX_SIZE;
+          } else {
+            width = Math.round((width * MAX_SIZE) / height);
+            height = MAX_SIZE;
+          }
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) { resolve(file); return; }
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Try WebP first, fallback to JPEG
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) { resolve(file); return; }
+            const ext = blob.type === 'image/webp' ? '.webp' : '.jpg';
+            const name = file.name.replace(/\.[^.]+$/, ext);
+            resolve(new File([blob], name, { type: blob.type }));
+          },
+          'image/webp',
+          0.80
+        );
+      };
+      
+      img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+      img.src = url;
+    });
+  };
+
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -50,14 +95,17 @@ export function PhotoGallery({
         toast.error(`${file.name} no es una imagen válida`);
         continue;
       }
-      if (file.size > 10 * 1024 * 1024) {
-        toast.error(`${file.name} supera el límite de 10MB`);
+      if (file.size > 20 * 1024 * 1024) {
+        toast.error(`${file.name} supera el límite de 20MB`);
         continue;
       }
 
       try {
+        // Compress before uploading
+        const compressed = await compressImage(file);
+        
         const formData = new FormData();
-        formData.append('file', file);
+        formData.append('file', compressed);
         formData.append('folder', folder);
 
         const res = await fetch('/api/upload/photos', {
@@ -71,7 +119,8 @@ export function PhotoGallery({
             newUrls.push(data.url);
           }
         } else {
-          toast.error(`Error subiendo ${file.name}`);
+          const err = await res.json().catch(() => ({}));
+          toast.error(err.error || `Error subiendo ${file.name}`);
         }
       } catch {
         toast.error(`Error subiendo ${file.name}`);
@@ -138,12 +187,12 @@ export function PhotoGallery({
                   className="relative group aspect-square rounded-lg overflow-hidden border bg-muted cursor-pointer"
                   onClick={() => setPreviewUrl(url)}
                 >
-                  <Image
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
                     src={url}
                     alt={`Foto ${idx + 1}`}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                    className="absolute inset-0 w-full h-full object-cover"
+                    loading="lazy"
                   />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
                     <ZoomIn className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -198,15 +247,12 @@ export function PhotoGallery({
           >
             <X className="h-6 w-6" />
           </button>
-          <div className="relative max-w-[90vw] max-h-[90vh] w-full h-full">
-            <Image
-              src={previewUrl}
-              alt="Vista previa"
-              fill
-              className="object-contain"
-              sizes="90vw"
-            />
-          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={previewUrl}
+            alt="Vista previa"
+            className="max-w-[90vw] max-h-[90vh] object-contain"
+          />
         </div>
       )}
     </>

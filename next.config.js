@@ -88,6 +88,14 @@ const nextConfig = {
         protocol: 'https',
         hostname: '**.abacusai.app',
       },
+      {
+        protocol: 'https',
+        hostname: '**.amazonaws.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'inmova.s3.eu-north-1.amazonaws.com',
+      },
     ],
   },
 
