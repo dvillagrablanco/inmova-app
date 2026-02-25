@@ -53,8 +53,10 @@ export async function POST(request: NextRequest) {
         select: { subscriptionPlan: { select: { tier: true, nombre: true } } },
       });
       const tier = company?.subscriptionPlan?.tier?.toLowerCase() || '';
-      const premiumTiers = ['enterprise', 'owner', 'business', 'empresarial', 'premium', 'personalizado'];
-      if (!premiumTiers.some(t => tier.includes(t))) {
+      const planName = company?.subscriptionPlan?.nombre?.toLowerCase() || '';
+      const premiumTiers = ['enterprise', 'business', 'empresarial', 'premium', 'personalizado'];
+      const isPremium = premiumTiers.some(t => tier.includes(t)) || planName === 'owner';
+      if (!isPremium) {
         return NextResponse.json({
           type: 'text',
           content: `El Asistente IA está disponible para planes premium. Tu plan actual es "${company?.subscriptionPlan?.nombre || 'Sin plan'}". Contacta con tu administrador para hacer upgrade.`,
