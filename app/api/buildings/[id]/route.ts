@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import logger, { logError } from '@/lib/logger';
 import { invalidateBuildingsCache, invalidateDashboardCache } from '@/lib/api-cache-helpers';
+import { resolveCompanyScope } from '@/lib/company-scope';
 import { z } from 'zod';
 import * as Sentry from '@sentry/nextjs';
 
@@ -35,6 +36,40 @@ const buildingUpdateSchema = z.object({
       message: 'El número de unidades debe ser positivo',
     }),
   imagenes: z.array(z.string()).optional(),
+  estadoConservacion: z.string().optional(),
+  certificadoEnergetico: z.string().optional(),
+  ascensor: z.boolean().optional(),
+  garaje: z.boolean().optional(),
+  trastero: z.boolean().optional(),
+  piscina: z.boolean().optional(),
+  jardin: z.boolean().optional(),
+  gastosComunidad: z
+    .union([z.string(), z.number()])
+    .optional()
+    .transform((val) => (typeof val === 'string' ? parseFloat(val) : val))
+    .refine((val) => val === undefined || val >= 0, {
+      message: 'Gastos de comunidad no pueden ser negativos',
+    }),
+  ibiAnual: z
+    .union([z.string(), z.number()])
+    .optional()
+    .transform((val) => (typeof val === 'string' ? parseFloat(val) : val))
+    .refine((val) => val === undefined || val >= 0, { message: 'IBI anual no puede ser negativo' }),
+  latitud: z
+    .union([z.string(), z.number()])
+    .optional()
+    .transform((val) => (typeof val === 'string' ? parseFloat(val) : val))
+    .refine((val) => val === undefined || (val >= -90 && val <= 90), {
+      message: 'Latitud inválida',
+    }),
+  longitud: z
+    .union([z.string(), z.number()])
+    .optional()
+    .transform((val) => (typeof val === 'string' ? parseFloat(val) : val))
+    .refine((val) => val === undefined || (val >= -180 && val <= 180), {
+      message: 'Longitud inválida',
+    }),
+  etiquetas: z.array(z.string()).optional(),
 });
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
@@ -44,6 +79,13 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     if (!session) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
+
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: session.user.role as string,
+      primaryCompanyId: session.user?.companyId,
+      request: req,
+    });
 
     const building = await prisma.building.findUnique({
       where: { id: params.id },
@@ -59,6 +101,11 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
     if (!building) {
       return NextResponse.json({ error: 'Edificio no encontrado' }, { status: 404 });
+    }
+
+    // Verify building belongs to user's company scope
+    if (!scope.scopeCompanyIds.includes(building.companyId)) {
+      return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
     }
 
     return NextResponse.json(building);
@@ -92,8 +139,26 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       return NextResponse.json({ error: 'Datos inválidos', details: errors }, { status: 400 });
     }
 
-    const { nombre, direccion, tipo, anoConstructor, numeroUnidades, imagenes } =
-      validationResult.data;
+    const {
+      nombre,
+      direccion,
+      tipo,
+      anoConstructor,
+      numeroUnidades,
+      imagenes,
+      estadoConservacion,
+      certificadoEnergetico,
+      ascensor,
+      garaje,
+      trastero,
+      piscina,
+      jardin,
+      gastosComunidad,
+      ibiAnual,
+      latitud,
+      longitud,
+      etiquetas,
+    } = validationResult.data;
 
     const building = await prisma.building.update({
       where: { id: params.id },
@@ -104,6 +169,18 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         ...(anoConstructor !== undefined && { anoConstructor }),
         ...(numeroUnidades !== undefined && { numeroUnidades }),
         ...(imagenes !== undefined && { imagenes }),
+        ...(estadoConservacion !== undefined && { estadoConservacion }),
+        ...(certificadoEnergetico !== undefined && { certificadoEnergetico }),
+        ...(ascensor !== undefined && { ascensor }),
+        ...(garaje !== undefined && { garaje }),
+        ...(trastero !== undefined && { trastero }),
+        ...(piscina !== undefined && { piscina }),
+        ...(jardin !== undefined && { jardin }),
+        ...(gastosComunidad !== undefined && { gastosComunidad }),
+        ...(ibiAnual !== undefined && { ibiAnual }),
+        ...(latitud !== undefined && { latitud }),
+        ...(longitud !== undefined && { longitud }),
+        ...(etiquetas !== undefined && { etiquetas }),
       },
     });
 
