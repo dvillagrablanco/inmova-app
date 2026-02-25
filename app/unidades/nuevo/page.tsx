@@ -44,7 +44,7 @@ export default function NuevaUnidadPage() {
   const [formData, setFormData] = useState({
     numero: '',
     edificioId: '',
-    tipo: 'apartamento',
+    tipo: 'vivienda',
     superficie: '0',
     habitaciones: '1',
     banos: '1',
@@ -84,7 +84,7 @@ export default function NuevaUnidadPage() {
           superficie: parseFloat(formData.superficie),
           habitaciones: parseInt(formData.habitaciones),
           banos: parseInt(formData.banos),
-          precioAlquiler: parseFloat(formData.precio),
+          rentaMensual: parseFloat(formData.precio),
           estado: 'disponible',
         }),
       });
@@ -217,11 +217,13 @@ export default function NuevaUnidadPage() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="apartamento">Apartamento</SelectItem>
+                          <SelectItem value="vivienda">Vivienda</SelectItem>
                           <SelectItem value="local">Local Comercial</SelectItem>
                           <SelectItem value="oficina">Oficina</SelectItem>
-                          <SelectItem value="estudio">Estudio</SelectItem>
-                          <SelectItem value="duplex">Dúplex</SelectItem>
+                          <SelectItem value="garaje">Garaje</SelectItem>
+                          <SelectItem value="trastero">Trastero</SelectItem>
+                          <SelectItem value="nave_industrial">Nave Industrial</SelectItem>
+                          <SelectItem value="coworking_space">Coworking</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -372,21 +374,24 @@ export default function NuevaUnidadPage() {
               setFormData((prev) => ({ ...prev, numero: data.numero || data.numeroUnidad }));
             }
             if (data.tipo || data.tipoVivienda) {
-              const tipo = (data.tipo || data.tipoVivienda).toLowerCase();
-              if (
-                [
-                  'apartamento',
-                  'estudio',
-                  'piso',
-                  'duplex',
-                  'atico',
-                  'local',
-                  'oficina',
-                  'habitacion',
-                ].includes(tipo)
-              ) {
-                setFormData((prev) => ({ ...prev, tipo }));
-              }
+              const raw = (data.tipo || data.tipoVivienda).toLowerCase();
+              const tipoMap: Record<string, string> = {
+                apartamento: 'vivienda',
+                estudio: 'vivienda',
+                piso: 'vivienda',
+                duplex: 'vivienda',
+                atico: 'vivienda',
+                habitacion: 'vivienda',
+                vivienda: 'vivienda',
+                local: 'local',
+                oficina: 'oficina',
+                garaje: 'garaje',
+                trastero: 'trastero',
+                nave: 'nave_industrial',
+                coworking: 'coworking_space',
+              };
+              const tipo = tipoMap[raw] || tipoMap[raw.replace(/\s/g, '_')];
+              if (tipo) setFormData((prev) => ({ ...prev, tipo }));
             }
             if (data.superficie || data.metrosCuadrados) {
               setFormData((prev) => ({

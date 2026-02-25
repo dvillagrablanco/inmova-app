@@ -73,47 +73,106 @@ export default function ReportesFinancierosPage() {
       setLoading(true);
       try {
         const now = new Date();
+
+        // Current period date range
         let fechaDesde: string;
         let fechaHasta: string;
+        // Previous period for month-over-month change
+        let prevFechaDesde: string;
+        let prevFechaHasta: string;
+
         if (period === 'year') {
           fechaDesde = `${now.getFullYear()}-01-01`;
           fechaHasta = now.toISOString().slice(0, 10);
+          prevFechaDesde = `${now.getFullYear() - 1}-01-01`;
+          prevFechaHasta = `${now.getFullYear() - 1}-12-31`;
         } else if (period === 'quarter') {
           const qStart = Math.floor(now.getMonth() / 3) * 3;
           fechaDesde = `${now.getFullYear()}-${String(qStart + 1).padStart(2, '0')}-01`;
           fechaHasta = now.toISOString().slice(0, 10);
+          const prevQStart = qStart === 0 ? 9 : qStart - 3;
+          const prevYear = qStart === 0 ? now.getFullYear() - 1 : now.getFullYear();
+          prevFechaDesde = `${prevYear}-${String(prevQStart + 1).padStart(2, '0')}-01`;
+          const prevQEndMonth = prevQStart + 3;
+          prevFechaHasta =
+            prevQEndMonth <= 12
+              ? `${prevYear}-${String(prevQEndMonth).padStart(2, '0')}-${new Date(prevYear, prevQEndMonth, 0).getDate()}`
+              : `${prevYear}-12-31`;
         } else {
           fechaDesde = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
           fechaHasta = now.toISOString().slice(0, 10);
+          const prevMonth = now.getMonth() === 0 ? 11 : now.getMonth() - 1;
+          const prevYear = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear();
+          prevFechaDesde = `${prevYear}-${String(prevMonth + 1).padStart(2, '0')}-01`;
+          prevFechaHasta = `${prevYear}-${String(prevMonth + 1).padStart(2, '0')}-${new Date(prevYear, prevMonth + 1, 0).getDate()}`;
         }
 
-        const [paymentsRes, contractsRes, unitsRes, buildingsRes, expensesRes] = await Promise.all([
-          fetch('/api/payments?limit=500').then((r) => (r.ok ? r.json() : { data: [] })),
-          fetch('/api/contracts?limit=500').then((r) => (r.ok ? r.json() : { data: [] })),
-          fetch('/api/units').then((r) => (r.ok ? r.json() : [])),
-          fetch('/api/buildings').then((r) => (r.ok ? r.json() : [])),
-          fetch(`/api/expenses?fechaDesde=${fechaDesde}&fechaHasta=${fechaHasta}`).then((r) =>
-            r.ok ? r.json() : { data: [] }
-          ),
-        ]);
+        const startCurrent = new Date(fechaDesde);
+        const endCurrent = new Date(fechaHasta);
+        endCurrent.setHours(23, 59, 59, 999);
+        const startPrev = new Date(prevFechaDesde);
+        const endPrev = new Date(prevFechaHasta);
+        endPrev.setHours(23, 59, 59, 999);
+
+        const [paymentsRes, unitsRes, buildingsRes, expensesRes, prevExpensesRes] =
+          await Promise.all([
+            fetch('/api/payments?limit=500').then((r) => (r.ok ? r.json() : { data: [] })),
+            fetch('/api/units').then((r) => (r.ok ? r.json() : [])),
+            fetch('/api/buildings').then((r) => (r.ok ? r.json() : [])),
+            fetch(`/api/expenses?fechaDesde=${fechaDesde}&fechaHasta=${fechaHasta}`).then((r) =>
+              r.ok ? r.json() : { data: [] }
+            ),
+            fetch(
+              `/api/expenses?fechaDesde=${prevFechaDesde}&fechaHasta=${prevFechaHasta}`
+            ).then((r) => (r.ok ? r.json() : { data: [] })),
+          ]);
 
         const payments = toArray(paymentsRes);
-        const contracts = toArray(contractsRes);
         const units = Array.isArray(unitsRes) ? unitsRes : toArray(unitsRes);
         const buildings = Array.isArray(buildingsRes) ? buildingsRes : toArray(buildingsRes);
         const expenses = toArray(expensesRes);
+        const prevExpenses = toArray(prevExpensesRes);
 
-        const activeContracts = contracts.filter(
-          (c: { estado?: string }) => c.estado?.toLowerCase() === 'activo'
-        );
-        const ingresos = activeContracts.reduce(
-          (acc: number, c: { rentaMensual?: number }) => acc + (Number(c.rentaMensual) || 0),
+        // Ingresos: sum of ACTUAL payments (estado=pagado) with fechaPago in current period
+        const paidInPeriod = payments.filter((p: { estado?: string; fechaPago?: string }) => {
+          const est = (p.estado || '').toLowerCase();
+          if (est !== 'pagado' && est !== 'cobrado') return false;
+          const fp = p.fechaPago ? new Date(p.fechaPago) : null;
+          if (!fp) return false;
+          return fp >= startCurrent && fp <= endCurrent;
+        });
+        const ingresos = paidInPeriod.reduce(
+          (acc: number, p: { monto?: number }) => acc + (Number(p.monto) || 0),
           0
         );
+
+        // Previous period ingresos for change %
+        const paidInPrevPeriod = payments.filter((p: { estado?: string; fechaPago?: string }) => {
+          const est = (p.estado || '').toLowerCase();
+          if (est !== 'pagado' && est !== 'cobrado') return false;
+          const fp = p.fechaPago ? new Date(p.fechaPago) : null;
+          if (!fp) return false;
+          return fp >= startPrev && fp <= endPrev;
+        });
+        const prevIngresos = paidInPrevPeriod.reduce(
+          (acc: number, p: { monto?: number }) => acc + (Number(p.monto) || 0),
+          0
+        );
+
         const gastos = expenses.reduce(
           (acc: number, e: { monto?: number }) => acc + (Number(e.monto) || 0),
           0
         );
+        const prevGastos = prevExpenses.reduce(
+          (acc: number, e: { monto?: number }) => acc + (Number(e.monto) || 0),
+          0
+        );
+
+        const ingresosChange =
+          prevIngresos > 0 ? Math.round(((ingresos - prevIngresos) / prevIngresos) * 1000) / 10 : 0;
+        const gastosChange =
+          prevGastos > 0 ? Math.round(((gastos - prevGastos) / prevGastos) * 1000) / 10 : 0;
+
         const beneficio = ingresos - gastos;
 
         const totalUnits = units.length;
@@ -143,12 +202,13 @@ export default function ReportesFinancierosPage() {
         const gastosPorBuilding = new Map<string, number>();
         const unitsPorBuilding = new Map<string, { total: number; ocupadas: number }>();
 
-        for (const c of activeContracts) {
-          const unit = (c as { unit?: { buildingId?: string } }).unit;
-          const buildingId = unit?.buildingId;
+        // Ingresos por building from ACTUAL payments in period (not contract rentaMensual)
+        for (const p of paidInPeriod) {
+          const contract = (p as { contract?: { unit?: { buildingId?: string } } }).contract;
+          const buildingId = contract?.unit?.buildingId;
           if (buildingId) {
-            const renta = Number((c as { rentaMensual?: number }).rentaMensual) || 0;
-            ingresosPorBuilding.set(buildingId, (ingresosPorBuilding.get(buildingId) ?? 0) + renta);
+            const monto = Number((p as { monto?: number }).monto) || 0;
+            ingresosPorBuilding.set(buildingId, (ingresosPorBuilding.get(buildingId) ?? 0) + monto);
           }
         }
         for (const e of expenses) {
@@ -204,8 +264,8 @@ export default function ReportesFinancierosPage() {
           ocupacion: Math.round(ocupacion * 10) / 10,
           morosidad: Math.round(morosidad * 10) / 10,
           rentabilidad: Math.round(rentabilidad * 10) / 10,
-          ingresosChange: 0,
-          gastosChange: 0,
+          ingresosChange,
+          gastosChange,
         });
         setPropiedades(props);
       } catch (err) {

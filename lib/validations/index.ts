@@ -257,7 +257,7 @@ export const paymentUpdateSchema = paymentCreateSchema.partial().omit({ contract
 
 export const maintenanceCreateSchema = z.object({
   unitId: z.string().uuid('ID de unidad inválido').optional(),
-  buildingId: z.string().uuid('ID de edificio inválido'),
+  buildingId: z.string().min(1, 'ID de edificio requerido'),
   titulo: z
     .string()
     .min(1, 'El título es requerido')
@@ -453,7 +453,7 @@ export const documentCreateSchema = z.object({
     'certificado',
     'otro',
   ]),
-  buildingId: z.string().uuid('ID de edificio inválido').optional(),
+  buildingId: z.string().min(1, 'ID de edificio requerido').optional(),
   unitId: z.string().uuid('ID de unidad inválido').optional(),
   tenantId: z.string().uuid('ID de inquilino inválido').optional(),
   contractId: z.string().uuid('ID de contrato inválido').optional(),
