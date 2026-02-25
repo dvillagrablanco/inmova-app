@@ -59,6 +59,7 @@ import {
 } from '@/components/ui/table';
 import Link from 'next/link';
 import { PhotoGallery } from '@/components/ui/photo-gallery';
+import { EntityDocuments } from '@/components/ui/entity-documents';
 
 interface Unit {
   id: string;
@@ -464,6 +465,12 @@ export default function EdificioDetallesPage() {
               title="Fotos del edificio"
               description="Sube fotos para documentar el estado del edificio"
               editable={true}
+            />
+
+            <EntityDocuments
+              entityType="building"
+              entityId={buildingId}
+              className="mt-6"
             />
 
             {/* Lista de Unidades */}

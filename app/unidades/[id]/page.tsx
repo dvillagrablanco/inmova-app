@@ -55,6 +55,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { PhotoGallery } from '@/components/ui/photo-gallery';
+import { EntityDocuments } from '@/components/ui/entity-documents';
 
 interface Tenant {
   id: string;
@@ -560,6 +561,13 @@ export default function UnitDetailPage() {
                   editable={true}
                 />
               </div>
+
+              <EntityDocuments
+                entityType="unit"
+                entityId={unitId}
+                buildingId={unit?.building?.id}
+                className="mt-6"
+              />
             </div>
           </TabsContent>
 
