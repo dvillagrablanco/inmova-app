@@ -101,6 +101,76 @@ async function consultaPorDireccion(provincia: string, municipio: string, tipoVi
   return consultaPorRC(rc);
 }
 
+/**
+ * Parsea una dirección libre para extraer provincia, municipio, tipo vía, nombre vía y número.
+ * Ejemplos:
+ *   "Calle Gran Vía 28, Madrid" → { tipoVia: 'CL', via: 'Gran Vía', numero: '28', municipio: 'Madrid', provincia: 'Madrid' }
+ *   "Avenida de la Constitución 3, Málaga, Málaga" → { tipoVia: 'AV', via: 'de la Constitución', numero: '3', municipio: 'Málaga', provincia: 'Málaga' }
+ */
+function parseDireccionLibre(direccion: string): { provincia: string; municipio: string; tipoVia: string; via: string; numero: string } | null {
+  const clean = direccion.trim();
+  
+  // Patrones de tipo de vía
+  const tipoViaMap: Record<string, string> = {
+    'calle': 'CL', 'cl': 'CL', 'c/': 'CL', 'c.': 'CL',
+    'avenida': 'AV', 'av': 'AV', 'av.': 'AV', 'avda': 'AV', 'avda.': 'AV',
+    'plaza': 'PZ', 'pz': 'PZ', 'pl': 'PZ', 'pl.': 'PZ',
+    'paseo': 'PS', 'ps': 'PS', 'pº': 'PS',
+    'carretera': 'CR', 'ctra': 'CR', 'ctra.': 'CR',
+    'camino': 'CM', 'cm': 'CM',
+    'ronda': 'RD', 'rd': 'RD',
+    'urbanización': 'UR', 'urbanizacion': 'UR', 'urb': 'UR', 'urb.': 'UR',
+    'pasaje': 'PJ', 'travesía': 'TR', 'travesia': 'TR',
+  };
+
+  // Split by commas to get parts
+  const parts = clean.split(',').map(p => p.trim()).filter(Boolean);
+  
+  if (parts.length < 1) return null;
+  
+  // First part: tipo vía + nombre vía + número
+  const streetPart = parts[0];
+  
+  // Try to extract tipo vía from beginning
+  let tipoVia = 'CL'; // default
+  let viaPart = streetPart;
+  
+  const lowerStreet = streetPart.toLowerCase();
+  for (const [prefix, code] of Object.entries(tipoViaMap)) {
+    if (lowerStreet.startsWith(prefix + ' ') || lowerStreet.startsWith(prefix + '.')) {
+      tipoVia = code;
+      viaPart = streetPart.substring(prefix.length).replace(/^[\s.]+/, '');
+      break;
+    }
+  }
+  
+  // Extract number from end of via part
+  const numMatch = viaPart.match(/\s+(\d+[A-Za-z]?)\s*$/);
+  let numero = '';
+  let nombreVia = viaPart;
+  
+  if (numMatch) {
+    numero = numMatch[1];
+    nombreVia = viaPart.substring(0, numMatch.index).trim();
+  }
+  
+  // Municipio and provincia from remaining parts
+  let municipio = '';
+  let provincia = '';
+  
+  if (parts.length >= 3) {
+    municipio = parts[1];
+    provincia = parts[2];
+  } else if (parts.length === 2) {
+    municipio = parts[1];
+    provincia = parts[1]; // Assume same as municipio (common for capitals)
+  }
+  
+  if (!nombreVia || !municipio) return null;
+  
+  return { provincia, municipio, tipoVia, via: nombreVia, numero };
+}
+
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -115,23 +185,45 @@ export async function GET(req: NextRequest) {
     const via = searchParams.get('via');
     const numero = searchParams.get('numero');
     const tipoVia = searchParams.get('tipoVia') || 'CL';
+    const direccionLibre = searchParams.get('direccionLibre');
     
     let result: CatastroResult | null = null;
     
     if (rc && rc.length >= 14) {
       result = await consultaPorRC(rc);
+    } else if (direccionLibre) {
+      // Parsear dirección libre
+      const parsed = parseDireccionLibre(direccionLibre);
+      if (!parsed) {
+        return NextResponse.json(
+          { error: 'No se pudo interpretar la dirección. Usa el formato: "Calle Nombre 12, Ciudad, Provincia"' },
+          { status: 400 }
+        );
+      }
+      
+      logger.info('[Catastro] Dirección libre parseada:', parsed);
+      result = await consultaPorDireccion(parsed.provincia, parsed.municipio, parsed.tipoVia, parsed.via, parsed.numero);
+      
+      // Si no encuentra, intentar con variaciones comunes
+      if (!result && parsed.tipoVia === 'CL') {
+        // Intentar sin tipo de vía
+        for (const altTipo of ['AV', 'PZ', 'PS']) {
+          result = await consultaPorDireccion(parsed.provincia, parsed.municipio, altTipo, parsed.via, parsed.numero);
+          if (result) break;
+        }
+      }
     } else if (provincia && municipio && via && numero) {
       result = await consultaPorDireccion(provincia, municipio, tipoVia, via, numero);
     } else {
       return NextResponse.json(
-        { error: 'Proporciona referencia catastral (rc) o dirección (provincia, municipio, via, numero)' },
+        { error: 'Proporciona una dirección (ej: "Calle Gran Vía 28, Madrid"), referencia catastral, o los campos separados' },
         { status: 400 }
       );
     }
     
     if (!result) {
       return NextResponse.json(
-        { error: 'No se encontraron datos catastrales para la referencia proporcionada' },
+        { error: 'No se encontraron datos catastrales. Verifica la dirección o prueba con la referencia catastral.' },
         { status: 404 }
       );
     }
@@ -139,6 +231,14 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(result);
   } catch (error: any) {
     logger.error('[Catastro API]', error);
+    
+    if (error.name === 'AbortError' || error.message?.includes('timeout')) {
+      return NextResponse.json(
+        { error: 'El Catastro no respondió a tiempo. Inténtalo de nuevo en unos segundos.' },
+        { status: 504 }
+      );
+    }
+    
     return NextResponse.json(
       { error: 'Error consultando el catastro', message: error.message },
       { status: 500 }

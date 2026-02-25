@@ -159,6 +159,8 @@ export default function ValoracionIAPage() {
   const [searchTipoVia, setSearchTipoVia] = useState('CL');
   const [searchVia, setSearchVia] = useState('');
   const [searchNumero, setSearchNumero] = useState('');
+  const [searchDireccionLibre, setSearchDireccionLibre] = useState('');
+  const [searchMode, setSearchMode] = useState<'libre' | 'avanzada'>('libre');
 
   // Datos del formulario
   const [formData, setFormData] = useState({
@@ -238,13 +240,12 @@ export default function ValoracionIAPage() {
   // Búsqueda Catastro (Valoración de Mercado)
   const handleBuscarCatastro = async () => {
     const hasRC = refCatastral.trim().length >= 14 && refCatastral.trim().length <= 20;
-    const hasAddress =
+    const hasAdvancedAddress =
       searchProvincia.trim() && searchMunicipio.trim() && searchVia.trim() && searchNumero.trim();
+    const hasFreeAddress = searchDireccionLibre.trim().length >= 5;
 
-    if (!hasRC && !hasAddress) {
-      toast.error(
-        'Introduce referencia catastral (14-20 chars) o completa todos los campos de dirección'
-      );
+    if (!hasRC && !hasAdvancedAddress && !hasFreeAddress) {
+      toast.error('Introduce una dirección, referencia catastral o completa los campos de búsqueda avanzada');
       return;
     }
 
@@ -255,6 +256,9 @@ export default function ValoracionIAPage() {
       let url = '/api/catastro/consulta?';
       if (hasRC) {
         url += `rc=${encodeURIComponent(refCatastral.trim())}`;
+      } else if (hasFreeAddress && searchMode === 'libre') {
+        // Parsear dirección libre para extraer componentes
+        url += `direccionLibre=${encodeURIComponent(searchDireccionLibre.trim())}`;
       } else {
         url += `provincia=${encodeURIComponent(searchProvincia)}&municipio=${encodeURIComponent(searchMunicipio)}&tipoVia=${encodeURIComponent(searchTipoVia)}&via=${encodeURIComponent(searchVia)}&numero=${encodeURIComponent(searchNumero)}`;
       }
@@ -280,7 +284,24 @@ export default function ValoracionIAPage() {
       toast.success('Datos del Catastro cargados correctamente');
     } catch (error: any) {
       logger.error('Error consultando catastro:', error);
-      toast.error(error.message || 'No se encontraron datos catastrales');
+      
+      // Si la búsqueda de catastro falla, guardamos al menos la dirección para la valoración IA
+      if (searchMode === 'libre' && searchDireccionLibre.trim()) {
+        setCatastroData({
+          direccion: searchDireccionLibre.trim(),
+          municipio: '',
+          provincia: '',
+          codigoPostal: '',
+          uso: '',
+          superficieTotal: 0,
+          anoConstruccion: 0,
+          inmuebles: [],
+          _sinCatastro: true, // Marca que no hay datos de catastro
+        });
+        toast.warning('No se encontraron datos en el Catastro, pero puedes continuar con la valoración IA usando la dirección proporcionada.');
+      } else {
+        toast.error(error.message || 'No se encontraron datos catastrales para esa dirección');
+      }
     } finally {
       setBuscandoCatastro(false);
     }
@@ -312,9 +333,14 @@ export default function ValoracionIAPage() {
       let ciudad = '';
       let unitId: string | undefined;
 
-      if (activeTab === 'mercado' && catastroData) {
-        direccion = catastroData.direccion || '';
-        ciudad = catastroData.municipio || 'Madrid';
+      if (activeTab === 'mercado') {
+        if (catastroData) {
+          direccion = catastroData.direccion || searchDireccionLibre || '';
+          ciudad = catastroData.municipio || '';
+        } else if (searchDireccionLibre.trim()) {
+          direccion = searchDireccionLibre.trim();
+          ciudad = '';
+        }
       } else if (selectedAsset && selectedAsset !== 'manual' && assetType === 'unit') {
         const unit = units.find((u) => u.id === selectedAsset);
         direccion = unit?.building?.direccion || '';
@@ -707,7 +733,7 @@ export default function ValoracionIAPage() {
                       <Label>Referencia Catastral</Label>
                       <div className="flex gap-2">
                         <Input
-                          placeholder="Ej: 1234567VK1234N0001W (14-20 caracteres)"
+                          placeholder="Ej: 1234567VK1234N0001W"
                           value={refCatastral}
                           onChange={(e) => setRefCatastral(e.target.value)}
                         />
@@ -719,67 +745,104 @@ export default function ValoracionIAPage() {
                           {buscandoCatastro ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
                           ) : (
-                            'Consultar Catastro'
+                            'Consultar'
                           )}
                         </Button>
                       </div>
                     </div>
 
-                    <Separator />
+                    <div className="relative">
+                      <Separator />
+                      <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-2 text-xs text-muted-foreground">o busca por dirección</span>
+                    </div>
 
                     {/* Búsqueda por Dirección */}
-                    <div className="space-y-2">
-                      <Label>O busca por dirección</Label>
-                      <div className="grid grid-cols-2 gap-2">
-                        <Input
-                          placeholder="Provincia"
-                          value={searchProvincia}
-                          onChange={(e) => setSearchProvincia(e.target.value)}
-                        />
-                        <Input
-                          placeholder="Municipio"
-                          value={searchMunicipio}
-                          onChange={(e) => setSearchMunicipio(e.target.value)}
-                        />
-                        <Select value={searchTipoVia} onValueChange={setSearchTipoVia}>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="CL">Calle (CL)</SelectItem>
-                            <SelectItem value="AV">Avenida (AV)</SelectItem>
-                            <SelectItem value="PZ">Plaza (PZ)</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <Input
-                          placeholder="Nombre vía"
-                          value={searchVia}
-                          onChange={(e) => setSearchVia(e.target.value)}
-                        />
-                        <Input
-                          placeholder="Número"
-                          value={searchNumero}
-                          onChange={(e) => setSearchNumero(e.target.value)}
-                          className="col-span-2"
-                        />
+                    {searchMode === 'libre' ? (
+                      <div className="space-y-3">
+                        <div className="space-y-2">
+                          <Label>Dirección completa</Label>
+                          <div className="flex gap-2">
+                            <Input
+                              placeholder="Ej: Calle Gran Vía 28, Madrid"
+                              value={searchDireccionLibre}
+                              onChange={(e) => setSearchDireccionLibre(e.target.value)}
+                              onKeyDown={(e) => e.key === 'Enter' && handleBuscarCatastro()}
+                            />
+                            <Button
+                              onClick={handleBuscarCatastro}
+                              disabled={buscandoCatastro}
+                            >
+                              {buscandoCatastro ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <MapPin className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </div>
+                          <p className="text-xs text-muted-foreground">Escribe la dirección completa con número, ciudad y provincia</p>
+                        </div>
+                        <Button variant="ghost" size="sm" className="text-xs" onClick={() => setSearchMode('avanzada')}>
+                          Búsqueda avanzada por campos →
+                        </Button>
                       </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleBuscarCatastro}
-                        disabled={buscandoCatastro}
-                      >
-                        {buscandoCatastro ? (
-                          <Loader2 className="h-4 w-4 animate-spin mr-1" />
-                        ) : null}
-                        Buscar
-                      </Button>
-                    </div>
+                    ) : (
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-2 gap-2">
+                          <Input
+                            placeholder="Provincia (ej: Madrid)"
+                            value={searchProvincia}
+                            onChange={(e) => setSearchProvincia(e.target.value)}
+                          />
+                          <Input
+                            placeholder="Municipio (ej: Madrid)"
+                            value={searchMunicipio}
+                            onChange={(e) => setSearchMunicipio(e.target.value)}
+                          />
+                          <Select value={searchTipoVia} onValueChange={setSearchTipoVia}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="CL">Calle (CL)</SelectItem>
+                              <SelectItem value="AV">Avenida (AV)</SelectItem>
+                              <SelectItem value="PZ">Plaza (PZ)</SelectItem>
+                              <SelectItem value="PS">Paseo (PS)</SelectItem>
+                              <SelectItem value="CR">Carretera (CR)</SelectItem>
+                              <SelectItem value="CM">Camino (CM)</SelectItem>
+                              <SelectItem value="RD">Ronda (RD)</SelectItem>
+                              <SelectItem value="UR">Urbanización (UR)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Input
+                            placeholder="Nombre de la vía"
+                            value={searchVia}
+                            onChange={(e) => setSearchVia(e.target.value)}
+                          />
+                          <Input
+                            placeholder="Número"
+                            value={searchNumero}
+                            onChange={(e) => setSearchNumero(e.target.value)}
+                          />
+                          <Button
+                            onClick={handleBuscarCatastro}
+                            disabled={buscandoCatastro}
+                          >
+                            {buscandoCatastro ? (
+                              <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                            ) : null}
+                            Buscar en Catastro
+                          </Button>
+                        </div>
+                        <Button variant="ghost" size="sm" className="text-xs" onClick={() => setSearchMode('libre')}>
+                          ← Volver a búsqueda simple
+                        </Button>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
 
                 {/* Resultado Catastro */}
-                {catastroData && (
+                {catastroData && !catastroData._sinCatastro && (
                   <Card className="border-2 border-violet-200 bg-violet-50/50">
                     <CardHeader className="pb-2">
                       <CardTitle className="flex items-center justify-between text-base">
@@ -787,14 +850,14 @@ export default function ValoracionIAPage() {
                           <Building2 className="h-5 w-5 text-violet-600" />
                           Datos del Catastro
                         </span>
-                        <Badge variant="secondary">Datos del Catastro</Badge>
+                        <Badge variant="secondary">Catastro</Badge>
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2 text-sm">
                       <p className="font-medium">{catastroData.direccion}</p>
                       <div className="grid grid-cols-2 gap-2 text-muted-foreground">
-                        <span>{catastroData.superficieTotal} m²</span>
-                        <span>Uso: {catastroData.uso}</span>
+                        {catastroData.superficieTotal > 0 && <span>{catastroData.superficieTotal} m²</span>}
+                        {catastroData.uso && <span>Uso: {catastroData.uso}</span>}
                         {catastroData.anoConstruccion ? (
                           <span>Año: {catastroData.anoConstruccion}</span>
                         ) : null}
@@ -802,6 +865,23 @@ export default function ValoracionIAPage() {
                           <span>{catastroData.inmuebles.length} inmueble(s)</span>
                         ) : null}
                       </div>
+                    </CardContent>
+                  </Card>
+                )}
+                {catastroData && catastroData._sinCatastro && (
+                  <Card className="border-2 border-amber-200 bg-amber-50/50">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="flex items-center justify-between text-base">
+                        <span className="flex items-center gap-2">
+                          <MapPin className="h-5 w-5 text-amber-600" />
+                          Dirección configurada
+                        </span>
+                        <Badge variant="outline" className="text-amber-600 border-amber-300">Sin datos Catastro</Badge>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="text-sm">
+                      <p className="font-medium">{catastroData.direccion}</p>
+                      <p className="text-muted-foreground text-xs mt-1">Rellena los datos del inmueble manualmente para obtener la valoración IA</p>
                     </CardContent>
                   </Card>
                 )}
@@ -836,7 +916,7 @@ export default function ValoracionIAPage() {
                 <CardTitle className="flex items-center gap-2">
                   <Ruler className="h-5 w-5" />
                   Características del Inmueble
-                  {activeTab === 'mercado' && catastroData && (
+                  {activeTab === 'mercado' && catastroData && !catastroData._sinCatastro && (
                     <Badge variant="outline" className="text-xs">
                       Datos del Catastro
                     </Badge>
