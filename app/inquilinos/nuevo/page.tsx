@@ -287,7 +287,6 @@ export default function NuevoInquilinoPage() {
 
         {/* Header Section */}
         <div className="space-y-4">
-          <BackButton href="/inquilinos" label="Volver a Inquilinos" />
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Nuevo Inquilino</h1>
             <p className="text-muted-foreground">Registra un nuevo inquilino en el sistema</p>

@@ -156,7 +156,6 @@ export default function NuevaUnidadPage() {
 
         {/* Header Section */}
         <div className="space-y-4">
-          <BackButton href="/unidades" label="Volver a Unidades" />
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Nueva Unidad</h1>
             <p className="text-muted-foreground">Registra una nueva unidad en un edificio</p>

@@ -34,10 +34,16 @@ import { BackButton } from '@/components/ui/back-button';
 import { MobileFormWizard, FormStep } from '@/components/ui/mobile-form-wizard';
 import { Badge } from '@/components/ui/badge';
 
+interface Building {
+  id: string;
+  nombre: string;
+}
+
 interface Unit {
   id: string;
   numero: string;
-  building: { nombre: string };
+  buildingId: string;
+  building: { id: string; nombre: string };
 }
 
 interface Tenant {
@@ -59,6 +65,9 @@ export default function NuevoContratoPage() {
   const router = useRouter();
   const { data: session, status } = useSession() || {};
   const [isLoading, setIsLoading] = useState(false);
+  const [buildings, setBuildings] = useState<Building[]>([]);
+  const [selectedBuildingId, setSelectedBuildingId] = useState<string>('');
+  const [allUnits, setAllUnits] = useState<Unit[]>([]);
   const [units, setUnits] = useState<Unit[]>([]);
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [documents, setDocuments] = useState<UploadedDocument[]>([]);
@@ -149,18 +158,29 @@ export default function NuevoContratoPage() {
     const fetchData = async () => {
       try {
         const [unitsRes, tenantsRes] = await Promise.all([
-          fetch('/api/units?estado=disponible'),
+          fetch('/api/units?limit=500'),
           fetch('/api/tenants'),
         ]);
 
         if (unitsRes.ok) {
           const unitsData = await unitsRes.json();
-          setUnits(unitsData);
+          const unitsList = Array.isArray(unitsData) ? unitsData : (unitsData?.data || []);
+          setAllUnits(unitsList);
+          setUnits(unitsList);
+          
+          // Extract unique buildings from units
+          const buildingMap = new Map<string, Building>();
+          unitsList.forEach((u: Unit) => {
+            if (u.building?.id) {
+              buildingMap.set(u.building.id, { id: u.building.id, nombre: u.building.nombre });
+            }
+          });
+          setBuildings(Array.from(buildingMap.values()).sort((a, b) => a.nombre.localeCompare(b.nombre)));
         }
 
         if (tenantsRes.ok) {
           const tenantsData = await tenantsRes.json();
-          setTenants(tenantsData);
+          setTenants(Array.isArray(tenantsData) ? tenantsData : (tenantsData?.data || []));
         }
       } catch (error) {
         logger.error('Error fetching data:', error);
@@ -171,6 +191,17 @@ export default function NuevoContratoPage() {
       fetchData();
     }
   }, [status]);
+
+  // Filtrar unidades cuando se selecciona edificio
+  const handleBuildingSelect = (buildingId: string) => {
+    setSelectedBuildingId(buildingId === 'all' ? '' : buildingId);
+    setFormData(prev => ({ ...prev, unitId: '' })); // Reset unit selection
+    if (buildingId && buildingId !== 'all') {
+      setUnits(allUnits.filter(u => u.building?.id === buildingId || u.buildingId === buildingId));
+    } else {
+      setUnits(allUnits);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -264,7 +295,6 @@ export default function NuevoContratoPage() {
 
         {/* Header Section */}
         <div className="space-y-4">
-          <BackButton href="/contratos" label="Volver a Contratos" />
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Nuevo Contrato</h1>
             <p className="text-muted-foreground">Crea un nuevo contrato de arrendamiento</p>
@@ -281,6 +311,27 @@ export default function NuevoContratoPage() {
                 description: 'Selecciona la unidad, inquilino y tipo de contrato',
                 fields: (
                   <div className="space-y-4">
+                    {/* Edificio (filtro) */}
+                    <div className="space-y-2">
+                      <Label htmlFor="buildingId">Edificio</Label>
+                      <Select
+                        value={selectedBuildingId}
+                        onValueChange={handleBuildingSelect}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Todos los edificios" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Todos los edificios</SelectItem>
+                          {buildings.map((b) => (
+                            <SelectItem key={b.id} value={b.id}>
+                              {b.nombre}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
                     {/* Unidad */}
                     <div className="space-y-2">
                       <Label htmlFor="unitId">Unidad *</Label>
