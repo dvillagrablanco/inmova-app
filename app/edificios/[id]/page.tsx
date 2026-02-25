@@ -28,6 +28,7 @@ import {
   FileText,
   Wrench,
 } from 'lucide-react';
+import { PropertyMap } from '@/components/property/PropertyMap';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -723,6 +724,17 @@ export default function EdificioDetallesPage() {
                 </Button>
               </CardContent>
             </Card>
+
+            {/* Mapa de Ubicación */}
+            {building.direccion && (
+              <PropertyMap
+                address={building.direccion}
+                city={building.ciudad || building.municipio || ''}
+                latitude={building.latitud}
+                longitude={building.longitud}
+                showNearbyPoints={false}
+              />
+            )}
 
             {/* Etiquetas */}
             {building.etiquetas && building.etiquetas.length > 0 && (

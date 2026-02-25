@@ -1,10 +1,9 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { MapPin, Loader2, AlertCircle } from 'lucide-react';
+import { MapPin, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { MapboxService } from '@/lib/mapbox-service';
 
 interface PropertyMapProps {
   address: string;
@@ -14,7 +13,10 @@ interface PropertyMapProps {
   showNearbyPoints?: boolean;
 }
 
-// Simulación de mapa sin Mapbox (para evitar dependencias)
+/**
+ * Mapa de ubicación de propiedad usando Google Maps Embed (gratuito, sin API key).
+ * Muestra el mapa real con la dirección de la propiedad.
+ */
 export function PropertyMap({
   address,
   city,
@@ -22,83 +24,20 @@ export function PropertyMap({
   longitude,
   showNearbyPoints = true,
 }: PropertyMapProps) {
-  const [loading, setLoading] = useState(true);
-  const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [iframeLoaded, setIframeLoaded] = useState(false);
 
-  useEffect(() => {
-    const geocodeAddress = async () => {
-      // Si ya tenemos coordenadas, usarlas
-      if (latitude && longitude) {
-        setCoordinates({ lat: latitude, lng: longitude });
-        setLoading(false);
-        return;
-      }
+  const fullAddress = `${address}, ${city}, España`;
+  const encodedAddress = encodeURIComponent(fullAddress);
 
-      // Usar MapboxService para geocoding (real o simulado)
-      try {
-        const result = await MapboxService.geocodeAddress(address, city);
-        
-        if (result) {
-          setCoordinates(result.coordinates);
-        } else {
-          setError('No se pudo encontrar la ubicación');
-        }
-      } catch (err) {
-        console.error('Geocoding error:', err);
-        setError('Error al buscar la ubicación');
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Google Maps Embed URL (gratuito, sin API key requerida para uso básico)
+  // Si hay coordenadas, las usamos; si no, buscamos por dirección
+  const mapSrc = latitude && longitude
+    ? `https://maps.google.com/maps?q=${latitude},${longitude}&z=16&output=embed`
+    : `https://maps.google.com/maps?q=${encodedAddress}&z=16&output=embed`;
 
-    geocodeAddress();
-  }, [address, city, latitude, longitude]);
-
-  const openInGoogleMaps = () => {
-    const query = encodeURIComponent(`${address}, ${city}`);
-    window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
-  };
-
-  if (loading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MapPin className="h-5 w-5" />
-            Ubicación
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (error) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MapPin className="h-5 w-5" />
-            Ubicación
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="aspect-video bg-muted rounded-lg flex flex-col items-center justify-center gap-3 text-muted-foreground">
-            <AlertCircle className="h-8 w-8" />
-            <p className="text-sm">{error}</p>
-            <Button variant="outline" onClick={openInGoogleMaps}>
-              Ver en Google Maps
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+  const googleMapsLink = latitude && longitude
+    ? `https://www.google.com/maps?q=${latitude},${longitude}`
+    : `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
 
   return (
     <Card>
@@ -109,95 +48,48 @@ export function PropertyMap({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Mapa simulado (en producción sería Mapbox GL JS) */}
-        <div className="aspect-video bg-gradient-to-br from-green-50 to-blue-50 dark:from-green-950 dark:to-blue-950 rounded-lg relative overflow-hidden">
-          {/* Simulación de mapa */}
-          <div className="absolute inset-0 opacity-20">
-            <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                  <path
-                    d="M 40 0 L 0 0 0 40"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1"
-                  />
-                </pattern>
-              </defs>
-              <rect width="100%" height="100%" fill="url(#grid)" />
-            </svg>
-          </div>
-
-          {/* Marcador central */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-            <div className="relative">
-              {/* Pin */}
-              <div className="w-12 h-12 bg-primary rounded-full shadow-lg flex items-center justify-center">
-                <MapPin className="h-6 w-6 text-primary-foreground fill-current" />
-              </div>
-              {/* Pulso */}
-              <div className="absolute inset-0 w-12 h-12 bg-primary rounded-full animate-ping opacity-30" />
+        {/* Mapa real de Google Maps */}
+        <div className="aspect-video rounded-lg overflow-hidden relative bg-muted">
+          {!iframeLoaded && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="animate-pulse text-muted-foreground text-sm">Cargando mapa...</div>
             </div>
-          </div>
-
-          {/* Info overlay */}
-          <div className="absolute bottom-4 left-4 right-4 bg-background/90 backdrop-blur p-3 rounded-lg shadow-lg">
-            <p className="text-sm font-medium flex items-center gap-2">
-              <MapPin className="h-4 w-4" />
-              {address}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">{city}</p>
-            {coordinates && (
-              <p className="text-xs text-muted-foreground mt-1">
-                {coordinates.lat.toFixed(6)}, {coordinates.lng.toFixed(6)}
-              </p>
-            )}
-          </div>
+          )}
+          <iframe
+            src={mapSrc}
+            width="100%"
+            height="100%"
+            style={{ border: 0 }}
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            onLoad={() => setIframeLoaded(true)}
+            className="absolute inset-0"
+          />
         </div>
 
-        {/* Acciones */}
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={openInGoogleMaps} className="flex-1">
-            <MapPin className="mr-2 h-4 w-4" />
-            Abrir en Google Maps
+        {/* Dirección + acciones */}
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start gap-2 text-sm text-muted-foreground min-w-0">
+            <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
+            <div>
+              <p className="font-medium text-foreground">{address}</p>
+              <p>{city}</p>
+              {latitude && longitude && (
+                <p className="text-xs mt-1">{latitude.toFixed(6)}, {longitude.toFixed(6)}</p>
+              )}
+            </div>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => window.open(googleMapsLink, '_blank')}
+            className="shrink-0"
+          >
+            <ExternalLink className="mr-2 h-4 w-4" />
+            Google Maps
           </Button>
         </div>
-
-        {/* Puntos de interés cercanos (simulado) */}
-        {showNearbyPoints && (
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium">Puntos de Interés Cercanos</h4>
-            <div className="space-y-2 text-sm">
-              <div className="flex items-center justify-between p-2 rounded bg-muted/50">
-                <span className="flex items-center gap-2">
-                  🏪 Supermercado
-                </span>
-                <span className="text-muted-foreground">~300m</span>
-              </div>
-              <div className="flex items-center justify-between p-2 rounded bg-muted/50">
-                <span className="flex items-center gap-2">
-                  🚇 Metro
-                </span>
-                <span className="text-muted-foreground">~500m</span>
-              </div>
-              <div className="flex items-center justify-between p-2 rounded bg-muted/50">
-                <span className="flex items-center gap-2">
-                  🏥 Centro de Salud
-                </span>
-                <span className="text-muted-foreground">~800m</span>
-              </div>
-              <div className="flex items-center justify-between p-2 rounded bg-muted/50">
-                <span className="flex items-center gap-2">
-                  🏫 Colegio
-                </span>
-                <span className="text-muted-foreground">~1.2km</span>
-              </div>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              * Distancias aproximadas. En producción se calcularían con geolocalización real.
-            </p>
-          </div>
-        )}
       </CardContent>
     </Card>
   );

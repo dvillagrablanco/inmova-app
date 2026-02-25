@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { PropertyMap } from '@/components/property/PropertyMap';
 import {
   Home,
   ArrowLeft,
@@ -526,6 +527,15 @@ export default function UnitDetailPage() {
                     </Button>
                   </CardContent>
                 </Card>
+              )}
+
+              {/* Mapa de Ubicación */}
+              {unit.building?.direccion && (
+                <PropertyMap
+                  address={unit.building.direccion}
+                  city={unit.building.ciudad || ''}
+                  showNearbyPoints={false}
+                />
               )}
 
               {/* Fechas */}
