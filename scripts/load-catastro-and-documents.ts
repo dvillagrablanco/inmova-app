@@ -19,12 +19,13 @@ import * as path from 'path';
 const DRY_RUN = !process.argv.includes('--apply');
 const prisma = new PrismaClient();
 
-const COMPANIES = ['rovida-sl', 'viroda-inversiones'];
+// IDs reales de la BD de producción
+const COMPANIES = ['cef19f55f7b6ce0637d5ffb53', 'cmkctneuh0001nokn7nvhuweq'];
 
 // Google Drive carpetas de seguros
 const SEGUROS_DRIVE_LINKS: Record<string, string> = {
-  'rovida-sl': 'https://drive.google.com/drive/folders/1tdvsqZ2d5lJZTx8bsMIY4Sk1BL0JGC8D',
-  'viroda-inversiones': 'https://drive.google.com/drive/folders/1tdvsqZ2d5lJZTx8bsMIY4Sk1BL0JGC8D',
+  'cef19f55f7b6ce0637d5ffb53': 'https://drive.google.com/drive/folders/1tdvsqZ2d5lJZTx8bsMIY4Sk1BL0JGC8D',
+  'cmkctneuh0001nokn7nvhuweq': 'https://drive.google.com/drive/folders/1tdvsqZ2d5lJZTx8bsMIY4Sk1BL0JGC8D',
 };
 
 // ============================================================================
@@ -313,7 +314,7 @@ async function main() {
 
       if (!hasEscrituraDoc) {
         // Buscar escritura que corresponda a este edificio
-        const empresaKey = companyId === 'rovida-sl' ? 'rovida' : 'viroda';
+        const empresaKey = companyId === 'cef19f55f7b6ce0637d5ffb53' ? 'rovida' : 'viroda';
         const matchingEscritura = escrituras.find(e => {
           if (e.empresa !== empresaKey && e.empresa !== 'ambas') return false;
           if (!e.edificio_app) return false;

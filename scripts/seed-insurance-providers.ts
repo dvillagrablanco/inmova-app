@@ -14,8 +14,9 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-const ROVIDA_COMPANY_ID = 'rovida-sl';
-const VIRODA_COMPANY_ID = 'viroda-inversiones';
+// IDs reales de la BD de producción
+const ROVIDA_COMPANY_ID = 'cef19f55f7b6ce0637d5ffb53';
+const VIRODA_COMPANY_ID = 'cmkctneuh0001nokn7nvhuweq';
 
 interface ProviderData {
   nombre: string;
