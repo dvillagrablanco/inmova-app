@@ -223,19 +223,13 @@ async function main() {
           console.log(`  │     Municipio: ${catastro.municipio}, ${catastro.provincia} (${catastro.codigoPostal})`);
           console.log(`  │     Año: ${catastro.anoConstruccion} | Fincas: ${catastro.fincas.length}`);
 
-          // Actualizar building (campo es anoConstructor, no anoConstruccion)
-          if (!DRY_RUN) {
-            const updateData: Record<string, any> = {};
-            if (catastro.anoConstruccion > 1800) updateData.anoConstructor = catastro.anoConstruccion;
-            if (catastro.codigoPostal) updateData.codigoPostal = catastro.codigoPostal;
-            
-            if (Object.keys(updateData).length > 0) {
-              await prisma.building.update({
-                where: { id: building.id },
-                data: updateData,
-              });
-              totalCatastroUpdated++;
-            }
+          // Actualizar building (campo es anoConstructor; Building no tiene codigoPostal)
+          if (!DRY_RUN && catastro.anoConstruccion > 1800) {
+            await prisma.building.update({
+              where: { id: building.id },
+              data: { anoConstructor: catastro.anoConstruccion },
+            });
+            totalCatastroUpdated++;
           }
 
           // Actualizar unidades sin ref catastral
