@@ -44,6 +44,8 @@ import {
   AlertTriangle,
   RefreshCw,
   FileText,
+  Paperclip,
+  X,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import logger from '@/lib/logger';
@@ -178,73 +180,173 @@ export default function AIAssistantPage() {
     });
   };
 
+  const [attachedFile, setAttachedFile] = useState<File | null>(null);
+
+  const handleFileAttach = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setAttachedFile(file);
+      toast.success(`Archivo adjuntado: ${file.name}`);
+    }
+  };
+
   const sendMessage = async () => {
-    if (!inputMessage.trim() || isTyping || !selectedAgent) return;
+    if ((!inputMessage.trim() && !attachedFile) || isTyping || !selectedAgent) return;
+
+    const displayContent = attachedFile
+      ? `${inputMessage || 'Analiza este documento'}\n📎 ${attachedFile.name}`
+      : inputMessage;
 
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
-      content: inputMessage,
+      content: displayContent,
       timestamp: new Date(),
     };
 
     setMessages((prev) => [...prev, userMessage]);
+    const currentInput = inputMessage;
+    const currentFile = attachedFile;
     setInputMessage('');
+    setAttachedFile(null);
     setIsTyping(true);
 
     try {
-      const conversationHistory = messages.map((m) => ({
-        role: m.role,
-        content: m.content,
-      }));
+      // If there's a file, route to the appropriate processing API
+      if (currentFile) {
+        const formData = new FormData();
+        formData.append('file', currentFile);
+        if (currentInput) formData.append('text', currentInput);
+        formData.append('context', `Agente: ${selectedAgent.name}. ${currentInput || 'Analiza este documento.'}`);
 
-      const response = await fetch('/api/agents/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: inputMessage,
-          conversationId: `conv_${Date.now()}`,
-          preferredAgent: selectedAgent.type,
-          conversationHistory,
-        }),
-      });
+        // Detect document type by filename and agent
+        const fname = currentFile.name.toLowerCase();
+        const isInvestmentAgent = selectedAgent.type === 'financial_analysis';
+        const isEscritura = fname.includes('escritura');
+        const isContrato = fname.includes('contrato') || fname.includes('arrendamiento') || fname.includes('adenda') || fname.includes('anexo');
+        const isPoliza = fname.includes('poliza') || fname.includes('póliza') || fname.includes('seguro');
+        const isProposal = isInvestmentAgent && !isEscritura && !isContrato && !isPoliza;
 
-      if (!response.ok) throw new Error('Error en la respuesta');
+        let apiUrl = '/api/ai/document-analysis';
+        if (isEscritura) apiUrl = '/api/ai/process-escritura';
+        else if (isContrato) apiUrl = '/api/ai/process-contract';
+        else if (isPoliza) apiUrl = '/api/ai/process-insurance';
+        else if (isProposal) apiUrl = '/api/investment/analysis/ai-analyze-proposal';
 
-      const data = await response.json();
+        const fileResponse = await fetch(apiUrl, { method: 'POST', body: formData });
 
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: data.response || data.message || 'Sin respuesta del agente.',
-        timestamp: new Date(),
-        actionExecuted: data.type === 'action_executed',
-        actionType: data.action?.action,
-        agentType: data.agentType || selectedAgent.type,
-      };
+        if (!fileResponse.ok) {
+          const err = await fileResponse.json().catch(() => ({ error: 'Error procesando documento' }));
+          throw new Error(err.error || 'Error procesando documento');
+        }
 
-      setMessages((prev) => [...prev, assistantMessage]);
+        const fileData = await fileResponse.json();
 
-      if (data.type === 'action_executed' && data.action?.success) {
-        toast.success('✅ Acción ejecutada automáticamente');
-        setStats((prev) => ({
-          ...prev,
-          actionsExecuted: prev.actionsExecuted + 1,
+        // Build response message from the API result
+        let responseContent = '';
+        const data = fileData.data || fileData;
+
+        if (data.extracted || data.extractedData) {
+          const ext = data.extracted || data.extractedData;
+          responseContent = `📄 **Documento procesado: ${currentFile.name}**\n\n`;
+
+          if (ext.resumen) responseContent += ext.resumen + '\n\n';
+          if (ext.tipo_escritura) responseContent += `**Tipo:** ${ext.tipo_escritura}\n`;
+          if (ext.tipo_documento) responseContent += `**Tipo:** ${ext.tipo_documento}\n`;
+          if (ext.tipo_contrato) responseContent += `**Contrato:** ${ext.tipo_contrato}\n`;
+          if (ext.precio_total) responseContent += `**Precio:** ${ext.precio_total.toLocaleString('es-ES')}€\n`;
+          if (ext.renta_mensual) responseContent += `**Renta:** ${ext.renta_mensual.toLocaleString('es-ES')}€/mes\n`;
+          if (ext.arrendatario?.nombre) responseContent += `**Inquilino:** ${ext.arrendatario.nombre}\n`;
+          if (ext.comprador?.nombre) responseContent += `**Comprador:** ${ext.comprador.nombre}\n`;
+          if (ext.vendedor?.nombre) responseContent += `**Vendedor:** ${ext.vendedor.nombre}\n`;
+          if (ext.inmueble?.direccion) responseContent += `**Dirección:** ${ext.inmueble.direccion}\n`;
+          if (ext.edificio?.nombre) responseContent += `**Edificio:** ${ext.edificio.nombre}\n`;
+          if (ext.unidad) responseContent += `**Unidad:** ${ext.unidad}\n`;
+
+          if (ext.analisisIndependiente?.conclusion) {
+            responseContent += `\n**Veredicto:** ${ext.analisisIndependiente.conclusion}\n`;
+            if (ext.analisisIndependiente.resumenEjecutivo) responseContent += ext.analisisIndependiente.resumenEjecutivo + '\n';
+          }
+
+          if (ext.analisis_ia?.recomendaciones?.length) {
+            responseContent += '\n**Recomendaciones:**\n' + ext.analisis_ia.recomendaciones.map((r: string) => `• ${r}`).join('\n');
+          }
+
+          if (ext.fincas?.length) responseContent += `\n\n**Fincas:** ${ext.fincas.length} encontradas`;
+          if (ext.coberturas?.length) responseContent += `\n**Coberturas:** ${ext.coberturas.length} detectadas`;
+        } else if (data.rawAnalysis) {
+          responseContent = data.rawAnalysis;
+        } else if (data.analysis) {
+          responseContent = typeof data.analysis === 'string' ? data.analysis : JSON.stringify(data.analysis, null, 2);
+        } else {
+          responseContent = 'Documento procesado. ' + JSON.stringify(data).substring(0, 500);
+        }
+
+        if (data.actions?.length) {
+          responseContent += '\n\n**Acciones realizadas:**\n' + data.actions.map((a: string) => `✓ ${a}`).join('\n');
+        }
+
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: responseContent,
+          timestamp: new Date(),
+          agentType: selectedAgent.type,
+        };
+
+        setMessages((prev) => [...prev, assistantMessage]);
+      } else {
+        // Text-only message: use the agents/chat API
+        const conversationHistory = messages.map((m) => ({
+          role: m.role,
+          content: m.content,
         }));
+
+        const response = await fetch('/api/agents/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: currentInput,
+            conversationId: `conv_${Date.now()}`,
+            preferredAgent: selectedAgent.type,
+            conversationHistory,
+          }),
+        });
+
+        if (!response.ok) throw new Error('Error en la respuesta');
+
+        const data = await response.json();
+
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: data.response || data.message || 'Sin respuesta del agente.',
+          timestamp: new Date(),
+          actionExecuted: data.type === 'action_executed',
+          actionType: data.action?.action,
+          agentType: data.agentType || selectedAgent.type,
+        };
+
+        setMessages((prev) => [...prev, assistantMessage]);
+
+        if (data.type === 'action_executed' && data.action?.success) {
+          toast.success('Acción ejecutada automáticamente');
+          setStats((prev) => ({
+            ...prev,
+            actionsExecuted: prev.actionsExecuted + 1,
+          }));
+        }
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error enviando mensaje:', error);
-      toast.error('Error al procesar tu mensaje');
+      toast.error(error.message || 'Error al procesar tu mensaje');
 
       setMessages((prev) => [
         ...prev,
         {
           id: (Date.now() + 1).toString(),
           role: 'assistant',
-          content:
-            'Lo siento, hubo un error al procesar tu mensaje. Por favor, inténtalo de nuevo.',
+          content: `Error: ${error.message || 'Hubo un error al procesar tu mensaje. Inténtalo de nuevo.'}`,
           timestamp: new Date(),
         },
       ]);
@@ -590,7 +692,33 @@ export default function AIAssistantPage() {
                   </ScrollArea>
 
                   <div className="border-t p-4">
+                    {attachedFile && (
+                      <div className="flex items-center gap-2 mb-2 px-2 py-1 bg-blue-50 rounded-lg text-sm text-blue-700">
+                        <Paperclip className="h-3 w-3" />
+                        <span className="flex-1 truncate">{attachedFile.name}</span>
+                        <button onClick={() => setAttachedFile(null)} className="hover:text-red-500">
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    )}
                     <div className="flex gap-2">
+                      <input
+                        type="file"
+                        accept=".pdf,.csv,.txt,.xlsx,.jpg,.jpeg,.png,.docx"
+                        className="hidden"
+                        id="chat-file-input"
+                        onChange={handleFileAttach}
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="shrink-0"
+                        onClick={() => document.getElementById('chat-file-input')?.click()}
+                        disabled={isTyping || !selectedAgent}
+                        title="Adjuntar documento (PDF, imagen, Excel)"
+                      >
+                        <Paperclip className="h-4 w-4" />
+                      </Button>
                       <Input
                         placeholder={selectedAgent 
                           ? `Pregunta a ${selectedAgent.name}...` 
@@ -603,7 +731,7 @@ export default function AIAssistantPage() {
                       />
                       <Button
                         onClick={sendMessage}
-                        disabled={!inputMessage.trim() || isTyping || !selectedAgent}
+                        disabled={(!inputMessage.trim() && !attachedFile) || isTyping || !selectedAgent}
                         size="icon"
                       >
                         {isTyping ? (
