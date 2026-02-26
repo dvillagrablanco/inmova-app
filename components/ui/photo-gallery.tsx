@@ -8,8 +8,8 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 interface PhotoGalleryProps {
-  images: string[];
-  onImagesChange: (images: string[]) => void;
+  images?: string[];
+  onImagesChange?: (images: string[]) => void;
   folder?: string;
   title?: string;
   description?: string;
@@ -19,8 +19,8 @@ interface PhotoGalleryProps {
 }
 
 export function PhotoGallery({
-  images,
-  onImagesChange,
+  images = [],
+  onImagesChange = () => {},
   folder = 'properties',
   title = 'Fotos del activo',
   description = 'Sube fotos para documentar el estado del inmueble',
