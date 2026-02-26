@@ -17,8 +17,10 @@ import {
   Building2, Plus, Trash2, Calculator, Euro, TrendingUp, Landmark,
   ArrowUpRight, ArrowDownRight, Table2, Save, ParkingCircle, Store, Home,
   Brain, Upload, FileText, Sparkles, Loader2, Copy, BarChart3,
+  MessageSquare, Send, AlertTriangle, CheckCircle2, XCircle, Shield,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import ReactMarkdown from 'react-markdown';
 
 interface RentRollEntry {
   tipo: 'vivienda' | 'garaje' | 'local' | 'trastero' | 'oficina' | 'otro';
@@ -59,6 +61,15 @@ export default function AnalisisInversionPage() {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiValuation, setAiValuation] = useState<any>(null);
   const [aiText, setAiText] = useState('');
+
+  // Análisis crítico de propuesta de broker
+  const [brokerAnalysis, setBrokerAnalysis] = useState<any>(null);
+  const [brokerLoading, setBrokerLoading] = useState(false);
+
+  // Chat de inversiones
+  const [chatMessages, setChatMessages] = useState<{role: 'user' | 'assistant'; content: string}[]>([]);
+  const [chatInput, setChatInput] = useState('');
+  const [chatLoading, setChatLoading] = useState(false);
 
   // Form state
   const [nombre, setNombre] = useState('');
@@ -290,6 +301,92 @@ export default function AnalisisInversionPage() {
     }
   };
 
+  const handleBrokerAnalysis = async (file?: File) => {
+    setBrokerLoading(true);
+    try {
+      const formData = new FormData();
+      if (file) formData.append('file', file);
+      if (aiText) formData.append('text', aiText);
+      formData.append('context', 'Propuesta de broker para grupo patrimonial familiar. Analizar críticamente.');
+
+      const res = await fetch('/api/investment/analysis/ai-analyze-proposal', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        toast.error(err.error || 'Error en análisis de propuesta');
+        return;
+      }
+
+      const data = await res.json();
+      const extracted = data.data;
+      setBrokerAnalysis(extracted);
+
+      if (extracted.rentRoll?.length > 0) {
+        setRentRoll(extracted.rentRoll);
+        toast.success(`${extracted.rentRoll.length} unidades extraídas`);
+      }
+      if (extracted.datosActivo) {
+        const d = extracted.datosActivo;
+        if (d.nombre) setNombre(d.nombre);
+        if (d.direccion) setDireccion(d.direccion);
+        if (d.askingPrice) setAskingPrice(d.askingPrice);
+        if (d.ibiAnual) setIbiAnual(d.ibiAnual);
+        if (d.comunidadMensual) setComunidadMensual(d.comunidadMensual);
+        if (d.seguroAnual) setSeguroAnual(d.seguroAnual);
+      }
+    } catch {
+      toast.error('Error de conexión con IA');
+    } finally {
+      setBrokerLoading(false);
+    }
+  };
+
+  const handleChatSend = async () => {
+    if (!chatInput.trim() || chatLoading) return;
+    const userMsg = chatInput.trim();
+    setChatInput('');
+    setChatMessages(prev => [...prev, { role: 'user', content: userMsg }]);
+    setChatLoading(true);
+
+    try {
+      const attachedAnalysis = results ? {
+        nombre, direccion, askingPrice,
+        rentRoll: rentRoll.slice(0, 30),
+        yieldBruto: results.yieldBruto,
+        yieldNeto: results.yieldNeto,
+        cashOnCash: results.cashOnCash,
+        noiAnual: results.noiAnual,
+        cashFlowAnualPreTax: results.cashFlowAnualPreTax,
+      } : null;
+
+      const res = await fetch('/api/ai/investment-chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: userMsg,
+          conversationHistory: chatMessages.slice(-20),
+          attachedAnalysis,
+        }),
+      });
+
+      if (!res.ok) throw new Error('Error en chat');
+      const data = await res.json();
+      setChatMessages(prev => [...prev, { role: 'assistant', content: data.data.reply }]);
+
+      if (data.data.extractedData?.rentRoll?.length > 0) {
+        setRentRoll(data.data.extractedData.rentRoll);
+        toast.success('Rent roll extraído del chat');
+      }
+    } catch {
+      setChatMessages(prev => [...prev, { role: 'assistant', content: 'Error de conexión. Intenta de nuevo.' }]);
+    } finally {
+      setChatLoading(false);
+    }
+  };
+
   const handleCalcular = async () => {
     if (!nombre || askingPrice <= 0 || rentRoll.length === 0) {
       toast.error('Completa nombre, precio y al menos 1 unidad');
@@ -345,13 +442,16 @@ export default function AnalisisInversionPage() {
         <Tabs defaultValue="datos" className="space-y-4">
           <TabsList className="flex flex-wrap gap-1">
             <TabsTrigger value="guardados" className="gap-1 text-xs"><Save className="h-3 w-3" /> Guardados</TabsTrigger>
-            <TabsTrigger value="ia" className="gap-1 text-xs"><Brain className="h-3 w-3" /> IA</TabsTrigger>
+            <TabsTrigger value="broker" className="gap-1 text-xs"><Shield className="h-3 w-3" /> Analizar Propuesta</TabsTrigger>
+            <TabsTrigger value="chat" className="gap-1 text-xs"><MessageSquare className="h-3 w-3" /> Chat IA</TabsTrigger>
+            <TabsTrigger value="ia" className="gap-1 text-xs"><Brain className="h-3 w-3" /> Extracción</TabsTrigger>
             <TabsTrigger value="datos" className="text-xs">Activo</TabsTrigger>
             <TabsTrigger value="rentroll" className="text-xs">Rent Roll</TabsTrigger>
             <TabsTrigger value="gastos" className="text-xs">Gastos</TabsTrigger>
-            <TabsTrigger value="financiacion" className="text-xs">Financiacion</TabsTrigger>
+            <TabsTrigger value="financiacion" className="text-xs">Financiación</TabsTrigger>
             {results && <TabsTrigger value="resultados" className="text-xs">Resultados</TabsTrigger>}
             {results && <TabsTrigger value="sensibilidad" className="text-xs">Sensibilidad</TabsTrigger>}
+            {brokerAnalysis?.analisisCritico && <TabsTrigger value="due-diligence" className="text-xs gap-1"><AlertTriangle className="h-3 w-3" /> Due Diligence</TabsTrigger>}
           </TabsList>
 
           {/* TAB: Analisis guardados */}
@@ -393,6 +493,350 @@ export default function AnalisisInversionPage() {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* TAB: Analizar Propuesta de Broker */}
+          <TabsContent value="broker">
+            <div className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Shield className="h-5 w-5 text-amber-600" />
+                    Analizar Propuesta de Broker
+                  </CardTitle>
+                  <CardDescription>
+                    Pega o sube la propuesta del broker con el rent roll. La IA extraerá los datos,
+                    cuestionará la información facilitada, contrastará con mercado y generará un análisis
+                    independiente con recomendación de compra/negociación/descarte.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label className="text-sm font-medium">Subir propuesta del broker</Label>
+                    <div className="mt-2 border-2 border-dashed border-amber-300 rounded-lg p-6 text-center hover:border-amber-400 transition-colors bg-amber-50/30">
+                      <input
+                        type="file"
+                        accept=".pdf,.csv,.txt,.xlsx,.jpg,.jpeg,.png"
+                        className="hidden"
+                        id="broker-file-upload"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleBrokerAnalysis(file);
+                        }}
+                        disabled={brokerLoading}
+                      />
+                      <label htmlFor="broker-file-upload" className="cursor-pointer">
+                        {brokerLoading ? (
+                          <div className="flex flex-col items-center gap-2">
+                            <Loader2 className="h-8 w-8 text-amber-600 animate-spin" />
+                            <span className="text-sm text-amber-600 font-medium">Analizando propuesta críticamente...</span>
+                            <span className="text-xs text-amber-500">Extrayendo rent roll, cuestionando datos, calculando yields reales...</span>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center gap-2">
+                            <Upload className="h-8 w-8 text-amber-500" />
+                            <span className="text-sm text-amber-700 font-medium">PDF, Excel, imagen o texto del broker</span>
+                            <span className="text-xs text-gray-500">Teaser comercial, rent roll, ficha del activo</span>
+                          </div>
+                        )}
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
+                    <div className="relative flex justify-center text-xs"><span className="bg-white px-2 text-gray-500">o pega el contenido</span></div>
+                  </div>
+
+                  <Textarea
+                    value={aiText}
+                    onChange={(e) => setAiText(e.target.value)}
+                    placeholder="Pega aquí la propuesta del broker, el rent roll, el teaser comercial...
+
+Ejemplo:
+ACTIVO: Edificio residencial Calle Goya 45, Madrid
+Precio: 2.200.000 EUR | Yield: 5,2%
+
+RENT ROLL:
+- 1ºA: 85m2, 3 hab, 1.100€/mes (alquilado hasta dic 2026)
+- 1ºB: 62m2, 2 hab, 850€/mes (alquilado)
+- 2ºA: 85m2, 3 hab, 1.050€/mes (alquilado)
+- 2ºB: 62m2, 2 hab, VACÍO (estimado 900€/mes)
+- Local: 120m2, 2.500€/mes (alquilado)
+- 2 Garajes: 150€/mes c/u
+
+IBI: 8.500€/año | Comunidad: 350€/mes
+Estado: Reformado 2018"
+                    rows={10}
+                    disabled={brokerLoading}
+                  />
+                  <Button
+                    className="w-full bg-amber-600 hover:bg-amber-700"
+                    disabled={brokerLoading || !aiText.trim()}
+                    onClick={() => handleBrokerAnalysis()}
+                  >
+                    {brokerLoading ? (
+                      <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Analizando propuesta...</>
+                    ) : (
+                      <><Shield className="h-4 w-4 mr-2" /> Analizar propuesta críticamente</>
+                    )}
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Resultado del análisis crítico */}
+              {brokerAnalysis?.analisisIndependiente && (
+                <Card className={`border-2 ${
+                  brokerAnalysis.analisisIndependiente.conclusion === 'COMPRAR' ? 'border-green-300 bg-green-50/30' :
+                  brokerAnalysis.analisisIndependiente.conclusion === 'NEGOCIAR' ? 'border-amber-300 bg-amber-50/30' :
+                  'border-red-300 bg-red-50/30'
+                }`}>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      {brokerAnalysis.analisisIndependiente.conclusion === 'COMPRAR' && <CheckCircle2 className="h-6 w-6 text-green-600" />}
+                      {brokerAnalysis.analisisIndependiente.conclusion === 'NEGOCIAR' && <AlertTriangle className="h-6 w-6 text-amber-600" />}
+                      {brokerAnalysis.analisisIndependiente.conclusion === 'DESCARTAR' && <XCircle className="h-6 w-6 text-red-600" />}
+                      Veredicto: {brokerAnalysis.analisisIndependiente.conclusion}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <p className="text-sm">{brokerAnalysis.analisisIndependiente.resumenEjecutivo}</p>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      <div className="bg-white rounded-lg p-3 border">
+                        <div className="text-xs text-gray-500">Yield bruto real</div>
+                        <div className="text-xl font-bold">{brokerAnalysis.analisisIndependiente.yieldBrutoReal}%</div>
+                      </div>
+                      <div className="bg-white rounded-lg p-3 border">
+                        <div className="text-xs text-gray-500">Yield neto estimado</div>
+                        <div className="text-xl font-bold text-blue-600">{brokerAnalysis.analisisIndependiente.yieldNetoEstimado}%</div>
+                      </div>
+                      <div className="bg-white rounded-lg p-3 border">
+                        <div className="text-xs text-gray-500">Precio máx recomendado</div>
+                        <div className="text-xl font-bold text-green-600">{fmt(brokerAnalysis.analisisIndependiente.precioMaximoRecomendado || 0)}</div>
+                      </div>
+                      <div className="bg-white rounded-lg p-3 border">
+                        <div className="text-xs text-gray-500">Descuento sugerido</div>
+                        <div className="text-xl font-bold text-amber-600">{brokerAnalysis.analisisIndependiente.descuentoSugerido}%</div>
+                      </div>
+                    </div>
+
+                    {/* Escenarios */}
+                    {brokerAnalysis.analisisIndependiente.escenarios && (
+                      <div>
+                        <h4 className="font-medium text-sm mb-2">Escenarios de oferta</h4>
+                        <div className="grid md:grid-cols-3 gap-3">
+                          {(['conservador', 'base', 'optimista'] as const).map(esc => {
+                            const e = brokerAnalysis.analisisIndependiente.escenarios[esc];
+                            if (!e) return null;
+                            const colors = { conservador: 'border-blue-200 bg-blue-50/50', base: 'border-green-200 bg-green-50/50', optimista: 'border-purple-200 bg-purple-50/50' };
+                            return (
+                              <div key={esc} className={`rounded-lg p-3 border ${colors[esc]}`}>
+                                <div className="text-xs font-medium uppercase text-gray-500">{esc}</div>
+                                <div className="text-lg font-bold">{fmt(e.precio || 0)}</div>
+                                <div className="text-sm text-gray-600">Yield: {e.yield}% | CF: {fmt(e.cashFlowMensual || 0)}/mes</div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Flags del análisis crítico */}
+              {brokerAnalysis?.analisisCritico?.flags && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Análisis Crítico - Flags</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {brokerAnalysis.analisisCritico.flags.map((flag: any, i: number) => (
+                        <div key={i} className={`flex items-start gap-2 p-2 rounded-lg text-sm ${
+                          flag.nivel === 'verde' ? 'bg-green-50' : flag.nivel === 'amarillo' ? 'bg-amber-50' : 'bg-red-50'
+                        }`}>
+                          <span className="shrink-0 mt-0.5">
+                            {flag.nivel === 'verde' ? '🟢' : flag.nivel === 'amarillo' ? '🟡' : '🔴'}
+                          </span>
+                          <div>
+                            <span className="font-medium">{flag.categoria}: </span>
+                            <span className="text-gray-700">{flag.detalle}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    {brokerAnalysis.analisisCritico.riesgos?.length > 0 && (
+                      <div className="mt-4 p-3 bg-red-50 rounded-lg">
+                        <h4 className="font-medium text-sm text-red-800 mb-1">Riesgos identificados</h4>
+                        <ul className="text-sm text-red-700 space-y-1">
+                          {brokerAnalysis.analisisCritico.riesgos.map((r: string, i: number) => (
+                            <li key={i}>• {r}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {brokerAnalysis.analisisCritico.oportunidades?.length > 0 && (
+                      <div className="mt-3 p-3 bg-green-50 rounded-lg">
+                        <h4 className="font-medium text-sm text-green-800 mb-1">Oportunidades</h4>
+                        <ul className="text-sm text-green-700 space-y-1">
+                          {brokerAnalysis.analisisCritico.oportunidades.map((o: string, i: number) => (
+                            <li key={i}>• {o}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </TabsContent>
+
+          {/* TAB: Chat IA de Inversiones */}
+          <TabsContent value="chat">
+            <Card className="h-[600px] flex flex-col">
+              <CardHeader className="shrink-0">
+                <CardTitle className="flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5 text-blue-600" />
+                  Chat Analista de Inversiones
+                </CardTitle>
+                <CardDescription>
+                  Pega una propuesta de broker o haz preguntas sobre un activo. La IA analizará
+                  críticamente la información y generará recomendaciones.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex-1 flex flex-col min-h-0">
+                {/* Messages */}
+                <div className="flex-1 overflow-y-auto space-y-3 mb-4 pr-1">
+                  {chatMessages.length === 0 && (
+                    <div className="text-center py-8 text-gray-400 space-y-3">
+                      <Brain className="h-12 w-12 mx-auto text-gray-300" />
+                      <p className="text-sm">Pega aquí la propuesta del broker o pregúntame sobre un activo.</p>
+                      <div className="flex flex-wrap gap-2 justify-center">
+                        {[
+                          'Analiza este rent roll que me ha pasado un broker...',
+                          '¿Qué yield neto debería buscar en Madrid centro?',
+                          '¿Este precio por m2 es razonable para la zona?',
+                        ].map((suggestion, i) => (
+                          <button
+                            key={i}
+                            className="text-xs px-3 py-1.5 rounded-full border border-gray-200 hover:bg-gray-50 text-gray-600"
+                            onClick={() => setChatInput(suggestion)}
+                          >
+                            {suggestion}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {chatMessages.map((msg, i) => (
+                    <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`max-w-[85%] rounded-lg px-4 py-2 text-sm ${
+                        msg.role === 'user'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {msg.role === 'assistant' ? (
+                          <div className="prose prose-sm max-w-none prose-headings:text-sm prose-headings:font-bold prose-p:my-1 prose-ul:my-1 prose-table:text-xs">
+                            <ReactMarkdown>{msg.content}</ReactMarkdown>
+                          </div>
+                        ) : (
+                          <p className="whitespace-pre-wrap">{msg.content}</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                  {chatLoading && (
+                    <div className="flex justify-start">
+                      <div className="bg-gray-100 rounded-lg px-4 py-2 text-sm text-gray-500 flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" /> Analizando...
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Input */}
+                <div className="shrink-0 flex gap-2">
+                  <Textarea
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleChatSend(); }
+                    }}
+                    placeholder="Pega la propuesta del broker o escribe tu pregunta..."
+                    rows={2}
+                    className="flex-1 resize-none"
+                    disabled={chatLoading}
+                  />
+                  <Button
+                    onClick={handleChatSend}
+                    disabled={chatLoading || !chatInput.trim()}
+                    className="shrink-0"
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* TAB: Due Diligence (aparece después del análisis de broker) */}
+          {brokerAnalysis?.analisisCritico && (
+            <TabsContent value="due-diligence">
+              <div className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <AlertTriangle className="h-5 w-5 text-amber-600" />
+                      Checklist de Due Diligence
+                    </CardTitle>
+                    <CardDescription>Puntos a verificar antes de realizar una oferta</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {[
+                        { cat: 'Legal', items: ['Nota simple actualizada', 'Cargas y gravámenes', 'Certificado comunidad de propietarios', 'IBI al corriente', 'Licencia de primera ocupación'] },
+                        { cat: 'Técnico', items: ['ITE (Inspección Técnica Edificio)', 'Certificado energético', 'Estado instalaciones (fontanería, electricidad)', 'Informe de humedades/estructura', 'Presupuesto de reforma si necesario'] },
+                        { cat: 'Arrendamientos', items: ['Contratos de alquiler originales', 'Historial de pagos de inquilinos', 'Fianzas depositadas en IVIMA/organismo', 'Vencimientos y prórrogas', 'Derechos de tanteo y retracto'] },
+                        { cat: 'Fiscal', items: ['Valor catastral y referencia', 'ITP o IVA+AJD aplicable', 'Plusvalía municipal estimada', 'Base amortización (suelo vs construcción)', 'IS/IRPF impacto'] },
+                        { cat: 'Mercado', items: ['Comparables de venta en la zona', 'Rentas de mercado por m2', 'Zona tensionada (tope de renta)', 'Tendencia del barrio', 'Oferta de alquiler disponible'] },
+                      ].map((section) => (
+                        <div key={section.cat} className="border rounded-lg p-3">
+                          <h4 className="font-medium text-sm mb-2">{section.cat}</h4>
+                          <div className="grid md:grid-cols-2 gap-1">
+                            {section.items.map((item, i) => (
+                              <label key={i} className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer hover:text-gray-900">
+                                <input type="checkbox" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                                {item}
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {brokerAnalysis.analisisCritico.gastosOmitidos?.length > 0 && (
+                  <Card className="border-amber-200">
+                    <CardHeader>
+                      <CardTitle className="text-base text-amber-800">Gastos omitidos por el broker</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="text-sm space-y-1">
+                        {brokerAnalysis.analisisCritico.gastosOmitidos.map((g: string, i: number) => (
+                          <li key={i} className="flex items-center gap-2">
+                            <AlertTriangle className="h-3 w-3 text-amber-500 shrink-0" />
+                            {g}
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            </TabsContent>
+          )}
 
           {/* TAB: Asistente IA Documental */}
           <TabsContent value="ia">
