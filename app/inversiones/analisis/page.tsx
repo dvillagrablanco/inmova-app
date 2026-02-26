@@ -76,6 +76,10 @@ export default function AnalisisInversionPage() {
   const [chatInput, setChatInput] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
 
+  // Procesamiento de escrituras
+  const [escrituraLoading, setEscrituraLoading] = useState(false);
+  const [escrituraResult, setEscrituraResult] = useState<any>(null);
+
   // Form state
   const [nombre, setNombre] = useState('');
   const [direccion, setDireccion] = useState('');
@@ -393,6 +397,64 @@ export default function AnalisisInversionPage() {
     }
   };
 
+  const handleEscrituraUpload = async (file: File) => {
+    setEscrituraLoading(true);
+    setEscrituraResult(null);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/api/ai/process-escritura', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        toast.error(err.error || 'Error procesando escritura');
+        return;
+      }
+
+      const data = await res.json();
+      setEscrituraResult(data.data);
+
+      const ed = data.data.extractedData;
+      if (ed) {
+        toast.success(`Escritura procesada: ${ed.tipo_escritura || 'compraventa'}`);
+        if (ed.precio_total) {
+          setAskingPrice(ed.precio_total);
+        }
+        if (ed.inmueble?.direccion) {
+          setDireccion(ed.inmueble.direccion);
+          setNombre(ed.inmueble.descripcion || ed.inmueble.direccion);
+        }
+        if (ed.fincas?.length > 0) {
+          setRentRoll(ed.fincas.map((f: any) => ({
+            tipo: f.tipo === 'local' ? 'local' : f.tipo === 'garaje' ? 'garaje' : f.tipo === 'trastero' ? 'trastero' : f.tipo === 'oficina' ? 'oficina' : 'vivienda',
+            referencia: f.descripcion || f.numero_finca || '',
+            superficie: f.superficie_construida || f.superficie_util || 0,
+            habitaciones: 0,
+            banos: 0,
+            rentaMensual: 0,
+            rentaMercado: 0,
+            estado: 'alquilado' as const,
+            contratoVencimiento: '',
+            inquilino: '',
+          })));
+          toast.success(`${ed.fincas.length} fincas extraídas de la escritura`);
+        }
+      }
+
+      data.data.actions?.forEach((a: string) => {
+        console.log(`[Escritura] ${a}`);
+      });
+    } catch {
+      toast.error('Error de conexión');
+    } finally {
+      setEscrituraLoading(false);
+    }
+  };
+
   const handleCalcular = async () => {
     if (!nombre || askingPrice <= 0 || rentRoll.length === 0) {
       toast.error('Completa nombre, precio y al menos 1 unidad');
@@ -448,6 +510,7 @@ export default function AnalisisInversionPage() {
         <Tabs defaultValue={initialTab} className="space-y-4">
           <TabsList className="flex flex-wrap gap-1">
             <TabsTrigger value="guardados" className="gap-1 text-xs"><Save className="h-3 w-3" /> Guardados</TabsTrigger>
+            <TabsTrigger value="escritura" className="gap-1 text-xs"><FileText className="h-3 w-3" /> Escrituras</TabsTrigger>
             <TabsTrigger value="broker" className="gap-1 text-xs"><Shield className="h-3 w-3" /> Analizar Propuesta</TabsTrigger>
             <TabsTrigger value="chat" className="gap-1 text-xs"><MessageSquare className="h-3 w-3" /> Chat IA</TabsTrigger>
             <TabsTrigger value="ia" className="gap-1 text-xs"><Brain className="h-3 w-3" /> Extracción</TabsTrigger>
@@ -500,6 +563,166 @@ export default function AnalisisInversionPage() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* TAB: Procesar Escrituras */}
+          <TabsContent value="escritura">
+            <div className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-blue-600" />
+                    Procesar Escritura Notarial
+                  </CardTitle>
+                  <CardDescription>
+                    Sube una escritura de compraventa (PDF escaneado o digital). La IA realizará OCR si es necesario,
+                    extraerá todos los datos (comprador, vendedor, precio, fincas, superficies, refs catastrales)
+                    y los guardará automáticamente en la app.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="border-2 border-dashed border-blue-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors bg-blue-50/30">
+                    <input
+                      type="file"
+                      accept=".pdf"
+                      className="hidden"
+                      id="escritura-upload"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleEscrituraUpload(file);
+                      }}
+                      disabled={escrituraLoading}
+                    />
+                    <label htmlFor="escritura-upload" className="cursor-pointer">
+                      {escrituraLoading ? (
+                        <div className="flex flex-col items-center gap-3">
+                          <Loader2 className="h-10 w-10 text-blue-600 animate-spin" />
+                          <span className="text-sm text-blue-600 font-medium">Procesando escritura...</span>
+                          <span className="text-xs text-blue-500">OCR + Extracción IA + Guardado en repositorio</span>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center gap-3">
+                          <Upload className="h-10 w-10 text-blue-500" />
+                          <span className="text-sm text-blue-700 font-medium">Subir escritura PDF</span>
+                          <span className="text-xs text-gray-500">PDF escaneado o digital - se aplica OCR automáticamente si es necesario</span>
+                        </div>
+                      )}
+                    </label>
+                  </div>
+
+                  <div className="bg-gray-50 rounded-lg p-3 text-xs text-gray-500">
+                    <strong>La IA procesará automáticamente:</strong>
+                    <ul className="mt-1 space-y-0.5 ml-4 list-disc">
+                      <li>OCR con Tesseract (español) si el PDF es escaneado</li>
+                      <li>Extracción: comprador, vendedor, precio, fecha, notario</li>
+                      <li>Fincas: superficies, refs catastrales, valores, cuotas</li>
+                      <li>Guardado del PDF en el repositorio documental</li>
+                      <li>Creación del registro AssetAcquisition con precio de compra</li>
+                      <li>Vinculación automática al edificio si existe en la app</li>
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Resultado de escritura procesada */}
+              {escrituraResult?.extractedData && (
+                <Card className="border-blue-200">
+                  <CardHeader>
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <CheckCircle2 className="h-5 w-5 text-green-600" />
+                      Escritura Procesada
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Info método */}
+                    <div className="flex gap-2 text-xs">
+                      <Badge variant="outline">{escrituraResult.ocrMethod === 'ocr' ? 'OCR Tesseract' : 'Texto embebido'}</Badge>
+                      <Badge variant="outline">{escrituraResult.pagesProcessed} páginas</Badge>
+                    </div>
+
+                    {/* Datos principales */}
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div className="space-y-2 text-sm">
+                        <h4 className="font-medium">Operación</h4>
+                        <div className="space-y-1">
+                          {escrituraResult.extractedData.tipo_escritura && <div><span className="text-gray-500">Tipo:</span> {escrituraResult.extractedData.tipo_escritura}</div>}
+                          {escrituraResult.extractedData.numero_escritura && <div><span className="text-gray-500">Nº:</span> {escrituraResult.extractedData.numero_escritura}</div>}
+                          {escrituraResult.extractedData.fecha && <div><span className="text-gray-500">Fecha:</span> {escrituraResult.extractedData.fecha}</div>}
+                          {escrituraResult.extractedData.notario && <div><span className="text-gray-500">Notario:</span> {escrituraResult.extractedData.notario}</div>}
+                          {escrituraResult.extractedData.precio_total && <div><span className="text-gray-500">Precio:</span> <strong className="text-green-700">{fmt(escrituraResult.extractedData.precio_total)}</strong></div>}
+                          {escrituraResult.extractedData.forma_pago && <div><span className="text-gray-500">Pago:</span> {escrituraResult.extractedData.forma_pago}</div>}
+                        </div>
+                      </div>
+                      <div className="space-y-2 text-sm">
+                        <h4 className="font-medium">Partes</h4>
+                        <div className="space-y-1">
+                          {escrituraResult.extractedData.comprador?.nombre && <div><span className="text-gray-500">Comprador:</span> {escrituraResult.extractedData.comprador.nombre}</div>}
+                          {escrituraResult.extractedData.comprador?.nif && <div><span className="text-gray-500">NIF:</span> {escrituraResult.extractedData.comprador.nif}</div>}
+                          {escrituraResult.extractedData.vendedor?.nombre && <div><span className="text-gray-500">Vendedor:</span> {escrituraResult.extractedData.vendedor.nombre}</div>}
+                          {escrituraResult.extractedData.vendedor?.nif && <div><span className="text-gray-500">NIF:</span> {escrituraResult.extractedData.vendedor.nif}</div>}
+                        </div>
+                        {escrituraResult.extractedData.inmueble && (
+                          <>
+                            <h4 className="font-medium mt-2">Inmueble</h4>
+                            <div><span className="text-gray-500">Dir:</span> {escrituraResult.extractedData.inmueble.direccion}</div>
+                            <div><span className="text-gray-500">Tipo:</span> {escrituraResult.extractedData.inmueble.tipo}</div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Fincas */}
+                    {escrituraResult.extractedData.fincas?.length > 0 && (
+                      <div>
+                        <h4 className="font-medium text-sm mb-2">Fincas extraídas ({escrituraResult.extractedData.fincas.length})</h4>
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-xs">
+                            <thead>
+                              <tr className="border-b bg-gray-50">
+                                <th className="text-left p-2">Finca</th>
+                                <th className="text-left p-2">Tipo</th>
+                                <th className="text-right p-2">Sup. constr.</th>
+                                <th className="text-right p-2">Sup. útil</th>
+                                <th className="text-right p-2">Valor</th>
+                                <th className="text-left p-2">Ref. catastral</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y">
+                              {escrituraResult.extractedData.fincas.map((f: any, i: number) => (
+                                <tr key={i}>
+                                  <td className="p-2 font-medium">{f.descripcion || f.numero_finca}</td>
+                                  <td className="p-2 text-gray-500">{f.tipo}</td>
+                                  <td className="p-2 text-right">{f.superficie_construida ? `${f.superficie_construida} m²` : '-'}</td>
+                                  <td className="p-2 text-right">{f.superficie_util ? `${f.superficie_util} m²` : '-'}</td>
+                                  <td className="p-2 text-right">{f.valor_escriturado ? fmt(f.valor_escriturado) : '-'}</td>
+                                  <td className="p-2 font-mono text-[10px]">{f.referencia_catastral || '-'}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Acciones realizadas */}
+                    {escrituraResult.actions?.length > 0 && (
+                      <div className="bg-green-50 rounded-lg p-3">
+                        <h4 className="font-medium text-sm text-green-800 mb-1">Acciones realizadas</h4>
+                        <ul className="text-xs text-green-700 space-y-0.5">
+                          {escrituraResult.actions.map((a: string, i: number) => (
+                            <li key={i}>✓ {a}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {escrituraResult.extractedData.resumen && (
+                      <p className="text-sm text-gray-600 bg-gray-50 rounded-lg p-3">{escrituraResult.extractedData.resumen}</p>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+            </div>
           </TabsContent>
 
           {/* TAB: Analizar Propuesta de Broker */}

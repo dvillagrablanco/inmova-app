@@ -1468,6 +1468,11 @@ const holdingGrupoNavItems = [
     badge: 'IA',
     subItems: [
       {
+        name: 'Procesar Escrituras',
+        href: '/inversiones/analisis?tab=escritura',
+        icon: FileSignature,
+      },
+      {
         name: 'Analizar Propuesta Broker',
         href: '/inversiones/analisis?tab=broker',
         icon: Shield,

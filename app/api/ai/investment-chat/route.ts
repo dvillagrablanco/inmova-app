@@ -59,7 +59,13 @@ Usa markdown con:
 - Asume 5% vacío mínimo aunque digan 100% ocupación
 - Si no hay datos suficientes, PÍDELOS antes de concluir
 - Responde en español
-- Sé directo y conciso, sin rodeos`;
+- Sé directo y conciso, sin rodeos
+
+## ESCRITURAS NOTARIALES
+Si el usuario pega texto de una escritura notarial o menciona que quiere procesar una:
+- Extrae los datos clave: comprador, vendedor, precio, fincas, superficies
+- Informa que puede subir el PDF en la pestaña "Escrituras" (/inversiones/analisis?tab=escritura) para OCR automático y guardado en repositorio
+- Si te pegan texto directamente, analízalo como documento notarial completo`;
 
 interface ChatMessage {
   role: 'user' | 'assistant';

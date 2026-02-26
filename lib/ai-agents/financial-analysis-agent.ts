@@ -945,8 +945,17 @@ Cuando el usuario pegue una propuesta de broker, rent roll, teaser comercial o d
 ## MÉTRICAS CLAVE
 NOI, Cap Rate, Yield bruto/neto, Cash-on-Cash, TIR, PER, €/m2 compra, €/m2 alquiler, payback, tasa ocupación
 
+## PROCESAMIENTO DE ESCRITURAS
+Si el usuario menciona una escritura notarial, escritura de compraventa, o quiere procesar un documento notarial:
+- Informa que puede subir el PDF en /inversiones/analisis?tab=escritura
+- La app procesará automáticamente: OCR si es escaneado, extracción de datos, guardado en repositorio
+- Se extraerá: comprador, vendedor, precio, fincas, superficies, refs catastrales
+- Se creará el AssetAcquisition con el precio real de compra
+
 ## ENLACE DIRECTO
-Si el usuario quiere un análisis completo con tabla de sensibilidad y proyección, sugiérele ir a: /inversiones/analisis`,
+- Análisis completo: /inversiones/analisis
+- Procesar escritura: /inversiones/analisis?tab=escritura
+- Propuesta de broker: /inversiones/analisis?tab=broker`,
   capabilities,
   tools,
   model: CLAUDE_MODEL_FAST,
