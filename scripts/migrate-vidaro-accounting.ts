@@ -233,28 +233,36 @@ async function main() {
     
     // Rentas mensuales calculadas desde contabilidad 2025 (ingreso anual / 12)
     // Subcuentas 7520000001-7520000015
+    // Superficies actualizadas según datos de compra + catastro 2024
     const silvelaUnits = [
-      { id: 'silvela-local', numero: 'Local', planta: 0, rentaMensual: 5451, superficie: 150, tipo: 'local' as const, habitaciones: 0, banos: 1 }, // €65.409/año
-      { id: 'silvela-bajo', numero: 'Bajo', planta: 0, rentaMensual: 909, superficie: 60, tipo: 'local' as const, habitaciones: 0, banos: 0 }, // €10.902/año
-      { id: 'silvela-1a', numero: '1ºA', planta: 1, rentaMensual: 2310, superficie: 80, tipo: 'vivienda' as const, habitaciones: 2, banos: 1 }, // €27.716/año
-      { id: 'silvela-1b', numero: '1ºB', planta: 1, rentaMensual: 1371, superficie: 70, tipo: 'vivienda' as const, habitaciones: 2, banos: 1 }, // €16.451/año
-      { id: 'silvela-2a', numero: '2ºA', planta: 2, rentaMensual: 2138, superficie: 85, tipo: 'vivienda' as const, habitaciones: 3, banos: 1 }, // €25.657/año
-      { id: 'silvela-2b', numero: '2ºB', planta: 2, rentaMensual: 1707, superficie: 75, tipo: 'vivienda' as const, habitaciones: 2, banos: 1 }, // €20.489/año
-      { id: 'silvela-3a', numero: '3ºA', planta: 3, rentaMensual: 2113, superficie: 80, tipo: 'vivienda' as const, habitaciones: 2, banos: 1 }, // €25.350/año
-      { id: 'silvela-3b', numero: '3ºB', planta: 3, rentaMensual: 2069, superficie: 80, tipo: 'vivienda' as const, habitaciones: 2, banos: 1 }, // €24.826/año
-      { id: 'silvela-4a', numero: '4ºA', planta: 4, rentaMensual: 3475, superficie: 95, tipo: 'vivienda' as const, habitaciones: 3, banos: 2 }, // €41.702/año
-      { id: 'silvela-4b', numero: '4ºB', planta: 4, rentaMensual: 2129, superficie: 80, tipo: 'vivienda' as const, habitaciones: 2, banos: 1 }, // €25.546/año
-      { id: 'silvela-5a', numero: '5ºA', planta: 5, rentaMensual: 3553, superficie: 100, tipo: 'vivienda' as const, habitaciones: 3, banos: 2 }, // €42.637/año
-      { id: 'silvela-5b', numero: '5ºB', planta: 5, rentaMensual: 1689, superficie: 75, tipo: 'vivienda' as const, habitaciones: 2, banos: 1 }, // €20.265/año
-      { id: 'silvela-6a', numero: '6ºA', planta: 6, rentaMensual: 1804, superficie: 80, tipo: 'vivienda' as const, habitaciones: 2, banos: 1 }, // €21.648/año
-      { id: 'silvela-6b', numero: '6ºB', planta: 6, rentaMensual: 1447, superficie: 70, tipo: 'vivienda' as const, habitaciones: 2, banos: 1 }, // €17.369/año
-      { id: 'silvela-6c', numero: '6ºC', planta: 6, rentaMensual: 2965, superficie: 90, tipo: 'vivienda' as const, habitaciones: 3, banos: 1 }, // €35.575/año
+      { id: 'silvela-local', numero: 'Local', planta: 0, rentaMensual: 5451, superficie: 127, superficieUtil: 346, tipo: 'local' as const, habitaciones: 0, banos: 1, terraza: false }, // Local grande bajo+sótano
+      { id: 'silvela-bajo', numero: 'Bajo', planta: 0, rentaMensual: 909, superficie: 33, superficieUtil: 84, tipo: 'vivienda' as const, habitaciones: 1, banos: 1, terraza: false }, // Estudio 1 Hab. - Bajo
+      { id: 'silvela-1a', numero: '1ºA', planta: 1, rentaMensual: 2310, superficie: 124, superficieUtil: 204, tipo: 'vivienda' as const, habitaciones: 2, banos: 1, terraza: false }, // Piso 2 Hab.
+      { id: 'silvela-1b', numero: '1ºB', planta: 1, rentaMensual: 1371, superficie: 71, tipo: 'vivienda' as const, habitaciones: 1, banos: 1, terraza: false }, // Estudio 1 Hab.
+      { id: 'silvela-2a', numero: '2ºA', planta: 2, rentaMensual: 2138, superficie: 124, superficieUtil: 200, tipo: 'vivienda' as const, habitaciones: 2, banos: 1, terraza: false }, // Piso 2 Hab.
+      { id: 'silvela-2b', numero: '2ºB', planta: 2, rentaMensual: 1707, superficie: 71, tipo: 'vivienda' as const, habitaciones: 1, banos: 1, terraza: false }, // Estudio 1 Hab.
+      { id: 'silvela-3a', numero: '3ºA', planta: 3, rentaMensual: 2113, superficie: 124, superficieUtil: 200, tipo: 'vivienda' as const, habitaciones: 2, banos: 1, terraza: false }, // Piso 2 Hab.
+      { id: 'silvela-3b', numero: '3ºB', planta: 3, rentaMensual: 2069, superficie: 71, tipo: 'vivienda' as const, habitaciones: 1, banos: 1, terraza: false }, // Estudio 1 Hab.
+      { id: 'silvela-4a', numero: '4ºA', planta: 4, rentaMensual: 3475, superficie: 124, superficieUtil: 200, tipo: 'vivienda' as const, habitaciones: 2, banos: 1, terraza: false }, // Piso 2 Hab.
+      { id: 'silvela-4b', numero: '4ºB', planta: 4, rentaMensual: 2129, superficie: 71, tipo: 'vivienda' as const, habitaciones: 1, banos: 1, terraza: false }, // Estudio 1 Hab.
+      { id: 'silvela-5a', numero: '5ºA', planta: 5, rentaMensual: 3553, superficie: 124, superficieUtil: 204, tipo: 'vivienda' as const, habitaciones: 2, banos: 1, terraza: false }, // Piso 2 Hab.
+      { id: 'silvela-5b', numero: '5ºB', planta: 5, rentaMensual: 1689, superficie: 71, tipo: 'vivienda' as const, habitaciones: 1, banos: 1, terraza: false }, // Estudio 1 Hab.
+      { id: 'silvela-6a', numero: '6ºA', planta: 6, rentaMensual: 1804, superficie: 82, superficieUtil: 181, tipo: 'vivienda' as const, habitaciones: 1, banos: 1, terraza: true }, // Duplex 1 Hab.+Terraza
+      { id: 'silvela-6b', numero: '6ºB', planta: 6, rentaMensual: 1447, superficie: 62, tipo: 'vivienda' as const, habitaciones: 1, banos: 1, terraza: false }, // Estudio 1 Hab.
+      { id: 'silvela-6c', numero: '6ºC', planta: 6, rentaMensual: 2965, superficie: 55, tipo: 'vivienda' as const, habitaciones: 1, banos: 1, terraza: true }, // Estudio 1 Hab.+Terraza
     ];
 
     for (const unitData of silvelaUnits) {
       await prisma.unit.upsert({
         where: { id: unitData.id },
-        update: {},
+        update: {
+          superficie: unitData.superficie,
+          ...(unitData.superficieUtil && { superficieUtil: unitData.superficieUtil }),
+          habitaciones: unitData.habitaciones,
+          banos: unitData.banos,
+          tipo: unitData.tipo,
+          terraza: unitData.terraza,
+        },
         create: {
           id: unitData.id,
           numero: unitData.numero,
@@ -262,9 +270,11 @@ async function main() {
           buildingId: silvela.id,
           tipo: unitData.tipo,
           superficie: unitData.superficie,
+          ...(unitData.superficieUtil && { superficieUtil: unitData.superficieUtil }),
           rentaMensual: unitData.rentaMensual,
           habitaciones: unitData.habitaciones,
           banos: unitData.banos,
+          terraza: unitData.terraza,
           estado: 'ocupada'
         }
       });

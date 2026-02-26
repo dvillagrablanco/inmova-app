@@ -28,21 +28,21 @@ async function main() {
       anoConstructor: 1980,
       ascensor: true,
       unidades_data: [
-        { numero: 'LOCAL', tipo: 'local', habitaciones: 0, banos: 1, superficie: 80 },
-        { numero: 'BAJO', tipo: 'estudio', habitaciones: 1, banos: 1, superficie: 40 },
-        { numero: '1º A', tipo: 'piso', habitaciones: 3, banos: 2, superficie: 85 },
-        { numero: '1º B', tipo: 'piso', habitaciones: 1, banos: 1, superficie: 45 },
-        { numero: '2º A', tipo: 'piso', habitaciones: 2, banos: 1, superficie: 65 },
-        { numero: '2º B', tipo: 'piso', habitaciones: 1, banos: 1, superficie: 45 },
-        { numero: '3º A', tipo: 'piso', habitaciones: 2, banos: 1, superficie: 65 },
-        { numero: '3º B', tipo: 'piso', habitaciones: 1, banos: 1, superficie: 45 },
-        { numero: '4º A', tipo: 'piso', habitaciones: 2, banos: 2, superficie: 70 },
-        { numero: '4º B', tipo: 'piso', habitaciones: 1, banos: 1, superficie: 45 },
-        { numero: '5º A', tipo: 'piso', habitaciones: 2, banos: 2, superficie: 70 },
-        { numero: '5º B', tipo: 'piso', habitaciones: 1, banos: 1, superficie: 45 },
-        { numero: '6º A', tipo: 'piso', habitaciones: 1, banos: 1, superficie: 45 },
-        { numero: '6º B', tipo: 'piso', habitaciones: 1, banos: 1, superficie: 45 },
-        { numero: 'ÁTICO', tipo: 'atico', habitaciones: 2, banos: 2, superficie: 75 }
+        { numero: 'LOCAL', tipo: 'local', habitaciones: 0, banos: 1, superficie: 127 },   // Local grande bajo+sótano (catastral: 346 m2)
+        { numero: 'BAJO', tipo: 'vivienda', habitaciones: 1, banos: 1, superficie: 33 },  // Estudio 1 Hab. - Bajo (catastral: 84 m2)
+        { numero: '1º A', tipo: 'vivienda', habitaciones: 2, banos: 1, superficie: 124 }, // Piso 2 Hab. (catastral: 204 m2)
+        { numero: '1º B', tipo: 'vivienda', habitaciones: 1, banos: 1, superficie: 71 },  // Estudio 1 Hab.
+        { numero: '2º A', tipo: 'vivienda', habitaciones: 2, banos: 1, superficie: 124 }, // Piso 2 Hab. (catastral: 200 m2)
+        { numero: '2º B', tipo: 'vivienda', habitaciones: 1, banos: 1, superficie: 71 },  // Estudio 1 Hab.
+        { numero: '3º A', tipo: 'vivienda', habitaciones: 2, banos: 1, superficie: 124 }, // Piso 2 Hab. (catastral: 200 m2)
+        { numero: '3º B', tipo: 'vivienda', habitaciones: 1, banos: 1, superficie: 71 },  // Estudio 1 Hab.
+        { numero: '4º A', tipo: 'vivienda', habitaciones: 2, banos: 1, superficie: 124 }, // Piso 2 Hab. (catastral: 200 m2)
+        { numero: '4º B', tipo: 'vivienda', habitaciones: 1, banos: 1, superficie: 71 },  // Estudio 1 Hab.
+        { numero: '5º A', tipo: 'vivienda', habitaciones: 2, banos: 1, superficie: 124 }, // Piso 2 Hab. (catastral: 204 m2)
+        { numero: '5º B', tipo: 'vivienda', habitaciones: 1, banos: 1, superficie: 71 },  // Estudio 1 Hab.
+        { numero: '6º A', tipo: 'vivienda', habitaciones: 1, banos: 1, superficie: 82 },  // Duplex 1 Hab.+Terraza (catastral: 181 m2)
+        { numero: '6º B', tipo: 'vivienda', habitaciones: 1, banos: 1, superficie: 62 },  // Estudio 1 Hab.
+        { numero: '6º C', tipo: 'vivienda', habitaciones: 1, banos: 1, superficie: 55 }   // Estudio 1 Hab.+Terraza
       ]
     },
     {
