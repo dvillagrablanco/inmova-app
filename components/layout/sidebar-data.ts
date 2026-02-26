@@ -1473,6 +1473,11 @@ const holdingGrupoNavItems = [
         icon: FileSignature,
       },
       {
+        name: 'Procesar Contratos',
+        href: '/inversiones/analisis?tab=contratos',
+        icon: FileText,
+      },
+      {
         name: 'Analizar Propuesta Broker',
         href: '/inversiones/analisis?tab=broker',
         icon: Shield,

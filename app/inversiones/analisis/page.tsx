@@ -80,6 +80,11 @@ export default function AnalisisInversionPage() {
   const [escrituraLoading, setEscrituraLoading] = useState(false);
   const [escrituraResult, setEscrituraResult] = useState<any>(null);
 
+  // Procesamiento de contratos
+  const [contratoLoading, setContratoLoading] = useState(false);
+  const [contratoResult, setContratoResult] = useState<any>(null);
+  const [contratoText, setContratoText] = useState('');
+
   // Form state
   const [nombre, setNombre] = useState('');
   const [direccion, setDireccion] = useState('');
@@ -397,6 +402,32 @@ export default function AnalisisInversionPage() {
     }
   };
 
+  const handleContratoUpload = async (file?: File) => {
+    setContratoLoading(true);
+    setContratoResult(null);
+    try {
+      const formData = new FormData();
+      if (file) formData.append('file', file);
+      if (contratoText) formData.append('text', contratoText);
+      formData.append('autoApply', 'true');
+
+      const res = await fetch('/api/ai/process-contract', { method: 'POST', body: formData });
+      if (!res.ok) {
+        const err = await res.json();
+        toast.error(err.error || 'Error procesando contrato');
+        return;
+      }
+
+      const data = await res.json();
+      setContratoResult(data.data);
+      const ed = data.data.extracted;
+      if (ed) {
+        toast.success(`${ed.tipo_documento === 'adenda' ? 'Adenda' : 'Contrato'} procesado: ${ed.arrendatario?.nombre || ''}`);
+      }
+    } catch { toast.error('Error de conexión'); }
+    finally { setContratoLoading(false); }
+  };
+
   const handleEscrituraUpload = async (file: File) => {
     setEscrituraLoading(true);
     setEscrituraResult(null);
@@ -511,6 +542,7 @@ export default function AnalisisInversionPage() {
           <TabsList className="flex flex-wrap gap-1">
             <TabsTrigger value="guardados" className="gap-1 text-xs"><Save className="h-3 w-3" /> Guardados</TabsTrigger>
             <TabsTrigger value="escritura" className="gap-1 text-xs"><FileText className="h-3 w-3" /> Escrituras</TabsTrigger>
+            <TabsTrigger value="contratos" className="gap-1 text-xs"><FileText className="h-3 w-3" /> Contratos</TabsTrigger>
             <TabsTrigger value="broker" className="gap-1 text-xs"><Shield className="h-3 w-3" /> Analizar Propuesta</TabsTrigger>
             <TabsTrigger value="chat" className="gap-1 text-xs"><MessageSquare className="h-3 w-3" /> Chat IA</TabsTrigger>
             <TabsTrigger value="ia" className="gap-1 text-xs"><Brain className="h-3 w-3" /> Extracción</TabsTrigger>
@@ -718,6 +750,125 @@ export default function AnalisisInversionPage() {
 
                     {escrituraResult.extractedData.resumen && (
                       <p className="text-sm text-gray-600 bg-gray-50 rounded-lg p-3">{escrituraResult.extractedData.resumen}</p>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </TabsContent>
+
+          {/* TAB: Procesar Contratos / Adendas */}
+          <TabsContent value="contratos">
+            <div className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-green-600" />
+                    Procesar Contrato o Adenda
+                  </CardTitle>
+                  <CardDescription>
+                    Sube un contrato de arrendamiento o adenda. La IA extraerá inquilino, renta, fechas
+                    y actualizará automáticamente la ficha de la unidad correspondiente.
+                    Las adendas prorrogarán el contrato existente.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="border-2 border-dashed border-green-300 rounded-lg p-6 text-center hover:border-green-400 transition-colors bg-green-50/30">
+                    <input
+                      type="file"
+                      accept=".pdf"
+                      className="hidden"
+                      id="contrato-upload"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleContratoUpload(file);
+                      }}
+                      disabled={contratoLoading}
+                    />
+                    <label htmlFor="contrato-upload" className="cursor-pointer">
+                      {contratoLoading ? (
+                        <div className="flex flex-col items-center gap-2">
+                          <Loader2 className="h-8 w-8 text-green-600 animate-spin" />
+                          <span className="text-sm text-green-600 font-medium">Procesando contrato...</span>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center gap-2">
+                          <Upload className="h-8 w-8 text-green-500" />
+                          <span className="text-sm text-green-700 font-medium">Subir contrato o adenda PDF</span>
+                          <span className="text-xs text-gray-500">Contrato nuevo, renovación, prórroga o adenda</span>
+                        </div>
+                      )}
+                    </label>
+                  </div>
+
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
+                    <div className="relative flex justify-center text-xs"><span className="bg-white px-2 text-gray-500">o pega el texto</span></div>
+                  </div>
+
+                  <Textarea
+                    value={contratoText}
+                    onChange={(e) => setContratoText(e.target.value)}
+                    placeholder="Pega aquí el texto del contrato o adenda..."
+                    rows={6}
+                    disabled={contratoLoading}
+                  />
+                  <Button
+                    className="w-full bg-green-600 hover:bg-green-700"
+                    disabled={contratoLoading || !contratoText.trim()}
+                    onClick={() => handleContratoUpload()}
+                  >
+                    {contratoLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <FileText className="h-4 w-4 mr-2" />}
+                    Procesar contrato
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {contratoResult?.extracted && (
+                <Card className={`border-2 ${contratoResult.extracted.es_adenda ? 'border-amber-300 bg-amber-50/30' : 'border-green-300 bg-green-50/30'}`}>
+                  <CardHeader>
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <CheckCircle2 className="h-5 w-5 text-green-600" />
+                      {contratoResult.extracted.es_adenda ? 'Adenda Procesada' : 'Contrato Procesado'}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="grid md:grid-cols-2 gap-4 text-sm">
+                      <div className="space-y-1">
+                        <div><span className="text-gray-500">Tipo:</span> {contratoResult.extracted.tipo_contrato}</div>
+                        <div><span className="text-gray-500">Edificio:</span> {contratoResult.extracted.edificio?.nombre}</div>
+                        <div><span className="text-gray-500">Unidad:</span> <strong>{contratoResult.extracted.unidad}</strong></div>
+                        <div><span className="text-gray-500">Inquilino:</span> {contratoResult.extracted.arrendatario?.nombre}</div>
+                      </div>
+                      <div className="space-y-1">
+                        {contratoResult.extracted.renta_mensual && <div><span className="text-gray-500">Renta:</span> <strong>{fmt(contratoResult.extracted.renta_mensual)}/mes</strong></div>}
+                        {contratoResult.extracted.fecha_inicio && <div><span className="text-gray-500">Inicio:</span> {contratoResult.extracted.fecha_inicio}</div>}
+                        {contratoResult.extracted.fecha_fin && <div><span className="text-gray-500">Fin:</span> {contratoResult.extracted.fecha_fin}</div>}
+                        {contratoResult.extracted.fianza && <div><span className="text-gray-500">Fianza:</span> {fmt(contratoResult.extracted.fianza)}</div>}
+                      </div>
+                    </div>
+
+                    {contratoResult.extracted.es_adenda && contratoResult.extracted.cambios_adenda && (
+                      <div className="bg-amber-100 rounded-lg p-3 text-sm">
+                        <strong>Cambios de la adenda:</strong>
+                        {contratoResult.extracted.cambios_adenda.nueva_fecha_fin && <div>Nueva fecha fin: {contratoResult.extracted.cambios_adenda.nueva_fecha_fin}</div>}
+                        {contratoResult.extracted.cambios_adenda.nueva_renta && <div>Nueva renta: {fmt(contratoResult.extracted.cambios_adenda.nueva_renta)}/mes</div>}
+                        {contratoResult.extracted.cambios_adenda.otros_cambios && <div>{contratoResult.extracted.cambios_adenda.otros_cambios}</div>}
+                      </div>
+                    )}
+
+                    {contratoResult.actions?.length > 0 && (
+                      <div className="bg-green-50 rounded-lg p-3">
+                        <ul className="text-xs text-green-700 space-y-0.5">
+                          {contratoResult.actions.map((a: string, i: number) => (
+                            <li key={i}>{a}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {contratoResult.extracted.resumen && (
+                      <p className="text-sm text-gray-600">{contratoResult.extracted.resumen}</p>
                     )}
                   </CardContent>
                 </Card>

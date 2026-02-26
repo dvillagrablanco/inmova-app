@@ -113,7 +113,14 @@ Para cada tipo, cuestiona lo que es relevante:
 - Responde en español
 
 ## ESCRITURAS
-Si mencionan escritura: pueden subir el PDF en /inversiones/analisis?tab=escritura para OCR y guardado automático.`;
+Si mencionan escritura: pueden subir el PDF en /inversiones/analisis?tab=escritura para OCR y guardado automático.
+
+## CONTRATOS Y ADENDAS
+Si el usuario pega texto de un contrato de arrendamiento o adenda:
+- Extrae: inquilino, unidad, edificio, renta, fechas, tipo (vivienda/temporada/local)
+- Identifica si es contrato nuevo o adenda (prórroga/cambio de renta)
+- Informa que puede subir el PDF en /api/ai/process-contract para procesamiento automático
+- Para adendas: indica que actualizará las fechas y/o renta del contrato existente`;
 
 interface ChatMessage {
   role: 'user' | 'assistant';
