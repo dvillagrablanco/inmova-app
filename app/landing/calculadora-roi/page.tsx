@@ -66,6 +66,8 @@ export default function CalculadoraROIPage() {
     sistema2: { base: 0, perUnit: 9, name: 'Sistema de Gestión B' },
     sistema3: { base: 174, perUnit: 0, name: 'Sistema de Gestión C' },
     sistema4: { base: 280, perUnit: 1, name: 'Sistema de Gestión D' },
+    buildium: { base: 55, perUnit: 1.5, name: 'Buildium' },
+    appfolio: { base: 298, perUnit: 1.4, name: 'AppFolio' },
     otro: { base: 150, perUnit: 0, name: 'Otro Sistema' },
   };
 
@@ -92,7 +94,7 @@ export default function CalculadoraROIPage() {
 
   const calcularCostos = () => {
     // Calcular coste del sistema actual
-    const competitor = competitorPricing[sistemaActual];
+    const competitor = competitorPricing[sistemaActual] || competitorPricing['otro'];
     let softwareBase = competitor.base;
     if (competitor.perUnit) {
       softwareBase += competitor.perUnit * unidades;
@@ -486,9 +488,9 @@ export default function CalculadoraROIPage() {
                       €{ahorroAnualConDescuento.toFixed(2)}
                     </p>
                     <p className="text-sm font-semibold text-yellow-800">
-                      ¡Ahorra más de{' '}
-                      {Math.round((ahorroAnualConDescuento / costActual.total / 12) * 100)}% en el
-                      primer año!
+                      {costActual.total > 0 && ahorroAnualConDescuento > 0
+                        ? `¡Ahorra más de ${Math.round((ahorroAnualConDescuento / (costActual.total * 12)) * 100)}% en el primer año!`
+                        : '¡Empieza a ahorrar desde el primer mes!'}
                     </p>
                   </div>
 
@@ -500,7 +502,7 @@ export default function CalculadoraROIPage() {
                     <div className="flex items-center gap-2">
                       <CheckCircle className="h-5 w-5 text-green-300" />
                       <span>
-                        Recuperas el coste de cambio en {Math.ceil(500 / (ahorroAnual / 12))} meses
+                        Recuperas el coste de cambio en {ahorroAnual > 0 ? Math.ceil(500 / (ahorroAnual / 12)) : '—'} meses
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
