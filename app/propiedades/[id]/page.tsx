@@ -54,6 +54,7 @@ interface PropertyDetails {
   banos?: number;
   planta?: number;
   orientacion?: string;
+  referenciaCatastral?: string;
   rentaMensual: number;
   gastosComunidad?: number;
   ibiAnual?: number;
@@ -72,6 +73,7 @@ interface PropertyDetails {
     direccion: string;
     ciudad: string;
     codigoPostal?: string;
+    referenciaCatastral?: string;
   };
   tenant?: {
     id: string;
@@ -213,17 +215,17 @@ export default function PropiedadDetallesPage() {
 
   return (
     <AuthenticatedLayout>
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         {/* Breadcrumbs */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4 overflow-x-auto">
           <Button
             variant="outline"
             size="sm"
             onClick={() => router.push('/propiedades')}
-            className="gap-2"
+            className="gap-2 flex-shrink-0"
           >
             <ArrowLeft className="h-4 w-4" />
-            Volver
+            <span className="hidden sm:inline">Volver</span>
           </Button>
           <Breadcrumb>
             <BreadcrumbList>
@@ -238,7 +240,7 @@ export default function PropiedadDetallesPage() {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>
+                <BreadcrumbPage className="truncate max-w-[200px]">
                   {property.building.nombre} - {property.numero}
                 </BreadcrumbPage>
               </BreadcrumbItem>
@@ -247,30 +249,36 @@ export default function PropiedadDetallesPage() {
         </div>
 
         {/* Header */}
-        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-          <div className="space-y-1">
-            <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-bold tracking-tight">
-                {property.building.nombre} - Unidad {property.numero}
+        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+          <div className="space-y-1 min-w-0">
+            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight break-words">
+                {property.building.nombre} - {property.numero}
               </h1>
               <Badge variant={estadoBadge.variant}>{estadoBadge.label}</Badge>
             </div>
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <MapPin className="h-4 w-4" />
-              <span>
-                {property.building.direccion}, {property.building.ciudad}
-              </span>
+            <div className="flex items-center gap-2 text-muted-foreground text-sm">
+              <MapPin className="h-4 w-4 flex-shrink-0" />
+              <span className="break-words">{property.building.direccion}, {property.building.ciudad}</span>
             </div>
-            <p className="text-sm text-muted-foreground">{getTipoLabel(property.tipo)}</p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="text-sm text-muted-foreground">{getTipoLabel(property.tipo)}</p>
+              {(property.referenciaCatastral || property.building.referenciaCatastral) && (
+                <Badge variant="outline" className="text-xs font-mono bg-amber-50 text-amber-800 border-amber-200">
+                  RC: {property.referenciaCatastral || property.building.referenciaCatastral}
+                </Badge>
+              )}
+            </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-shrink-0">
             <Button
               variant="outline"
+              size="sm"
               onClick={() => router.push(`/propiedades/${property.id}/editar`)}
             >
-              <Edit className="mr-2 h-4 w-4" />
-              Editar
+              <Edit className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Editar</span>
             </Button>
             <DeletePropertyDialog
               propertyId={property.id}
@@ -281,9 +289,9 @@ export default function PropiedadDetallesPage() {
           </div>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
           {/* Columna Principal */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Galería de Imágenes */}
             <PhotoGallery
               images={images}
@@ -307,73 +315,73 @@ export default function PropiedadDetallesPage() {
                 <CardTitle>Características Principales</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid gap-6 md:grid-cols-2">
-                  <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <Maximize2 className="h-6 w-6 text-primary" />
+                <div className="grid grid-cols-2 gap-3 sm:gap-6 md:grid-cols-2">
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <Maximize2 className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">Superficie Total</p>
-                      <p className="text-2xl font-bold">{property.superficie}m²</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground">Superficie</p>
+                      <p className="text-lg sm:text-2xl font-bold">{property.superficie}m²</p>
                     </div>
                   </div>
 
-                  {property.superficieUtil && (
-                    <div className="flex items-center gap-4">
-                      <div className="h-12 w-12 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                        <Maximize2 className="h-6 w-6 text-blue-600" />
+                  {property.superficieUtil != null && property.superficieUtil > 0 && (
+                    <div className="flex items-center gap-3 sm:gap-4">
+                      <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg bg-blue-500/10 flex items-center justify-center flex-shrink-0">
+                        <Maximize2 className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
                       </div>
                       <div>
-                        <p className="text-sm text-muted-foreground">Superficie Útil</p>
-                        <p className="text-2xl font-bold">{property.superficieUtil}m²</p>
+                        <p className="text-xs sm:text-sm text-muted-foreground">Sup. Útil</p>
+                        <p className="text-lg sm:text-2xl font-bold">{property.superficieUtil}m²</p>
                       </div>
                     </div>
                   )}
 
-                  {property.habitaciones && (
-                    <div className="flex items-center gap-4">
-                      <div className="h-12 w-12 rounded-lg bg-green-500/10 flex items-center justify-center">
-                        <Bed className="h-6 w-6 text-green-600" />
+                  {property.habitaciones != null && property.habitaciones > 0 && (
+                    <div className="flex items-center gap-3 sm:gap-4">
+                      <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg bg-green-500/10 flex items-center justify-center flex-shrink-0">
+                        <Bed className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
                       </div>
                       <div>
-                        <p className="text-sm text-muted-foreground">Habitaciones</p>
-                        <p className="text-2xl font-bold">{property.habitaciones}</p>
+                        <p className="text-xs sm:text-sm text-muted-foreground">Habitaciones</p>
+                        <p className="text-lg sm:text-2xl font-bold">{property.habitaciones}</p>
                       </div>
                     </div>
                   )}
 
-                  {property.banos && (
-                    <div className="flex items-center gap-4">
-                      <div className="h-12 w-12 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                        <Bath className="h-6 w-6 text-purple-600" />
+                  {property.banos != null && property.banos > 0 && (
+                    <div className="flex items-center gap-3 sm:gap-4">
+                      <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg bg-purple-500/10 flex items-center justify-center flex-shrink-0">
+                        <Bath className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600" />
                       </div>
                       <div>
-                        <p className="text-sm text-muted-foreground">Baños</p>
-                        <p className="text-2xl font-bold">{property.banos}</p>
+                        <p className="text-xs sm:text-sm text-muted-foreground">Baños</p>
+                        <p className="text-lg sm:text-2xl font-bold">{property.banos}</p>
                       </div>
                     </div>
                   )}
 
                   {property.planta !== null && property.planta !== undefined && (
-                    <div className="flex items-center gap-4">
-                      <div className="h-12 w-12 rounded-lg bg-orange-500/10 flex items-center justify-center">
-                        <Building2 className="h-6 w-6 text-orange-600" />
+                    <div className="flex items-center gap-3 sm:gap-4">
+                      <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg bg-orange-500/10 flex items-center justify-center flex-shrink-0">
+                        <Building2 className="h-5 w-5 sm:h-6 sm:w-6 text-orange-600" />
                       </div>
                       <div>
-                        <p className="text-sm text-muted-foreground">Planta</p>
-                        <p className="text-2xl font-bold">{property.planta}</p>
+                        <p className="text-xs sm:text-sm text-muted-foreground">Planta</p>
+                        <p className="text-lg sm:text-2xl font-bold">{property.planta}</p>
                       </div>
                     </div>
                   )}
 
                   {property.orientacion && (
-                    <div className="flex items-center gap-4">
-                      <div className="h-12 w-12 rounded-lg bg-yellow-500/10 flex items-center justify-center">
-                        <MapPin className="h-6 w-6 text-yellow-600" />
+                    <div className="flex items-center gap-3 sm:gap-4">
+                      <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg bg-yellow-500/10 flex items-center justify-center flex-shrink-0">
+                        <MapPin className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-600" />
                       </div>
                       <div>
-                        <p className="text-sm text-muted-foreground">Orientación</p>
-                        <p className="text-2xl font-bold">{property.orientacion}</p>
+                        <p className="text-xs sm:text-sm text-muted-foreground">Orientación</p>
+                        <p className="text-lg sm:text-2xl font-bold">{property.orientacion}</p>
                       </div>
                     </div>
                   )}
@@ -387,21 +395,21 @@ export default function PropiedadDetallesPage() {
                 <CardTitle>Equipamiento y Comodidades</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid gap-3 md:grid-cols-2">
+                <div className="grid grid-cols-2 gap-2 sm:gap-3">
                   {[
-                    { label: 'Aire Acondicionado', value: property.aireAcondicionado },
+                    { label: 'Aire Acond.', value: property.aireAcondicionado },
                     { label: 'Calefacción', value: property.calefaccion },
                     { label: 'Terraza', value: property.terraza },
                     { label: 'Balcón', value: property.balcon },
                     { label: 'Amueblado', value: property.amueblado },
                   ].map((item) => (
-                    <div key={item.label} className="flex items-center gap-2">
+                    <div key={item.label} className="flex items-center gap-2 p-2 rounded bg-muted/50">
                       {item.value ? (
-                        <Check className="h-5 w-5 text-green-600" />
+                        <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
                       ) : (
-                        <XIcon className="h-5 w-5 text-muted-foreground" />
+                        <XIcon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                       )}
-                      <span className={item.value ? '' : 'text-muted-foreground'}>
+                      <span className={`text-sm ${item.value ? '' : 'text-muted-foreground'}`}>
                         {item.label}
                       </span>
                     </div>
@@ -431,7 +439,7 @@ export default function PropiedadDetallesPage() {
           </div>
 
           {/* Columna Lateral */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Precio */}
             <Card>
               <CardHeader>
@@ -588,6 +596,18 @@ export default function PropiedadDetallesPage() {
                   <div>
                     <p className="text-sm text-muted-foreground">Código Postal</p>
                     <p className="font-semibold">{property.building.codigoPostal}</p>
+                  </div>
+                )}
+                {property.referenciaCatastral && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Ref. Catastral (Unidad)</p>
+                    <p className="font-mono text-xs sm:text-sm font-semibold break-all">{property.referenciaCatastral}</p>
+                  </div>
+                )}
+                {!property.referenciaCatastral && property.building.referenciaCatastral && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Ref. Catastral (Edificio)</p>
+                    <p className="font-mono text-xs sm:text-sm font-semibold break-all">{property.building.referenciaCatastral}</p>
                   </div>
                 )}
                 <Separator className="my-3" />
