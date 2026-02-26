@@ -20,7 +20,10 @@ export interface RentRollEntry {
   habitaciones?: number;     // Numero de habitaciones
   banos?: number;            // Numero de banos
   rentaMensual: number;      // Renta mensual actual o estimada
+  rentaMercado?: number;     // Renta estimada a precio de mercado
   estado: 'alquilado' | 'vacio' | 'reforma';
+  contratoVencimiento?: string; // Fecha vencimiento contrato (YYYY-MM)
+  inquilino?: string;        // Nombre/ref del inquilino
   notas?: string;
 }
 
@@ -144,6 +147,31 @@ export interface AnalysisResult {
     gapRentaActualVsPotencial: number; // % diferencia
     upside: number;                    // EUR anuales extra si se sube a mercado
   } | null;
+
+  // Gap renta actual vs mercado por unidad
+  gapPorUnidad: {
+    referencia: string;
+    tipo: string;
+    rentaActual: number;
+    rentaMercado: number;
+    gap: number;       // EUR/mes diferencia
+    gapPct: number;    // % diferencia
+  }[];
+
+  // Proyeccion cash flow a 10 anos
+  proyeccion: {
+    ano: number;
+    rentaBruta: number;
+    opex: number;
+    noi: number;
+    deuda: number;
+    cashFlow: number;
+    cashFlowAcumulado: number;
+  }[];
+
+  // TIR / IRR
+  tirBruta: number | null;    // TIR sin financiacion
+  tirApalancada: number | null; // TIR con financiacion (si aplica)
 
   // Tabla de sensibilidad
   tablaSensibilidad: SensitivityRow[];
@@ -288,6 +316,40 @@ function round(n: number): number {
 }
 
 /**
+ * Calcula la TIR (IRR) de una serie de cash flows usando Newton-Raphson.
+ * cashFlows[0] es la inversion inicial (negativa).
+ */
+function calcularTIR(cashFlows: number[], maxIter = 100, tolerance = 0.0001): number | null {
+  if (cashFlows.length < 2) return null;
+  if (cashFlows[0] >= 0) return null;
+
+  let rate = 0.1; // Estimacion inicial 10%
+
+  for (let i = 0; i < maxIter; i++) {
+    let npv = 0;
+    let dnpv = 0;
+
+    for (let t = 0; t < cashFlows.length; t++) {
+      const denom = Math.pow(1 + rate, t);
+      npv += cashFlows[t] / denom;
+      if (t > 0) dnpv -= t * cashFlows[t] / Math.pow(1 + rate, t + 1);
+    }
+
+    if (Math.abs(dnpv) < 1e-10) break;
+    const newRate = rate - npv / dnpv;
+
+    if (Math.abs(newRate - rate) < tolerance) {
+      return round(newRate * 100);
+    }
+    rate = newRate;
+
+    if (rate < -0.99 || rate > 10) return null;
+  }
+
+  return round(rate * 100);
+}
+
+/**
  * Ejecuta el analisis completo con tabla de sensibilidad.
  *
  * La tabla parte del asking price como MAXIMO y baja
@@ -382,6 +444,64 @@ export function runInvestmentAnalysis(input: AnalysisInput): AnalysisResult {
     };
   }
 
+  // Gap por unidad (renta actual vs mercado)
+  const gapPorUnidad = input.rentRoll
+    .filter(u => u.rentaMercado && u.rentaMercado > 0)
+    .map(u => {
+      const gap = (u.rentaMercado || 0) - u.rentaMensual;
+      const gapPct = u.rentaMensual > 0 ? round((gap / u.rentaMensual) * 100) : 0;
+      return {
+        referencia: u.referencia || u.tipo,
+        tipo: u.tipo,
+        rentaActual: u.rentaMensual,
+        rentaMercado: u.rentaMercado || 0,
+        gap: round(gap),
+        gapPct,
+      };
+    });
+
+  // Proyeccion a 10 anos (2% IPC anual sobre rentas, 2% sobre OPEX)
+  const IPC_ANUAL = 0.02;
+  const VENTA_MULTIPLO = 15; // PER de salida estimado
+  const proyeccion = [];
+  let cashFlowAcumulado = 0;
+
+  const cfBruto: number[] = [-base.inversionTotal]; // Ano 0: inversion
+  const cfApalancado: number[] = [-base.capitalPropio]; // Ano 0: capital propio
+
+  for (let ano = 1; ano <= 10; ano++) {
+    const factor = Math.pow(1 + IPC_ANUAL, ano - 1);
+    const rentaBruta = round(base.rentaBrutaAnual * factor);
+    const ajusteVacio = round(rentaBruta * (input.vacioEstimadoPct / 100));
+    const rentaEfectiva = rentaBruta - ajusteVacio;
+    const opex = round(base.opexAnual * factor);
+    const noi = round(rentaEfectiva - opex);
+    const deuda = round(base.cuotaAnual);
+    const cf = round(noi - deuda);
+    cashFlowAcumulado = round(cashFlowAcumulado + cf);
+
+    proyeccion.push({
+      ano,
+      rentaBruta,
+      opex,
+      noi,
+      deuda,
+      cashFlow: cf,
+      cashFlowAcumulado,
+    });
+
+    cfBruto.push(noi);
+    cfApalancado.push(cf);
+  }
+
+  // Ano 10: venta estimada (NOI ano 10 * multiplo) + ultimo CF
+  const valorSalidaEstimado = proyeccion[9].noi * VENTA_MULTIPLO;
+  cfBruto[10] += valorSalidaEstimado;
+  cfApalancado[10] += valorSalidaEstimado - (base.importeHipoteca > 0 ? base.importeHipoteca * 0.6 : 0);
+
+  const tirBruta = calcularTIR(cfBruto);
+  const tirApalancada = input.usaFinanciacion ? calcularTIR(cfApalancado) : null;
+
   return {
     rentRollSummary,
     ...base,
@@ -390,6 +510,10 @@ export function runInvestmentAnalysis(input: AnalysisInput): AnalysisResult {
     rentaM2Mensual,
     rentabilidadPorTipo,
     potencialZona,
+    gapPorUnidad,
+    proyeccion,
+    tirBruta,
+    tirApalancada,
     tablaSensibilidad,
   };
 }

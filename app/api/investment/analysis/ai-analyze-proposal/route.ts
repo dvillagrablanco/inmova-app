@@ -48,28 +48,65 @@ Para cada punto genera un "flag" (verde ✅, amarillo ⚠️, rojo 🔴):
 
 Responde SIEMPRE en formato JSON con esta estructura exacta:
 {
-  "rentRoll": [{ "tipo", "referencia", "superficie", "habitaciones", "banos", "rentaMensual", "estado" }],
-  "datosActivo": { "nombre", "direccion", "ciudad", "askingPrice", "ibiAnual", "comunidadMensual", "seguroAnual", "superficieTotal", "anoConstruccion" },
+  "rentRoll": [{
+    "tipo": "vivienda|garaje|local|trastero|oficina|otro",
+    "referencia": "1A",
+    "superficie": 75,
+    "habitaciones": 2,
+    "banos": 1,
+    "rentaMensual": 900,
+    "rentaMercado": 1050,
+    "estado": "alquilado|vacio|reforma",
+    "contratoVencimiento": "2026-12",
+    "inquilino": "nombre o ref"
+  }],
+  "datosActivo": {
+    "nombre": "Edificio X",
+    "direccion": "Calle Y nº Z, Madrid",
+    "ciudad": "Madrid",
+    "askingPrice": 2000000,
+    "ibiAnual": 8000,
+    "comunidadMensual": 350,
+    "seguroAnual": 2500,
+    "mantenimientoAnual": 3000,
+    "superficieTotal": 500,
+    "anoConstruccion": 1975,
+    "estadoConservacion": "bueno|reformado|necesita reforma"
+  },
   "analisisCritico": {
-    "flags": [{ "categoria", "nivel": "verde|amarillo|rojo", "detalle" }],
-    "rentasInfladas": boolean,
-    "gastosOmitidos": string[],
-    "riesgos": string[],
-    "oportunidades": string[]
+    "flags": [{ "categoria": "string", "nivel": "verde|amarillo|rojo", "detalle": "string" }],
+    "rentasInfladas": false,
+    "gastosOmitidos": ["seguro ~2.500€/año", "mantenimiento ~3.000€/año"],
+    "riesgos": ["Zona tensionada - tope de renta en renovaciones", "2 contratos vencen en 6 meses"],
+    "oportunidades": ["Gap de renta +15% en 3 unidades", "Local comercial infrautilizado"],
+    "contratosMasProximosAVencer": ["1A vence dic 2026", "2B vence mar 2027"],
+    "gastosEstimadosOmitidos": {
+      "ibiEstimado": 8000,
+      "comunidadEstimada": 4200,
+      "seguroEstimado": 2500,
+      "mantenimientoEstimado": 3000,
+      "gestionEstimada": 3600
+    }
   },
   "analisisIndependiente": {
-    "yieldBrutoReal": number,
-    "yieldNetoEstimado": number,
-    "rentaMercadoEstimada": number,
-    "precioMaximoRecomendado": number,
-    "descuentoSugerido": number,
+    "yieldBrutoReal": 5.8,
+    "yieldNetoEstimado": 4.2,
+    "rentaBrutaAnual": 120000,
+    "opexEstimadoAnual": 25000,
+    "noiEstimado": 95000,
+    "rentaMercadoEstimadaMensual": 11000,
+    "precioMaximoRecomendado": 1800000,
+    "descuentoSugerido": 15,
+    "precioM2Compra": 4000,
+    "precioM2Zona": 4500,
+    "tirEstimada10anos": 7.5,
     "escenarios": {
-      "conservador": { "precio", "yield", "cashFlowMensual" },
-      "base": { "precio", "yield", "cashFlowMensual" },
-      "optimista": { "precio", "yield", "cashFlowMensual" }
+      "conservador": { "precio": 1600000, "yield": 5.5, "cashFlowMensual": 2500 },
+      "base": { "precio": 1800000, "yield": 4.8, "cashFlowMensual": 1800 },
+      "optimista": { "precio": 1950000, "yield": 4.3, "cashFlowMensual": 1200 }
     },
     "conclusion": "COMPRAR|NEGOCIAR|DESCARTAR",
-    "resumenEjecutivo": string
+    "resumenEjecutivo": "string con resumen de 3-5 líneas"
   }
 }`;
 

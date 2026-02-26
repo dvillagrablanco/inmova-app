@@ -29,7 +29,10 @@ interface RentRollEntry {
   habitaciones: number;
   banos: number;
   rentaMensual: number;
+  rentaMercado: number;
   estado: 'alquilado' | 'vacio' | 'reforma';
+  contratoVencimiento: string;
+  inquilino: string;
 }
 
 const TIPO_ICONS: Record<string, any> = {
@@ -111,7 +114,7 @@ export default function AnalisisInversionPage() {
 
   // Rent Roll
   const [rentRoll, setRentRoll] = useState<RentRollEntry[]>([
-    { tipo: 'vivienda', referencia: '', superficie: 0, habitaciones: 0, banos: 0, rentaMensual: 0, estado: 'alquilado' },
+    { tipo: 'vivienda', referencia: '', superficie: 0, habitaciones: 0, banos: 0, rentaMensual: 0, rentaMercado: 0, estado: 'alquilado', contratoVencimiento: '', inquilino: '' },
   ]);
 
   const [notas, setNotas] = useState('');
@@ -212,7 +215,8 @@ export default function AnalisisInversionPage() {
       tipo, referencia: '', superficie: 0,
       habitaciones: needsRooms ? 2 : 0,
       banos: needsRooms ? 1 : 0,
-      rentaMensual: 0, estado: 'alquilado',
+      rentaMensual: 0, rentaMercado: 0, estado: 'alquilado',
+      contratoVencimiento: '', inquilino: '',
     }]);
   };
 
@@ -451,6 +455,8 @@ export default function AnalisisInversionPage() {
             <TabsTrigger value="financiacion" className="text-xs">Financiación</TabsTrigger>
             {results && <TabsTrigger value="resultados" className="text-xs">Resultados</TabsTrigger>}
             {results && <TabsTrigger value="sensibilidad" className="text-xs">Sensibilidad</TabsTrigger>}
+            {results?.proyeccion && <TabsTrigger value="proyeccion" className="text-xs">Proyección 10a</TabsTrigger>}
+            {results?.gapPorUnidad?.length > 0 && <TabsTrigger value="gap" className="text-xs">Gap Rentas</TabsTrigger>}
             {brokerAnalysis?.analisisCritico && <TabsTrigger value="due-diligence" className="text-xs gap-1"><AlertTriangle className="h-3 w-3" /> Due Diligence</TabsTrigger>}
           </TabsList>
 
@@ -1139,7 +1145,7 @@ Comunidad: 180 EUR/mes"
                           )}
                         </div>
                         {/* Fila 2: m2 + hab + banos + renta */}
-                        <div className={`grid gap-2 ${showRooms ? 'grid-cols-2 md:grid-cols-4' : 'grid-cols-2'}`}>
+                        <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
                           <div>
                             <Label className="text-[10px] text-gray-400">Superficie (m2)</Label>
                             <Input className="h-8 text-sm" type="number" placeholder="75" value={unit.superficie || ''}
@@ -1148,7 +1154,7 @@ Comunidad: 180 EUR/mes"
                           {showRooms && (
                             <>
                               <div>
-                                <Label className="text-[10px] text-gray-400">Habitaciones</Label>
+                                <Label className="text-[10px] text-gray-400">Hab.</Label>
                                 <Input className="h-8 text-sm" type="number" placeholder="2" value={unit.habitaciones || ''}
                                   onChange={e => updateUnit(idx, 'habitaciones', Number(e.target.value))} />
                               </div>
@@ -1160,11 +1166,28 @@ Comunidad: 180 EUR/mes"
                             </>
                           )}
                           <div>
-                            <Label className="text-[10px] text-gray-400">Renta EUR/mes</Label>
+                            <Label className="text-[10px] text-gray-400">Renta actual €/mes</Label>
                             <Input className="h-8 text-sm" type="number" placeholder="800" value={unit.rentaMensual || ''}
                               onChange={e => updateUnit(idx, 'rentaMensual', Number(e.target.value))} />
                           </div>
+                          <div>
+                            <Label className="text-[10px] text-gray-400">Renta mercado €/mes</Label>
+                            <Input className="h-8 text-sm" type="number" placeholder="950" value={unit.rentaMercado || ''}
+                              onChange={e => updateUnit(idx, 'rentaMercado', Number(e.target.value))} />
+                          </div>
+                          <div>
+                            <Label className="text-[10px] text-gray-400">Vencimiento</Label>
+                            <Input className="h-8 text-sm" type="month" value={unit.contratoVencimiento || ''}
+                              onChange={e => updateUnit(idx, 'contratoVencimiento', e.target.value)} />
+                          </div>
                         </div>
+                        {/* Gap indicator */}
+                        {unit.rentaMercado > 0 && unit.rentaMensual > 0 && unit.rentaMercado !== unit.rentaMensual && (
+                          <div className={`text-[10px] px-2 py-0.5 rounded ${unit.rentaMercado > unit.rentaMensual ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                            Gap: {unit.rentaMercado > unit.rentaMensual ? '+' : ''}{Math.round(unit.rentaMercado - unit.rentaMensual)}€/mes ({unit.rentaMercado > unit.rentaMensual ? '+' : ''}{Math.round((unit.rentaMercado / unit.rentaMensual - 1) * 100)}%)
+                            {unit.contratoVencimiento && ` | Vence: ${unit.contratoVencimiento}`}
+                          </div>
+                        )}
                       </div>
                     );
                   })}
@@ -1275,6 +1298,13 @@ Comunidad: 180 EUR/mes"
                     <div className="text-xs text-gray-500">Payback</div>
                     <div className="text-2xl font-bold">{results.paybackAnos < 100 ? `${results.paybackAnos} a` : 'N/A'}</div>
                   </CardContent></Card>
+                  {results.tirBruta != null && (
+                    <Card><CardContent className="p-4">
+                      <div className="text-xs text-gray-500">TIR (10 años)</div>
+                      <div className="text-2xl font-bold text-purple-600">{results.tirBruta}%</div>
+                      {results.tirApalancada != null && <div className="text-xs text-gray-400">Apalancada: {results.tirApalancada}%</div>}
+                    </CardContent></Card>
+                  )}
                 </div>
 
                 {/* KPIs secundarios */}
@@ -1534,6 +1564,153 @@ Comunidad: 180 EUR/mes"
                   <p className="text-xs text-gray-400 mt-3">
                     Rojo = asking price (techo). Verde = zona de descuento favorable. El cash-flow incluye hipoteca si se usa financiacion.
                   </p>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          )}
+
+          {/* TAB: Proyección Cash Flow 10 años */}
+          {results?.proyeccion && (
+            <TabsContent value="proyeccion">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2"><TrendingUp className="h-5 w-5" /> Proyección Cash Flow a 10 Años</CardTitle>
+                  <CardDescription>IPC estimado: 2% anual sobre rentas y gastos. Valor de salida: NOI año 10 × 15 (PER).</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {/* TIR cards */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                    {results.tirBruta != null && (
+                      <div className="bg-purple-50 rounded-lg p-3 border border-purple-200">
+                        <div className="text-xs text-purple-600">TIR Bruta (sin financiación)</div>
+                        <div className="text-2xl font-bold text-purple-700">{results.tirBruta}%</div>
+                      </div>
+                    )}
+                    {results.tirApalancada != null && (
+                      <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+                        <div className="text-xs text-blue-600">TIR Apalancada</div>
+                        <div className="text-2xl font-bold text-blue-700">{results.tirApalancada}%</div>
+                      </div>
+                    )}
+                    <div className="bg-gray-50 rounded-lg p-3 border">
+                      <div className="text-xs text-gray-500">CF acumulado 10 años</div>
+                      <div className={`text-2xl font-bold ${(results.proyeccion[9]?.cashFlowAcumulado || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {fmt(results.proyeccion[9]?.cashFlowAcumulado || 0)}
+                      </div>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-3 border">
+                      <div className="text-xs text-gray-500">Valor salida estimado</div>
+                      <div className="text-2xl font-bold">{fmt((results.proyeccion[9]?.noi || 0) * 15)}</div>
+                    </div>
+                  </div>
+
+                  <div className="overflow-x-auto -mx-4 px-4">
+                    <table className="w-full text-sm min-w-[700px]">
+                      <thead>
+                        <tr className="border-b bg-gray-50 text-xs">
+                          <th className="text-left p-2 font-medium">Año</th>
+                          <th className="text-right p-2 font-medium">Renta bruta</th>
+                          <th className="text-right p-2 font-medium">OPEX</th>
+                          <th className="text-right p-2 font-medium">NOI</th>
+                          <th className="text-right p-2 font-medium">Deuda</th>
+                          <th className="text-right p-2 font-medium">Cash Flow</th>
+                          <th className="text-right p-2 font-medium">CF Acumulado</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y">
+                        {results.proyeccion.map((row: any) => (
+                          <tr key={row.ano} className={row.cashFlowAcumulado >= 0 && results.proyeccion[row.ano - 2]?.cashFlowAcumulado < 0 ? 'bg-green-50' : ''}>
+                            <td className="p-2 font-medium">Año {row.ano}</td>
+                            <td className="p-2 text-right">{fmt(row.rentaBruta)}</td>
+                            <td className="p-2 text-right text-red-600">-{fmt(row.opex)}</td>
+                            <td className="p-2 text-right font-medium">{fmt(row.noi)}</td>
+                            <td className="p-2 text-right text-gray-500">{row.deuda > 0 ? `-${fmt(row.deuda)}` : '-'}</td>
+                            <td className={`p-2 text-right font-medium ${row.cashFlow >= 0 ? 'text-green-600' : 'text-red-600'}`}>{fmt(row.cashFlow)}</td>
+                            <td className={`p-2 text-right ${row.cashFlowAcumulado >= 0 ? 'text-green-600' : 'text-red-600'}`}>{fmt(row.cashFlowAcumulado)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          )}
+
+          {/* TAB: Gap Rentas Actual vs Mercado */}
+          {results?.gapPorUnidad?.length > 0 && (
+            <TabsContent value="gap">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2"><BarChart3 className="h-5 w-5 text-green-600" /> Gap Renta Actual vs Mercado</CardTitle>
+                  <CardDescription>Comparativa por unidad entre la renta actual y la renta estimada de mercado. Upside potencial al renovar contratos.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {/* Totals */}
+                  {(() => {
+                    const totalGap = results.gapPorUnidad.reduce((s: number, u: any) => s + u.gap, 0);
+                    const totalActual = results.gapPorUnidad.reduce((s: number, u: any) => s + u.rentaActual, 0);
+                    const totalMercado = results.gapPorUnidad.reduce((s: number, u: any) => s + u.rentaMercado, 0);
+                    return (
+                      <div className="grid grid-cols-3 gap-3 mb-4">
+                        <div className="bg-gray-50 rounded-lg p-3 border text-center">
+                          <div className="text-xs text-gray-500">Renta actual total</div>
+                          <div className="text-lg font-bold">{fmt(totalActual)}/mes</div>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-3 border border-green-200 text-center">
+                          <div className="text-xs text-green-600">Renta mercado total</div>
+                          <div className="text-lg font-bold text-green-700">{fmt(totalMercado)}/mes</div>
+                        </div>
+                        <div className={`rounded-lg p-3 border text-center ${totalGap > 0 ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                          <div className="text-xs text-gray-600">Gap (upside)</div>
+                          <div className={`text-lg font-bold ${totalGap > 0 ? 'text-green-700' : 'text-red-700'}`}>
+                            {totalGap > 0 ? '+' : ''}{fmt(totalGap)}/mes
+                          </div>
+                          <div className="text-xs text-gray-500">{totalGap > 0 ? '+' : ''}{fmt(totalGap * 12)}/año</div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b bg-gray-50 text-xs">
+                          <th className="text-left p-2">Unidad</th>
+                          <th className="text-left p-2">Tipo</th>
+                          <th className="text-right p-2">Renta actual</th>
+                          <th className="text-right p-2">Renta mercado</th>
+                          <th className="text-right p-2">Gap €/mes</th>
+                          <th className="text-right p-2">Gap %</th>
+                          <th className="p-2">Potencial</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y">
+                        {results.gapPorUnidad.map((u: any, i: number) => (
+                          <tr key={i}>
+                            <td className="p-2 font-medium">{u.referencia}</td>
+                            <td className="p-2 text-gray-500">{TIPO_LABELS[u.tipo] || u.tipo}</td>
+                            <td className="p-2 text-right">{fmt(u.rentaActual)}</td>
+                            <td className="p-2 text-right">{fmt(u.rentaMercado)}</td>
+                            <td className={`p-2 text-right font-medium ${u.gap > 0 ? 'text-green-600' : u.gap < 0 ? 'text-red-600' : ''}`}>
+                              {u.gap > 0 ? '+' : ''}{fmt(u.gap)}
+                            </td>
+                            <td className={`p-2 text-right ${u.gapPct > 0 ? 'text-green-600' : u.gapPct < 0 ? 'text-red-600' : ''}`}>
+                              {u.gapPct > 0 ? '+' : ''}{u.gapPct}%
+                            </td>
+                            <td className="p-2">
+                              <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                                <div
+                                  className={`h-full rounded-full ${u.gap > 0 ? 'bg-green-500' : 'bg-red-500'}`}
+                                  style={{ width: `${Math.min(Math.abs(u.gapPct), 100)}%` }}
+                                />
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
