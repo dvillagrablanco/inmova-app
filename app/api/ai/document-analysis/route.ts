@@ -957,19 +957,41 @@ export async function POST(request: NextRequest) {
           ),
         });
 
-        // Verificar tipo de archivo
-        const allowedTypes = [
+        // Verificar tipo de archivo (por MIME type O por extensión)
+        const allowedMimeTypes = [
           'application/pdf',
           'image/jpeg',
           'image/png',
           'image/jpg',
+          'image/webp',
+          'image/gif',
+          'image/heic',
+          'image/heif',
           'application/msword',
           'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
           'text/plain',
+          'application/octet-stream', // Fallback genérico de algunos navegadores
         ];
 
-        if (!allowedTypes.includes(file.type)) {
-          return NextResponse.json({ error: 'Tipo de archivo no permitido' }, { status: 400 });
+        const allowedExtensions = [
+          '.pdf', '.jpg', '.jpeg', '.png', '.gif', '.webp', '.heic', '.heif',
+          '.doc', '.docx', '.txt', '.bmp', '.tiff',
+        ];
+
+        const fileExtension = (file.name || '').toLowerCase().match(/\.[a-z0-9]+$/)?.[0] || '';
+        const mimeTypeOk = file.type && allowedMimeTypes.includes(file.type);
+        const extensionOk = fileExtension && allowedExtensions.includes(fileExtension);
+
+        if (!mimeTypeOk && !extensionOk) {
+          logger.warn('[AI Document Analysis] Archivo rechazado', {
+            fileName: file.name,
+            fileType: file.type,
+            fileExtension,
+          });
+          return NextResponse.json(
+            { error: `Tipo de archivo no permitido: ${file.type || 'desconocido'} (${file.name}). Formatos aceptados: PDF, JPG, PNG, WEBP, DOC, DOCX, TXT.` },
+            { status: 400 }
+          );
         }
 
         // Verificar tamaño (máximo 10MB)

@@ -576,6 +576,43 @@ export default function SegurosPage() {
           </Card>
         </div>
 
+        {/* Acceso Rápido - Cotizaciones y Proveedores */}
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card className="cursor-pointer hover:shadow-md transition-shadow border-blue-200 bg-blue-50/50" onClick={() => router.push('/seguros/cotizaciones')}>
+            <CardContent className="flex items-center gap-4 pt-6">
+              <div className="p-3 bg-blue-100 rounded-lg">
+                <FileText className="h-6 w-6 text-blue-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Plataforma de Cotizaciones</h3>
+                <p className="text-sm text-muted-foreground">Solicitar, comparar y analizar cotizaciones</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="cursor-pointer hover:shadow-md transition-shadow border-purple-200 bg-purple-50/50" onClick={() => router.push('/seguros/proveedores')}>
+            <CardContent className="flex items-center gap-4 pt-6">
+              <div className="p-3 bg-purple-100 rounded-lg">
+                <Building2 className="h-6 w-6 text-purple-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Proveedores de Seguros</h3>
+                <p className="text-sm text-muted-foreground">Gestionar aseguradoras y contactos</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="cursor-pointer hover:shadow-md transition-shadow border-green-200 bg-green-50/50" onClick={() => router.push('/seguros/analisis')}>
+            <CardContent className="flex items-center gap-4 pt-6">
+              <div className="p-3 bg-green-100 rounded-lg">
+                <TrendingUp className="h-6 w-6 text-green-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Análisis de Siniestralidad</h3>
+                <p className="text-sm text-muted-foreground">Dashboard y reportes de seguros</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Documentación de Seguros Externa (Google Drive) */}
         {externalDocs.length > 0 && (
           <Card>

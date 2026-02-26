@@ -311,6 +311,9 @@ enum NotificationType {
   inspeccion_programada
   alerta_sistema
   info
+  seguro_renovacion
+  cotizacion_seguro
+  cotizacion_recibida
 }
 
 enum SituacionLaboral {
@@ -531,6 +534,7 @@ model Building {
   energyReadings       EnergyReading[]
   energyAlerts         EnergyAlert[]
   insurancePolicies    InsurancePolicy[]
+  insuranceQuoteRequests InsuranceQuoteRequest[]
 
   // Prioridades Medias
   valoraciones  ValoracionPropiedad[]
@@ -2208,6 +2212,10 @@ model Company {
   sepaPayments      SepaPayment[]      @relation("CompanySepaPayments")
   sepaSubscriptions SepaSubscription[] @relation("CompanySepaSubscriptions")
   gcPayouts         GCPayout[]         @relation("CompanyGCPayouts")
+
+  // 🛡️ PLATAFORMA DE COTIZACIONES DE SEGUROS
+  insuranceProviders     InsuranceProvider[]
+  insuranceQuoteRequests InsuranceQuoteRequest[]
 
   @@map("company")
 }
@@ -4730,6 +4738,28 @@ enum ClaimStatus {
   @@map("claim_statuses")
 }
 
+enum QuoteRequestStatus {
+  borrador
+  pendiente
+  enviada
+  parcialmente_respondida
+  completada
+  cancelada
+
+  @@map("quote_request_statuses")
+}
+
+enum QuotationStatus {
+  recibida
+  en_revision
+  analizada
+  aceptada
+  rechazada
+  expirada
+
+  @@map("quotation_statuses")
+}
+
 model Insurance {
   id String @id @default(cuid())
 
@@ -4827,6 +4857,175 @@ model InsuranceClaim {
   @@index([estado])
   @@index([fechaSiniestro])
   @@map("insurance_claims")
+}
+
+// ==========================================
+// PROVEEDORES DE SEGUROS Y COTIZACIONES
+// ==========================================
+
+model InsuranceProvider {
+  id        String  @id @default(cuid())
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  // Datos del proveedor
+  nombre       String
+  cif          String?
+  direccion    String?
+  ciudad       String?
+  codigoPostal String?
+  telefono     String?
+  email        String?
+  web          String?
+
+  // Contacto comercial
+  contactoNombre   String?
+  contactoEmail    String?
+  contactoTelefono String?
+  contactoCargo    String?
+
+  // Metadata
+  tiposSeguro String[] @default([]) // ej: ["hogar","comunidad","responsabilidad_civil"]
+  activo      Boolean  @default(true)
+  notas       String?  @db.Text
+  logoUrl     String?
+
+  // Relaciones
+  quotations    InsuranceQuotation[]
+  quoteRequests InsuranceQuoteRequestProvider[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([activo])
+  @@map("insurance_providers")
+}
+
+model InsuranceQuoteRequest {
+  id        String  @id @default(cuid())
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  // Referencia
+  codigo String @unique // "SOL-2026-0001"
+
+  // Propiedad/edificio a asegurar
+  buildingId String?
+  building   Building? @relation(fields: [buildingId], references: [id], onDelete: SetNull)
+  unitId     String?
+
+  // Datos de la solicitud
+  tipoSeguro            InsuranceType
+  descripcion           String        @db.Text
+  sumaAsegurada         Float?
+  coberturasSolicitadas String[]      @default([])
+
+  // Datos del inmueble para cotización
+  direccionInmueble String?
+  superficieM2      Float?
+  anoConstruccion   Int?
+  usoPrincipal      String? // "residencial","comercial","mixto"
+
+  // Estado del proceso
+  estado               QuoteRequestStatus @default(borrador)
+  fechaEnvio           DateTime?
+  fechaLimiteRespuesta DateTime?
+
+  // Proveedores destinatarios
+  proveedores InsuranceQuoteRequestProvider[]
+
+  // Cotizaciones recibidas
+  quotations InsuranceQuotation[]
+
+  // IA Analysis resumen
+  analisisIA Json? // Resultado del análisis comparativo
+
+  // Auditoría
+  creadoPor String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([estado])
+  @@index([createdAt])
+  @@map("insurance_quote_requests")
+}
+
+model InsuranceQuoteRequestProvider {
+  id         String                @id @default(cuid())
+  requestId  String
+  request    InsuranceQuoteRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  providerId String
+  provider   InsuranceProvider     @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  // Tracking email
+  emailEnviado      Boolean   @default(false)
+  fechaEnvioEmail   DateTime?
+  emailDestinatario String?
+
+  // Respuesta
+  respondido     Boolean   @default(false)
+  fechaRespuesta DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@unique([requestId, providerId])
+  @@index([requestId])
+  @@index([providerId])
+  @@map("insurance_quote_request_providers")
+}
+
+model InsuranceQuotation {
+  id        String @id @default(cuid())
+  companyId String
+
+  // Referencias
+  requestId  String?
+  request    InsuranceQuoteRequest? @relation(fields: [requestId], references: [id], onDelete: SetNull)
+  providerId String
+  provider   InsuranceProvider      @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  // Datos de la cotización
+  codigo       String?       // Referencia del proveedor
+  tipoSeguro   InsuranceType
+  primaAnual   Float
+  primaMensual Float?
+  sumaAsegurada Float
+  franquicia   Float? // Deducible
+
+  // Coberturas
+  coberturas           String[] @default([])
+  exclusiones          String[] @default([])
+  condicionesEspeciales String?  @db.Text
+
+  // Validez
+  fechaCotizacion DateTime @default(now())
+  validaHasta     DateTime?
+
+  // Estado
+  estado       QuotationStatus @default(recibida)
+  seleccionada Boolean         @default(false)
+
+  // Documentos
+  documentoUrl       String?
+  documentosAdjuntos Json? // Array de {filename, url, uploadedAt}
+
+  // Análisis IA
+  analisisIA Json?  // {score, pros, cons, recomendacion, riesgos}
+  scoreIA    Float? // 0-100
+
+  // Notas
+  notas String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([requestId])
+  @@index([providerId])
+  @@index([estado])
+  @@map("insurance_quotations")
 }
 
 // ==========================================

@@ -203,6 +203,9 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/galerias': 'galerias',
   '/certificaciones': 'certificaciones',
   '/seguros': 'seguros',
+  '/seguros/cotizaciones': 'seguros',
+  '/seguros/proveedores': 'seguros',
+  '/seguros/analisis': 'seguros',
   '/inspecciones': 'inspecciones',
   '/visitas': 'visitas',
   '/ordenes-trabajo': 'ordenes_trabajo',
@@ -1646,6 +1649,12 @@ const documentosLegalNavItems = [
     href: '/seguros',
     icon: Shield,
     roles: ['super_admin', 'administrador', 'gestor'],
+    subItems: [
+      { name: 'Pólizas', href: '/seguros', icon: Shield },
+      { name: 'Cotizaciones', href: '/seguros/cotizaciones', icon: FileText },
+      { name: 'Proveedores', href: '/seguros/proveedores', icon: Building2 },
+      { name: 'Análisis', href: '/seguros/analisis', icon: BarChart3 },
+    ],
   },
 ];
 

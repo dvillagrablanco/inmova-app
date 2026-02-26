@@ -41,6 +41,7 @@ import { PropertyMap } from '@/components/property/PropertyMap';
 import { ValuationCard } from '@/components/property/ValuationCard';
 import { DeletePropertyDialog } from '@/components/property/DeletePropertyDialog';
 import { PhotoGallery } from '@/components/ui/photo-gallery';
+import { EntityDocuments } from '@/components/ui/entity-documents';
 
 interface PropertyDetails {
   id: string;
@@ -291,6 +292,13 @@ export default function PropiedadDetallesPage() {
               title="Fotos de la propiedad"
               description="Sube fotos para documentar el estado de la propiedad"
               editable={true}
+            />
+
+            {/* Documentos de la Unidad */}
+            <EntityDocuments
+              entityType="unit"
+              entityId={propertyId}
+              buildingId={property.building?.id}
             />
 
             {/* Características Principales */}

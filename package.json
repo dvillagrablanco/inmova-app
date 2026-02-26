@@ -36,6 +36,8 @@
     "db:verify": "tsx scripts/db-verify-integrity.ts",
     "db:optimize": "tsx scripts/db-optimize.ts",
     "db:migrate": "prisma migrate deploy",
+    "db:push": "prisma db push",
+    "db:generate": "prisma generate",
     "db:seed": "prisma db seed",
     "db:status": "prisma migrate status",
     "audit:deployment": "node scripts/pre-deployment-audit.js",
