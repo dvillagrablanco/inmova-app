@@ -45,7 +45,6 @@ export function VirtualTourViewer({ propertyId, autoload = true }: VirtualTourVi
 
       const data = await response.json();
       setTour(data.data);
-
     } catch (error: any) {
       setError(error.message);
     } finally {
@@ -92,9 +91,7 @@ export function VirtualTourViewer({ propertyId, autoload = true }: VirtualTourVi
               <Eye className="h-5 w-5" />
               {tour.titulo}
             </CardTitle>
-            {tour.descripcion && (
-              <CardDescription>{tour.descripcion}</CardDescription>
-            )}
+            {tour.descripcion && <CardDescription>{tour.descripcion}</CardDescription>}
           </div>
           <div className="flex items-center gap-2 text-sm text-gray-500">
             <Eye className="h-4 w-4" />
@@ -106,13 +103,26 @@ export function VirtualTourViewer({ propertyId, autoload = true }: VirtualTourVi
         <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-gray-100">
           {tour.embedCode ? (
             // Embed code custom - sanitizado para prevenir XSS
-            <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(tour.embedCode, {
-              allowedTags: ['iframe', 'div', 'script'],
-              allowedAttributes: { 
-                iframe: ['src', 'width', 'height', 'frameborder', 'allow', 'allowfullscreen', 'style', 'class'],
-                div: ['style', 'class', 'id'],
-              },
-            }) }} />
+            <div
+              dangerouslySetInnerHTML={{
+                __html: sanitizeHtml(tour.embedCode, {
+                  allowedTags: ['iframe', 'div'],
+                  allowedAttributes: {
+                    iframe: [
+                      'src',
+                      'width',
+                      'height',
+                      'frameborder',
+                      'allow',
+                      'allowfullscreen',
+                      'style',
+                      'class',
+                    ],
+                    div: ['style', 'class', 'id'],
+                  },
+                }),
+              }}
+            />
           ) : tour.tipo === 'MATTERPORT' ? (
             // Matterport iframe
             <iframe
