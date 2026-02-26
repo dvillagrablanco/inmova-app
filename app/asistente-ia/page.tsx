@@ -48,7 +48,6 @@ import {
   X,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import logger from '@/lib/logger';
 
 interface Message {
   id: string;
@@ -104,7 +103,7 @@ export default function AIAssistantPage() {
   const { data: _session, status } = useSession() || {};
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('chat');
+  const [activeTab, setActiveTab] = useState('agents');
   const [agents, setAgents] = useState<AgentInfo[]>([]);
   const [selectedAgent, setSelectedAgent] = useState<AgentInfo | null>(null);
   const [isLoadingAgents, setIsLoadingAgents] = useState(true);
@@ -142,14 +141,18 @@ export default function AIAssistantPage() {
         if (data.agents && Array.isArray(data.agents)) {
           const enabledAgents = data.agents.filter((a: AgentInfo) => a.enabled);
           setAgents(enabledAgents);
-          // Seleccionar el primer agente por defecto
           if (enabledAgents.length > 0 && !selectedAgent) {
             selectAgent(enabledAgents[0]);
+            setActiveTab('chat');
           }
         }
+      } else {
+        console.warn('Error loading agents, status:', res.status);
+        toast.error('No se pudieron cargar los agentes IA');
       }
     } catch (error) {
       console.error('Error loading agents:', error);
+      toast.error('Error de conexión al cargar agentes');
     } finally {
       setIsLoadingAgents(false);
     }
@@ -338,7 +341,7 @@ export default function AIAssistantPage() {
         }
       }
     } catch (error: any) {
-      logger.error('Error enviando mensaje:', error);
+      console.error('Error enviando mensaje:', error);
       toast.error(error.message || 'Error al procesar tu mensaje');
 
       setMessages((prev) => [
@@ -401,31 +404,31 @@ export default function AIAssistantPage() {
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
-            <h1 className="mt-2 text-2xl font-bold md:text-3xl flex items-center gap-2">
-              <Brain className="h-6 w-6 text-violet-600" />
-              Asistentes IA Especializados
+            <h1 className="mt-2 text-xl font-bold sm:text-2xl md:text-3xl flex items-center gap-2">
+              <Brain className="h-5 w-5 sm:h-6 sm:w-6 text-violet-600 flex-shrink-0" />
+              Asistentes IA
             </h1>
-            <p className="text-muted-foreground">
-              <Badge variant="outline" className="mr-2 bg-violet-50 text-violet-700">
-                Powered by Claude 3.5
+            <p className="text-sm text-muted-foreground flex items-center gap-2 flex-wrap">
+              <Badge variant="outline" className="bg-violet-50 text-violet-700 text-xs">
+                Claude 3.5
               </Badge>
-              Selecciona un agente especializado para ayudarte
+              <span className="hidden sm:inline">Selecciona un agente especializado para ayudarte</span>
             </p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={loadAgents}>
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Actualizar
+            <Button variant="outline" size="sm" onClick={loadAgents}>
+              <RefreshCw className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Actualizar</span>
             </Button>
-            <Button variant="outline" onClick={() => router.push('/dashboard')}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Volver
+            <Button variant="outline" size="sm" onClick={() => router.push('/dashboard')}>
+              <ArrowLeft className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Volver</span>
             </Button>
           </div>
         </div>
 
         {/* Stats Cards */}
-        <div className="mb-6 grid gap-4 md:grid-cols-4">
+        <div className="mb-6 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
@@ -579,9 +582,9 @@ export default function AIAssistantPage() {
 
           {/* Tab: Chat */}
           <TabsContent value="chat">
-            <div className="grid gap-6 lg:grid-cols-3">
+            <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
               {/* Panel de Chat Principal */}
-              <Card className="lg:col-span-2">
+              <Card className="lg:col-span-2 order-1">
                 <CardHeader className="border-b">
                   {selectedAgent ? (
                     <div className="flex items-center gap-3">
@@ -612,7 +615,7 @@ export default function AIAssistantPage() {
                   )}
                 </CardHeader>
                 <CardContent className="p-0">
-                  <ScrollArea className="h-[450px] px-6">
+                  <ScrollArea className="h-[350px] sm:h-[450px] px-4 sm:px-6">
                     <div className="space-y-4 py-4">
                       {messages.length === 0 && (
                         <div className="text-center text-muted-foreground py-12">
@@ -642,7 +645,7 @@ export default function AIAssistantPage() {
                             </div>
                           )}
                           <div
-                            className={`max-w-[80%] rounded-lg px-4 py-3 ${
+                            className={`max-w-[85%] sm:max-w-[80%] rounded-lg px-3 py-2 sm:px-4 sm:py-3 ${
                               message.role === 'user'
                                 ? 'bg-primary text-primary-foreground'
                                 : 'bg-muted'
@@ -678,7 +681,7 @@ export default function AIAssistantPage() {
                           }`}>
                             <Loader2 className="h-4 w-4 animate-spin text-white" />
                           </div>
-                          <div className="max-w-[80%] rounded-lg bg-muted px-4 py-3">
+                          <div className="max-w-[85%] sm:max-w-[80%] rounded-lg bg-muted px-3 py-2 sm:px-4 sm:py-3">
                             <div className="flex gap-1">
                               <div className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.3s]"></div>
                               <div className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.15s]"></div>
@@ -725,7 +728,7 @@ export default function AIAssistantPage() {
                           : 'Selecciona un agente primero'}
                         value={inputMessage}
                         onChange={(e) => setInputMessage(e.target.value)}
-                        onKeyPress={handleKeyPress}
+                        onKeyDown={handleKeyPress}
                         disabled={isTyping || !selectedAgent}
                         className="flex-1"
                       />
@@ -745,8 +748,8 @@ export default function AIAssistantPage() {
                 </CardContent>
               </Card>
 
-              {/* Panel Lateral */}
-              <div className="space-y-4">
+              {/* Panel Lateral - hidden on mobile when in chat, visible on lg+ */}
+              <div className="space-y-4 order-2">
                 {/* Agente Activo */}
                 {selectedAgent && (
                   <Card>
