@@ -1,13 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import {
   Building2,
   Plus,
   Search,
   MoreVertical,
+  Eye,
   Edit,
   Trash2,
   Phone,
@@ -16,6 +18,10 @@ import {
   CheckCircle2,
   XCircle,
   Shield,
+  FileText,
+  Send,
+  Home,
+  RefreshCw,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -65,22 +71,21 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 
-const TIPO_SEGURO_LABELS: Record<string, string> = {
-  incendio: 'Incendio',
-  robo: 'Robo',
-  responsabilidad_civil: 'R. Civil',
-  hogar: 'Hogar',
-  comunidad: 'Comunidad',
-  vida: 'Vida',
-  accidentes: 'Accidentes',
-  impago_alquiler: 'Impago',
-  otro: 'Otro',
-};
+const INSURANCE_TYPE_OPTIONS = [
+  { value: 'incendio', label: 'Incendio' },
+  { value: 'robo', label: 'Robo' },
+  { value: 'responsabilidad_civil', label: 'Responsabilidad Civil' },
+  { value: 'hogar', label: 'Hogar' },
+  { value: 'comunidad', label: 'Comunidad' },
+  { value: 'vida', label: 'Vida' },
+  { value: 'accidentes', label: 'Accidentes' },
+  { value: 'impago_alquiler', label: 'Impago Alquiler' },
+  { value: 'otro', label: 'Otro' },
+];
 
-const TIPOS_SEGURO_OPTIONS = Object.entries(TIPO_SEGURO_LABELS).map(([value, label]) => ({
-  value,
-  label,
-}));
+const TIPO_SEGURO_LABELS: Record<string, string> = Object.fromEntries(
+  INSURANCE_TYPE_OPTIONS.map((t) => [t.value, t.label])
+);
 
 interface InsuranceProvider {
   id: string;
@@ -144,10 +149,13 @@ const EMPTY_FORM: ProviderFormData = {
 
 export default function ProveedoresPage() {
   const router = useRouter();
+  const pathname = usePathname();
+  const { data: _session, status } = useSession();
   const [providers, setProviders] = useState<InsuranceProvider[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [tipoFilter, setTipoFilter] = useState<string>('all');
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingProvider, setEditingProvider] = useState<InsuranceProvider | null>(null);
@@ -158,9 +166,13 @@ export default function ProveedoresPage() {
   const [providerToDelete, setProviderToDelete] = useState<InsuranceProvider | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const dashboardHref = pathname?.startsWith('/admin') ? '/admin/dashboard' : '/dashboard';
+
   useEffect(() => {
-    fetchProviders();
-  }, []);
+    if (status === 'authenticated') {
+      fetchProviders();
+    }
+  }, [status]);
 
   const fetchProviders = async () => {
     try {
@@ -190,15 +202,17 @@ export default function ProveedoresPage() {
       (statusFilter === 'activo' && p.activo) ||
       (statusFilter === 'inactivo' && !p.activo);
 
-    return matchesSearch && matchesStatus;
+    const matchesTipo =
+      tipoFilter === 'all' || (p.tiposSeguro && p.tiposSeguro.includes(tipoFilter));
+
+    return matchesSearch && matchesStatus && matchesTipo;
   });
 
   const stats = {
     total: providers.length,
     activos: providers.filter((p) => p.activo).length,
-    conCotizaciones: providers.filter(
-      (p) => (p._count?.quotations ?? 0) + (p._count?.quoteRequests ?? 0) > 0
-    ).length,
+    cotizacionesRecibidas: providers.reduce((sum, p) => sum + (p._count?.quotations ?? 0), 0),
+    solicitudesEnviadas: providers.reduce((sum, p) => sum + (p._count?.quoteRequests ?? 0), 0),
   };
 
   const openCreateDialog = () => {
@@ -321,13 +335,13 @@ export default function ProveedoresPage() {
   const getQuotationCount = (provider: InsuranceProvider) =>
     (provider._count?.quotations ?? 0) + (provider._count?.quoteRequests ?? 0);
 
-  if (isLoading) {
+  if (status === 'loading' || isLoading) {
     return (
       <AuthenticatedLayout>
         <div className="space-y-6">
           <Skeleton className="h-8 w-72" />
-          <div className="grid gap-4 md:grid-cols-3">
-            {[1, 2, 3].map((i) => (
+          <div className="grid gap-4 md:grid-cols-4">
+            {[1, 2, 3, 4].map((i) => (
               <Skeleton key={i} className="h-28" />
             ))}
           </div>
@@ -347,7 +361,9 @@ export default function ProveedoresPage() {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
-                  <BreadcrumbLink href="/dashboard">Home</BreadcrumbLink>
+                  <BreadcrumbLink href={dashboardHref}>
+                    <Home className="h-4 w-4" />
+                  </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
@@ -364,20 +380,26 @@ export default function ProveedoresPage() {
               <div>
                 <h1 className="text-3xl font-bold tracking-tight">Proveedores de Seguros</h1>
                 <p className="text-sm text-muted-foreground">
-                  Gestiona las aseguradoras y proveedores de seguros
+                  Gestiona tus proveedores y aseguradoras
                 </p>
               </div>
             </div>
           </div>
 
-          <Button onClick={openCreateDialog}>
-            <Plus className="mr-2 h-4 w-4" />
-            Nuevo Proveedor
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => fetchProviders()}>
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Actualizar
+            </Button>
+            <Button onClick={() => router.push('/seguros/proveedores/nuevo')}>
+              <Plus className="mr-2 h-4 w-4" />
+              Nuevo Proveedor
+            </Button>
+          </div>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Proveedores</CardTitle>
@@ -402,12 +424,23 @@ export default function ProveedoresPage() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Con Cotizaciones</CardTitle>
-              <Shield className="h-4 w-4 text-blue-500" />
+              <CardTitle className="text-sm font-medium">Cotizaciones Recibidas</CardTitle>
+              <FileText className="h-4 w-4 text-blue-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-blue-600">{stats.conCotizaciones}</div>
-              <p className="text-xs text-muted-foreground">Han enviado cotizaciones</p>
+              <div className="text-2xl font-bold text-blue-600">{stats.cotizacionesRecibidas}</div>
+              <p className="text-xs text-muted-foreground">Total de cotizaciones</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Solicitudes Enviadas</CardTitle>
+              <Send className="h-4 w-4 text-purple-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-purple-600">{stats.solicitudesEnviadas}</div>
+              <p className="text-xs text-muted-foreground">Solicitudes de cotización</p>
             </CardContent>
           </Card>
         </div>
@@ -416,7 +449,7 @@ export default function ProveedoresPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="grid gap-4 md:grid-cols-3">
-              <div className="relative md:col-span-2">
+              <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   placeholder="Buscar por nombre, CIF, email o contacto..."
@@ -425,6 +458,20 @@ export default function ProveedoresPage() {
                   className="pl-9"
                 />
               </div>
+
+              <Select value={tipoFilter} onValueChange={setTipoFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Tipo de seguro" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los tipos</SelectItem>
+                  {INSURANCE_TYPE_OPTIONS.map((tipo) => (
+                    <SelectItem key={tipo.value} value={tipo.value}>
+                      {tipo.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger>
@@ -438,7 +485,7 @@ export default function ProveedoresPage() {
               </Select>
             </div>
 
-            {(searchTerm || statusFilter !== 'all') && (
+            {(searchTerm || statusFilter !== 'all' || tipoFilter !== 'all') && (
               <div className="mt-4 flex items-center gap-2">
                 <span className="text-sm text-muted-foreground">
                   Mostrando {filteredProviders.length} de {providers.length} proveedores
@@ -449,6 +496,7 @@ export default function ProveedoresPage() {
                   onClick={() => {
                     setSearchTerm('');
                     setStatusFilter('all');
+                    setTipoFilter('all');
                   }}
                 >
                   Limpiar filtros
@@ -474,7 +522,7 @@ export default function ProveedoresPage() {
                 <p className="text-sm text-muted-foreground mb-4">
                   Añade tu primer proveedor de seguros
                 </p>
-                <Button onClick={openCreateDialog}>
+                <Button onClick={() => router.push('/seguros/proveedores/nuevo')}>
                   <Plus className="mr-2 h-4 w-4" />
                   Nuevo Proveedor
                 </Button>
@@ -582,6 +630,10 @@ export default function ProveedoresPage() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem onClick={() => openEditDialog(provider)}>
+                                <Eye className="mr-2 h-4 w-4" />
+                                Ver
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => openEditDialog(provider)}>
                                 <Edit className="mr-2 h-4 w-4" />
                                 Editar
                               </DropdownMenuItem>
@@ -629,34 +681,33 @@ export default function ProveedoresPage() {
             </DialogHeader>
 
             <div className="space-y-6 py-4">
-              {/* Datos generales */}
               <div>
                 <h3 className="text-sm font-semibold mb-3">Datos Generales</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="nombre">
+                    <Label htmlFor="dlg-nombre">
                       Nombre <span className="text-red-500">*</span>
                     </Label>
                     <Input
-                      id="nombre"
+                      id="dlg-nombre"
                       value={formData.nombre}
                       onChange={(e) => handleFormChange('nombre', e.target.value)}
                       placeholder="Nombre de la aseguradora"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="cif">CIF</Label>
+                    <Label htmlFor="dlg-cif">CIF</Label>
                     <Input
-                      id="cif"
+                      id="dlg-cif"
                       value={formData.cif}
                       onChange={(e) => handleFormChange('cif', e.target.value)}
                       placeholder="B12345678"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="dlg-email">Email</Label>
                     <Input
-                      id="email"
+                      id="dlg-email"
                       type="email"
                       value={formData.email}
                       onChange={(e) => handleFormChange('email', e.target.value)}
@@ -664,18 +715,18 @@ export default function ProveedoresPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="telefono">Teléfono</Label>
+                    <Label htmlFor="dlg-telefono">Teléfono</Label>
                     <Input
-                      id="telefono"
+                      id="dlg-telefono"
                       value={formData.telefono}
                       onChange={(e) => handleFormChange('telefono', e.target.value)}
                       placeholder="+34 900 000 000"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="web">Web</Label>
+                    <Label htmlFor="dlg-web">Web</Label>
                     <Input
-                      id="web"
+                      id="dlg-web"
                       value={formData.web}
                       onChange={(e) => handleFormChange('web', e.target.value)}
                       placeholder="https://www.aseguradora.com"
@@ -684,32 +735,31 @@ export default function ProveedoresPage() {
                 </div>
               </div>
 
-              {/* Dirección */}
               <div>
                 <h3 className="text-sm font-semibold mb-3">Dirección</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2 sm:col-span-2">
-                    <Label htmlFor="direccion">Dirección</Label>
+                    <Label htmlFor="dlg-direccion">Dirección</Label>
                     <Input
-                      id="direccion"
+                      id="dlg-direccion"
                       value={formData.direccion}
                       onChange={(e) => handleFormChange('direccion', e.target.value)}
                       placeholder="Calle, número, piso"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="ciudad">Ciudad</Label>
+                    <Label htmlFor="dlg-ciudad">Ciudad</Label>
                     <Input
-                      id="ciudad"
+                      id="dlg-ciudad"
                       value={formData.ciudad}
                       onChange={(e) => handleFormChange('ciudad', e.target.value)}
                       placeholder="Madrid"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="codigoPostal">Código Postal</Label>
+                    <Label htmlFor="dlg-codigoPostal">Código Postal</Label>
                     <Input
-                      id="codigoPostal"
+                      id="dlg-codigoPostal"
                       value={formData.codigoPostal}
                       onChange={(e) => handleFormChange('codigoPostal', e.target.value)}
                       placeholder="28001"
@@ -718,32 +768,31 @@ export default function ProveedoresPage() {
                 </div>
               </div>
 
-              {/* Persona de contacto */}
               <div>
                 <h3 className="text-sm font-semibold mb-3">Persona de Contacto</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="contactoNombre">Nombre</Label>
+                    <Label htmlFor="dlg-contactoNombre">Nombre</Label>
                     <Input
-                      id="contactoNombre"
+                      id="dlg-contactoNombre"
                       value={formData.contactoNombre}
                       onChange={(e) => handleFormChange('contactoNombre', e.target.value)}
                       placeholder="Juan García"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="contactoCargo">Cargo</Label>
+                    <Label htmlFor="dlg-contactoCargo">Cargo</Label>
                     <Input
-                      id="contactoCargo"
+                      id="dlg-contactoCargo"
                       value={formData.contactoCargo}
                       onChange={(e) => handleFormChange('contactoCargo', e.target.value)}
                       placeholder="Director Comercial"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="contactoEmail">Email de contacto</Label>
+                    <Label htmlFor="dlg-contactoEmail">Email de contacto</Label>
                     <Input
-                      id="contactoEmail"
+                      id="dlg-contactoEmail"
                       type="email"
                       value={formData.contactoEmail}
                       onChange={(e) => handleFormChange('contactoEmail', e.target.value)}
@@ -751,9 +800,9 @@ export default function ProveedoresPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="contactoTelefono">Teléfono de contacto</Label>
+                    <Label htmlFor="dlg-contactoTelefono">Teléfono de contacto</Label>
                     <Input
-                      id="contactoTelefono"
+                      id="dlg-contactoTelefono"
                       value={formData.contactoTelefono}
                       onChange={(e) => handleFormChange('contactoTelefono', e.target.value)}
                       placeholder="+34 600 000 000"
@@ -762,19 +811,18 @@ export default function ProveedoresPage() {
                 </div>
               </div>
 
-              {/* Tipos de seguro */}
               <div>
                 <h3 className="text-sm font-semibold mb-3">Tipos de Seguro</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {TIPOS_SEGURO_OPTIONS.map((tipo) => (
+                  {INSURANCE_TYPE_OPTIONS.map((tipo) => (
                     <div key={tipo.value} className="flex items-center space-x-2">
                       <Checkbox
-                        id={`tipo-${tipo.value}`}
+                        id={`dlg-tipo-${tipo.value}`}
                         checked={formData.tiposSeguro.includes(tipo.value)}
                         onCheckedChange={() => toggleTipoSeguro(tipo.value)}
                       />
                       <Label
-                        htmlFor={`tipo-${tipo.value}`}
+                        htmlFor={`dlg-tipo-${tipo.value}`}
                         className="text-sm font-normal cursor-pointer"
                       >
                         {tipo.label}
@@ -784,11 +832,10 @@ export default function ProveedoresPage() {
                 </div>
               </div>
 
-              {/* Notas */}
               <div className="space-y-2">
-                <Label htmlFor="notas">Notas</Label>
+                <Label htmlFor="dlg-notas">Notas</Label>
                 <Textarea
-                  id="notas"
+                  id="dlg-notas"
                   value={formData.notas}
                   onChange={(e) => handleFormChange('notas', e.target.value)}
                   placeholder="Observaciones adicionales sobre el proveedor..."
@@ -796,14 +843,13 @@ export default function ProveedoresPage() {
                 />
               </div>
 
-              {/* Estado activo */}
               <div className="flex items-center space-x-2">
                 <Checkbox
-                  id="activo"
+                  id="dlg-activo"
                   checked={formData.activo}
                   onCheckedChange={(checked) => handleFormChange('activo', !!checked)}
                 />
-                <Label htmlFor="activo" className="cursor-pointer">
+                <Label htmlFor="dlg-activo" className="cursor-pointer">
                   Proveedor activo
                 </Label>
               </div>

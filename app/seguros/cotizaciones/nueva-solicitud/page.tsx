@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import {
   FileText,
@@ -60,32 +61,31 @@ const TIPOS_SEGURO = [
 ];
 
 const COBERTURAS_COMUNES = [
-  'Incendio',
+  'Incendio y explosión',
   'Daños por agua',
   'Robo y vandalismo',
   'Responsabilidad civil',
   'Fenómenos atmosféricos',
   'Daños eléctricos',
   'Rotura de cristales',
-  'Asistencia 24h',
+  'Asistencia en el hogar 24h',
   'Defensa jurídica',
-  'Pérdida de alquileres',
-  'Actos vandálicos',
-  'Impago de alquileres',
+  'Impago de alquiler',
+  'Daños estéticos',
+  'Inhabilitación de vivienda',
 ];
 
 const USOS_PRINCIPALES = [
   { value: 'residencial', label: 'Residencial' },
   { value: 'comercial', label: 'Comercial' },
   { value: 'mixto', label: 'Mixto' },
-  { value: 'industrial', label: 'Industrial' },
 ];
 
 const STEPS = [
-  { id: 1, label: 'Tipo de Seguro', icon: Shield },
-  { id: 2, label: 'Coberturas', icon: ClipboardList },
-  { id: 3, label: 'Proveedores', icon: Users },
-  { id: 4, label: 'Revisar y Enviar', icon: Send },
+  { id: 0, label: 'Tipo de Seguro', icon: Shield },
+  { id: 1, label: 'Coberturas', icon: ClipboardList },
+  { id: 2, label: 'Proveedores', icon: Users },
+  { id: 3, label: 'Revisar y Enviar', icon: Send },
 ];
 
 interface BuildingOption {
@@ -115,14 +115,14 @@ interface FormData {
   buildingId: string;
   descripcion: string;
   coberturasSolicitadas: string[];
-  coberturaPersonalizada: string;
   fechaLimiteRespuesta: string;
   proveedorIds: string[];
 }
 
 export default function NuevaSolicitudCotizacionPage() {
   const router = useRouter();
-  const [currentStep, setCurrentStep] = useState(1);
+  useSession({ required: true });
+  const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [buildings, setBuildings] = useState<BuildingOption[]>([]);
@@ -140,7 +140,6 @@ export default function NuevaSolicitudCotizacionPage() {
     buildingId: '',
     descripcion: '',
     coberturasSolicitadas: [],
-    coberturaPersonalizada: '',
     fechaLimiteRespuesta: '',
     proveedorIds: [],
   });
@@ -150,7 +149,7 @@ export default function NuevaSolicitudCotizacionPage() {
   }, []);
 
   useEffect(() => {
-    if (currentStep === 3) {
+    if (currentStep === 2) {
       fetchProviders();
     }
   }, [currentStep]);
@@ -202,20 +201,6 @@ export default function NuevaSolicitudCotizacionPage() {
     });
   };
 
-  const addCustomCobertura = () => {
-    const trimmed = formData.coberturaPersonalizada.trim();
-    if (!trimmed) return;
-    if (formData.coberturasSolicitadas.includes(trimmed)) {
-      toast.error('Esta cobertura ya está añadida');
-      return;
-    }
-    setFormData((prev) => ({
-      ...prev,
-      coberturasSolicitadas: [...prev.coberturasSolicitadas, trimmed],
-      coberturaPersonalizada: '',
-    }));
-  };
-
   const toggleProvider = (id: string) => {
     setFormData((prev) => {
       const exists = prev.proveedorIds.includes(id);
@@ -247,7 +232,7 @@ export default function NuevaSolicitudCotizacionPage() {
 
   const validateStep = (step: number): boolean => {
     switch (step) {
-      case 1:
+      case 0:
         if (!formData.tipoSeguro) {
           toast.error('Selecciona un tipo de seguro');
           return false;
@@ -257,13 +242,13 @@ export default function NuevaSolicitudCotizacionPage() {
           return false;
         }
         return true;
-      case 2:
+      case 1:
         if (formData.coberturasSolicitadas.length === 0) {
           toast.error('Selecciona al menos una cobertura');
           return false;
         }
         return true;
-      case 3:
+      case 2:
         if (formData.proveedorIds.length === 0) {
           toast.error('Selecciona al menos un proveedor');
           return false;
@@ -276,12 +261,12 @@ export default function NuevaSolicitudCotizacionPage() {
 
   const goNext = () => {
     if (validateStep(currentStep)) {
-      setCurrentStep((s) => Math.min(s + 1, 4));
+      setCurrentStep((s) => Math.min(s + 1, 3));
     }
   };
 
   const goBack = () => {
-    setCurrentStep((s) => Math.max(s - 1, 1));
+    setCurrentStep((s) => Math.max(s - 1, 0));
   };
 
   const buildPayload = () => ({
@@ -333,7 +318,7 @@ export default function NuevaSolicitudCotizacionPage() {
   };
 
   const handleSaveAndSend = async () => {
-    for (let step = 1; step <= 3; step++) {
+    for (let step = 0; step <= 2; step++) {
       if (!validateStep(step)) return;
     }
 
@@ -390,7 +375,7 @@ export default function NuevaSolicitudCotizacionPage() {
   return (
     <AuthenticatedLayout>
       <div className="space-y-6">
-        {/* Header */}
+        {/* Breadcrumb */}
         <div className="space-y-1">
           <Breadcrumb>
             <BreadcrumbList>
@@ -465,7 +450,8 @@ export default function NuevaSolicitudCotizacionPage() {
 
         {/* Step Content */}
         <Card>
-          {currentStep === 1 && (
+          {/* Step 0: Tipo de Seguro y Datos del Inmueble */}
+          {currentStep === 0 && (
             <>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -500,7 +486,7 @@ export default function NuevaSolicitudCotizacionPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="buildingId">Inmueble (opcional)</Label>
+                    <Label htmlFor="buildingId">Inmueble existente (opcional)</Label>
                     <Select
                       value={formData.buildingId || '_none'}
                       onValueChange={handleBuildingSelect}
@@ -600,23 +586,18 @@ export default function NuevaSolicitudCotizacionPage() {
                     value={formData.sumaAsegurada}
                     onChange={(e) => updateField('sumaAsegurada', e.target.value)}
                   />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="descripcion">Descripción / Notas adicionales</Label>
-                  <Textarea
-                    id="descripcion"
-                    placeholder="Información adicional relevante para la cotización..."
-                    rows={4}
-                    value={formData.descripcion}
-                    onChange={(e) => updateField('descripcion', e.target.value)}
-                  />
+                  {formData.sumaAsegurada && parseFloat(formData.sumaAsegurada) > 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      {currencyFormatter.format(parseFloat(formData.sumaAsegurada))}
+                    </p>
+                  )}
                 </div>
               </CardContent>
             </>
           )}
 
-          {currentStep === 2 && (
+          {/* Step 1: Coberturas Solicitadas */}
+          {currentStep === 1 && (
             <>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -648,45 +629,20 @@ export default function NuevaSolicitudCotizacionPage() {
                   })}
                 </div>
 
-                {/* Custom coverages added */}
-                {formData.coberturasSolicitadas
-                  .filter((c) => !COBERTURAS_COMUNES.includes(c))
-                  .map((custom) => (
-                    <div
-                      key={custom}
-                      className="flex items-center gap-3 rounded-lg border border-primary bg-primary/5 p-3"
-                    >
-                      <Checkbox checked onCheckedChange={() => toggleCobertura(custom)} />
-                      <span className="text-sm font-medium">{custom}</span>
-                      <Badge variant="secondary" className="ml-auto text-xs">
-                        Personalizada
-                      </Badge>
-                    </div>
-                  ))}
-
                 <Separator />
 
                 <div className="space-y-2">
-                  <Label>Añadir cobertura personalizada</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Nombre de la cobertura..."
-                      value={formData.coberturaPersonalizada}
-                      onChange={(e) => updateField('coberturaPersonalizada', e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          addCustomCobertura();
-                        }
-                      }}
-                    />
-                    <Button type="button" variant="outline" onClick={addCustomCobertura}>
-                      Añadir
-                    </Button>
-                  </div>
+                  <Label htmlFor="descripcion">
+                    Descripción adicional / Notas para el proveedor
+                  </Label>
+                  <Textarea
+                    id="descripcion"
+                    placeholder="Información adicional relevante para la cotización, requisitos especiales, contexto del inmueble..."
+                    rows={4}
+                    value={formData.descripcion}
+                    onChange={(e) => updateField('descripcion', e.target.value)}
+                  />
                 </div>
-
-                <Separator />
 
                 <div className="space-y-2">
                   <Label htmlFor="fechaLimiteRespuesta">
@@ -708,7 +664,8 @@ export default function NuevaSolicitudCotizacionPage() {
             </>
           )}
 
-          {currentStep === 3 && (
+          {/* Step 2: Seleccionar Proveedores */}
+          {currentStep === 2 && (
             <>
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -770,6 +727,11 @@ export default function NuevaSolicitudCotizacionPage() {
                             </div>
                             {selected && <Check className="h-4 w-4 text-primary" />}
                           </div>
+                          {provider.contactoNombre && (
+                            <p className="text-xs text-muted-foreground pl-6 truncate">
+                              {provider.contactoNombre}
+                            </p>
+                          )}
                           {contactEmail && (
                             <p className="text-xs text-muted-foreground pl-6 truncate">
                               {contactEmail}
@@ -809,7 +771,8 @@ export default function NuevaSolicitudCotizacionPage() {
             </>
           )}
 
-          {currentStep === 4 && (
+          {/* Step 3: Revisar y Enviar */}
+          {currentStep === 3 && (
             <>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -821,7 +784,7 @@ export default function NuevaSolicitudCotizacionPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Insurance details */}
+                {/* Insurance details summary */}
                 <div className="space-y-3">
                   <h3 className="font-semibold flex items-center gap-2">
                     <Shield className="h-4 w-4" />
@@ -886,7 +849,7 @@ export default function NuevaSolicitudCotizacionPage() {
 
                 <Separator />
 
-                {/* Coverages */}
+                {/* Coverages summary */}
                 <div className="space-y-3">
                   <h3 className="font-semibold flex items-center gap-2">
                     <ClipboardList className="h-4 w-4" />
@@ -906,9 +869,7 @@ export default function NuevaSolicitudCotizacionPage() {
                       {format(
                         new Date(formData.fechaLimiteRespuesta + 'T00:00:00'),
                         "d 'de' MMMM, yyyy",
-                        {
-                          locale: es,
-                        }
+                        { locale: es }
                       )}
                     </p>
                   )}
@@ -916,7 +877,7 @@ export default function NuevaSolicitudCotizacionPage() {
 
                 <Separator />
 
-                {/* Providers */}
+                {/* Providers summary */}
                 <div className="space-y-3">
                   <h3 className="font-semibold flex items-center gap-2">
                     <Users className="h-4 w-4" />
@@ -1020,18 +981,18 @@ export default function NuevaSolicitudCotizacionPage() {
         <div className="flex items-center justify-between">
           <Button
             variant="outline"
-            onClick={currentStep === 1 ? () => router.push('/seguros/cotizaciones') : goBack}
+            onClick={currentStep === 0 ? () => router.push('/seguros/cotizaciones') : goBack}
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
-            {currentStep === 1 ? 'Cancelar' : 'Anterior'}
+            {currentStep === 0 ? 'Cancelar' : 'Anterior'}
           </Button>
 
           <div className="flex gap-2">
-            {currentStep === 4 ? (
+            {currentStep === 3 ? (
               <>
                 <Button variant="outline" onClick={handleSaveDraft} disabled={isSubmitting}>
                   <Save className="mr-2 h-4 w-4" />
-                  {isSubmitting ? 'Guardando...' : 'Guardar como borrador'}
+                  {isSubmitting ? 'Guardando...' : 'Guardar como Borrador'}
                 </Button>
                 <Button onClick={handleSaveAndSend} disabled={isSubmitting}>
                   <Send className="mr-2 h-4 w-4" />
