@@ -39,6 +39,10 @@ interface PortfolioData {
   netYield: number;
   averageOccupancy: number;
   ltv: number;
+  totalPrecioCompra: number;
+  totalValorMercadoUnidades: number;
+  revalorizacion: number;
+  revalorizacionPct: number;
 }
 
 interface ConsolidatedData {
@@ -189,6 +193,53 @@ export default function InversionesPage() {
           </div>
         )}
 
+        {/* Revalorización patrimonial */}
+        {p && p.totalPrecioCompra > 0 && (
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <Card>
+              <CardContent className="p-4">
+                <div className="text-xs text-gray-500 mb-1">Precio compra (escrituras)</div>
+                <div className="text-lg font-bold">{formatCurrency(p.totalPrecioCompra)}</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="text-xs text-gray-500 mb-1">Valor mercado estimado</div>
+                <div className="text-lg font-bold text-blue-600">{formatCurrency(p.totalValorMercadoUnidades)}</div>
+              </CardContent>
+            </Card>
+            <Card className={p.revalorizacion >= 0 ? 'border-green-200' : 'border-red-200'}>
+              <CardContent className="p-4">
+                <div className="text-xs text-gray-500 mb-1">Revalorizacion</div>
+                <div className={`text-lg font-bold ${p.revalorizacion >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {p.revalorizacion >= 0 ? '+' : ''}{formatCurrency(p.revalorizacion)}
+                </div>
+                <div className={`text-xs ${p.revalorizacionPct >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                  {p.revalorizacionPct >= 0 ? '+' : ''}{p.revalorizacionPct}%
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="text-xs text-gray-500 mb-1">Renta mensual</div>
+                <div className="text-lg font-bold text-green-600">{formatCurrency(p.totalMonthlyIncome)}</div>
+                <div className="text-xs text-gray-400">{formatCurrency(p.totalMonthlyIncome * 12)}/ano</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="text-xs text-gray-500 mb-1">Yield s/compra</div>
+                <div className="text-lg font-bold text-purple-600">
+                  {p.totalPrecioCompra > 0 ? ((p.totalMonthlyIncome * 12 / p.totalPrecioCompra) * 100).toFixed(1) : '0'}%
+                </div>
+                <div className="text-xs text-gray-400">
+                  PER {p.totalMonthlyIncome > 0 ? (p.totalPrecioCompra / (p.totalMonthlyIncome * 12)).toFixed(1) : 'N/A'}x
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         <Tabs defaultValue="consolidado" className="space-y-4">
           <TabsList>
             <TabsTrigger value="consolidado">Consolidado</TabsTrigger>
@@ -274,20 +325,31 @@ export default function InversionesPage() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div className="grid grid-cols-2 md:grid-cols-6 gap-4 text-sm">
                       <div>
-                        <span className="text-gray-500">Patrimonio neto</span>
-                        <div className="font-medium">{formatCurrency(company.portfolio.totalEquity)}</div>
+                        <span className="text-gray-500">Precio compra</span>
+                        <div className="font-medium">{formatCurrency(company.portfolio.totalPrecioCompra || 0)}</div>
                       </div>
                       <div>
-                        <span className="text-gray-500">Cash-flow mensual</span>
-                        <div className={`font-medium ${company.portfolio.monthlyCashFlow >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          {formatCurrency(company.portfolio.monthlyCashFlow)}
+                        <span className="text-gray-500">Valor mercado</span>
+                        <div className="font-medium text-blue-600">{formatCurrency(company.portfolio.totalValorMercadoUnidades || 0)}</div>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Revalorizacion</span>
+                        <div className={`font-medium ${(company.portfolio.revalorizacion || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {(company.portfolio.revalorizacion || 0) >= 0 ? '+' : ''}{formatCurrency(company.portfolio.revalorizacion || 0)}
+                          <span className="text-xs ml-1">({(company.portfolio.revalorizacionPct || 0) >= 0 ? '+' : ''}{company.portfolio.revalorizacionPct || 0}%)</span>
                         </div>
                       </div>
                       <div>
-                        <span className="text-gray-500">Rentabilidad neta</span>
-                        <div className="font-medium">{company.portfolio.netYield}%</div>
+                        <span className="text-gray-500">Renta mensual</span>
+                        <div className="font-medium text-green-600">{formatCurrency(company.portfolio.totalMonthlyIncome)}</div>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Yield s/compra</span>
+                        <div className="font-medium text-purple-600">
+                          {company.portfolio.totalPrecioCompra > 0 ? ((company.portfolio.totalMonthlyIncome * 12 / company.portfolio.totalPrecioCompra) * 100).toFixed(1) : '0'}%
+                        </div>
                       </div>
                       <div>
                         <span className="text-gray-500">Ocupacion</span>

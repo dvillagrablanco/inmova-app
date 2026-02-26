@@ -129,10 +129,16 @@ export async function getCompanyPortfolio(companyId: string): Promise<PortfolioS
     }),
   ]);
 
-  // Ingresos: usa pagos reales del ultimo mes, o renta contratada si no hay pagos
+  // Ingresos: prioridad → pagos reales > renta contratada > rentaMensual de unidades ocupadas
   const paymentsTotal = payments.reduce((sum, p) => sum + p.monto, 0);
   const contractedRent = contracts.reduce((sum, c) => sum + c.rentaMensual, 0);
-  const totalMonthlyIncome = paymentsTotal > 0 ? paymentsTotal : contractedRent;
+  const unitRentTotal = units
+    .filter(u => (u.estado === 'ocupada' || u.contracts.length > 0) && u.rentaMensual > 0)
+    .reduce((s, u) => s + u.rentaMensual, 0);
+
+  // Usar la fuente más fiable: renta de unidades (dato contable/escritura)
+  // es más fiable que contratos (pueden no estar todos formalizados en el sistema)
+  const totalMonthlyIncome = Math.max(contractedRent, unitRentTotal);
 
   // Gastos
   const totalMonthlyExpenses = expenses.reduce((sum, e) => sum + e.monto, 0);
