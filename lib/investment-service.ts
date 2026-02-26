@@ -129,16 +129,12 @@ export async function getCompanyPortfolio(companyId: string): Promise<PortfolioS
     }),
   ]);
 
-  // Ingresos: prioridad → pagos reales > renta contratada > rentaMensual de unidades ocupadas
-  const paymentsTotal = payments.reduce((sum, p) => sum + p.monto, 0);
-  const contractedRent = contracts.reduce((sum, c) => sum + c.rentaMensual, 0);
+  // Ingresos: suma la renta de TODAS las unidades con renta > 0
+  // (dato más fiable, viene de contabilidad/escrituras/gestión directa)
   const unitRentTotal = units
-    .filter(u => (u.estado === 'ocupada' || u.contracts.length > 0) && u.rentaMensual > 0)
+    .filter(u => u.rentaMensual > 0)
     .reduce((s, u) => s + u.rentaMensual, 0);
-
-  // Usar la fuente más fiable: renta de unidades (dato contable/escritura)
-  // es más fiable que contratos (pueden no estar todos formalizados en el sistema)
-  const totalMonthlyIncome = Math.max(contractedRent, unitRentTotal);
+  const totalMonthlyIncome = unitRentTotal;
 
   // Gastos
   const totalMonthlyExpenses = expenses.reduce((sum, e) => sum + e.monto, 0);
@@ -173,7 +169,7 @@ export async function getCompanyPortfolio(companyId: string): Promise<PortfolioS
   const netYield = totalInvestment > 0 ? ((annualIncome - annualExpenses) / totalInvestment) * 100 : 0;
 
   const totalUnits = units.length;
-  const occupiedUnits = units.filter(u => u.contracts.length > 0).length;
+  const occupiedUnits = units.filter(u => u.contracts.length > 0 || u.estado === 'ocupada').length;
   const averageOccupancy = totalUnits > 0 ? (occupiedUnits / totalUnits) * 100 : 0;
 
   const ltv = totalMarketValue > 0 ? (totalMortgageDebt / totalMarketValue) * 100 : 0;
@@ -185,7 +181,7 @@ export async function getCompanyPortfolio(companyId: string): Promise<PortfolioS
   const revalorizacionPct = totalPrecioCompra > 0 ? (revalorizacion / totalPrecioCompra) * 100 : 0;
 
   return {
-    totalAssets: assets.length > 0 ? assets.length : buildings.length,
+    totalAssets: buildings.length,
     totalInvestment: Math.round(totalInvestment * 100) / 100,
     totalMarketValue: Math.round(totalMarketValue > 0 ? totalMarketValue : totalValorMercadoUnidades),
     totalMortgageDebt: Math.round(totalMortgageDebt * 100) / 100,
