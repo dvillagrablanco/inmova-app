@@ -397,7 +397,7 @@ const SECTION_TO_MODULES: Record<string, string[]> = {
   alquilerResidencial: [
     'alquiler_residencial', 'gestion_inmobiliaria', 'edificios', 'inquilinos',
     'matching', 'contratos', 'candidatos', 'garantias', 'valoracion_ia',
-    'inspecciones', 'certificaciones',
+    'inspecciones', 'certificaciones', 'seguros',
   ],
   str: ['str', 'str_listings', 'str_bookings', 'str_channels', 'str_housekeeping', 'str_reviews'],
   hospitality: ['hospitality'],
@@ -571,6 +571,18 @@ const alquilerResidencialItems = [
     href: '/valoracion-ia',
     icon: Brain,
     roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Seguros',
+    href: '/seguros',
+    icon: Shield,
+    roles: ['super_admin', 'administrador', 'gestor'],
+    subItems: [
+      { name: 'Pólizas', href: '/seguros', icon: Shield },
+      { name: 'Cotizaciones', href: '/seguros/cotizaciones', icon: FileText },
+      { name: 'Proveedores', href: '/seguros/proveedores', icon: Building2 },
+      { name: 'Análisis', href: '/seguros/analisis', icon: BarChart3 },
+    ],
   },
   {
     name: 'Inspecciones',
@@ -940,6 +952,18 @@ const patrimonioTerciarioNavItems = [
     href: '/comercial/leads',
     icon: UserPlus,
     roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Seguros',
+    href: '/seguros',
+    icon: Shield,
+    roles: ['super_admin', 'administrador', 'gestor'],
+    subItems: [
+      { name: 'Pólizas', href: '/seguros', icon: Shield },
+      { name: 'Cotizaciones', href: '/seguros/cotizaciones', icon: FileText },
+      { name: 'Proveedores', href: '/seguros/proveedores', icon: Building2 },
+      { name: 'Análisis', href: '/seguros/analisis', icon: BarChart3 },
+    ],
   },
 ];
 
