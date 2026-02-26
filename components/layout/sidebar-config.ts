@@ -61,7 +61,7 @@ export const DEFAULT_EXPANDED_BY_ROLE: Record<UserRole, Record<string, boolean>>
     operaciones: true,
     herramientasInversion: true, // NUEVO: Calculadoras y herramientas de inversión
     comunicaciones: false,
-    documentosLegal: false,
+    documentosLegal: true, // Seguros, documentos, firma digital
     crmMarketing: false,
     automatizacion: false,
     innovacion: false,
@@ -93,7 +93,7 @@ export const DEFAULT_EXPANDED_BY_ROLE: Record<UserRole, Record<string, boolean>>
     adminFincas: false,
     operaciones: true,
     comunicaciones: false,
-    documentosLegal: false,
+    documentosLegal: true, // Seguros, documentos, firma digital
     crmMarketing: false,
     automatizacion: false,
     innovacion: false,
@@ -106,6 +106,7 @@ export const DEFAULT_EXPANDED_BY_ROLE: Record<UserRole, Record<string, boolean>>
     misPropiedades: true, // CRÍTICO: Cartera asignada
     operaciones: true, // CRÍTICO: Tareas del día
     comunicaciones: true, // CRÍTICO: Coordinación
+    documentosLegal: true, // Seguros, documentos
     gestion: false,
     reportes: false,
     finanzas: false,
