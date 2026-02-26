@@ -1461,11 +1461,39 @@ const holdingGrupoNavItems = [
     roles: ['super_admin', 'administrador'],
   },
   {
-    name: 'Analisis Inversion',
+    name: 'Analisis de Activos',
     href: '/inversiones/analisis',
     icon: Calculator,
     roles: ['super_admin', 'administrador'],
-    badge: 'Nuevo',
+    badge: 'IA',
+    subItems: [
+      {
+        name: 'Analizar Propuesta Broker',
+        href: '/inversiones/analisis?tab=broker',
+        icon: Shield,
+      },
+      {
+        name: 'Chat Analista IA',
+        href: '/inversiones/analisis?tab=chat',
+        icon: MessageSquare,
+      },
+      {
+        name: 'Extraccion Documental',
+        href: '/inversiones/analisis?tab=ia',
+        icon: Scan,
+      },
+      {
+        name: 'Rent Roll Manual',
+        href: '/inversiones/analisis?tab=rentroll',
+        icon: ClipboardList,
+      },
+    ],
+  },
+  {
+    name: 'Valoracion IA',
+    href: '/valoracion-ia',
+    icon: Brain,
+    roles: ['super_admin', 'administrador'],
   },
   {
     name: 'Comparativa Sociedades',

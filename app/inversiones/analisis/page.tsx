@@ -56,6 +56,8 @@ const TIPO_LABELS: Record<string, string> = {
 export default function AnalisisInversionPage() {
   const { status } = useSession();
   const router = useRouter();
+  const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  const initialTab = searchParams?.get('tab') || 'broker';
   const [saving, setSaving] = useState(false);
   const [results, setResults] = useState<any>(null);
   const [savedId, setSavedId] = useState<string | null>(null);
@@ -443,7 +445,7 @@ export default function AnalisisInversionPage() {
           <p className="text-gray-500">Introduce el rent roll y datos del activo para calcular rentabilidad y sensibilidad</p>
         </div>
 
-        <Tabs defaultValue="datos" className="space-y-4">
+        <Tabs defaultValue={initialTab} className="space-y-4">
           <TabsList className="flex flex-wrap gap-1">
             <TabsTrigger value="guardados" className="gap-1 text-xs"><Save className="h-3 w-3" /> Guardados</TabsTrigger>
             <TabsTrigger value="broker" className="gap-1 text-xs"><Shield className="h-3 w-3" /> Analizar Propuesta</TabsTrigger>
