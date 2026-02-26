@@ -1,15 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import logger, { logError } from '@/lib/logger';
+import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-// Lazy Prisma (auditoria V2)
 async function getPrisma() {
   const { getPrismaClient } = await import('@/lib/db');
   return getPrismaClient();
+}
+
+/**
+ * Verifica que el usuario tiene acceso a la conversación vía companyId scope.
+ */
+async function verifyConversationAccess(prisma: any, conversationId: string, session: any): Promise<boolean> {
+  const conversation = await prisma.chatConversation.findUnique({
+    where: { id: conversationId },
+    select: { companyId: true },
+  });
+
+  if (!conversation) return false;
+
+  // Super admin can access all
+  if (session.user.role === 'super_admin') return true;
+
+  // Check company scope (includes child companies for groups)
+  const { resolveCompanyScope } = await import('@/lib/company-scope');
+  const scope = await resolveCompanyScope({
+    userId: session.user.id,
+    role: session.user.role,
+    primaryCompanyId: session.user.companyId,
+    request: null as any,
+  });
+
+  return scope.scopeCompanyIds.includes(conversation.companyId);
 }
 
 export async function GET(request: NextRequest) {
@@ -24,10 +49,13 @@ export async function GET(request: NextRequest) {
     const conversationId = searchParams.get('conversationId');
 
     if (!conversationId) {
-      return NextResponse.json(
-        { error: 'ID de conversación requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'ID de conversación requerido' }, { status: 400 });
+    }
+
+    // Security: verify company access
+    const hasAccess = await verifyConversationAccess(prisma, conversationId, session);
+    if (!hasAccess) {
+      return NextResponse.json({ error: 'No tienes acceso a esta conversación' }, { status: 403 });
     }
 
     const messages = await prisma.chatMessage.findMany({
@@ -35,11 +63,11 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: 'asc' },
     });
 
-    // Mark messages as read (if from tenant)
+    // Mark messages as read (if from tenant/external)
     await prisma.chatMessage.updateMany({
       where: {
         conversationId,
-        senderType: 'tenant',
+        senderType: { not: 'user' },
         leido: false,
       },
       data: {
@@ -69,16 +97,18 @@ export async function POST(request: NextRequest) {
     const { conversationId, mensaje } = await request.json();
 
     if (!conversationId || !mensaje) {
-      return NextResponse.json(
-        { error: 'Datos incompletos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Datos incompletos' }, { status: 400 });
     }
 
     const userId = session.user?.id;
-    
     if (!userId) {
       return NextResponse.json({ error: 'Usuario no válido' }, { status: 401 });
+    }
+
+    // Security: verify company access
+    const hasAccess = await verifyConversationAccess(prisma, conversationId, session);
+    if (!hasAccess) {
+      return NextResponse.json({ error: 'No tienes acceso a esta conversación' }, { status: 403 });
     }
 
     // Create message

@@ -24,12 +24,22 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Label } from '@/components/ui/label';
+
+interface Company {
+  id: string;
+  nombre: string;
+}
 
 interface Conversation {
   id: string;
   asunto: string;
   estado: string;
-  tenantName: string;
+  tenantName?: string;
+  participantName?: string;
+  participantType?: string;
+  companyId?: string;
+  companyName?: string;
   ultimoMensaje: string | null;
   ultimoMensajeFecha: string | null;
   unreadCount: number;
@@ -52,6 +62,9 @@ function AdminChatPage() {
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [filterCompanyId, setFilterCompanyId] = useState<string>('all');
+  const [isGroup, setIsGroup] = useState(false);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -63,7 +76,7 @@ function AdminChatPage() {
     if (session?.user) {
       loadConversations();
     }
-  }, [session]);
+  }, [session, filterCompanyId]);
 
   useEffect(() => {
     if (selectedConversation) {
@@ -77,10 +90,15 @@ function AdminChatPage() {
 
   const loadConversations = async () => {
     try {
-      const response = await fetch('/api/chat/conversations');
+      const url = filterCompanyId && filterCompanyId !== 'all'
+        ? `/api/chat/conversations?companyId=${filterCompanyId}`
+        : '/api/chat/conversations';
+      const response = await fetch(url);
       if (!response.ok) throw new Error('Error');
       const data = await response.json();
       setConversations(data.conversations || []);
+      if (data.companies) setCompanies(data.companies);
+      if (data.scope) setIsGroup(data.scope.isGroup || data.scope.totalCompanies > 1);
     } catch (error) {
       toast.error('Error al cargar conversaciones');
     } finally {
@@ -198,6 +216,25 @@ function AdminChatPage() {
                 </Button>
               </div>
             </div>
+
+            {/* Filtro por empresa (solo si tiene acceso a múltiples) */}
+            {isGroup && companies.length > 1 && (
+              <Card className="p-3">
+                <div className="flex items-center gap-3">
+                  <Label className="text-sm font-medium whitespace-nowrap">Empresa:</Label>
+                  <select
+                    value={filterCompanyId}
+                    onChange={(e) => setFilterCompanyId(e.target.value)}
+                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  >
+                    <option value="all">Todas las empresas del grupo ({companies.length})</option>
+                    {companies.map(c => (
+                      <option key={c.id} value={c.id}>{c.nombre}</option>
+                    ))}
+                  </select>
+                </div>
+              </Card>
+            )}
 
             {/* Tabs para diferentes canales */}
             <Tabs defaultValue="internal" className="w-full">

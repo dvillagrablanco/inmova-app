@@ -29,24 +29,34 @@ export async function GET(
 
     const otherUserId = params.userId;
 
-    // Verificar que el otro usuario existe y pertenece a la misma empresa
+    // Get accessible company IDs for group support
+    const { resolveCompanyScope } = await import('@/lib/company-scope');
+    const scope = await resolveCompanyScope({
+      userId: user.id,
+      role: (session.user as any).role || 'gestor',
+      primaryCompanyId: user.companyId,
+      request,
+    });
+    const scopeIds = scope.scopeCompanyIds.length > 0 ? scope.scopeCompanyIds : [user.companyId];
+
+    // Verificar que el otro usuario existe y pertenece al mismo grupo de empresas
     const otherUser = await prisma.user.findFirst({
       where: {
         id: otherUserId,
-        companyId: user.companyId
+        companyId: { in: scopeIds }
       },
       select: { id: true, name: true, email: true }
     });
 
     if (!otherUser) {
-      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
+      return NextResponse.json({ error: 'Usuario no encontrado o no accesible' }, { status: 404 });
     }
 
-    // Obtener mensajes entre los dos usuarios
+    // Obtener mensajes entre los dos usuarios (within group scope)
     const messages = await prisma.notification.findMany({
       where: {
-        companyId: user.companyId,
-        tipo: 'info', // Mensajes de chat
+        companyId: { in: scopeIds },
+        tipo: 'info',
         OR: [
           { userId: user.id, entityId: otherUserId },
           { userId: otherUserId, entityId: user.id }
@@ -120,16 +130,26 @@ export async function POST(
 
     const recipientId = params.userId;
 
-    // Verificar que el destinatario existe
+    // Get accessible company IDs for group support
+    const { resolveCompanyScope } = await import('@/lib/company-scope');
+    const scope = await resolveCompanyScope({
+      userId: user.id,
+      role: (session.user as any).role || 'gestor',
+      primaryCompanyId: user.companyId,
+      request,
+    });
+    const scopeIds = scope.scopeCompanyIds.length > 0 ? scope.scopeCompanyIds : [user.companyId];
+
+    // Verificar que el destinatario existe y pertenece al grupo
     const recipient = await prisma.user.findFirst({
       where: {
         id: recipientId,
-        companyId: user.companyId
+        companyId: { in: scopeIds }
       }
     });
 
     if (!recipient) {
-      return NextResponse.json({ error: 'Destinatario no encontrado' }, { status: 404 });
+      return NextResponse.json({ error: 'Destinatario no encontrado o no accesible' }, { status: 404 });
     }
 
     // Crear el mensaje como notificación
