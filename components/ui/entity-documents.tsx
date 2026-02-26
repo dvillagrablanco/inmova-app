@@ -189,18 +189,18 @@ export function EntityDocuments({
 
   return (
     <Card className={className}>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <FolderOpen className="h-5 w-5" />
+      <CardHeader className="pb-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <FolderOpen className="h-5 w-5 flex-shrink-0" />
               {title || defaultTitles[entityType]}
             </CardTitle>
-            <CardDescription>{description || defaultDescs[entityType]}</CardDescription>
+            <CardDescription className="text-xs sm:text-sm mt-1">{description || defaultDescs[entityType]}</CardDescription>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <Select value={selectedType} onValueChange={setSelectedType}>
-              <SelectTrigger className="w-[160px]">
+              <SelectTrigger className="w-[130px] sm:w-[160px] h-9">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -219,13 +219,14 @@ export function EntityDocuments({
             />
             <Button
               variant="outline"
+              size="sm"
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
             >
               {uploading ? (
-                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Subiendo...</>
+                <><Loader2 className="h-4 w-4 sm:mr-2 animate-spin" /> <span className="hidden sm:inline">Subiendo...</span></>
               ) : (
-                <><Upload className="h-4 w-4 mr-2" /> Subir</>
+                <><Upload className="h-4 w-4 sm:mr-2" /> <span className="hidden sm:inline">Subir</span></>
               )}
             </Button>
           </div>
@@ -241,31 +242,31 @@ export function EntityDocuments({
             {docs.map((doc) => {
               const Icon = getFileIcon(doc.nombre);
               return (
-                <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 group">
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <Icon className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                <div key={doc.id} className="flex items-center justify-between p-2 sm:p-3 border rounded-lg hover:bg-muted/50 group gap-2">
+                  <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0 cursor-pointer" onClick={() => handleDownload(doc)}>
+                    <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 flex-shrink-0" />
                     <div className="min-w-0">
-                      <p className="font-medium text-sm truncate">{doc.nombre}</p>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <Badge variant="outline" className="text-[10px]">
+                      <p className="font-medium text-xs sm:text-sm truncate">{doc.nombre}</p>
+                      <div className="flex items-center gap-1 sm:gap-2 mt-0.5 flex-wrap">
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">
                           {getTypeLabel(doc.tipo)}
                         </Badge>
                         {doc.fechaSubida && (
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-[10px] sm:text-xs text-muted-foreground">
                             {format(new Date(doc.fechaSubida), 'dd MMM yyyy', { locale: es })}
                           </span>
                         )}
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 flex-shrink-0">
-                    <Button variant="ghost" size="sm" onClick={() => handleDownload(doc)}>
+                  <div className="flex items-center gap-0.5 flex-shrink-0">
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => handleDownload(doc)}>
                       <Eye className="h-4 w-4" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-red-500 opacity-0 group-hover:opacity-100"
+                      className="h-8 w-8 p-0 text-red-500 opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
                       onClick={() => handleDelete(doc.id)}
                     >
                       <Trash2 className="h-4 w-4" />

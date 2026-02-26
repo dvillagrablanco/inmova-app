@@ -332,9 +332,9 @@ export default function EdificioDetallesPage() {
 
   return (
     <AuthenticatedLayout>
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         {/* Breadcrumbs */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4 overflow-x-auto">
           <Button
             variant="outline"
             size="sm"
@@ -365,44 +365,47 @@ export default function EdificioDetallesPage() {
 
         {/* Header */}
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-          <div className="space-y-1">
-            <div className="flex items-center gap-3">
-              <Building2 className="h-8 w-8 text-indigo-600" />
-              <h1 className="text-3xl font-bold tracking-tight">{building.nombre}</h1>
+          <div className="space-y-1 min-w-0">
+            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+              <Building2 className="h-6 w-6 sm:h-8 sm:w-8 text-indigo-600 flex-shrink-0" />
+              <h1 className="text-xl sm:text-3xl font-bold tracking-tight break-words">{building.nombre}</h1>
               <Badge variant={tipoBadge.variant}>{tipoBadge.label}</Badge>
             </div>
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <MapPin className="h-4 w-4" />
-              <span>{building.direccion}</span>
+            <div className="flex items-center gap-2 text-muted-foreground text-sm">
+              <MapPin className="h-4 w-4 flex-shrink-0" />
+              <span className="break-words">{building.direccion}</span>
             </div>
-            {building.anoConstructor && (
+            {building.anoConstructor > 0 && (
               <p className="text-sm text-muted-foreground">
                 Construido en {building.anoConstructor}
               </p>
             )}
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-shrink-0">
             <Button
               variant="outline"
+              size="sm"
+              className="sm:size-default"
               onClick={() => router.push(`/edificios/${building.id}/editar`)}
             >
-              <Edit className="mr-2 h-4 w-4" />
-              Editar
+              <Edit className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Editar</span>
             </Button>
             <Button
               variant="outline"
-              className="text-red-600 hover:text-red-700"
+              size="sm"
+              className="text-red-600 hover:text-red-700 sm:size-default"
               onClick={() => setDeleteDialogOpen(true)}
             >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Eliminar
+              <Trash2 className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Eliminar</span>
             </Button>
           </div>
         </div>
 
         {/* Stats Summary */}
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Unidades</CardTitle>
@@ -454,9 +457,9 @@ export default function EdificioDetallesPage() {
           </Card>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
           {/* Columna Principal */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Galería de Imágenes */}
             <PhotoGallery
               images={images}
@@ -475,86 +478,94 @@ export default function EdificioDetallesPage() {
 
             {/* Lista de Unidades */}
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
+              <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <CardTitle>Unidades del Edificio</CardTitle>
+                  <CardTitle className="text-base sm:text-lg">Unidades del Edificio</CardTitle>
                   <CardDescription>
                     {building.units?.length || 0} unidades registradas
                   </CardDescription>
                 </div>
-                <Button onClick={() => router.push(`/propiedades/crear?buildingId=${building.id}`)}>
+                <Button size="sm" onClick={() => router.push(`/propiedades/crear?buildingId=${building.id}`)}>
                   <Plus className="mr-2 h-4 w-4" />
                   Nueva Unidad
                 </Button>
               </CardHeader>
               <CardContent>
                 {building.units && building.units.length > 0 ? (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Unidad</TableHead>
-                        <TableHead>Tipo</TableHead>
-                        <TableHead>Estado</TableHead>
-                        <TableHead>Superficie</TableHead>
-                        <TableHead>Renta</TableHead>
-                        <TableHead>Inquilino</TableHead>
-                        <TableHead className="text-right">Acciones</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {building.units.map((unit) => {
-                        const estadoBadge = getEstadoUnidadBadge(unit.estado);
-                        return (
-                          <TableRow key={unit.id}>
-                            <TableCell className="font-medium">{unit.numero}</TableCell>
-                            <TableCell className="capitalize">{unit.tipo}</TableCell>
-                            <TableCell>
-                              <Badge variant={estadoBadge.variant}>{estadoBadge.label}</Badge>
-                            </TableCell>
-                            <TableCell>{unit.superficie}m²</TableCell>
-                            <TableCell>
-                              €{unit.rentaMensual?.toLocaleString('es-ES') || 0}
-                            </TableCell>
-                            <TableCell>
-                              {unit.tenant ? (
-                                <Link
-                                  href={`/inquilinos/${unit.tenant.id}`}
-                                  className="text-primary hover:underline"
-                                >
-                                  {unit.tenant.nombreCompleto}
-                                </Link>
-                              ) : (
-                                <span className="text-muted-foreground">-</span>
-                              )}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                    <MoreVertical className="h-4 w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem
-                                    onClick={() => router.push(`/propiedades/${unit.id}`)}
-                                  >
-                                    <Eye className="mr-2 h-4 w-4" />
-                                    Ver detalles
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={() => router.push(`/propiedades/${unit.id}/editar`)}
-                                  >
-                                    <Edit className="mr-2 h-4 w-4" />
-                                    Editar
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </TableCell>
+                  <div className="overflow-x-auto -mx-4 sm:mx-0">
+                    <div className="min-w-[600px] sm:min-w-0 px-4 sm:px-0">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Unidad</TableHead>
+                            <TableHead className="hidden sm:table-cell">Tipo</TableHead>
+                            <TableHead>Estado</TableHead>
+                            <TableHead className="hidden md:table-cell">Superficie</TableHead>
+                            <TableHead>Renta</TableHead>
+                            <TableHead className="hidden lg:table-cell">Inquilino</TableHead>
+                            <TableHead className="text-right">Acciones</TableHead>
                           </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
+                        </TableHeader>
+                        <TableBody>
+                          {building.units.map((unit) => {
+                            const estadoBadge = getEstadoUnidadBadge(unit.estado);
+                            return (
+                              <TableRow key={unit.id} className="cursor-pointer" onClick={() => router.push(`/propiedades/${unit.id}`)}>
+                                <TableCell className="font-medium">
+                                  <div>{unit.numero}</div>
+                                  <div className="text-xs text-muted-foreground sm:hidden capitalize">{unit.tipo}</div>
+                                </TableCell>
+                                <TableCell className="hidden sm:table-cell capitalize">{unit.tipo}</TableCell>
+                                <TableCell>
+                                  <Badge variant={estadoBadge.variant} className="text-xs">{estadoBadge.label}</Badge>
+                                </TableCell>
+                                <TableCell className="hidden md:table-cell">{unit.superficie}m²</TableCell>
+                                <TableCell className="whitespace-nowrap">
+                                  €{unit.rentaMensual?.toLocaleString('es-ES') || 0}
+                                </TableCell>
+                                <TableCell className="hidden lg:table-cell">
+                                  {unit.tenant ? (
+                                    <Link
+                                      href={`/inquilinos/${unit.tenant.id}`}
+                                      className="text-primary hover:underline"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      {unit.tenant.nombreCompleto}
+                                    </Link>
+                                  ) : (
+                                    <span className="text-muted-foreground">-</span>
+                                  )}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={(e) => e.stopPropagation()}>
+                                        <MoreVertical className="h-4 w-4" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                      <DropdownMenuItem
+                                        onClick={() => router.push(`/propiedades/${unit.id}`)}
+                                      >
+                                        <Eye className="mr-2 h-4 w-4" />
+                                        Ver detalles
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem
+                                        onClick={() => router.push(`/propiedades/${unit.id}/editar`)}
+                                      >
+                                        <Edit className="mr-2 h-4 w-4" />
+                                        Editar
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </div>
                 ) : (
                   <div className="text-center py-8 text-muted-foreground">
                     <Home className="h-12 w-12 mx-auto mb-3 opacity-50" />
@@ -578,7 +589,7 @@ export default function EdificioDetallesPage() {
                 <CardTitle>Equipamiento y Servicios</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-3 lg:grid-cols-3">
                   {[
                     { label: 'Ascensor', value: building.ascensor, icon: Building2 },
                     { label: 'Garaje', value: building.garaje, icon: Car },
@@ -612,7 +623,7 @@ export default function EdificioDetallesPage() {
           </div>
 
           {/* Columna Lateral */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Información Económica */}
             <Card>
               <CardHeader>
