@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useId } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -251,6 +251,11 @@ export function AIDocumentAssistant({
   const [selectedFile, setSelectedFile] = useState<UploadedFile | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
+  // ID único para el input file (evitar conflictos con múltiples instancias)
+  const instanceId = useId();
+  const fileInputId = `ai-doc-upload-${instanceId}`;
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   // Estado para el diálogo de revisión de datos
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [pendingReviewFile, setPendingReviewFile] = useState<UploadedFile | null>(null);
@@ -267,7 +272,7 @@ export function AIDocumentAssistant({
   // Manejar selección de archivos
   const handleFileSelect = useCallback(
     (files: FileList | null) => {
-      if (!files) return;
+      if (!files || files.length === 0) return;
 
       const newFiles: UploadedFile[] = Array.from(files).map((file) => ({
         file,
@@ -281,6 +286,11 @@ export function AIDocumentAssistant({
       newFiles.forEach((uploadedFile) => {
         processFile(uploadedFile);
       });
+
+      // Resetear el input para permitir subir el mismo archivo otra vez
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     },
     [context]
@@ -351,8 +361,9 @@ export function AIDocumentAssistant({
         }
 
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
+          const errorData = await response.json().catch(() => ({ error: `Error HTTP ${response.status}` }));
+          const errorMsg = errorData.error || errorData.message || `Error ${response.status}: ${response.statusText}`;
+          throw new Error(errorMsg);
         }
 
         const analysis: DocumentAnalysis = await response.json();
@@ -360,6 +371,12 @@ export function AIDocumentAssistant({
         // Verificar que la respuesta sea válida
         if (!analysis || !analysis.extractedFields) {
           throw new Error('Respuesta de análisis inválida');
+        }
+
+        // Verificar si la API reportó un error en el body (error fallback)
+        if ((analysis as any).error === true) {
+          const errMsg = (analysis as any).errorMessage || 'Error en el análisis de IA';
+          throw new Error(errMsg);
         }
 
         // Actualizar archivo con éxito
@@ -423,15 +440,19 @@ export function AIDocumentAssistant({
     } catch (error: any) {
       console.error('[AIDocumentAssistant] Error procesando documento:', error);
 
-      // Mensaje de error más descriptivo
+      // Mensaje de error descriptivo
       let errorMessage = 'Error al analizar el documento';
       if (error.name === 'AbortError') {
         errorMessage = 'El análisis tardó demasiado. Intenta con un archivo más pequeño.';
       } else if (
-        error.message.includes('Failed to fetch') ||
-        error.message.includes('NetworkError')
+        error.message?.includes('Failed to fetch') ||
+        error.message?.includes('NetworkError')
       ) {
         errorMessage = 'Error de conexión. Verifica tu internet e intenta de nuevo.';
+      } else if (error.message?.includes('Tipo de archivo no permitido')) {
+        errorMessage = error.message;
+      } else if (error.message?.includes('excede el tamaño')) {
+        errorMessage = 'El archivo es demasiado grande. Máximo 10MB.';
       } else if (error.message) {
         errorMessage = error.message;
       }
@@ -768,7 +789,7 @@ export function AIDocumentAssistant({
             <p className="text-xs text-muted-foreground mb-3">
               PDF, imágenes (JPG, PNG) o documentos de texto
             </p>
-            <label htmlFor="file-upload">
+            <label htmlFor={fileInputId}>
               <Button variant="outline" size="sm" asChild>
                 <span className="cursor-pointer">
                   <FileText className="h-4 w-4 mr-2" />
@@ -777,10 +798,11 @@ export function AIDocumentAssistant({
               </Button>
             </label>
             <input
-              id="file-upload"
+              ref={fileInputRef}
+              id={fileInputId}
               type="file"
               multiple
-              accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.txt"
+              accept=".pdf,.jpg,.jpeg,.png,.webp,.gif,.heic,.doc,.docx,.txt"
               className="hidden"
               onChange={(e) => handleFileSelect(e.target.files)}
             />
