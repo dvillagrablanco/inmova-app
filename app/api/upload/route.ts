@@ -1,13 +1,13 @@
 /**
  * API Route: Upload de archivos
  * POST /api/upload
- * 
+ *
  * Soporta:
  * - Imágenes (propiedades, avatars)
  * - Documentos PDF (contratos, facturas)
  * - Upload múltiple
  * - Validación de tipos y tamaños
- * 
+ *
  * Auth: Requiere sesión activa
  */
 
@@ -16,7 +16,11 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import * as S3Service from '@/lib/aws-s3-service';
 import { FileType } from '@/lib/aws-s3-service';
-import { checkStorageLimit, createLimitExceededResponse, logUsageWarning } from '@/lib/usage-limits';
+import {
+  checkStorageLimit,
+  createLimitExceededResponse,
+  logUsageWarning,
+} from '@/lib/usage-limits';
 import { trackUsage } from '@/lib/usage-tracking-service';
 
 import logger from '@/lib/logger';
@@ -25,12 +29,12 @@ export const runtime = 'nodejs';
 
 /**
  * POST /api/upload
- * 
+ *
  * Body (multipart/form-data):
  * - files: File | File[] (archivos a subir)
  * - folder: string (carpeta destino: 'properties', 'documents', 'avatars')
  * - fileType: 'image' | 'document'
- * 
+ *
  * Response:
  * {
  *   success: true,
@@ -51,9 +55,10 @@ export async function POST(request: NextRequest) {
     // 2. Verificar que S3 esté configurado
     if (!S3Service.isS3Configured()) {
       return NextResponse.json(
-        { 
+        {
           error: 'AWS S3 no configurado',
-          message: 'El almacenamiento en la nube no está disponible. Contacta al administrador para configurar AWS S3.',
+          message:
+            'El almacenamiento en la nube no está disponible. Contacta al administrador para configurar AWS S3.',
         },
         { status: 503 }
       );
@@ -67,15 +72,16 @@ export async function POST(request: NextRequest) {
 
     // Validar que haya archivos
     if (!files || files.length === 0) {
-      return NextResponse.json(
-        { error: 'No se enviaron archivos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No se enviaron archivos' }, { status: 400 });
     }
 
     // 4. Convertir Files a Buffers y validar tipo MIME + magic bytes
     const ALLOWED_MIMES = new Set([
-      'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
+      'image/jpeg',
+      'image/png',
+      'image/gif',
+      'image/webp',
+      'image/svg+xml',
       'application/pdf',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -83,14 +89,22 @@ export async function POST(request: NextRequest) {
     ]);
 
     const ALLOWED_EXTENSIONS = new Set([
-      '.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg',
-      '.pdf', '.docx', '.xlsx', '.csv',
+      '.jpg',
+      '.jpeg',
+      '.png',
+      '.gif',
+      '.webp',
+      '.svg',
+      '.pdf',
+      '.docx',
+      '.xlsx',
+      '.csv',
     ]);
 
     // Magic bytes para validacion basica de tipo real
     const MAGIC_BYTES: Record<string, number[]> = {
-      'image/jpeg': [0xFF, 0xD8, 0xFF],
-      'image/png': [0x89, 0x50, 0x4E, 0x47],
+      'image/jpeg': [0xff, 0xd8, 0xff],
+      'image/png': [0x89, 0x50, 0x4e, 0x47],
       'image/gif': [0x47, 0x49, 0x46],
       'image/webp': [0x52, 0x49, 0x46, 0x46], // RIFF
       'application/pdf': [0x25, 0x50, 0x44, 0x46], // %PDF
@@ -121,7 +135,9 @@ export async function POST(request: NextRequest) {
         // Validar magic bytes (firma real del archivo)
         if (file.type && !validateMagicBytes(buffer, file.type)) {
           logger.warn(`[Upload] Magic bytes mismatch: claimed ${file.type}, file: ${file.name}`);
-          throw new Error(`El contenido del archivo no coincide con el tipo declarado: ${file.type}`);
+          throw new Error(
+            `El contenido del archivo no coincide con el tipo declarado: ${file.type}`
+          );
         }
 
         return {
@@ -136,16 +152,18 @@ export async function POST(request: NextRequest) {
     // 5. Verificar límite de storage
     const totalSize = fileBuffers.reduce((sum, f) => sum + f.size, 0);
     const limitCheck = await checkStorageLimit(session.user.companyId, totalSize);
-    
+
     if (!limitCheck.allowed) {
       return createLimitExceededResponse(limitCheck);
     }
-    
+
     // Log warning si está cerca del límite (80%)
     logUsageWarning(session.user.companyId, limitCheck);
 
-    // 6. Upload a S3
-    const results = await S3Service.uploadMultipleToS3(fileBuffers, folder, fileType);
+    // 6. Upload a S3 (key format: companies/{companyId}/{folder}/{filename})
+    const companyPrefix = `companies/${session.user.companyId}`;
+    const scopedFolder = `${companyPrefix}/${folder}`;
+    const results = await S3Service.uploadMultipleToS3(fileBuffers, scopedFolder, fileType);
 
     // 6. Verificar si hubo errores
     const errors = results.filter((r) => !r.success);
@@ -172,7 +190,7 @@ export async function POST(request: NextRequest) {
         fileCount: files.length,
         folder,
         fileType,
-        keys: results.map(r => r.key),
+        keys: results.map((r) => r.key),
       },
     });
 
@@ -215,11 +233,11 @@ export async function POST(request: NextRequest) {
 /**
  * GET /api/upload?key=xxx
  * Genera una URL pre-firmada para acceso temporal
- * 
+ *
  * Query params:
  * - key: Key del objeto en S3
  * - expiresIn: Tiempo de expiración en segundos (default: 3600)
- * 
+ *
  * Response:
  * { url: string }
  */
@@ -228,18 +246,12 @@ export async function GET(request: NextRequest) {
     // 1. Verificar autenticación
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     // 2. Verificar que S3 esté configurado
     if (!S3Service.isS3Configured()) {
-      return NextResponse.json(
-        { error: 'AWS S3 no configurado' },
-        { status: 503 }
-      );
+      return NextResponse.json({ error: 'AWS S3 no configurado' }, { status: 503 });
     }
 
     // 3. Parsear query params
@@ -248,32 +260,41 @@ export async function GET(request: NextRequest) {
     const expiresIn = parseInt(searchParams.get('expiresIn') || '3600');
 
     if (!key) {
-      return NextResponse.json(
-        { error: 'Key requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Key requerido' }, { status: 400 });
     }
 
-    // 4. Generar URL pre-firmada
+    // 4. Ownership check: key must belong to user's company
+    const companyId = (session.user as { companyId?: string }).companyId;
+    if (!companyId) {
+      logger.warn('[API Upload GET] User without companyId attempted access', { key });
+      return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
+    }
+    const expectedPrefix = `companies/${companyId}/`;
+    if (!key.startsWith(expectedPrefix)) {
+      logger.warn('[API Upload GET] IDOR attempt - key does not belong to company', {
+        key,
+        companyId,
+      });
+      return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
+    }
+
+    // 5. Generar URL pre-firmada
     const url = await S3Service.getSignedUrlForObject(key, expiresIn);
 
     return NextResponse.json({ url });
   } catch (error: any) {
     logger.error('[API Upload GET] Error:', error);
-    return NextResponse.json(
-      { error: 'Error generando URL' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error generando URL' }, { status: 500 });
   }
 }
 
 /**
  * DELETE /api/upload?key=xxx
  * Elimina un archivo de S3
- * 
+ *
  * Query params:
  * - key: Key del objeto a eliminar
- * 
+ *
  * Response:
  * { success: true }
  */
@@ -282,18 +303,12 @@ export async function DELETE(request: NextRequest) {
     // 1. Verificar autenticación
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     // 2. Verificar que S3 esté configurado
     if (!S3Service.isS3Configured()) {
-      return NextResponse.json(
-        { error: 'AWS S3 no configurado' },
-        { status: 503 }
-      );
+      return NextResponse.json({ error: 'AWS S3 no configurado' }, { status: 503 });
     }
 
     // 3. Parsear query params
@@ -301,28 +316,34 @@ export async function DELETE(request: NextRequest) {
     const key = searchParams.get('key');
 
     if (!key) {
-      return NextResponse.json(
-        { error: 'Key requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Key requerido' }, { status: 400 });
     }
 
-    // 4. Eliminar de S3
+    // 4. Ownership check: key must belong to user's company
+    const companyId = (session.user as { companyId?: string }).companyId;
+    if (!companyId) {
+      logger.warn('[API Upload DELETE] User without companyId attempted delete', { key });
+      return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
+    }
+    const expectedPrefix = `companies/${companyId}/`;
+    if (!key.startsWith(expectedPrefix)) {
+      logger.warn('[API Upload DELETE] IDOR attempt - key does not belong to company', {
+        key,
+        companyId,
+      });
+      return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
+    }
+
+    // 5. Eliminar de S3
     const deleted = await S3Service.deleteFromS3(key);
 
     if (!deleted) {
-      return NextResponse.json(
-        { error: 'No se pudo eliminar el archivo' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'No se pudo eliminar el archivo' }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
     logger.error('[API Upload DELETE] Error:', error);
-    return NextResponse.json(
-      { error: 'Error eliminando archivo' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error eliminando archivo' }, { status: 500 });
   }
 }

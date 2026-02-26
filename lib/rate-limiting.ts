@@ -1,10 +1,10 @@
 /**
  * Rate Limiting Middleware - Hibrido Redis/Memoria
- * 
+ *
  * Usa Redis cuando esta disponible (produccion con PM2 cluster)
  * para compartir limites entre workers. Fallback a Map en memoria
  * cuando Redis no esta configurado.
- * 
+ *
  * AUDITORIA 2026-02-11: Migrado de in-memory puro a Redis+fallback
  */
 
@@ -198,7 +198,12 @@ function getRateLimitType(pathname: string, method?: string): keyof typeof RATE_
   if (pathname.startsWith('/admin/') || pathname.startsWith('/api/admin/')) {
     return 'admin';
   }
-  if (pathname.includes('/auth') || pathname.includes('/login') || pathname.includes('/register') || pathname.includes('/signup')) {
+  if (
+    pathname.includes('/auth') ||
+    pathname.includes('/login') ||
+    pathname.includes('/register') ||
+    pathname.includes('/signup')
+  ) {
     return 'auth';
   }
   if (
@@ -258,16 +263,19 @@ export async function rateLimitMiddleware(request: NextRequest): Promise<NextRes
 
 /**
  * Helper para aplicar rate limiting en API routes
+ * @param keyPrefix - Prefix for rate limit key (default 'api', use 'auth' for login endpoints)
  */
 export async function withRateLimit(
   request: NextRequest,
   handler: () => Promise<NextResponse>,
-  customConfig?: RateLimitConfig
+  customConfig?: RateLimitConfig,
+  keyPrefix?: string
 ): Promise<NextResponse> {
   const identifier = getClientIdentifier(request);
   const config = customConfig || RATE_LIMITS.api;
+  const prefix = keyPrefix ?? 'api';
 
-  const result = await checkRateLimit(`api:${identifier}`, config);
+  const result = await checkRateLimit(`${prefix}:${identifier}`, config);
 
   if (!result.success) {
     return NextResponse.json(
@@ -297,13 +305,13 @@ export async function withRateLimit(
 }
 
 /**
- * Rate limiting especifico para autenticacion (mas restrictivo)
+ * Rate limiting especifico para autenticacion (10 req / 5 min por IP)
  */
 export async function withAuthRateLimit(
   request: NextRequest,
   handler: () => Promise<NextResponse>
 ): Promise<NextResponse> {
-  return withRateLimit(request, handler, RATE_LIMITS.auth);
+  return withRateLimit(request, handler, RATE_LIMITS.auth, 'auth');
 }
 
 /**
@@ -334,6 +342,7 @@ export function getRateLimitStats(): {
   return {
     cacheSize: tokenCache.size,
     maxSize: 500,
-    backend: process.env.REDIS_URL || process.env.REDIS_HOST ? 'redis+memory-fallback' : 'memory-only',
+    backend:
+      process.env.REDIS_URL || process.env.REDIS_HOST ? 'redis+memory-fallback' : 'memory-only',
   };
 }
