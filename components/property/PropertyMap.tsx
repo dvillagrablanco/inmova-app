@@ -2,69 +2,88 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { MapPin, Loader2, AlertCircle } from 'lucide-react';
+import { MapPin, Loader2, AlertCircle, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { MapboxService } from '@/lib/mapbox-service';
 
 interface PropertyMapProps {
   address: string;
-  city: string;
+  city?: string;
   latitude?: number;
   longitude?: number;
   showNearbyPoints?: boolean;
 }
 
-// Simulación de mapa sin Mapbox (para evitar dependencias)
+/**
+ * Mapa embebido usando OpenStreetMap (gratuito, sin API key).
+ * Geocodifica la dirección con Nominatim y muestra un iframe de OSM.
+ */
 export function PropertyMap({
   address,
   city,
   latitude,
   longitude,
-  showNearbyPoints = true,
+  showNearbyPoints = false,
 }: PropertyMapProps) {
   const [loading, setLoading] = useState(true);
-  const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const fullAddress = city ? `${address}, ${city}` : address;
+
   useEffect(() => {
-    const geocodeAddress = async () => {
-      // Si ya tenemos coordenadas, usarlas
+    const geocode = async () => {
+      // Si ya tenemos coordenadas, usarlas directamente
       if (latitude && longitude) {
-        setCoordinates({ lat: latitude, lng: longitude });
+        setCoords({ lat: latitude, lng: longitude });
         setLoading(false);
         return;
       }
 
-      // Usar MapboxService para geocoding (real o simulado)
+      // Geocodificar con Nominatim (OpenStreetMap, gratuito)
       try {
-        const result = await MapboxService.geocodeAddress(address, city);
-        
-        if (result) {
-          setCoordinates(result.coordinates);
+        const query = encodeURIComponent(fullAddress);
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${query}&limit=1`,
+          { headers: { 'User-Agent': 'InmovaApp/1.0' } }
+        );
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data.length > 0) {
+            setCoords({ lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) });
+          } else {
+            setError('No se encontró la ubicación');
+          }
         } else {
-          setError('No se pudo encontrar la ubicación');
+          setError('Error al buscar ubicación');
         }
       } catch (err) {
         console.error('Geocoding error:', err);
-        setError('Error al buscar la ubicación');
+        setError('Error de conexión');
       } finally {
         setLoading(false);
       }
     };
 
-    geocodeAddress();
-  }, [address, city, latitude, longitude]);
+    geocode();
+  }, [address, city, latitude, longitude, fullAddress]);
 
   const openInGoogleMaps = () => {
-    const query = encodeURIComponent(`${address}, ${city}`);
+    const query = encodeURIComponent(fullAddress);
     window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
+  };
+
+  const openInOSM = () => {
+    if (coords) {
+      window.open(`https://www.openstreetmap.org/?mlat=${coords.lat}&mlon=${coords.lng}#map=17/${coords.lat}/${coords.lng}`, '_blank');
+    }
   };
 
   if (loading) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
             <MapPin className="h-5 w-5" />
             Ubicación
           </CardTitle>
@@ -78,11 +97,11 @@ export function PropertyMap({
     );
   }
 
-  if (error) {
+  if (error || !coords) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
             <MapPin className="h-5 w-5" />
             Ubicación
           </CardTitle>
@@ -90,9 +109,11 @@ export function PropertyMap({
         <CardContent>
           <div className="aspect-video bg-muted rounded-lg flex flex-col items-center justify-center gap-3 text-muted-foreground">
             <AlertCircle className="h-8 w-8" />
-            <p className="text-sm">{error}</p>
-            <Button variant="outline" onClick={openInGoogleMaps}>
-              Ver en Google Maps
+            <p className="text-sm">{error || 'Ubicación no disponible'}</p>
+            <p className="text-xs">{fullAddress}</p>
+            <Button variant="outline" size="sm" onClick={openInGoogleMaps}>
+              <ExternalLink className="h-4 w-4 mr-2" />
+              Buscar en Google Maps
             </Button>
           </div>
         </CardContent>
@@ -100,104 +121,57 @@ export function PropertyMap({
     );
   }
 
+  // OpenStreetMap iframe embed (100% gratuito)
+  const zoom = 17;
+  const bbox = 0.003; // ~300m alrededor del punto
+  const osmEmbedUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${coords.lng - bbox}%2C${coords.lat - bbox}%2C${coords.lng + bbox}%2C${coords.lat + bbox}&layer=mapnik&marker=${coords.lat}%2C${coords.lng}`;
+
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
           <MapPin className="h-5 w-5" />
           Ubicación
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Mapa simulado (en producción sería Mapbox GL JS) */}
-        <div className="aspect-video bg-gradient-to-br from-green-50 to-blue-50 dark:from-green-950 dark:to-blue-950 rounded-lg relative overflow-hidden">
-          {/* Simulación de mapa */}
-          <div className="absolute inset-0 opacity-20">
-            <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                  <path
-                    d="M 40 0 L 0 0 0 40"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1"
-                  />
-                </pattern>
-              </defs>
-              <rect width="100%" height="100%" fill="url(#grid)" />
-            </svg>
-          </div>
+      <CardContent className="space-y-3">
+        {/* Mapa real OSM embebido */}
+        <div className="aspect-video rounded-lg overflow-hidden border bg-muted relative">
+          <iframe
+            src={osmEmbedUrl}
+            width="100%"
+            height="100%"
+            style={{ border: 0 }}
+            loading="lazy"
+            referrerPolicy="no-referrer"
+            title={`Mapa de ${fullAddress}`}
+            className="absolute inset-0"
+          />
+        </div>
 
-          {/* Marcador central */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-            <div className="relative">
-              {/* Pin */}
-              <div className="w-12 h-12 bg-primary rounded-full shadow-lg flex items-center justify-center">
-                <MapPin className="h-6 w-6 text-primary-foreground fill-current" />
-              </div>
-              {/* Pulso */}
-              <div className="absolute inset-0 w-12 h-12 bg-primary rounded-full animate-ping opacity-30" />
-            </div>
-          </div>
-
-          {/* Info overlay */}
-          <div className="absolute bottom-4 left-4 right-4 bg-background/90 backdrop-blur p-3 rounded-lg shadow-lg">
-            <p className="text-sm font-medium flex items-center gap-2">
-              <MapPin className="h-4 w-4" />
-              {address}
+        {/* Dirección + coordenadas */}
+        <div className="flex items-start gap-2 text-sm">
+          <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0 text-muted-foreground" />
+          <div>
+            <p className="font-medium">{address}</p>
+            {city && <p className="text-muted-foreground text-xs">{city}</p>}
+            <p className="text-muted-foreground text-xs mt-0.5">
+              {coords.lat.toFixed(6)}, {coords.lng.toFixed(6)}
             </p>
-            <p className="text-xs text-muted-foreground mt-1">{city}</p>
-            {coordinates && (
-              <p className="text-xs text-muted-foreground mt-1">
-                {coordinates.lat.toFixed(6)}, {coordinates.lng.toFixed(6)}
-              </p>
-            )}
           </div>
         </div>
 
-        {/* Acciones */}
+        {/* Botones */}
         <div className="flex gap-2">
-          <Button variant="outline" onClick={openInGoogleMaps} className="flex-1">
-            <MapPin className="mr-2 h-4 w-4" />
-            Abrir en Google Maps
+          <Button variant="outline" size="sm" onClick={openInGoogleMaps} className="flex-1">
+            <ExternalLink className="mr-2 h-3.5 w-3.5" />
+            Google Maps
+          </Button>
+          <Button variant="outline" size="sm" onClick={openInOSM} className="flex-1">
+            <MapPin className="mr-2 h-3.5 w-3.5" />
+            OpenStreetMap
           </Button>
         </div>
-
-        {/* Puntos de interés cercanos (simulado) */}
-        {showNearbyPoints && (
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium">Puntos de Interés Cercanos</h4>
-            <div className="space-y-2 text-sm">
-              <div className="flex items-center justify-between p-2 rounded bg-muted/50">
-                <span className="flex items-center gap-2">
-                  🏪 Supermercado
-                </span>
-                <span className="text-muted-foreground">~300m</span>
-              </div>
-              <div className="flex items-center justify-between p-2 rounded bg-muted/50">
-                <span className="flex items-center gap-2">
-                  🚇 Metro
-                </span>
-                <span className="text-muted-foreground">~500m</span>
-              </div>
-              <div className="flex items-center justify-between p-2 rounded bg-muted/50">
-                <span className="flex items-center gap-2">
-                  🏥 Centro de Salud
-                </span>
-                <span className="text-muted-foreground">~800m</span>
-              </div>
-              <div className="flex items-center justify-between p-2 rounded bg-muted/50">
-                <span className="flex items-center gap-2">
-                  🏫 Colegio
-                </span>
-                <span className="text-muted-foreground">~1.2km</span>
-              </div>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              * Distancias aproximadas. En producción se calcularían con geolocalización real.
-            </p>
-          </div>
-        )}
       </CardContent>
     </Card>
   );

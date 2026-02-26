@@ -60,6 +60,7 @@ import {
 import Link from 'next/link';
 import { PhotoGallery } from '@/components/ui/photo-gallery';
 import { EntityDocuments } from '@/components/ui/entity-documents';
+import { PropertyMap } from '@/components/property/PropertyMap';
 
 interface Unit {
   id: string;
@@ -624,6 +625,13 @@ export default function EdificioDetallesPage() {
 
           {/* Columna Lateral */}
           <div className="space-y-4 sm:space-y-6">
+            {/* Mapa de Ubicación */}
+            <PropertyMap
+              address={building.direccion}
+              latitude={building.latitud ?? undefined}
+              longitude={building.longitud ?? undefined}
+            />
+
             {/* Información Económica */}
             <Card>
               <CardHeader>
