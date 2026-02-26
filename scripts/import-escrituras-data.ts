@@ -97,7 +97,7 @@ async function upsertDocument(
   return prisma.document.create({
     data: {
       nombre: docName,
-      tipo: 'escritura_propiedad',
+      tipo: 'otro',
       descripcion: `${escritura.tipo} - ${escritura.inmueble || 'N/A'} (${escritura.fecha})`,
       cloudStoragePath: escritura.archivo,
       ...(buildingId && { buildingId }),

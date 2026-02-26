@@ -220,7 +220,7 @@ async function storeDocument(
   const doc = await prisma.document.create({
     data: {
       nombre: `Escritura ${extractedData.numero_escritura || ''} - ${extractedData.inmueble?.direccion || fileName}`,
-      tipo: 'escritura_propiedad',
+      tipo: 'otro',
       descripcion: extractedData.resumen || `${extractedData.tipo_escritura} (${extractedData.fecha})`,
       cloudStoragePath: storagePath,
       ...(buildingId && { buildingId }),
