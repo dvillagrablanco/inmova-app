@@ -57,8 +57,16 @@ export async function GET(
       );
     }
 
-    // Verificar acceso (ownership)
-    if (property.building?.companyId !== session.user.companyId) {
+    // Verificar acceso (ownership) - soporta multi-empresa
+    const { resolveCompanyScope } = await import('@/lib/company-scope');
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: (session.user as any).role,
+      primaryCompanyId: (session.user as any).companyId,
+      request,
+    });
+    
+    if (!scope.scopeCompanyIds.includes(property.building?.companyId || '')) {
       return NextResponse.json(
         { error: 'Acceso denegado' },
         { status: 403 }
@@ -98,9 +106,10 @@ export async function GET(
     );
 
     // Buscar propiedades similares en la BD
+    const buildingCompanyId = property.building?.companyId || session.user.companyId;
     const similarProperties = await prisma.unit.findMany({
       where: {
-        building: { companyId: session.user.companyId },
+        building: { companyId: buildingCompanyId },
         id: { not: propertyId },
         buildingId: property.buildingId,
         superficie: {
@@ -151,7 +160,7 @@ export async function GET(
       await prisma.propertyValuation.create({
         data: {
           unitId: propertyId,
-          companyId: session.user.companyId,
+          companyId: buildingCompanyId,
           address: propertyData.address,
           postalCode,
           city,
