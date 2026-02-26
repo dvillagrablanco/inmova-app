@@ -2,16 +2,19 @@
  * Script para importar datos extraídos de las escrituras de compraventa
  * a la base de datos de la app (AssetAcquisition, Building, Unit, Document).
  *
- * Datos fuente: data/escrituras-metadata.json
+ * Datos fuente: data/escrituras-metadata.json (17 escrituras con OCR)
  * Escrituras PDF: data/viroda/escrituras/ y data/rovida/escrituras/
  *
- * Uso: npx tsx scripts/import-escrituras-data.ts
+ * Uso:
+ *   npx tsx scripts/import-escrituras-data.ts          # Dry-run (muestra cambios)
+ *   npx tsx scripts/import-escrituras-data.ts --apply   # Aplica cambios a BD
  */
 
 import { PrismaClient } from '@prisma/client';
 import * as fs from 'fs';
 import * as path from 'path';
 
+const DRY_RUN = !process.argv.includes('--apply');
 const prisma = new PrismaClient();
 
 interface EscrituraFinca {
@@ -21,10 +24,7 @@ interface EscrituraFinca {
   superficie_util?: number;
   ref_catastral?: string;
   valor?: number;
-  garaje_anejo?: string;
   cuota?: number;
-  registro?: string;
-  nota?: string;
 }
 
 interface EscrituraData {
@@ -40,11 +40,13 @@ interface EscrituraData {
   inmueble: string | null;
   edificio_app: string | null;
   precio_total: number | null;
+  ref_catastral_principal?: string;
+  refs_catastrales?: string[];
   forma_pago?: string;
   estado: string;
   archivo: string;
-  texto_extraible: boolean;
-  fincas: EscrituraFinca[];
+  nota?: string;
+  fincas?: EscrituraFinca[];
 }
 
 async function findCompany(hint: string) {
@@ -70,12 +72,14 @@ async function findBuilding(name: string) {
   });
 }
 
-async function createDocumentRecord(
+async function upsertDocument(
   companyId: string,
   buildingId: string | null,
   escritura: EscrituraData
 ) {
   const fileName = path.basename(escritura.archivo);
+  const docName = fileName.replace('.pdf', '');
+
   const existing = await prisma.document.findFirst({
     where: {
       nombre: { contains: `Escritura_${escritura.numero}` },
@@ -88,9 +92,14 @@ async function createDocumentRecord(
     return existing;
   }
 
+  if (DRY_RUN) {
+    console.log(`    [DRY-RUN] Crearía Document: ${docName}`);
+    return null;
+  }
+
   return prisma.document.create({
     data: {
-      nombre: fileName.replace('.pdf', ''),
+      nombre: docName,
       tipo: 'escritura_propiedad',
       descripcion: `${escritura.tipo} - ${escritura.inmueble || 'N/A'} (${escritura.fecha})`,
       cloudStoragePath: escritura.archivo,
@@ -101,12 +110,12 @@ async function createDocumentRecord(
   });
 }
 
-async function createAssetAcquisition(
+async function upsertAssetAcquisition(
   companyId: string,
   buildingId: string | null,
   escritura: EscrituraData
 ) {
-  if (!escritura.precio_total && escritura.fincas.length === 0) return null;
+  if (!escritura.precio_total) return null;
 
   const existing = await prisma.assetAcquisition.findFirst({
     where: {
@@ -117,19 +126,29 @@ async function createAssetAcquisition(
   });
 
   if (existing) {
-    console.log(`    AssetAcquisition ya existe para ${escritura.edificio_app || escritura.inmueble}`);
+    if (existing.precioCompra !== escritura.precio_total) {
+      console.log(`    AssetAcquisition existe pero precio difiere: ${existing.precioCompra} vs ${escritura.precio_total}`);
+      if (!DRY_RUN) {
+        await prisma.assetAcquisition.update({
+          where: { id: existing.id },
+          data: {
+            precioCompra: escritura.precio_total,
+            ...(escritura.ref_catastral_principal && { referenciaCatastral: escritura.ref_catastral_principal }),
+            notas: buildNotas(escritura),
+          },
+        });
+        console.log(`    Actualizado`);
+      }
+    } else {
+      console.log(`    AssetAcquisition ya existe: ${existing.id}`);
+    }
     return existing;
   }
 
-  const notas = [
-    `Escritura nº ${escritura.numero}`,
-    escritura.notario ? `Notario: ${escritura.notario}` : null,
-    escritura.vendedor ? `Vendedor: ${escritura.vendedor}` : null,
-    escritura.forma_pago ? `Forma pago: ${escritura.forma_pago}` : null,
-    `Estado: ${escritura.estado}`,
-  ]
-    .filter(Boolean)
-    .join('\n');
+  if (DRY_RUN) {
+    console.log(`    [DRY-RUN] Crearía AssetAcquisition: ${escritura.precio_total}€ (${escritura.fecha})`);
+    return null;
+  }
 
   return prisma.assetAcquisition.create({
     data: {
@@ -137,108 +156,127 @@ async function createAssetAcquisition(
       ...(buildingId && { buildingId }),
       assetType: 'edificio',
       fechaAdquisicion: new Date(escritura.fecha),
-      precioCompra: escritura.precio_total || 0,
-      notas,
+      precioCompra: escritura.precio_total,
+      ...(escritura.ref_catastral_principal && { referenciaCatastral: escritura.ref_catastral_principal }),
+      notas: buildNotas(escritura),
     },
   });
 }
 
-async function updateCandelariaMoraUnits(building: any, fincas: EscrituraFinca[]) {
-  if (!building?.units?.length || !fincas.length) return;
+function buildNotas(escritura: EscrituraData): string {
+  return [
+    `Escritura nº ${escritura.numero}`,
+    escritura.notario ? `Notario: ${escritura.notario}` : null,
+    escritura.vendedor ? `Vendedor: ${escritura.vendedor}` : null,
+    escritura.vendedor_nif ? `NIF vendedor: ${escritura.vendedor_nif}` : null,
+    escritura.forma_pago ? `Forma pago: ${escritura.forma_pago}` : null,
+    escritura.nota || null,
+    `Estado: ${escritura.estado}`,
+    escritura.refs_catastrales?.length ? `Refs catastrales: ${escritura.refs_catastrales.join(', ')}` : null,
+  ]
+    .filter(Boolean)
+    .join('\n');
+}
 
-  console.log(`\n  Actualizando unidades de ${building.nombre} con datos de escritura...`);
+async function updateUnitsFromFincas(building: any, fincas: EscrituraFinca[], buildingName: string) {
+  if (!building?.units?.length || !fincas?.length) return;
 
-  const unitMapping: Record<string, string> = {
-    'Vivienda 1ºA Bloque A': '1º A',
-    'Vivienda 1ºB Bloque A': '1º B',
-    'Vivienda 1ºC Bloque A': '1º C',
-    'Vivienda 1ºD Dúplex Bloque B (plantas 1ª y 2ª)': '1º D',
-    'Vivienda 1ºE Dúplex Bloque B (plantas 1ª y 2ª)': '1º E',
-    'Vivienda 2ºA Bloque A': '2º A',
-    'Vivienda 2ºB Bloque A': '2º B',
-    'Vivienda 2ºC Bloque A': '2º C',
-    'Vivienda 3ºA Bloque A': '3º A',
-    'Vivienda 3ºB Bloque A': '3º B',
-    'Vivienda 3ºC Bloque A': '3º C',
-    'Vivienda 4ºA Bloque A': '4º A',
-    'Vivienda 4ºB Bloque A': '4º B',
-    'Vivienda 4ºC Bloque A': '4º C',
-  };
+  console.log(`\n  Actualizando unidades de ${buildingName} con datos de escritura...`);
 
   for (const finca of fincas) {
-    const unitNumero = unitMapping[finca.descripcion];
-    if (!unitNumero) continue;
+    if (!finca.superficie_construida && !finca.superficie_util) continue;
 
-    const unit = building.units.find(
-      (u: any) => u.numero === unitNumero || u.numero.replace(/\s/g, '') === unitNumero.replace(/\s/g, '')
-    );
+    const desc = finca.descripcion.toLowerCase();
+    let matched = false;
 
-    if (!unit) {
-      console.log(`    ⚠ Unidad "${unitNumero}" no encontrada`);
-      continue;
+    for (const unit of building.units) {
+      const unitNum = unit.numero.toLowerCase().replace(/\s/g, '');
+      const fincaDesc = desc.replace(/\s/g, '');
+      if (fincaDesc.includes(unitNum) || unitNum.includes(fincaDesc.slice(-3))) {
+        const changes: string[] = [];
+        const updateData: any = {};
+
+        if (finca.superficie_construida && unit.superficie !== finca.superficie_construida) {
+          changes.push(`superficie: ${unit.superficie}→${finca.superficie_construida}`);
+          updateData.superficie = finca.superficie_construida;
+        }
+        if (finca.superficie_util && unit.superficieUtil !== finca.superficie_util) {
+          changes.push(`superficieUtil: ${unit.superficieUtil ?? 'null'}→${finca.superficie_util}`);
+          updateData.superficieUtil = finca.superficie_util;
+        }
+
+        if (changes.length > 0) {
+          if (DRY_RUN) {
+            console.log(`    [DRY-RUN] ${unit.numero}: ${changes.join(', ')}`);
+          } else {
+            await prisma.unit.update({ where: { id: unit.id }, data: updateData });
+            console.log(`    ✓ ${unit.numero}: ${changes.join(', ')}`);
+          }
+        }
+        matched = true;
+        break;
+      }
     }
 
-    const changes: string[] = [];
-    if (finca.superficie_construida && unit.superficie !== finca.superficie_construida)
-      changes.push(`superficie: ${unit.superficie}→${finca.superficie_construida}`);
-    if (finca.superficie_util && unit.superficieUtil !== finca.superficie_util)
-      changes.push(`superficieUtil: ${unit.superficieUtil ?? 'null'}→${finca.superficie_util}`);
-
-    if (changes.length > 0) {
-      await prisma.unit.update({
-        where: { id: unit.id },
-        data: {
-          ...(finca.superficie_construida && { superficie: finca.superficie_construida }),
-          ...(finca.superficie_util && { superficieUtil: finca.superficie_util }),
-        },
-      });
-      console.log(`    ✓ ${unitNumero}: ${changes.join(', ')}`);
+    if (!matched && (finca.superficie_construida || finca.superficie_util)) {
+      console.log(`    ⚠ No match para: "${finca.descripcion}"`);
     }
   }
 }
 
 async function main() {
   console.log('='.repeat(70));
-  console.log('IMPORTACIÓN DE DATOS DE ESCRITURAS');
+  console.log(`IMPORTACIÓN DE DATOS DE ESCRITURAS ${DRY_RUN ? '(DRY-RUN)' : '(APLICANDO)'}`);
   console.log('='.repeat(70));
+
+  if (DRY_RUN) {
+    console.log('Modo DRY-RUN: muestra cambios sin aplicar. Usa --apply para ejecutar.\n');
+  }
 
   const metadataPath = path.join(__dirname, '..', 'data', 'escrituras-metadata.json');
   const metadata = JSON.parse(fs.readFileSync(metadataPath, 'utf-8'));
   const escrituras: EscrituraData[] = metadata.escrituras;
 
-  console.log(`\nEscrituras a procesar: ${escrituras.length}`);
+  console.log(`Escrituras a procesar: ${escrituras.length}`);
 
-  const viroda = await findCompany('Viroda');
-  const rovida = await findCompany('Rovida');
+  let viroda: any, rovida: any;
+  try {
+    viroda = await findCompany('Viroda');
+    rovida = await findCompany('Rovida');
+  } catch (e: any) {
+    if (e.message?.includes('connect') || e.message?.includes('ECONNREFUSED')) {
+      console.error('\nERROR: No se pudo conectar a la BD.');
+      console.error('Ejecuta en el servidor de producción con la BD accesible.');
+      console.error('Uso: DATABASE_URL=postgresql://... npx tsx scripts/import-escrituras-data.ts --apply\n');
+      process.exit(1);
+    }
+    throw e;
+  }
 
-  if (!viroda) {
-    console.error('ERROR: No se encontró la empresa Viroda');
-    process.exit(1);
-  }
-  if (!rovida) {
-    console.error('ERROR: No se encontró la empresa Rovida');
-    process.exit(1);
-  }
+  if (!viroda) { console.error('ERROR: Empresa Viroda no encontrada'); process.exit(1); }
+  if (!rovida) { console.error('ERROR: Empresa Rovida no encontrada'); process.exit(1); }
 
   console.log(`Viroda: ${viroda.nombre} (${viroda.id})`);
   console.log(`Rovida: ${rovida.nombre} (${rovida.id})`);
+
+  let docsCreated = 0, assetsCreated = 0, unitsUpdated = 0;
 
   for (const escritura of escrituras) {
     console.log(`\n${'─'.repeat(60)}`);
     console.log(`📜 Escritura ${escritura.numero} (${escritura.fecha})`);
     console.log(`   ${escritura.tipo}: ${escritura.inmueble || 'N/A'}`);
-    console.log(`   Empresa: ${escritura.empresa} | Estado: ${escritura.estado}`);
+    if (escritura.precio_total) console.log(`   Precio: ${escritura.precio_total.toLocaleString('es-ES')}€`);
 
     let companies: { id: string; nombre: string }[] = [];
     if (escritura.empresa === 'viroda') companies = [viroda];
     else if (escritura.empresa === 'rovida') companies = [rovida];
     else companies = [rovida, viroda];
 
-    let building = null;
+    let building: any = null;
     if (escritura.edificio_app) {
       building = await findBuilding(escritura.edificio_app);
       if (building) {
-        console.log(`   Edificio encontrado: ${building.nombre} (${building.units.length} uds)`);
+        console.log(`   Edificio: ${building.nombre} (${building.units.length} uds)`);
       } else {
         console.log(`   ⚠ Edificio "${escritura.edificio_app}" no encontrado en BD`);
       }
@@ -247,47 +285,35 @@ async function main() {
     for (const company of companies) {
       console.log(`\n  → ${company.nombre}:`);
 
-      const doc = await createDocumentRecord(company.id, building?.id || null, escritura);
-      console.log(`    Doc: ${doc.nombre}`);
+      const doc = await upsertDocument(company.id, building?.id || null, escritura);
+      if (doc) docsCreated++;
 
-      if (escritura.precio_total || escritura.fincas.length > 0) {
-        const acquisition = await createAssetAcquisition(
-          company.id,
-          building?.id || null,
-          escritura
-        );
-        if (acquisition) {
-          console.log(`    AssetAcquisition: ${acquisition.id} (${acquisition.precioCompra}€)`);
-        }
+      if (escritura.precio_total) {
+        const asset = await upsertAssetAcquisition(company.id, building?.id || null, escritura);
+        if (asset) assetsCreated++;
       }
     }
 
-    if (escritura.edificio_app === 'Candelaria Mora' && building && escritura.fincas.length > 0) {
-      await updateCandelariaMoraUnits(building, escritura.fincas);
+    if (building && escritura.fincas?.length) {
+      await updateUnitsFromFincas(building, escritura.fincas, escritura.edificio_app || '');
     }
   }
 
   console.log('\n' + '='.repeat(70));
-  console.log('IMPORTACIÓN COMPLETADA');
+  console.log(`IMPORTACIÓN ${DRY_RUN ? '(DRY-RUN) SIMULADA' : 'COMPLETADA'}`);
+  console.log(`  Escrituras procesadas: ${escrituras.length}`);
+  console.log(`  Documents: ${docsCreated}`);
+  console.log(`  AssetAcquisitions: ${assetsCreated}`);
   console.log('='.repeat(70));
 
-  console.log('\n📋 Resumen de archivos por directorio:');
-  const virodaDir = path.join(__dirname, '..', 'data', 'viroda', 'escrituras');
-  const rovidaDir = path.join(__dirname, '..', 'data', 'rovida', 'escrituras');
-
-  if (fs.existsSync(virodaDir)) {
-    const virodaFiles = fs.readdirSync(virodaDir).filter((f) => f.endsWith('.pdf'));
-    console.log(`  Viroda: ${virodaFiles.length} escrituras`);
-  }
-  if (fs.existsSync(rovidaDir)) {
-    const rovidaFiles = fs.readdirSync(rovidaDir).filter((f) => f.endsWith('.pdf'));
-    console.log(`  Rovida: ${rovidaFiles.length} escrituras`);
+  if (DRY_RUN) {
+    console.log('\nPara aplicar cambios: npx tsx scripts/import-escrituras-data.ts --apply');
   }
 }
 
 main()
   .catch((e) => {
-    console.error('Error:', e);
+    console.error('Error:', e.message || e);
     process.exit(1);
   })
   .finally(() => prisma.$disconnect());
