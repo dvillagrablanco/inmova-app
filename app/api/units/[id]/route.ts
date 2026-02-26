@@ -84,6 +84,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
             id: true,
             nombre: true,
             direccion: true,
+            referenciaCatastral: true,
           },
         },
         tenant: {
