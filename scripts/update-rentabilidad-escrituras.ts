@@ -130,10 +130,7 @@ const SILVELA_UNITS = [
 async function findCompany(hint: string) {
   return prisma.company.findFirst({
     where: {
-      OR: [
-        { nombre: { contains: hint, mode: 'insensitive' } },
-        { razonSocial: { contains: hint, mode: 'insensitive' } },
-      ],
+      nombre: { contains: hint, mode: 'insensitive' },
     },
   });
 }
@@ -224,7 +221,10 @@ async function updateUnitSurfaces(building: any, unitData: { numero: string; sup
   let updated = 0;
   for (const ud of unitData) {
     const unit = building.units.find(
-      (u: any) => u.numero === ud.numero || u.numero.replace(/\s/g, '') === ud.numero.replace(/\s/g, '')
+      (u: any) => {
+        const norm = (s: string) => s.replace(/\s/g, '').replace(/[ºª°]/g, '').toUpperCase();
+        return norm(u.numero) === norm(ud.numero);
+      }
     );
     if (!unit) continue;
 

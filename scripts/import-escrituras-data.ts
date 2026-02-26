@@ -52,10 +52,7 @@ interface EscrituraData {
 async function findCompany(hint: string) {
   return prisma.company.findFirst({
     where: {
-      OR: [
-        { nombre: { contains: hint, mode: 'insensitive' } },
-        { razonSocial: { contains: hint, mode: 'insensitive' } },
-      ],
+      nombre: { contains: hint, mode: 'insensitive' },
     },
   });
 }

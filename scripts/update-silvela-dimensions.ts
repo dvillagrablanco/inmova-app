@@ -66,8 +66,9 @@ async function main() {
   let notFound = 0;
 
   for (const unitData of SILVELA_UNITS) {
+    const normalize = (s: string) => s.replace(/\s/g, '').replace(/[ºª°]/g, '').toUpperCase();
     const existing = building.units.find(
-      (u) => u.numero === unitData.numero || u.numero.replace(/\s/g, '') === unitData.numero.replace(/\s/g, '')
+      (u) => normalize(u.numero) === normalize(unitData.numero)
     );
 
     if (!existing) {
