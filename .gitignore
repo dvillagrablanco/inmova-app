@@ -3,6 +3,10 @@
 # Data import temp files (Excel + JSON)
 /data-import/
 
+# Escrituras PDF (documentos pesados - solo metadatos en git)
+data/viroda/escrituras/*.pdf
+data/rovida/escrituras/*.pdf
+
 # dependencies
 /node_modules
 /.pnp
