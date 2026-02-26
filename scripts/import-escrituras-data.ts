@@ -80,7 +80,7 @@ async function upsertDocument(
   const existing = await prisma.document.findFirst({
     where: {
       nombre: { contains: `Escritura_${escritura.numero}` },
-      companyId,
+      ...(buildingId && { buildingId }),
     },
   });
 
@@ -100,7 +100,6 @@ async function upsertDocument(
       tipo: 'escritura_propiedad',
       descripcion: `${escritura.tipo} - ${escritura.inmueble || 'N/A'} (${escritura.fecha})`,
       cloudStoragePath: escritura.archivo,
-      companyId,
       ...(buildingId && { buildingId }),
       tags: ['escritura', 'compraventa', escritura.estado.toLowerCase()].filter(Boolean),
     },
@@ -151,7 +150,7 @@ async function upsertAssetAcquisition(
     data: {
       companyId,
       ...(buildingId && { buildingId }),
-      assetType: 'edificio',
+      assetType: 'otro',
       fechaAdquisicion: new Date(escritura.fecha),
       precioCompra: escritura.precio_total,
       ...(escritura.ref_catastral_principal && { referenciaCatastral: escritura.ref_catastral_principal }),

@@ -223,7 +223,6 @@ async function storeDocument(
       tipo: 'escritura_propiedad',
       descripcion: extractedData.resumen || `${extractedData.tipo_escritura} (${extractedData.fecha})`,
       cloudStoragePath: storagePath,
-      companyId,
       ...(buildingId && { buildingId }),
       tags: ['escritura', extractedData.tipo_escritura, extractedData.fecha?.substring(0, 4)].filter(Boolean),
     },
@@ -276,7 +275,7 @@ async function createOrUpdateAssetAcquisition(
     data: {
       companyId,
       ...(buildingId && { buildingId }),
-      assetType: 'edificio',
+      assetType: 'otro',
       fechaAdquisicion: new Date(extractedData.fecha || new Date()),
       precioCompra: extractedData.precio_total,
       inversionTotal: extractedData.precio_total,

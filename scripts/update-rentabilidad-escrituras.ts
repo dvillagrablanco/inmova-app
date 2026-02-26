@@ -204,7 +204,7 @@ async function upsertAssetAcquisition(
     data: {
       companyId,
       buildingId,
-      assetType: 'edificio',
+      assetType: 'otro',
       fechaAdquisicion: new Date(data.fecha_compra),
       precioCompra: data.precio_compra,
       inversionTotal: data.precio_compra,
