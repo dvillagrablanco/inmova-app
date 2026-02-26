@@ -410,11 +410,128 @@ export class InsuranceNotificationService {
 
         console.log(`[Auto-Renewal] Renewed policy ${insurance.numeroPoliza}`);
 
-        // TODO: Enviar email confirmando renovación automática
+        // Enviar notificación de renovación automática
+        await this.createRenewalNotification(insurance);
       }
     } catch (error) {
       logger.error('[Auto-Renewal Error]:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Crear notificación de renovación automática completada
+   */
+  private static async createRenewalNotification(insurance: any): Promise<void> {
+    try {
+      const users = await prisma.user.findMany({
+        where: {
+          companyId: insurance.companyId,
+          role: { in: ['administrador', 'gestor', 'super_admin'] },
+          activo: true,
+        },
+        select: { id: true },
+      });
+
+      for (const user of users) {
+        await prisma.notification.create({
+          data: {
+            companyId: insurance.companyId,
+            userId: user.id,
+            titulo: `✅ Seguro renovado automáticamente`,
+            mensaje: `La póliza ${insurance.numeroPoliza} (${insurance.tipo}) ha sido renovada automáticamente. Nueva fecha de vencimiento: ${new Date(insurance.fechaVencimiento).toLocaleDateString('es-ES')}.`,
+            tipo: 'seguro_renovacion',
+            prioridad: 'medio',
+            leida: false,
+            entityId: insurance.id,
+            entityType: 'insurance',
+          },
+        });
+      }
+    } catch (error) {
+      logger.error('[Renewal Notification Error]:', error);
+    }
+  }
+
+  /**
+   * Notificar que se ha recibido una cotización de un proveedor
+   */
+  static async notifyQuotationReceived(params: {
+    companyId: string;
+    requestCodigo: string;
+    providerName: string;
+    primaAnual: number;
+    requestId: string;
+  }): Promise<void> {
+    try {
+      const users = await prisma.user.findMany({
+        where: {
+          companyId: params.companyId,
+          role: { in: ['administrador', 'gestor', 'super_admin'] },
+          activo: true,
+        },
+        select: { id: true },
+      });
+
+      for (const user of users) {
+        await prisma.notification.create({
+          data: {
+            companyId: params.companyId,
+            userId: user.id,
+            titulo: `📋 Cotización recibida de ${params.providerName}`,
+            mensaje: `Se ha registrado una cotización de ${params.providerName} para la solicitud ${params.requestCodigo}. Prima anual: €${params.primaAnual.toLocaleString()}.`,
+            tipo: 'cotizacion_recibida',
+            prioridad: 'medio',
+            leida: false,
+            entityId: params.requestId,
+            entityType: 'insurance_quote_request',
+          },
+        });
+      }
+
+      console.log(`[Quote Notification] Notified ${users.length} users of new quotation from ${params.providerName}`);
+    } catch (error) {
+      logger.error('[Quote Notification Error]:', error);
+    }
+  }
+
+  /**
+   * Notificar que se han enviado solicitudes de cotización
+   */
+  static async notifyQuoteRequestSent(params: {
+    companyId: string;
+    requestCodigo: string;
+    providerCount: number;
+    tipoSeguro: string;
+    requestId: string;
+  }): Promise<void> {
+    try {
+      const users = await prisma.user.findMany({
+        where: {
+          companyId: params.companyId,
+          role: { in: ['administrador', 'gestor', 'super_admin'] },
+          activo: true,
+        },
+        select: { id: true },
+      });
+
+      for (const user of users) {
+        await prisma.notification.create({
+          data: {
+            companyId: params.companyId,
+            userId: user.id,
+            titulo: `📤 Solicitud de cotización enviada`,
+            mensaje: `La solicitud ${params.requestCodigo} (${params.tipoSeguro}) ha sido enviada a ${params.providerCount} proveedor(es).`,
+            tipo: 'cotizacion_seguro',
+            prioridad: 'bajo',
+            leida: false,
+            entityId: params.requestId,
+            entityType: 'insurance_quote_request',
+          },
+        });
+      }
+    } catch (error) {
+      logger.error('[Quote Request Sent Notification Error]:', error);
     }
   }
 }
