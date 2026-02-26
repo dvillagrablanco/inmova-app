@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -12,555 +11,609 @@ import {
   X,
   Bot,
   User,
-  ExternalLink,
-  PlayCircle,
   Loader2,
   Sparkles,
-  BookOpen,
-  Ticket,
-  Smile,
-  Meh,
-  Frown,
-  AlertTriangle,
-  Zap,
-  Heart,
-  ThumbsUp
+  Paperclip,
+  Users,
+  Home,
+  Wrench,
+  ChevronLeft,
+  Building2,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
-import logger, { logError } from '@/lib/logger';
+import { useSession } from 'next-auth/react';
+import logger from '@/lib/logger';
 
-interface SentimentInfo {
-  sentiment: 'positive' | 'neutral' | 'negative';
-  score: number;
-  urgency: 'low' | 'medium' | 'high' | 'critical';
-  emotions: string[];
-  suggestedTone?: string;
-}
+// ═══════════════════════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════════════════════
 
-interface Message {
+type ChatChannel = 'ai' | 'team' | 'tenants';
+
+interface AIMessage {
   id: string;
   sender: 'user' | 'bot';
   text: string;
   timestamp: Date;
-  confidence?: number;
-  suggestedActions?: SuggestedAction[];
-  relatedArticles?: KnowledgeArticle[];
-  sentimentAnalysis?: SentimentInfo;
 }
 
-interface SuggestedAction {
+interface ChatConversation {
   id: string;
-  label: string;
-  action: string;
-  icon: string;
+  asunto: string;
+  estado: string;
+  participantName: string;
+  participantType: string;
+  companyName?: string;
+  ultimoMensaje: string | null;
+  ultimoMensajeFecha: string | null;
+  unreadCount: number;
 }
 
-interface KnowledgeArticle {
+interface InternalUser {
   id: string;
-  title: string;
-  excerpt: string;
-  videoUrl?: string;
+  name: string;
+  email: string;
+  role: string;
+  company?: { nombre: string };
 }
+
+interface ChatMsg {
+  id: string;
+  mensaje: string;
+  senderType: string;
+  senderId?: string;
+  createdAt: string;
+  leido: boolean;
+}
+
+// ═══════════════════════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════════════════════
 
 export default function IntelligentSupportChatbot() {
   const router = useRouter();
+  const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      sender: 'bot',
-      text: '¡Hola! Soy tu asistente inteligente de INMOVA. ¿En qué puedo ayudarte hoy? 🚀',
-      timestamp: new Date()
-    }
+  const [channel, setChannel] = useState<ChatChannel>('ai');
+  
+  // AI state
+  const [aiMessages, setAiMessages] = useState<AIMessage[]>([
+    { id: '1', sender: 'bot', text: '¡Hola! Soy el asistente IA de INMOVA. Puedo ayudarte con cualquier gestión, analizar documentos o responder preguntas. 🚀', timestamp: new Date() }
   ]);
-  const [inputValue, setInputValue] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
+  const [aiInput, setAiInput] = useState('');
+  const [aiTyping, setAiTyping] = useState(false);
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleSendMessage = async () => {
-    if (!inputValue.trim() && !attachedFile) return;
+  // Team/Tenant chat state
+  const [conversations, setConversations] = useState<ChatConversation[]>([]);
+  const [internalUsers, setInternalUsers] = useState<InternalUser[]>([]);
+  const [selectedConvId, setSelectedConvId] = useState<string | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [chatMessages, setChatMessages] = useState<ChatMsg[]>([]);
+  const [chatInput, setChatInput] = useState('');
+  const [chatLoading, setChatLoading] = useState(false);
+  const [chatSending, setChatSending] = useState(false);
+
+  // Unread counts
+  const [unreadTeam, setUnreadTeam] = useState(0);
+  const [unreadTenants, setUnreadTenants] = useState(0);
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+  };
+
+  useEffect(() => { scrollToBottom(); }, [aiMessages, chatMessages]);
+
+  // ═══════════════════════════════════════════════════════════
+  // AI CHANNEL
+  // ═══════════════════════════════════════════════════════════
+
+  const sendAIMessage = async () => {
+    if (!aiInput.trim() && !attachedFile) return;
 
     const userText = attachedFile
-      ? `${inputValue || 'Analiza este archivo'} 📎 ${attachedFile.name}`
-      : inputValue;
+      ? `${aiInput || 'Analiza este archivo'} 📎 ${attachedFile.name}`
+      : aiInput;
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      sender: 'user',
-      text: userText,
-      timestamp: new Date()
-    };
+    setAiMessages(prev => [...prev, {
+      id: Date.now().toString(), sender: 'user', text: userText, timestamp: new Date()
+    }]);
 
-    setMessages(prev => [...prev, userMessage]);
-    const currentInput = inputValue;
+    const currentInput = aiInput;
     const currentFile = attachedFile;
-    setInputValue('');
+    setAiInput('');
     setAttachedFile(null);
-    setIsTyping(true);
+    setAiTyping(true);
 
     try {
-      const conversationHistory = messages.slice(-10).map(msg => ({
-        role: msg.sender === 'user' ? 'user' : 'assistant',
-        content: msg.text
+      const history = aiMessages.slice(-10).map(m => ({
+        role: m.sender === 'user' ? 'user' : 'assistant',
+        content: m.text
       }));
 
       let res;
-      
       if (currentFile) {
-        // Send with file via FormData to AI assistant
         const formData = new FormData();
-        formData.append('message', currentInput || `Analiza este archivo: ${currentFile.name}`);
+        formData.append('message', currentInput || `Analiza: ${currentFile.name}`);
         formData.append('file', currentFile);
-        formData.append('conversationHistory', JSON.stringify(conversationHistory));
-        
-        res = await fetch('/api/ai/assistant', {
-          method: 'POST',
-          body: formData,
-        });
+        formData.append('conversationHistory', JSON.stringify(history));
+        res = await fetch('/api/ai/assistant', { method: 'POST', body: formData });
       } else {
-        // Text-only message to AI assistant
         res = await fetch('/api/ai/assistant', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            message: currentInput,
-            conversationHistory
-          })
+          body: JSON.stringify({ message: currentInput, conversationHistory: history })
         });
       }
 
       if (res.ok) {
         const data = await res.json();
-        
-        const botMessage: Message = {
+        setAiMessages(prev => [...prev, {
           id: (Date.now() + 1).toString(),
           sender: 'bot',
           text: data.content || data.message || 'Respuesta recibida.',
-          timestamp: new Date(),
-          confidence: data.confidence,
-          suggestedActions: data.suggestedActions,
-          relatedArticles: data.relatedArticles,
-        };
-
-        setMessages(prev => [...prev, botMessage]);
-      } else {
-        throw new Error('Error en la respuesta');
-      }
-    } catch (error) {
-      logger.error('Error sending message:', error);
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        sender: 'bot',
-        text: 'Lo siento, he tenido un problema procesando tu mensaje. ¿Podrías intentarlo de nuevo?',
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, errorMessage]);
-    } finally {
-      setIsTyping(false);
-    }
-  };
-
-  const handleActionClick = (action: SuggestedAction) => {
-    if (action.action.startsWith('navigate:')) {
-      const path = action.action.replace('navigate:', '');
-      router.push(path);
-      setIsOpen(false);
-      toast.success(`Redirigiendo a ${action.label}`);
-    } else if (action.action === 'create_ticket') {
-      router.push('/soporte?action=create');
-      setIsOpen(false);
-    } else if (action.action.startsWith('play_video:')) {
-      const videoUrl = action.action.replace('play_video:', '');
-      window.open(videoUrl, '_blank');
-    }
-  };
-
-  const handleArticleClick = async (article: KnowledgeArticle) => {
-    try {
-      const res = await fetch('/api/support/chatbot', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'get_article',
-          articleId: article.id
-        })
-      });
-
-      if (res.ok) {
-        const { article: fullArticle } = await res.json();
-        
-        const articleMessage: Message = {
-          id: Date.now().toString(),
-          sender: 'bot',
-          text: `Aquí está el artículo completo:\n\n## ${fullArticle.title}\n\n${fullArticle.excerpt}\n\n[Ver artículo completo](/knowledge-base?article=${fullArticle.id})`,
           timestamp: new Date()
-        };
-
-        setMessages(prev => [...prev, articleMessage]);
+        }]);
+      } else {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.content || err.error || 'Error');
       }
-    } catch (error) {
-      logger.error('Error fetching article:', error);
+    } catch (error: any) {
+      logger.error('AI error:', error);
+      setAiMessages(prev => [...prev, {
+        id: (Date.now() + 1).toString(), sender: 'bot',
+        text: error.message?.includes('upgrade') ? error.message : 'Error procesando tu mensaje. Inténtalo de nuevo.',
+        timestamp: new Date()
+      }]);
+    } finally {
+      setAiTyping(false);
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
+  // ═══════════════════════════════════════════════════════════
+  // TEAM / TENANT CHANNELS
+  // ═══════════════════════════════════════════════════════════
+
+  const loadConversations = useCallback(async () => {
+    try {
+      const res = await fetch('/api/chat/conversations');
+      if (!res.ok) return;
+      const data = await res.json();
+      
+      const allConvs: ChatConversation[] = data.conversations || [];
+      setConversations(allConvs);
+      setInternalUsers(data.internalUsers || []);
+      
+      // Calculate unread counts per channel
+      const tenantConvs = allConvs.filter(c => c.participantType === 'tenant');
+      const teamConvs = allConvs.filter(c => c.participantType !== 'tenant');
+      setUnreadTenants(tenantConvs.reduce((s, c) => s + (c.unreadCount || 0), 0));
+      setUnreadTeam(teamConvs.reduce((s, c) => s + (c.unreadCount || 0), 0));
+    } catch {
+      // Silent fail - widget should not block app
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isOpen && (channel === 'team' || channel === 'tenants')) {
+      loadConversations();
+    }
+  }, [isOpen, channel, loadConversations]);
+
+  // Poll for new messages every 10s when chat is open
+  useEffect(() => {
+    if (!isOpen) return;
+    const interval = setInterval(loadConversations, 10000);
+    return () => clearInterval(interval);
+  }, [isOpen, loadConversations]);
+
+  const loadChatMessages = async (conversationId: string) => {
+    setChatLoading(true);
+    try {
+      const res = await fetch(`/api/chat/messages?conversationId=${conversationId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setChatMessages(data.messages || []);
+      }
+    } catch {
+      toast.error('Error cargando mensajes');
+    } finally {
+      setChatLoading(false);
     }
   };
+
+  const loadUserMessages = async (userId: string) => {
+    setChatLoading(true);
+    try {
+      const res = await fetch(`/api/chat/messages/${userId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setChatMessages((data.messages || []).map((m: any) => ({
+          id: m.id,
+          mensaje: m.mensaje || m.titulo,
+          senderType: m.isSent ? 'other' : 'user',
+          createdAt: m.createdAt,
+          leido: m.leida,
+        })));
+      }
+    } catch {
+      toast.error('Error cargando mensajes');
+    } finally {
+      setChatLoading(false);
+    }
+  };
+
+  const sendChatMessage = async () => {
+    if (!chatInput.trim()) return;
+    setChatSending(true);
+    try {
+      if (selectedConvId) {
+        await fetch('/api/chat/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ conversationId: selectedConvId, mensaje: chatInput.trim() })
+        });
+        loadChatMessages(selectedConvId);
+      } else if (selectedUserId) {
+        await fetch(`/api/chat/messages/${selectedUserId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: chatInput.trim() })
+        });
+        loadUserMessages(selectedUserId);
+      }
+      setChatInput('');
+    } catch {
+      toast.error('Error enviando mensaje');
+    } finally {
+      setChatSending(false);
+    }
+  };
+
+  const openConversation = (conv: ChatConversation) => {
+    setSelectedConvId(conv.id);
+    setSelectedUserId(null);
+    loadChatMessages(conv.id);
+  };
+
+  const openUserChat = (user: InternalUser) => {
+    setSelectedUserId(user.id);
+    setSelectedConvId(null);
+    loadUserMessages(user.id);
+  };
+
+  const backToList = () => {
+    setSelectedConvId(null);
+    setSelectedUserId(null);
+    setChatMessages([]);
+  };
+
+  // ═══════════════════════════════════════════════════════════
+  // CHANNEL TABS
+  // ═══════════════════════════════════════════════════════════
+
+  const tabs: { key: ChatChannel; label: string; icon: React.ReactNode; badge?: number }[] = [
+    { key: 'ai', label: 'IA', icon: <Sparkles className="h-3.5 w-3.5" /> },
+    { key: 'team', label: 'Equipo', icon: <Users className="h-3.5 w-3.5" />, badge: unreadTeam },
+    { key: 'tenants', label: 'Inquilinos', icon: <Home className="h-3.5 w-3.5" />, badge: unreadTenants },
+  ];
+
+  // ═══════════════════════════════════════════════════════════
+  // RENDER
+  // ═══════════════════════════════════════════════════════════
+
+  const totalUnread = unreadTeam + unreadTenants;
+  const currentUserId = session?.user?.id;
 
   return (
     <>
-      {/* Botón flotante mejorado con emoticono */}
+      {/* Floating button */}
       <AnimatePresence>
         {!isOpen && (
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
-            whileHover={{ scale: 1.05 }}
-            className="fixed bottom-24 right-4 z-50 sm:bottom-6 sm:right-6"
+            className="fixed bottom-6 right-6 z-[9998]"
           >
             <Button
               size="lg"
               onClick={() => setIsOpen(true)}
-              className="h-16 w-16 rounded-full shadow-2xl hover:shadow-3xl transition-all bg-gradient-to-br from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white border-2 border-white relative overflow-hidden group"
-              aria-label="Abrir chat de asistencia"
+              className="h-14 w-14 rounded-full shadow-2xl bg-gradient-to-br from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white border-2 border-white/20 relative"
+              aria-label="Abrir chat"
             >
-              {/* Efecto de brillo en hover */}
-              <div className="absolute inset-0 bg-white/20 group-hover:bg-white/30 transition-colors" />
-              
-              {/* Emoticono del asistente */}
-              <span className="text-3xl relative z-10 group-hover:scale-110 transition-transform" role="img" aria-label="Asistente">
-                🤖
-              </span>
+              <MessageCircle className="h-6 w-6" />
+              {totalUnread > 0 && (
+                <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-[10px] text-white flex items-center justify-center font-bold">
+                  {totalUnread > 9 ? '9+' : totalUnread}
+                </span>
+              )}
             </Button>
-            
-            {/* Indicador de disponibilidad pulsante */}
-            <motion.div
-              animate={{ 
-                scale: [1, 1.3, 1],
-                opacity: [1, 0.7, 1]
-              }}
-              transition={{ 
-                repeat: Infinity, 
-                duration: 2,
-                ease: "easeInOut"
-              }}
-              className="absolute -top-1 -right-1 h-5 w-5 bg-green-500 rounded-full border-3 border-white shadow-lg"
-              aria-label="En línea"
-            >
-              <span className="sr-only">Asistente disponible</span>
-            </motion.div>
-            
-            {/* Tooltip informativo */}
-            <motion.div
-              initial={{ opacity: 0, x: 10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 2 }}
-              className="absolute right-full mr-4 top-1/2 -translate-y-1/2 bg-gray-900 text-white px-3 py-2 rounded-lg text-sm whitespace-nowrap shadow-xl pointer-events-none hidden sm:block"
-            >
-              💬 ¿Necesitas ayuda?
-              <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-full border-8 border-transparent border-l-gray-900" />
-            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Ventana del chat */}
+      {/* Chat panel */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-24 right-4 z-50 w-full max-w-md sm:bottom-6 sm:right-6"
+            transition={{ duration: 0.2 }}
+            className="fixed bottom-6 right-6 z-[9998] w-[380px] h-[540px] bg-background border rounded-2xl shadow-2xl flex flex-col overflow-hidden"
           >
-            <Card className="h-[600px] flex flex-col shadow-2xl">
-              <CardHeader className="flex-shrink-0 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-white/20 rounded-lg">
-                      <Sparkles className="h-5 w-5" />
+            {/* Header */}
+            <div className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white px-4 py-3 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2">
+                {(selectedConvId || selectedUserId) && channel !== 'ai' ? (
+                  <button onClick={backToList} className="hover:bg-white/20 rounded p-0.5">
+                    <ChevronLeft className="h-5 w-5" />
+                  </button>
+                ) : null}
+                <span className="font-semibold text-sm">
+                  {channel === 'ai' ? '🤖 Asistente IA' :
+                   selectedConvId || selectedUserId ? 'Conversación' :
+                   channel === 'team' ? '👥 Equipo' : '🏠 Inquilinos'}
+                </span>
+              </div>
+              <button onClick={() => setIsOpen(false)} className="hover:bg-white/20 rounded p-1">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Channel tabs */}
+            <div className="flex border-b shrink-0 bg-muted/30">
+              {tabs.map(tab => (
+                <button
+                  key={tab.key}
+                  onClick={() => { setChannel(tab.key); backToList(); }}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium transition-colors relative ${
+                    channel === tab.key
+                      ? 'text-indigo-600 border-b-2 border-indigo-600 bg-background'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                  }`}
+                >
+                  {tab.icon}
+                  {tab.label}
+                  {tab.badge && tab.badge > 0 ? (
+                    <span className="ml-0.5 h-4 min-w-[16px] px-1 rounded-full bg-red-500 text-white text-[9px] flex items-center justify-center">
+                      {tab.badge}
+                    </span>
+                  ) : null}
+                </button>
+              ))}
+            </div>
+
+            {/* Content area */}
+            <div className="flex-1 min-h-0 flex flex-col">
+              {/* ═══ AI TAB ═══ */}
+              {channel === 'ai' && (
+                <>
+                  <ScrollArea className="flex-1 p-3">
+                    <div className="space-y-3">
+                      {aiMessages.map(msg => (
+                        <div key={msg.id} className={`flex gap-2 ${msg.sender === 'user' ? 'justify-end' : ''}`}>
+                          {msg.sender === 'bot' && (
+                            <div className="h-7 w-7 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center shrink-0">
+                              <Bot className="h-3.5 w-3.5 text-white" />
+                            </div>
+                          )}
+                          <div className={`max-w-[85%] rounded-xl px-3 py-2 text-sm ${
+                            msg.sender === 'user'
+                              ? 'bg-indigo-600 text-white'
+                              : 'bg-muted'
+                          }`}>
+                            <p className="whitespace-pre-wrap break-words">{msg.text}</p>
+                          </div>
+                        </div>
+                      ))}
+                      {aiTyping && (
+                        <div className="flex gap-2">
+                          <div className="h-7 w-7 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center shrink-0">
+                            <Bot className="h-3.5 w-3.5 text-white" />
+                          </div>
+                          <div className="bg-muted rounded-xl px-3 py-2">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          </div>
+                        </div>
+                      )}
+                      <div ref={messagesEndRef} />
                     </div>
-                    <div>
-                      <CardTitle className="text-lg">Asistente INMOVA</CardTitle>
-                      <CardDescription className="text-primary-foreground/80 text-xs">
-                        Soporte inteligente 24/7
-                      </CardDescription>
+                  </ScrollArea>
+
+                  {/* AI Input */}
+                  <div className="border-t p-2 shrink-0">
+                    {attachedFile && (
+                      <div className="flex items-center gap-2 px-2 py-1 mb-1 bg-muted rounded text-xs">
+                        <Paperclip className="h-3 w-3" />
+                        <span className="truncate flex-1">{attachedFile.name}</span>
+                        <button onClick={() => setAttachedFile(null)} className="text-muted-foreground hover:text-foreground">
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    )}
+                    <div className="flex gap-1.5">
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".pdf,.xlsx,.xls,.csv,.doc,.docx,.jpg,.jpeg,.png"
+                        className="hidden"
+                        onChange={(e) => { if (e.target.files?.[0]) setAttachedFile(e.target.files[0]); }}
+                      />
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-9 w-9 shrink-0"
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        <Paperclip className="h-4 w-4" />
+                      </Button>
+                      <Input
+                        value={aiInput}
+                        onChange={(e) => setAiInput(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), sendAIMessage())}
+                        placeholder="Pregunta a la IA..."
+                        className="h-9 text-sm"
+                        disabled={aiTyping}
+                      />
+                      <Button
+                        size="icon"
+                        className="h-9 w-9 shrink-0 bg-indigo-600 hover:bg-indigo-700"
+                        onClick={sendAIMessage}
+                        disabled={aiTyping || (!aiInput.trim() && !attachedFile)}
+                      >
+                        <Send className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setIsOpen(false)}
-                    className="text-primary-foreground hover:bg-white/20"
-                  >
-                    <X className="h-5 w-5" />
-                  </Button>
-                </div>
-              </CardHeader>
+                </>
+              )}
 
-              <ScrollArea className="flex-1 p-4">
-                <div className="space-y-4">
-                  {messages.map((message) => (
-                    <motion.div
-                      key={message.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className={`flex gap-3 ${
-                        message.sender === 'user' ? 'flex-row-reverse' : ''
-                      }`}
+              {/* ═══ TEAM / TENANTS TAB ═══ */}
+              {(channel === 'team' || channel === 'tenants') && !selectedConvId && !selectedUserId && (
+                <ScrollArea className="flex-1">
+                  {/* Conversations */}
+                  {conversations
+                    .filter(c => channel === 'tenants' ? c.participantType === 'tenant' : c.participantType !== 'tenant')
+                    .map(conv => (
+                    <button
+                      key={conv.id}
+                      onClick={() => openConversation(conv)}
+                      className="w-full text-left px-3 py-2.5 hover:bg-muted/50 border-b flex items-start gap-2.5 transition-colors"
                     >
-                      <div className={`flex-shrink-0 ${
-                        message.sender === 'user'
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted'
-                      } p-2 rounded-full h-8 w-8 flex items-center justify-center`}>
-                        {message.sender === 'user' ? (
-                          <User className="h-4 w-4" />
-                        ) : (
-                          <Bot className="h-4 w-4" />
-                        )}
+                      <div className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 ${
+                        conv.participantType === 'tenant' ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'
+                      }`}>
+                        {conv.participantType === 'tenant' ? <Home className="h-4 w-4" /> : <User className="h-4 w-4" />}
                       </div>
-                      <div className={`flex-1 ${
-                        message.sender === 'user' ? 'items-end' : 'items-start'
-                      } flex flex-col gap-2`}>
-                        <div className={`${
-                          message.sender === 'user'
-                            ? 'bg-primary text-primary-foreground ml-auto'
-                            : 'bg-muted'
-                        } rounded-lg p-3 max-w-[85%]`}>
-                          <p className="text-sm whitespace-pre-wrap">{message.text}</p>
-                          {message.confidence && message.confidence < 0.7 && (
-                            <Badge variant="outline" className="mt-2 text-xs">
-                              Sugerencia: puede que necesites crear un ticket
-                            </Badge>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium truncate">{conv.participantName}</span>
+                          {conv.unreadCount > 0 && (
+                            <Badge variant="destructive" className="h-5 min-w-[20px] text-[10px]">{conv.unreadCount}</Badge>
                           )}
                         </div>
-
-                        {/* Análisis de Sentimiento */}
-                        {message.sentimentAnalysis && message.sender === 'bot' && (
-                          <div className="mt-2 p-2 bg-white border rounded-lg shadow-sm">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="text-xs font-medium text-muted-foreground">
-                                Análisis de Sentimiento:
-                              </span>
-                            </div>
-                            <div className="flex flex-wrap gap-1.5">
-                              {/* Sentimiento */}
-                              <Badge 
-                                variant={
-                                  message.sentimentAnalysis.sentiment === 'positive' 
-                                    ? 'default' 
-                                    : message.sentimentAnalysis.sentiment === 'negative' 
-                                    ? 'destructive' 
-                                    : 'secondary'
-                                }
-                                className="text-xs flex items-center gap-1"
-                              >
-                                {message.sentimentAnalysis.sentiment === 'positive' && <Smile className="h-3 w-3" />}
-                                {message.sentimentAnalysis.sentiment === 'neutral' && <Meh className="h-3 w-3" />}
-                                {message.sentimentAnalysis.sentiment === 'negative' && <Frown className="h-3 w-3" />}
-                                {message.sentimentAnalysis.sentiment === 'positive' ? 'Positivo' : 
-                                 message.sentimentAnalysis.sentiment === 'negative' ? 'Negativo' : 'Neutral'}
-                              </Badge>
-                              
-                              {/* Urgencia */}
-                              {message.sentimentAnalysis.urgency !== 'low' && (
-                                <Badge 
-                                  variant={
-                                    message.sentimentAnalysis.urgency === 'critical' 
-                                      ? 'destructive' 
-                                      : message.sentimentAnalysis.urgency === 'high'
-                                      ? 'default'
-                                      : 'outline'
-                                  }
-                                  className="text-xs flex items-center gap-1"
-                                >
-                                  {(message.sentimentAnalysis.urgency === 'critical' || 
-                                    message.sentimentAnalysis.urgency === 'high') && 
-                                    <AlertTriangle className="h-3 w-3" />}
-                                  {message.sentimentAnalysis.urgency === 'critical' ? 'Crítico' :
-                                   message.sentimentAnalysis.urgency === 'high' ? 'Alta Urgencia' : 'Moderado'}
-                                </Badge>
-                              )}
-                              
-                              {/* Emociones detectadas */}
-                              {message.sentimentAnalysis.emotions && message.sentimentAnalysis.emotions.length > 0 && (
-                                <Badge variant="outline" className="text-xs">
-                                  {message.sentimentAnalysis.emotions.slice(0, 2).join(', ')}
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
+                        {conv.companyName && (
+                          <span className="text-[10px] text-muted-foreground">{conv.companyName}</span>
                         )}
-                        
-                        {/* Acciones sugeridas */}
-                        {message.suggestedActions && message.suggestedActions.length > 0 && (
-                          <div className="flex flex-wrap gap-2 mt-2">
-                            {message.suggestedActions.map((action) => (
-                              <Button
-                                key={action.id}
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleActionClick(action)}
-                                className="text-xs"
-                              >
-                                {action.icon === 'Ticket' && <Ticket className="mr-1 h-3 w-3" />}
-                                {action.icon === 'BookOpen' && <BookOpen className="mr-1 h-3 w-3" />}
-                                {action.icon === 'ExternalLink' && <ExternalLink className="mr-1 h-3 w-3" />}
-                                {action.label}
-                              </Button>
-                            ))}
-                          </div>
-                        )}
-
-                        {/* Artículos relacionados */}
-                        {message.relatedArticles && message.relatedArticles.length > 0 && (
-                          <div className="mt-2 space-y-2 w-full">
-                            <p className="text-xs text-muted-foreground font-medium">
-                              Artículos relacionados:
-                            </p>
-                            {message.relatedArticles.map((article) => (
-                              <button
-                                key={article.id}
-                                onClick={() => handleArticleClick(article)}
-                                className="w-full text-left p-3 border rounded-lg hover:bg-accent transition-colors"
-                              >
-                                <div className="flex items-start gap-2">
-                                  <BookOpen className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                                  <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium truncate">{article.title}</p>
-                                    <p className="text-xs text-muted-foreground line-clamp-2">
-                                      {article.excerpt}
-                                    </p>
-                                    {article.videoUrl && (
-                                      <span className="inline-flex items-center gap-1 text-xs text-primary mt-1">
-                                        <PlayCircle className="h-3 w-3" />
-                                        Incluye video tutorial
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              </button>
-                            ))}
-                          </div>
-                        )}
-
-                        <span className="text-xs text-muted-foreground">
-                          {message.timestamp.toLocaleTimeString('es-ES', {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </span>
+                        <p className="text-xs text-muted-foreground truncate mt-0.5">
+                          {conv.ultimoMensaje || conv.asunto || 'Sin mensajes'}
+                        </p>
                       </div>
-                    </motion.div>
+                    </button>
                   ))}
 
-                  {isTyping && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="flex gap-3"
-                    >
-                      <div className="bg-muted p-2 rounded-full h-8 w-8 flex items-center justify-center">
-                        <Bot className="h-4 w-4" />
+                  {/* Internal users (Team tab only) */}
+                  {channel === 'team' && internalUsers.length > 0 && (
+                    <>
+                      <div className="px-3 py-2 text-[10px] font-semibold text-muted-foreground uppercase bg-muted/30">
+                        Usuarios del equipo
                       </div>
-                      <div className="bg-muted rounded-lg p-3">
-                        <div className="flex gap-1">
-                          <motion.div
-                            animate={{ scale: [1, 1.2, 1] }}
-                            transition={{ repeat: Infinity, duration: 0.8, delay: 0 }}
-                            className="h-2 w-2 bg-muted-foreground rounded-full"
-                          />
-                          <motion.div
-                            animate={{ scale: [1, 1.2, 1] }}
-                            transition={{ repeat: Infinity, duration: 0.8, delay: 0.2 }}
-                            className="h-2 w-2 bg-muted-foreground rounded-full"
-                          />
-                          <motion.div
-                            animate={{ scale: [1, 1.2, 1] }}
-                            transition={{ repeat: Infinity, duration: 0.8, delay: 0.4 }}
-                            className="h-2 w-2 bg-muted-foreground rounded-full"
-                          />
-                        </div>
-                      </div>
-                    </motion.div>
+                      {internalUsers.map(user => (
+                        <button
+                          key={user.id}
+                          onClick={() => openUserChat(user)}
+                          className="w-full text-left px-3 py-2 hover:bg-muted/50 border-b flex items-center gap-2.5 transition-colors"
+                        >
+                          <div className="h-7 w-7 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 shrink-0">
+                            <User className="h-3.5 w-3.5" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <span className="text-sm truncate block">{user.name || user.email}</span>
+                            <span className="text-[10px] text-muted-foreground">
+                              {user.role} {user.company ? `· ${user.company.nombre}` : ''}
+                            </span>
+                          </div>
+                        </button>
+                      ))}
+                    </>
                   )}
 
-                  <div ref={messagesEndRef} />
-                </div>
-              </ScrollArea>
+                  {/* Empty state */}
+                  {conversations.filter(c => channel === 'tenants' ? c.participantType === 'tenant' : c.participantType !== 'tenant').length === 0 && 
+                   (channel === 'tenants' || internalUsers.length === 0) && (
+                    <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                      <MessageCircle className="h-10 w-10 mb-3 opacity-30" />
+                      <p className="text-sm">Sin conversaciones</p>
+                      <p className="text-xs mt-1">
+                        {channel === 'tenants' ? 'Los inquilinos pueden contactarte desde su portal' : 'Selecciona un usuario del equipo'}
+                      </p>
+                    </div>
+                  )}
+                </ScrollArea>
+              )}
 
-              <CardContent className="flex-shrink-0 p-4 border-t">
-                <div className="flex gap-2">
-                  <Input
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder={attachedFile ? `📎 ${attachedFile.name}` : "Escribe tu pregunta o adjunta un archivo..."}
-                    className="flex-1"
-                    disabled={isTyping}
-                  />
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    className="hidden"
-                    accept=".pdf,.xlsx,.xls,.csv,.jpg,.jpeg,.png,.webp,.doc,.docx,.txt,.json,.xml"
-                    onChange={(e) => {
-                      const f = e.target.files?.[0];
-                      if (f) {
-                        if (f.size > 15 * 1024 * 1024) {
-                          toast.error('Archivo demasiado grande (máx 15MB)');
-                        } else {
-                          setAttachedFile(f);
-                          toast.success(`📎 ${f.name} adjuntado`);
-                        }
-                      }
-                      e.target.value = '';
-                    }}
-                  />
-                  <Button
-                    onClick={() => fileInputRef.current?.click()}
-                    variant={attachedFile ? "default" : "ghost"}
-                    size="icon"
-                    disabled={isTyping}
-                    title="Adjuntar archivo"
-                  >
-                    <Zap className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    onClick={handleSendMessage}
-                    disabled={(!inputValue.trim() && !attachedFile) || isTyping}
-                    size="icon"
-                  >
-                    {isTyping ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
+              {/* ═══ CONVERSATION VIEW ═══ */}
+              {(channel === 'team' || channel === 'tenants') && (selectedConvId || selectedUserId) && (
+                <>
+                  <ScrollArea className="flex-1 p-3">
+                    {chatLoading ? (
+                      <div className="flex items-center justify-center py-12">
+                        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                      </div>
                     ) : (
-                      <Send className="h-4 w-4" />
+                      <div className="space-y-2">
+                        {chatMessages.map(msg => {
+                          const isMe = msg.senderType === 'user' && msg.senderId === currentUserId;
+                          const isOther = msg.senderType === 'other' || (msg.senderType === 'user' && msg.senderId !== currentUserId);
+                          const isTenant = msg.senderType === 'tenant';
+                          const alignRight = isMe || (!isTenant && !isOther && msg.senderType === 'user');
+                          
+                          return (
+                            <div key={msg.id} className={`flex ${alignRight ? 'justify-end' : ''}`}>
+                              <div className={`max-w-[85%] rounded-xl px-3 py-2 text-sm ${
+                                alignRight
+                                  ? 'bg-indigo-600 text-white'
+                                  : 'bg-muted'
+                              }`}>
+                                <p className="whitespace-pre-wrap break-words">{msg.mensaje}</p>
+                                <p className={`text-[9px] mt-1 ${alignRight ? 'text-white/60' : 'text-muted-foreground'}`}>
+                                  {new Date(msg.createdAt).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+                                </p>
+                              </div>
+                            </div>
+                          );
+                        })}
+                        {chatMessages.length === 0 && !chatLoading && (
+                          <p className="text-center text-xs text-muted-foreground py-8">
+                            No hay mensajes. Envía el primero.
+                          </p>
+                        )}
+                        <div ref={messagesEndRef} />
+                      </div>
                     )}
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground mt-2 text-center">
-                  Respuestas automáticas con IA - Soporte 24/7
-                </p>
-              </CardContent>
-            </Card>
+                  </ScrollArea>
+
+                  {/* Chat input */}
+                  <div className="border-t p-2 shrink-0">
+                    <div className="flex gap-1.5">
+                      <Input
+                        value={chatInput}
+                        onChange={(e) => setChatInput(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), sendChatMessage())}
+                        placeholder="Escribe un mensaje..."
+                        className="h-9 text-sm"
+                        disabled={chatSending}
+                      />
+                      <Button
+                        size="icon"
+                        className="h-9 w-9 shrink-0 bg-indigo-600 hover:bg-indigo-700"
+                        onClick={sendChatMessage}
+                        disabled={chatSending || !chatInput.trim()}
+                      >
+                        {chatSending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
