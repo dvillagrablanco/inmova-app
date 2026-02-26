@@ -267,7 +267,16 @@ export default function ReportesFinancierosPage() {
           ingresosChange,
           gastosChange,
         });
-        setPropiedades(props);
+        // Filtrar propiedades sin datos y ordenar por ingresos desc
+        const propsConDatos = props
+          .filter(p => p.ingresos > 0 || p.gastos > 0 || p.ocupacion > 0)
+          .sort((a, b) => b.ingresos - a.ingresos);
+        
+        // Si no hay propiedades con datos, mostrar todas (top 10) con ocupación
+        setPropiedades(propsConDatos.length > 0 
+          ? propsConDatos 
+          : props.filter(p => p.ocupacion > 0).sort((a, b) => b.ocupacion - a.ocupacion).slice(0, 10)
+        );
       } catch (err) {
         console.error('Error fetching financial data:', err);
         setStats({

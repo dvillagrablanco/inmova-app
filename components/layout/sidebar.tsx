@@ -90,7 +90,11 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
   const [modulesLoaded, setModulesLoaded] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [favorites, setFavorites] = useState<string[]>([]);
-  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
+  // Secciones principales expandidas por defecto para mejor navegación
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
+    alquilerResidencial: true,
+    finanzas: true,
+  });
   const [primaryVertical, setPrimaryVertical] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
   const [editModulesMode, setEditModulesMode] = useState(false);
@@ -929,13 +933,13 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
               <button
                 onClick={() => setEditModulesMode(!editModulesMode)}
                 className={cn(
-                  'w-full flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
+                  'w-full flex items-center justify-center gap-1.5 px-2 py-1 rounded text-[10px] font-medium transition-all',
                   editModulesMode
                     ? 'bg-green-600 text-white hover:bg-green-700'
-                    : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'
+                    : 'text-gray-500 hover:text-gray-300 hover:bg-gray-800/50'
                 )}
               >
-                <Settings size={14} />
+                <Settings size={12} />
                 {editModulesMode ? 'Guardar cambios' : 'Editar Módulos'}
               </button>
             </div>

@@ -128,7 +128,7 @@ export function CookieConsentBanner() {
     <>
       {/* Banner Simple (Primera Vista) */}
       {!showSettings && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t shadow-lg">
+        <div className="fixed bottom-0 left-0 right-0 z-[9999] bg-white border-t shadow-2xl">
           <div className="max-w-7xl mx-auto px-4 py-4">
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0 mt-1">
