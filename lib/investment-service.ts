@@ -140,12 +140,17 @@ export async function getCompanyPortfolio(companyId: string): Promise<PortfolioS
   let totalInvestment = assets.reduce((sum, a) => sum + (a.inversionTotal || a.precioCompra), 0);
   let totalMarketValue = assets.reduce((sum, a) => sum + (a.valorMercadoEstimado || a.precioCompra), 0);
 
-  // Si no hay assets registrados, estimar valor como multiplo de renta anual
-  // (PER 15 = multiplicador tipico mercado espanol residencial)
-  if (totalInvestment === 0 && contractedRent > 0) {
-    const estimatedByPER = contractedRent * 12 * 15;
-    totalInvestment = estimatedByPER;
-    totalMarketValue = estimatedByPER;
+  // Si no hay AssetAcquisitions, sumar rentaMensual de unidades ocupadas
+  // como proxy de ingresos (datos contables de migración)
+  if (totalInvestment === 0 && totalMonthlyIncome === 0) {
+    const unitRents = units
+      .filter(u => u.estado === 'ocupada' && u.rentaMensual > 0)
+      .reduce((s, u) => s + u.rentaMensual, 0);
+    if (unitRents > contractedRent) {
+      // Usar renta de unidad cuando no hay contratos formales en el sistema
+      const effectiveRent = Math.max(contractedRent, unitRents);
+      // No se asigna valor ficticio - yield queda 0 sin precio de compra real
+    }
   }
 
   const totalEquity = totalMarketValue - totalMortgageDebt;
@@ -300,6 +305,7 @@ export async function getCompanyAssetPerformance(companyId: string): Promise<Ass
   });
 
   // Fallback: si no hay AssetAcquisitions, generar desde buildings reales
+  // Usa rentaMensual de unit (dato contable) cuando no hay contratos activos
   if (result.length === 0) {
     const buildings = await prisma.building.findMany({
       where: { companyId, isDemo: false },
@@ -321,15 +327,17 @@ export async function getCompanyAssetPerformance(companyId: string): Promise<Ass
         if (u.contracts.length > 0) {
           occupiedUnits++;
           monthlyRent += u.contracts[0].rentaMensual;
+        } else if (u.estado === 'ocupada' && u.rentaMensual > 0) {
+          occupiedUnits++;
+          monthlyRent += u.rentaMensual;
         }
       }
 
       const annualRent = monthlyRent * 12;
-      const estimatedValue = annualRent > 0 ? annualRent * 15 : 0; // PER 15
+      // No usar PER estimado - sin precio de compra real no hay yield significativo
+      // Se muestra 0 hasta que se registre el AssetAcquisition
       const monthlyExpenses = (b.gastosComunidad || 0) + ((b.ibiAnual || 0) / 12);
       const noi = annualRent - (monthlyExpenses * 12);
-      const grossYield = estimatedValue > 0 ? (annualRent / estimatedValue) * 100 : 0;
-      const netYield = estimatedValue > 0 ? (noi / estimatedValue) * 100 : 0;
       const occupancyRate = totalUnits > 0 ? (occupiedUnits / totalUnits) * 100 : 0;
 
       return {
@@ -337,15 +345,15 @@ export async function getCompanyAssetPerformance(companyId: string): Promise<Ass
         buildingName: b.nombre,
         unitNumber: undefined,
         purchasePrice: 0,
-        totalInvestment: Math.round(estimatedValue * 100) / 100,
-        currentValue: Math.round(estimatedValue * 100) / 100,
+        totalInvestment: 0,
+        currentValue: 0,
         monthlyRent: Math.round(monthlyRent * 100) / 100,
         monthlyExpenses: Math.round(monthlyExpenses * 100) / 100,
         mortgagePayment: 0,
         monthlyCashFlow: Math.round((monthlyRent - monthlyExpenses) * 100) / 100,
-        grossYield: Math.round(grossYield * 100) / 100,
-        netYield: Math.round(netYield * 100) / 100,
-        cashOnCash: Math.round(grossYield * 100) / 100, // Sin hipoteca = mismo que gross
+        grossYield: 0,
+        netYield: 0,
+        cashOnCash: 0,
         capitalGain: 0,
         accumulatedDepreciation: 0,
         occupancyRate: Math.round(occupancyRate * 100) / 100,
