@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import {
   FileText,
@@ -12,16 +13,19 @@ import {
   Eye,
   Brain,
   CheckCircle2,
+  XCircle,
   Clock,
-  Euro,
   TrendingDown,
   BarChart3,
   ArrowRight,
   Shield,
   Star,
+  Trash2,
+  Home,
+  Info,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -37,6 +41,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -118,74 +123,83 @@ const formatDate = (iso: string) => {
   }
 };
 
-const SOLICITUD_BADGE: Record<
-  SolicitudEstado,
-  { variant: 'secondary' | 'default' | 'destructive' | 'outline'; label: string }
-> = {
-  borrador: { variant: 'secondary', label: 'Borrador' },
-  pendiente: { variant: 'default', label: 'Pendiente' },
-  enviada: { variant: 'default', label: 'Enviada' },
-  parcialmente_respondida: { variant: 'outline', label: 'Parcial' },
-  completada: { variant: 'default', label: 'Completada' },
-  cancelada: { variant: 'destructive', label: 'Cancelada' },
+const SOLICITUD_BADGE: Record<SolicitudEstado, { label: string; className: string }> = {
+  borrador: {
+    label: 'Borrador',
+    className: 'border-muted-foreground/40 bg-transparent text-muted-foreground',
+  },
+  pendiente: {
+    label: 'Pendiente',
+    className: 'border-transparent bg-secondary text-secondary-foreground',
+  },
+  enviada: {
+    label: 'Enviada',
+    className: 'border-transparent bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-400',
+  },
+  parcialmente_respondida: {
+    label: 'Parcial',
+    className:
+      'border-yellow-500 bg-yellow-50 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-400',
+  },
+  completada: {
+    label: 'Completada',
+    className: 'border-green-500 bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-400',
+  },
+  cancelada: {
+    label: 'Cancelada',
+    className: 'border-transparent bg-destructive text-destructive-foreground',
+  },
 };
 
-const COTIZACION_BADGE: Record<
-  CotizacionEstado,
-  {
-    variant: 'secondary' | 'default' | 'destructive' | 'outline';
-    label: string;
-    icon?: React.ReactNode;
-  }
-> = {
-  recibida: { variant: 'secondary', label: 'Recibida' },
-  en_revision: { variant: 'default', label: 'En revisión' },
-  analizada: { variant: 'default', label: 'Analizada', icon: <Brain className="mr-1 h-3 w-3" /> },
-  aceptada: { variant: 'default', label: 'Aceptada' },
-  rechazada: { variant: 'destructive', label: 'Rechazada' },
-  expirada: { variant: 'outline', label: 'Expirada' },
+const COTIZACION_BADGE: Record<CotizacionEstado, { label: string; className: string }> = {
+  recibida: {
+    label: 'Recibida',
+    className: 'border-transparent bg-secondary text-secondary-foreground',
+  },
+  en_revision: {
+    label: 'En revisión',
+    className: 'border-transparent bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-400',
+  },
+  analizada: {
+    label: 'Analizada',
+    className:
+      'border-transparent bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-400',
+  },
+  aceptada: {
+    label: 'Aceptada',
+    className: 'border-green-500 bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-400',
+  },
+  rechazada: {
+    label: 'Rechazada',
+    className: 'border-transparent bg-destructive text-destructive-foreground',
+  },
+  expirada: {
+    label: 'Expirada',
+    className: 'border-muted-foreground/40 bg-transparent text-muted-foreground',
+  },
 };
 
-function solicitudBadgeClass(estado: SolicitudEstado) {
-  switch (estado) {
-    case 'parcialmente_respondida':
-      return 'border-yellow-500 bg-yellow-50 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-400';
-    case 'completada':
-      return 'border-green-500 bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-400';
-    default:
-      return '';
+function ScoreIABadge({ score }: { score: number | null }) {
+  if (score === null) {
+    return <span className="text-xs text-muted-foreground">Sin evaluar</span>;
   }
-}
 
-function cotizacionBadgeClass(estado: CotizacionEstado) {
-  switch (estado) {
-    case 'aceptada':
-      return 'border-green-500 bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-400';
-    default:
-      return '';
+  let colorClass: string;
+  if (score >= 80) {
+    colorClass =
+      'border-green-500 bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-400';
+  } else if (score >= 60) {
+    colorClass =
+      'border-yellow-500 bg-yellow-50 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-400';
+  } else {
+    colorClass = 'border-red-500 bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-400';
   }
-}
 
-function renderStars(score: number | null) {
-  if (score === null) return <span className="text-xs text-muted-foreground">Sin evaluar</span>;
-  const full = Math.floor(score);
-  const half = score - full >= 0.5;
   return (
-    <span className="inline-flex items-center gap-0.5">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <Star
-          key={i}
-          className={`h-3.5 w-3.5 ${
-            i < full
-              ? 'fill-yellow-400 text-yellow-400'
-              : i === full && half
-                ? 'fill-yellow-400/50 text-yellow-400'
-                : 'text-muted-foreground/30'
-          }`}
-        />
-      ))}
-      <span className="ml-1 text-xs font-medium">{score.toFixed(1)}</span>
-    </span>
+    <Badge variant="outline" className={`gap-1 font-medium ${colorClass}`}>
+      <Star className="h-3 w-3" />
+      {score}
+    </Badge>
   );
 }
 
@@ -232,6 +246,7 @@ function TableSkeletons({ rows = 5, cols = 7 }: { rows?: number; cols?: number }
 
 export default function CotizacionesPage() {
   const router = useRouter();
+  const { data: _session, status: sessionStatus } = useSession();
 
   const [loading, setLoading] = useState(true);
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
@@ -251,6 +266,8 @@ export default function CotizacionesPage() {
   // ---- Data fetching -------------------------------------------------------
 
   useEffect(() => {
+    if (sessionStatus !== 'authenticated') return;
+
     let cancelled = false;
 
     async function fetchData() {
@@ -280,12 +297,15 @@ export default function CotizacionesPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [sessionStatus]);
 
   // Derive stats from fetched data
   useEffect(() => {
     const solicitudesEnviadas = solicitudes.filter(
-      (s) => s.estado !== 'borrador' && s.estado !== 'cancelada'
+      (s) =>
+        s.estado === 'enviada' ||
+        s.estado === 'parcialmente_respondida' ||
+        s.estado === 'completada'
     ).length;
 
     const pendientesRespuesta = solicitudes.reduce(
@@ -334,9 +354,66 @@ export default function CotizacionesPage() {
     }
   };
 
-  const handleSendReminder = (solicitudId: string) => {
-    toast.success('Recordatorio enviado a los proveedores pendientes');
-    void solicitudId; // consumed
+  const handleSendSolicitud = async (solicitudId: string) => {
+    try {
+      const res = await fetch(`/api/seguros/cotizaciones/solicitudes/${solicitudId}/enviar`, {
+        method: 'POST',
+      });
+      if (!res.ok) throw new Error();
+      toast.success('Solicitud enviada a proveedores');
+      setSolicitudes((prev) =>
+        prev.map((s) => (s.id === solicitudId ? { ...s, estado: 'enviada' as SolicitudEstado } : s))
+      );
+    } catch {
+      toast.error('Error al enviar la solicitud');
+    }
+  };
+
+  const handleDeleteSolicitud = async (solicitudId: string) => {
+    try {
+      const res = await fetch(`/api/seguros/cotizaciones/solicitudes/${solicitudId}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) throw new Error();
+      toast.success('Solicitud eliminada');
+      setSolicitudes((prev) => prev.filter((s) => s.id !== solicitudId));
+    } catch {
+      toast.error('Error al eliminar la solicitud');
+    }
+  };
+
+  const handleAcceptCotizacion = async (cotizacionId: string, proveedor: string) => {
+    try {
+      const res = await fetch(`/api/seguros/cotizaciones/recibidas/${cotizacionId}/aceptar`, {
+        method: 'POST',
+      });
+      if (!res.ok) throw new Error();
+      toast.success(`Cotización de ${proveedor} aceptada`);
+      setCotizaciones((prev) =>
+        prev.map((c) =>
+          c.id === cotizacionId ? { ...c, estado: 'aceptada' as CotizacionEstado } : c
+        )
+      );
+    } catch {
+      toast.error('Error al aceptar la cotización');
+    }
+  };
+
+  const handleRejectCotizacion = async (cotizacionId: string, proveedor: string) => {
+    try {
+      const res = await fetch(`/api/seguros/cotizaciones/recibidas/${cotizacionId}/rechazar`, {
+        method: 'POST',
+      });
+      if (!res.ok) throw new Error();
+      toast.success(`Cotización de ${proveedor} rechazada`);
+      setCotizaciones((prev) =>
+        prev.map((c) =>
+          c.id === cotizacionId ? { ...c, estado: 'rechazada' as CotizacionEstado } : c
+        )
+      );
+    } catch {
+      toast.error('Error al rechazar la cotización');
+    }
   };
 
   const handleCompareSelected = () => {
@@ -373,7 +450,26 @@ export default function CotizacionesPage() {
     return c.proveedor.toLowerCase().includes(q) || c.tipoSeguro.toLowerCase().includes(q);
   });
 
-  // ---- Render --------------------------------------------------------------
+  // ---- Render: Loading / Auth guard ----------------------------------------
+
+  if (sessionStatus === 'loading' || loading) {
+    return (
+      <AuthenticatedLayout>
+        <div className="space-y-6">
+          <Skeleton className="h-4 w-48" />
+          <Skeleton className="h-10 w-80" />
+          <StatsSkeletons />
+          <Card>
+            <CardContent className="p-6">
+              <TableSkeletons rows={5} cols={7} />
+            </CardContent>
+          </Card>
+        </div>
+      </AuthenticatedLayout>
+    );
+  }
+
+  // ---- Render: Main --------------------------------------------------------
 
   return (
     <AuthenticatedLayout>
@@ -382,7 +478,9 @@ export default function CotizacionesPage() {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/dashboard">Home</BreadcrumbLink>
+              <BreadcrumbLink href="/dashboard">
+                <Home className="h-4 w-4" />
+              </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
@@ -395,7 +493,7 @@ export default function CotizacionesPage() {
           </BreadcrumbList>
         </Breadcrumb>
 
-        {/* Title */}
+        {/* Title + action */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
@@ -404,7 +502,7 @@ export default function CotizacionesPage() {
             <div>
               <h1 className="text-2xl font-bold tracking-tight">Plataforma de Cotizaciones</h1>
               <p className="text-sm text-muted-foreground">
-                Gestiona solicitudes y compara cotizaciones de seguros
+                Solicita, compara y analiza cotizaciones de seguros
               </p>
             </div>
           </div>
@@ -415,68 +513,65 @@ export default function CotizacionesPage() {
         </div>
 
         {/* Stats */}
-        {loading ? (
-          <StatsSkeletons />
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Solicitudes Enviadas</CardTitle>
-                <Send className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.solicitudesEnviadas}</div>
-                <p className="text-xs text-muted-foreground">Total de solicitudes activas</p>
-              </CardContent>
-            </Card>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Solicitudes Enviadas</CardTitle>
+              <Send className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.solicitudesEnviadas}</div>
+              <p className="text-xs text-muted-foreground">Total de solicitudes activas</p>
+            </CardContent>
+          </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Pendientes de Respuesta</CardTitle>
-                <Clock className="h-4 w-4 text-yellow-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.pendientesRespuesta}</div>
-                <p className="text-xs text-muted-foreground">Proveedores sin responder</p>
-              </CardContent>
-            </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Respuestas Pendientes</CardTitle>
+              <Clock className="h-4 w-4 text-yellow-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.pendientesRespuesta}</div>
+              <p className="text-xs text-muted-foreground">Proveedores sin responder</p>
+            </CardContent>
+          </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Cotizaciones Recibidas</CardTitle>
-                <BarChart3 className="h-4 w-4 text-blue-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.cotizacionesRecibidas}</div>
-                <p className="text-xs text-muted-foreground">Total de cotizaciones</p>
-              </CardContent>
-            </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Cotizaciones Recibidas</CardTitle>
+              <FileText className="h-4 w-4 text-blue-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.cotizacionesRecibidas}</div>
+              <p className="text-xs text-muted-foreground">Total de cotizaciones</p>
+            </CardContent>
+          </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Ahorros Potenciales</CardTitle>
-                <TrendingDown className="h-4 w-4 text-green-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{formatCurrency(stats.ahorrosPotenciales)}</div>
-                <p className="text-xs text-muted-foreground">
-                  Diferencia entre mayor y menor prima
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        )}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Ahorro Estimado</CardTitle>
+              <TrendingDown className="h-4 w-4 text-green-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">
+                {formatCurrency(stats.ahorrosPotenciales)}
+              </div>
+              <p className="text-xs text-muted-foreground">Diferencia entre mayor y menor prima</p>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Tabs */}
         <Tabs defaultValue="solicitudes" className="space-y-4">
           <TabsList>
             <TabsTrigger value="solicitudes">Solicitudes</TabsTrigger>
             <TabsTrigger value="cotizaciones">Cotizaciones Recibidas</TabsTrigger>
+            <TabsTrigger value="comparativas">Comparativas</TabsTrigger>
           </TabsList>
 
-          {/* -------------------------------------------------------------- */}
-          {/* Tab 1 – Solicitudes                                            */}
-          {/* -------------------------------------------------------------- */}
+          {/* ---------------------------------------------------------------- */}
+          {/* Tab 1 – Solicitudes                                              */}
+          {/* ---------------------------------------------------------------- */}
           <TabsContent value="solicitudes" className="space-y-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="relative w-full max-w-sm">
@@ -490,13 +585,7 @@ export default function CotizacionesPage() {
               </div>
             </div>
 
-            {loading ? (
-              <Card>
-                <CardContent className="p-6">
-                  <TableSkeletons rows={5} cols={7} />
-                </CardContent>
-              </Card>
-            ) : filteredSolicitudes.length === 0 ? (
+            {filteredSolicitudes.length === 0 ? (
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-16 text-center">
                   <Shield className="mb-4 h-12 w-12 text-muted-foreground/40" />
@@ -526,13 +615,16 @@ export default function CotizacionesPage() {
                           <TableHead className="hidden md:table-cell">Inmueble</TableHead>
                           <TableHead>Proveedores</TableHead>
                           <TableHead>Estado</TableHead>
-                          <TableHead className="hidden lg:table-cell">Fecha</TableHead>
+                          <TableHead className="hidden lg:table-cell">Fecha Envío</TableHead>
                           <TableHead className="w-[60px]">Acciones</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {filteredSolicitudes.map((sol) => {
                           const badge = SOLICITUD_BADGE[sol.estado];
+                          const hasCotizaciones = sol.proveedoresRespondidos > 0;
+                          const canSend = sol.estado === 'borrador' || sol.estado === 'pendiente';
+
                           return (
                             <TableRow key={sol.id}>
                               <TableCell className="font-mono text-sm">{sol.codigo}</TableCell>
@@ -540,14 +632,12 @@ export default function CotizacionesPage() {
                               <TableCell className="hidden md:table-cell">{sol.inmueble}</TableCell>
                               <TableCell>
                                 <Badge variant="outline" className="font-normal">
-                                  {sol.proveedoresRespondidos}/{sol.proveedoresEnviados} respondidos
+                                  {sol.proveedoresEnviados} enviados / {sol.proveedoresRespondidos}{' '}
+                                  respondidos
                                 </Badge>
                               </TableCell>
                               <TableCell>
-                                <Badge
-                                  variant={badge.variant}
-                                  className={solicitudBadgeClass(sol.estado)}
-                                >
+                                <Badge variant="outline" className={badge.className}>
                                   {badge.label}
                                 </Badge>
                               </TableCell>
@@ -566,11 +656,33 @@ export default function CotizacionesPage() {
                                       onClick={() => router.push(`/seguros/cotizaciones/${sol.id}`)}
                                     >
                                       <Eye className="mr-2 h-4 w-4" />
-                                      Ver detalle
+                                      Ver Detalle
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => handleSendReminder(sol.id)}>
-                                      <Send className="mr-2 h-4 w-4" />
-                                      Enviar recordatorio
+                                    {canSend && (
+                                      <DropdownMenuItem onClick={() => handleSendSolicitud(sol.id)}>
+                                        <Send className="mr-2 h-4 w-4" />
+                                        Enviar
+                                      </DropdownMenuItem>
+                                    )}
+                                    {hasCotizaciones && (
+                                      <DropdownMenuItem
+                                        onClick={() =>
+                                          router.push(
+                                            `/seguros/cotizaciones/comparar?solicitudId=${sol.id}`
+                                          )
+                                        }
+                                      >
+                                        <BarChart3 className="mr-2 h-4 w-4" />
+                                        Comparar Cotizaciones
+                                      </DropdownMenuItem>
+                                    )}
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                      className="text-red-600 focus:text-red-600"
+                                      onClick={() => handleDeleteSolicitud(sol.id)}
+                                    >
+                                      <Trash2 className="mr-2 h-4 w-4" />
+                                      Eliminar
                                     </DropdownMenuItem>
                                   </DropdownMenuContent>
                                 </DropdownMenu>
@@ -586,9 +698,9 @@ export default function CotizacionesPage() {
             )}
           </TabsContent>
 
-          {/* -------------------------------------------------------------- */}
-          {/* Tab 2 – Cotizaciones Recibidas                                 */}
-          {/* -------------------------------------------------------------- */}
+          {/* ---------------------------------------------------------------- */}
+          {/* Tab 2 – Cotizaciones Recibidas                                   */}
+          {/* ---------------------------------------------------------------- */}
           <TabsContent value="cotizaciones" className="space-y-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="relative w-full max-w-sm">
@@ -610,16 +722,10 @@ export default function CotizacionesPage() {
               )}
             </div>
 
-            {loading ? (
-              <Card>
-                <CardContent className="p-6">
-                  <TableSkeletons rows={5} cols={8} />
-                </CardContent>
-              </Card>
-            ) : filteredCotizaciones.length === 0 ? (
+            {filteredCotizaciones.length === 0 ? (
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-                  <Euro className="mb-4 h-12 w-12 text-muted-foreground/40" />
+                  <FileText className="mb-4 h-12 w-12 text-muted-foreground/40" />
                   <h3 className="text-lg font-semibold">Sin cotizaciones recibidas</h3>
                   <p className="mt-1 max-w-md text-sm text-muted-foreground">
                     Las cotizaciones aparecerán aquí cuando los proveedores respondan a tus
@@ -636,7 +742,7 @@ export default function CotizacionesPage() {
                         <TableRow>
                           <TableHead className="w-[40px]" />
                           <TableHead>Proveedor</TableHead>
-                          <TableHead>Tipo Seguro</TableHead>
+                          <TableHead>Tipo</TableHead>
                           <TableHead className="text-right">Prima Anual</TableHead>
                           <TableHead className="hidden md:table-cell text-right">
                             Suma Asegurada
@@ -672,13 +778,11 @@ export default function CotizacionesPage() {
                               <TableCell className="hidden lg:table-cell text-right">
                                 {formatCurrency(cot.franquicia)}
                               </TableCell>
-                              <TableCell>{renderStars(cot.scoreIA)}</TableCell>
                               <TableCell>
-                                <Badge
-                                  variant={badge.variant}
-                                  className={cotizacionBadgeClass(cot.estado)}
-                                >
-                                  {badge.icon}
+                                <ScoreIABadge score={cot.scoreIA} />
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant="outline" className={badge.className}>
                                   {badge.label}
                                 </Badge>
                               </TableCell>
@@ -705,13 +809,19 @@ export default function CotizacionesPage() {
                                       <Brain className="mr-2 h-4 w-4" />
                                       {analyzingId === cot.id ? 'Analizando...' : 'Analizar con IA'}
                                     </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
                                     <DropdownMenuItem
-                                      onClick={() =>
-                                        toast.success(`Cotización de ${cot.proveedor} aceptada`)
-                                      }
+                                      onClick={() => handleAcceptCotizacion(cot.id, cot.proveedor)}
                                     >
                                       <CheckCircle2 className="mr-2 h-4 w-4" />
                                       Aceptar
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      className="text-red-600 focus:text-red-600"
+                                      onClick={() => handleRejectCotizacion(cot.id, cot.proveedor)}
+                                    >
+                                      <XCircle className="mr-2 h-4 w-4" />
+                                      Rechazar
                                     </DropdownMenuItem>
                                   </DropdownMenuContent>
                                 </DropdownMenu>
@@ -721,6 +831,121 @@ export default function CotizacionesPage() {
                         })}
                       </TableBody>
                     </Table>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          {/* ---------------------------------------------------------------- */}
+          {/* Tab 3 – Comparativas                                             */}
+          {/* ---------------------------------------------------------------- */}
+          <TabsContent value="comparativas" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5" />
+                  Herramienta de Comparación
+                </CardTitle>
+                <CardDescription>
+                  Selecciona cotizaciones para comparar primas, coberturas y condiciones lado a lado
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950/50">
+                  <Info className="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-600 dark:text-blue-400" />
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-blue-800 dark:text-blue-300">
+                      Cómo usar la herramienta de comparación
+                    </p>
+                    <ul className="list-inside list-disc space-y-1 text-sm text-blue-700 dark:text-blue-400">
+                      <li>
+                        Ve a la pestaña &quot;Cotizaciones Recibidas&quot; y selecciona al menos 2
+                        cotizaciones con los checkboxes
+                      </li>
+                      <li>
+                        Pulsa el botón &quot;Comparar seleccionadas&quot; que aparecerá en la parte
+                        superior
+                      </li>
+                      <li>
+                        También puedes ir directamente desde la acción &quot;Comparar
+                        Cotizaciones&quot; en una solicitud
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {cotizaciones.length === 0 ? (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+                  <BarChart3 className="mb-4 h-12 w-12 text-muted-foreground/40" />
+                  <h3 className="text-lg font-semibold">Sin cotizaciones para comparar</h3>
+                  <p className="mt-1 max-w-md text-sm text-muted-foreground">
+                    Necesitas al menos 2 cotizaciones recibidas para poder hacer una comparativa.
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Selecciona cotizaciones para comparar</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-[40px]" />
+                          <TableHead>Proveedor</TableHead>
+                          <TableHead>Tipo</TableHead>
+                          <TableHead className="text-right">Prima Anual</TableHead>
+                          <TableHead className="hidden md:table-cell text-right">
+                            Suma Asegurada
+                          </TableHead>
+                          <TableHead>Score IA</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {cotizaciones.map((cot) => (
+                          <TableRow key={cot.id}>
+                            <TableCell>
+                              <Checkbox
+                                checked={selectedCotizaciones.has(cot.id)}
+                                onCheckedChange={() => toggleCotizacionSelection(cot.id)}
+                                aria-label={`Seleccionar cotización de ${cot.proveedor}`}
+                              />
+                            </TableCell>
+                            <TableCell className="font-medium">{cot.proveedor}</TableCell>
+                            <TableCell>{cot.tipoSeguro}</TableCell>
+                            <TableCell className="text-right font-medium">
+                              {formatCurrency(cot.primaAnual)}
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell text-right">
+                              {formatCurrency(cot.sumaAsegurada)}
+                            </TableCell>
+                            <TableCell>
+                              <ScoreIABadge score={cot.scoreIA} />
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+
+                  <div className="flex items-center justify-between border-t pt-4">
+                    <p className="text-sm text-muted-foreground">
+                      {selectedCotizaciones.size} cotización(es) seleccionada(s)
+                    </p>
+                    <Button
+                      onClick={handleCompareSelected}
+                      disabled={selectedCotizaciones.size < 2}
+                    >
+                      <BarChart3 className="mr-2 h-4 w-4" />
+                      Comparar Seleccionadas
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
