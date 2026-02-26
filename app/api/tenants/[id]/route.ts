@@ -5,6 +5,7 @@ import { authOptions } from '@/lib/auth-options';
 import logger, { logError } from '@/lib/logger';
 import * as Sentry from '@sentry/nextjs';
 import { z } from 'zod';
+import { resolveCompanyScope } from '@/lib/company-scope';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -64,6 +65,13 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: session.user.role as string,
+      primaryCompanyId: session.user?.companyId,
+      request: req,
+    });
+
     const tenant = await prisma.tenant.findUnique({
       where: { id: params.id },
       include: {
@@ -88,6 +96,10 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
     if (!tenant) {
       return NextResponse.json({ error: 'Inquilino no encontrado' }, { status: 404 });
+    }
+
+    if (!scope.scopeCompanyIds.includes(tenant.companyId)) {
+      return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
     }
 
     return NextResponse.json(tenant);
@@ -118,6 +130,26 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       }));
       logger.warn('Validation error updating tenant:', { errors, tenantId: params.id });
       return NextResponse.json({ error: 'Datos inválidos', details: errors }, { status: 400 });
+    }
+
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: session.user.role as string,
+      primaryCompanyId: session.user?.companyId,
+      request: req,
+    });
+
+    const existingTenant = await prisma.tenant.findUnique({
+      where: { id: params.id },
+      select: { companyId: true },
+    });
+
+    if (!existingTenant) {
+      return NextResponse.json({ error: 'Inquilino no encontrado' }, { status: 404 });
+    }
+
+    if (!scope.scopeCompanyIds.includes(existingTenant.companyId)) {
+      return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
     }
 
     const {
@@ -187,6 +219,26 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: session.user.role as string,
+      primaryCompanyId: session.user?.companyId,
+      request: req,
+    });
+
+    const existingTenant = await prisma.tenant.findUnique({
+      where: { id: params.id },
+      select: { companyId: true },
+    });
+
+    if (!existingTenant) {
+      return NextResponse.json({ error: 'Inquilino no encontrado' }, { status: 404 });
+    }
+
+    if (!scope.scopeCompanyIds.includes(existingTenant.companyId)) {
+      return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
     }
 
     await prisma.tenant.delete({

@@ -206,6 +206,26 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: session.user.role as string,
+      primaryCompanyId: session.user?.companyId,
+      request: req,
+    });
+
+    const building = await prisma.building.findUnique({
+      where: { id: params.id },
+      select: { companyId: true },
+    });
+
+    if (!building) {
+      return NextResponse.json({ error: 'Edificio no encontrado' }, { status: 404 });
+    }
+
+    if (!scope.scopeCompanyIds.includes(building.companyId)) {
+      return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
+    }
+
     const companyId = session.user?.companyId;
 
     await prisma.building.delete({

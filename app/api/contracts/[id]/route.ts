@@ -9,6 +9,7 @@ import {
 } from '@/lib/api-cache-helpers';
 import { z } from 'zod';
 import * as Sentry from '@sentry/nextjs';
+import { resolveCompanyScope } from '@/lib/company-scope';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -60,6 +61,13 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: session.user.role as string,
+      primaryCompanyId: session.user?.companyId,
+      request: req,
+    });
+
     const contract = await prisma.contract.findUnique({
       where: { id: params.id },
       include: {
@@ -68,6 +76,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
             building: {
               select: {
                 id: true,
+                companyId: true,
                 nombre: true,
                 direccion: true,
                 tipo: true,
@@ -93,6 +102,11 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
     if (!contract) {
       return NextResponse.json({ error: 'Contrato no encontrado' }, { status: 404 });
+    }
+
+    const resourceCompanyId = contract.unit.building.companyId;
+    if (!scope.scopeCompanyIds.includes(resourceCompanyId)) {
+      return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
     }
 
     return NextResponse.json(contract);
@@ -124,6 +138,33 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       }));
       logger.warn('Validation error updating contract:', { errors, contractId: params.id });
       return NextResponse.json({ error: 'Datos inválidos', details: errors }, { status: 400 });
+    }
+
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: session.user.role as string,
+      primaryCompanyId: session.user?.companyId,
+      request: req,
+    });
+
+    const existingContract = await prisma.contract.findUnique({
+      where: { id: params.id },
+      include: {
+        unit: {
+          include: {
+            building: { select: { companyId: true } },
+          },
+        },
+      },
+    });
+
+    if (!existingContract) {
+      return NextResponse.json({ error: 'Contrato no encontrado' }, { status: 404 });
+    }
+
+    const resourceCompanyId = existingContract.unit.building.companyId;
+    if (!scope.scopeCompanyIds.includes(resourceCompanyId)) {
+      return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
     }
 
     const {
@@ -174,6 +215,33 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: session.user.role as string,
+      primaryCompanyId: session.user?.companyId,
+      request: req,
+    });
+
+    const existingContract = await prisma.contract.findUnique({
+      where: { id: params.id },
+      include: {
+        unit: {
+          include: {
+            building: { select: { companyId: true } },
+          },
+        },
+      },
+    });
+
+    if (!existingContract) {
+      return NextResponse.json({ error: 'Contrato no encontrado' }, { status: 404 });
+    }
+
+    const resourceCompanyId = existingContract.unit.building.companyId;
+    if (!scope.scopeCompanyIds.includes(resourceCompanyId)) {
+      return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
     }
 
     const companyId = session.user?.companyId;

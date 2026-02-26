@@ -9,6 +9,7 @@ import logger, { logError } from '@/lib/logger';
 import { invalidatePaymentsCache, invalidateDashboardCache } from '@/lib/api-cache-helpers';
 import { z } from 'zod';
 import * as Sentry from '@sentry/nextjs';
+import { resolveCompanyScope } from '@/lib/company-scope';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -58,6 +59,13 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: session.user.role as string,
+      primaryCompanyId: session.user?.companyId,
+      request: req,
+    });
+
     const payment = await prisma.payment.findUnique({
       where: { id: params.id },
       include: {
@@ -76,6 +84,11 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
     if (!payment) {
       return NextResponse.json({ error: 'Pago no encontrado' }, { status: 404 });
+    }
+
+    const resourceCompanyId = payment.contract.unit.building.companyId;
+    if (!scope.scopeCompanyIds.includes(resourceCompanyId)) {
+      return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
     }
 
     return NextResponse.json(payment);
@@ -146,6 +159,18 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
     if (!currentPayment) {
       return NextResponse.json({ error: 'Pago no encontrado' }, { status: 404 });
+    }
+
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: session.user.role as string,
+      primaryCompanyId: session.user?.companyId,
+      request: req,
+    });
+
+    const resourceCompanyId = currentPayment.contract.unit.building.companyId;
+    if (!scope.scopeCompanyIds.includes(resourceCompanyId)) {
+      return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
     }
 
     const wasNotPaid = currentPayment.estado !== 'pagado';
@@ -291,6 +316,37 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: session.user.role as string,
+      primaryCompanyId: session.user?.companyId,
+      request: req,
+    });
+
+    const existingPayment = await prisma.payment.findUnique({
+      where: { id: params.id },
+      include: {
+        contract: {
+          include: {
+            unit: {
+              include: {
+                building: { select: { companyId: true } },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!existingPayment) {
+      return NextResponse.json({ error: 'Pago no encontrado' }, { status: 404 });
+    }
+
+    const resourceCompanyId = existingPayment.contract.unit.building.companyId;
+    if (!scope.scopeCompanyIds.includes(resourceCompanyId)) {
+      return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
     }
 
     const companyId = session.user?.companyId;
