@@ -79,6 +79,8 @@ export async function GET(req: NextRequest) {
               estado: true,
               planta: true,
               superficie: true,
+              superficieUtil: true,
+              referenciaCatastral: true,
               habitaciones: true,
               banos: true,
               rentaMensual: true,

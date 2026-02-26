@@ -501,6 +501,7 @@ model Building {
   nombre                String
   direccion             String
   tipo                  BuildingType
+  referenciaCatastral   String?      // Ref catastral principal del edificio (ej: 0858104VK4705H)
   anoConstructor        Int
   numeroUnidades        Int
   estadoConservacion    String?
@@ -745,19 +746,20 @@ model Tenant {
 }
 
 model Unit {
-  id                String     @id @default(cuid())
-  numero            String
-  buildingId        String
-  tipo              UnitType
-  estado            UnitStatus @default(disponible)
-  superficie        Float
-  superficieUtil    Float?
-  habitaciones      Int?
-  banos             Int?
-  planta            Int?
-  orientacion       String?
-  rentaMensual      Float
-  tenantId          String?
+  id                  String     @id @default(cuid())
+  numero              String
+  buildingId          String
+  tipo                UnitType
+  estado              UnitStatus @default(disponible)
+  superficie          Float
+  superficieUtil      Float?
+  referenciaCatastral String?    // Ref catastral individual de la finca (ej: 0858104VK4705H0001XX)
+  habitaciones        Int?
+  banos               Int?
+  planta              Int?
+  orientacion         String?
+  rentaMensual        Float
+  tenantId            String?
   aireAcondicionado Boolean    @default(false)
   calefaccion       Boolean    @default(false)
   terraza           Boolean    @default(false)

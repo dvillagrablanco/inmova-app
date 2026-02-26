@@ -217,7 +217,6 @@ export default function ValoracionIAPage() {
   const handleAssetSelect = (assetId: string) => {
     setSelectedAsset(assetId);
 
-    // Si es "manual", no rellenar datos automáticamente
     if (assetId === 'manual') {
       return;
     }
@@ -231,6 +230,14 @@ export default function ValoracionIAPage() {
           habitaciones: unit.habitaciones?.toString() || '',
           banos: unit.banos?.toString() || '',
         }));
+        if ((unit as any).referenciaCatastral) {
+          setRefCatastral((unit as any).referenciaCatastral);
+        }
+      }
+    } else if (assetType === 'building') {
+      const building = buildings.find((b: any) => b.id === assetId);
+      if (building?.referenciaCatastral) {
+        setRefCatastral(building.referenciaCatastral);
       }
     }
   };
