@@ -37,6 +37,7 @@ const unitUpdateSchema = z.object({
   estado: z.enum(['disponible', 'ocupada', 'en_mantenimiento']).optional(),
   superficie: z.number().positive().optional(),
   superficieUtil: z.number().positive().nullable().optional(),
+  referenciaCatastral: z.string().nullable().optional(),
   habitaciones: z.number().int().nonnegative().nullable().optional(),
   banos: z.number().int().nonnegative().nullable().optional(),
   planta: z.number().int().nullable().optional(),
@@ -178,6 +179,32 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
     const updateData: Record<string, any> = { ...parsed.data };
     if (updateData.buildingId === undefined) delete updateData.buildingId;
+
+    // Auto-fill referenciaCatastral if missing
+    if (!updateData.referenciaCatastral) {
+      try {
+        const building = await prisma.building.findUnique({
+          where: { id: existing.buildingId },
+          select: { referenciaCatastral: true, direccion: true },
+        });
+        if (building?.referenciaCatastral) {
+          const { consultarEdificioPorRC } = await import('@/lib/catastro-service');
+          const catastro = await consultarEdificioPorRC(building.referenciaCatastral.substring(0, 14));
+          if (catastro?.fincas?.length) {
+            const unitPlanta = updateData.planta ?? (await prisma.unit.findUnique({ where: { id: existing.id }, select: { planta: true, numero: true, tipo: true, superficie: true } }));
+            const unitInfo = unitPlanta || {};
+            for (const finca of catastro.fincas) {
+              const fPlanta = parseInt(finca.planta) || 0;
+              const norm = (s: string) => s.replace(/[ºª°\s]/g, '').toUpperCase();
+              if ((unitInfo as any).planta === fPlanta && finca.puerta && norm((unitInfo as any).numero || '').includes(norm(finca.puerta))) {
+                updateData.referenciaCatastral = finca.referenciaCatastral;
+                break;
+              }
+            }
+          }
+        }
+      } catch { /* Catastro lookup is best-effort */ }
+    }
 
     const updatedUnit = await prisma.unit.update({
       where: { id: existing.id },
