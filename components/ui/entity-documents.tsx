@@ -152,12 +152,17 @@ export function EntityDocuments({
         formData.append('nombre', file.name);
         formData.append('tipo', selectedType);
 
-        // Link to the correct entity
-        if (entityType === 'unit') formData.append('unitId', entityId);
-        if (entityType === 'tenant') formData.append('tenantId', entityId);
-        if (entityType === 'building') formData.append('buildingId', entityId);
-        if (entityType === 'contract') formData.append('contractId', entityId);
-        if (buildingId) formData.append('buildingId', buildingId);
+        // Link to the correct entity ONLY — don't cross-link
+        if (entityType === 'unit') {
+          formData.append('unitId', entityId);
+          // Don't add buildingId — unit docs stay on unit page only
+        } else if (entityType === 'building') {
+          formData.append('buildingId', entityId);
+        } else if (entityType === 'tenant') {
+          formData.append('tenantId', entityId);
+        } else if (entityType === 'contract') {
+          formData.append('contractId', entityId);
+        }
 
         formData.append('tags', [entityType, selectedType].join(','));
 
