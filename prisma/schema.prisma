@@ -754,6 +754,9 @@ model Unit {
   superficie          Float
   superficieUtil      Float?
   referenciaCatastral String?    // Ref catastral individual de la finca (ej: 0858104VK4705H0001XX)
+  precioCompra        Float?    // Precio de compra escriturado (proporcional o individual)
+  valorMercado        Float?    // Última valoración de mercado estimada
+  fechaValoracion     DateTime? // Fecha de la última valoración
   habitaciones        Int?
   banos               Int?
   planta              Int?

@@ -26,6 +26,11 @@ export interface PortfolioSummary {
   netYield: number; // %
   averageOccupancy: number; // %
   ltv: number; // Loan-to-Value %
+  // Revalorización patrimonial (desde precioCompra y valorMercado de unidades)
+  totalPrecioCompra: number;
+  totalValorMercadoUnidades: number;
+  revalorizacion: number;
+  revalorizacionPct: number;
 }
 
 export interface AssetPerformance {
@@ -167,10 +172,16 @@ export async function getCompanyPortfolio(companyId: string): Promise<PortfolioS
 
   const ltv = totalMarketValue > 0 ? (totalMortgageDebt / totalMarketValue) * 100 : 0;
 
+  // Revalorización patrimonial desde precioCompra/valorMercado de las unidades
+  const totalPrecioCompra = units.reduce((s, u) => s + ((u as any).precioCompra || 0), 0);
+  const totalValorMercadoUnidades = units.reduce((s, u) => s + ((u as any).valorMercado || 0), 0);
+  const revalorizacion = totalValorMercadoUnidades - totalPrecioCompra;
+  const revalorizacionPct = totalPrecioCompra > 0 ? (revalorizacion / totalPrecioCompra) * 100 : 0;
+
   return {
     totalAssets: assets.length > 0 ? assets.length : buildings.length,
     totalInvestment: Math.round(totalInvestment * 100) / 100,
-    totalMarketValue: Math.round(totalMarketValue * 100) / 100,
+    totalMarketValue: Math.round(totalMarketValue > 0 ? totalMarketValue : totalValorMercadoUnidades),
     totalMortgageDebt: Math.round(totalMortgageDebt * 100) / 100,
     totalEquity: Math.round(totalEquity * 100) / 100,
     totalMonthlyIncome: Math.round(totalMonthlyIncome * 100) / 100,
@@ -181,6 +192,10 @@ export async function getCompanyPortfolio(companyId: string): Promise<PortfolioS
     netYield: Math.round(netYield * 100) / 100,
     averageOccupancy: Math.round(averageOccupancy * 100) / 100,
     ltv: Math.round(ltv * 100) / 100,
+    totalPrecioCompra: Math.round(totalPrecioCompra),
+    totalValorMercadoUnidades: Math.round(totalValorMercadoUnidades),
+    revalorizacion: Math.round(revalorizacion),
+    revalorizacionPct: Math.round(revalorizacionPct * 100) / 100,
   };
 }
 

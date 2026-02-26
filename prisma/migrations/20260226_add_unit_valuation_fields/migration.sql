@@ -1,0 +1,4 @@
+-- Add valuation fields to Unit
+ALTER TABLE "units" ADD COLUMN IF NOT EXISTS "precioCompra" DOUBLE PRECISION;
+ALTER TABLE "units" ADD COLUMN IF NOT EXISTS "valorMercado" DOUBLE PRECISION;
+ALTER TABLE "units" ADD COLUMN IF NOT EXISTS "fechaValoracion" TIMESTAMP(3);

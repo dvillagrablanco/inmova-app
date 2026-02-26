@@ -87,11 +87,17 @@ interface Unit {
   estado: string;
   superficie: number;
   superficieUtil?: number;
+  referenciaCatastral?: string;
+  precioCompra?: number;
+  valorMercado?: number;
+  fechaValoracion?: string;
   habitaciones: number;
   banos: number;
   planta?: number;
   orientacion?: string;
   rentaMensual: number;
+  gastosComunidad?: number;
+  ibiAnual?: number;
   aireAcondicionado: boolean;
   calefaccion: boolean;
   terraza: boolean;
@@ -400,6 +406,85 @@ export default function UnitDetailPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Valoración patrimonial */}
+        {(unit.precioCompra || unit.valorMercado) && (
+          <Card className="border-l-4 border-l-blue-500">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Layers className="h-5 w-5 text-blue-600" />
+                Valoración Patrimonial
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                {unit.precioCompra && unit.precioCompra > 0 && (
+                  <div>
+                    <p className="text-xs text-muted-foreground">Precio compra (escritura)</p>
+                    <p className="text-xl font-bold">{formatCurrency(unit.precioCompra)}</p>
+                    {unit.superficie > 0 && (
+                      <p className="text-xs text-muted-foreground">{Math.round(unit.precioCompra / unit.superficie).toLocaleString('es-ES')} €/m²</p>
+                    )}
+                  </div>
+                )}
+                {unit.valorMercado && unit.valorMercado > 0 && (
+                  <div>
+                    <p className="text-xs text-muted-foreground">Valor mercado (IA)</p>
+                    <p className="text-xl font-bold text-blue-600">{formatCurrency(unit.valorMercado)}</p>
+                    {unit.superficie > 0 && (
+                      <p className="text-xs text-muted-foreground">{Math.round(unit.valorMercado / unit.superficie).toLocaleString('es-ES')} €/m²</p>
+                    )}
+                  </div>
+                )}
+                {unit.precioCompra && unit.precioCompra > 0 && unit.valorMercado && unit.valorMercado > 0 && (
+                  <div>
+                    <p className="text-xs text-muted-foreground">Revalorización</p>
+                    <p className={`text-xl font-bold ${unit.valorMercado >= unit.precioCompra ? 'text-green-600' : 'text-red-600'}`}>
+                      {unit.valorMercado >= unit.precioCompra ? '+' : ''}{formatCurrency(unit.valorMercado - unit.precioCompra)}
+                    </p>
+                    <p className={`text-xs ${unit.valorMercado >= unit.precioCompra ? 'text-green-600' : 'text-red-600'}`}>
+                      {unit.valorMercado >= unit.precioCompra ? '+' : ''}{Math.round((unit.valorMercado / unit.precioCompra - 1) * 100)}%
+                    </p>
+                  </div>
+                )}
+                {unit.rentaMensual > 0 && unit.precioCompra && unit.precioCompra > 0 && (
+                  <div>
+                    <p className="text-xs text-muted-foreground">Yield bruto (s/compra)</p>
+                    <p className="text-xl font-bold text-purple-600">
+                      {((unit.rentaMensual * 12 / unit.precioCompra) * 100).toFixed(1)}%
+                    </p>
+                    <p className="text-xs text-muted-foreground">PER {(unit.precioCompra / (unit.rentaMensual * 12)).toFixed(1)}x</p>
+                  </div>
+                )}
+                {unit.rentaMensual > 0 && unit.valorMercado && unit.valorMercado > 0 && (
+                  <div>
+                    <p className="text-xs text-muted-foreground">Yield bruto (s/mercado)</p>
+                    <p className="text-xl font-bold">
+                      {((unit.rentaMensual * 12 / unit.valorMercado) * 100).toFixed(1)}%
+                    </p>
+                  </div>
+                )}
+              </div>
+              {unit.referenciaCatastral && (
+                <div className="mt-3 pt-3 border-t flex items-center gap-2 text-xs text-muted-foreground">
+                  <MapPin className="h-3 w-3" />
+                  Ref. catastral: <span className="font-mono">{unit.referenciaCatastral}</span>
+                  {unit.fechaValoracion && (
+                    <span className="ml-2">| Valoración: {new Date(unit.fechaValoracion).toLocaleDateString('es-ES')}</span>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Ref catastral si no hay valoración */}
+        {!unit.precioCompra && !unit.valorMercado && unit.referenciaCatastral && (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground px-1">
+            <MapPin className="h-3 w-3" />
+            Ref. catastral: <span className="font-mono">{unit.referenciaCatastral}</span>
+          </div>
+        )}
 
         {/* Contenido principal */}
         <Tabs defaultValue="info" className="space-y-4">
