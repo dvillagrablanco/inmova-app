@@ -115,6 +115,10 @@ export function PriorityAlerts() {
         return `/mantenimiento/${alert.entityId}`;
       case 'document':
         return '/documentos';
+      case 'insurance':
+        return '/seguros';
+      case 'unit':
+        return '/edificios';
       default:
         return '/dashboard';
     }

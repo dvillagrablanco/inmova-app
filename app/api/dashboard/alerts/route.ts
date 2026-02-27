@@ -308,6 +308,79 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    // ============================================
+    // ALERTAS DE SEGUROS PRÓXIMOS A VENCER
+    // ============================================
+    try {
+      const expiringInsurance = await prisma.insurance.findMany({
+        where: {
+          companyId,
+          estado: 'activa',
+          fechaVencimiento: {
+            gte: today,
+            lte: addDays(today, 30),
+          },
+        },
+        include: {
+          building: { select: { nombre: true } },
+        },
+        orderBy: { fechaVencimiento: 'asc' },
+        take: 10,
+      });
+
+      for (const seguro of expiringInsurance) {
+        const daysRemaining = differenceInDays(seguro.fechaVencimiento, today);
+        alerts.push({
+          id: `insurance-${seguro.id}`,
+          type: 'document',
+          priority: daysRemaining <= 7 ? 'alto' : 'medio',
+          title: `Seguro Próximo a Vencer`,
+          description: `${seguro.tipo} | ${seguro.building?.nombre || 'General'} | ${seguro.aseguradora}`,
+          date: seguro.fechaVencimiento,
+          daysRemaining,
+          entityId: seguro.id,
+          entityType: 'insurance',
+        });
+      }
+    } catch {
+      // Insurance model may not exist — skip silently
+    }
+
+    // ============================================
+    // ALERTAS DE UNIDADES VACÍAS >30 DÍAS
+    // ============================================
+    try {
+      const vacantUnits = await prisma.unit.findMany({
+        where: {
+          building: { companyId },
+          estado: 'disponible',
+          contracts: {
+            none: {
+              estado: 'activo',
+            },
+          },
+        },
+        include: {
+          building: { select: { nombre: true } },
+        },
+        take: 10,
+      });
+
+      for (const unit of vacantUnits) {
+        alerts.push({
+          id: `vacant-${unit.id}`,
+          type: 'contract',
+          priority: 'bajo',
+          title: `Unidad Vacía`,
+          description: `${unit.building?.nombre} - ${unit.numero} | ${unit.tipo || 'Sin tipo'} | Sin contrato activo`,
+          entityId: unit.id,
+          entityType: 'unit',
+        });
+      }
+    } catch {
+      // Skip if query fails
+    }
+
     // Ordenar alertas por prioridad y fecha
     const priorityOrder = { alto: 0, medio: 1, bajo: 2 };
     alerts.sort((a, b) => {
