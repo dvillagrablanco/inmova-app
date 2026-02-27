@@ -185,12 +185,12 @@ export const navigationItems: NavItem[] = [
 // ============================================================================
 
 export const heroData = {
-  eyebrow: '🏠 EL ECOSISTEMA PROPTECH MÁS COMPLETO DE ESPAÑA',
-  headline: 'Del Alquiler a la Construcción: Todo tu Negocio Inmobiliario en Una Plataforma',
+  eyebrow: '🏠 PLATAFORMA PROPTECH MULTI-VERTICAL',
+  headline: 'Toda tu Gestión Inmobiliaria en Una Sola Plataforma',
   subheadline:
-    '7 verticales + 20 módulos | Desde alquiler hasta construcción B2B | Sin permanencia',
+    '7 verticales de negocio | Alquiler, coliving, STR, comunidades y más | Sin permanencia',
   description:
-    'Inmova cubre todo el ciclo de vida inmobiliario: alquiler, coliving, construcción (ewoorker), seguros, partners estratégicos y más. Elimina 5-7 herramientas, ahorra 10+ horas/semana.',
+    'Inmova centraliza todo el ciclo inmobiliario: alquiler residencial, coliving, vacacional, comunidades, construcción B2B y más. Elimina herramientas redundantes y ahorra +10h/semana.',
   primaryCTA: {
     text: '🚀 Prueba GRATIS 30 Días',
     subtext: 'Sin tarjeta · Setup en 10 min',
@@ -209,7 +209,7 @@ export const heroData = {
     { icon: 'Clock', text: 'Setup en 10 minutos' },
     { icon: 'Headphones', text: 'Soporte 24/7' },
   ],
-  socialProof: '⭐⭐⭐⭐⭐ 4.8/5 · Más de 500 propietarios confían en INMOVA',
+  socialProof: '⭐⭐⭐⭐⭐ 30 días gratis · Sin tarjeta · Sin permanencia',
   heroImage: '/images/hero-dashboard.png',
 };
 
@@ -218,21 +218,21 @@ export const heroData = {
 // ============================================================================
 
 export const socialProofStats: Stat[] = [
-  { icon: 'Trophy', label: '#1 Ecosistema PropTech' },
-  { icon: 'Users', label: '3,000+ usuarios activos' },
-  { icon: 'Star', label: '4.8/5 estrellas' },
-  { icon: 'Euro', label: '€15M+ gestionados/mes' },
-  { icon: 'Building2', label: '7 verticales' },
-  { icon: 'Zap', label: '20+ módulos' },
+  { icon: 'Building2', label: '7 verticales de negocio' },
+  { icon: 'Zap', label: 'Setup en menos de 3 minutos' },
+  { icon: 'Star', label: '30 días de prueba gratis' },
+  { icon: 'Shield', label: 'Sin permanencia' },
+  { icon: 'Clock', label: 'Ahorro medio de 10h/semana' },
+  { icon: 'Euro', label: 'Desde €35/mes' },
 ];
 
 // ============================================================================
 // PROBLEM SECTION DATA
 // ============================================================================
 
-export const problemData = {
+export const   problemData = {
   headline: '¿Te Identificas con Alguna de Estas Situaciones?',
-  subheadline: 'Si dijiste "SÍ" a 2 o más, INMOVA es la solución que necesitas',
+  subheadline: 'Si dijiste "SÍ" a 2 o más, INMOVA centraliza y automatiza tu gestión',
   painPoints: [
     {
       icon: '😰',
@@ -706,11 +706,11 @@ export function calculateROI(inputs: {
 
 export const comparisonData: ComparisonRow[] = [
   {
-    feature: 'Módulos incluidos',
-    inmova: { value: '100+', highlight: true, icon: '✅' },
-    plataformaA: { value: '35' },
-    plataformaB: { value: '42' },
-    buildium: { value: '28' },
+    feature: 'Verticales de negocio',
+    inmova: { value: '7 verticales', highlight: true, icon: '✅' },
+    plataformaA: { value: '1-2' },
+    plataformaB: { value: '1-2' },
+    buildium: { value: '1' },
   },
   {
     feature: 'Verticales de negocio',
@@ -769,8 +769,8 @@ export const comparisonData: ComparisonRow[] = [
     buildium: { value: '✅ (pago)' },
   },
   {
-    feature: 'Mobile app',
-    inmova: { value: '✅ 2025', highlight: true },
+    feature: 'App móvil / Responsive',
+    inmova: { value: '✅ 100% responsive', highlight: true },
     plataformaA: { value: '❌' },
     plataformaB: { value: '❌' },
     buildium: { value: '✅' },
@@ -1048,7 +1048,7 @@ export const faqs: FAQ[] = [
     category: 'Mobile',
     question: '¿Funciona en móvil?',
     answer:
-      'Sí. 100% responsive y optimizado para móvil. Puedes hacer todo desde tu smartphone. App nativa iOS y Android disponibles en Q2 2025.',
+      'Sí. 100% responsive y optimizado para móvil. Puedes gestionar todas tus propiedades desde tu smartphone o tablet sin necesidad de instalar nada.',
   },
   {
     id: 8,
@@ -1203,15 +1203,15 @@ export const trustBadges = [
 // ============================================================================
 
 export const seoMetadata = {
-  title: 'INMOVA - Ecosistema PropTech Completo | Alquiler + Construcción + Partners',
+  title: 'INMOVA - Plataforma PropTech Multi-Vertical | Gestión Inmobiliaria Integral',
   description:
-    'El ecosistema PropTech más completo: Alquiler, Coliving, Construcción B2B (ewoorker), Seguros, Partners. 7 verticales + 20 módulos. ✓ 3,000+ usuarios ✓ 4.8/5 ⭐ ✓ Prueba gratis 30 días.',
+    'Plataforma PropTech con 7 verticales: alquiler residencial, coliving, vacacional, comunidades, construcción B2B y más. Centraliza toda tu gestión inmobiliaria. ✓ Prueba gratis 30 días ✓ Sin permanencia.',
   keywords:
-    'software gestión inmobiliaria, proptech españa, gestión alquileres, crm inmobiliario, software propietarios, gestión inquilinos, software agentes inmobiliarios, construcción B2B, ewoorker, seguros inmobiliarios, partners inmobiliarios, mejor software inmobiliario',
+    'software gestión inmobiliaria, proptech españa, gestión alquileres, crm inmobiliario, software propietarios, gestión inquilinos, coliving software, administración fincas, alquiler vacacional, construcción B2B, ewoorker, mejor software inmobiliario 2026',
   openGraph: {
-    title: 'INMOVA - Del Alquiler a la Construcción: Ecosistema PropTech Completo',
+    title: 'INMOVA - Plataforma PropTech Multi-Vertical para Gestión Inmobiliaria',
     description:
-      '7 verticales + 20 módulos | Alquiler, Coliving, Construcción B2B | ROI en 60 días | 3,000+ usuarios',
+      '7 verticales de negocio | Alquiler, coliving, STR, comunidades y construcción B2B | 30 días gratis | Sin permanencia',
     image: 'https://inmovaapp.com/og-image.jpg',
     type: 'website',
     url: 'https://inmovaapp.com',

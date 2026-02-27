@@ -75,12 +75,12 @@ const plans: PlanData[] = [
     },
     features: [
       'Gestión completa de propiedades',
-      'Contratos digitales',
-      'Portal inquilinos básico',
-      'Cobros y recordatorios',
-      'Dashboard con métricas',
+      'Contratos digitales con firma',
+      'Portal de inquilinos',
+      'Cobros automáticos y recordatorios',
+      'Dashboard con métricas clave',
     ],
-    highlight: 'Ideal para empezar',
+    highlight: 'Para propietarios particulares',
   },
   {
     name: 'Professional',
@@ -105,13 +105,13 @@ const plans: PlanData[] = [
     },
     features: [
       'Todo de Starter +',
-      'Combina Alquiler + STR + Coliving',
-      'Portal propietarios',
-      'Reportes avanzados',
-      'Integraciones portales',
-      'IA para valoraciones',
+      'Combina hasta 3 verticales (ej. Alquiler + STR + Coliving)',
+      'Portal de propietarios con informes 24/7',
+      'Reportes avanzados automatizados',
+      'Publicación en portales inmobiliarios',
+      'Valoraciones asistidas con IA',
     ],
-    highlight: 'El más elegido',
+    highlight: 'El más elegido por gestores',
   },
   {
     name: 'Business',
@@ -135,14 +135,14 @@ const plans: PlanData[] = [
     },
     features: [
       'Todo de Professional +',
-      'TODOS los 7 verticales',
-      'API completa incluida',
-      'Personalización de marca',
-      'CRM integrado',
-      'Automatizaciones',
+      'Acceso a los 7 verticales completos',
+      'API REST incluida para integraciones',
+      'Personalización de marca (colores, logo)',
+      'CRM inmobiliario con pipeline',
+      'Automatizaciones avanzadas',
       'Gestor de cuenta dedicado',
     ],
-    highlight: 'Máximo valor',
+    highlight: 'Para gestoras en crecimiento',
   },
   {
     name: 'Enterprise',
@@ -166,26 +166,26 @@ const plans: PlanData[] = [
     },
     features: [
       'Todo de Business +',
-      'White-label incluido',
-      'Desarrollos a medida',
-      'Migración asistida',
+      'White-label incluido (tu marca, tu dominio)',
+      'Desarrollos y módulos a medida',
+      'Migración asistida de datos completa',
       'SLA 99.9% garantizado',
-      'Formación presencial',
-      'Integraciones custom',
+      'Formación presencial para tu equipo',
+      'Integraciones personalizadas',
     ],
-    highlight: 'Para grandes gestoras',
+    highlight: 'Para grandes gestoras y fondos',
   },
 ];
 
 // Comparativa genérica
 const featureComparison = [
   { feature: 'Verticales de negocio', inmova: '7 verticales', others: '1-2 verticales' },
-  { feature: 'Propiedades incluidas', inmova: 'Hasta 100', others: 'Hasta 50' },
-  { feature: 'Firmas digitales', inmova: 'Incluidas + Packs', others: 'Limitadas' },
-  { feature: 'IA integrada', inmova: '✅ Incluida', others: '❌ No disponible' },
-  { feature: 'Multi-vertical', inmova: '✅ Sí', others: '❌ No' },
+  { feature: 'Multi-vertical (alquiler + coliving + STR...)', inmova: '✅ Combina libremente', others: '❌ Solo 1 modelo' },
+  { feature: 'Firma digital incluida', inmova: '✅ Signaturit integrado', others: '❌ Limitada o de pago' },
+  { feature: 'IA integrada (valoraciones, scoring)', inmova: '✅ Incluida', others: '❌ No disponible' },
   { feature: 'API abierta', inmova: '✅ Desde Business', others: '❌ Solo Enterprise' },
-  { feature: 'White-label', inmova: '✅ Disponible', others: '❌ No disponible' },
+  { feature: 'White-label (tu marca)', inmova: '✅ Disponible', others: '❌ No disponible' },
+  { feature: 'Sin permanencia', inmova: '✅ Mes a mes', others: '❌ 12 meses mínimo' },
 ];
 
 export function PricingSection() {
@@ -198,14 +198,14 @@ export function PricingSection() {
             <span className="text-green-700">✓</span> 7 Verticales · Precios Transparentes · Add-ons Flexibles
           </Badge>
           <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-            Más Funcionalidades. Mejor Precio.
+            Elige el Plan que se Adapta a Ti
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-2">
-            Una plataforma, <strong className="text-indigo-600">7 verticales de negocio</strong>. 
-            Todo lo que necesitas para gestionar tu cartera inmobiliaria.
+            Una plataforma con <strong className="text-indigo-600">7 verticales de negocio</strong>. 
+            Escoge las que necesitas y escala cuando quieras.
           </p>
           <p className="text-lg text-gray-500">
-            30 días gratis · Sin tarjeta · Cancela cuando quieras
+            30 días gratis · Sin tarjeta de crédito · Sin permanencia
           </p>
         </div>
 
@@ -409,9 +409,9 @@ export function PricingSection() {
         {/* CTA Final */}
         <div className="text-center mt-12">
           <p className="text-lg text-gray-700 mb-4">
-            ¿Más de 100 propiedades? ¿Necesitas personalización?
+            ¿Gestionas +100 propiedades o necesitas funcionalidades a medida?
           </p>
-          <Link href="/contacto">
+          <Link href="/landing/contacto">
             <Button size="lg" className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-semibold shadow-lg">
               Solicitar Demo Personalizada
             </Button>

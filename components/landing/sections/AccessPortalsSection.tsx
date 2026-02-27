@@ -10,7 +10,7 @@ export function AccessPortalsSection() {
   const portals = [
     {
       title: 'Portal de Proveedores',
-      description: 'Acceso para empresas de mantenimiento, limpieza y servicios',
+      description: 'Para empresas de mantenimiento, limpieza y servicios profesionales',
       icon: Briefcase,
       link: '/portal-proveedor/login',
       color: 'from-blue-600 to-cyan-600',
@@ -25,7 +25,7 @@ export function AccessPortalsSection() {
     },
     {
       title: 'Portal de Inquilinos',
-      description: 'Acceso para residentes y arrendatarios',
+      description: 'Para residentes: pagos, incidencias y documentos en un solo lugar',
       icon: Home,
       link: '/portal-inquilino/login',
       color: 'from-indigo-600 to-purple-600',
@@ -40,7 +40,7 @@ export function AccessPortalsSection() {
     },
     {
       title: 'Portal de Propietarios',
-      description: 'Acceso para inversores y dueños de propiedades',
+      description: 'Para inversores y propietarios: informes de rentabilidad 24/7',
       icon: Building,
       link: '/portal-propietario/login',
       color: 'from-violet-600 to-pink-600',
@@ -55,7 +55,7 @@ export function AccessPortalsSection() {
     },
     {
       title: 'Portal Administrativo',
-      description: 'Acceso para gestores y administradores de fincas',
+      description: 'Para gestores y administradores: control total multi-vertical',
       icon: Users,
       link: '/login',
       color: 'from-green-600 to-emerald-600',
@@ -70,7 +70,7 @@ export function AccessPortalsSection() {
     },
     {
       title: 'ewoorker (Construcción B2B)',
-      description: 'Plataforma para constructores y subcontratistas',
+      description: 'Para constructores: marketplace, compliance y pagos escrow',
       icon: Hammer,
       link: '/ewoorker/dashboard',
       color: 'from-orange-600 to-yellow-500',
@@ -101,7 +101,7 @@ export function AccessPortalsSection() {
             </span>
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Cada perfil tiene su propio portal optimizado con funcionalidades específicas
+            Cada usuario accede a un portal adaptado a su rol con las funcionalidades que necesita
           </p>
         </div>
 
