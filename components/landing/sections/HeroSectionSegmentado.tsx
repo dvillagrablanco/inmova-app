@@ -41,20 +41,20 @@ interface PersonaContent {
 
 const personasContent: Record<string, PersonaContent> = {
   propietarios: {
-    title: 'Simplifica tu gestión inmobiliaria',
+    title: 'Tu alquiler en piloto automático',
     subtitle:
-      'Automatiza todo el proceso de alquiler tradicional y a medio plazo. Recupera tu tiempo sin complicaciones, sin morosidad, sin estrés.',
+      'Contratos, cobros, incidencias y comunicación con inquilinos: todo automatizado en una sola plataforma. Dedica tu tiempo a lo que importa.',
     painPoints: [
-      'Gestión manual caótica con Excel y WhatsApp',
-      'Morosidad de inquilinos (15% promedio)',
-      '10 horas semanales perdidas en tareas administrativas',
-      'Desconocimiento legal y fiscal',
+      'Gestión manual con Excel, WhatsApp y papeles',
+      'Morosidad de inquilinos sin herramientas de prevención',
+      '+10 horas semanales en tareas administrativas repetitivas',
+      'Riesgo legal por contratos desactualizados',
     ],
     benefits: [
-      'Screening automático de inquilinos con IA',
-      'Alertas de pagos y recordatorios automáticos',
-      'Contratos legales pre-aprobados',
-      'Panel de control simple e intuitivo',
+      'Screening de inquilinos con IA y verificación de solvencia',
+      'Cobros automáticos con Stripe y alertas de impago',
+      'Contratos LAU actualizados con firma digital',
+      'Portal de inquilinos: incidencias, pagos y documentos sin llamadas',
     ],
     cta: {
       primary: { text: 'Empezar Gratis', href: '/register' },
@@ -63,52 +63,52 @@ const personasContent: Record<string, PersonaContent> = {
     stats: [
       { icon: Clock, value: '10h', label: 'Ahorro semanal' },
       { icon: Shield, value: '95%', label: 'Reducción morosidad' },
-      { icon: Zap, value: '3min', label: 'Onboarding' },
+      { icon: Zap, value: '3min', label: 'Setup inicial' },
     ],
     image: '/images/hero-propietarios.jpg',
   },
   gestores: {
-    title: 'Escala tu negocio inmobiliario',
+    title: 'Gestiona más propiedades sin más equipo',
     subtitle:
-      'Todo-en-uno que elimina 5-7 herramientas. Ahorra €300-€1,000/mes y automatiza el 60% de tus tareas repetitivas.',
+      'Centraliza toda tu operación en una plataforma multi-vertical. Elimina herramientas redundantes, automatiza reportes y escala sin fricciones.',
     painPoints: [
-      'Software fragmentado (6-8 herramientas diferentes)',
-      'Costos elevados (€500-€1,500/mes en software)',
-      'Falta de automatización y reportes manuales',
-      'Escalabilidad limitada',
+      'Software fragmentado (5-8 herramientas que no se comunican)',
+      'Costes de €500-€1,500/mes en suscripciones dispersas',
+      'Reportes manuales que consumen jornadas enteras',
+      'Imposible escalar sin contratar más personal',
     ],
     benefits: [
-      'Todo-en-uno que elimina múltiples herramientas',
-      'Ahorro de €300-€1,000/mes en software',
-      'Automatización del 60% de tareas repetitivas',
-      'Escalable a 1,000+ propiedades',
+      'Plataforma todo-en-uno: alquiler, coliving, STR y más',
+      'Portal de propietarios con informes 24/7 (adiós emails)',
+      'Automatización de facturación, cobros y recordatorios',
+      'Escalable de 10 a 1.000+ propiedades sin cambiar de herramienta',
     ],
     cta: {
       primary: { text: 'Prueba 30 Días', href: '/register' },
-      secondary: { text: 'Agendar Demo', href: '/contact?type=gestor' },
+      secondary: { text: 'Agendar Demo', href: '/landing/contacto' },
     },
     stats: [
       { icon: DollarSign, value: '€1K', label: 'Ahorro mensual' },
-      { icon: TrendingUp, value: '60%', label: 'Automatización' },
-      { icon: Target, value: '1-3meses', label: 'ROI garantizado' },
+      { icon: TrendingUp, value: '60%', label: 'Tareas automatizadas' },
+      { icon: Target, value: '<3 meses', label: 'Retorno inversión' },
     ],
     image: '/images/hero-gestores.jpg',
   },
   inversores: {
-    title: 'Control total de tu cartera inmobiliaria',
+    title: 'Visibilidad total sobre tu cartera',
     subtitle:
-      'Dashboard ejecutivo con métricas en tiempo real. Visualiza rendimiento, ocupación y rentabilidad de todas tus propiedades.',
+      'Dashboard ejecutivo con rentabilidad por propiedad, ocupación en tiempo real y alertas inteligentes. Toma decisiones basadas en datos, no en intuiciones.',
     painPoints: [
-      'Información dispersa en Excel y emails',
-      'Falta de visibilidad en tiempo real',
-      'Reportes manuales que consumen tiempo',
-      'Dificultad para tomar decisiones rápidas',
+      'Información dispersa entre gestores, Excel y emails',
+      'Sin visibilidad real de rentabilidad neta por activo',
+      'Reportes manuales desactualizados al recibirlos',
+      'Difícil comparar rendimiento entre propiedades',
     ],
     benefits: [
-      'Dashboard unificado todas las propiedades',
-      'Métricas de rentabilidad automatizadas',
-      'Alertas de vencimientos y pagos',
-      'Reportes exportables para contabilidad',
+      'Dashboard unificado con todas tus propiedades y métricas',
+      'Rentabilidad neta calculada automáticamente por activo',
+      'Alertas de vencimientos, impagos y oportunidades',
+      'Reportes fiscales exportables con un clic',
     ],
     cta: {
       primary: { text: 'Ver Demo', href: '/landing/demo' },
@@ -116,35 +116,35 @@ const personasContent: Record<string, PersonaContent> = {
     },
     stats: [
       { icon: BarChart3, value: '10h', label: 'Ahorro semanal' },
-      { icon: Sparkles, value: '100%', label: 'Visibilidad' },
-      { icon: Building2, value: 'Ilimitadas', label: 'Propiedades' },
+      { icon: Sparkles, value: '100%', label: 'Visibilidad cartera' },
+      { icon: Building2, value: 'Sin límite', label: 'Propiedades' },
     ],
     image: '/images/hero-inversores.jpg',
   },
   constructores: {
     title: 'Subcontrata con seguridad legal total',
     subtitle:
-      'Marketplace B2B + Compliance Ley 32/2006 + Escrow de pagos. Todo en ewoorker by Inmova.',
+      'Marketplace B2B con compliance automático Ley 32/2006, pagos escrow y documentación verificada. Encuentra subcontratistas fiables en ewoorker by Inmova.',
     painPoints: [
       'Libro de subcontratación manual (sanciones hasta €10K)',
-      'Subcontratistas sin papeles al día (REA, TC1, TC2)',
-      'Riesgo de impago o trabajo mal hecho',
-      'Gestión documental caótica',
+      'Subcontratistas con documentación vencida (REA, TC1, TC2)',
+      'Riesgo de impago o trabajos sin garantía de calidad',
+      'Gestión documental caótica entre obras y proveedores',
     ],
     benefits: [
-      'Libro digital automático (Ley 32/2006)',
-      'Solo empresas verificadas con REA vigente',
-      'Escrow: paga solo si el trabajo está perfecto',
-      'Alertas de vencimiento de documentos',
+      'Libro digital automático conforme a Ley 32/2006',
+      'Solo empresas verificadas con REA y seguros vigentes',
+      'Escrow de pagos: libera fondos solo al validar el trabajo',
+      'Alertas automáticas de vencimiento de documentos',
     ],
     cta: {
       primary: { text: 'Explorar eWoorker', href: '/ewoorker/landing' },
       secondary: { text: 'Ver Marketplace', href: '/ewoorker/dashboard' },
     },
     stats: [
-      { icon: Users, value: '2.5K', label: 'Empresas' },
-      { icon: Building2, value: '500+', label: 'Obras/semana' },
-      { icon: Shield, value: '100%', label: 'Legal' },
+      { icon: Users, value: '2.5K', label: 'Empresas verificadas' },
+      { icon: Building2, value: '500+', label: 'Obras activas' },
+      { icon: Shield, value: '100%', label: 'Compliance legal' },
     ],
     image: '/images/hero-constructores.jpg',
   },
@@ -185,8 +185,8 @@ export function HeroSectionSegmentado() {
               </span>
             </h1>
             <p className="text-xl sm:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              7 verticales (alquiler a construcción B2B) + 15 módulos de IA, IoT y Blockchain.
-              <span className="font-semibold text-indigo-600"> Todo en un solo lugar.</span>
+              7 verticales de negocio, desde alquiler residencial hasta construcción B2B.
+              <span className="font-semibold text-indigo-600"> Centraliza, automatiza y escala.</span>
             </p>
           </div>
 
@@ -317,7 +317,11 @@ export function HeroSectionSegmentado() {
                       {/* Placeholder para imagen - en producción usar Image de Next.js */}
                       <div className="aspect-[4/3] bg-gradient-to-br from-indigo-100 via-violet-100 to-pink-100 flex items-center justify-center">
                         <div className="text-center p-8">
-                          <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 mb-6">
+                          <div className={`inline-flex items-center justify-center w-24 h-24 rounded-full mb-6 ${
+                            activeTab === 'constructores'
+                              ? 'bg-gradient-to-r from-orange-500 to-yellow-500'
+                              : 'bg-gradient-to-r from-indigo-500 to-violet-500'
+                          }`}>
                             {activeTab === 'propietarios' && (
                               <Home className="h-12 w-12 text-white" />
                             )}
@@ -327,19 +331,25 @@ export function HeroSectionSegmentado() {
                             {activeTab === 'inversores' && (
                               <BarChart3 className="h-12 w-12 text-white" />
                             )}
+                            {activeTab === 'constructores' && (
+                              <Building2 className="h-12 w-12 text-white" />
+                            )}
                           </div>
                           <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                            {activeTab === 'propietarios' && 'Gestión Simplificada'}
-                            {activeTab === 'gestores' && 'Escalabilidad Total'}
-                            {activeTab === 'inversores' && 'Analytics Avanzado'}
+                            {activeTab === 'propietarios' && 'Alquiler Automatizado'}
+                            {activeTab === 'gestores' && 'Escala Sin Límites'}
+                            {activeTab === 'inversores' && 'Decisiones con Datos'}
+                            {activeTab === 'constructores' && 'Compliance Automático'}
                           </h3>
                           <p className="text-gray-600">
                             {activeTab === 'propietarios' &&
-                              'Todo lo que necesitas en un solo lugar'}
+                              'Contratos, cobros e incidencias en piloto automático'}
                             {activeTab === 'gestores' &&
-                              'Gestiona miles de propiedades sin límites'}
+                              'De 10 a 1.000 propiedades con la misma herramienta'}
                             {activeTab === 'inversores' &&
-                              'Toma decisiones basadas en datos en tiempo real'}
+                              'Rentabilidad neta por activo en tiempo real'}
+                            {activeTab === 'constructores' &&
+                              'Ley 32/2006, escrow y documentación verificada'}
                           </p>
                         </div>
                       </div>
@@ -365,15 +375,15 @@ export function HeroSectionSegmentado() {
             </div>
             <div className="flex items-center gap-2">
               <Users className="h-5 w-5 text-violet-600" />
-              <span className="font-medium">+5,000 Usuarios Activos</span>
+              <span className="font-medium">30 días de prueba gratis</span>
             </div>
             <div className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-pink-600" />
-              <span className="font-medium">Ahorro medio 10h/semana</span>
+              <span className="font-medium">Ahorro medio de 10h/semana</span>
             </div>
             <div className="flex items-center gap-2">
               <Shield className="h-5 w-5 text-green-600" />
-              <span className="font-medium">Soporte 24/7</span>
+              <span className="font-medium">Sin permanencia · Cancela cuando quieras</span>
             </div>
           </div>
         </div>
