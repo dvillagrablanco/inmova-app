@@ -5,7 +5,18 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
-import { UserPlus, Home, ArrowLeft, Save, Upload, FileText, X, Loader2, Brain, Sparkles } from 'lucide-react';
+import {
+  UserPlus,
+  Home,
+  ArrowLeft,
+  Save,
+  Upload,
+  FileText,
+  X,
+  Loader2,
+  Brain,
+  Sparkles,
+} from 'lucide-react';
 import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -405,51 +416,63 @@ export default function NuevoCandidatoPage() {
                     entityType="tenant"
                     autoSaveDocument={true}
                     onApplyData={(data) => {
-                      console.log('[Candidato] Datos recibidos:', JSON.stringify(data, null, 2));
+                      // Datos recibidos del asistente IA
                       const updates: Partial<typeof formData> = {};
-                      
+
                       // Nombre
-                      const nombre = data.nombreCompleto || data.nombre || data.fullName || data.name;
+                      const nombre =
+                        data.nombreCompleto || data.nombre || data.fullName || data.name;
                       if (nombre) updates.nombre = nombre;
-                      
+
                       // Email
                       if (data.email || data.correo) updates.email = data.email || data.correo;
-                      
+
                       // Teléfono
-                      if (data.telefono || data.phone) updates.telefono = data.telefono || data.phone;
-                      
+                      if (data.telefono || data.phone)
+                        updates.telefono = data.telefono || data.phone;
+
                       // DNI/NIE
-                      const docIdentidad = data.dni || data.nie || data.numeroDocumento || data.documentoIdentidad;
+                      const docIdentidad =
+                        data.dni || data.nie || data.numeroDocumento || data.documentoIdentidad;
                       if (docIdentidad) updates.dni = docIdentidad;
-                      
+
                       // Ocupación
                       if (data.ocupacion || data.profession || data.trabajo) {
                         updates.ocupacion = data.ocupacion || data.profession || data.trabajo;
                       }
-                      
+
                       // Ingresos
                       if (data.ingresosMensuales || data.ingresos || data.income) {
                         const ingresosStr = data.ingresosMensuales || data.ingresos || data.income;
-                        const ingresosNum = parseFloat(String(ingresosStr).replace(/[^0-9,.]/g, '').replace(',', '.'));
+                        const ingresosNum = parseFloat(
+                          String(ingresosStr)
+                            .replace(/[^0-9,.]/g, '')
+                            .replace(',', '.')
+                        );
                         if (!isNaN(ingresosNum)) {
                           updates.ingresosMensuales = ingresosNum;
                         }
                       }
-                      
+
                       if (Object.keys(updates).length > 0) {
                         setFormData((prev) => ({ ...prev, ...updates }));
-                        toast.success(`${Object.keys(updates).length} campos del candidato aplicados`);
+                        toast.success(
+                          `${Object.keys(updates).length} campos del candidato aplicados`
+                        );
                       }
                     }}
                     onDocumentSaved={(documentId, file) => {
-                      setDocuments((prev) => [...prev, {
-                        id: documentId,
-                        name: file.name,
-                        type: file.type,
-                        url: `/api/documents/${documentId}/download`,
-                        uploading: false,
-                        progress: 100,
-                      }]);
+                      setDocuments((prev) => [
+                        ...prev,
+                        {
+                          id: documentId,
+                          name: file.name,
+                          type: file.type,
+                          url: `/api/documents/${documentId}/download`,
+                          uploading: false,
+                          progress: 100,
+                        },
+                      ]);
                     }}
                   />
 

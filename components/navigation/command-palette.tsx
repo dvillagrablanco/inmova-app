@@ -81,10 +81,7 @@ export function CommandPalette() {
   const saveRecentPage = useCallback((url: string, title: string) => {
     setRecentPages((prev) => {
       const filtered = prev.filter((p) => p.url !== url);
-      const updated = [
-        { url, title, timestamp: Date.now() },
-        ...filtered,
-      ].slice(0, 10); // Máximo 10 recientes
+      const updated = [{ url, title, timestamp: Date.now() }, ...filtered].slice(0, 10); // Máximo 10 recientes
 
       try {
         localStorage.setItem('recent-pages', JSON.stringify(updated));
@@ -335,7 +332,7 @@ export function CommandPalette() {
       icon: HelpCircle,
       action: () => {
         // Abrir modal de shortcuts
-        console.log('Show shortcuts modal');
+        // Abrir dialog de shortcuts (se gestiona via ShortcutsHelpDialog)
       },
       keywords: ['help', 'ayuda', 'shortcuts', 'atajos'],
       group: 'help',
@@ -352,13 +349,10 @@ export function CommandPalette() {
     },
   ];
 
-  const handleAction = useCallback(
-    (action: CommandAction) => {
-      setOpen(false);
-      action.action();
-    },
-    []
-  );
+  const handleAction = useCallback((action: CommandAction) => {
+    setOpen(false);
+    action.action();
+  }, []);
 
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>

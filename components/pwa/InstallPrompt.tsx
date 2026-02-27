@@ -29,7 +29,7 @@ export function InstallPrompt() {
   useEffect(() => {
     // ✅ FIX: Guard SSR - solo ejecutar en browser
     if (typeof window === 'undefined') return;
-    
+
     // Check if already installed
     if (
       window.matchMedia('(display-mode: standalone)').matches ||
@@ -85,9 +85,9 @@ export function InstallPrompt() {
     const choiceResult = await deferredPrompt.userChoice;
 
     if (choiceResult.outcome === 'accepted') {
-      console.log('User accepted PWA install');
+      // PWA install aceptada
     } else {
-      console.log('User dismissed PWA install');
+      // PWA install descartada
     }
 
     // Clear prompt

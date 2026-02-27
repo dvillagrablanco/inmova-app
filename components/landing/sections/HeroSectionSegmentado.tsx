@@ -36,7 +36,6 @@ interface PersonaContent {
     secondary: { text: string; href: string };
   };
   stats: Array<{ icon: any; value: string; label: string }>;
-  image: string;
 }
 
 const personasContent: Record<string, PersonaContent> = {
@@ -65,7 +64,6 @@ const personasContent: Record<string, PersonaContent> = {
       { icon: Shield, value: '95%', label: 'Reducción morosidad' },
       { icon: Zap, value: '3min', label: 'Setup inicial' },
     ],
-    image: '/images/hero-propietarios.jpg',
   },
   gestores: {
     title: 'Gestiona más propiedades sin más equipo',
@@ -92,7 +90,6 @@ const personasContent: Record<string, PersonaContent> = {
       { icon: TrendingUp, value: '60%', label: 'Tareas automatizadas' },
       { icon: Target, value: '<3 meses', label: 'Retorno inversión' },
     ],
-    image: '/images/hero-gestores.jpg',
   },
   inversores: {
     title: 'Visibilidad total sobre tu cartera',
@@ -119,7 +116,6 @@ const personasContent: Record<string, PersonaContent> = {
       { icon: Sparkles, value: '100%', label: 'Visibilidad cartera' },
       { icon: Building2, value: 'Sin límite', label: 'Propiedades' },
     ],
-    image: '/images/hero-inversores.jpg',
   },
   constructores: {
     title: 'Subcontrata con seguridad legal total',
@@ -146,7 +142,6 @@ const personasContent: Record<string, PersonaContent> = {
       { icon: Building2, value: '500+', label: 'Obras activas' },
       { icon: Shield, value: '100%', label: 'Compliance legal' },
     ],
-    image: '/images/hero-constructores.jpg',
   },
 };
 
@@ -186,7 +181,10 @@ export function HeroSectionSegmentado() {
             </h1>
             <p className="text-xl sm:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
               7 verticales de negocio, desde alquiler residencial hasta construcción B2B.
-              <span className="font-semibold text-indigo-600"> Centraliza, automatiza y escala.</span>
+              <span className="font-semibold text-indigo-600">
+                {' '}
+                Centraliza, automatiza y escala.
+              </span>
             </p>
           </div>
 
@@ -317,11 +315,13 @@ export function HeroSectionSegmentado() {
                       {/* Placeholder para imagen - en producción usar Image de Next.js */}
                       <div className="aspect-[4/3] bg-gradient-to-br from-indigo-100 via-violet-100 to-pink-100 flex items-center justify-center">
                         <div className="text-center p-8">
-                          <div className={`inline-flex items-center justify-center w-24 h-24 rounded-full mb-6 ${
-                            activeTab === 'constructores'
-                              ? 'bg-gradient-to-r from-orange-500 to-yellow-500'
-                              : 'bg-gradient-to-r from-indigo-500 to-violet-500'
-                          }`}>
+                          <div
+                            className={`inline-flex items-center justify-center w-24 h-24 rounded-full mb-6 ${
+                              activeTab === 'constructores'
+                                ? 'bg-gradient-to-r from-orange-500 to-yellow-500'
+                                : 'bg-gradient-to-r from-indigo-500 to-violet-500'
+                            }`}
+                          >
                             {activeTab === 'propietarios' && (
                               <Home className="h-12 w-12 text-white" />
                             )}

@@ -8,29 +8,32 @@
 import { useState } from 'react';
 import { HelpCircle, Phone, Bot, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 
 // Tipos de agentes
-export type AgentType = 
-  | 'sales' | 'customer_service' | 'incidents' | 'valuations' 
-  | 'acquisition' | 'coliving' | 'communities' | 'receptionist';
+export type AgentType =
+  | 'sales'
+  | 'customer_service'
+  | 'incidents'
+  | 'valuations'
+  | 'acquisition'
+  | 'coliving'
+  | 'communities'
+  | 'receptionist';
 
 // Info de agentes
-const AGENT_INFO: Record<AgentType, { name: string; title: string; emoji: string; color: string }> = {
-  receptionist: { name: 'Ana', title: 'Recepcionista', emoji: '👩‍💻', color: 'bg-indigo-500' },
-  sales: { name: 'Elena', title: 'Ventas', emoji: '👩‍💼', color: 'bg-blue-500' },
-  customer_service: { name: 'María', title: 'Soporte', emoji: '👩‍🔧', color: 'bg-green-500' },
-  incidents: { name: 'Carlos', title: 'Incidencias', emoji: '👨‍🔧', color: 'bg-orange-500' },
-  valuations: { name: 'Patricia', title: 'Valoraciones', emoji: '👩‍💻', color: 'bg-purple-500' },
-  acquisition: { name: 'Roberto', title: 'Captación', emoji: '👨‍💼', color: 'bg-cyan-500' },
-  coliving: { name: 'Laura', title: 'Coliving', emoji: '👩‍🎨', color: 'bg-pink-500' },
-  communities: { name: 'Antonio', title: 'Comunidades', emoji: '👨‍⚖️', color: 'bg-amber-500' },
-};
+const AGENT_INFO: Record<AgentType, { name: string; title: string; emoji: string; color: string }> =
+  {
+    receptionist: { name: 'Ana', title: 'Recepcionista', emoji: '👩‍💻', color: 'bg-indigo-500' },
+    sales: { name: 'Elena', title: 'Ventas', emoji: '👩‍💼', color: 'bg-blue-500' },
+    customer_service: { name: 'María', title: 'Soporte', emoji: '👩‍🔧', color: 'bg-green-500' },
+    incidents: { name: 'Carlos', title: 'Incidencias', emoji: '👨‍🔧', color: 'bg-orange-500' },
+    valuations: { name: 'Patricia', title: 'Valoraciones', emoji: '👩‍💻', color: 'bg-purple-500' },
+    acquisition: { name: 'Roberto', title: 'Captación', emoji: '👨‍💼', color: 'bg-cyan-500' },
+    coliving: { name: 'Laura', title: 'Coliving', emoji: '👩‍🎨', color: 'bg-pink-500' },
+    communities: { name: 'Antonio', title: 'Comunidades', emoji: '👨‍⚖️', color: 'bg-amber-500' },
+  };
 
 const PHONE_NUMBER = (process.env.NEXT_PUBLIC_VAPI_PHONE_NUMBER ?? '').trim();
 
@@ -53,7 +56,7 @@ export function ContextualHelpButton({
 
   const startCall = () => {
     // Iniciar llamada web con Vapi
-    console.log('Iniciando llamada con', agent.name);
+    // TODO: integración con Vapi para iniciar llamada
     // Aquí iría la integración con Vapi
   };
 
@@ -61,11 +64,7 @@ export function ContextualHelpButton({
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         {variant === 'icon' ? (
-          <Button
-            variant="ghost"
-            size="icon"
-            className={cn('rounded-full', className)}
-          >
+          <Button variant="ghost" size="icon" className={cn('rounded-full', className)}>
             <HelpCircle className="h-5 w-5" />
           </Button>
         ) : variant === 'text' ? (
@@ -84,10 +83,12 @@ export function ContextualHelpButton({
         <div className="space-y-3">
           {/* Header del agente */}
           <div className="flex items-center gap-3">
-            <div className={cn(
-              'flex h-12 w-12 items-center justify-center rounded-full text-2xl',
-              agent.color
-            )}>
+            <div
+              className={cn(
+                'flex h-12 w-12 items-center justify-center rounded-full text-2xl',
+                agent.color
+              )}
+            >
               {agent.emoji}
             </div>
             <div>
@@ -97,11 +98,7 @@ export function ContextualHelpButton({
           </div>
 
           {/* Contexto */}
-          {context && (
-            <p className="text-sm text-muted-foreground">
-              {context}
-            </p>
-          )}
+          {context && <p className="text-sm text-muted-foreground">{context}</p>}
 
           {/* Botones de acción */}
           <div className="space-y-2">
@@ -125,9 +122,7 @@ export function ContextualHelpButton({
           </div>
 
           {/* Info adicional */}
-          <p className="text-xs text-center text-muted-foreground">
-            Atención inmediata con IA
-          </p>
+          <p className="text-xs text-center text-muted-foreground">Atención inmediata con IA</p>
         </div>
       </PopoverContent>
     </Popover>
