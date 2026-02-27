@@ -16,8 +16,8 @@ INMOVA es una **plataforma PropTech multi-vertical** diseñada específicamente 
 
 | Métrica | Valor |
 |---------|-------|
-| Páginas funcionales | 575 |
-| Endpoints API | 992 |
+| Páginas funcionales | 577 |
+| Endpoints API | 999 |
 | Módulos disponibles | 34 secciones |
 | Verticales de negocio | 7 |
 | Integraciones | 15+ (Stripe, GoCardless, Bankinter, Signaturit, Claude IA, etc.) |
@@ -44,6 +44,21 @@ El perfil de administrador está diseñado para la **toma de decisiones estraté
 - **Export Gestoría** — Generación de datos para Modelo 303 (IVA trimestral) y 347 (operaciones >3.005€)
 - **Facturación Intragrupo** — Facturas entre Rovida↔Viroda↔Vidaro con asientos contables duales
 - **Activos del Grupo** — Ficha detallada por inmueble: precio compra, valor mercado, amortización, plusvalía
+
+#### Nuevas Funcionalidades Financieras (Feb 2026)
+
+- **Calendario de Vencimientos** — Timeline visual de contratos que vencen los próximos 12 meses, agrupados por edificio. Identifica picos (ej: "48 contratos de garaje vencen en marzo en Espronceda") para planificar renovaciones con antelación.
+- **Control de Costes por Edificio** — Margen real por edificio: ingresos (rentas) menos gastos (IBI + comunidad + mantenimiento + seguros). Responde: "¿Cuánto cuesta mantener Piamonte?" y "¿Qué edificio tiene mejor margen?".
+- **Rentabilidad por m²** — Cálculo €/m²/mes de cada unidad comparado con la media del edificio. Detecta automáticamente unidades infravaloradas (>15% bajo media) con potencial de incremento mensual y anual.
+- **Alertas de Morosidad Escaladas** — Flujo automático de escalado por días de retraso:
+  - **5 días**: Recordatorio amable (email)
+  - **15 días**: Aviso formal (email + SMS)
+  - **30 días**: Carta de requerimiento (PDF generado)
+  - **60+ días**: Derivación a abogado (flag en sistema)
+- **Export Fiscal Modelo 303/347** — Generación automática de datos para:
+  - Modelo 303: IVA trimestral (facturas emitidas vs recibidas, distingue locales con IVA vs viviendas exentas)
+  - Modelo 347: Operaciones con terceros >3.005,06€ agrupadas por NIF
+- **Facturación Intragrupo** — Facturas entre Rovida↔Viroda↔Vidaro con asientos contables duales automáticos
 
 **Acceso exclusivo adicional**: Open Banking, Presupuestos, Automatización, Workflows, Innovación (ESG, IoT, Blockchain).
 
@@ -105,6 +120,14 @@ El perfil de gestor está optimizado para la **operación diaria**:
 - **Reportes Operacionales** — Informes generados automáticamente
 - **Asistente IA** — Pregunta en lenguaje natural: "¿Cuántos garajes libres tiene Espronceda?" y obtén respuesta inmediata
 
+#### Nuevas Funcionalidades para Gestores (Feb 2026)
+
+- **Renovación en Lote** — Selecciona todos los contratos de un edificio → preview del incremento IPC → confirma → 115 contratos renovados en 2 minutos
+- **Actualización IPC Automática** — Calcula el nuevo importe según IPC para contratos elegibles (>12 meses, tipo IPC). Soporta IPC + diferencial. Preview antes de aplicar.
+- **Mapa Visual de Garajes** — Grid coloreado de plazas por planta y edificio: verde=ocupada, gris=libre, naranja=mantenimiento. Hover muestra inquilino y renta.
+- **Alertas de Morosidad** — Dashboard de impagos con nivel de escalado (recordatorio → aviso → requerimiento → legal) y acción sugerida por cada caso.
+- **OCR Extractos Bancarios** — Sube un PDF de extracto de Bankinter → la IA extrae automáticamente todos los movimientos (fecha, concepto, importe, ordenante). Sin teclear nada.
+
 ---
 
 ### 👷 Para el Operador de Campo
@@ -146,9 +169,28 @@ INMOVA incorpora IA (Claude de Anthropic) en múltiples puntos:
   - Nombre del inquilino en concepto bancario
   - Niveles de confianza: alta, media, baja
 
+### Predicción de Morosidad (Nuevo)
+- **Scoring 0-100** por inquilino basado en historial real de pagos
+- Factores: % pagos atrasados (40%), pendientes actuales (30%), retraso medio en días (20%), tendencia reciente (10%)
+- Clasifica en riesgo **alto** (≥70), **medio** (40-69), **bajo** (<40)
+- Muestra la **renta total en riesgo** (suma de rentas de inquilinos de alto riesgo)
+- Acción sugerida: "Contactar inmediatamente. No renovar contrato." / "Monitorizar. Recordatorios anticipados."
+
+### Optimización de Rentas (Nuevo)
+- Compara la renta actual de cada unidad con la **media del edificio por tipo** (vivienda, garaje, local)
+- Detecta unidades **infravaloradas** (>15% por debajo de la media) con potencial de incremento
+- Ejemplo: *"Plaza 45 de Espronceda renta a €85/mes pero la media del edificio es €110 → potencial +€25/mes"*
+- Resumen: total de unidades infravaloradas y **potencial de incremento mensual y anual** del grupo
+
 ### Valoración IA
 - Estimación del valor de mercado de cualquier propiedad
 - Comparables automáticos basados en zona, superficie, tipología
+
+### OCR de Extractos Bancarios (Nuevo)
+- Sube un **PDF de extracto bancario** (Bankinter, BBVA, Santander, CaixaBank)
+- Claude analiza el documento y extrae **todos los movimientos**: fecha, concepto, importe, ordenante/beneficiario
+- Resumen automático: total ingresos, total gastos, saldo
+- Elimina la necesidad de introducir movimientos manualmente
 
 ---
 
@@ -164,6 +206,11 @@ INMOVA incorpora IA (Claude de Anthropic) en múltiples puntos:
 | **Conciliación Bankinter** | Cruce automático de movimientos con pagos SEPA — 0 conciliación manual |
 | **Naves industriales** | Fichas detalladas de Cuba 48-52 (Palencia) y Metal 4 (Valladolid) con specs técnicos |
 | **IPC automático** | Cálculo y aplicación del incremento anual en 1 clic con preview |
+| **Morosidad escalada** | Alertas automáticas en 4 niveles (recordatorio → legal) para 243 inquilinos |
+| **Rentabilidad por m²** | Detectar garajes que rentan por debajo de la media de Espronceda o Tejada |
+| **Costes por edificio** | Saber exactamente cuánto cuesta mantener cada inmueble vs lo que genera |
+| **Vencimientos 12 meses** | Planificar renovaciones: "48 garajes vencen en marzo" |
+| **OCR Bankinter** | Subir extracto PDF y extraer movimientos sin teclear |
 
 ### Para Viroda Inversiones (101 inquilinos, 5 edificios)
 
@@ -174,6 +221,9 @@ INMOVA incorpora IA (Claude de Anthropic) en múltiples puntos:
 | **Mantenimiento preventivo** | Calendario de ITEs, calderas, ascensores con alertas automáticas |
 | **Seguros** | Gestión de pólizas, cotizaciones comparativas, alertas de vencimiento |
 | **Scoring inquilinos** | Verificación de solvencia antes de firmar contrato |
+| **Predicción morosidad** | Score 0-100 por inquilino basado en historial real de pagos |
+| **Optimización rentas** | Detectar viviendas infravaloradas vs media del edificio |
+| **Renovación lote** | Renovar todos los contratos de Silvela o Reina con IPC en 1 clic |
 
 ### Para Vidaro Inversiones (Holding)
 
@@ -186,6 +236,9 @@ INMOVA incorpora IA (Claude de Anthropic) en múltiples puntos:
 | **Facturación intragrupo** | Facturas entre sociedades con asientos contables automáticos |
 | **Mapa de cartera** | Vista geográfica de 17+ inmuebles en 5 ciudades |
 | **Export gestoría** | Datos para Modelo 303 y 347 listos para descargar |
+| **Vencimientos grupo** | Timeline 12 meses de contratos por vencer en todo el grupo |
+| **Costes por edificio** | Margen real de cada inmueble (Piamonte €644K ing. — ¿cuánto coste?) |
+| **Morosidad IA** | Renta total en riesgo del grupo + predicción por inquilino |
 
 ---
 
@@ -264,6 +317,11 @@ El operador de campo puede gestionar incidencias, ver órdenes de trabajo y comu
 | Buscar un dato de un inquilino | 5-10 minutos |
 | Preparar datos para gestoría (303/347) | 1-2 días/trimestre |
 | Comparar rendimiento Rovida vs Viroda | Horas (manual) |
+| Detectar inquilinos morosos | Revisar uno a uno (horas) |
+| Saber qué garajes rentan bajo | Comparar en Excel (horas) |
+| Introducir extracto bancario | Teclear línea a línea (2-3h) |
+| Saber coste real por edificio | Cruzar múltiples fuentes (días) |
+| Planificar renovaciones del año | Revisar cada contrato (día) |
 
 ### Con INMOVA
 
@@ -275,8 +333,13 @@ El operador de campo puede gestionar incidencias, ver órdenes de trabajo y comu
 | Buscar un dato de un inquilino | 3 segundos (buscador global) |
 | Preparar datos para gestoría | 1 clic (export API) |
 | Comparar rendimiento Rovida vs Viroda | Siempre visible (dashboard) |
+| Detectar inquilinos morosos | Automático (IA score 0-100 + alertas escaladas) |
+| Saber qué garajes rentan bajo | 1 clic (€/m² + detección automática) |
+| Introducir extracto bancario | Subir PDF → IA extrae todo (30 seg) |
+| Saber coste real por edificio | Siempre visible (margen por edificio) |
+| Planificar renovaciones del año | Calendario 12 meses automático |
 
-**Ahorro estimado: 40-60 horas/mes** en tareas administrativas.
+**Ahorro estimado: 60-80 horas/mes** en tareas administrativas.
 
 ---
 
