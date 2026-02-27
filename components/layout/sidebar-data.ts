@@ -197,6 +197,8 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/media-estancia/scoring': 'media_estancia',
   '/media-estancia/analytics': 'media_estancia',
   '/media-estancia/configuracion': 'media_estancia',
+  '/renovaciones-contratos': 'contratos',
+  '/mantenimiento-pro': 'mantenimiento',
   '/valoraciones': 'valoraciones',
   '/publicaciones': 'publicaciones',
   '/screening': 'screening',
@@ -566,12 +568,7 @@ const alquilerResidencialItems = [
     icon: Shield,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
-  {
-    name: 'Valoración IA',
-    href: '/valoracion-ia',
-    icon: Brain,
-    roles: ['super_admin', 'administrador', 'gestor'],
-  },
+  // Valoración IA eliminada de aquí — se accede desde Holding/Grupo (evitar duplicado)
   {
     name: 'Seguros',
     href: '/seguros',
@@ -953,18 +950,7 @@ const patrimonioTerciarioNavItems = [
     icon: UserPlus,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
-  {
-    name: 'Seguros',
-    href: '/seguros',
-    icon: Shield,
-    roles: ['super_admin', 'administrador', 'gestor'],
-    subItems: [
-      { name: 'Pólizas', href: '/seguros', icon: Shield },
-      { name: 'Cotizaciones', href: '/seguros/cotizaciones', icon: FileText },
-      { name: 'Proveedores', href: '/seguros/proveedores', icon: Building2 },
-      { name: 'Análisis', href: '/seguros/analisis', icon: BarChart3 },
-    ],
-  },
+  // Seguros eliminado de aquí — se gestiona desde Documentos y Legal (evitar duplicado x3)
 ];
 
 // 2.6.1 ESPACIOS FLEXIBLES (Coworking, Salas de Reuniones, Workspace)
@@ -1341,6 +1327,16 @@ const finanzasNavItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
+    name: 'Renovaciones',
+    href: '/renovaciones-contratos',
+    icon: FileSignature,
+    roles: ['super_admin', 'administrador', 'gestor'],
+    subItems: [
+      { name: 'Renovar en Lote', href: '/renovaciones-contratos', icon: ClipboardList },
+      { name: 'Actualización IPC', href: '/renovaciones-contratos?ipc=true', icon: TrendingUp },
+    ],
+  },
+  {
     name: 'Gastos',
     href: '/gastos',
     icon: Euro,
@@ -1433,6 +1429,10 @@ const operacionesNavItems = [
     href: '/mantenimiento',
     icon: Wrench,
     roles: ['super_admin', 'administrador', 'gestor', 'operador'],
+    subItems: [
+      { name: 'Solicitudes', href: '/mantenimiento', icon: Wrench },
+      { name: 'Preventivo', href: '/mantenimiento-pro', icon: Calendar },
+    ],
   },
   {
     name: 'Proveedores',
