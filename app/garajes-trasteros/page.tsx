@@ -297,6 +297,67 @@ export default function GarajesTrasterosPage() {
               </BreadcrumbList>
             </Breadcrumb>
 
+            {/* KPIs Dashboard */}
+            {(() => {
+              const totalPlazas = units.length;
+              const ocupadas = units.filter(u => u.estado === 'ocupada').length;
+              const disponibles = units.filter(u => u.estado === 'disponible').length;
+              const ocupacionPct = totalPlazas > 0 ? (ocupadas / totalPlazas) * 100 : 0;
+              const rentaTotal = units.filter(u => u.estado === 'ocupada').reduce((s, u) => s + u.rentaMensual, 0);
+              const rentaMedia = ocupadas > 0 ? rentaTotal / ocupadas : 0;
+              const garajes = units.filter(u => u.tipo === 'garaje');
+              const trasteros = units.filter(u => u.tipo === 'trastero');
+              const edificiosGaraje = [...new Set(units.map(u => u.building.nombre))];
+              const fmtEur = (n: number) => new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
+
+              return (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                    <Card><CardContent className="pt-3 pb-2">
+                      <div className="text-xs text-gray-500">Total plazas</div>
+                      <div className="text-xl font-bold">{totalPlazas}</div>
+                      <div className="text-xs text-gray-400">{garajes.length} garajes · {trasteros.length} trasteros</div>
+                    </CardContent></Card>
+                    <Card><CardContent className="pt-3 pb-2">
+                      <div className="text-xs text-gray-500">Ocupadas</div>
+                      <div className="text-xl font-bold text-green-600">{ocupadas}</div>
+                      <div className="text-xs text-green-500">{ocupacionPct.toFixed(1)}% ocupación</div>
+                    </CardContent></Card>
+                    <Card><CardContent className="pt-3 pb-2">
+                      <div className="text-xs text-gray-500">Disponibles</div>
+                      <div className="text-xl font-bold text-orange-600">{disponibles}</div>
+                    </CardContent></Card>
+                    <Card><CardContent className="pt-3 pb-2">
+                      <div className="text-xs text-gray-500">Renta mensual</div>
+                      <div className="text-xl font-bold text-indigo-600">{fmtEur(rentaTotal)}</div>
+                    </CardContent></Card>
+                    <Card><CardContent className="pt-3 pb-2">
+                      <div className="text-xs text-gray-500">Renta media/plaza</div>
+                      <div className="text-xl font-bold">{fmtEur(rentaMedia)}</div>
+                      <div className="text-xs text-gray-400">{edificiosGaraje.length} edificios</div>
+                    </CardContent></Card>
+                  </div>
+
+                  {/* Mini desglose por edificio */}
+                  {edificiosGaraje.length > 1 && (
+                    <div className="flex flex-wrap gap-2">
+                      {edificiosGaraje.map(nombre => {
+                        const edUnits = units.filter(u => u.building.nombre === nombre);
+                        const edOcupadas = edUnits.filter(u => u.estado === 'ocupada').length;
+                        const edOcupPct = edUnits.length > 0 ? (edOcupadas / edUnits.length) * 100 : 0;
+                        return (
+                          <Badge key={nombre} variant="outline" className="text-xs py-1 px-2">
+                            <Building2 className="h-3 w-3 mr-1" />
+                            {nombre}: {edOcupadas}/{edUnits.length} ({edOcupPct.toFixed(0)}%)
+                          </Badge>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
