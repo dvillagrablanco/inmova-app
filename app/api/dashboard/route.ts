@@ -408,13 +408,31 @@ export async function GET(request: NextRequest) {
       // BankTransaction puede no tener datos
     }
 
-    // Cálculos de KPIs - cascada: Payment → AccountingTransaction → BankTransaction
-    let ingresosTotalesMensuales = fallbackIngresos;
-    if (ingresosTotalesMensuales === 0 && accountingMonthTotals.ingresos > 0) {
-      ingresosTotalesMensuales = accountingMonthTotals.ingresos;
-    }
-    if (ingresosTotalesMensuales === 0 && bankTxIncome > 0) {
-      ingresosTotalesMensuales = bankTxIncome;
+    // Cálculos de KPIs - Usar renta de contratos activos como fuente principal (fiable)
+    // Los pagos y transacciones bancarias pueden contener duplicados o movimientos no-alquiler
+    const activeContractsRent = await prisma.contract.aggregate({
+      where: {
+        unit: { building: { companyId: companyFilter } },
+        estado: 'activo',
+      },
+      _sum: { rentaMensual: true },
+    });
+    
+    // Renta mensual esperada = suma de rentas de contratos activos
+    const rentaMensualEsperada = Number(activeContractsRent._sum.rentaMensual) || 0;
+    
+    // Ingresos totales: usar renta esperada como base fiable
+    // Solo usar pagos/contabilidad/banco si NO hay contratos (empresa sin datos de contratos)
+    let ingresosTotalesMensuales = rentaMensualEsperada;
+    if (ingresosTotalesMensuales === 0) {
+      // Fallback para empresas sin contratos: usar pagos o contabilidad
+      ingresosTotalesMensuales = fallbackIngresos;
+      if (ingresosTotalesMensuales === 0 && accountingMonthTotals.ingresos > 0) {
+        ingresosTotalesMensuales = accountingMonthTotals.ingresos;
+      }
+      if (ingresosTotalesMensuales === 0 && bankTxIncome > 0) {
+        ingresosTotalesMensuales = bankTxIncome;
+      }
     }
 
     let gastosTotales = fallbackGastos;
