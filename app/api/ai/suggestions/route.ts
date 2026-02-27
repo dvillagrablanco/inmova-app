@@ -82,6 +82,11 @@ async function generateSuggestions({
   const in30days = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
   const in90days = new Date(today.getTime() + 90 * 24 * 60 * 60 * 1000);
 
+  const cid = companyId || undefined;
+  const companyWhere = { companyId: cid };
+  const buildingScope = { building: { companyId: cid } };
+  const contractScope = { unit: { building: { companyId: cid } } };
+
   const [
     buildingsCount,
     tenantsCount,
@@ -93,22 +98,36 @@ async function generateSuggestions({
     vacantUnits,
     pendingMaintenance,
   ] = await Promise.all([
-    prisma.building.count({ where: { companyId: companyId || undefined } }),
-    prisma.tenant.count({ where: { companyId: companyId || undefined } }),
-    prisma.contract.count({ where: { unit: { building: { companyId: companyId || undefined } }, estado: 'activo' } }),
-    prisma.contract.count({ where: { unit: { building: { companyId: companyId || undefined } }, estado: 'activo', fechaFin: { gte: today, lte: in30days } } }),
-    prisma.contract.count({ where: { unit: { building: { companyId: companyId || undefined } }, estado: 'activo', fechaFin: { gte: today, lte: in90days } } }),
-    prisma.payment.count({ where: { contract: { unit: { building: { companyId: companyId || undefined } } }, estado: 'pendiente' } }),
-    prisma.payment.count({ where: { contract: { unit: { building: { companyId: companyId || undefined } } }, estado: 'atrasado' } }),
-    prisma.unit.count({ where: { building: { companyId: companyId || undefined }, isDemo: false }, estado: 'disponible' } }),
-    prisma.maintenanceRequest.count({ where: { unit: { building: { companyId: companyId || undefined } }, estado: 'pendiente' } }),
+    prisma.building.count({ where: companyWhere }),
+    prisma.tenant.count({ where: companyWhere }),
+    prisma.contract.count({
+      where: { ...contractScope, estado: 'activo' },
+    }),
+    prisma.contract.count({
+      where: { ...contractScope, estado: 'activo', fechaFin: { gte: today, lte: in30days } },
+    }),
+    prisma.contract.count({
+      where: { ...contractScope, estado: 'activo', fechaFin: { gte: today, lte: in90days } },
+    }),
+    prisma.payment.count({
+      where: { contract: contractScope, estado: 'pendiente' },
+    }),
+    prisma.payment.count({
+      where: { contract: contractScope, estado: 'atrasado' },
+    }),
+    prisma.unit.count({
+      where: { ...buildingScope, estado: 'disponible' },
+    }),
+    prisma.maintenanceRequest.count({
+      where: { ...contractScope, estado: 'pendiente' },
+    }),
   ]);
 
   // Obtener edificios con contratos por vencer para sugerencias específicas
   let expiringByBuilding: Array<{ nombre: string; count: number }> = [];
   try {
     const expiring = await prisma.contract.findMany({
-      where: { unit: { building: { companyId: companyId || undefined } }, estado: 'activo', fechaFin: { gte: today, lte: in90days } },
+      where: { ...contractScope, estado: 'activo', fechaFin: { gte: today, lte: in90days } },
       select: { unit: { select: { building: { select: { nombre: true } } } } },
     });
     const byBuilding: Record<string, number> = {};
