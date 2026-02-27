@@ -60,7 +60,7 @@ export function LandingPageContent() {
         {/* Footer */}
         <Footer />
 
-        {/* Chatbot y WhatsApp flotantes */}
+        {/* Chatbot flotante */}
         <LandingChatbot />
       </main>
     </>
