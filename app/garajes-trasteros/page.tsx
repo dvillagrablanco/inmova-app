@@ -443,6 +443,64 @@ export default function GarajesTrasterosPage() {
               </Card>
             </div>
 
+            {/* Vista Visual de Plazas por Edificio */}
+            {units.length > 0 && (
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Building2 className="h-4 w-4" />
+                    Mapa Visual de Plazas
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {[...new Set(units.map(u => u.building.nombre))].map(edificio => {
+                      const edUnits = units.filter(u => u.building.nombre === edificio);
+                      const plantas = [...new Set(edUnits.map(u => u.planta ?? 0))].sort((a, b) => a - b);
+
+                      return (
+                        <div key={edificio}>
+                          <div className="text-xs font-semibold text-gray-700 mb-1">{edificio}</div>
+                          {plantas.map(planta => {
+                            const plantaUnits = edUnits
+                              .filter(u => (u.planta ?? 0) === planta)
+                              .sort((a, b) => a.numero.localeCompare(b.numero, 'es', { numeric: true }));
+                            return (
+                              <div key={planta} className="mb-2">
+                                <div className="text-[10px] text-gray-400 mb-0.5">Planta {planta}</div>
+                                <div className="flex flex-wrap gap-1">
+                                  {plantaUnits.map(u => (
+                                    <div
+                                      key={u.id}
+                                      title={`${u.numero} — ${u.estado === 'ocupada' ? u.tenant?.nombreCompleto || 'Ocupada' : 'Disponible'} — ${u.rentaMensual}€`}
+                                      className={`w-7 h-7 rounded text-[8px] font-bold flex items-center justify-center cursor-default ${
+                                        u.estado === 'ocupada'
+                                          ? 'bg-green-500 text-white'
+                                          : u.estado === 'en_mantenimiento'
+                                            ? 'bg-orange-400 text-white'
+                                            : 'bg-gray-200 text-gray-600'
+                                      }`}
+                                    >
+                                      {u.numero.replace(/[^\d]/g, '').slice(-3) || u.numero.slice(0, 3)}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="flex items-center gap-4 mt-3 text-[10px] text-gray-500">
+                    <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-green-500 inline-block" /> Ocupada</span>
+                    <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-gray-200 inline-block" /> Disponible</span>
+                    <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-orange-400 inline-block" /> Mantenimiento</span>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Filtros Avanzados */}
             <Card>
               <CardContent className="pt-6">
