@@ -39,7 +39,11 @@ export async function GET(request: NextRequest) {
 
     const units = await prisma.unit.findMany({
       where: {
-        building: { companyId: scope.activeCompanyId, isDemo: false },
+        building: {
+          companyId: scope.activeCompanyId,
+          isDemo: false,
+          NOT: { etiquetas: { has: 'uso_propio_socios' } },
+        },
         estado: 'ocupada',
         rentaMensual: { gt: 0 },
       },
