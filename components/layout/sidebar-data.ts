@@ -1488,7 +1488,7 @@ const holdingGrupoNavItems = [
     roles: ['super_admin', 'administrador'],
   },
   {
-    name: 'Analisis de Activos',
+    name: 'Análisis de Activos',
     href: '/inversiones/analisis',
     icon: Calculator,
     roles: ['super_admin', 'administrador'],
@@ -1515,7 +1515,7 @@ const holdingGrupoNavItems = [
         icon: MessageSquare,
       },
       {
-        name: 'Extraccion Documental',
+        name: 'Extracción Documental',
         href: '/inversiones/analisis?tab=ia',
         icon: Scan,
       },
@@ -1527,7 +1527,7 @@ const holdingGrupoNavItems = [
     ],
   },
   {
-    name: 'Valoracion IA',
+    name: 'Valoración IA',
     href: '/valoracion-ia',
     icon: Brain,
     roles: ['super_admin', 'administrador'],

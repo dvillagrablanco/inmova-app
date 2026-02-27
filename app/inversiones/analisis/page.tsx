@@ -195,7 +195,7 @@ export default function AnalisisInversionPage() {
     try {
       const res = await fetch(`/api/investment/analysis/${id}`);
       if (!res.ok) {
-        toast.error('Error cargando analisis');
+        toast.error('Error cargando análisis');
         return;
       }
       const { data } = await res.json();
@@ -263,7 +263,7 @@ export default function AnalisisInversionPage() {
           cuotaAnual: (data.cuotaHipotecaMensual || 0) * 12,
         });
       }
-      toast.success('Analisis cargado');
+      toast.success('Análisis cargado');
     } catch {
       toast.error('Error cargando');
     }
@@ -271,7 +271,7 @@ export default function AnalisisInversionPage() {
 
   const handleExport = (format: 'csv' | 'json') => {
     if (!savedId) {
-      toast.error('Primero calcula y guarda el analisis');
+      toast.error('Primero calcula y guarda el análisis');
       return;
     }
     window.open(`/api/investment/analysis/${savedId}/export?format=${format}`, '_blank');
@@ -336,7 +336,7 @@ export default function AnalisisInversionPage() {
       }
       formData.append(
         'context',
-        `Analisis de inversion para grupo societario. Extraer rent roll con viviendas, garajes, locales, trasteros. Datos del activo y gastos.`
+        `Análisis de inversión para grupo societario. Extraer rent roll con viviendas, garajes, locales, trasteros. Datos del activo y gastos.`
       );
 
       const res = await fetch('/api/investment/analysis/ai-extract', {
@@ -346,7 +346,7 @@ export default function AnalisisInversionPage() {
 
       if (!res.ok) {
         const err = await res.json();
-        toast.error(err.error || 'Error en analisis IA');
+        toast.error(err.error || 'Error en análisis IA');
         return;
       }
 
@@ -642,7 +642,7 @@ export default function AnalisisInversionPage() {
         .then((d) => {
           if (d?.data) setSavedAnalyses(d.data);
         });
-      toast.success('Analisis calculado y guardado');
+      toast.success('Análisis calculado y guardado');
     } catch {
       toast.error('Error de conexion');
     } finally {
@@ -654,7 +654,7 @@ export default function AnalisisInversionPage() {
     <AuthenticatedLayout>
       <div className="space-y-6 p-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Analisis de Inversion</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Análisis de Inversión</h1>
           <p className="text-gray-500">
             Introduce el rent roll y datos del activo para calcular rentabilidad y sensibilidad
           </p>
@@ -723,13 +723,13 @@ export default function AnalisisInversionPage() {
           <TabsContent value="guardados">
             <Card>
               <CardHeader>
-                <CardTitle>Analisis Guardados</CardTitle>
-                <CardDescription>Selecciona un analisis para cargarlo o exportarlo</CardDescription>
+                <CardTitle>Análisis Guardados</CardTitle>
+                <CardDescription>Selecciona un análisis para cargarlo o exportarlo</CardDescription>
               </CardHeader>
               <CardContent>
                 {savedAnalyses.length === 0 ? (
                   <p className="text-gray-500 text-center py-8">
-                    No hay analisis guardados. Crea uno nuevo desde las pestanas.
+                    No hay análisis guardados. Crea uno nuevo desde las pestañas.
                   </p>
                 ) : (
                   <div className="space-y-2">
@@ -1734,7 +1734,7 @@ Estado: Reformado 2018"
                     <Textarea
                       value={aiText}
                       onChange={(e) => setAiText(e.target.value)}
-                      placeholder="Pega aqui el rent roll, datos del activo, o cualquier informacion relevante...
+                      placeholder="Pega aquí el rent roll, datos del activo, o cualquier información relevante...
 
 Ejemplo:
 Edificio Calle Mayor 12, Madrid
@@ -1921,7 +1921,7 @@ Comunidad: 180 EUR/mes"
                       disabled={aiLoading}
                       onClick={async () => {
                         if (!direccion) {
-                          toast.error('Introduce direccion primero');
+                          toast.error('Introduce dirección primero');
                           return;
                         }
                         setAiLoading(true);
@@ -2598,7 +2598,7 @@ Comunidad: 180 EUR/mes"
                   {/* Inversion */}
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-lg">Inversion</CardTitle>
+                      <CardTitle className="text-lg">Inversión</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2 text-sm">
                       <div className="flex justify-between">
@@ -2614,7 +2614,7 @@ Comunidad: 180 EUR/mes"
                         <span>{fmt(results.totalCapex)}</span>
                       </div>
                       <div className="flex justify-between border-t pt-2 font-bold">
-                        <span>Inversion total</span>
+                        <span>Inversión total</span>
                         <span>{fmt(results.inversionTotal)}</span>
                       </div>
                       {usaFinanciacion && (
@@ -2661,7 +2661,7 @@ Comunidad: 180 EUR/mes"
                             <span>{fmt(results.detalleOpex.mantenimiento || 0)}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-gray-500">Gestion admin</span>
+                            <span className="text-gray-500">Gestión admin</span>
                             <span>{fmt(results.detalleOpex.gestionAdmin || 0)}</span>
                           </div>
                           <div className="flex justify-between">
@@ -2860,7 +2860,7 @@ Comunidad: 180 EUR/mes"
                         <tr className="border-b bg-gray-50">
                           <th className="text-left p-3 font-medium">Precio</th>
                           <th className="text-right p-3 font-medium">Dto.</th>
-                          <th className="text-right p-3 font-medium">Inversion</th>
+                          <th className="text-right p-3 font-medium">Inversión</th>
                           <th className="text-right p-3 font-medium">Capital propio</th>
                           {usaFinanciacion && (
                             <th className="text-right p-3 font-medium">Cuota/mes</th>

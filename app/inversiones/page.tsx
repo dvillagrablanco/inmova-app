@@ -182,7 +182,7 @@ export default function InversionesPage() {
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
                   <Percent className="h-4 w-4" />
-                  Ocupacion / LTV
+                  Ocupación / LTV
                 </div>
                 <div className="text-2xl font-bold text-gray-900">{p.averageOccupancy}%</div>
                 <div className="text-xs text-gray-400">
@@ -210,7 +210,7 @@ export default function InversionesPage() {
             </Card>
             <Card className={p.revalorizacion >= 0 ? 'border-green-200' : 'border-red-200'}>
               <CardContent className="p-4">
-                <div className="text-xs text-gray-500 mb-1">Revalorizacion</div>
+                <div className="text-xs text-gray-500 mb-1">Revalorización</div>
                 <div className={`text-lg font-bold ${p.revalorizacion >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                   {p.revalorizacion >= 0 ? '+' : ''}{formatCurrency(p.revalorizacion)}
                 </div>
@@ -257,7 +257,7 @@ export default function InversionesPage() {
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <div className="flex justify-between">
-                      <span className="text-gray-500">Inversion total</span>
+                      <span className="text-gray-500">Inversión total</span>
                       <span className="font-medium">{formatCurrency(p.totalInvestment)}</span>
                     </div>
                     <div className="flex justify-between">
@@ -335,7 +335,7 @@ export default function InversionesPage() {
                         <div className="font-medium text-blue-600">{formatCurrency(company.portfolio.totalValorMercadoUnidades || 0)}</div>
                       </div>
                       <div>
-                        <span className="text-gray-500">Revalorizacion</span>
+                        <span className="text-gray-500">Revalorización</span>
                         <div className={`font-medium ${(company.portfolio.revalorizacion || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                           {(company.portfolio.revalorizacion || 0) >= 0 ? '+' : ''}{formatCurrency(company.portfolio.revalorizacion || 0)}
                           <span className="text-xs ml-1">({(company.portfolio.revalorizacionPct || 0) >= 0 ? '+' : ''}{company.portfolio.revalorizacionPct || 0}%)</span>
@@ -352,7 +352,7 @@ export default function InversionesPage() {
                         </div>
                       </div>
                       <div>
-                        <span className="text-gray-500">Ocupacion</span>
+                        <span className="text-gray-500">Ocupación</span>
                         <div className="font-medium">{company.portfolio.averageOccupancy}%</div>
                       </div>
                     </div>
@@ -362,7 +362,7 @@ export default function InversionesPage() {
               {(!consolidated?.companies || consolidated.companies.length === 0) && (
                 <Card>
                   <CardContent className="p-8 text-center text-gray-500">
-                    No hay sociedades configuradas. Configura el grupo en Configuracion &gt; Empresas.
+                    No hay sociedades configuradas. Configura el grupo en Configuración &gt; Empresas.
                   </CardContent>
                 </Card>
               )}

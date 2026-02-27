@@ -36,7 +36,7 @@ export default function ExportGestoriaPage() {
     {
       id: 'amortizaciones',
       name: 'Cuadro de Amortizaciones',
-      description: 'Amortizacion anual por inmueble (3% construccion para IS)',
+      description: 'Amortización anual por inmueble (3% construcción para IS)',
       icon: Building2,
       format: 'CSV',
     },
@@ -81,7 +81,7 @@ export default function ExportGestoriaPage() {
       <div className="space-y-6 p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Export para Gestoria</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Export para Gestoría</h1>
             <p className="text-gray-500">Datos contables y fiscales para tu asesor</p>
           </div>
           <Select value={year} onValueChange={setYear}>

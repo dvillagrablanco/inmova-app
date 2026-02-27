@@ -86,7 +86,7 @@ export default function ComparativaPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b bg-gray-50">
-                    <th className="text-left p-4 font-medium text-gray-500">Metrica</th>
+                    <th className="text-left p-4 font-medium text-gray-500">Métrica</th>
                     {companies.map(c => (
                       <th key={c.companyId} className="text-right p-4 font-medium text-gray-900">
                         <div>{c.companyName}</div>
@@ -103,7 +103,7 @@ export default function ComparativaPage() {
                     ))}
                   </tr>
                   <tr className="bg-gray-50/50">
-                    <td className="p-4 text-gray-500">Inversion total</td>
+                    <td className="p-4 text-gray-500">Inversión total</td>
                     {companies.map(c => (
                       <td key={c.companyId} className="p-4 text-right font-medium">{fmt(c.portfolio.totalInvestment)}</td>
                     ))}
@@ -146,7 +146,7 @@ export default function ComparativaPage() {
                     ))}
                   </tr>
                   <tr className="bg-gray-50/50">
-                    <td className="p-4 text-gray-500 flex items-center gap-2"><Percent className="h-4 w-4" /> Ocupacion</td>
+                    <td className="p-4 text-gray-500 flex items-center gap-2"><Percent className="h-4 w-4" /> Ocupación</td>
                     {companies.map(c => (
                       <td key={c.companyId} className="p-4 text-right font-medium">
                         {c.portfolio.averageOccupancy}%
@@ -173,7 +173,7 @@ export default function ComparativaPage() {
         {companies.length === 0 && (
           <Card>
             <CardContent className="p-8 text-center text-gray-500">
-              No hay sociedades filiales. Configura Viroda y Rovida como filiales de Vidaro en Configuracion &gt; Empresas.
+              No hay sociedades filiales. Configura Viroda y Rovida como filiales de Vidaro en Configuración &gt; Empresas.
             </CardContent>
           </Card>
         )}

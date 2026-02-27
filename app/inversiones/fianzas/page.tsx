@@ -37,7 +37,7 @@ export default function FianzasPage() {
     new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
 
   const estadoBadge: Record<string, { color: string; icon: any; label: string }> = {
-    pendiente_deposito: { color: 'bg-yellow-100 text-yellow-700', icon: Clock, label: 'Pendiente deposito' },
+    pendiente_deposito: { color: 'bg-yellow-100 text-yellow-700', icon: Clock, label: 'Pendiente depósito' },
     depositada: { color: 'bg-green-100 text-green-700', icon: CheckCircle2, label: 'Depositada' },
     devuelta: { color: 'bg-blue-100 text-blue-700', icon: CheckCircle2, label: 'Devuelta' },
     retenida_parcial: { color: 'bg-orange-100 text-orange-700', icon: AlertTriangle, label: 'Retenida parcial' },
@@ -73,7 +73,7 @@ export default function FianzasPage() {
             <Card>
               <CardContent className="p-4">
                 <div className="text-sm text-gray-500 flex items-center gap-1">
-                  <AlertTriangle className="h-4 w-4 text-yellow-500" /> Pendientes deposito
+                  <AlertTriangle className="h-4 w-4 text-yellow-500" /> Pendientes depósito
                 </div>
                 <div className="text-2xl font-bold text-yellow-600">{summary.pendientes}</div>
                 <div className="text-xs text-gray-400">{fmt(summary.totalPendiente)}</div>
@@ -90,7 +90,7 @@ export default function FianzasPage() {
             </Card>
             <Card>
               <CardContent className="p-4">
-                <div className="text-sm text-gray-500">Total en deposito</div>
+                <div className="text-sm text-gray-500">Total en depósito</div>
                 <div className="text-2xl font-bold">{fmt(summary.totalDepositado)}</div>
               </CardContent>
             </Card>

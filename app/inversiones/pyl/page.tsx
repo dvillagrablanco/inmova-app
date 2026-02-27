@@ -109,7 +109,7 @@ export default function PYLConsolidadoPage() {
               <div className="flex justify-between items-center py-2">
                 <span className="flex items-center gap-2 text-gray-500">
                   <Minus className="h-4 w-4" />
-                  Amortizaciones (3% construccion)
+                  Amortizaciones (3% construcción)
                 </span>
                 <span className="text-orange-600">-{fmt(amortizaciones)}</span>
               </div>

@@ -80,7 +80,7 @@ export default function ActivosGrupoPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card>
             <CardContent className="p-4">
-              <div className="text-sm text-gray-500">Inversion Total</div>
+              <div className="text-sm text-gray-500">Inversión Total</div>
               <div className="text-xl font-bold">{fmt(totalInversion)}</div>
             </CardContent>
           </Card>
@@ -92,7 +92,7 @@ export default function ActivosGrupoPage() {
           </Card>
           <Card>
             <CardContent className="p-4">
-              <div className="text-sm text-gray-500">Amortizacion Acumulada</div>
+              <div className="text-sm text-gray-500">Amortización Acumulada</div>
               <div className="text-xl font-bold text-orange-600">{fmt(totalAmortizacion)}</div>
             </CardContent>
           </Card>
