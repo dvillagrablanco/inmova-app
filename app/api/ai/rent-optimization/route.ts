@@ -39,13 +39,10 @@ export async function GET(request: NextRequest) {
     }
 
     // Obtener todas las unidades ocupadas con contrato activo
+    // rentaMensual > 0 excluye unidades de uso propio de socios (renta=0)
     const units = await prisma.unit.findMany({
       where: {
-        building: {
-          companyId: scope.activeCompanyId,
-          isDemo: false,
-          NOT: { etiquetas: { has: 'uso_propio_socios' } },
-        },
+        building: { companyId: scope.activeCompanyId, isDemo: false },
         estado: 'ocupada',
         rentaMensual: { gt: 0 },
       },

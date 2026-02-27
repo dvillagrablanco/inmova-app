@@ -1,17 +1,19 @@
 /**
- * Script: Marcar propiedades de uso propio de los socios
+ * Script: Marcar unidades de uso propio de los socios
  *
- * Estas propiedades NO se alquilan (renta=0, estado=ocupada por los socios).
+ * Estas unidades NO se alquilan (renta=0, estado=ocupada por los socios).
+ * Se identifican por: estado='ocupada' + rentaMensual=0
+ *
  * Deben excluirse de:
  * - Cálculos de rentabilidad y €/m²
- * - Alertas de "unidad sin contrato"
+ * - Alertas de "unidad infravalorada"
  * - Optimización de rentas IA
- * - KPIs de ocupación comercial
+ * - KPIs de ocupación comercial (se cuentan como ocupadas pero sin renta)
  *
- * Propiedades:
- * 1. El Tomillar de Nagüelles, Marbella → ROVIDA S.L.
- * 2. Camilo José Cela, Marbella → VIRODA INVERSIONES S.L.U.
- * 3. Menéndez Pelayo 1D, Palencia → VIRODA INVERSIONES S.L.U.
+ * Unidades de uso propio:
+ * 1. Todas las unidades de "El Tomillar de Nagüelles", Marbella → ROVIDA S.L.
+ * 2. Todas las unidades de "Camilo José Cela", Marbella → VIRODA INVERSIONES S.L.U.
+ * 3. Unidad 1D de "Menéndez Pelayo", Palencia → VIRODA INVERSIONES S.L.U.
  */
 
 import 'dotenv/config';
@@ -20,108 +22,99 @@ async function main() {
   const { PrismaClient } = await import('@prisma/client');
   const prisma = new PrismaClient();
 
-  console.log('=== MARCAR PROPIEDADES DE USO PROPIO ===\n');
-
-  // Patrones de búsqueda para cada propiedad
-  const ownerUseProperties = [
-    {
-      buildingPattern: 'Tomillar',
-      company: 'Rovida',
-      description: 'Casa El Tomillar de Nagüelles, Marbella',
-    },
-    {
-      buildingPattern: 'Camilo',
-      company: 'Viroda',
-      description: 'Camilo José Cela, Marbella',
-    },
-    {
-      buildingPattern: 'Cela',
-      company: 'Viroda',
-      description: 'Camilo José Cela, Marbella (alt)',
-    },
-  ];
+  console.log('=== MARCAR UNIDADES DE USO PROPIO DE SOCIOS ===\n');
 
   let totalUpdated = 0;
 
-  for (const prop of ownerUseProperties) {
-    const buildings = await prisma.building.findMany({
-      where: {
-        nombre: { contains: prop.buildingPattern, mode: 'insensitive' },
-      },
-      include: {
-        units: { select: { id: true, numero: true, estado: true, rentaMensual: true } },
-        company: { select: { nombre: true } },
-      },
-    });
+  // 1. El Tomillar de Nagüelles (Rovida) — todas las unidades
+  console.log('1. El Tomillar de Nagüelles, Marbella (Rovida)');
+  const tomillarBuildings = await prisma.building.findMany({
+    where: { nombre: { contains: 'Tomillar', mode: 'insensitive' } },
+    include: {
+      units: { select: { id: true, numero: true, estado: true, rentaMensual: true } },
+      company: { select: { nombre: true } },
+    },
+  });
 
-    for (const building of buildings) {
-      console.log(`📍 ${building.nombre} (${building.company?.nombre})`);
-      console.log(`   Dirección: ${building.direccion}`);
-      console.log(`   Unidades: ${building.units.length}`);
-
-      // Marcar el edificio con etiqueta de uso propio
-      await prisma.building.update({
-        where: { id: building.id },
-        data: {
-          etiquetas: ['uso_propio_socios'],
-        },
+  for (const b of tomillarBuildings) {
+    console.log(`   Edificio: ${b.nombre} (${b.company?.nombre}) — ${b.units.length} unidades`);
+    for (const u of b.units) {
+      await prisma.unit.update({
+        where: { id: u.id },
+        data: { estado: 'ocupada', rentaMensual: 0 },
       });
-
-      // Marcar todas las unidades como ocupada con renta 0
-      for (const unit of building.units) {
-        await prisma.unit.update({
-          where: { id: unit.id },
-          data: {
-            estado: 'ocupada',
-            rentaMensual: 0,
-          },
-        });
-        console.log(`   ✓ Unidad ${unit.numero}: renta=0, estado=ocupada`);
-        totalUpdated++;
-      }
-      console.log(`   ✓ Edificio marcado con etiqueta uso_propio_socios`);
+      console.log(`   ✓ ${u.numero}: estado=ocupada, renta=0 (uso propio socios)`);
+      totalUpdated++;
     }
   }
 
-  // Menéndez Pelayo 1D específicamente (es una vivienda concreta, no todo el edificio)
-  console.log('\n📍 Menéndez Pelayo 1D, Palencia (Viroda)');
+  // 2. Camilo José Cela (Viroda) — todas las unidades
+  console.log('\n2. Camilo José Cela, Marbella (Viroda)');
+  const celaBuildings = await prisma.building.findMany({
+    where: {
+      OR: [
+        { nombre: { contains: 'Camilo', mode: 'insensitive' } },
+        { nombre: { contains: 'Cela', mode: 'insensitive' } },
+      ],
+    },
+    include: {
+      units: { select: { id: true, numero: true, estado: true, rentaMensual: true } },
+      company: { select: { nombre: true } },
+    },
+  });
+
+  for (const b of celaBuildings) {
+    console.log(`   Edificio: ${b.nombre} (${b.company?.nombre}) — ${b.units.length} unidades`);
+    for (const u of b.units) {
+      await prisma.unit.update({
+        where: { id: u.id },
+        data: { estado: 'ocupada', rentaMensual: 0 },
+      });
+      console.log(`   ✓ ${u.numero}: estado=ocupada, renta=0 (uso propio socios)`);
+      totalUpdated++;
+    }
+  }
+
+  // 3. Menéndez Pelayo 1D (Viroda) — solo la unidad 1D
+  console.log('\n3. Menéndez Pelayo 1D, Palencia (Viroda)');
   const pelayoBuildings = await prisma.building.findMany({
     where: {
       nombre: { contains: 'Pelayo', mode: 'insensitive' },
       company: { nombre: { contains: 'Viroda', mode: 'insensitive' } },
     },
     include: {
-      units: { select: { id: true, numero: true } },
+      units: { select: { id: true, numero: true, estado: true, rentaMensual: true } },
+      company: { select: { nombre: true } },
     },
   });
 
-  for (const building of pelayoBuildings) {
-    // Buscar la unidad 1D específicamente
-    const unit1D = building.units.find(
-      (u) => u.numero === '1D' || u.numero === '1º D' || u.numero === '1ºD' || u.numero.toLowerCase().includes('1d')
+  for (const b of pelayoBuildings) {
+    console.log(`   Edificio: ${b.nombre} (${b.company?.nombre}) — ${b.units.length} unidades`);
+    // Buscar la unidad 1D
+    const unit1D = b.units.find(
+      (u) =>
+        u.numero === '1D' ||
+        u.numero === '1º D' ||
+        u.numero === '1ºD' ||
+        u.numero.toLowerCase() === '1d' ||
+        u.numero === '1º Dcha'
     );
 
     if (unit1D) {
       await prisma.unit.update({
         where: { id: unit1D.id },
-        data: {
-          estado: 'ocupada',
-          rentaMensual: 0,
-        },
+        data: { estado: 'ocupada', rentaMensual: 0 },
       });
-      console.log(`   ✓ Unidad ${unit1D.numero} en ${building.nombre}: marcada como uso propio`);
+      console.log(`   ✓ ${unit1D.numero}: estado=ocupada, renta=0 (uso propio socios)`);
       totalUpdated++;
     } else {
-      console.log(`   ⚠ No encontrada unidad 1D en ${building.nombre}. Unidades: ${building.units.map((u) => u.numero).join(', ')}`);
+      console.log(`   ⚠ No se encontró unidad 1D. Unidades existentes: ${b.units.map((u) => u.numero).join(', ')}`);
+      console.log('   → Revisa manualmente cuál es la unidad correcta');
     }
   }
 
-  console.log(`\n✅ ${totalUpdated} unidades marcadas como uso propio de socios`);
-  console.log('\nEstas unidades se excluirán de:');
-  console.log('  - Cálculos de rentabilidad y €/m²');
-  console.log('  - Alertas de "unidad sin contrato"');
-  console.log('  - Optimización de rentas IA');
-  console.log('  - KPIs de ocupación comercial');
+  console.log(`\n✅ ${totalUpdated} unidades marcadas como uso propio (renta=0, estado=ocupada)`);
+  console.log('\nCriterio de exclusión en APIs: estado=ocupada AND rentaMensual=0');
 
   await prisma.$disconnect();
 }
