@@ -388,8 +388,8 @@ export const SUBSCRIPTION_PLANS: Record<SubscriptionPlanId, SubscriptionPlan> = 
     id: 'starter',
     name: 'Starter',
     description: 'Para propietarios individuales',
-    priceMonthly: 19,
-    priceYearly: 190,
+    priceMonthly: 35,
+    priceYearly: 350,
     limits: {
       maxProperties: 5,
       maxBuildings: 3,
@@ -473,8 +473,8 @@ export const SUBSCRIPTION_PLANS: Record<SubscriptionPlanId, SubscriptionPlan> = 
     id: 'professional',
     name: 'Profesional',
     description: 'Para gestores y pequeñas agencias',
-    priceMonthly: 79,
-    priceYearly: 790,
+    priceMonthly: 59,
+    priceYearly: 590,
     limits: {
       maxProperties: 50,
       maxBuildings: 30,
@@ -528,8 +528,8 @@ export const SUBSCRIPTION_PLANS: Record<SubscriptionPlanId, SubscriptionPlan> = 
     id: 'business',
     name: 'Business',
     description: 'Para agencias y gestores profesionales',
-    priceMonthly: 149,
-    priceYearly: 1490,
+    priceMonthly: 129,
+    priceYearly: 1290,
     limits: {
       maxProperties: 200,
       maxBuildings: 100,
@@ -596,8 +596,8 @@ export const SUBSCRIPTION_PLANS: Record<SubscriptionPlanId, SubscriptionPlan> = 
     id: 'enterprise',
     name: 'Enterprise',
     description: 'Para grandes carteras y SOCIMIs',
-    priceMonthly: 499,
-    priceYearly: 4990,
+    priceMonthly: 299,
+    priceYearly: 2990,
     limits: {
       maxProperties: -1, // Ilimitado
       maxBuildings: -1,

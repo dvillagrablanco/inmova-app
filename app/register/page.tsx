@@ -41,7 +41,7 @@ import {
 // Información de cupones disponibles
 const COUPON_INFO: Record<string, { nombre: string; descuento: string; plan: string; color: string }> = {
   'STARTER26': {
-    nombre: '¡Empieza a €17/mes!',
+    nombre: '¡Empieza a €17,50/mes!',
     descuento: '50% dto. 3 meses',
     plan: 'Starter',
     color: 'from-amber-500 to-orange-500',

@@ -28,7 +28,7 @@ const ofertas = [
     gradient: 'from-amber-500 via-orange-500 to-red-500',
     price: {
       original: '€35',
-      discounted: '€17',
+      discounted: '€17,50',
       period: '/mes (3 meses)'
     },
     savings: 'Ahorras €54',
@@ -223,7 +223,7 @@ export default function OfertasPage() {
                 <p className="text-gray-500 text-sm mb-4">1-5 propiedades</p>
                 <div className="mb-4">
                   <span className="text-gray-400 line-through text-xl">€35/mes</span>
-                  <div className="text-3xl font-black text-amber-600">€17/mes</div>
+                  <div className="text-3xl font-black text-amber-600">€17,50/mes</div>
                   <span className="text-sm text-amber-700">3 primeros meses</span>
                 </div>
                 <Badge className="bg-amber-200 text-amber-800">STARTER26</Badge>

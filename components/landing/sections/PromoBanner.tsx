@@ -23,7 +23,7 @@ const campaigns: PromoCampaign[] = [
   {
     id: 'starter26',
     code: 'STARTER26',
-    title: 'Empieza desde €17/mes',
+    title: 'Empieza desde €17,50/mes',
     subtitle: 'Plan Starter al 50% los 3 primeros meses',
     description: 'Pasa del Excel a gestión profesional. Contratos digitales, cobros automáticos y portal de inquilinos incluidos.',
     cta: 'Ver oferta',
@@ -106,7 +106,7 @@ export function PromoBanner() {
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,0.5),transparent_70%)] animate-pulse"></div>
             </div>
 
-            <div className="relative flex flex-col md:flex-row items-center justify-between gap-6 p-8 md:p-12">
+            <div className="relative flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6 p-5 sm:p-8 md:p-12">
               {/* Contenido */}
               <div className="flex-1 text-white space-y-4">
                 <div className="flex items-center gap-3">
@@ -117,17 +117,17 @@ export function PromoBanner() {
                     <Badge className="mb-2 bg-white/30 text-white border-white/50 backdrop-blur-sm px-3 py-1 text-xs font-bold">
                       Código: {current.code}
                     </Badge>
-                    <h3 className="text-3xl md:text-4xl font-black">
+                    <h3 className="text-2xl sm:text-3xl md:text-4xl font-black">
                       {current.title}
                     </h3>
                   </div>
                 </div>
                 
-                <p className="text-2xl md:text-3xl font-bold opacity-95">
+                <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold opacity-95">
                   {current.subtitle}
                 </p>
                 
-                <p className="text-base md:text-lg opacity-90 max-w-2xl leading-relaxed">
+                <p className="text-sm sm:text-base md:text-lg opacity-90 max-w-2xl leading-relaxed">
                   {current.description}
                 </p>
 
