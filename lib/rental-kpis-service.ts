@@ -265,15 +265,25 @@ export async function calculateRentalKPIs(companyId: string): Promise<RentalKPIs
   // CALCULAR KPIs FINANCIEROS
   // ============================================
   
-  // Ingresos del mes actual
+  // Ingresos del mes actual - usar payments reales o renta esperada de contratos
   const currentMonthPayments = payments.filter(p => 
     new Date(p.fechaVencimiento) >= currentMonthStart &&
     new Date(p.fechaVencimiento) <= currentMonthEnd &&
     p.estado === 'pagado'
   );
-  const monthlyGrossIncome = currentMonthPayments.reduce(
+  const monthlyGrossIncomeFromPayments = currentMonthPayments.reduce(
     (sum, p) => sum + Number(p.monto || 0), 0
   );
+  
+  // Renta mensual esperada de contratos activos (fuente fiable)
+  const expectedMonthlyRent = activeContracts.reduce(
+    (sum, c) => sum + Number(c.rentaMensual || 0), 0
+  );
+  
+  // Usar payments si hay, sino usar renta esperada de contratos activos
+  const monthlyGrossIncome = monthlyGrossIncomeFromPayments > 0
+    ? monthlyGrossIncomeFromPayments
+    : expectedMonthlyRent;
   
   // Gastos del mes actual
   const currentMonthExpenses = expenses.filter(e =>
@@ -424,9 +434,12 @@ export async function calculateRentalKPIs(companyId: string): Promise<RentalKPIs
     new Date(p.fechaVencimiento) <= previousMonthEnd &&
     p.estado === 'pagado'
   );
-  const previousMonthIncome = previousMonthPayments.reduce(
+  let previousMonthIncome = previousMonthPayments.reduce(
     (sum, p) => sum + Number(p.monto || 0), 0
   );
+  if (previousMonthIncome === 0 && expectedMonthlyRent > 0) {
+    previousMonthIncome = expectedMonthlyRent;
+  }
   
   const previousMonthExpensesTotal = expenses
     .filter(e =>
@@ -456,13 +469,18 @@ export async function calculateRentalKPIs(companyId: string): Promise<RentalKPIs
     const monthStart = startOfMonth(monthDate);
     const monthEnd = endOfMonth(monthDate);
     
-    const monthIncome = payments
+    let monthIncome = payments
       .filter(p =>
         new Date(p.fechaVencimiento) >= monthStart &&
         new Date(p.fechaVencimiento) <= monthEnd &&
         p.estado === 'pagado'
       )
       .reduce((sum, p) => sum + Number(p.monto || 0), 0);
+    
+    // Fallback: si no hay payments pero hay contratos activos, usar renta esperada
+    if (monthIncome === 0 && expectedMonthlyRent > 0) {
+      monthIncome = expectedMonthlyRent;
+    }
     
     const monthExpenses = expenses
       .filter(e =>
