@@ -43,9 +43,21 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const activo = searchParams.get('activo');
 
+    // Multi-company scope
+    const { resolveCompanyScope } = await import('@/lib/company-scope');
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: (session.user as any).role,
+      primaryCompanyId: (session.user as any).companyId,
+      request,
+    });
+    const companyFilter = scope.scopeCompanyIds.length > 1
+      ? { in: scope.scopeCompanyIds }
+      : scope.activeCompanyId || (session.user as any).companyId;
+
     const providers = await prisma.insuranceProvider.findMany({
       where: {
-        companyId: session.user.companyId,
+        companyId: companyFilter,
         ...(activo !== null && activo !== undefined && activo !== ''
           ? { activo: activo === 'true' }
           : {}),
@@ -80,10 +92,19 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validated = createProviderSchema.parse(body);
 
+    // Use active company from scope (not holding)
+    const { resolveCompanyScope } = await import('@/lib/company-scope');
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: (session.user as any).role,
+      primaryCompanyId: (session.user as any).companyId,
+      request,
+    });
+
     const provider = await prisma.insuranceProvider.create({
       data: {
         ...validated,
-        companyId: session.user.companyId,
+        companyId: scope.activeCompanyId || session.user.companyId,
       },
     });
 

@@ -31,6 +31,17 @@ const updateProviderSchema = z.object({
   logoUrl: z.string().optional().nullable(),
 });
 
+async function getCompanyIds(session: any, request: NextRequest) {
+  const { resolveCompanyScope } = await import('@/lib/company-scope');
+  const scope = await resolveCompanyScope({
+    userId: session.user.id as string,
+    role: (session.user as any).role,
+    primaryCompanyId: (session.user as any).companyId,
+    request,
+  });
+  return scope.scopeCompanyIds;
+}
+
 // GET - Get single provider by ID
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -40,6 +51,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     }
 
     const prisma = await getPrisma();
+    const companyIds = await getCompanyIds(session, request);
     const provider = await prisma.insuranceProvider.findUnique({
       where: { id: params.id },
       include: {
@@ -56,7 +68,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ error: 'Proveedor no encontrado' }, { status: 404 });
     }
 
-    if (provider.companyId !== session.user.companyId) {
+    if (!companyIds.includes(provider.companyId)) {
       return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
     }
 
@@ -76,6 +88,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     }
 
     const prisma = await getPrisma();
+    const companyIds = await getCompanyIds(session, request);
 
     const existing = await prisma.insuranceProvider.findUnique({
       where: { id: params.id },
@@ -86,7 +99,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ error: 'Proveedor no encontrado' }, { status: 404 });
     }
 
-    if (existing.companyId !== session.user.companyId) {
+    if (!companyIds.includes(existing.companyId)) {
       return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
     }
 
@@ -120,6 +133,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     }
 
     const prisma = await getPrisma();
+    const companyIds = await getCompanyIds(session, request);
 
     const existing = await prisma.insuranceProvider.findUnique({
       where: { id: params.id },
@@ -130,7 +144,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
       return NextResponse.json({ error: 'Proveedor no encontrado' }, { status: 404 });
     }
 
-    if (existing.companyId !== session.user.companyId) {
+    if (!companyIds.includes(existing.companyId)) {
       return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
     }
 
