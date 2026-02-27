@@ -75,58 +75,105 @@ async function generateSuggestions({
     return { error: 'User not found', status: 404 as const };
   }
 
+  const companyId = user.companyId;
+
+  // Recopilar datos reales de la empresa para contexto enriquecido
+  const today = new Date();
+  const in30days = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+  const in90days = new Date(today.getTime() + 90 * 24 * 60 * 60 * 1000);
+
+  const [
+    buildingsCount,
+    tenantsCount,
+    activeContractsCount,
+    expiringContracts30d,
+    expiringContracts90d,
+    pendingPayments,
+    overduePayments,
+    vacantUnits,
+    pendingMaintenance,
+  ] = await Promise.all([
+    prisma.building.count({ where: { companyId: companyId || undefined } }),
+    prisma.tenant.count({ where: { companyId: companyId || undefined } }),
+    prisma.contract.count({ where: { unit: { building: { companyId: companyId || undefined } }, estado: 'activo' } }),
+    prisma.contract.count({ where: { unit: { building: { companyId: companyId || undefined } }, estado: 'activo', fechaFin: { gte: today, lte: in30days } } }),
+    prisma.contract.count({ where: { unit: { building: { companyId: companyId || undefined } }, estado: 'activo', fechaFin: { gte: today, lte: in90days } } }),
+    prisma.payment.count({ where: { contract: { unit: { building: { companyId: companyId || undefined } } }, estado: 'pendiente' } }),
+    prisma.payment.count({ where: { contract: { unit: { building: { companyId: companyId || undefined } } }, estado: 'atrasado' } }),
+    prisma.unit.count({ where: { building: { companyId: companyId || undefined }, isDemo: false }, estado: 'disponible' } }),
+    prisma.maintenanceRequest.count({ where: { unit: { building: { companyId: companyId || undefined } }, estado: 'pendiente' } }),
+  ]);
+
+  // Obtener edificios con contratos por vencer para sugerencias específicas
+  let expiringByBuilding: Array<{ nombre: string; count: number }> = [];
+  try {
+    const expiring = await prisma.contract.findMany({
+      where: { unit: { building: { companyId: companyId || undefined } }, estado: 'activo', fechaFin: { gte: today, lte: in90days } },
+      select: { unit: { select: { building: { select: { nombre: true } } } } },
+    });
+    const byBuilding: Record<string, number> = {};
+    expiring.forEach((c: any) => {
+      const name = c.unit?.building?.nombre || 'Sin edificio';
+      byBuilding[name] = (byBuilding[name] || 0) + 1;
+    });
+    expiringByBuilding = Object.entries(byBuilding)
+      .map(([nombre, count]) => ({ nombre, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+  } catch { /* skip */ }
+
   const userContext = {
-    buildingsCount: 0,
-    tenantsCount: 0,
-    contractsCount: 0,
+    buildingsCount,
+    tenantsCount,
+    contractsCount: activeContractsCount,
+    expiringContracts30d,
+    expiringContracts90d,
+    pendingPayments,
+    overduePayments,
+    vacantUnits,
+    pendingMaintenance,
+    expiringByBuilding,
     hasCompletedSetup: !!(user.name && user.email),
     ...context,
   };
 
-  const systemPrompt = `Eres un asistente experto en gestión inmobiliaria que genera sugerencias proactivas para mejorar la productividad del usuario.
+  const systemPrompt = `Eres un asistente experto en gestión inmobiliaria patrimonial para sociedades como Rovida (garajes, locales) y Viroda (viviendas residenciales). Generas sugerencias proactivas BASADAS EN DATOS REALES.
 
-Basándote en el contexto del usuario, genera hasta 3 sugerencias relevantes y accionables.
+REGLAS:
+- Solo sugiere acciones que correspondan a datos reales (no inventes números)
+- Prioriza: impagos > contratos por vencer > unidades vacías > mantenimiento
+- Sé específico: menciona edificios, números, importes si los tienes
+- Máximo 4 sugerencias, ordenadas por prioridad
 
-Cada sugerencia debe tener:
-- type: "wizard" (abre un asistente paso a paso), "action" (acción directa), "tip" (consejo), o "warning" (advertencia)
-- title: Título corto y claro
-- description: Descripción de 1-2 líneas
-- priority: "high", "medium", o "low"
-- action: {label: "Texto del botón", route: "/ruta" o callback: "functionName"}
-- dismissable: true/false
+Cada sugerencia DEBE tener:
+- type: "warning" (urgente), "action" (acción directa), "tip" (mejora), "wizard" (proceso guiado)
+- title: Título corto y directo (máx 60 chars)
+- description: Descripción con datos concretos (máx 120 chars)
+- priority: "high", "medium", "low"
+- action: {label: "Texto botón", route: "/ruta-de-la-app"}
+- dismissable: true
 
-Ejemplos de sugerencias:
-- Si no tiene edificios: Sugerir crear el primero
-- Si no tiene inquilinos: Sugerir registrar uno
-- Si tiene edificios pero no contratos: Sugerir crear contrato
-- Si no ha completado el setup: Sugerir completarlo
-- Si tiene muchos pagos pendientes: Avisar de morosidad
-- Si no ha configurado integraciones: Sugerir configurar contabilidad
+Rutas disponibles:
+- /renovaciones-contratos (renovar contratos en lote)
+- /pagos (gestión de pagos)
+- /mantenimiento (incidencias)
+- /edificios (gestión de edificios)
+- /seguros (seguros)
+- /inquilinos (gestión de inquilinos)
+- /finanzas/conciliacion (conciliación bancaria)
 
-Responde en JSON con la siguiente estructura:
-{
-  "suggestions": [
-    {
-      "id": "unique-id",
-      "type": "wizard",
-      "title": "...",
-      "description": "...",
-      "priority": "high",
-      "action": {"label": "...", "route": "..."},
-      "dismissable": true
-    }
-  ]
-}
+Responde SOLO con JSON válido (sin markdown):
+{"suggestions": [...]}`;
 
-Respond with raw JSON only. Do not include code blocks, markdown, or any other formatting.`;
+  const userMessage = `Datos reales de la empresa:
+- ${buildingsCount} edificios, ${tenantsCount} inquilinos, ${activeContractsCount} contratos activos
+- ${expiringContracts30d} contratos vencen en 30 días, ${expiringContracts90d} en 90 días
+- ${pendingPayments} pagos pendientes, ${overduePayments} pagos atrasados
+- ${vacantUnits} unidades vacías sin contrato
+- ${pendingMaintenance} solicitudes de mantenimiento pendientes
+${expiringByBuilding.length > 0 ? `- Contratos por vencer por edificio: ${expiringByBuilding.map(e => `${e.nombre} (${e.count})`).join(', ')}` : ''}
 
-  const userMessage = `Contexto del usuario:
-- Edificios registrados: ${userContext.buildingsCount}
-- Inquilinos registrados: ${userContext.tenantsCount}
-- Contratos activos: ${userContext.contractsCount}
-- Setup completado: ${userContext.hasCompletedSetup ? 'Sí' : 'No'}
-
-Genera sugerencias relevantes para ayudar al usuario.`;
+Genera sugerencias accionables basadas en estos datos.`;
 
   const messages = [
     { role: 'system', content: systemPrompt },
