@@ -30,12 +30,13 @@ const testimonials: Testimonial[] = [
     vertical: 'Alquiler',
     avatar: '/testimonials/maria-garcia.jpg',
     rating: 5,
-    quote: 'Pasé de gestionar todo con Excel y WhatsApp a tener todo organizado en un solo lugar. Los recordatorios automáticos de cobro me han ahorrado muchos dolores de cabeza.',
+    quote: 'Pasé de gestionar todo con Excel y WhatsApp a tener todo organizado en un solo lugar. Los cobros automáticos y las alertas de impago me han quitado un peso enorme de encima.',
     stats: [
       { metric: 'Propiedades', value: '8' },
-      { metric: 'Tiempo ahorrado', value: '5h/sem' }
+      { metric: 'Tiempo ahorrado', value: '5h/sem' },
+      { metric: 'Impagos', value: '0' },
     ],
-    highlight: 'Todo en un solo lugar'
+    highlight: 'Cobros en piloto automático'
   },
   {
     id: '2',
@@ -45,42 +46,77 @@ const testimonials: Testimonial[] = [
     vertical: 'Gestión',
     avatar: '/testimonials/javier-martinez.jpg',
     rating: 5,
-    quote: 'Mis clientes propietarios ahora pueden ver sus informes cuando quieran desde su portal. Ya no tengo que enviar emails con PDFs cada mes. Me ha liberado mucho tiempo.',
+    quote: 'Mis propietarios acceden a sus informes 24/7 desde su portal. He eliminado el envío manual de PDFs y las llamadas para preguntar por el estado de pagos. Puedo gestionar el doble de cartera.',
     stats: [
       { metric: 'Clientes', value: '25' },
-      { metric: 'Propiedades', value: '120' }
+      { metric: 'Propiedades', value: '120' },
+      { metric: 'Ahorro', value: '€600/mes' },
     ],
-    highlight: 'Portal de propietarios incluido'
+    highlight: 'Portal de propietarios 24/7'
   },
   {
     id: '3',
     name: 'Laura S.',
-    role: 'Administradora',
+    role: 'Operadora Coliving',
     company: 'Coliving Valencia',
     vertical: 'Coliving',
     avatar: '/testimonials/laura-sanchez.jpg',
     rating: 5,
-    quote: 'Gestionar 15 habitaciones con inquilinos diferentes era un caos. Ahora cada uno tiene su contrato, sus pagos y su comunicación independiente pero yo lo veo todo junto.',
+    quote: 'Gestionar 15 habitaciones con inquilinos diferentes era un caos total. Ahora cada uno tiene su contrato, sus pagos y prorrateo de suministros individual, y yo lo controlo todo desde un panel.',
     stats: [
       { metric: 'Habitaciones', value: '15' },
-      { metric: 'Inquilinos', value: '15' }
+      { metric: 'Ocupación', value: '95%' },
+      { metric: 'Conflictos', value: '-60%' },
     ],
-    highlight: 'Gestión por habitación'
+    highlight: 'Prorrateo automático de suministros'
   },
   {
     id: '4',
     name: 'Carlos R.',
-    role: 'Inversor',
-    company: 'Cartera propia',
+    role: 'Inversor Inmobiliario',
+    company: '12 propiedades en 3 ciudades',
     vertical: 'Inversión',
     avatar: '/testimonials/carlos-ruiz.jpg',
     rating: 5,
-    quote: 'El dashboard me da una visión clara de rentabilidad de cada propiedad. Antes tenía que hacer cálculos en Excel que siempre me quedaban desactualizados.',
+    quote: 'Antes hacía cálculos de rentabilidad en Excel que quedaban obsoletos al día siguiente. Ahora tengo rentabilidad neta por activo actualizada en tiempo real. Las decisiones son mucho más claras.',
     stats: [
       { metric: 'Propiedades', value: '12' },
-      { metric: 'Ciudades', value: '3' }
+      { metric: 'Ciudades', value: '3' },
+      { metric: 'Visibilidad', value: '100%' },
     ],
-    highlight: 'Rentabilidad en tiempo real'
+    highlight: 'Rentabilidad neta por activo en tiempo real'
+  },
+  {
+    id: '5',
+    name: 'Roberto L.',
+    role: 'Gestor STR',
+    company: '22 apartamentos turísticos en Málaga',
+    vertical: 'Vacacional',
+    avatar: '/testimonials/roberto-lopez.jpg',
+    rating: 5,
+    quote: 'El channel manager sincroniza Airbnb, Booking y Vrbo en tiempo real. Antes usaba 3 herramientas diferentes y siempre tenía problemas de overbooking. Con Inmova todo va en automático.',
+    stats: [
+      { metric: 'Apartamentos', value: '22' },
+      { metric: 'Canales', value: '3' },
+      { metric: 'Overbookings', value: '0' },
+    ],
+    highlight: 'Channel manager multi-plataforma'
+  },
+  {
+    id: '6',
+    name: 'Ana P.',
+    role: 'Administradora de Fincas',
+    company: '18 comunidades en Sevilla',
+    vertical: 'Comunidades',
+    avatar: '/testimonials/ana-perez.jpg',
+    rating: 5,
+    quote: 'Las votaciones telemáticas han sido un antes y un después. Aprobar presupuestos que antes tardaban dos meses ahora se resuelve en días. Los comuneros están mucho más implicados.',
+    stats: [
+      { metric: 'Comunidades', value: '18' },
+      { metric: 'Participación', value: '+40%' },
+      { metric: 'Tiempo juntas', value: '-80%' },
+    ],
+    highlight: 'Votaciones online y juntas digitales'
   },
 ];
 
@@ -95,15 +131,15 @@ export function TestimonialsSection() {
             Testimonios Verificados
           </Badge>
           <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-            Lo que Dicen Nuestros Clientes
+            Profesionales que ya Gestionan con INMOVA
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Historias reales de gestoras, agencias y operadores de coliving que transformaron su negocio con INMOVA
+            Propietarios, gestoras, operadores de coliving y administradores de fincas que simplificaron su día a día
           </p>
         </div>
 
         {/* Testimonials Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {testimonials.map((testimonial) => (
             <Card key={testimonial.id} className="group hover:shadow-2xl transition-all duration-300 border-2 hover:border-indigo-300 relative">
               {/* Badge de Vertical */}
@@ -175,22 +211,22 @@ export function TestimonialsSection() {
             <div className="inline-flex p-4 bg-indigo-100 rounded-full mb-4">
               <Building2 className="h-8 w-8 text-indigo-600" />
             </div>
-            <div className="text-4xl font-black text-gray-900 mb-2">30 días</div>
-            <div className="text-gray-700 font-semibold">Prueba Gratis Sin Compromiso</div>
+            <div className="text-4xl font-black text-gray-900 mb-2">7 verticales</div>
+            <div className="text-gray-700 font-semibold">Alquiler, coliving, STR, comunidades y más</div>
           </div>
           <div className="p-6">
             <div className="inline-flex p-4 bg-green-100 rounded-full mb-4">
               <Users className="h-8 w-8 text-green-600" />
             </div>
-            <div className="text-4xl font-black text-green-600 mb-2">10 min</div>
-            <div className="text-gray-600 font-semibold">Setup Inicial Promedio</div>
+            <div className="text-4xl font-black text-green-600 mb-2">30 días</div>
+            <div className="text-gray-600 font-semibold">Prueba gratis sin tarjeta de crédito</div>
           </div>
           <div className="p-6">
             <div className="inline-flex p-4 bg-yellow-100 rounded-full mb-4">
               <Star className="h-8 w-8 text-yellow-600 fill-yellow-600" />
             </div>
-            <div className="text-4xl font-black text-yellow-600 mb-2">24/7</div>
-            <div className="text-gray-600 font-semibold">Soporte Disponible</div>
+            <div className="text-4xl font-black text-yellow-600 mb-2">Sin permanencia</div>
+            <div className="text-gray-600 font-semibold">Cancela cuando quieras, sin penalización</div>
           </div>
         </div>
       </div>

@@ -1635,14 +1635,6 @@ select[aria-invalid='true']:focus {
     right: 24px !important;
   }
 
-  /* WhatsApp Button - Posición más arriba */
-  .whatsapp-button,
-  [aria-label*="WhatsApp"],
-  a[href*="wa.me"] {
-    bottom: 176px !important;
-    right: 24px !important;
-  }
-
   /* Contenedor de botones flotantes - stack vertical */
   .floating-buttons-container {
     position: fixed;
@@ -1691,16 +1683,6 @@ select[aria-invalid='true']:focus {
   .fixed.bottom-4.right-4.z-50 {
     bottom: 80px !important;
     right: 76px !important;
-    width: 48px !important;
-    height: 48px !important;
-  }
-
-  /* WhatsApp en móvil */
-  .whatsapp-button,
-  [aria-label*="WhatsApp"],
-  a[href*="wa.me"] {
-    bottom: 80px !important;
-    right: 136px !important;
     width: 48px !important;
     height: 48px !important;
   }

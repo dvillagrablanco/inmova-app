@@ -7,68 +7,68 @@ import { CheckCircle, CreditCard, Globe, Hotel, MessageSquare, FileText, Shield,
 const integrations = [
   {
     icon: CreditCard,
-    title: 'Pagos',
-    desc: 'Cobros automáticos y seguros',
+    title: 'Cobros y Pagos',
+    desc: 'Automatiza la gestión financiera de tus alquileres',
     gradient: 'from-green-500 to-emerald-500',
     items: [
-      { name: 'Stripe', desc: 'Pagos con tarjeta' },
-      { name: 'Transferencias', desc: 'Seguimiento automático' },
-      { name: 'Recibos', desc: 'Generación automática' },
+      { name: 'Stripe', desc: 'Cobro automático con tarjeta y SEPA' },
+      { name: 'Conciliación', desc: 'Seguimiento de transferencias bancarias' },
+      { name: 'Facturación', desc: 'Recibos y facturas generados al instante' },
     ]
   },
   {
     icon: Globe,
-    title: 'Publicación',
-    desc: 'Publica en múltiples portales',
+    title: 'Portales y Calendario',
+    desc: 'Publica propiedades y sincroniza tu agenda',
     gradient: 'from-blue-500 to-indigo-500',
     items: [
-      { name: 'Portales', desc: 'Idealista, Fotocasa...' },
-      { name: 'Web propia', desc: 'Exportación de datos' },
-      { name: 'Calendario', desc: 'Google Calendar, Outlook' },
+      { name: 'Idealista y Fotocasa', desc: 'Publicación directa en portales' },
+      { name: 'Google Calendar', desc: 'Visitas y vencimientos sincronizados' },
+      { name: 'Outlook', desc: 'Integración con correo corporativo' },
     ]
   },
   {
     icon: MessageSquare,
     title: 'Comunicación',
-    desc: 'Mantén el contacto',
+    desc: 'Notificaciones multicanal con inquilinos y propietarios',
     gradient: 'from-violet-500 to-purple-500',
     items: [
-      { name: 'Email', desc: 'Notificaciones automáticas' },
-      { name: 'SMS', desc: 'Recordatorios de pago' },
-      { name: 'Chat', desc: 'Comunicación con inquilinos' },
+      { name: 'Email automático', desc: 'Alertas de pago, vencimientos y avisos' },
+      { name: 'SMS', desc: 'Recordatorios urgentes de cobro' },
+      { name: 'Chat integrado', desc: 'Comunicación directa sin salir de la app' },
     ]
   },
   {
     icon: FileText,
-    title: 'Documentos',
-    desc: 'Gestión documental',
+    title: 'Contratos y Firma Digital',
+    desc: 'Genera, firma y almacena contratos con validez legal',
     gradient: 'from-amber-500 to-yellow-500',
     items: [
-      { name: 'Contratos', desc: 'Plantillas legales LAU' },
-      { name: 'Firma digital', desc: 'Signaturit integrado' },
-      { name: 'Almacenamiento', desc: 'Documentos en la nube' },
+      { name: 'Plantillas LAU', desc: 'Contratos conformes a normativa vigente' },
+      { name: 'Signaturit', desc: 'Firma digital con plena validez jurídica' },
+      { name: 'Almacenamiento', desc: 'Documentos organizados en la nube' },
     ]
   },
   {
     icon: Shield,
-    title: 'Seguridad',
-    desc: 'Tus datos protegidos',
+    title: 'Seguridad y Cumplimiento',
+    desc: 'Tus datos protegidos con estándares bancarios',
     gradient: 'from-red-500 to-orange-500',
     items: [
-      { name: 'Encriptación', desc: 'Datos cifrados' },
-      { name: 'GDPR', desc: 'Cumplimiento europeo' },
-      { name: 'Backups', desc: 'Copias automáticas' },
+      { name: 'Encriptación AES-256', desc: 'Cifrado de nivel bancario' },
+      { name: 'GDPR Compliant', desc: 'Servidores 100% en la Unión Europea' },
+      { name: 'Backups diarios', desc: 'Copias de seguridad automáticas' },
     ]
   },
   {
     icon: Hotel,
-    title: 'Vacacional',
-    desc: 'Para alquiler turístico',
+    title: 'Channel Manager STR',
+    desc: 'Sincroniza calendarios y reservas de alquiler vacacional',
     gradient: 'from-pink-500 to-rose-500',
     items: [
-      { name: 'Airbnb', desc: 'Sincronización' },
-      { name: 'Booking', desc: 'Gestión reservas' },
-      { name: 'iCal', desc: 'Calendario unificado' },
+      { name: 'Airbnb', desc: 'Sincronización bidireccional' },
+      { name: 'Booking.com', desc: 'Gestión centralizada de reservas' },
+      { name: 'iCal / Vrbo', desc: 'Calendario unificado sin overbooking' },
     ]
   },
 ];
@@ -83,10 +83,10 @@ export function IntegrationsSection() {
             Integraciones
           </Badge>
           <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-            Conecta con tus Herramientas Favoritas
+            Todo Conectado, Todo Automático
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            INMOVA se integra perfectamente con las principales plataformas del sector inmobiliario y financiero
+            Integraciones nativas con las plataformas que ya usas. Cobros, portales, firma digital y comunicación en una sola herramienta.
           </p>
         </div>
 

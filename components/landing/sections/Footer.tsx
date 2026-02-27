@@ -16,7 +16,7 @@ export function Footer() {
               <span className="text-xl font-bold">INMOVA</span>
             </div>
             <p className="text-sm text-gray-300 mb-4">
-              La plataforma PropTech multi-vertical más avanzada de España
+              Plataforma PropTech multi-vertical para gestión inmobiliaria integral
             </p>
             <div className="flex gap-3">
               <a href="https://twitter.com/inmova" target="_blank" rel="noopener noreferrer">
@@ -83,8 +83,8 @@ export function Footer() {
 
         {/* CTA Final */}
         <div className="border-t border-gray-800 pt-8 pb-6 text-center">
-          <h3 className="text-2xl font-bold mb-3">¿Listo para simplificar tu gestión?</h3>
-          <p className="text-gray-300 mb-6">Empieza gratis hoy. Sin tarjeta de crédito.</p>
+          <h3 className="text-2xl font-bold mb-3">Centraliza toda tu gestión inmobiliaria</h3>
+          <p className="text-gray-300 mb-6">30 días gratis. Sin tarjeta. Sin permanencia.</p>
           <Link href="/register">
             <button
               className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 rounded-lg shadow-lg shadow-indigo-500/50 transition-all"
