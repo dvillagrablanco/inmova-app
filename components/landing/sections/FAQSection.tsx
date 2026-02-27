@@ -12,101 +12,97 @@ interface FAQItem {
 }
 
 const faqs: FAQItem[] = [
-  // General
   {
     question: '¿Qué es Inmova y para quién es?',
     answer:
-      'Inmova es una plataforma PropTech todo-en-uno para propietarios, gestores de propiedades e inversores inmobiliarios. Te ayuda a automatizar la gestión de alquileres, contratos, pagos y mantenimiento en un solo lugar.',
+      'Inmova es una plataforma PropTech multi-vertical que centraliza toda la gestión inmobiliaria en un solo lugar. Está diseñada para propietarios particulares, gestores de propiedades, operadores de coliving, administradores de fincas, inversores y constructores. Cubre 7 modelos de negocio: alquiler residencial, media estancia, vacacional (STR), coliving, house flipping, comunidades de propietarios y construcción B2B.',
     category: 'general',
   },
   {
-    question: '¿Cómo funciona el proceso de onboarding?',
+    question: '¿Cuánto tiempo lleva configurar mi cuenta?',
     answer:
-      'El onboarding toma menos de 3 minutos. Solo necesitas crear una cuenta, añadir tu primera propiedad y comenzar a invitar inquilinos. Nuestro asistente guiado te acompaña en cada paso.',
+      'El setup inicial toma menos de 3 minutos. Creas tu cuenta, añades tu primera propiedad con nuestro asistente guiado y ya puedes empezar a gestionar. Si tienes datos en Excel u otra plataforma, puedes importarlos con un clic o nuestro equipo los migra por ti sin coste adicional.',
     category: 'general',
   },
   {
-    question: '¿Necesito conocimientos técnicos para usar Inmova?',
+    question: '¿Necesito conocimientos técnicos?',
     answer:
-      'No. Inmova está diseñada para ser intuitiva. Si sabes usar WhatsApp y Gmail, puedes usar Inmova. Además, tenemos tutoriales en video y soporte en vivo.',
+      'No. Inmova está diseñada para ser intuitiva. Si sabes usar un navegador web, puedes usar Inmova. Además, incluimos tutoriales en vídeo, centro de ayuda completo y soporte en vivo para resolver cualquier duda.',
     category: 'general',
   },
   {
-    question: '¿Puedo gestionar múltiples propiedades?',
+    question: '¿Cuántas propiedades puedo gestionar?',
     answer:
-      'Sí. Según el plan: Starter hasta 5, Professional hasta 25, Business hasta 100, y Enterprise ilimitadas. Puedes actualizar en cualquier momento.',
+      'Depende del plan: Starter hasta 5, Professional hasta 25, Business hasta 100, y Enterprise ilimitadas. Puedes cambiar de plan en cualquier momento y el ajuste de precio se prorratea automáticamente.',
     category: 'general',
   },
 
-  // Pricing
   {
-    question: '¿Hay periodo de prueba?',
+    question: '¿Hay periodo de prueba gratuito?',
     answer:
-      'Sí. Todos los planes incluyen 30 días de prueba gratis sin necesidad de tarjeta de crédito. Puedes probar todas las funcionalidades antes de decidir.',
+      'Sí. Todos los planes incluyen 30 días de prueba gratis sin necesidad de tarjeta de crédito. Puedes probar todas las funcionalidades de tu plan elegido. Si no te convence, simplemente no activas la suscripción.',
     category: 'pricing',
   },
   {
     question: '¿Puedo cancelar en cualquier momento?',
     answer:
-      'Por supuesto. No hay permanencia. Puedes cancelar tu suscripción en cualquier momento desde tu panel de configuración. Si cancelas, mantienes acceso hasta el final del periodo pagado.',
+      'Sí, sin permanencia ni penalización. Cancelas desde tu panel de configuración en un clic. Mantienes acceso hasta el final del periodo pagado y puedes exportar todos tus datos en cualquier momento.',
     category: 'pricing',
   },
   {
-    question: '¿Ofrecen descuentos para anuales?',
+    question: '¿Ofrecen descuento por pago anual?',
     answer:
-      'Sí. Al pagar anualmente obtienes 2 meses gratis (ahorro del 17%). Los planes anuales también incluyen prioridad en soporte.',
+      'Sí. Al pagar anualmente obtienes 2 meses gratis (ahorro del 17%). Los planes anuales también incluyen prioridad en soporte técnico.',
     category: 'pricing',
   },
   {
-    question: '¿Qué pasa si necesito más propiedades?',
+    question: '¿Qué son los add-ons y cómo funcionan?',
     answer:
-      'Puedes actualizar tu plan en cualquier momento. El cambio es inmediato y solo pagas la diferencia prorrateada.',
+      'Los add-ons son extensiones opcionales que puedes añadir a cualquier plan: packs de firmas digitales, almacenamiento extra, tokens de IA, SMS, white-label o acceso API. Se contratan mes a mes y los activas o desactivas cuando quieras.',
     category: 'pricing',
   },
 
-  // Technical
   {
     question: '¿Mis datos están seguros?',
     answer:
-      'Absolutamente. Usamos encriptación AES-256, servidores en Europa (GDPR compliant), backups diarios automáticos y autenticación de dos factores (2FA). Tus datos nunca se comparten con terceros.',
+      'Sí. Usamos encriptación AES-256, servidores en la Unión Europea (GDPR compliant), backups diarios automáticos y autenticación de dos factores (2FA). Tus datos nunca se comparten con terceros y puedes exportarlos en cualquier momento.',
     category: 'technical',
   },
   {
-    question: '¿Puedo exportar mis datos?',
+    question: '¿Puedo exportar mis datos si cambio de plataforma?',
     answer:
-      'Sí. Puedes exportar todos tus datos (propiedades, inquilinos, contratos, pagos) en formato Excel o PDF en cualquier momento. No hay lock-in.',
+      'Sí. Todos tus datos (propiedades, inquilinos, contratos, pagos, documentos) se exportan en formato Excel o PDF en cualquier momento. No hay lock-in de datos.',
     category: 'technical',
   },
   {
-    question: '¿Se integra con otras herramientas?',
+    question: '¿Con qué herramientas se integra?',
     answer:
-      'Sí. Nos integramos con Stripe (pagos), Google Calendar (eventos), Gmail/Outlook (emails), y tenemos API REST para integraciones personalizadas.',
+      'Inmova se integra nativamente con Stripe (cobros automáticos), Signaturit (firma digital), Google Calendar y Outlook (calendario), portales inmobiliarios (Idealista, Fotocasa), plataformas vacacionales (Airbnb, Booking) y contabilidad. Además, los planes Business y Enterprise incluyen API REST para integraciones personalizadas.',
     category: 'technical',
   },
   {
-    question: '¿Funciona en móvil?',
+    question: '¿Funciona en el móvil?',
     answer:
-      'Sí. Inmova es 100% responsive. Funciona perfectamente en móviles, tablets y ordenadores. Próximamente lanzaremos apps nativas para iOS y Android.',
+      'Sí. Inmova es 100% responsive y funciona perfectamente en móviles, tablets y ordenadores. Puedes gestionar todas tus propiedades desde cualquier dispositivo con navegador web.',
     category: 'technical',
   },
 
-  // Legal
   {
-    question: '¿Los contratos son legalmente válidos?',
+    question: '¿Los contratos generados son legalmente válidos?',
     answer:
-      'Sí. Nuestros contratos están redactados por abogados especializados en derecho inmobiliario y cumplen con la Ley de Arrendamientos Urbanos (LAU) vigente en España.',
+      'Sí. Las plantillas de contrato están redactadas por abogados especializados en derecho inmobiliario y cumplen con la Ley de Arrendamientos Urbanos (LAU) vigente en España. Además, integran firma digital con validez legal plena.',
     category: 'legal',
   },
   {
     question: '¿Cumplen con GDPR y protección de datos?',
     answer:
-      'Totalmente. Somos GDPR compliant. Tenemos Política de Privacidad, banner de cookies con consent mode, y todos los datos se almacenan en servidores europeos.',
+      'Totalmente. Inmova es GDPR compliant. Contamos con Política de Privacidad detallada, banner de cookies con consent mode, DPO designado y todos los datos se almacenan exclusivamente en servidores europeos.',
     category: 'legal',
   },
   {
-    question: '¿Qué soporte ofrecen?',
+    question: '¿Qué tipo de soporte incluye cada plan?',
     answer:
-      'Todos los planes incluyen soporte por email y acceso a tutoriales. Los planes Business y Enterprise incluyen chat en vivo y soporte prioritario. El plan Enterprise incluye gestor de cuenta dedicado.',
+      'Starter incluye soporte por email y acceso a tutoriales. Professional añade chat prioritario. Business incluye gestor de cuenta dedicado y soporte prioritario. Enterprise ofrece soporte 24/7, account manager dedicado y formación personalizada para tu equipo.',
     category: 'legal',
   },
 ];
