@@ -355,7 +355,7 @@ export async function GET(request: NextRequest) {
       if (ingresosMes === 0 && !useAccountingIncome) {
         const monthPayments = await prisma.payment.aggregate({
           where: {
-            contract: { unit: { building: { companyId } } },
+            contract: { unit: { building: { companyId: companyFilter } } },
             fechaVencimiento: { gte: mStart, lte: mEnd },
             estado: 'pagado',
           },
@@ -372,6 +372,11 @@ export async function GET(request: NextRequest) {
           }
           return sum;
         }, 0);
+      }
+
+      // 4. If still 0 and there are active contracts, use expected rent as estimate
+      if (ingresosMes === 0 && rentaMensualEsperada > 0) {
+        ingresosMes = rentaMensualEsperada;
       }
 
       monthlyIncome.push({
@@ -458,14 +463,14 @@ export async function GET(request: NextRequest) {
     // Calcular morosidad (pagos vencidos no pagados)
     const overduePayments = await prisma.payment.count({
       where: {
-        contract: { unit: { building: { companyId } } },
+        contract: { unit: { building: { companyId: companyFilter } } },
         estado: 'pendiente',
         fechaVencimiento: { lt: new Date() },
       },
     });
     const totalExpectedPayments = await prisma.payment.count({
       where: {
-        contract: { unit: { building: { companyId } } },
+        contract: { unit: { building: { companyId: companyFilter } } },
         fechaVencimiento: { gte: subMonths(currentMonth, 3), lte: endDate },
       },
     });
