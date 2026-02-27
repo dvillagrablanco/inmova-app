@@ -1539,6 +1539,12 @@ const holdingGrupoNavItems = [
     roles: ['super_admin', 'administrador'],
   },
   {
+    name: 'Mapa de Cartera',
+    href: '/inversiones/mapa',
+    icon: MapPin,
+    roles: ['super_admin', 'administrador'],
+  },
+  {
     name: 'Activos del Grupo',
     href: '/inversiones/activos',
     icon: Building2,
