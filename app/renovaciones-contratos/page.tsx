@@ -9,214 +9,597 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
-import { Home, ArrowLeft, FileText, Calendar, AlertTriangle, CheckCircle2, Clock, Send, User, Building2, Euro, RefreshCw, Search, Plus, TrendingUp } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
+import {
+  Home,
+  FileText,
+  Calendar,
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  Building2,
+  Euro,
+  RefreshCw,
+  Search,
+  TrendingUp,
+  Loader2,
+  Layers,
+} from 'lucide-react';
 import { toast } from 'sonner';
+import { format, differenceInDays } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 interface Contrato {
   id: string;
-  inquilino: string;
-  propiedad: string;
-  unidad: string;
+  tenantName: string;
+  buildingName: string;
+  buildingId: string;
+  unitNumber: string;
   fechaFin: string;
-  rentaActual: number;
+  rentaMensual: number;
   diasRestantes: number;
-  estado: 'activo' | 'por_vencer' | 'vencido' | 'renovado';
-  propuestaEnviada?: boolean;
-  nuevaRenta?: number;
+  estado: string;
+}
+
+interface BatchPreview {
+  resumen: {
+    totalContratos: number;
+    rentaActualTotal: number;
+    nuevaRentaTotal: number;
+    incrementoTotal: number;
+    incrementoPct: number;
+  };
+  renovaciones: Array<{
+    contractId: string;
+    inquilino: string;
+    edificio: string;
+    unidad: string;
+    rentaActual: number;
+    nuevaRenta: number;
+    incremento: number;
+  }>;
 }
 
 export default function RenovacionesContratosPage() {
-  const { data: _session, status } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [contratos, setContratos] = useState<Contrato[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterEdificio, setFilterEdificio] = useState<string>('all');
   const [filterEstado, setFilterEstado] = useState<string>('all');
-  const [showRenovarDialog, setShowRenovarDialog] = useState(false);
-  const [selectedContrato, setSelectedContrato] = useState<Contrato | null>(null);
-  const [nuevaRenta, setNuevaRenta] = useState('');
-  const [duracion, setDuracion] = useState('12');
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
-  const [contratos, setContratos] = useState<Contrato[]>([
-    { id: 'c1', inquilino: 'María García', propiedad: 'Edificio Centro', unidad: '3A', fechaFin: '2025-02-15', rentaActual: 950, diasRestantes: 23, estado: 'por_vencer' },
-    { id: 'c2', inquilino: 'Juan Martínez', propiedad: 'Residencial Playa', unidad: '2B', fechaFin: '2025-02-28', rentaActual: 1100, diasRestantes: 36, estado: 'por_vencer', propuestaEnviada: true, nuevaRenta: 1150 },
-    { id: 'c3', inquilino: 'Ana López', propiedad: 'Apartamentos Norte', unidad: '1C', fechaFin: '2025-03-10', rentaActual: 850, diasRestantes: 46, estado: 'activo' },
-    { id: 'c4', inquilino: 'Carlos Ruiz', propiedad: 'Edificio Centro', unidad: '5D', fechaFin: '2025-01-15', rentaActual: 1000, diasRestantes: -8, estado: 'vencido' },
-    { id: 'c5', inquilino: 'Laura Sánchez', propiedad: 'Piso Centro', unidad: '2A', fechaFin: '2026-01-01', rentaActual: 1200, diasRestantes: 343, estado: 'renovado' },
-  ]);
+  // Batch dialog
+  const [showBatchDialog, setShowBatchDialog] = useState(false);
+  const [batchPreview, setBatchPreview] = useState<BatchPreview | null>(null);
+  const [incrementoPct, setIncrementoPct] = useState('3.0');
+  const [duracionMeses, setDuracionMeses] = useState('12');
+  const [batchLoading, setBatchLoading] = useState(false);
+  const [applying, setApplying] = useState(false);
 
   useEffect(() => {
-    if (status === 'authenticated') setLoading(false);
-    else if (status === 'unauthenticated') router.push('/login');
+    if (status === 'unauthenticated') router.push('/login');
+    if (status === 'authenticated') loadContratos();
   }, [status, router]);
 
-  const filteredContratos = contratos.filter(c => {
-    const matchesSearch = c.inquilino.toLowerCase().includes(searchTerm.toLowerCase()) || c.propiedad.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesEstado = filterEstado === 'all' || c.estado === filterEstado;
-    return matchesSearch && matchesEstado;
+  const loadContratos = async () => {
+    try {
+      const res = await fetch('/api/contracts');
+      if (!res.ok) throw new Error('Error cargando contratos');
+      const data = await res.json();
+
+      const list = (Array.isArray(data) ? data : data.data || []).map((c: any) => {
+        const fechaFin = new Date(c.fechaFin);
+        const diasRestantes = differenceInDays(fechaFin, new Date());
+        return {
+          id: c.id,
+          tenantName: c.tenant?.nombreCompleto || 'Sin inquilino',
+          buildingName: c.unit?.building?.nombre || 'Sin edificio',
+          buildingId: c.unit?.building?.id || '',
+          unitNumber: c.unit?.numero || '-',
+          fechaFin: c.fechaFin,
+          rentaMensual: c.rentaMensual || 0,
+          diasRestantes,
+          estado: c.estado,
+        };
+      });
+
+      // Ordenar por días restantes (más urgentes primero)
+      list.sort((a: Contrato, b: Contrato) => a.diasRestantes - b.diasRestantes);
+      setContratos(list);
+    } catch {
+      toast.error('Error cargando contratos');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Edificios únicos para filtro
+  const edificios = [...new Set(contratos.map((c) => c.buildingName))].sort();
+
+  // Filtrado
+  const filtered = contratos.filter((c) => {
+    const matchSearch =
+      c.tenantName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      c.buildingName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      c.unitNumber.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchEdificio = filterEdificio === 'all' || c.buildingName === filterEdificio;
+    const matchEstado =
+      filterEstado === 'all' ||
+      (filterEstado === 'por_vencer' && c.diasRestantes <= 90 && c.diasRestantes > 0) ||
+      (filterEstado === 'vencido' && c.diasRestantes <= 0) ||
+      (filterEstado === 'activo' && c.diasRestantes > 90);
+    return matchSearch && matchEdificio && matchEstado;
   });
 
-  const stats = {
-    total: contratos.length,
-    porVencer: contratos.filter(c => c.estado === 'por_vencer').length,
-    vencidos: contratos.filter(c => c.estado === 'vencido').length,
-    renovados: contratos.filter(c => c.estado === 'renovado').length,
+  // Selección
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   };
 
-  const getEstadoBadge = (estado: string, propuestaEnviada?: boolean) => {
-    if (propuestaEnviada) return <Badge className="bg-blue-500">Propuesta Enviada</Badge>;
-    const config: Record<string, { className: string; label: string }> = {
-      activo: { className: 'bg-green-500', label: 'Activo' },
-      por_vencer: { className: 'bg-orange-500', label: 'Por Vencer' },
-      vencido: { className: 'bg-red-500', label: 'Vencido' },
-      renovado: { className: 'bg-purple-500', label: 'Renovado' },
-    };
-    const { className, label } = config[estado] || config.activo;
-    return <Badge className={className}>{label}</Badge>;
+  const selectAll = () => {
+    if (selectedIds.size === filtered.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filtered.map((c) => c.id)));
+    }
   };
 
-  const handleRenovar = (contrato: Contrato) => {
-    setSelectedContrato(contrato);
-    setNuevaRenta(String(Math.round(contrato.rentaActual * 1.03)));
-    setShowRenovarDialog(true);
+  const selectEdificio = (buildingName: string) => {
+    const ids = filtered.filter((c) => c.buildingName === buildingName).map((c) => c.id);
+    setSelectedIds(new Set(ids));
   };
 
-  const handleEnviarPropuesta = () => {
-    if (!selectedContrato) return;
-    setContratos(prev => prev.map(c => c.id === selectedContrato.id ? { ...c, propuestaEnviada: true, nuevaRenta: Number(nuevaRenta) } : c));
-    toast.success('Propuesta de renovación enviada');
-    setShowRenovarDialog(false);
+  // Batch preview (dry run)
+  const previewBatch = async () => {
+    if (selectedIds.size === 0) {
+      toast.error('Selecciona al menos un contrato');
+      return;
+    }
+    setBatchLoading(true);
+    try {
+      const res = await fetch('/api/renewals/batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contractIds: Array.from(selectedIds),
+          incrementoPct: parseFloat(incrementoPct),
+          duracionMeses: parseInt(duracionMeses),
+          dryRun: true,
+        }),
+      });
+      if (!res.ok) throw new Error('Error calculando renovación');
+      const data = await res.json();
+      setBatchPreview(data);
+      setShowBatchDialog(true);
+    } catch {
+      toast.error('Error al calcular renovación en lote');
+    } finally {
+      setBatchLoading(false);
+    }
   };
+
+  // Apply batch
+  const applyBatch = async () => {
+    setApplying(true);
+    try {
+      const res = await fetch('/api/renewals/batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contractIds: Array.from(selectedIds),
+          incrementoPct: parseFloat(incrementoPct),
+          duracionMeses: parseInt(duracionMeses),
+          dryRun: false,
+        }),
+      });
+      if (!res.ok) throw new Error('Error aplicando renovación');
+      const data = await res.json();
+      toast.success(
+        `${data.resumen.exitosos} contratos renovados (+${incrementoPct}% IPC, ${duracionMeses} meses)`
+      );
+      setShowBatchDialog(false);
+      setSelectedIds(new Set());
+      setBatchPreview(null);
+      loadContratos();
+    } catch {
+      toast.error('Error al aplicar renovación');
+    } finally {
+      setApplying(false);
+    }
+  };
+
+  const fmt = (n: number) =>
+    new Intl.NumberFormat('es-ES', {
+      style: 'currency',
+      currency: 'EUR',
+      maximumFractionDigits: 0,
+    }).format(n);
+
+  const estadoBadge = (dias: number) => {
+    if (dias <= 0)
+      return (
+        <Badge className="bg-red-100 text-red-700">
+          <AlertTriangle className="h-3 w-3 mr-1" /> Vencido
+        </Badge>
+      );
+    if (dias <= 30)
+      return (
+        <Badge className="bg-orange-100 text-orange-700">
+          <Clock className="h-3 w-3 mr-1" /> {dias}d
+        </Badge>
+      );
+    if (dias <= 90)
+      return (
+        <Badge className="bg-yellow-100 text-yellow-700">
+          <Calendar className="h-3 w-3 mr-1" /> {dias}d
+        </Badge>
+      );
+    return (
+      <Badge className="bg-green-100 text-green-700">
+        <CheckCircle2 className="h-3 w-3 mr-1" /> Activo
+      </Badge>
+    );
+  };
+
+  // KPIs
+  const totalContratos = contratos.length;
+  const porVencer = contratos.filter((c) => c.diasRestantes > 0 && c.diasRestantes <= 90).length;
+  const vencidos = contratos.filter((c) => c.diasRestantes <= 0).length;
+  const rentaTotal = contratos.reduce((s, c) => s + c.rentaMensual, 0);
 
   if (loading) {
-    return <AuthenticatedLayout><div className="flex items-center justify-center min-h-[60vh]"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div></AuthenticatedLayout>;
+    return (
+      <AuthenticatedLayout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        </div>
+      </AuthenticatedLayout>
+    );
   }
 
   return (
     <AuthenticatedLayout>
-      <div className="max-w-7xl mx-auto space-y-6">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={() => router.push('/dashboard')}><ArrowLeft className="h-4 w-4 mr-2" />Volver</Button>
-          <Breadcrumb><BreadcrumbList><BreadcrumbItem><BreadcrumbLink href="/dashboard"><Home className="h-4 w-4" /></BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbPage>Renovaciones de Contratos</BreadcrumbPage></BreadcrumbItem></BreadcrumbList></Breadcrumb>
-        </div>
+      <div className="space-y-6 p-4 md:p-6">
+        {/* Breadcrumb */}
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/dashboard">
+                <Home className="h-4 w-4" />
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Renovaciones de Contratos</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
 
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-teal-100 rounded-xl"><RefreshCw className="h-8 w-8 text-teal-600" /></div>
-            <div><h1 className="text-2xl sm:text-3xl font-bold">Renovaciones de Contratos</h1><p className="text-muted-foreground">Gestiona las renovaciones próximas</p></div>
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Renovaciones de Contratos</h1>
+            <p className="text-gray-500">Gestiona renovaciones individuales o en lote por edificio</p>
           </div>
+          <Button
+            onClick={previewBatch}
+            disabled={selectedIds.size === 0 || batchLoading}
+            className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white"
+          >
+            {batchLoading ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Layers className="h-4 w-4 mr-2" />
+            )}
+            Renovar en lote ({selectedIds.size})
+          </Button>
         </div>
 
         {/* KPIs */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Total Contratos</CardTitle></CardHeader><CardContent><div className="text-3xl font-bold">{stats.total}</div></CardContent></Card>
-          <Card className="border-orange-300"><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Por Vencer</CardTitle></CardHeader><CardContent><div className="text-3xl font-bold text-orange-600">{stats.porVencer}</div></CardContent></Card>
-          <Card className="border-red-300"><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Vencidos</CardTitle></CardHeader><CardContent><div className="text-3xl font-bold text-red-600">{stats.vencidos}</div></CardContent></Card>
-          <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Renovados</CardTitle></CardHeader><CardContent><div className="text-3xl font-bold text-purple-600">{stats.renovados}</div></CardContent></Card>
+          <Card>
+            <CardContent className="pt-4 pb-3">
+              <div className="text-sm text-gray-500">Total contratos</div>
+              <div className="text-2xl font-bold">{totalContratos}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4 pb-3">
+              <div className="text-sm text-gray-500 flex items-center gap-1">
+                <AlertTriangle className="h-3 w-3 text-orange-500" /> Por vencer (90d)
+              </div>
+              <div className="text-2xl font-bold text-orange-600">{porVencer}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4 pb-3">
+              <div className="text-sm text-gray-500 flex items-center gap-1">
+                <AlertTriangle className="h-3 w-3 text-red-500" /> Vencidos
+              </div>
+              <div className="text-2xl font-bold text-red-600">{vencidos}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4 pb-3">
+              <div className="text-sm text-gray-500">Renta mensual total</div>
+              <div className="text-2xl font-bold text-green-600">{fmt(rentaTotal)}</div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Filtros */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Buscar por inquilino, edificio o unidad..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <Select value={filterEdificio} onValueChange={setFilterEdificio}>
+            <SelectTrigger className="w-full sm:w-[200px]">
+              <SelectValue placeholder="Edificio" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos los edificios</SelectItem>
+              {edificios.map((e) => (
+                <SelectItem key={e} value={e}>
+                  {e}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={filterEstado} onValueChange={setFilterEstado}>
+            <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectValue placeholder="Estado" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos</SelectItem>
+              <SelectItem value="por_vencer">Por vencer (90d)</SelectItem>
+              <SelectItem value="vencido">Vencidos</SelectItem>
+              <SelectItem value="activo">Activos</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Quick select por edificio */}
+        {edificios.length > 1 && (
+          <div className="flex flex-wrap gap-2">
+            <span className="text-sm text-gray-500 py-1">Selección rápida:</span>
+            {edificios.map((e) => {
+              const count = filtered.filter((c) => c.buildingName === e).length;
+              if (count === 0) return null;
+              return (
+                <Button
+                  key={e}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => selectEdificio(e)}
+                  className="text-xs"
+                >
+                  <Building2 className="h-3 w-3 mr-1" />
+                  {e} ({count})
+                </Button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* IPC y duración */}
         <Card>
-          <CardContent className="pt-6">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Buscar por inquilino o propiedad..." className="pl-10" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+          <CardContent className="pt-4 pb-3">
+            <div className="flex flex-col sm:flex-row gap-4 items-end">
+              <div className="flex-1">
+                <Label htmlFor="ipc" className="text-sm font-medium">
+                  Incremento IPC (%)
+                </Label>
+                <Input
+                  id="ipc"
+                  type="number"
+                  step="0.1"
+                  value={incrementoPct}
+                  onChange={(e) => setIncrementoPct(e.target.value)}
+                  className="mt-1"
+                />
               </div>
-              <Select value={filterEstado} onValueChange={setFilterEstado}>
-                <SelectTrigger className="w-[180px]"><SelectValue placeholder="Estado" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="por_vencer">Por Vencer</SelectItem>
-                  <SelectItem value="vencido">Vencido</SelectItem>
-                  <SelectItem value="renovado">Renovado</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="flex-1">
+                <Label htmlFor="duracion" className="text-sm font-medium">
+                  Duración renovación (meses)
+                </Label>
+                <Input
+                  id="duracion"
+                  type="number"
+                  value={duracionMeses}
+                  onChange={(e) => setDuracionMeses(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+              <Button variant="outline" onClick={selectAll} className="whitespace-nowrap">
+                {selectedIds.size === filtered.length ? 'Deseleccionar todos' : 'Seleccionar todos'}
+              </Button>
             </div>
           </CardContent>
         </Card>
 
-        {/* Lista */}
-        <div className="space-y-4">
-          {filteredContratos.map((contrato) => (
-            <Card key={contrato.id} className={`hover:shadow-lg transition-shadow ${contrato.estado === 'vencido' ? 'border-red-300' : contrato.estado === 'por_vencer' ? 'border-orange-300' : ''}`}>
-              <CardHeader>
-                <div className="flex flex-col sm:flex-row justify-between gap-4">
-                  <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center"><User className="h-6 w-6 text-muted-foreground" /></div>
-                    <div>
-                      <CardTitle className="flex items-center gap-2">{contrato.inquilino}{getEstadoBadge(contrato.estado, contrato.propuestaEnviada)}</CardTitle>
-                      <CardDescription className="flex items-center gap-2"><Building2 className="h-3 w-3" />{contrato.propiedad} - {contrato.unidad}</CardDescription>
+        {/* Lista de contratos */}
+        <Card>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b bg-gray-50">
+                    <th className="p-3 text-left w-10">
+                      <Checkbox
+                        checked={selectedIds.size === filtered.length && filtered.length > 0}
+                        onCheckedChange={selectAll}
+                      />
+                    </th>
+                    <th className="p-3 text-left font-medium text-gray-500">Inquilino</th>
+                    <th className="p-3 text-left font-medium text-gray-500">Edificio</th>
+                    <th className="p-3 text-left font-medium text-gray-500">Unidad</th>
+                    <th className="p-3 text-right font-medium text-gray-500">Renta</th>
+                    <th className="p-3 text-right font-medium text-gray-500">Vencimiento</th>
+                    <th className="p-3 text-center font-medium text-gray-500">Estado</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {filtered.map((c) => (
+                    <tr
+                      key={c.id}
+                      className={`hover:bg-gray-50 cursor-pointer ${
+                        selectedIds.has(c.id) ? 'bg-indigo-50' : ''
+                      }`}
+                      onClick={() => toggleSelect(c.id)}
+                    >
+                      <td className="p-3">
+                        <Checkbox
+                          checked={selectedIds.has(c.id)}
+                          onCheckedChange={() => toggleSelect(c.id)}
+                        />
+                      </td>
+                      <td className="p-3 font-medium text-gray-900">{c.tenantName}</td>
+                      <td className="p-3 text-gray-600">{c.buildingName}</td>
+                      <td className="p-3 text-gray-600">{c.unitNumber}</td>
+                      <td className="p-3 text-right font-medium">{fmt(c.rentaMensual)}</td>
+                      <td className="p-3 text-right text-gray-600">
+                        {format(new Date(c.fechaFin), 'dd MMM yyyy', { locale: es })}
+                      </td>
+                      <td className="p-3 text-center">{estadoBadge(c.diasRestantes)}</td>
+                    </tr>
+                  ))}
+                  {filtered.length === 0 && (
+                    <tr>
+                      <td colSpan={7} className="p-8 text-center text-gray-500">
+                        No se encontraron contratos con los filtros actuales.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Batch Confirmation Dialog */}
+        <Dialog open={showBatchDialog} onOpenChange={setShowBatchDialog}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Layers className="h-5 w-5 text-indigo-600" />
+                Confirmar Renovación en Lote
+              </DialogTitle>
+              <DialogDescription>
+                Revisa los cambios antes de aplicarlos. Esta acción actualizará la renta y fecha de
+                fin de cada contrato.
+              </DialogDescription>
+            </DialogHeader>
+
+            {batchPreview && (
+              <div className="space-y-4">
+                {/* Resumen */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div className="p-3 bg-gray-50 rounded-lg text-center">
+                    <div className="text-xs text-gray-500">Contratos</div>
+                    <div className="text-lg font-bold">{batchPreview.resumen.totalContratos}</div>
+                  </div>
+                  <div className="p-3 bg-gray-50 rounded-lg text-center">
+                    <div className="text-xs text-gray-500">Renta actual</div>
+                    <div className="text-lg font-bold">{fmt(batchPreview.resumen.rentaActualTotal)}</div>
+                  </div>
+                  <div className="p-3 bg-green-50 rounded-lg text-center">
+                    <div className="text-xs text-green-600">Nueva renta</div>
+                    <div className="text-lg font-bold text-green-700">
+                      {fmt(batchPreview.resumen.nuevaRentaTotal)}
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-2xl font-bold">€{contrato.rentaActual}/mes</p>
-                    {contrato.propuestaEnviada && contrato.nuevaRenta && (
-                      <p className="text-sm text-green-600 flex items-center justify-end gap-1"><TrendingUp className="h-3 w-3" />Propuesta: €{contrato.nuevaRenta}</p>
-                    )}
+                  <div className="p-3 bg-indigo-50 rounded-lg text-center">
+                    <div className="text-xs text-indigo-600">Incremento</div>
+                    <div className="text-lg font-bold text-indigo-700">
+                      +{fmt(batchPreview.resumen.incrementoTotal)}/mes
+                    </div>
                   </div>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap items-center justify-between gap-4">
-                  <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                    <span className="flex items-center gap-1"><Calendar className="h-4 w-4" />Vence: {new Date(contrato.fechaFin).toLocaleDateString('es-ES')}</span>
-                    <span className={`flex items-center gap-1 font-medium ${contrato.diasRestantes < 0 ? 'text-red-600' : contrato.diasRestantes < 30 ? 'text-orange-600' : ''}`}>
-                      <Clock className="h-4 w-4" />{contrato.diasRestantes < 0 ? `Venció hace ${Math.abs(contrato.diasRestantes)} días` : `${contrato.diasRestantes} días restantes`}
-                    </span>
-                  </div>
-                  <div className="flex gap-2">
-                    {!contrato.propuestaEnviada && contrato.estado !== 'renovado' && (
-                      <Button onClick={() => handleRenovar(contrato)}><RefreshCw className="h-4 w-4 mr-2" />Renovar</Button>
-                    )}
-                    {contrato.propuestaEnviada && <Button variant="outline"><Send className="h-4 w-4 mr-2" />Reenviar</Button>}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
 
-        {/* Dialog Renovar */}
-        <Dialog open={showRenovarDialog} onOpenChange={setShowRenovarDialog}>
-          <DialogContent>
-            <DialogHeader><DialogTitle>Propuesta de Renovación</DialogTitle><DialogDescription>Configura las condiciones de la renovación</DialogDescription></DialogHeader>
-            {selectedContrato && (
-              <div className="space-y-4 py-4">
-                <div className="p-3 bg-muted rounded-lg">
-                  <p className="font-medium">{selectedContrato.inquilino}</p>
-                  <p className="text-sm text-muted-foreground">{selectedContrato.propiedad} - {selectedContrato.unidad}</p>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Renta Actual</Label>
-                    <Input value={`€${selectedContrato.rentaActual}`} disabled />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Nueva Renta *</Label>
-                    <Input type="number" value={nuevaRenta} onChange={(e) => setNuevaRenta(e.target.value)} />
-                    <p className="text-xs text-muted-foreground">Incremento: {((Number(nuevaRenta) / selectedContrato.rentaActual - 1) * 100).toFixed(1)}%</p>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>Duración</Label>
-                  <Select value={duracion} onValueChange={setDuracion}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="6">6 meses</SelectItem>
-                      <SelectItem value="12">12 meses</SelectItem>
-                      <SelectItem value="24">24 meses</SelectItem>
-                      <SelectItem value="36">36 meses</SelectItem>
-                    </SelectContent>
-                  </Select>
+                {/* Detalle */}
+                <div className="border rounded-lg overflow-hidden">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-gray-50 border-b">
+                        <th className="p-2 text-left text-gray-500">Inquilino</th>
+                        <th className="p-2 text-left text-gray-500">Edificio</th>
+                        <th className="p-2 text-right text-gray-500">Actual</th>
+                        <th className="p-2 text-right text-gray-500">Nueva</th>
+                        <th className="p-2 text-right text-gray-500">Δ</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y">
+                      {batchPreview.renovaciones.map((r) => (
+                        <tr key={r.contractId}>
+                          <td className="p-2 font-medium">{r.inquilino}</td>
+                          <td className="p-2 text-gray-600">
+                            {r.edificio} - {r.unidad}
+                          </td>
+                          <td className="p-2 text-right">{fmt(r.rentaActual)}</td>
+                          <td className="p-2 text-right font-medium text-green-700">
+                            {fmt(r.nuevaRenta)}
+                          </td>
+                          <td className="p-2 text-right text-indigo-600">+{fmt(r.incremento)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             )}
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setShowRenovarDialog(false)}>Cancelar</Button>
-              <Button onClick={handleEnviarPropuesta}><Send className="h-4 w-4 mr-2" />Enviar Propuesta</Button>
+
+            <DialogFooter className="gap-2">
+              <Button variant="outline" onClick={() => setShowBatchDialog(false)} disabled={applying}>
+                Cancelar
+              </Button>
+              <Button
+                onClick={applyBatch}
+                disabled={applying}
+                className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white"
+              >
+                {applying ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                )}
+                Aplicar Renovación
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
