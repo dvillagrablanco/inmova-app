@@ -1343,6 +1343,12 @@ const finanzasNavItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
+    name: 'Intragrupo',
+    href: '/contabilidad/intragrupo',
+    icon: ArrowRightLeft,
+    roles: ['super_admin', 'administrador'],
+  },
+  {
     name: 'Contabilidad',
     href: '/contabilidad',
     icon: FileBarChart,
