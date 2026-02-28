@@ -410,7 +410,7 @@ export default function AIAssistantPage() {
             </h1>
             <p className="text-sm text-muted-foreground flex items-center gap-2 flex-wrap">
               <Badge variant="outline" className="bg-violet-50 text-violet-700 text-xs">
-                Claude 3.5
+                IA Avanzada
               </Badge>
               <span className="hidden sm:inline">Selecciona un agente especializado para ayudarte</span>
             </p>

@@ -286,6 +286,7 @@ export async function GET(request: NextRequest) {
     if (!companyId) {
       return NextResponse.json({ error: 'CompanyId no disponible' }, { status: 400 });
     }
+    const prisma = await getPrisma();
     const integration = await prisma.integrationConfig.findUnique({
       where: { companyId_provider: { companyId, provider: PROVIDER } },
       select: { settings: true },
@@ -376,6 +377,7 @@ export async function PUT(request: NextRequest) {
         { status: 404 }
       );
     }
+    const prisma = await getPrisma();
     const integration = await prisma.integrationConfig.findUnique({
       where: { companyId_provider: { companyId, provider: PROVIDER } },
       select: { credentials: true, settings: true },
