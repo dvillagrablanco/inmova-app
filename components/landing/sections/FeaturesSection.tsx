@@ -75,6 +75,15 @@ const verticales = [
     color: 'cyan',
   },
   {
+    icon: DollarSign,
+    title: 'Alquiler Comercial',
+    desc: 'Locales, oficinas y naves industriales con IVA 21%, modelo 303 y facturación automática',
+    features: ['Contratos comerciales con IVA', 'Modelo 303 IVA trimestral', 'Gestión de CAM y repercusión'],
+    gradient: 'from-rose-500 to-red-500',
+    color: 'rose',
+    badge: 'NUEVO',
+  },
+  {
     icon: Briefcase,
     title: 'Servicios Profesionales',
     desc: 'CRM inmobiliario, facturación y gestión multi-cartera para property managers',

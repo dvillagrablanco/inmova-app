@@ -37,18 +37,18 @@ const features = [
   },
   {
     icon: Banknote,
-    title: 'Tesorería Multi-Banco',
-    desc: 'Saldos consolidados de 8+ bancos. Previsión de cash-flow a 6 meses. Alertas de liquidez.',
+    title: 'Tesorería 12 Meses',
+    desc: 'Saldos consolidados de 8+ bancos. Previsión mensual de cobros, pagos, hipotecas y fiscal. Alertas de liquidez.',
   },
   {
     icon: Brain,
-    title: 'Copiloto IA Patrimonial',
-    desc: '"¿Cuánto tengo en Pictet?" "Simula vender Espronceda". Chat ejecutivo con datos reales del patrimonio.',
+    title: 'Simulador Fiscal What-If',
+    desc: '¿Vendo este inmueble? ¿Subo alquileres? ¿Amortizo hipoteca? Compara escenarios con impacto en IS y cash-flow.',
   },
   {
     icon: BarChart3,
-    title: 'Reporting formato MDFF',
-    desc: 'Informes mensuales como los de tu Multi-Family Office. Posición por custodio, P&L, benchmarks, Modelo 720.',
+    title: 'Modelos Tributarios + MDFF',
+    desc: 'Genera Modelo 202, 200, 303 y 347 automáticamente. Export contable PGC para tu gestoría. Informes formato MDFF.',
   },
 ];
 

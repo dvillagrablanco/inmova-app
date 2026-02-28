@@ -146,11 +146,11 @@ export function NewFeaturesSection() {
             NOVEDADES 2026
           </Badge>
           <h2 className="text-4xl md:text-6xl font-black mb-6 bg-gradient-to-r from-gray-900 via-indigo-900 to-violet-900 bg-clip-text text-transparent">
-            6 Módulos Nuevos que Revolucionan la Industria
+            Módulos Destacados 2026
           </h2>
           <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
-            Desde <strong className="text-indigo-600">gestión de seguros</strong> hasta{' '}
-            <strong className="text-orange-600">construcción B2B</strong>. Inmova cubre todo el
+            Desde <strong className="text-indigo-600">Family Office patrimonial</strong> hasta{' '}
+            <strong className="text-orange-600">construcción B2B</strong>. 180+ módulos cubriendo todo el
             ecosistema PropTech.
           </p>
         </div>
