@@ -23,6 +23,7 @@ import { FamilyOfficeSection } from '@/components/landing/sections/FamilyOfficeS
 import { TestimonialsSection } from '@/components/landing/sections/TestimonialsSection';
 import { IntegrationsSection } from '@/components/landing/sections/IntegrationsSection';
 import { FAQSection } from '@/components/landing/sections/FAQSection';
+import { CustomDevelopmentSection } from '@/components/landing/sections/CustomDevelopmentSection';
 import { Footer } from '@/components/landing/sections/Footer';
 
 export function LandingPageContent() {
@@ -60,6 +61,9 @@ export function LandingPageContent() {
 
         {/* FAQ Section */}
         <FAQSection />
+
+        {/* Custom Development CTA */}
+        <CustomDevelopmentSection />
 
         {/* Footer */}
         <Footer />
