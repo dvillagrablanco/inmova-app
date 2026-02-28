@@ -724,11 +724,161 @@ const tools: Anthropic.Messages.Tool[] = [
       properties: { periodo: { type: 'string', description: 'YYYY-MM o YYYY' } },
     },
   },
+  // ========================================================================
+  // AGENTES ESPECIALIZADOS — El asistente delega a estos agentes
+  // ========================================================================
+  {
+    name: 'evaluate_investment_proposal',
+    description: 'Evalúa una propuesta de inversión inmobiliaria de un broker. Analiza precio, yields, riesgos y emite veredicto: COMPRAR/NEGOCIAR/DESCARTAR. Usar cuando el usuario pide analizar una oportunidad de compra.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        proposalText: { type: 'string', description: 'Texto de la propuesta del broker o descripción del activo' },
+      },
+      required: ['proposalText'],
+    },
+  },
+  {
+    name: 'simulate_acquisition',
+    description: 'Simula la compra de un inmueble: calcula yield, cash-flow, ROI, impacto fiscal, proyección a 10 años. Usar cuando preguntan "qué pasaría si compramos X".',
+    input_schema: {
+      type: 'object',
+      properties: {
+        precioCompra: { type: 'number', description: 'Precio de compra en euros' },
+        rentaMensualEstimada: { type: 'number', description: 'Renta mensual estimada en euros' },
+        hipotecaCapital: { type: 'number', description: 'Capital hipoteca (0 si sin hipoteca)' },
+        hipotecaInteres: { type: 'number', description: 'Tipo interés hipoteca (%)' },
+      },
+      required: ['precioCompra', 'rentaMensualEstimada'],
+    },
+  },
+  {
+    name: 'negotiate_deal',
+    description: 'Genera estrategia de negociación para una compra. Calcula contraoferta, argumentos, concesiones. Usar cuando piden "cómo negociar" o "qué ofrecer".',
+    input_schema: {
+      type: 'object',
+      properties: {
+        precioSolicitado: { type: 'number', description: 'Precio que pide el vendedor' },
+        rentaMensualActual: { type: 'number', description: 'Renta mensual actual del activo' },
+        ubicacion: { type: 'string', description: 'Dirección o zona' },
+      },
+      required: ['precioSolicitado'],
+    },
+  },
+  {
+    name: 'screen_tenant',
+    description: 'Analiza solvencia de un candidato a inquilino. Calcula score de riesgo y recomendación. Usar cuando piden "evaluar inquilino" o "verificar solvencia".',
+    input_schema: {
+      type: 'object',
+      properties: {
+        tenantName: { type: 'string', description: 'Nombre del candidato' },
+        rentaMensual: { type: 'number', description: 'Renta mensual de la vivienda' },
+        ingresosMensuales: { type: 'number', description: 'Ingresos mensuales del candidato' },
+        tipoContrato: { type: 'string', description: 'Tipo contrato laboral: indefinido, temporal, autónomo' },
+      },
+      required: ['tenantName', 'rentaMensual'],
+    },
+  },
+  {
+    name: 'generate_rental_contract',
+    description: 'Genera un contrato de arrendamiento LAU personalizado. Usar cuando piden "crear contrato" o "generar contrato".',
+    input_schema: {
+      type: 'object',
+      properties: {
+        tenantName: { type: 'string' },
+        tenantDni: { type: 'string' },
+        address: { type: 'string' },
+        unitNumber: { type: 'string' },
+        rentaMensual: { type: 'number' },
+        tipo: { type: 'string', description: 'vivienda_habitual, temporada, local_comercial, garaje' },
+      },
+      required: ['tenantName', 'address', 'rentaMensual'],
+    },
+  },
+  {
+    name: 'check_delinquency_risk',
+    description: 'Obtiene el score de riesgo de morosidad de los inquilinos. Usar cuando preguntan por morosos, riesgo de impago, o inquilinos problemáticos.',
+    input_schema: {
+      type: 'object',
+      properties: {},
+    },
+  },
+  {
+    name: 'optimize_rents',
+    description: 'Analiza qué unidades están rentando por debajo del mercado y calcula potencial de incremento. Usar cuando preguntan por "optimizar rentas" o "subir precios".',
+    input_schema: {
+      type: 'object',
+      properties: {},
+    },
+  },
+  {
+    name: 'find_missing_documents',
+    description: 'Detecta documentación faltante: contratos sin PDF, DNIs caducados, seguros vencidos. Usar cuando preguntan por "documentos pendientes" o "qué falta".',
+    input_schema: {
+      type: 'object',
+      properties: {},
+    },
+  },
+  {
+    name: 'get_market_data',
+    description: 'Obtiene datos de mercado (Idealista/Fotocasa) para una zona: precio venta/m², alquiler/m², tendencia. Usar cuando preguntan por "precios de mercado" o "comparar con zona".',
+    input_schema: {
+      type: 'object',
+      properties: {
+        address: { type: 'string', description: 'Dirección o zona (ej: Chamberí, Silvela, Espronceda)' },
+      },
+      required: ['address'],
+    },
+  },
+  {
+    name: 'get_predictive_maintenance',
+    description: 'Analiza patrones de averías por edificio y predice próximas incidencias. Usar cuando preguntan por "mantenimiento preventivo" o "averías recurrentes".',
+    input_schema: {
+      type: 'object',
+      properties: {},
+    },
+  },
 ];
 
 // ============================================================================
 // IMPLEMENTACIÓN DE HERRAMIENTAS
 // ============================================================================
+
+/**
+ * Delega ejecución a un agente especializado (API interna)
+ */
+async function delegateToAgent(
+  apiPath: string,
+  body: any,
+  context: AssistantContext,
+  method: 'POST' | 'GET' = 'POST'
+): Promise<any> {
+  try {
+    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+    const url = `${baseUrl}${apiPath}`;
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'x-company-id': context.companyId,
+    };
+
+    const res = await fetch(url, {
+      method,
+      headers,
+      ...(method === 'POST' && { body: JSON.stringify(body) }),
+    });
+
+    if (res.ok) {
+      return await res.json();
+    }
+
+    const errorText = await res.text().catch(() => '');
+    return { success: false, error: `Agent returned ${res.status}`, details: errorText.substring(0, 200) };
+  } catch (error: any) {
+    logger.warn(`[Agent Delegate] Error calling ${apiPath}:`, error.message);
+    return { success: false, error: `Error connecting to agent: ${error.message}` };
+  }
+}
 
 async function executeTool(
   toolName: string,
@@ -834,6 +984,58 @@ async function executeTool(
       case 'get_accounting_summary':
         return await getAccountingSummary(toolInput, context);
 
+      // ========== AGENTES ESPECIALIZADOS ==========
+      case 'evaluate_investment_proposal':
+        return await delegateToAgent('/api/ai/evaluate-proposal', { proposalText: toolInput.proposalText }, context);
+
+      case 'simulate_acquisition':
+        return await delegateToAgent('/api/investment/simulate-acquisition', {
+          precioCompra: toolInput.precioCompra,
+          rentaMensualEstimada: toolInput.rentaMensualEstimada,
+          hipoteca: toolInput.hipotecaCapital ? {
+            capitalInicial: toolInput.hipotecaCapital,
+            interes: toolInput.hipotecaInteres || 3,
+            plazoAnos: 25,
+          } : undefined,
+        }, context);
+
+      case 'negotiate_deal':
+        return await delegateToAgent('/api/ai/negotiation-agent', toolInput, context);
+
+      case 'screen_tenant':
+        return await delegateToAgent('/api/ai/tenant-screening', toolInput, context);
+
+      case 'generate_rental_contract':
+        return await delegateToAgent('/api/ai/generate-contract', {
+          ...toolInput,
+          buildingName: toolInput.address,
+          deposito: (toolInput.rentaMensual || 0) * 2,
+          duracionMeses: 12,
+          fechaInicio: new Date().toISOString().split('T')[0],
+          tipo: toolInput.tipo || 'vivienda_habitual',
+        }, context);
+
+      case 'check_delinquency_risk':
+        return await delegateToAgent('/api/ai/delinquency-risk', {}, context, 'GET');
+
+      case 'optimize_rents':
+        return await delegateToAgent('/api/ai/rent-optimization', {}, context, 'GET');
+
+      case 'find_missing_documents':
+        return await delegateToAgent('/api/ai/missing-documents', {}, context, 'GET');
+
+      case 'get_market_data': {
+        const { getMarketDataByAddress, estimateMarketValue } = await import('@/lib/market-data-service');
+        const mkt = getMarketDataByAddress(toolInput.address);
+        if (mkt) {
+          return { success: true, zona: mkt.zona, precioVentaM2: mkt.precioVentaM2, alquilerM2: mkt.precioAlquilerM2, garajeVenta: mkt.precioGarajeVenta, garajeAlquiler: mkt.precioGarajeAlquiler, tendencia: mkt.tendencia, demanda: mkt.demanda, fuente: mkt.fuente };
+        }
+        return { success: false, message: 'No se encontraron datos de mercado para esa zona.' };
+      }
+
+      case 'get_predictive_maintenance':
+        return await delegateToAgent('/api/ai/predictive-maintenance', {}, context, 'GET');
+
       default:
         return { error: `Unknown tool: ${toolName}` };
     }
@@ -851,9 +1053,23 @@ export async function chatWithClaude(
   context: AssistantContext
 ): Promise<AssistantResponse> {
   try {
-    const systemPrompt = `Eres un asistente IA experto en gestión inmobiliaria llamado INMOVA Assistant. Actúas como operador completo de la plataforma.
+    const systemPrompt = `Eres INMOVA Assistant, el asistente IA central de la plataforma de gestión inmobiliaria. Actúas como COORDINADOR de todos los agentes especializados del sistema.
 
-Tus capacidades:
+Cuando el usuario pide algo que requiere un agente especializado, DEBES usar la herramienta correspondiente:
+- Analizar propuesta de inversión → evaluate_investment_proposal
+- Simular compra de inmueble → simulate_acquisition
+- Estrategia de negociación → negotiate_deal
+- Evaluar solvencia inquilino → screen_tenant
+- Generar contrato → generate_rental_contract
+- Ver riesgo de morosidad → check_delinquency_risk
+- Optimizar rentas → optimize_rents
+- Documentos faltantes → find_missing_documents
+- Precios de mercado de una zona → get_market_data
+- Mantenimiento predictivo → get_predictive_maintenance
+
+REGLA FUNDAMENTAL: Si el usuario pregunta algo que un agente especializado puede resolver, SIEMPRE delega al agente. No intentes responder tú directamente con datos inventados.
+
+Tus capacidades directas (sin agente):
 
 CONSULTAS:
 - Buscar y consultar edificios, unidades, inquilinos, contratos y pagos
