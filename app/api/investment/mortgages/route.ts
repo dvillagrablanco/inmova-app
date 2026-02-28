@@ -119,6 +119,15 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Auto-generar tabla de amortización completa
+    try {
+      const { generateMortgageAmortizationTable } = await import('@/lib/mortgage-amortization-service');
+      const paymentsGenerated = await generateMortgageAmortizationTable(mortgage.id);
+      logger.info(`[Mortgages POST] Generated ${paymentsGenerated} amortization payments for mortgage ${mortgage.id}`);
+    } catch (amortError: any) {
+      logger.warn(`[Mortgages POST] Could not generate amortization table: ${amortError.message}`);
+    }
+
     return NextResponse.json({ success: true, data: mortgage }, { status: 201 });
   } catch (error: any) {
     if (error instanceof z.ZodError) {
