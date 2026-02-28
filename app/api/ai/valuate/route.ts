@@ -2,10 +2,12 @@ import { CLAUDE_MODEL_FAST, CLAUDE_MODEL_PRIMARY } from '@/lib/ai-model-config';
 /**
  * API Route: Valoración Automática con IA
  * POST /api/ai/valuate
- * 
+ *
  * Usa Claude AI para estimar el valor de una propiedad
- * basándose en sus características y datos del mercado
- * 
+ * basándose en sus características y datos del mercado obtenidos
+ * de múltiples plataformas: Idealista, Fotocasa, Habitaclia,
+ * Notariado, INE y base de datos interna.
+ *
  * Auth: Requiere sesión activa
  */
 
@@ -17,6 +19,10 @@ import { PropertyData } from '@/lib/claude-ai-service';
 import { z } from 'zod';
 import { checkAILimit, createLimitExceededResponse, logUsageWarning } from '@/lib/usage-limits';
 import { trackUsage } from '@/lib/usage-tracking-service';
+import {
+  getAggregatedMarketData,
+  formatPlatformDataForPrompt,
+} from '@/lib/external-platform-data-service';
 
 import logger from '@/lib/logger';
 import Anthropic from '@anthropic-ai/sdk';
@@ -58,19 +64,22 @@ async function valuatePropertyEnhanced(
     orientacion: string;
     descripcionAdicional: string;
     comparables: any[];
+    platformDataText?: string;
   }
 ) {
   const anthropic = new Anthropic({
     apiKey: process.env.ANTHROPIC_API_KEY || '',
   });
 
-  const caracteristicasStr = options.caracteristicas.length > 0 
-    ? options.caracteristicas.join(', ') 
-    : 'Ninguna adicional';
+  const caracteristicasStr =
+    options.caracteristicas.length > 0 ? options.caracteristicas.join(', ') : 'Ninguna adicional';
 
-  const comparablesStr = options.comparables.length > 0
-    ? options.comparables.map(c => `- ${c.address}: ${c.price}€ (${c.squareMeters}m²)`).join('\n')
-    : 'No se encontraron comparables en la base de datos.';
+  const comparablesStr =
+    options.comparables.length > 0
+      ? options.comparables
+          .map((c) => `- ${c.address}: ${c.price}€ (${c.squareMeters}m²)`)
+          .join('\n')
+      : 'No se encontraron comparables en la base de datos interna.';
 
   const prompt = `Eres un tasador inmobiliario certificado con 20 años de experiencia en el mercado español.
 
@@ -85,16 +94,18 @@ PROPIEDAD A VALORAR:
 - Características: ${caracteristicasStr}
 ${options.descripcionAdicional ? `- Información adicional: ${options.descripcionAdicional}` : ''}
 
-PROPIEDADES COMPARABLES EN BD:
+PROPIEDADES COMPARABLES DEL PORTFOLIO INTERNO:
 ${comparablesStr}
 
-DATOS DE MERCADO DE LA ZONA:
-${(() => {
-  try {
-    const { getMarketDataByAddress } = require('@/lib/market-data-service');
-    const mktData = getMarketDataByAddress(`${property.address}, ${property.city}`);
-    if (mktData) {
-      return `- Zona: ${mktData.zona}
+${
+  options.platformDataText ||
+  (() => {
+    try {
+      const { getMarketDataByAddress } = require('@/lib/market-data-service');
+      const mktData = getMarketDataByAddress(`${property.address}, ${property.city}`);
+      if (mktData) {
+        return `=== DATOS DE MERCADO (fuente: datos de referencia estáticos) ===
+- Zona: ${mktData.zona}
 
 PRECIOS REALES (escriturados, fuente: Notariado penotariado.com):
 - Precio venta REAL: ${mktData.precioRealVentaM2}€/m² (transacciones escrituradas)
@@ -110,11 +121,14 @@ ASKING PRICES (portales Idealista/Fotocasa — NO son precio real, son ~12% supe
 - Demanda: ${mktData.demanda}
 - Fuentes: ${mktData.fuenteNotarial} + ${mktData.fuente}
 
-IMPORTANTE: Basa tu valoración en los PRECIOS REALES escriturados del Notariado, NO en los asking prices de portales. Los asking prices son orientativos pero están inflados ~12%.`;
+IMPORTANTE: Basa tu valoración en los PRECIOS REALES escriturados del Notariado, NO en los asking prices de portales.`;
+      }
+      return 'No se encontraron datos de mercado para esta zona.';
+    } catch {
+      return 'Datos de mercado no disponibles.';
     }
-    return 'No se encontraron datos de mercado para esta zona.';
-  } catch { return 'Datos de mercado no disponibles.'; }
-})()}
+  })()
+}
 
 FINALIDAD: ${options.finalidad === 'venta' ? 'Venta' : options.finalidad === 'alquiler' ? 'Alquiler' : 'Venta y Alquiler'}
 
@@ -208,17 +222,17 @@ function generateMockComparables(property: PropertyData, precioM2: number) {
 function generateFallbackValuation(property: PropertyData, finalidad: string) {
   // Precios base por m² según ciudad (aproximados 2024)
   const preciosBase: Record<string, number> = {
-    'Madrid': 4200,
-    'Barcelona': 4500,
-    'Valencia': 2300,
-    'Sevilla': 2100,
-    'Málaga': 2800,
-    'default': 2500,
+    Madrid: 4200,
+    Barcelona: 4500,
+    Valencia: 2300,
+    Sevilla: 2100,
+    Málaga: 2800,
+    default: 2500,
   };
-  
+
   const precioBase = preciosBase[property.city] || preciosBase['default'];
   const superficie = property.squareMeters;
-  
+
   // Ajustes por características
   let multiplicador = 1;
   if (property.hasElevator) multiplicador += 0.05;
@@ -226,10 +240,10 @@ function generateFallbackValuation(property: PropertyData, finalidad: string) {
   if (property.hasPool) multiplicador += 0.06;
   if (property.condition === 'NEW') multiplicador += 0.15;
   if (property.condition === 'NEEDS_RENOVATION') multiplicador -= 0.15;
-  
+
   const precioM2 = Math.round(precioBase * multiplicador);
   const valorEstimado = Math.round(precioM2 * superficie);
-  
+
   return {
     valorEstimado,
     valorMinimo: Math.round(valorEstimado * 0.9),
@@ -244,10 +258,7 @@ function generateFallbackValuation(property: PropertyData, finalidad: string) {
       `${property.rooms} habitaciones`,
       'Superficie adecuada',
     ],
-    factoresNegativos: [
-      'Valoración automática (sin IA)',
-      'Datos de mercado limitados',
-    ],
+    factoresNegativos: ['Valoración automática (sin IA)', 'Datos de mercado limitados'],
     recomendaciones: [
       'Solicitar tasación profesional para mayor precisión',
       'Comparar con propiedades similares en portales',
@@ -256,7 +267,7 @@ function generateFallbackValuation(property: PropertyData, finalidad: string) {
     analisisMercado: `El mercado inmobiliario en ${property.city} presenta una tendencia estable. Los precios por m² rondan los ${precioM2}€ en zonas similares.`,
     tiempoEstimadoVenta: '3-4 meses',
     rentabilidadAlquiler: 4.5,
-    alquilerEstimado: Math.round(valorEstimado * 0.045 / 12),
+    alquilerEstimado: Math.round((valorEstimado * 0.045) / 12),
   };
 }
 
@@ -264,29 +275,32 @@ function generateFallbackValuation(property: PropertyData, finalidad: string) {
 const valuateSchema = z.object({
   // Campos requeridos
   superficie: z.number().positive(),
-  
+
   // Campos opcionales básicos
   habitaciones: z.number().int().nonnegative().optional().default(0),
   banos: z.number().int().nonnegative().optional().default(0),
   antiguedad: z.number().int().nonnegative().optional().default(0),
   planta: z.number().int().optional().default(0),
-  
+
   // Características opcionales
-  estadoConservacion: z.enum(['excelente', 'muy_bueno', 'bueno', 'normal', 'reformar']).optional().default('bueno'),
+  estadoConservacion: z
+    .enum(['excelente', 'muy_bueno', 'bueno', 'normal', 'reformar'])
+    .optional()
+    .default('bueno'),
   orientacion: z.enum(['norte', 'sur', 'este', 'oeste']).optional().default('sur'),
   finalidad: z.enum(['venta', 'alquiler', 'ambos']).optional().default('venta'),
   caracteristicas: z.array(z.string()).optional().default([]),
   descripcionAdicional: z.string().optional().default(''),
-  
+
   // Ubicación
   direccion: z.string().optional().default(''),
   ciudad: z.string().optional().default('Madrid'),
   codigoPostal: z.string().optional().default(''),
-  
+
   // IDs opcionales
   unitId: z.string().optional(),
   propertyId: z.string().optional(),
-  
+
   // Compatibilidad con esquema antiguo (alias)
   address: z.string().optional(),
   postalCode: z.string().optional(),
@@ -310,9 +324,9 @@ const valuateSchema = z.object({
 
 /**
  * POST /api/ai/valuate
- * 
+ *
  * Body: PropertyData (ver schema)
- * 
+ *
  * Response:
  * {
  *   success: true,
@@ -342,11 +356,11 @@ export async function POST(request: NextRequest) {
     // 2. Verificar límite de IA (estimar ~1000 tokens por valoración)
     const ESTIMATED_TOKENS_PER_VALUATION = 1000;
     const limitCheck = await checkAILimit(session.user.companyId, ESTIMATED_TOKENS_PER_VALUATION);
-    
+
     if (!limitCheck.allowed) {
       return createLimitExceededResponse(limitCheck);
     }
-    
+
     // Log warning si está cerca del límite (80%)
     logUsageWarning(session.user.companyId, limitCheck);
 
@@ -355,7 +369,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error: 'IA no configurada',
-          message: 'El servicio de valoración con IA no está disponible. Contacta al administrador para configurar Claude AI.',
+          message:
+            'El servicio de valoración con IA no está disponible. Contacta al administrador para configurar Claude AI.',
         },
         { status: 503 }
       );
@@ -365,15 +380,41 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validated = valuateSchema.parse(body);
 
-    // 4. Si hay unitId, enriquecer con datos comparables de BD
-    let comparables: any[] = [];
-
-    // 5. Preparar datos para IA - mapear nuevos campos al formato esperado
-    const superficie = validated.superficie || validated.squareMeters || 80;
-    const habitaciones = validated.habitaciones || validated.rooms || 2;
-    const banos = validated.banos || validated.bathrooms || 1;
+    // 4. Obtener datos de múltiples plataformas externas
     const ciudad = validated.ciudad || validated.city || 'Madrid';
     const direccion = validated.direccion || validated.address || 'Centro';
+    const superficie = validated.superficie || validated.squareMeters || 80;
+    const habitaciones = validated.habitaciones || validated.rooms || 2;
+
+    let aggregatedPlatformData;
+    let platformDataText = '';
+    try {
+      aggregatedPlatformData = await getAggregatedMarketData({
+        city: ciudad,
+        postalCode: validated.codigoPostal || validated.postalCode || '',
+        address: direccion,
+        companyId: session.user.companyId,
+        squareMeters: superficie,
+        rooms: habitaciones,
+      });
+      platformDataText = formatPlatformDataForPrompt(aggregatedPlatformData);
+      logger.info('[AI Valuate] Datos de plataformas obtenidos', {
+        sourcesUsed: aggregatedPlatformData.sourcesUsed,
+        reliability: aggregatedPlatformData.overallReliability,
+        comparablesCount: aggregatedPlatformData.allComparables.length,
+      });
+    } catch (platformError) {
+      logger.warn(
+        '[AI Valuate] Error obteniendo datos de plataformas, continuando sin ellos:',
+        platformError
+      );
+    }
+
+    // 5. Si hay unitId, enriquecer con datos comparables de BD
+    let comparables: any[] = [];
+
+    // 6. Preparar datos para IA - mapear nuevos campos al formato esperado
+    const banos = validated.banos || validated.bathrooms || 1;
 
     if (validated.unitId) {
       const selectedUnit = await prisma.unit.findFirst({
@@ -426,7 +467,7 @@ export async function POST(request: NextRequest) {
           }));
       }
     }
-    
+
     const propertyData: PropertyData = {
       address: direccion,
       city: ciudad,
@@ -435,7 +476,8 @@ export async function POST(request: NextRequest) {
       rooms: habitaciones,
       bathrooms: banos,
       floor: validated.planta || validated.floor || 0,
-      hasElevator: validated.caracteristicas?.includes('ascensor') || validated.hasElevator || false,
+      hasElevator:
+        validated.caracteristicas?.includes('ascensor') || validated.hasElevator || false,
       hasParking:
         validated.caracteristicas?.includes('garaje') ||
         validated.caracteristicas?.includes('parking') ||
@@ -447,13 +489,14 @@ export async function POST(request: NextRequest) {
       neighborhood: validated.neighborhood || '',
     };
 
-    // 6. Llamar a Claude AI para valoración completa
+    // 7. Llamar a Claude AI para valoración completa con datos de plataformas
     const valuation = await valuatePropertyEnhanced(propertyData, {
       finalidad: validated.finalidad || 'venta',
       caracteristicas: validated.caracteristicas || [],
       orientacion: validated.orientacion || 'sur',
       descripcionAdicional: validated.descripcionAdicional || '',
       comparables,
+      platformDataText,
     });
 
     // 7. Normalizar resultados de IA
@@ -566,10 +609,36 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // 11. Respuesta exitosa - devolver todos los datos para la UI
+    // 12. Respuesta exitosa - devolver todos los datos incluyendo fuentes de plataformas
     return NextResponse.json({
       success: true,
       ...valuation,
+      platformSources: aggregatedPlatformData
+        ? {
+            sourcesUsed: aggregatedPlatformData.sourcesUsed,
+            sourcesFailed: aggregatedPlatformData.sourcesFailed,
+            overallReliability: aggregatedPlatformData.overallReliability,
+            weightedSalePricePerM2: aggregatedPlatformData.weightedSalePricePerM2,
+            weightedRentPricePerM2: aggregatedPlatformData.weightedRentPricePerM2,
+            marketTrend: aggregatedPlatformData.marketTrend,
+            trendPercentage: aggregatedPlatformData.trendPercentage,
+            demandLevel: aggregatedPlatformData.demandLevel,
+            avgDaysOnMarket: aggregatedPlatformData.avgDaysOnMarket,
+            dataFreshness: aggregatedPlatformData.dataFreshness,
+            platformDetails: aggregatedPlatformData.platformData.map((pd) => ({
+              source: pd.source,
+              sourceLabel: pd.sourceLabel,
+              sourceUrl: pd.sourceUrl,
+              reliability: pd.reliability,
+              dataType: pd.dataType,
+              pricePerM2Sale: pd.pricePerM2Sale,
+              pricePerM2Rent: pd.pricePerM2Rent,
+              sampleSize: pd.sampleSize,
+              trend: pd.trend,
+            })),
+            comparablesCount: aggregatedPlatformData.allComparables.length,
+          }
+        : null,
       message: 'Valoración completada con éxito',
     });
   } catch (error: any) {
@@ -648,9 +717,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error: any) {
     logger.error('[API AI Valuate GET] Error:', error);
-    return NextResponse.json(
-      { error: 'Error obteniendo valoraciones' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error obteniendo valoraciones' }, { status: 500 });
   }
 }

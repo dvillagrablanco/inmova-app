@@ -1,15 +1,29 @@
 /**
  * Servicio de Valoración Automática de Propiedades con IA
- * 
+ *
  * Utiliza Anthropic Claude para valorar propiedades inmobiliarias
- * basándose en características de la propiedad y datos del mercado.
- * 
+ * basándose en características de la propiedad y datos del mercado
+ * obtenidos de múltiples plataformas:
+ *
+ * - Idealista (asking prices)
+ * - Fotocasa (asking prices)
+ * - Habitaclia (asking prices, fuerte en Cataluña)
+ * - Notariado (precios reales escriturados)
+ * - INE (índice de precios de vivienda)
+ * - Base de datos interna (portfolio propio)
+ *
  * @module PropertyValuationService
  */
 
 import Anthropic from '@anthropic-ai/sdk';
 import { prisma } from './db';
 import logger from './logger';
+import {
+  getAggregatedMarketData,
+  formatPlatformDataForPrompt,
+  type AggregatedMarketData,
+  type PlatformSource,
+} from './external-platform-data-service';
 
 // ============================================================================
 // CONFIGURACIÓN
@@ -71,11 +85,14 @@ export interface ValuationResult {
   estimatedROI?: number;
   capRate?: number;
   recommendations: string[];
+  platformSources?: PlatformSource[];
+  platformDataSummary?: string;
 }
 
 export interface ValuationRequest {
   property: PropertyFeatures;
   marketData?: MarketData;
+  aggregatedPlatformData?: AggregatedMarketData;
   userId: string;
   companyId: string;
   unitId?: string;
@@ -123,9 +140,7 @@ async function fetchMarketData(
     });
 
     // Calcular precio medio por m²
-    const validComparables = comparables.filter(
-      (c) => c.superficie && c.rentaMensual
-    );
+    const validComparables = comparables.filter((c) => c.superficie && c.rentaMensual);
 
     if (validComparables.length === 0) {
       logger.warn(`No market data found for ${city}, ${postalCode}`);
@@ -156,30 +171,25 @@ async function fetchMarketData(
 }
 
 /**
- * Obtiene el precio medio por m² desde APIs externas (mock)
- * En producción: Idealista API, Fotocasa API, etc.
+ * Obtiene datos de mercado consolidados desde múltiples plataformas externas
+ * (Idealista, Fotocasa, Habitaclia, Notariado, INE, base interna)
  */
-async function fetchExternalMarketData(
+async function fetchExternalMarketDataFromPlatforms(
   city: string,
-  postalCode: string
-): Promise<{ avgPricePerM2: number; trend: 'UP' | 'STABLE' | 'DOWN' }> {
-  // Mock de datos para desarrollo
-  // En producción, hacer fetch real a APIs externas
-  const cityPrices: Record<string, number> = {
-    Madrid: 15,
-    Barcelona: 18,
-    Valencia: 10,
-    Sevilla: 9,
-    Málaga: 11,
-    Bilbao: 12,
-  };
-
-  const avgPricePerM2 = cityPrices[city] || 10;
-
-  return {
-    avgPricePerM2,
-    trend: 'STABLE',
-  };
+  postalCode: string,
+  address?: string,
+  companyId?: string,
+  squareMeters?: number,
+  rooms?: number
+): Promise<AggregatedMarketData> {
+  return getAggregatedMarketData({
+    city,
+    postalCode,
+    address,
+    companyId,
+    squareMeters,
+    rooms,
+  });
 }
 
 // ============================================================================
@@ -187,11 +197,12 @@ async function fetchExternalMarketData(
 // ============================================================================
 
 /**
- * Genera prompt optimizado para Claude
+ * Genera prompt optimizado para Claude con datos de múltiples plataformas
  */
 function buildValuationPrompt(
   property: PropertyFeatures,
-  marketData: MarketData
+  marketData: MarketData,
+  platformDataText?: string
 ): string {
   const featuresText = `
 Ubicación:
@@ -216,14 +227,13 @@ ${property.floor !== undefined ? `- Planta: ${property.floor}` : ''}
 ${property.yearBuilt ? `- Año de construcción: ${property.yearBuilt}` : ''}
 `;
 
-  const marketDataText = `
-Datos del mercado:
-${marketData.avgPricePerM2 ? `- Precio medio por m² en la zona: ${marketData.avgPricePerM2}€/m²` : '- Precio medio por m²: No disponible'}
-${marketData.trend ? `- Tendencia del mercado: ${marketData.trend}` : ''}
-
+  const internalMarketText = `
+Datos internos del mercado:
+${marketData.avgPricePerM2 ? `- Precio medio por m² (base interna): ${marketData.avgPricePerM2}€/m²` : ''}
+${marketData.trend ? `- Tendencia interna: ${marketData.trend}` : ''}
 ${
   marketData.comparables && marketData.comparables.length > 0
-    ? `Propiedades comparables:
+    ? `Comparables del portfolio interno:
 ${marketData.comparables
   .map(
     (c, i) =>
@@ -236,18 +246,23 @@ ${marketData.comparables
 
   return `Eres un tasador inmobiliario certificado con 20 años de experiencia en el mercado español.
 
-Tu tarea: Valorar esta propiedad con precisión y proporcionar recomendaciones.
+Tu tarea: Valorar esta propiedad con precisión, utilizando datos de MÚLTIPLES FUENTES de mercado.
 
 PROPIEDAD A VALORAR:
 ${featuresText}
 
-${marketDataText}
+${platformDataText || '(Sin datos de plataformas externas disponibles)'}
+
+${internalMarketText}
 
 INSTRUCCIONES:
 1. Analiza todas las características de la propiedad
-2. Considera la ubicación y el estado del mercado
-3. Compara con propiedades similares si están disponibles
-4. Calcula un precio estimado realista
+2. CRUZA los datos de las diferentes plataformas (Idealista, Fotocasa, Notariado, INE, etc.)
+3. Prioriza los PRECIOS REALES del Notariado (escriturados) sobre los asking prices de portales
+4. Los asking prices de Idealista/Fotocasa están inflados ~12% respecto al cierre real
+5. Compara con propiedades similares de todas las fuentes
+6. Calcula un precio estimado realista basado en la ponderación de fuentes
+7. Indica en el reasoning qué fuentes pesaron más en tu valoración
 
 Proporciona tu valoración en formato JSON con la siguiente estructura exacta:
 
@@ -256,7 +271,7 @@ Proporciona tu valoración en formato JSON con la siguiente estructura exacta:
   "confidenceScore": number (0-100),
   "minValue": number,
   "maxValue": number,
-  "reasoning": "string con explicación detallada de tu valoración (máximo 500 palabras)",
+  "reasoning": "string con explicación detallada incluyendo qué fuentes de datos usaste y cómo las ponderaste (máximo 500 palabras)",
   "keyFactors": ["factor1", "factor2", "factor3", ...],
   "estimatedRent": number (renta mensual estimada),
   "estimatedROI": number (ROI anual en porcentaje),
@@ -266,31 +281,35 @@ Proporciona tu valoración en formato JSON con la siguiente estructura exacta:
 
 IMPORTANTE:
 - estimatedValue debe ser el precio de venta estimado en euros
-- confidenceScore indica qué tan seguro estás de tu valoración (100 = muy seguro)
-- minValue y maxValue deben ser un rango razonable (±10-15% del valor estimado)
-- estimatedRent es la renta mensual que podría generar
-- estimatedROI es el retorno de inversión anual esperado
-- capRate es la tasa de capitalización (renta anual / valor de propiedad)
-- keyFactors son los 3-5 factores más importantes que influyeron en tu valoración
-- recommendations son sugerencias para aumentar el valor de la propiedad
+- confidenceScore: mayor si hay datos del Notariado/INE, menor si solo hay asking prices
+- minValue y maxValue: rango razonable (±10-15% del valor estimado)
+- En el reasoning, menciona explícitamente las fuentes consultadas y su peso
+- keyFactors: 3-5 factores clave incluyendo las fuentes de datos que influyeron
+- recommendations: sugerencias para aumentar el valor
 
 Sé preciso, realista y profesional en tu análisis.`;
 }
 
 /**
- * Valora una propiedad usando IA (Claude)
+ * Valora una propiedad usando IA (Claude) con datos de múltiples plataformas
  */
 export async function valuateProperty(
   property: PropertyFeatures,
-  marketData: MarketData
+  marketData: MarketData,
+  aggregatedPlatformData?: AggregatedMarketData
 ): Promise<ValuationResult> {
   try {
-    const prompt = buildValuationPrompt(property, marketData);
+    const platformDataText = aggregatedPlatformData
+      ? formatPlatformDataForPrompt(aggregatedPlatformData)
+      : undefined;
+
+    const prompt = buildValuationPrompt(property, marketData, platformDataText);
 
     logger.info('🏡 Starting property valuation with AI', {
       city: property.city,
       squareMeters: property.squareMeters,
       rooms: property.rooms,
+      platformSources: aggregatedPlatformData?.sourcesUsed || [],
     });
 
     const message = await anthropic.messages.create({
@@ -313,7 +332,7 @@ export async function valuateProperty(
 
     // Parsear el JSON de la respuesta
     const responseText = content.text;
-    
+
     // Extraer JSON del texto (puede venir envuelto en markdown)
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
@@ -324,21 +343,23 @@ export async function valuateProperty(
     const result: ValuationResult = JSON.parse(jsonMatch[0]);
 
     // Validar resultado
-    if (
-      !result.estimatedValue ||
-      !result.confidenceScore ||
-      !result.minValue ||
-      !result.maxValue
-    ) {
+    if (!result.estimatedValue || !result.confidenceScore || !result.minValue || !result.maxValue) {
       throw new Error('Incomplete valuation result from AI');
     }
 
     // Calcular precio por m²
     result.pricePerM2 = Math.round((result.estimatedValue / property.squareMeters) * 100) / 100;
 
+    // Agregar metadatos de plataformas usadas
+    if (aggregatedPlatformData) {
+      result.platformSources = aggregatedPlatformData.sourcesUsed;
+      result.platformDataSummary = `Datos obtenidos de ${aggregatedPlatformData.sourcesUsed.length} fuentes: ${aggregatedPlatformData.sourcesUsed.join(', ')}. Fiabilidad global: ${aggregatedPlatformData.overallReliability}%`;
+    }
+
     logger.info('✅ Property valuation completed', {
       estimatedValue: result.estimatedValue,
       confidenceScore: result.confidenceScore,
+      platformSources: result.platformSources,
     });
 
     return result;
@@ -355,31 +376,39 @@ export async function valuateProperty(
 /**
  * Valora una propiedad y guarda el resultado en base de datos
  */
-export async function valuateAndSaveProperty(
-  request: ValuationRequest
-): Promise<any> {
+export async function valuateAndSaveProperty(request: ValuationRequest): Promise<any> {
   try {
     const { property, userId, companyId, unitId, ipAddress, userAgent } = request;
 
-    // 1. Obtener datos del mercado
+    // 1. Obtener datos del mercado de múltiples plataformas
     let marketData = request.marketData;
-    
+    let aggregatedPlatformData = request.aggregatedPlatformData;
+
+    // Obtener datos de plataformas externas si no se proporcionaron
+    if (!aggregatedPlatformData) {
+      aggregatedPlatformData = await fetchExternalMarketDataFromPlatforms(
+        property.city,
+        property.postalCode,
+        property.address,
+        companyId,
+        property.squareMeters,
+        property.rooms
+      );
+    }
+
     if (!marketData || !marketData.avgPricePerM2) {
-      // Combinar datos internos y externos
-      const [internalData, externalData] = await Promise.all([
-        fetchMarketData(property.city, property.postalCode, companyId),
-        fetchExternalMarketData(property.city, property.postalCode),
-      ]);
+      const internalData = await fetchMarketData(property.city, property.postalCode, companyId);
 
       marketData = {
-        avgPricePerM2: internalData.avgPricePerM2 || externalData.avgPricePerM2,
-        trend: internalData.trend || externalData.trend,
+        avgPricePerM2:
+          internalData.avgPricePerM2 || aggregatedPlatformData.weightedSalePricePerM2 || undefined,
+        trend: internalData.trend || aggregatedPlatformData.marketTrend || undefined,
         comparables: internalData.comparables,
       };
     }
 
-    // 2. Valorar con IA
-    const valuation = await valuateProperty(property, marketData);
+    // 2. Valorar con IA, pasando datos de todas las plataformas
+    const valuation = await valuateProperty(property, marketData, aggregatedPlatformData);
 
     // 3. Guardar en base de datos
     const savedValuation = await prisma.propertyValuation.create({
@@ -387,7 +416,7 @@ export async function valuateAndSaveProperty(
         companyId,
         unitId: unitId || null,
         requestedBy: userId,
-        
+
         // Características de la propiedad
         address: property.address,
         postalCode: property.postalCode,
@@ -406,32 +435,32 @@ export async function valuateAndSaveProperty(
         hasGarage: property.hasGarage || false,
         condition: property.condition,
         yearBuilt: property.yearBuilt || null,
-        
+
         // Datos del mercado
         avgPricePerM2: marketData.avgPricePerM2 || null,
         marketTrend: marketData.trend || null,
         comparables: marketData.comparables || null,
-        
+
         // Resultado de la valoración
         estimatedValue: valuation.estimatedValue,
         confidenceScore: valuation.confidenceScore,
         minValue: valuation.minValue,
         maxValue: valuation.maxValue,
         pricePerM2: valuation.pricePerM2,
-        
+
         // IA Details
         model: CLAUDE_MODEL,
         reasoning: valuation.reasoning,
         keyFactors: valuation.keyFactors,
-        
+
         // ROI & Investment
         estimatedRent: valuation.estimatedRent || null,
         estimatedROI: valuation.estimatedROI || null,
         capRate: valuation.capRate || null,
-        
+
         // Recommendations
         recommendations: valuation.recommendations,
-        
+
         // Metadata
         ipAddress: ipAddress || null,
         userAgent: userAgent || null,

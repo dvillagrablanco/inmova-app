@@ -100,6 +100,33 @@ interface Unit {
   };
 }
 
+interface PlatformDetail {
+  source: string;
+  sourceLabel: string;
+  sourceUrl?: string;
+  reliability: number;
+  dataType: string;
+  pricePerM2Sale?: number;
+  pricePerM2Rent?: number;
+  sampleSize?: number;
+  trend?: string;
+}
+
+interface PlatformSources {
+  sourcesUsed: string[];
+  sourcesFailed: string[];
+  overallReliability: number;
+  weightedSalePricePerM2: number | null;
+  weightedRentPricePerM2: number | null;
+  marketTrend: string;
+  trendPercentage: number;
+  demandLevel: string;
+  avgDaysOnMarket: number | null;
+  dataFreshness: string;
+  platformDetails: PlatformDetail[];
+  comparablesCount: number;
+}
+
 interface ValoracionResult {
   valorEstimado: number;
   valorMinimo: number;
@@ -122,6 +149,7 @@ interface ValoracionResult {
   tiempoEstimadoVenta: string;
   rentabilidadAlquiler: number;
   alquilerEstimado: number;
+  platformSources?: PlatformSources | null;
 }
 
 // Características del inmueble
@@ -1290,6 +1318,134 @@ export default function ValoracionIAPage() {
                       </p>
                     </AccordionContent>
                   </AccordionItem>
+
+                  {/* Fuentes de Datos de Plataformas */}
+                  {resultado.platformSources &&
+                    resultado.platformSources.sourcesUsed?.length > 0 && (
+                      <AccordionItem value="plataformas">
+                        <AccordionTrigger>
+                          <span className="flex items-center gap-2">
+                            <BarChart3 className="h-4 w-4" />
+                            Fuentes de Datos ({resultado.platformSources.sourcesUsed.length}{' '}
+                            plataformas)
+                          </span>
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <div className="space-y-4">
+                            {/* Resumen */}
+                            <div className="grid grid-cols-2 gap-3">
+                              <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
+                                <p className="text-xs text-blue-600 font-medium">
+                                  Fiabilidad global
+                                </p>
+                                <p className="text-lg font-bold text-blue-800">
+                                  {resultado.platformSources.overallReliability}%
+                                </p>
+                              </div>
+                              {resultado.platformSources.weightedSalePricePerM2 && (
+                                <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-100">
+                                  <p className="text-xs text-emerald-600 font-medium">
+                                    Precio ponderado
+                                  </p>
+                                  <p className="text-lg font-bold text-emerald-800">
+                                    {formatCurrency(
+                                      resultado.platformSources.weightedSalePricePerM2
+                                    )}
+                                    /m²
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Detalle por plataforma */}
+                            <div className="space-y-2">
+                              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                                Desglose por fuente
+                              </p>
+                              {resultado.platformSources.platformDetails
+                                ?.filter((pd: PlatformDetail) => pd.reliability > 0)
+                                .sort(
+                                  (a: PlatformDetail, b: PlatformDetail) =>
+                                    b.reliability - a.reliability
+                                )
+                                .map((pd: PlatformDetail, idx: number) => (
+                                  <div
+                                    key={idx}
+                                    className="p-3 bg-muted/50 rounded-lg flex items-center justify-between"
+                                  >
+                                    <div className="flex-1">
+                                      <div className="flex items-center gap-2">
+                                        <p className="font-medium text-sm">{pd.sourceLabel}</p>
+                                        <Badge
+                                          variant="outline"
+                                          className={`text-xs ${
+                                            pd.dataType === 'transaction_price'
+                                              ? 'border-green-300 text-green-700 bg-green-50'
+                                              : pd.dataType === 'asking_price'
+                                                ? 'border-orange-300 text-orange-700 bg-orange-50'
+                                                : pd.dataType === 'index'
+                                                  ? 'border-blue-300 text-blue-700 bg-blue-50'
+                                                  : 'border-gray-300'
+                                          }`}
+                                        >
+                                          {pd.dataType === 'transaction_price'
+                                            ? 'Precio real'
+                                            : pd.dataType === 'asking_price'
+                                              ? 'Asking price'
+                                              : pd.dataType === 'index'
+                                                ? 'Indice'
+                                                : 'Estimación'}
+                                        </Badge>
+                                      </div>
+                                      <div className="flex gap-3 mt-1 text-xs text-muted-foreground">
+                                        {pd.pricePerM2Sale && (
+                                          <span>Venta: {formatCurrency(pd.pricePerM2Sale)}/m²</span>
+                                        )}
+                                        {pd.pricePerM2Rent && (
+                                          <span>Alquiler: {pd.pricePerM2Rent}€/m²/mes</span>
+                                        )}
+                                        {pd.sampleSize ? (
+                                          <span>{pd.sampleSize} muestras</span>
+                                        ) : null}
+                                      </div>
+                                    </div>
+                                    <div className="text-right">
+                                      <div className="flex items-center gap-1">
+                                        <div
+                                          className={`h-2 w-2 rounded-full ${
+                                            pd.reliability >= 80
+                                              ? 'bg-green-500'
+                                              : pd.reliability >= 60
+                                                ? 'bg-yellow-500'
+                                                : 'bg-red-500'
+                                          }`}
+                                        />
+                                        <span className="text-xs font-medium">
+                                          {pd.reliability}%
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                            </div>
+
+                            {/* Fuentes fallidas */}
+                            {resultado.platformSources.sourcesFailed?.length > 0 && (
+                              <div className="text-xs text-muted-foreground mt-2">
+                                <span className="font-medium">No disponibles: </span>
+                                {resultado.platformSources.sourcesFailed.join(', ')}
+                              </div>
+                            )}
+
+                            <p className="text-xs text-muted-foreground mt-2 italic">
+                              Los asking prices de Idealista/Fotocasa se ajustan -12% para aproximar
+                              el precio real de cierre. Los datos del Notariado son precios
+                              escriturados (máxima fiabilidad).
+                            </p>
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    )}
                 </Accordion>
 
                 {/* Acciones */}

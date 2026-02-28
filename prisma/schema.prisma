@@ -15090,6 +15090,56 @@ model PropertyValuation {
 }
 
 // ============================================================================
+// CACHE DE DATOS DE MERCADO DE PLATAFORMAS EXTERNAS
+// ============================================================================
+
+model ExternalMarketDataCache {
+  id String @id @default(cuid())
+
+  // Ubicación
+  city       String
+  postalCode String?
+  province   String?
+  neighborhood String?
+
+  // Fuente
+  source     String // 'idealista', 'fotocasa', 'habitaclia', 'notariado', 'ine'
+  sourceLabel String?
+  dataType   String // 'asking_price', 'transaction_price', 'index', 'estimate'
+
+  // Datos de precios
+  pricePerM2Sale  Float?
+  pricePerM2Rent  Float?
+  avgPrice        Float?
+  sampleSize      Int?
+
+  // Tendencia
+  trend           String? // 'UP', 'STABLE', 'DOWN'
+  trendPercentage Float?
+  demandLevel     String? // 'alta', 'media', 'baja'
+  avgDaysOnMarket Int?
+
+  // Comparables encontrados
+  comparables Json?
+
+  // Fiabilidad
+  reliability Int @default(0) // 0-100
+
+  // Datos crudos de la API
+  rawData Json?
+
+  // TTL
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([city, postalCode, source])
+  @@index([expiresAt])
+  @@index([source])
+  @@map("external_market_data_cache")
+}
+
+// ============================================================================
 // FIRMA DIGITAL DE CONTRATOS
 // ============================================================================
 

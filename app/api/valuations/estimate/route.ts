@@ -1,15 +1,18 @@
 /**
  * API Endpoint: Valoración Automática de Propiedades
- * 
+ *
  * POST /api/valuations/estimate
- * 
+ *
  * Utiliza IA (Anthropic Claude) para valorar propiedades inmobiliarias
+ * con datos de mercado de múltiples plataformas (Idealista, Fotocasa,
+ * Notariado, INE, base interna).
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { valuateAndSaveProperty } from '@/lib/property-valuation-service';
+import { getAggregatedMarketData } from '@/lib/external-platform-data-service';
 import { withRateLimit } from '@/lib/rate-limiting';
 import logger from '@/lib/logger';
 import { z } from 'zod';
@@ -40,7 +43,7 @@ const propertyValuationSchema = z.object({
   hasGarage: z.boolean().optional().default(false),
   condition: z.enum(['NEW', 'EXCELLENT', 'GOOD', 'FAIR', 'NEEDS_RENOVATION', 'POOR']),
   yearBuilt: z.number().int().min(1800).max(new Date().getFullYear()).optional(),
-  
+
   // Opcional: ID de unidad existente
   unitId: z.string().optional(),
 });
@@ -65,25 +68,22 @@ export async function POST(req: NextRequest) {
       const companyId = session.user.companyId;
 
       if (!userId || !companyId) {
-        return NextResponse.json(
-          { error: 'Usuario o empresa no encontrado' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Usuario o empresa no encontrado' }, { status: 400 });
       }
 
       // 2. Parsear y validar body
       const body = await req.json();
-      
+
       const validationResult = propertyValuationSchema.safeParse(body);
-      
+
       if (!validationResult.success) {
         const errors = validationResult.error.errors.map((err) => ({
           field: err.path.join('.'),
           message: err.message,
         }));
-        
+
         logger.warn('Validation error in property valuation:', { errors });
-        
+
         return NextResponse.json(
           {
             error: 'Datos inválidos',
@@ -96,7 +96,8 @@ export async function POST(req: NextRequest) {
       const validatedData = validationResult.data;
 
       // 3. Obtener metadata de la request
-      const ipAddress = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || undefined;
+      const ipAddress =
+        req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || undefined;
       const userAgent = req.headers.get('user-agent') || undefined;
 
       // 4. Ejecutar valoración con IA
@@ -109,8 +110,24 @@ export async function POST(req: NextRequest) {
 
       const startTime = Date.now();
 
+      // Obtener datos de múltiples plataformas
+      let aggregatedPlatformData;
+      try {
+        aggregatedPlatformData = await getAggregatedMarketData({
+          city: validatedData.city,
+          postalCode: validatedData.postalCode,
+          address: validatedData.address,
+          companyId,
+          squareMeters: validatedData.squareMeters,
+          rooms: validatedData.rooms,
+        });
+      } catch (platformError) {
+        logger.warn('Error obteniendo datos de plataformas:', platformError);
+      }
+
       const valuation = await valuateAndSaveProperty({
         property: validatedData,
+        aggregatedPlatformData,
         userId,
         companyId,
         unitId: validatedData.unitId,
@@ -185,7 +202,7 @@ export async function POST(req: NextRequest) {
           message: 'Ocurrió un error al procesar la valoración. Intenta de nuevo más tarde.',
         },
         { status: 500 }
-        );
+      );
     }
   });
 }
