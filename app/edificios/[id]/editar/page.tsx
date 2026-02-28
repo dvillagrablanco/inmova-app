@@ -29,6 +29,7 @@ import {
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import logger from '@/lib/logger';
+import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
 
 interface BuildingData {
   id: string;
@@ -494,6 +495,7 @@ export default function EditarEdificioPage() {
           </div>
         </form>
       </div>
+      <AIDocumentAssistant />
     </AuthenticatedLayout>
   );
 }

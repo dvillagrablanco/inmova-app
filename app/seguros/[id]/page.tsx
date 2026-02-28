@@ -56,6 +56,7 @@ import {
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
 
 interface Insurance {
   id: string;
@@ -717,6 +718,7 @@ export default function InsuranceDetailPage() {
           </DialogContent>
         </Dialog>
       </div>
+      <AIDocumentAssistant />
     </AuthenticatedLayout>
   );
 }

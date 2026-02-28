@@ -51,6 +51,7 @@ import {
 import { toast } from 'sonner';
 import { format, differenceInDays } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
 
 interface Contrato {
   id: string;
@@ -604,6 +605,7 @@ export default function RenovacionesContratosPage() {
           </DialogContent>
         </Dialog>
       </div>
+      <AIDocumentAssistant />
     </AuthenticatedLayout>
   );
 }

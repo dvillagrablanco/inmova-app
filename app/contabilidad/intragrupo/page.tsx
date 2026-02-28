@@ -45,6 +45,7 @@ import {
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
 
 interface Company {
   id: string;
@@ -309,6 +310,7 @@ export default function IntragrupoPage() {
           </DialogContent>
         </Dialog>
       </div>
+      <AIDocumentAssistant />
     </AuthenticatedLayout>
   );
 }

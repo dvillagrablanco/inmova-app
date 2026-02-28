@@ -61,6 +61,7 @@ import Link from 'next/link';
 import { PhotoGallery } from '@/components/ui/photo-gallery';
 import { EntityDocuments } from '@/components/ui/entity-documents';
 import { PropertyMap } from '@/components/property/PropertyMap';
+import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
 
 interface Unit {
   id: string;
@@ -797,6 +798,7 @@ export default function EdificioDetallesPage() {
             : undefined
         }
       />
+      <AIDocumentAssistant />
     </AuthenticatedLayout>
   );
 }

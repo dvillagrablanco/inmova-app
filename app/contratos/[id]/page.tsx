@@ -58,6 +58,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
 
 interface Contract {
   id: string;
@@ -705,6 +706,7 @@ export default function ContractDetailPage() {
           </TabsContent>
         </Tabs>
       </div>
+      <AIDocumentAssistant />
     </AuthenticatedLayout>
   );
 }

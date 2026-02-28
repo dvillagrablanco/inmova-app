@@ -71,6 +71,7 @@ import {
 import { toast } from 'sonner';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
 
 // ============================================
 // TIPOS
@@ -1194,6 +1195,7 @@ export default function ConciliacionBancariaPage() {
           </TabsContent>
         </Tabs>
       </div>
+      <AIDocumentAssistant />
     </AuthenticatedLayout>
   );
 }
