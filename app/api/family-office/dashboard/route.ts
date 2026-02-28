@@ -26,9 +26,18 @@ export async function GET(request: NextRequest) {
     const companyId = session.user.companyId;
     const prisma = await getPrisma();
 
-    // --- 1. INMOBILIARIO ---
+    // Obtener empresa + filiales para vista consolidada
+    const company = await prisma.company.findUnique({
+      where: { id: companyId },
+      include: { childCompanies: { select: { id: true } } },
+    });
+    const allCompanyIds = company
+      ? [company.id, ...company.childCompanies.map((c: any) => c.id)]
+      : [companyId];
+
+    // --- 1. INMOBILIARIO (holding + filiales) ---
     const buildings = await prisma.building.findMany({
-      where: { companyId, isDemo: false },
+      where: { companyId: { in: allCompanyIds }, isDemo: false },
       include: {
         units: {
           select: {
@@ -63,15 +72,15 @@ export async function GET(request: NextRequest) {
         nombre: b.nombre,
         direccion: b.direccion,
         unidades: b.units.length,
-        ocupadas: b.units.filter((u: any) => u.estado === 'ocupado').length,
+        ocupadas: b.units.filter((u: any) => u.estado === 'ocupada').length,
         valor: Math.round(valorEdificio * 100) / 100,
         renta: Math.round(rentaEdificio * 100) / 100,
       };
     });
 
-    // --- 2. FINANCIERO ---
+    // --- 2. FINANCIERO (holding + filiales) ---
     const accounts = await prisma.financialAccount.findMany({
-      where: { companyId, activa: true },
+      where: { companyId: { in: allCompanyIds }, activa: true },
       include: {
         positions: {
           select: {
@@ -120,9 +129,9 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    // --- 3. PRIVATE EQUITY / PARTICIPACIONES ---
+    // --- 3. PRIVATE EQUITY / PARTICIPACIONES (holding + filiales) ---
     const participations = await prisma.participation.findMany({
-      where: { companyId, activa: true },
+      where: { companyId: { in: allCompanyIds }, activa: true },
     });
 
     let valorPE = 0;
