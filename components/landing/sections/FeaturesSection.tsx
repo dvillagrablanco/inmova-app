@@ -82,6 +82,15 @@ const verticales = [
     gradient: 'from-indigo-500 to-violet-500',
     color: 'indigo',
   },
+  {
+    icon: TrendingUp,
+    title: 'Family Office & Wealth',
+    desc: 'Control patrimonial 360°: inmuebles + carteras financieras + private equity + tesorería multi-banco',
+    features: ['Dashboard patrimonial consolidado', 'Conexión con 9+ bancos (PSD2, SWIFT)', 'IA copiloto financiero + fiscal'],
+    gradient: 'from-amber-500 to-yellow-600',
+    color: 'amber',
+    badge: 'Add-on',
+  },
 ];
 
 // Módulos transversales - funcionalidades reales

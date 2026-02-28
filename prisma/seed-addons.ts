@@ -521,6 +521,107 @@ const ADDONS = [
     destacado: false,
     orden: 27,
   },
+
+  // ══════════════════════════════════════════════════════════════
+  // CATEGORÍA: FAMILY OFFICE - Gestión Patrimonial Integral
+  // Módulo premium para holdings y family offices
+  // ══════════════════════════════════════════════════════════════
+
+  {
+    codigo: 'fo_starter',
+    nombre: 'Family Office Starter',
+    descripcion:
+      'Dashboard patrimonial 360°, conexión con 3 entidades bancarias, import manual de extractos, reporting básico mensual.',
+    categoria: 'premium',
+    precioMensual: 299,
+    precioAnual: 2990,
+    unidades: 1,
+    tipoUnidad: 'modulo',
+    disponiblePara: ['BUSINESS', 'ENTERPRISE'],
+    incluidoEn: [],
+    margenPorcentaje: 85,
+    costoUnitario: 45,
+    destacado: true,
+    orden: 28,
+  },
+  {
+    codigo: 'fo_professional',
+    nombre: 'Family Office Professional',
+    descripcion:
+      'Todas las entidades bancarias (PSD2 auto-sync + SWIFT + OCR), módulo Private Equity completo, IA copiloto patrimonial, previsión tesorería, Modelo 720.',
+    categoria: 'premium',
+    precioMensual: 599,
+    precioAnual: 5990,
+    unidades: 1,
+    tipoUnidad: 'modulo',
+    disponiblePara: ['BUSINESS', 'ENTERPRISE'],
+    incluidoEn: [],
+    margenPorcentaje: 88,
+    costoUnitario: 72,
+    destacado: true,
+    orden: 29,
+  },
+  {
+    codigo: 'fo_enterprise',
+    nombre: 'Family Office Enterprise',
+    descripcion:
+      'Todo de Professional + API para Multi-Family Office (MDFF), reporting custom, optimización fiscal IA, SLA dedicado, onboarding presencial.',
+    categoria: 'premium',
+    precioMensual: 999,
+    precioAnual: 9990,
+    unidades: 1,
+    tipoUnidad: 'modulo',
+    disponiblePara: ['ENTERPRISE'],
+    incluidoEn: [],
+    margenPorcentaje: 90,
+    costoUnitario: 100,
+    destacado: false,
+    orden: 30,
+  },
+
+  // ══════════════════════════════════════════════════════════════
+  // CATEGORÍA: IA SUITE - Agentes IA Especializados
+  // ══════════════════════════════════════════════════════════════
+
+  {
+    codigo: 'ia_suite',
+    nombre: 'Suite IA Completa',
+    descripcion:
+      '10 agentes IA especializados: cobros automáticos, renovaciones inteligentes, screening inquilinos, negociador, copiloto financiero, due diligence, detector riesgos, OCR bancario.',
+    categoria: 'feature',
+    precioMensual: 49,
+    precioAnual: 490,
+    unidades: 1,
+    tipoUnidad: 'modulo',
+    disponiblePara: ['STARTER', 'PROFESSIONAL', 'BUSINESS', 'ENTERPRISE'],
+    incluidoEn: ['ENTERPRISE'],
+    margenPorcentaje: 70,
+    costoUnitario: 15,
+    destacado: true,
+    orden: 31,
+  },
+
+  // ══════════════════════════════════════════════════════════════
+  // CATEGORÍA: MEDIA ESTANCIA - Portales Premium
+  // ══════════════════════════════════════════════════════════════
+
+  {
+    codigo: 'media_estancia_pro',
+    nombre: 'Media Estancia Pro',
+    descripcion:
+      'Publicación en 9 portales (Álamo, Spotahome, HousingAnywhere, Badi, Beroomers, Homelike + Idealista, Fotocasa). Webhook de leads automático.',
+    categoria: 'feature',
+    precioMensual: 39,
+    precioAnual: 390,
+    unidades: 1,
+    tipoUnidad: 'modulo',
+    disponiblePara: ['PROFESSIONAL', 'BUSINESS', 'ENTERPRISE'],
+    incluidoEn: [],
+    margenPorcentaje: 75,
+    costoUnitario: 10,
+    destacado: false,
+    orden: 32,
+  },
 ];
 
 // ═══════════════════════════════════════════════════════════════

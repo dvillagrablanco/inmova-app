@@ -19,6 +19,10 @@ const VERTICALES = [
 
 // Add-ons disponibles
 const ADDONS = [
+  { id: 'fo_starter', name: '🏦 Family Office Starter', price: 299, desc: 'Patrimonio 360°, 3 bancos, import manual, reporting' },
+  { id: 'fo_professional', name: '🏦 Family Office Pro', price: 599, desc: 'Todos los bancos, PSD2 auto-sync, PE, IA copiloto' },
+  { id: 'ia_suite', name: '🤖 Suite IA Completa', price: 49, desc: '10 agentes IA: cobros, renovaciones, screening, negociador' },
+  { id: 'media_estancia', name: '🏠 Media Estancia Pro', price: 39, desc: '9 portales (Álamo, Spotahome...), leads automáticos' },
   { id: 'signatures', name: 'Pack 10 Firmas', price: 15, desc: 'Firmas digitales adicionales' },
   { id: 'storage', name: 'Pack 10GB Storage', price: 5, desc: 'Almacenamiento extra' },
   { id: 'ai', name: 'Pack IA Avanzada', price: 10, desc: '50K tokens IA/mes' },

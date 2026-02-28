@@ -199,6 +199,9 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/media-estancia/configuracion': 'media_estancia',
   '/renovaciones-contratos': 'contratos',
   '/mantenimiento-pro': 'mantenimiento',
+  // Family Office Add-on
+  '/family-office': 'family_office',
+  '/family-office/dashboard': 'family_office',
   '/valoraciones': 'valoraciones',
   '/publicaciones': 'publicaciones',
   '/screening': 'screening',
@@ -414,6 +417,10 @@ const SECTION_TO_MODULES: Record<string, string[]> = {
   comercial: ['alquiler_comercial'],
   adminFincas: ['admin_fincas'],
   viviendaSocial: ['vivienda_social'],
+  // Family Office Add-on
+  holdingGrupo: [
+    'inversiones', 'family_office', 'contabilidad', 'conciliacion',
+  ],
   realEstateDeveloper: ['real_estate_developer'],
   workspace: ['workspace'],
   warehouse: ['warehouse'],
@@ -1498,7 +1505,15 @@ const holdingGrupoNavItems = [
     href: '/family-office/dashboard',
     icon: Landmark,
     roles: ['super_admin', 'administrador'],
-    badge: 'Nuevo',
+    badge: 'Add-on',
+    subItems: [
+      { name: 'Patrimonio 360°', href: '/family-office/dashboard', icon: Crown },
+      { name: 'Cuentas Financieras', href: '/family-office/dashboard#cuentas', icon: CreditCard },
+      { name: 'P&L Carteras', href: '/family-office/dashboard#pnl', icon: TrendingUp },
+      { name: 'Private Equity', href: '/family-office/dashboard#pe', icon: Briefcase },
+      { name: 'Tesorería', href: '/family-office/dashboard#tesoreria', icon: Euro },
+      { name: 'Copiloto IA', href: '/asistente-ia', icon: Brain },
+    ],
   },
   {
     name: 'Análisis de Activos',
