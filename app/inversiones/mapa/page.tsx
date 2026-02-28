@@ -98,7 +98,7 @@ export default function MapaCarteraPage() {
 
   const loadData = async () => {
     try {
-      const res = await fetch('/api/buildings');
+      const res = await fetch('/api/buildings?limit=200');
       if (!res.ok) throw new Error();
       const data = await res.json();
       const list = (Array.isArray(data) ? data : data.data || [])
