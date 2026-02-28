@@ -167,6 +167,20 @@ const CARACTERISTICAS = [
   { id: 'aire_acondicionado', label: 'Aire acondicionado', icon: Zap },
   { id: 'calefaccion', label: 'Calefacción', icon: Zap },
   { id: 'jardin', label: 'Jardín', icon: Trees },
+  { id: 'portero', label: 'Portero/Conserje', icon: Users },
+  { id: 'armarios_empotrados', label: 'Armarios empotrados', icon: Building2 },
+  { id: 'lavadero', label: 'Lavadero', icon: Waves },
+  { id: 'videoportero', label: 'Videoportero', icon: Zap },
+];
+
+// Pasos del proceso de valoración
+const VALUATION_STEPS = [
+  { label: 'Recopilando datos del inmueble', duration: 1000 },
+  { label: 'Scraping de portales inmobiliarios', duration: 4000 },
+  { label: 'Consultando Notariado e INE', duration: 2000 },
+  { label: 'Fase 1 IA: Analizando comparables', duration: 3000 },
+  { label: 'Fase 2 IA: Valoración experta', duration: 5000 },
+  { label: 'Generando informe', duration: 1000 },
 ];
 
 export default function ValoracionIAPage() {
@@ -193,6 +207,12 @@ export default function ValoracionIAPage() {
   const [searchVia, setSearchVia] = useState('');
   const [searchNumero, setSearchNumero] = useState('');
 
+  // Pasos de valoración progresivos
+  const [currentStep, setCurrentStep] = useState(0);
+  // Historial
+  const [historial, setHistorial] = useState<any[]>([]);
+  const [loadingHistorial, setLoadingHistorial] = useState(false);
+
   // Datos del formulario
   const [formData, setFormData] = useState({
     superficie: '',
@@ -206,6 +226,10 @@ export default function ValoracionIAPage() {
     caracteristicas: [] as string[],
     descripcionAdicional: '',
     tipoActivo: 'vivienda' as string,
+    direccionManual: '',
+    ciudadManual: '',
+    codigoPostalManual: '',
+    eficienciaEnergetica: '',
   });
 
   // Cargar datos al iniciar
@@ -336,10 +360,44 @@ export default function ValoracionIAPage() {
     }));
   };
 
+  // Cargar historial de valoraciones
+  const fetchHistorial = async () => {
+    setLoadingHistorial(true);
+    try {
+      const res = await fetch('/api/valuations?limit=10');
+      if (res.ok) {
+        const data = await res.json();
+        setHistorial(Array.isArray(data.data) ? data.data : Array.isArray(data) ? data : []);
+      }
+    } catch {
+      // Silencioso
+    } finally {
+      setLoadingHistorial(false);
+    }
+  };
+
+  // Simular pasos progresivos durante la valoración
+  useEffect(() => {
+    if (!valorando) {
+      setCurrentStep(0);
+      return;
+    }
+    let step = 0;
+    const timers: NodeJS.Timeout[] = [];
+    let accumulated = 0;
+    for (const s of VALUATION_STEPS) {
+      const localStep = step;
+      accumulated += s.duration;
+      timers.push(setTimeout(() => setCurrentStep(localStep), accumulated));
+      step++;
+    }
+    return () => timers.forEach(clearTimeout);
+  }, [valorando]);
+
   // Realizar valoración con IA
   const handleValorar = async () => {
     if (!formData.superficie || parseFloat(formData.superficie) <= 0) {
-      toast.error('Por favor indica la superficie del inmueble');
+      toast.error('Indica la superficie del inmueble');
       return;
     }
 
@@ -347,24 +405,27 @@ export default function ValoracionIAPage() {
     setResultado(null);
 
     try {
-      // Obtener datos del activo seleccionado (o catastro para mercado)
-      let direccion = '';
-      let ciudad = '';
+      let direccion = formData.direccionManual || '';
+      let ciudad = formData.ciudadManual || '';
+      let codigoPostal = formData.codigoPostalManual || '';
       let unitId: string | undefined;
 
       if (activeTab === 'mercado' && catastroData) {
-        direccion = catastroData.direccion || '';
-        ciudad = catastroData.municipio || 'Madrid';
+        direccion = direccion || catastroData.direccion || '';
+        ciudad = ciudad || catastroData.municipio || 'Madrid';
+        codigoPostal = codigoPostal || catastroData.codigoPostal || '';
       } else if (selectedAsset && selectedAsset !== 'manual' && assetType === 'unit') {
         const unit = units.find((u) => u.id === selectedAsset);
-        direccion = unit?.building?.direccion || '';
-        ciudad = unit?.building?.ciudad || 'Madrid';
+        direccion = direccion || unit?.building?.direccion || '';
+        ciudad = ciudad || unit?.building?.ciudad || 'Madrid';
         unitId = selectedAsset;
       } else if (selectedAsset && selectedAsset !== 'manual' && assetType === 'building') {
         const building = buildings.find((b) => b.id === selectedAsset);
-        direccion = building?.direccion || '';
-        ciudad = building?.ciudad || 'Madrid';
+        direccion = direccion || building?.direccion || '';
+        ciudad = ciudad || building?.ciudad || 'Madrid';
       }
+
+      if (!ciudad) ciudad = 'Madrid';
 
       const response = await fetch('/api/ai/valuate', {
         method: 'POST',
@@ -378,8 +439,7 @@ export default function ValoracionIAPage() {
           planta: parseInt(formData.planta) || 0,
           direccion,
           ciudad,
-          codigoPostal:
-            activeTab === 'mercado' && catastroData?.codigoPostal ? catastroData.codigoPostal : '',
+          codigoPostal,
           unitId: activeTab === 'mis-activos' ? unitId : undefined,
         }),
       });
@@ -391,7 +451,7 @@ export default function ValoracionIAPage() {
 
       const data = await response.json();
       setResultado(data);
-      toast.success('Valoración completada con éxito');
+      toast.success('Valoración completada');
     } catch (error: any) {
       logger.error('Error en valoración:', error);
       toast.error(error.message || 'Error al realizar la valoración con IA');
@@ -478,99 +538,129 @@ export default function ValoracionIAPage() {
     }
   };
 
-  // Descargar informe como archivo de texto
+  // Descargar informe profesional
   const handleDescargarInforme = () => {
     if (!resultado) return;
 
+    const fecha = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' });
+    const hora = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+
     const lines = [
-      '════════════════════════════════════════════════════════',
-      '         INFORME DE VALORACIÓN DE ACTIVO INMOBILIARIO',
-      '                    Generado por Inmova IA',
-      '════════════════════════════════════════════════════════',
+      '════════════════════════════════════════════════════════════════',
+      '       INFORME DE VALORACIÓN DE ACTIVO INMOBILIARIO',
+      '          Generado por Inmova IA — Análisis Multi-Plataforma',
+      '════════════════════════════════════════════════════════════════',
       '',
-      `Fecha: ${new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })}`,
+      `Fecha: ${fecha} a las ${hora}`,
+      `Referencia: VAL-${Date.now().toString(36).toUpperCase()}`,
       '',
-      '── DATOS DEL INMUEBLE ──────────────────────────────────',
+      '── DATOS DEL INMUEBLE ─────────────────────────────────────────',
+      `Dirección: ${formData.direccionManual || '(auto-rellenada)'}`,
+      `Ciudad: ${formData.ciudadManual || '(auto-rellenada)'}`,
+      `Código Postal: ${formData.codigoPostalManual || '(auto-rellenada)'}`,
       `Superficie: ${formData.superficie} m²`,
       `Habitaciones: ${formData.habitaciones || 'N/A'}`,
       `Baños: ${formData.banos || 'N/A'}`,
+      `Planta: ${formData.planta || 'N/A'}`,
       `Antigüedad: ${formData.antiguedad ? formData.antiguedad + ' años' : 'N/A'}`,
       `Estado: ${formData.estadoConservacion}`,
       `Orientación: ${formData.orientacion}`,
+      `Eficiencia energética: ${formData.eficienciaEnergetica || 'Sin certificar'}`,
+      `Tipo de activo: ${formData.tipoActivo}`,
       `Finalidad: ${formData.finalidad}`,
-      formData.caracteristicas.length > 0
-        ? `Características: ${formData.caracteristicas.join(', ')}`
-        : '',
+      formData.caracteristicas.length > 0 ? `Equipamiento: ${formData.caracteristicas.join(', ')}` : '',
+      formData.descripcionAdicional ? `Info adicional: ${formData.descripcionAdicional}` : '',
       '',
-      '── VALORACIÓN ESTIMADA ─────────────────────────────────',
-      `Valor estimado: ${formatCurrency(resultado.valorEstimado)}`,
-      `Rango: ${formatCurrency(resultado.valorMinimo)} - ${formatCurrency(resultado.valorMaximo)}`,
-      `Precio por m²: ${formatCurrency(resultado.precioM2)}`,
-      `Nivel de confianza: ${resultado.confianza}%`,
+      '── VALORACIÓN ESTIMADA ────────────────────────────────────────',
+      `Valor estimado:        ${formatCurrency(resultado.valorEstimado)}`,
+      `Rango:                 ${formatCurrency(resultado.valorMinimo)} - ${formatCurrency(resultado.valorMaximo)}`,
+      `Precio por m²:         ${formatCurrency(resultado.precioM2)}`,
+      `Nivel de confianza:    ${resultado.confianza}%`,
       `Tendencia del mercado: ${resultado.tendenciaMercado} (${resultado.porcentajeTendencia}%)`,
-      `Tiempo estimado de venta: ${resultado.tiempoEstimadoVenta}`,
+      `Tiempo estimado venta: ${resultado.tiempoEstimadoVenta}`,
+      '',
+      '── ANÁLISIS DE INVERSIÓN ──────────────────────────────────────',
+      `Alquiler mensual estimado:  ${resultado.alquilerEstimado ? formatCurrency(resultado.alquilerEstimado) + '/mes' : 'N/A'}`,
+      `Renta anual estimada:       ${resultado.alquilerEstimado ? formatCurrency(resultado.alquilerEstimado * 12) + '/año' : 'N/A'}`,
+      `Rentabilidad bruta anual:   ${resultado.rentabilidadAlquiler ? resultado.rentabilidadAlquiler.toFixed(2) + '%' : 'N/A'}`,
+      `Cap Rate:                   ${(resultado as any).capRate ? (resultado as any).capRate.toFixed(2) + '%' : 'N/A'}`,
       '',
     ];
 
-    if (formData.finalidad === 'alquiler' || formData.finalidad === 'ambos') {
-      lines.push(
-        '── RENTABILIDAD ────────────────────────────────────────',
-        `Alquiler mensual estimado: ${formatCurrency(resultado.alquilerEstimado)}/mes`,
-        `Rentabilidad bruta: ${resultado.rentabilidadAlquiler.toFixed(2)}%`,
-        ''
-      );
+    if (resultado.metodologiaUsada) {
+      lines.push('── METODOLOGÍA ────────────────────────────────────────────', resultado.metodologiaUsada, '');
     }
 
-    if (resultado.factoresPositivos.length > 0) {
-      lines.push('── FACTORES POSITIVOS ──────────────────────────────────');
+    if (resultado.reasoning) {
+      lines.push('── RAZONAMIENTO DEL TASADOR IA ────────────────────────────', resultado.reasoning, '');
+    }
+
+    if (resultado.factoresPositivos?.length > 0) {
+      lines.push('── FACTORES POSITIVOS ─────────────────────────────────────');
       resultado.factoresPositivos.forEach((f) => lines.push(`  + ${f}`));
       lines.push('');
     }
 
-    if (resultado.factoresNegativos.length > 0) {
-      lines.push('── FACTORES NEGATIVOS ──────────────────────────────────');
+    if (resultado.factoresNegativos?.length > 0) {
+      lines.push('── FACTORES NEGATIVOS ─────────────────────────────────────');
       resultado.factoresNegativos.forEach((f) => lines.push(`  - ${f}`));
       lines.push('');
     }
 
-    if (resultado.recomendaciones.length > 0) {
-      lines.push('── RECOMENDACIONES ─────────────────────────────────────');
+    if (resultado.recomendaciones?.length > 0) {
+      lines.push('── RECOMENDACIONES ────────────────────────────────────────');
       resultado.recomendaciones.forEach((r, i) => lines.push(`  ${i + 1}. ${r}`));
       lines.push('');
     }
 
-    if (resultado.comparables.length > 0) {
-      lines.push('── PROPIEDADES COMPARABLES ─────────────────────────────');
+    if (resultado.comparables?.length > 0) {
+      lines.push('── PROPIEDADES COMPARABLES (analizadas por IA) ───────────');
       resultado.comparables.forEach((c, i) => {
-        lines.push(`  ${i + 1}. ${c.direccion}`);
-        lines.push(
-          `     Precio: ${formatCurrency(c.precio)} | ${c.superficie}m² | ${formatCurrency(c.precioM2)}/m² | Similitud: ${Math.round(c.similitud * 100)}%`
-        );
+        lines.push(`  ${i + 1}. ${c.direccion}${c.fuente ? ` [${c.fuente}]` : ''}`);
+        lines.push(`     ${formatCurrency(c.precio)} | ${c.superficie}m² | ${formatCurrency(c.precioM2)}/m² | Similitud: ${Math.round(c.similitud * 100)}%`);
       });
       lines.push('');
     }
 
     if (resultado.analisisMercado) {
-      lines.push('── ANÁLISIS DE MERCADO ─────────────────────────────────');
-      lines.push(resultado.analisisMercado);
+      lines.push('── ANÁLISIS DE MERCADO ────────────────────────────────────', resultado.analisisMercado, '');
+    }
+
+    if (resultado.phase1Summary) {
+      lines.push('── PRE-ANÁLISIS DE COMPARABLES (Fase 1 IA) ───────────────', resultado.phase1Summary, '');
+    }
+
+    if (resultado.platformSources?.sourcesUsed?.length) {
+      lines.push('── FUENTES DE DATOS CONSULTADAS ───────────────────────────');
+      lines.push(`  Plataformas: ${resultado.platformSources.sourcesUsed.join(', ')}`);
+      lines.push(`  Fiabilidad global: ${resultado.platformSources.overallReliability}%`);
+      if (resultado.platformSources.weightedSalePricePerM2) {
+        lines.push(`  Precio ponderado: ${formatCurrency(resultado.platformSources.weightedSalePricePerM2)}/m²`);
+      }
       lines.push('');
     }
 
-    lines.push('════════════════════════════════════════════════════════');
-    lines.push('Informe generado automáticamente por Inmova App');
-    lines.push('https://inmovaapp.com');
+    if (resultado.aiSourcesUsed?.length) {
+      lines.push(`  Fuentes IA: ${resultado.aiSourcesUsed.join(', ')}`, '');
+    }
 
-    const content = lines.join('\n');
+    lines.push('════════════════════════════════════════════════════════════════');
+    lines.push('AVISO LEGAL: Esta valoración es una estimación basada en datos');
+    lines.push('de mercado y análisis de IA. No sustituye a una tasación oficial');
+    lines.push('realizada por un perito acreditado.');
+    lines.push('');
+    lines.push('Generado por Inmova App — https://inmovaapp.com');
+
+    const content = lines.filter(l => l !== undefined).join('\n');
     const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `informe-valoracion-${new Date().toISOString().split('T')[0]}.txt`;
+    a.download = `informe-valoracion-inmova-${new Date().toISOString().split('T')[0]}.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-
     toast.success('Informe descargado');
   };
 
@@ -654,7 +744,7 @@ export default function ValoracionIAPage() {
               value={activeTab}
               onValueChange={(v) => setActiveTab(v as 'mis-activos' | 'mercado')}
             >
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="mis-activos" className="gap-2">
                   <Building2 className="h-4 w-4" />
                   Mis Activos
@@ -662,6 +752,10 @@ export default function ValoracionIAPage() {
                 <TabsTrigger value="mercado" className="gap-2">
                   <MapPin className="h-4 w-4" />
                   Valoración de Mercado
+                </TabsTrigger>
+                <TabsTrigger value="historial" className="gap-2" onClick={() => { if (historial.length === 0) fetchHistorial(); }}>
+                  <Clock className="h-4 w-4" />
+                  Historial
                 </TabsTrigger>
               </TabsList>
 
@@ -846,27 +940,85 @@ export default function ValoracionIAPage() {
                   </Card>
                 )}
 
-                {/* Tipo de activo (solo para mercado) */}
-                <div className="space-y-2">
-                  <Label>Tipo de activo</Label>
-                  <Select
-                    value={formData.tipoActivo}
-                    onValueChange={(v) => setFormData((prev) => ({ ...prev, tipoActivo: v }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="vivienda">Vivienda</SelectItem>
-                      <SelectItem value="local_comercial">Local comercial</SelectItem>
-                      <SelectItem value="oficina">Oficina</SelectItem>
-                      <SelectItem value="nave_industrial">Nave industrial</SelectItem>
-                      <SelectItem value="garaje">Garaje</SelectItem>
-                      <SelectItem value="edificio_completo">Edificio completo</SelectItem>
-                      <SelectItem value="solar">Solar</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              </TabsContent>
+
+              {/* Tab: Historial de Valoraciones */}
+              <TabsContent value="historial" className="mt-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Clock className="h-5 w-5" />
+                      Historial de Valoraciones
+                    </CardTitle>
+                    <CardDescription>
+                      Valoraciones realizadas anteriormente
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {loadingHistorial ? (
+                      <div className="flex items-center justify-center py-8">
+                        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                      </div>
+                    ) : historial.length === 0 ? (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <FileText className="h-10 w-10 mx-auto mb-3 opacity-30" />
+                        <p>No hay valoraciones anteriores</p>
+                        <Button variant="outline" size="sm" className="mt-3" onClick={fetchHistorial}>
+                          <RefreshCw className="h-3 w-3 mr-1" />
+                          Recargar
+                        </Button>
+                      </div>
+                    ) : (
+                      <ScrollArea className="h-[400px]">
+                        <div className="space-y-3">
+                          {historial.map((v: any, idx: number) => (
+                            <div
+                              key={v.id || idx}
+                              className="p-3 border rounded-lg hover:bg-muted/30 transition-colors cursor-pointer"
+                              onClick={() => {
+                                setResultado({
+                                  valorEstimado: v.estimatedValue,
+                                  valorMinimo: v.minValue,
+                                  valorMaximo: v.maxValue,
+                                  precioM2: v.pricePerM2 || 0,
+                                  confianza: v.confidenceScore || 70,
+                                  tendenciaMercado: v.marketTrend === 'UP' ? 'alcista' : v.marketTrend === 'DOWN' ? 'bajista' : 'estable',
+                                  porcentajeTendencia: 0,
+                                  comparables: [],
+                                  factoresPositivos: v.keyFactors || [],
+                                  factoresNegativos: [],
+                                  recomendaciones: v.recommendations || [],
+                                  analisisMercado: '',
+                                  tiempoEstimadoVenta: '',
+                                  rentabilidadAlquiler: v.estimatedROI || 0,
+                                  alquilerEstimado: v.estimatedRent || 0,
+                                  reasoning: v.reasoning || '',
+                                });
+                                setActiveTab('mis-activos');
+                                toast.success('Valoración cargada');
+                              }}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <p className="font-medium text-sm">{v.address || 'Sin dirección'}, {v.city}</p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {v.squareMeters}m² | {v.rooms} hab. | {new Date(v.createdAt).toLocaleDateString('es-ES')}
+                                  </p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="font-bold text-violet-700">{formatCurrency(v.estimatedValue)}</p>
+                                  <Badge variant="outline" className="text-[10px]">
+                                    {v.confidenceScore || 0}% confianza
+                                  </Badge>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    )}
+                  </CardContent>
+                </Card>
               </TabsContent>
             </Tabs>
 
@@ -991,9 +1143,89 @@ export default function ValoracionIAPage() {
                   </div>
                 </div>
 
+                {/* Ubicación (manual o auto-rellenada) */}
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4" />
+                    Ubicación
+                    {(activeTab === 'mercado' && catastroData) || (selectedAsset !== 'manual') ? (
+                      <Badge variant="outline" className="text-[10px]">Auto-rellenada</Badge>
+                    ) : null}
+                  </Label>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <Input
+                      placeholder="Dirección (calle, n.°)"
+                      value={formData.direccionManual}
+                      onChange={(e) => setFormData({ ...formData, direccionManual: e.target.value })}
+                    />
+                    <Input
+                      placeholder="Ciudad"
+                      value={formData.ciudadManual}
+                      onChange={(e) => setFormData({ ...formData, ciudadManual: e.target.value })}
+                    />
+                    <Input
+                      placeholder="Código Postal"
+                      value={formData.codigoPostalManual}
+                      onChange={(e) => setFormData({ ...formData, codigoPostalManual: e.target.value })}
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Si se selecciona un activo o catastro, se usará esa dirección. Estos campos permiten sobreescribirla.
+                  </p>
+                </div>
+
+                <Separator />
+
+                {/* Eficiencia Energética */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Certificado Energético</Label>
+                    <Select
+                      value={formData.eficienciaEnergetica}
+                      onValueChange={(v) => setFormData({ ...formData, eficienciaEnergetica: v })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sin certificar" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">Sin certificar</SelectItem>
+                        <SelectItem value="A">A (muy eficiente)</SelectItem>
+                        <SelectItem value="B">B</SelectItem>
+                        <SelectItem value="C">C</SelectItem>
+                        <SelectItem value="D">D</SelectItem>
+                        <SelectItem value="E">E</SelectItem>
+                        <SelectItem value="F">F</SelectItem>
+                        <SelectItem value="G">G (poco eficiente)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Tipo de activo</Label>
+                    <Select
+                      value={formData.tipoActivo}
+                      onValueChange={(v) => setFormData({ ...formData, tipoActivo: v })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="vivienda">Vivienda</SelectItem>
+                        <SelectItem value="local_comercial">Local comercial</SelectItem>
+                        <SelectItem value="oficina">Oficina</SelectItem>
+                        <SelectItem value="nave_industrial">Nave industrial</SelectItem>
+                        <SelectItem value="garaje">Garaje</SelectItem>
+                        <SelectItem value="edificio_completo">Edificio completo</SelectItem>
+                        <SelectItem value="solar">Solar</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <Separator />
+
                 {/* Características adicionales */}
                 <div className="space-y-2">
-                  <Label>Características adicionales</Label>
+                  <Label>Equipamiento y extras</Label>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {CARACTERISTICAS.map((car) => {
                       const Icon = car.icon;
@@ -1055,26 +1287,41 @@ export default function ValoracionIAPage() {
           {/* Panel de Resultados */}
           <div className="space-y-6">
             {!resultado && !valorando && (
-              <Card className="h-full flex flex-col items-center justify-center min-h-[400px] border-dashed">
-                <CardContent className="text-center py-12">
-                  <div className="h-20 w-20 rounded-full bg-violet-50 flex items-center justify-center mx-auto mb-6">
+              <Card className="h-full flex flex-col items-center justify-center min-h-[400px] border-dashed border-2">
+                <CardContent className="text-center py-10">
+                  <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-violet-100 to-purple-100 flex items-center justify-center mx-auto mb-6">
                     <Brain className="h-10 w-10 text-violet-500" />
                   </div>
-                  <h3 className="text-xl font-semibold mb-2">Valoración Inteligente</h3>
-                  <p className="text-muted-foreground max-w-sm mx-auto mb-6">
-                    Completa los datos del inmueble y obtén una valoración profesional basada en
-                    análisis de mercado con inteligencia artificial.
+                  <h3 className="text-xl font-semibold mb-2">Valoración Inteligente Multi-Plataforma</h3>
+                  <p className="text-muted-foreground max-w-md mx-auto mb-6 text-sm leading-relaxed">
+                    Obtiene datos en tiempo real de Idealista, Fotocasa, Habitaclia y Pisos.com
+                    mediante scraping, los cruza con datos oficiales del Notariado e INE, y aplica
+                    un análisis IA en dos fases para una valoración profesional.
                   </p>
+                  <div className="grid grid-cols-2 gap-2 max-w-sm mx-auto mb-6">
+                    <div className="p-2 bg-muted/50 rounded-lg text-left">
+                      <p className="text-xs font-medium">Fase 1 — IA rápida</p>
+                      <p className="text-[10px] text-muted-foreground">Filtra y puntúa comparables de portales</p>
+                    </div>
+                    <div className="p-2 bg-muted/50 rounded-lg text-left">
+                      <p className="text-xs font-medium">Fase 2 — IA experta</p>
+                      <p className="text-[10px] text-muted-foreground">Valoración por comparables + capitalización</p>
+                    </div>
+                  </div>
                   <div className="flex flex-wrap justify-center gap-2">
-                    <Badge variant="secondary">
+                    <Badge variant="secondary" className="text-xs">
                       <Target className="h-3 w-3 mr-1" />
-                      Análisis de comparables
+                      4 portales
                     </Badge>
-                    <Badge variant="secondary">
-                      <TrendingUp className="h-3 w-3 mr-1" />
-                      Tendencias de mercado
+                    <Badge variant="secondary" className="text-xs">
+                      <BarChart3 className="h-3 w-3 mr-1" />
+                      Notariado + INE
                     </Badge>
-                    <Badge variant="secondary">
+                    <Badge variant="secondary" className="text-xs">
+                      <Brain className="h-3 w-3 mr-1" />
+                      IA multi-paso
+                    </Badge>
+                    <Badge variant="secondary" className="text-xs">
                       <Lightbulb className="h-3 w-3 mr-1" />
                       Recomendaciones
                     </Badge>
@@ -1085,30 +1332,46 @@ export default function ValoracionIAPage() {
 
             {valorando && (
               <Card className="h-full flex flex-col items-center justify-center min-h-[400px]">
-                <CardContent className="text-center py-12">
+                <CardContent className="text-center py-10">
                   <div className="relative h-24 w-24 mx-auto mb-6">
                     <div className="absolute inset-0 rounded-full border-4 border-violet-200" />
                     <div className="absolute inset-0 rounded-full border-4 border-violet-500 border-t-transparent animate-spin" />
                     <Brain className="absolute inset-0 m-auto h-10 w-10 text-violet-500" />
                   </div>
-                  <h3 className="text-xl font-semibold mb-2">Analizando con IA</h3>
-                  <p className="text-muted-foreground max-w-sm mx-auto">
-                    Claude está analizando el mercado, comparando propiedades similares y calculando
-                    el valor óptimo...
+                  <h3 className="text-xl font-semibold mb-2">Valoración IA en curso</h3>
+                  <p className="text-muted-foreground max-w-sm mx-auto text-sm mb-6">
+                    Scraping de portales, análisis de comparables y valoración experta multi-paso
                   </p>
-                  <div className="mt-6 space-y-2 text-sm text-left max-w-xs mx-auto">
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
-                      Analizando características
-                    </div>
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <Loader2 className="h-4 w-4 animate-spin text-violet-500" />
-                      Buscando comparables
-                    </div>
-                    <div className="flex items-center gap-2 text-muted-foreground opacity-50">
-                      <Clock className="h-4 w-4" />
-                      Calculando valoración
-                    </div>
+
+                  <div className="mb-4">
+                    <Progress value={((currentStep + 1) / VALUATION_STEPS.length) * 100} className="h-2" />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Paso {currentStep + 1} de {VALUATION_STEPS.length}
+                    </p>
+                  </div>
+
+                  <div className="space-y-2 text-sm text-left max-w-sm mx-auto">
+                    {VALUATION_STEPS.map((step, idx) => (
+                      <div
+                        key={idx}
+                        className={`flex items-center gap-2 transition-opacity ${
+                          idx < currentStep
+                            ? 'text-muted-foreground'
+                            : idx === currentStep
+                              ? 'text-foreground font-medium'
+                              : 'text-muted-foreground/40'
+                        }`}
+                      >
+                        {idx < currentStep ? (
+                          <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
+                        ) : idx === currentStep ? (
+                          <Loader2 className="h-4 w-4 animate-spin text-violet-500 shrink-0" />
+                        ) : (
+                          <Clock className="h-4 w-4 shrink-0" />
+                        )}
+                        {step.label}
+                      </div>
+                    ))}
                   </div>
                 </CardContent>
               </Card>
@@ -1117,8 +1380,8 @@ export default function ValoracionIAPage() {
             {resultado && (
               <div className="space-y-4">
                 {/* Valoración Principal */}
-                <Card className="border-2 border-violet-200 bg-gradient-to-br from-violet-50 to-purple-50">
-                  <CardHeader>
+                <Card className="border-2 border-violet-200 bg-gradient-to-br from-violet-50/80 to-purple-50/80 shadow-lg">
+                  <CardHeader className="pb-2">
                     <CardTitle className="flex items-center justify-between">
                       <span className="flex items-center gap-2">
                         <Award className="h-5 w-5 text-violet-600" />
@@ -1127,80 +1390,113 @@ export default function ValoracionIAPage() {
                       <Badge className={getTrendColor(resultado.tendenciaMercado)}>
                         {getTrendIcon(resultado.tendenciaMercado)}
                         <span className="ml-1">
-                          {resultado.tendenciaMercado === 'alcista'
-                            ? '+'
-                            : resultado.tendenciaMercado === 'bajista'
-                              ? '-'
-                              : ''}
+                          {resultado.tendenciaMercado === 'alcista' ? '+' : resultado.tendenciaMercado === 'bajista' ? '-' : ''}
                           {resultado.porcentajeTendencia}%
                         </span>
                       </Badge>
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <div className="text-center mb-6">
-                      <p className="text-5xl font-bold text-violet-700">
+                  <CardContent className="space-y-5">
+                    {/* Precio principal */}
+                    <div className="text-center">
+                      <p className="text-4xl sm:text-5xl font-bold text-violet-700 tracking-tight">
                         {formatCurrency(resultado.valorEstimado)}
                       </p>
-                      <p className="text-sm text-muted-foreground mt-2">
-                        Rango: {formatCurrency(resultado.valorMinimo)} -{' '}
-                        {formatCurrency(resultado.valorMaximo)}
-                      </p>
+                      {resultado.metodologiaUsada && (
+                        <p className="text-xs text-violet-500 mt-1">{resultado.metodologiaUsada}</p>
+                      )}
                     </div>
 
-                    <div className="grid grid-cols-3 gap-4 pt-4 border-t">
-                      <div className="text-center">
-                        <p className="text-2xl font-bold">{formatCurrency(resultado.precioM2)}</p>
-                        <p className="text-xs text-muted-foreground">Precio/m²</p>
+                    {/* Barra visual de rango min-max */}
+                    <div className="px-2">
+                      <div className="relative h-3 bg-gradient-to-r from-violet-100 via-violet-300 to-violet-100 rounded-full">
+                        {resultado.valorMinimo > 0 && resultado.valorMaximo > 0 && (
+                          <div
+                            className="absolute top-1/2 -translate-y-1/2 h-5 w-5 rounded-full bg-violet-600 border-2 border-white shadow-md"
+                            style={{
+                              left: `${Math.max(5, Math.min(95, ((resultado.valorEstimado - resultado.valorMinimo) / (resultado.valorMaximo - resultado.valorMinimo)) * 100))}%`,
+                              transform: 'translate(-50%, -50%)',
+                            }}
+                          />
+                        )}
                       </div>
-                      <div className="text-center">
-                        <p className="text-2xl font-bold">{resultado.confianza}%</p>
-                        <p className="text-xs text-muted-foreground">Confianza</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-2xl font-bold">{resultado.tiempoEstimadoVenta}</p>
-                        <p className="text-xs text-muted-foreground">Tiempo venta</p>
+                      <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                        <span>{formatCurrency(resultado.valorMinimo)}</span>
+                        <span className="font-medium text-violet-700">{formatCurrency(resultado.valorEstimado)}</span>
+                        <span>{formatCurrency(resultado.valorMaximo)}</span>
                       </div>
                     </div>
 
-                    {/* Nivel de confianza */}
-                    <div className="mt-4">
-                      <div className="flex justify-between text-sm mb-1">
-                        <span>Nivel de confianza</span>
-                        <span className="font-medium">{resultado.confianza}%</span>
+                    {/* KPIs */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t">
+                      <div className="text-center p-2 bg-white/60 rounded-lg">
+                        <p className="text-lg font-bold">{formatCurrency(resultado.precioM2)}</p>
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Precio/m²</p>
+                      </div>
+                      <div className="text-center p-2 bg-white/60 rounded-lg">
+                        <p className="text-lg font-bold">{resultado.confianza}%</p>
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Confianza</p>
+                      </div>
+                      <div className="text-center p-2 bg-white/60 rounded-lg">
+                        <p className="text-lg font-bold">{resultado.tiempoEstimadoVenta || '-'}</p>
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Tiempo venta</p>
+                      </div>
+                      <div className="text-center p-2 bg-white/60 rounded-lg">
+                        <p className="text-lg font-bold">{resultado.comparables?.length || 0}</p>
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Comparables</p>
+                      </div>
+                    </div>
+
+                    {/* Barra de confianza */}
+                    <div>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="text-muted-foreground">Fiabilidad del análisis</span>
+                        <span className={`font-semibold ${resultado.confianza >= 75 ? 'text-green-600' : resultado.confianza >= 60 ? 'text-yellow-600' : 'text-red-600'}`}>
+                          {resultado.confianza >= 75 ? 'Alta' : resultado.confianza >= 60 ? 'Media' : 'Baja'}
+                        </span>
                       </div>
                       <Progress value={resultado.confianza} className="h-2" />
                     </div>
                   </CardContent>
                 </Card>
 
-                {/* Rentabilidad Alquiler */}
-                {(formData.finalidad === 'alquiler' || formData.finalidad === 'ambos') && (
-                  <Card>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-base flex items-center gap-2">
-                        <Euro className="h-4 w-4" />
-                        Análisis de Rentabilidad
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="p-3 bg-green-50 rounded-lg border border-green-100">
-                          <p className="text-sm text-green-700">Alquiler mensual estimado</p>
-                          <p className="text-2xl font-bold text-green-800">
-                            {formatCurrency(resultado.alquilerEstimado)}/mes
-                          </p>
-                        </div>
-                        <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
-                          <p className="text-sm text-blue-700">Rentabilidad bruta</p>
-                          <p className="text-2xl font-bold text-blue-800">
-                            {resultado.rentabilidadAlquiler.toFixed(2)}%
-                          </p>
-                        </div>
+                {/* Dashboard de Inversión — siempre visible */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Euro className="h-4 w-4" />
+                      Análisis de Inversión
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                      <div className="p-3 bg-green-50 rounded-lg border border-green-100">
+                        <p className="text-[10px] text-green-600 uppercase tracking-wide font-medium">Alquiler estimado</p>
+                        <p className="text-xl font-bold text-green-800">
+                          {resultado.alquilerEstimado ? `${formatCurrency(resultado.alquilerEstimado)}/mes` : '-'}
+                        </p>
                       </div>
-                    </CardContent>
-                  </Card>
-                )}
+                      <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
+                        <p className="text-[10px] text-blue-600 uppercase tracking-wide font-medium">Rentabilidad bruta</p>
+                        <p className="text-xl font-bold text-blue-800">
+                          {resultado.rentabilidadAlquiler ? `${resultado.rentabilidadAlquiler.toFixed(2)}%` : '-'}
+                        </p>
+                      </div>
+                      <div className="p-3 bg-amber-50 rounded-lg border border-amber-100">
+                        <p className="text-[10px] text-amber-600 uppercase tracking-wide font-medium">Cap Rate</p>
+                        <p className="text-xl font-bold text-amber-800">
+                          {(resultado as any).capRate ? `${(resultado as any).capRate.toFixed(2)}%` : '-'}
+                        </p>
+                      </div>
+                      <div className="p-3 bg-purple-50 rounded-lg border border-purple-100">
+                        <p className="text-[10px] text-purple-600 uppercase tracking-wide font-medium">Renta anual</p>
+                        <p className="text-xl font-bold text-purple-800">
+                          {resultado.alquilerEstimado ? formatCurrency(resultado.alquilerEstimado * 12) : '-'}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
 
                 {/* Análisis Detallado */}
                 <Accordion type="single" collapsible className="w-full">
