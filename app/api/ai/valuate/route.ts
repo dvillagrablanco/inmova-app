@@ -88,6 +88,25 @@ ${options.descripcionAdicional ? `- Información adicional: ${options.descripcio
 PROPIEDADES COMPARABLES EN BD:
 ${comparablesStr}
 
+DATOS DE MERCADO DE LA ZONA (Idealista/Fotocasa Feb 2026):
+${(() => {
+  try {
+    const { estimateMarketValue, getMarketDataByAddress } = require('@/lib/market-data-service');
+    const mktData = getMarketDataByAddress(`${property.address}, ${property.city}`);
+    if (mktData) {
+      return `- Zona: ${mktData.zona}
+- Precio venta medio: ${mktData.precioVentaM2}€/m²
+- Alquiler medio: ${mktData.precioAlquilerM2}€/m²/mes
+- Garaje venta medio: ${mktData.precioGarajeVenta}€
+- Garaje alquiler medio: ${mktData.precioGarajeAlquiler}€/mes
+- Tendencia: ${mktData.tendencia}
+- Demanda: ${mktData.demanda}
+- Fuente: ${mktData.fuente}`;
+    }
+    return 'No se encontraron datos de mercado para esta zona.';
+  } catch { return 'Datos de mercado no disponibles.'; }
+})()}
+
 FINALIDAD: ${options.finalidad === 'venta' ? 'Venta' : options.finalidad === 'alquiler' ? 'Alquiler' : 'Venta y Alquiler'}
 
 Tu tarea: Proporciona una VALORACIÓN COMPLETA en formato JSON EXACTO como se muestra abajo.
