@@ -19,6 +19,7 @@ import { PromoBanner } from '@/components/landing/sections/PromoBanner';
 import { FeaturesSection } from '@/components/landing/sections/FeaturesSection';
 import { AccessPortalsSection } from '@/components/landing/sections/AccessPortalsSection';
 import { PricingSection } from '@/components/landing/sections/PricingSection';
+import { FamilyOfficeSection } from '@/components/landing/sections/FamilyOfficeSection';
 import { TestimonialsSection } from '@/components/landing/sections/TestimonialsSection';
 import { IntegrationsSection } from '@/components/landing/sections/IntegrationsSection';
 import { FAQSection } from '@/components/landing/sections/FAQSection';
@@ -47,6 +48,9 @@ export function LandingPageContent() {
 
         {/* Pricing Section */}
         <PricingSection />
+
+        {/* Family Office Add-on Section */}
+        <FamilyOfficeSection />
 
         {/* Testimonios */}
         <TestimonialsSection />
