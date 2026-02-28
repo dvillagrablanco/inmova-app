@@ -1,4 +1,5 @@
-import { prisma } from './db';
+import { getPrismaClient } from './db';
+const prisma = getPrismaClient();
 
 /**
  * CATÁLOGO DE MÓDULOS DISPONIBLES

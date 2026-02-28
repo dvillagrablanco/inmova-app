@@ -424,17 +424,16 @@ const SECTION_TO_MODULES: Record<string, string[]> = {
   comercial: ['alquiler_comercial'],
   adminFincas: ['admin_fincas'],
   viviendaSocial: ['vivienda_social'],
-  // Family Office Add-on
+  // Family Office & Holding / Grupo
   holdingGrupo: [
     'inversiones', 'family_office', 'contabilidad', 'conciliacion',
+    'holding_grupo', 'fiscal_modelos', 'fiscal_simulador', 'tesoreria',
+    'amortizaciones', 'comparativa_sociedades', 'export_contable',
   ],
   realEstateDeveloper: ['real_estate_developer'],
   workspace: ['workspace'],
   warehouse: ['warehouse'],
   viajesCorporativos: ['viajes_corporativos'],
-
-  // === Holding / Grupo ===
-  holdingGrupo: ['holding_grupo'],
 
   // === Herramientas Horizontales ===
   finanzas: [
