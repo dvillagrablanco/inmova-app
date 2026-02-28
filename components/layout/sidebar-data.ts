@@ -335,6 +335,8 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/inversiones/hipotecas': 'holding_grupo',
   '/inversiones/fiscal': 'holding_grupo',
   '/inversiones/fiscal/modelos': 'holding_grupo',
+  '/inversiones/fiscal/simulador': 'holding_grupo',
+  '/inversiones/tesoreria': 'holding_grupo',
   '/inversiones/pyl': 'holding_grupo',
   '/inversiones/fianzas': 'holding_grupo',
   '/inversiones/export': 'holding_grupo',
@@ -1599,6 +1601,18 @@ const holdingGrupoNavItems = [
     name: 'Modelos Tributarios',
     href: '/inversiones/fiscal/modelos',
     icon: FileBarChart,
+    roles: ['super_admin', 'administrador'],
+  },
+  {
+    name: 'Simulador Fiscal',
+    href: '/inversiones/fiscal/simulador',
+    icon: FileBarChart,
+    roles: ['super_admin', 'administrador'],
+  },
+  {
+    name: 'Tesorería 12m',
+    href: '/inversiones/tesoreria',
+    icon: Euro,
     roles: ['super_admin', 'administrador'],
   },
   {
