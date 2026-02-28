@@ -2163,6 +2163,10 @@ model Company {
   integrationConfigs IntegrationConfig[]
   integrationLogs    IntegrationLog[]
 
+  // 🏦 FAMILY OFFICE ADD-ON
+  financialAccounts    FinancialAccount[]
+  holdingParticipations Participation[] @relation("HoldingParticipations")
+
   // 📊 CRM AVANZADO - Comentado temporalmente
   // crmLeads              CRMLead[]
   // crmDeals              Deal[]
@@ -16614,4 +16618,210 @@ model GCWebhookEvent {
   @@index([resourceType, action])
   @@index([processed])
   @@map("gc_webhook_events")
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FAMILY OFFICE ADD-ON — Gestión Patrimonial Integral
+// Consolida: inmobiliario + carteras financieras + PE + tesorería
+// ═══════════════════════════════════════════════════════════════
+
+enum FinancialEntityType {
+  banca_privada
+  gestora_fondos
+  custodio
+  banca_comercial
+  broker
+  aseguradora
+  otro_financiero
+}
+
+enum FinancialInstrumentType {
+  fondo_inversion
+  sicav
+  accion
+  bono
+  etf
+  deposito
+  cuenta_corriente
+  plan_pensiones
+  seguro_vida
+  pe_fund
+  real_estate_fund
+  derivado
+  divisa
+  cripto
+  otro_instrumento
+}
+
+enum FinancialTxType {
+  compra
+  venta
+  dividendo
+  cupon
+  comision
+  transferencia_entrada
+  transferencia_salida
+  aportacion
+  reembolso
+  interes
+  capital_call
+  distribucion
+  otro_movimiento
+}
+
+enum ParticipationType {
+  filial_100
+  participada_mayoritaria
+  participada_minoritaria
+  pe_fund
+  coinversion
+  joint_venture
+}
+
+model FinancialAccount {
+  id        String  @id @default(cuid())
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  // Entidad
+  entidad       String // Banca March, Pictet, UBS, CACEIS, Inversis, etc.
+  tipoEntidad   FinancialEntityType
+  numeroCuenta  String? // IBAN o número de cuenta
+  alias         String? // "Cartera Pictet", "Cuenta Bankinter"
+
+  // Divisa y saldos
+  divisa        String  @default("EUR")
+  saldoActual   Float   @default(0)
+  valorMercado  Float   @default(0) // Valor total de posiciones
+  pnlTotal      Float   @default(0) // P&L acumulado
+
+  // Conexión
+  conexionTipo  String  @default("manual") // api_psd2, swift, ocr_pdf, manual
+  ultimaSync    DateTime?
+  apiConfig     Json?   // Configuración de conexión (encrypted)
+
+  // Estado
+  activa        Boolean @default(true)
+  notas         String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  positions    FinancialPosition[]
+  transactions FinancialTransaction[]
+
+  @@index([companyId])
+  @@index([entidad])
+  @@map("financial_accounts")
+}
+
+model FinancialPosition {
+  id        String           @id @default(cuid())
+  accountId String
+  account   FinancialAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  // Instrumento
+  nombre        String // "Pictet Global Bonds", "Iberdrola", etc.
+  isin          String? // ES0144580Y14, LU0128467544
+  ticker        String? // IBE.MC, AAPL
+  tipo          FinancialInstrumentType
+  categoria     String? // "Renta Fija EUR", "RV Global", "Monetario"
+
+  // Posición
+  cantidad        Float   @default(0) // Participaciones o títulos
+  precioMedio     Float   @default(0) // Coste medio de adquisición
+  valorActual     Float   @default(0) // Valor de mercado actual
+  divisa          String  @default("EUR")
+
+  // P&L
+  costeTotal      Float   @default(0) // cantidad * precioMedio
+  pnlNoRealizado  Float   @default(0) // valorActual - costeTotal
+  pnlRealizado    Float   @default(0) // Ganancias ya materializadas
+  pnlPct          Float   @default(0) // % rentabilidad
+
+  // Metadata
+  fechaCompra         DateTime?
+  ultimaActualizacion DateTime?
+  peso                Float?    // % del total de la cuenta
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  transactions FinancialTransaction[]
+
+  @@index([accountId])
+  @@index([isin])
+  @@index([tipo])
+  @@map("financial_positions")
+}
+
+model FinancialTransaction {
+  id         String           @id @default(cuid())
+  accountId  String
+  account    FinancialAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  positionId String?
+  position   FinancialPosition? @relation(fields: [positionId], references: [id], onDelete: SetNull)
+
+  // Movimiento
+  tipo        FinancialTxType
+  fecha       DateTime
+  concepto    String
+  importe     Float // Positivo = entrada, Negativo = salida
+  divisa      String @default("EUR")
+
+  // Detalle para compra/venta
+  cantidad    Float?  // Participaciones/títulos
+  precio      Float?  // Precio por unidad
+  comision    Float?  // Comisión cobrada
+
+  // Referencia
+  referencia  String? // Número de operación del banco
+  notas       String? @db.Text
+
+  createdAt DateTime @default(now())
+
+  @@index([accountId])
+  @@index([fecha])
+  @@index([tipo])
+  @@map("financial_transactions")
+}
+
+model Participation {
+  id        String  @id @default(cuid())
+  companyId String  // Holding (ej: Vidaro)
+  company   Company @relation("HoldingParticipations", fields: [companyId], references: [id], onDelete: Cascade)
+
+  // Sociedad participada
+  targetCompanyName String // "Disfasa S.L.", "Facundo S.L."
+  targetCompanyCIF  String?
+  targetCompanyId   String? // ID en INMOVA si es filial registrada
+
+  // Participación
+  tipo              ParticipationType
+  porcentaje        Float // 100, 51, 33.33, etc.
+  fechaAdquisicion  DateTime
+  costeAdquisicion  Float   @default(0) // Precio pagado
+
+  // Valoración
+  valorContable     Float   @default(0) // Valor en libros
+  valorEstimado     Float?  // Última valoración estimada
+  fechaValoracion   DateTime?
+
+  // PE specifics
+  compromisoTotal   Float?  // Total committed
+  capitalLlamado    Float?  // Total called
+  capitalDistribuido Float? // Total distributed
+  dpi               Float?  // Distributed to Paid-In ratio
+  tvpi              Float?  // Total Value to Paid-In ratio
+
+  // Estado
+  activa            Boolean @default(true)
+  notas             String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([tipo])
+  @@map("participations")
 }
