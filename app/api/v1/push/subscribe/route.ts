@@ -12,6 +12,7 @@ import { z } from 'zod';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const subscribeSchema = z.object({
   endpoint: z.string().url(),

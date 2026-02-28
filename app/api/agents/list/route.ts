@@ -9,6 +9,7 @@ import { authOptions } from '@/lib/auth-options';
 import { listAgents, SYSTEM_INFO } from '@/lib/ai-agents';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
   try {

@@ -1,4 +1,5 @@
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // Swagger documentation temporarily disabled for deployment optimization
 // import { NextResponse } from 'next/server';

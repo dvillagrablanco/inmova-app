@@ -5,6 +5,7 @@ import { MODULOS_CATALOGO, SUBSCRIPTION_PACKS } from '@/lib/modules-service';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function GET(req: NextRequest) {
   try {

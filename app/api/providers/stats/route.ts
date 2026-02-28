@@ -12,6 +12,7 @@ import { getAssignmentStats } from '@/lib/provider-assignment-service';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function GET(req: NextRequest) {
   try {

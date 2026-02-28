@@ -12,6 +12,7 @@ import { WorkspaceService } from '@/lib/services/workspace-service';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const createMemberSchema = z.object({
   nombre: z.string().min(1),

@@ -5,6 +5,7 @@ import { insuranceComparison } from '@/lib/integrations/insurance-providers';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
   try {

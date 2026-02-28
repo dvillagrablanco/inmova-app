@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { livenessCheck } from '@/lib/health-check';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
   const isAlive = await livenessCheck();

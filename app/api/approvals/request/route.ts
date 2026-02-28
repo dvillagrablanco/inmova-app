@@ -8,6 +8,7 @@ import {
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 /**
  * POST /api/approvals/request

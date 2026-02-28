@@ -12,6 +12,7 @@ import { z } from 'zod';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const ADMIN_ROLES = ['super_admin', 'administrador', 'socio_ewoorker'];
 

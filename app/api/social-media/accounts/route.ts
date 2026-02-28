@@ -8,6 +8,7 @@ import {
 } from '@/lib/social-media-service';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
   try {

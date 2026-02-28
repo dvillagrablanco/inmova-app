@@ -3,6 +3,7 @@ import { z } from 'zod';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const detectIntentSchema = z.object({
   message: z.string().min(1, 'Message is required').max(2000),

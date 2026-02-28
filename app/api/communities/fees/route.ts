@@ -9,6 +9,7 @@ import {
 } from '@/lib/services/community-management-service';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 
 /**

@@ -5,6 +5,7 @@ import { generateCleaningSchedule, saveCleaningScheduleToContracts } from '@/lib
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 /**
  * GET /api/room-rental/cleaning-schedule

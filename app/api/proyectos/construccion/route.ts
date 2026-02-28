@@ -4,7 +4,7 @@ import { z } from 'zod';
 
 import { authOptions } from '@/lib/auth-options';
 import logger from '@/lib/logger';
-import type { ConstructionPhase } from '@prisma/client';
+import type { ConstructionPhase } from '@/types/prisma-types';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';

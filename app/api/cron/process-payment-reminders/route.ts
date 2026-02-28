@@ -4,6 +4,7 @@ import logger from '@/lib/logger';
 import { requireCronSecret } from '@/lib/api-auth-guard';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 /**
  * GET /api/cron/process-payment-reminders

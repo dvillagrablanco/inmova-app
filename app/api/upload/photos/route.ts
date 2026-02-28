@@ -5,6 +5,7 @@ import { S3Service } from '@/lib/s3-service';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
   try {

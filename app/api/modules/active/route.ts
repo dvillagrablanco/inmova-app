@@ -6,6 +6,7 @@ import logger, { logError } from '@/lib/logger';
 import { resolveCompanyScope } from '@/lib/company-scope';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function GET(req: NextRequest) {
   try {

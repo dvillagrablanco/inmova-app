@@ -11,6 +11,7 @@ import { ewoorkerNotifications } from '@/lib/ewoorker-notifications-service';
 import logger from '@/lib/logger';
 import { requireSession } from '@/lib/api-auth-guard';
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
   // Auth guard

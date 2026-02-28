@@ -3,6 +3,7 @@ import { getAuthenticatedOwner } from '@/lib/owner-auth';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // GET /api/auth-propietario/me - Obtener datos del propietario autenticado
 export async function GET(req: NextRequest) {

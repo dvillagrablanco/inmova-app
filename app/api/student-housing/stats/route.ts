@@ -9,6 +9,7 @@ import { authOptions } from '@/lib/auth-options';
 import { StudentHousingService } from '@/lib/services/student-housing-service';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
   try {

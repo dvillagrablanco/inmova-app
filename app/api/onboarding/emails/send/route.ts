@@ -12,6 +12,7 @@ import { sendOnboardingEmail, EmailType } from '@/lib/onboarding-email-service';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 interface SendEmailRequest {
   type: EmailType;

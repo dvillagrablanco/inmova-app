@@ -3,6 +3,7 @@ import { getAuthenticatedProvider } from '@/lib/provider-auth';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // GET /api/auth-proveedor/me - Obtener proveedor autenticado
 export async function GET(req: NextRequest) {

@@ -4,7 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { resolveCompanyScope } from '@/lib/company-scope';
 import logger, { logError } from '@/lib/logger';
 import { z } from 'zod';
-import type { UserRole } from '@prisma/client';
+import type { UserRole } from '@/types/prisma-types';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';

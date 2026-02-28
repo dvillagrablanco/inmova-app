@@ -11,6 +11,7 @@ import { ewoorkerAnalytics } from '@/lib/ewoorker-analytics-service';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const VALID_METRICS = ['empresas', 'obras', 'ofertas', 'contratos', 'transacciones'] as const;
 

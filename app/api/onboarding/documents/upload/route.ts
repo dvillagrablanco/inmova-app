@@ -24,7 +24,7 @@ import {
 } from '@/lib/document-import-processor-service';
 import logger from '@/lib/logger';
 import { z } from 'zod';
-import type { Prisma } from '@prisma/client';
+import type { Prisma } from '@/types/prisma-types';
 
 // Lazy Prisma (auditoria V2)
 async function getPrisma() {

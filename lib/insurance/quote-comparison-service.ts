@@ -1,4 +1,4 @@
-import type { PrismaClient } from '@prisma/client';
+import type { PrismaClient } from '@/types/prisma-types';
 import logger from '@/lib/logger';
 
 async function getPrisma(): Promise<PrismaClient> {

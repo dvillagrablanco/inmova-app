@@ -171,8 +171,18 @@ export type {
   DocumentImportCategory,
   DocumentImportStatus,
 
+  // Insurance types
+  InsuranceStatus,
+  InsuranceType,
+
+  // Project types
+  RenovationCategory,
+  ConstructionPhase,
+  ProjectType,
+
   // Prisma utility types
   Prisma,
+  PrismaClient,
 } from '@prisma/client';
 
 // Para development/build sin DATABASE_URL, definir tipos mínimos

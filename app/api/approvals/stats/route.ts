@@ -4,6 +4,7 @@ import { getApprovalStats } from '@/lib/enhanced-approval-service';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 /**
  * GET /api/approvals/stats

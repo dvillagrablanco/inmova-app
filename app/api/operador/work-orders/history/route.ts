@@ -10,6 +10,7 @@ import { getOperatorWorkHistory } from '@/lib/work-order-service';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
   try {

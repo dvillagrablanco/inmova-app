@@ -11,6 +11,7 @@ import { registerWebhookSubscription, WebhookEventType } from '@/lib/webhook-ser
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 interface SubscribeRequest {
   url: string;

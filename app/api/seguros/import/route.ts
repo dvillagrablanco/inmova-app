@@ -5,7 +5,7 @@ import { validateFile } from '@/lib/file-validation';
 import { parseCSV } from '@/lib/import-service';
 import { S3Service } from '@/lib/s3-service';
 import logger from '@/lib/logger';
-import type { InsuranceStatus, InsuranceType, Prisma } from '@prisma/client';
+import type { InsuranceStatus, InsuranceType, Prisma } from '@/types/prisma-types';
 import * as XLSX from 'xlsx';
 import AdmZip from 'adm-zip';
 

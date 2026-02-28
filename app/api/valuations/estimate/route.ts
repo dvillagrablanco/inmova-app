@@ -15,6 +15,7 @@ import logger from '@/lib/logger';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // ============================================================================
 // VALIDACIÓN CON ZOD

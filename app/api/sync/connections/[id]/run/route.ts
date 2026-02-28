@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // In-memory storage for sync logs
 interface SyncLog {

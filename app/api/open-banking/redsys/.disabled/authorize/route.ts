@@ -29,6 +29,7 @@ import { authOptions } from '@/lib/auth-options';
 
 // Force dynamic rendering for this route
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 
 // Almacenamiento temporal para code_verifier y state

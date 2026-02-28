@@ -5,6 +5,7 @@ import { ViviendaSocialService } from '@/lib/services/vivienda-social-service';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const checkEligibilitySchema = z.object({
   ingresosFamiliares: z.number(),

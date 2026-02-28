@@ -5,6 +5,7 @@ import { getPrioritizedTasks } from '@/lib/task-prioritization-service';
 import { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 /**
  * GET /api/tasks/prioritized

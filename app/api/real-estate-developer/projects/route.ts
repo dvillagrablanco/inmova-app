@@ -5,6 +5,7 @@ import { RealEstateDeveloperService } from '@/lib/services/real-estate-developer
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const createProjectSchema = z.object({
   nombre: z.string().min(1),

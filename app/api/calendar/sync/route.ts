@@ -5,6 +5,7 @@ import { sincronizarEventosAutomaticos } from '@/lib/calendar-service';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 /**
  * POST /api/calendar/sync

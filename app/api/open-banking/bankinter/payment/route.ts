@@ -5,6 +5,7 @@ import { getBankinterService, isBankinterConfigured } from '@/lib/bankinter-inte
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 /**
  * POST /api/open-banking/bankinter/payment

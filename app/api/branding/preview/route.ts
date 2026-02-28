@@ -5,6 +5,7 @@ import { generateCSSVariables } from '@/lib/branding-service';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 /**
  * POST /api/branding/preview

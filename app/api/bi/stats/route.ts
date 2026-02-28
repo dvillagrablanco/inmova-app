@@ -9,6 +9,7 @@ import {
 } from '@/lib/bi-service';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // GET /api/bi/stats - Obtener estadísticas y análisis
 export async function GET(req: NextRequest) {

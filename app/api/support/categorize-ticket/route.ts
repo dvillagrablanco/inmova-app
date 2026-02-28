@@ -4,6 +4,7 @@ import logger, { logError } from '@/lib/logger';
 import { requireSession } from '@/lib/api-auth-guard';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 
 /**

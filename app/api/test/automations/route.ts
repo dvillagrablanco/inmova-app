@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 /**
  * Endpoint de prueba para ejecutar y probar todas las automatizaciones

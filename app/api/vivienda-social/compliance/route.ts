@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { ViviendaSocialService } from '@/lib/services/vivienda-social-service';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
   try {

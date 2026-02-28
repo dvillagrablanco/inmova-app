@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { readinessCheck } from '@/lib/health-check';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
   const isReady = await readinessCheck();

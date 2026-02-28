@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // Nota: En producción, estos logs deberían almacenarse en la base de datos
 // Actualmente no existe un modelo SyncLog en Prisma

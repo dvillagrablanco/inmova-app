@@ -14,7 +14,7 @@ import { authOptions } from '@/lib/auth-options';
 import { z } from 'zod';
 
 import logger from '@/lib/logger';
-import type { BusinessVertical } from '@prisma/client';
+import type { BusinessVertical } from '@/types/prisma-types';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 

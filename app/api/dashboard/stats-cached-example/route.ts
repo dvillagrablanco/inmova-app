@@ -13,6 +13,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireSession } from '@/lib/api-auth-guard';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
   // Auth guard

@@ -3,6 +3,7 @@ import { createPasswordResetToken } from '@/lib/tenant-invitation-service';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 
 // Simulación de envío de email (en producción usar un servicio real)

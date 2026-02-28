@@ -3,6 +3,7 @@ import { z } from 'zod';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const detectBusinessSchema = z.object({
   companyName: z.string().max(200).optional(),

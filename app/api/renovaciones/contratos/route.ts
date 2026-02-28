@@ -8,6 +8,7 @@ import {
 } from '@/lib/services/renewal-service';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);

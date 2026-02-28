@@ -3,6 +3,7 @@ import { removeOwnerAuthCookie } from '@/lib/owner-auth';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // POST /api/auth-propietario/logout - Logout para propietarios
 export async function POST(req: NextRequest) {

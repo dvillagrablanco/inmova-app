@@ -10,6 +10,7 @@ import { z } from 'zod';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const validateSchema = z.object({
   code: z.string().min(6).max(12),

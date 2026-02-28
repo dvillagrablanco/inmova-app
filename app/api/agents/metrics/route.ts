@@ -10,6 +10,7 @@ import { getAgentsMetrics } from '@/lib/ai-agents';
 import { AgentType } from '@/lib/ai-agents/types';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
   try {

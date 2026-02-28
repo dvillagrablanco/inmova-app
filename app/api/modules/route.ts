@@ -1,4 +1,5 @@
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 /**
  * API: Gestión de Módulos Activos del Usuario
@@ -22,7 +23,7 @@ import {
   getModulesByCategory
 } from '@/lib/modules-management-system';
 import { z } from 'zod';
-import type { BusinessVertical, UserRole } from '@prisma/client';
+import type { BusinessVertical, UserRole } from '@/types/prisma-types';
 
 import logger from '@/lib/logger';
 

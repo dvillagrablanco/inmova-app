@@ -12,6 +12,7 @@ import { StudentHousingService } from '@/lib/services/student-housing-service';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const createApplicationSchema = z.object({
   solicitanteNombre: z.string().min(1),

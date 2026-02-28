@@ -14,6 +14,7 @@ import { z } from 'zod';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 export const maxDuration = 60; // 60s para generar embeddings
 
 const searchSchema = z.object({

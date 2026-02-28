@@ -7,6 +7,7 @@ import { NextResponse } from 'next/server';
 import swaggerDefinition from '@/lib/swagger-config';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 /**
  * GET /api/docs

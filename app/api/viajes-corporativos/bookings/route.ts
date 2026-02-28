@@ -5,6 +5,7 @@ import { ViajesCorporativosService } from '@/lib/services/viajes-corporativos-se
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const createBookingSchema = z.object({
   tenantId: z.string().optional(),

@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { getRenewalStats } from '@/lib/services/renewal-service-simple';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 
 /**

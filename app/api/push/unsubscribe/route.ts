@@ -7,6 +7,7 @@ import { unsubscribePushNotification } from '@/lib/push-notifications';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
   try {

@@ -3,6 +3,7 @@ import { removeProviderAuthCookie } from '@/lib/provider-auth';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // POST /api/auth-proveedor/logout - Logout para proveedores
 export async function POST(req: NextRequest) {

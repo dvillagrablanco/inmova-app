@@ -7,6 +7,7 @@ import {
 } from '@/lib/services/renewal-service-simple';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 /**
  * @swagger

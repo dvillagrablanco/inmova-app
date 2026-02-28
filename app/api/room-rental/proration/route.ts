@@ -5,6 +5,7 @@ import { applyUtilityProrationToUnit, calculateUtilityProration } from '@/lib/ro
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 /**
  * POST /api/room-rental/proration

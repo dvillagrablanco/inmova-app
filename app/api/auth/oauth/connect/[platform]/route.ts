@@ -11,6 +11,7 @@ import { generateAuthUrl } from '@/lib/oauth-service';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function GET(
   req: NextRequest,

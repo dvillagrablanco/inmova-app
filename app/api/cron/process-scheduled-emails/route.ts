@@ -17,6 +17,7 @@ import logger from '@/lib/logger';
 import { requireCronSecret } from '@/lib/api-auth-guard';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 export const maxDuration = 60; // 60 segundos máximo de ejecución
 
 /**

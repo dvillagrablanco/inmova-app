@@ -1,4 +1,5 @@
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 /**
  * API: Gestión de Tours Virtuales
@@ -21,7 +22,7 @@ import {
   calculateTourProgress
 } from '@/lib/virtual-tours-system';
 import { z } from 'zod';
-import type { BusinessVertical, UserRole } from '@prisma/client';
+import type { BusinessVertical, UserRole } from '@/types/prisma-types';
 
 import logger from '@/lib/logger';
 

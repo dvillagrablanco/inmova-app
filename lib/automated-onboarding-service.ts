@@ -8,7 +8,6 @@ async function getPrisma() {
   const { getPrismaClient } = await import('@/lib/db');
   return getPrismaClient();
 }
-// Removed unused import: UserRole from '@prisma/client'
 import logger, { logError } from '@/lib/logger';
 
 // Tipos de negocio soportados

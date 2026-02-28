@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import logger from '@/lib/logger';
-import type { PrismaClient } from '@prisma/client';
+import type { PrismaClient } from '@/types/prisma-types';
 
 async function getPrisma(): Promise<PrismaClient> {
   const { getPrismaClient } = await import('@/lib/db');
