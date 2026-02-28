@@ -110,10 +110,10 @@ export default function InversionesPage() {
     );
   }
 
-  const p = consolidated?.consolidated;
+  const p = consolidated?.consolidated || null;
 
   const formatCurrency = (n: number) =>
-    new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
+    new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n || 0);
 
   return (
     <AuthenticatedLayout>

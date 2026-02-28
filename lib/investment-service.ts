@@ -439,6 +439,10 @@ export async function getConsolidatedReport(parentCompanyId: string): Promise<Co
     netYield: 0,
     averageOccupancy: 0,
     ltv: 0,
+    totalPrecioCompra: companies.reduce((s, c) => s + (c.portfolio.totalPrecioCompra || 0), 0),
+    totalValorMercadoUnidades: companies.reduce((s, c) => s + (c.portfolio.totalValorMercadoUnidades || 0), 0),
+    revalorizacion: companies.reduce((s, c) => s + (c.portfolio.revalorizacion || 0), 0),
+    revalorizacionPct: 0,
   };
 
   // Recalcular ratios consolidados
@@ -455,6 +459,9 @@ export async function getConsolidatedReport(parentCompanyId: string): Promise<Co
     : 0;
   consolidated.ltv = consolidated.totalMarketValue > 0
     ? Math.round((consolidated.totalMortgageDebt / consolidated.totalMarketValue) * 10000) / 100
+    : 0;
+  consolidated.revalorizacionPct = consolidated.totalPrecioCompra > 0
+    ? Math.round((consolidated.revalorizacion / consolidated.totalPrecioCompra) * 10000) / 100
     : 0;
 
   return {
