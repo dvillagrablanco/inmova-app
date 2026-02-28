@@ -83,8 +83,16 @@ export function DocumentManager({ entityType, entityId }: DocumentManagerProps) 
     }
   };
 
-  const handleDownload = (documentId: string) => {
-    window.open(`/api/v1/documents/${documentId}/download`, '_blank');
+  const handleDownload = async (documentId: string) => {
+    try {
+      const res = await fetch(`/api/documents/${documentId}/download`);
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.url) window.open(data.url, '_blank');
+    } catch {
+      // Fallback to direct open
+      window.open(`/api/documents/${documentId}/download`, '_blank');
+    }
   };
 
   const formatFileSize = (bytes: number) => {

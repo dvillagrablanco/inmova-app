@@ -202,11 +202,28 @@ export function EntityDocuments({
     }
   };
 
-  const handleOpen = (doc: Document) => {
+  const handleOpen = async (doc: Document) => {
     if (doc.cloudStoragePath?.startsWith('http')) {
       window.open(doc.cloudStoragePath, '_blank');
-    } else {
-      window.open(`/api/documents/${doc.id}/download`, '_blank');
+      return;
+    }
+
+    // Obtener signed URL de S3 y redirigir
+    try {
+      const res = await fetch(`/api/documents/${doc.id}/download`);
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        toast.error(err.error || 'Error descargando documento');
+        return;
+      }
+      const data = await res.json();
+      if (data.url) {
+        window.open(data.url, '_blank');
+      } else {
+        toast.error('No se pudo obtener la URL del documento');
+      }
+    } catch {
+      toast.error('Error descargando documento');
     }
   };
 

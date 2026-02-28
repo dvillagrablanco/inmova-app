@@ -423,7 +423,13 @@ export default function DocumentosPortalPage() {
                       <Button
                         variant="outline"
                         className="w-full"
-                        onClick={() => window.open(`/api/documents/${doc.id}/download`, '_blank')}
+                        onClick={async () => {
+                          try {
+                            const res = await fetch(`/api/documents/${doc.id}/download`);
+                            const data = await res.json();
+                            if (data.url) window.open(data.url, '_blank');
+                          } catch { /* fallback */ }
+                        }}
                         disabled={!share.puedeDescargar}
                       >
                         <Download className="h-4 w-4 mr-2" />

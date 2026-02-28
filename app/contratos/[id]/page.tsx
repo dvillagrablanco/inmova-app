@@ -201,11 +201,15 @@ function ContractDocuments({ contractId, buildingId }: { contractId: string; bui
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => {
+                  onClick={async () => {
                     if (doc.cloudStoragePath?.startsWith('http')) {
                       window.open(doc.cloudStoragePath, '_blank');
                     } else {
-                      window.open(`/api/documents/${doc.id}/download`, '_blank');
+                      try {
+                        const res = await fetch(`/api/documents/${doc.id}/download`);
+                        const data = await res.json();
+                        if (data.url) window.open(data.url, '_blank');
+                      } catch { /* fallback */ }
                     }
                   }}
                 >
