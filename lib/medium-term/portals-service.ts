@@ -24,7 +24,10 @@ export type PortalName =
   | 'uniplaces'
   | 'badi'
   | 'idealista'
-  | 'fotocasa';
+  | 'fotocasa'
+  | 'alamo'
+  | 'beroomers'
+  | 'homelike';
 
 export interface PortalConfig {
   name: PortalName;
@@ -213,6 +216,60 @@ export const PORTAL_CONFIGS: PortalConfig[] = [
       'Filtros específicos para temporal',
       'Alertas personalizadas',
       'Mapa interactivo',
+    ],
+  },
+  {
+    name: 'alamo',
+    displayName: 'Álamo',
+    logo: '/images/portals/alamo.svg',
+    apiBaseUrl: 'https://api.alamo.es/v1',
+    supportsTemporary: true,
+    minDuration: 1,
+    maxDuration: 11,
+    targetAudience: ['profesionales', 'expatriados', 'empresas', 'nómadas digitales'],
+    commission: 10,
+    features: [
+      'Especializado en media estancia premium',
+      'Verificación inquilinos profesionales',
+      'Contratos adaptados a temporada',
+      'Gestión integral de entradas/salidas',
+      'Servicio de limpieza coordinado',
+      'Atención al inquilino multiidioma',
+    ],
+  },
+  {
+    name: 'beroomers',
+    displayName: 'Beroomers',
+    logo: '/images/portals/beroomers.svg',
+    apiBaseUrl: 'https://api.beroomers.com/v1',
+    supportsTemporary: true,
+    minDuration: 1,
+    maxDuration: 12,
+    targetAudience: ['estudiantes', 'profesionales', 'erasmus'],
+    commission: 8,
+    features: [
+      'Fuerte en mercado estudiantil',
+      'Reserva online segura',
+      'Verificación de universidad/empresa',
+      'Chat integrado con propietario',
+    ],
+  },
+  {
+    name: 'homelike',
+    displayName: 'Homelike',
+    logo: '/images/portals/homelike.svg',
+    apiBaseUrl: 'https://api.thehomelike.com/v1',
+    supportsTemporary: true,
+    minDuration: 1,
+    maxDuration: 24,
+    targetAudience: ['corporativos', 'empresas', 'reubicaciones'],
+    commission: 12,
+    features: [
+      'Mercado corporativo premium',
+      'Facturación a empresas',
+      'Estancias de reubicación',
+      'Proceso de reserva empresarial',
+      'Servicio concierge',
     ],
   },
 ];
