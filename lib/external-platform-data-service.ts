@@ -3,21 +3,24 @@
  *
  * Centraliza la obtención de datos de mercado desde múltiples fuentes:
  *
- * 1. Idealista API — Portal inmobiliario líder en España
- * 2. Fotocasa API — Segundo portal más grande
- * 3. Habitaclia — Portal fuerte en Cataluña
- * 4. Pisos.com — Portal generalista
- * 5. Catastro — Datos oficiales de inmuebles
- * 6. Notariado (penotariado.com) — Precios reales escriturados
- * 7. INE — Índice de precios de vivienda
- * 8. Base interna — Comparables del portfolio propio
+ * 1. Idealista — Web scraping del portal líder en España
+ * 2. Fotocasa — Web scraping del segundo portal más grande
+ * 3. Habitaclia — Web scraping, fuerte en Cataluña
+ * 4. Pisos.com — Web scraping del portal generalista
+ * 5. Notariado (penotariado.com) — Precios reales escriturados (datos referencia)
+ * 6. INE — Índice de precios de vivienda (datos referencia)
+ * 7. Base interna — Comparables del portfolio propio (BD en vivo)
  *
- * Cada fuente tiene un adaptador que normaliza los datos a un formato común.
- * Los datos se cachean en Redis (7 días) y en BD (MarketData) para evitar
- * llamadas excesivas a APIs externas.
+ * Los portales inmobiliarios se consultan mediante web scraping con:
+ * - Rotación de User-Agents
+ * - Rate limiting por dominio (mín. 3s entre requests)
+ * - Cache en Redis (24h) para minimizar requests
+ * - Retry con backoff exponencial
+ * - Fallback a datos estáticos si el scraping falla
  */
 
 import logger from '@/lib/logger';
+import { scrapeAllPortals, type AggregatedScrapingResult } from './scraping/index';
 
 // ============================================================================
 // TIPOS
@@ -120,245 +123,124 @@ interface FetchOptions {
 }
 
 // ============================================================================
-// ADAPTADORES DE PLATAFORMAS
+// ADAPTADOR PRINCIPAL: WEB SCRAPING DE PORTALES
 // ============================================================================
 
 /**
- * Adaptador para Idealista API
- * Requiere API key: https://developers.idealista.com/
+ * Obtiene datos de portales inmobiliarios vía web scraping.
+ * Lanza scrapers en paralelo contra Idealista, Fotocasa, Habitaclia y Pisos.com.
+ * Resultados cacheados 24h en Redis.
  */
-async function fetchFromIdealista(options: FetchOptions): Promise<PlatformMarketDataPoint | null> {
-  const apiKey = process.env.IDEALISTA_API_KEY;
-  const apiSecret = process.env.IDEALISTA_API_SECRET;
-
-  if (!apiKey || !apiSecret) {
-    logger.debug('[Idealista] API key no configurada, usando datos estimados');
-    return generateIdealistaEstimate(options);
-  }
+async function fetchFromScrapedPortals(
+  options: FetchOptions,
+): Promise<PlatformMarketDataPoint[]> {
+  const results: PlatformMarketDataPoint[] = [];
 
   try {
-    const tokenResponse = await fetch('https://api.idealista.com/oauth/token', {
-      method: 'POST',
-      headers: {
-        Authorization: `Basic ${Buffer.from(`${apiKey}:${apiSecret}`).toString('base64')}`,
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: 'grant_type=client_credentials&scope=read',
-    });
-
-    if (!tokenResponse.ok) {
-      logger.warn('[Idealista] Error obteniendo token:', tokenResponse.status);
-      return generateIdealistaEstimate(options);
-    }
-
-    const { access_token } = await tokenResponse.json();
-
-    const searchParams = new URLSearchParams({
-      country: 'es',
-      operation: 'sale',
-      propertyType: 'homes',
-      center: `${options.city}`,
-      locale: 'es',
-      maxItems: '20',
-      order: 'priceDown',
-      ...(options.rooms && {
-        minRooms: String(options.rooms - 1),
-        maxRooms: String(options.rooms + 1),
-      }),
-      ...(options.squareMeters && {
-        minSize: String(Math.round(options.squareMeters * 0.8)),
-        maxSize: String(Math.round(options.squareMeters * 1.2)),
-      }),
-    });
-
-    const response = await fetch(`https://api.idealista.com/3.5/es/search?${searchParams}`, {
-      headers: { Authorization: `Bearer ${access_token}` },
-    });
-
-    if (!response.ok) {
-      logger.warn('[Idealista] Error en búsqueda:', response.status);
-      return generateIdealistaEstimate(options);
-    }
-
-    const data = await response.json();
-    const listings = data.elementList || [];
-
-    if (listings.length === 0) {
-      return generateIdealistaEstimate(options);
-    }
-
-    const prices = listings.map((l: any) => l.priceByArea || l.price / l.size);
-    const avgPricePerM2 = prices.reduce((a: number, b: number) => a + b, 0) / prices.length;
-
-    return {
-      source: 'idealista',
-      sourceLabel: 'Idealista (API en vivo)',
-      sourceUrl: 'https://www.idealista.com',
-      fetchedAt: new Date().toISOString(),
-      reliability: 82,
-      dataType: 'asking_price',
-      pricePerM2Sale: Math.round(avgPricePerM2),
-      sampleSize: listings.length,
-      trend: 'STABLE',
-      comparables: listings.slice(0, 5).map((l: any) => ({
-        source: 'idealista' as PlatformSource,
-        address: l.address || l.neighborhood || options.city,
-        price: l.price,
-        pricePerM2: Math.round(l.priceByArea || l.price / l.size),
-        squareMeters: l.size,
-        rooms: l.rooms,
-        bathrooms: l.bathrooms,
-        floor: parseInt(l.floor) || undefined,
-        url: l.url,
-        publishedDate: l.modificationDate,
-      })),
-      rawData: { totalItems: data.total, summary: data.summary },
-    };
-  } catch (error) {
-    logger.warn('[Idealista] Error fetching data:', error);
-    return generateIdealistaEstimate(options);
-  }
-}
-
-/**
- * Genera estimación basada en datos conocidos de Idealista cuando la API no está disponible
- */
-function generateIdealistaEstimate(options: FetchOptions): PlatformMarketDataPoint {
-  const { getMarketDataByPostalCode, getMarketDataByAddress } = require('./market-data-service');
-
-  const zoneData = options.postalCode
-    ? getMarketDataByPostalCode(options.postalCode)
-    : getMarketDataByAddress(options.address || options.city);
-
-  if (zoneData) {
-    return {
-      source: 'idealista',
-      sourceLabel: 'Idealista (datos referencia Feb 2026)',
-      sourceUrl: 'https://www.idealista.com',
-      fetchedAt: new Date().toISOString(),
-      reliability: 70,
-      dataType: 'asking_price',
-      pricePerM2Sale: zoneData.askingPriceVentaM2,
-      pricePerM2Rent: zoneData.askingPriceAlquilerM2,
-      trend:
-        zoneData.tendencia === 'subiendo'
-          ? 'UP'
-          : zoneData.tendencia === 'bajando'
-            ? 'DOWN'
-            : 'STABLE',
-      demandLevel: zoneData.demanda,
-      sampleSize: 0,
-    };
-  }
-
-  return {
-    source: 'idealista',
-    sourceLabel: 'Idealista (sin datos para esta zona)',
-    fetchedAt: new Date().toISOString(),
-    reliability: 0,
-    dataType: 'asking_price',
-  };
-}
-
-/**
- * Adaptador para Fotocasa API
- */
-async function fetchFromFotocasa(options: FetchOptions): Promise<PlatformMarketDataPoint | null> {
-  const apiKey = process.env.FOTOCASA_API_KEY;
-
-  if (!apiKey) {
-    logger.debug('[Fotocasa] API key no configurada, usando datos estimados');
-    return generateFotocasaEstimate(options);
-  }
-
-  try {
-    const response = await fetch(
-      `https://api.fotocasa.es/v1/properties/search?location=${encodeURIComponent(options.city)}&operation=sale&propertyType=flat`,
-      {
-        headers: { 'X-Api-Key': apiKey },
-      }
+    const scrapingResult = await scrapeAllPortals(
+      options.city,
+      'sale',
+      options.postalCode,
     );
 
-    if (!response.ok) {
-      return generateFotocasaEstimate(options);
+    for (const portal of scrapingResult.portals) {
+      if (!portal.success) continue;
+
+      const rawResult = scrapingResult.rawResults.find(
+        (r) => r && r.source === portal.name,
+      );
+
+      results.push({
+        source: portal.name as PlatformSource,
+        sourceLabel: `${portal.name.charAt(0).toUpperCase() + portal.name.slice(1).replace('_', '.')} (scraping en vivo — ${portal.listingsCount} anuncios)`,
+        sourceUrl: `https://www.${portal.name.replace('_', '.')}.com`,
+        fetchedAt: scrapingResult.scrapedAt,
+        reliability: portal.listingsCount >= 10 ? 82 : portal.listingsCount >= 3 ? 70 : 55,
+        dataType: 'asking_price',
+        pricePerM2Sale: portal.avgPricePerM2 || undefined,
+        sampleSize: portal.listingsCount,
+        trend: 'STABLE',
+        priceRange: rawResult
+          ? { min: rawResult.minPricePerM2 || 0, max: rawResult.maxPricePerM2 || 0 }
+          : undefined,
+        comparables: rawResult?.listings
+          .filter((l) => l.price && l.squareMeters && l.pricePerM2)
+          .slice(0, 5)
+          .map((l) => ({
+            source: portal.name as PlatformSource,
+            address: l.address || l.title,
+            price: l.price!,
+            pricePerM2: l.pricePerM2!,
+            squareMeters: l.squareMeters!,
+            rooms: l.rooms || undefined,
+            bathrooms: l.bathrooms || undefined,
+            url: l.url,
+          })),
+      });
     }
 
-    const data = await response.json();
-    const listings = data.properties || [];
-
-    if (listings.length === 0) {
-      return generateFotocasaEstimate(options);
+    if (results.length === 0) {
+      logger.warn('[Scraping] Ningún portal devolvió resultados, usando fallback estático');
+      results.push(...getStaticFallbackData(options));
     }
-
-    const prices = listings
-      .filter((l: any) => l.price && l.surface)
-      .map((l: any) => l.price / l.surface);
-    const avgPricePerM2 = prices.reduce((a: number, b: number) => a + b, 0) / prices.length;
-
-    return {
-      source: 'fotocasa',
-      sourceLabel: 'Fotocasa (API en vivo)',
-      sourceUrl: 'https://www.fotocasa.es',
-      fetchedAt: new Date().toISOString(),
-      reliability: 78,
-      dataType: 'asking_price',
-      pricePerM2Sale: Math.round(avgPricePerM2),
-      sampleSize: listings.length,
-      trend: 'STABLE',
-      comparables: listings.slice(0, 5).map((l: any) => ({
-        source: 'fotocasa' as PlatformSource,
-        address: l.address || options.city,
-        price: l.price,
-        pricePerM2: Math.round(l.price / l.surface),
-        squareMeters: l.surface,
-        rooms: l.rooms,
-        url: l.url,
-      })),
-    };
   } catch (error) {
-    logger.warn('[Fotocasa] Error fetching data:', error);
-    return generateFotocasaEstimate(options);
-  }
-}
-
-function generateFotocasaEstimate(options: FetchOptions): PlatformMarketDataPoint {
-  const { getMarketDataByPostalCode, getMarketDataByAddress } = require('./market-data-service');
-
-  const zoneData = options.postalCode
-    ? getMarketDataByPostalCode(options.postalCode)
-    : getMarketDataByAddress(options.address || options.city);
-
-  if (zoneData) {
-    // Fotocasa suele tener precios ligeramente inferiores a Idealista (~3-5%)
-    const adjustment = 0.97;
-    return {
-      source: 'fotocasa',
-      sourceLabel: 'Fotocasa (datos referencia Feb 2026)',
-      sourceUrl: 'https://www.fotocasa.es',
-      fetchedAt: new Date().toISOString(),
-      reliability: 68,
-      dataType: 'asking_price',
-      pricePerM2Sale: Math.round(zoneData.askingPriceVentaM2 * adjustment),
-      pricePerM2Rent: Math.round(zoneData.askingPriceAlquilerM2 * adjustment * 100) / 100,
-      trend:
-        zoneData.tendencia === 'subiendo'
-          ? 'UP'
-          : zoneData.tendencia === 'bajando'
-            ? 'DOWN'
-            : 'STABLE',
-      demandLevel: zoneData.demanda,
-      sampleSize: 0,
-    };
+    logger.error('[Scraping] Error general en scraping de portales:', error);
+    results.push(...getStaticFallbackData(options));
   }
 
-  return {
-    source: 'fotocasa',
-    sourceLabel: 'Fotocasa (sin datos para esta zona)',
-    fetchedAt: new Date().toISOString(),
-    reliability: 0,
-    dataType: 'asking_price',
-  };
+  return results;
 }
+
+/**
+ * Datos estáticos como fallback cuando el scraping falla
+ */
+function getStaticFallbackData(options: FetchOptions): PlatformMarketDataPoint[] {
+  const results: PlatformMarketDataPoint[] = [];
+  try {
+    const { getMarketDataByPostalCode, getMarketDataByAddress } = require('./market-data-service');
+    const zoneData = options.postalCode
+      ? getMarketDataByPostalCode(options.postalCode)
+      : getMarketDataByAddress(options.address || options.city);
+
+    if (zoneData) {
+      results.push({
+        source: 'idealista',
+        sourceLabel: 'Idealista (datos referencia estáticos Feb 2026 — scraping no disponible)',
+        sourceUrl: 'https://www.idealista.com',
+        fetchedAt: new Date().toISOString(),
+        reliability: 60,
+        dataType: 'asking_price',
+        pricePerM2Sale: zoneData.askingPriceVentaM2,
+        pricePerM2Rent: zoneData.askingPriceAlquilerM2,
+        trend: zoneData.tendencia === 'subiendo' ? 'UP' : zoneData.tendencia === 'bajando' ? 'DOWN' : 'STABLE',
+        demandLevel: zoneData.demanda,
+        sampleSize: 0,
+      });
+      results.push({
+        source: 'fotocasa',
+        sourceLabel: 'Fotocasa (datos referencia estáticos Feb 2026 — scraping no disponible)',
+        sourceUrl: 'https://www.fotocasa.es',
+        fetchedAt: new Date().toISOString(),
+        reliability: 55,
+        dataType: 'asking_price',
+        pricePerM2Sale: Math.round(zoneData.askingPriceVentaM2 * 0.97),
+        pricePerM2Rent: Math.round(zoneData.askingPriceAlquilerM2 * 0.97 * 100) / 100,
+        trend: zoneData.tendencia === 'subiendo' ? 'UP' : zoneData.tendencia === 'bajando' ? 'DOWN' : 'STABLE',
+        demandLevel: zoneData.demanda,
+        sampleSize: 0,
+      });
+    }
+  } catch {
+    // Sin datos
+  }
+  return results;
+}
+
+// ============================================================================
+// ADAPTADORES DE DATOS OFICIALES (Notariado, INE, BD interna)
+// ============================================================================
+
+// (Adaptadores de API de Idealista y Fotocasa eliminados — reemplazados por web scraping arriba)
 
 /**
  * Adaptador para datos del Notariado (precios reales escriturados)
@@ -532,78 +414,7 @@ async function fetchFromInternalDB(options: FetchOptions): Promise<PlatformMarke
   }
 }
 
-/**
- * Adaptador para datos de Habitaclia
- */
-async function fetchFromHabitaclia(options: FetchOptions): Promise<PlatformMarketDataPoint | null> {
-  const apiKey = process.env.HABITACLIA_API_KEY;
-
-  if (!apiKey) {
-    // Habitaclia es fuerte principalmente en Cataluña
-    const catalanCities = [
-      'Barcelona',
-      'Girona',
-      'Tarragona',
-      'Lleida',
-      'Terrassa',
-      'Sabadell',
-      'Hospitalet',
-    ];
-    if (!catalanCities.some((c) => options.city.toLowerCase().includes(c.toLowerCase()))) {
-      return null;
-    }
-
-    return {
-      source: 'habitaclia',
-      sourceLabel: 'Habitaclia (sin API key — datos no disponibles)',
-      fetchedAt: new Date().toISOString(),
-      reliability: 0,
-      dataType: 'asking_price',
-    };
-  }
-
-  try {
-    const response = await fetch(
-      `https://api.habitaclia.com/v1/search?location=${encodeURIComponent(options.city)}&type=sale`,
-      { headers: { Authorization: `Bearer ${apiKey}` } }
-    );
-
-    if (!response.ok) return null;
-
-    const data = await response.json();
-    const listings = data.results || [];
-
-    if (listings.length === 0) return null;
-
-    const prices = listings
-      .filter((l: any) => l.price && l.surface)
-      .map((l: any) => l.price / l.surface);
-    const avgPricePerM2 = prices.reduce((a: number, b: number) => a + b, 0) / prices.length;
-
-    return {
-      source: 'habitaclia',
-      sourceLabel: 'Habitaclia (API en vivo)',
-      sourceUrl: 'https://www.habitaclia.com',
-      fetchedAt: new Date().toISOString(),
-      reliability: 75,
-      dataType: 'asking_price',
-      pricePerM2Sale: Math.round(avgPricePerM2),
-      sampleSize: listings.length,
-      comparables: listings.slice(0, 5).map((l: any) => ({
-        source: 'habitaclia' as PlatformSource,
-        address: l.address || options.city,
-        price: l.price,
-        pricePerM2: Math.round(l.price / l.surface),
-        squareMeters: l.surface,
-        rooms: l.rooms,
-        url: l.url,
-      })),
-    };
-  } catch (error) {
-    logger.warn('[Habitaclia] Error fetching data:', error);
-    return null;
-  }
-}
+// (Adaptador de API de Habitaclia eliminado — reemplazado por web scraping)
 
 /**
  * Adaptador para datos de valoraciones anteriores en BD (PropertyValuation)
@@ -751,42 +562,37 @@ export async function getAggregatedMarketData(
     address: options.address,
   });
 
-  // Lanzar todas las peticiones en paralelo
-  const results = await Promise.allSettled([
-    fetchFromNotariado(options),
-    fetchFromIdealista(options),
-    fetchFromFotocasa(options),
-    fetchFromINE(options),
-    fetchFromInternalDB(options),
-    fetchFromHabitaclia(options),
-    fetchFromPreviousValuations(options),
+  // 1. Obtener datos de portales vía web scraping (Idealista, Fotocasa, Habitaclia, Pisos.com)
+  // 2. Obtener datos oficiales (Notariado, INE) y base interna en paralelo
+  const [scrapedPortalData, ...officialResults] = await Promise.all([
+    fetchFromScrapedPortals(options),
+    fetchFromNotariado(options).catch(() => null),
+    fetchFromINE(options).catch(() => null),
+    fetchFromInternalDB(options).catch(() => null),
+    fetchFromPreviousValuations(options).catch(() => null),
   ]);
-
-  const platformNames: PlatformSource[] = [
-    'notariado',
-    'idealista',
-    'fotocasa',
-    'ine',
-    'internal_db',
-    'habitaclia',
-    'internal_db',
-  ];
 
   const platformData: PlatformMarketDataPoint[] = [];
   const sourcesUsed: PlatformSource[] = [];
   const sourcesFailed: PlatformSource[] = [];
 
-  results.forEach((result, idx) => {
-    const source = platformNames[idx];
-    if (result.status === 'fulfilled' && result.value && result.value.reliability > 0) {
-      platformData.push(result.value);
-      if (!sourcesUsed.includes(result.value.source)) {
-        sourcesUsed.push(result.value.source);
-      }
+  // Agregar datos de portales scrapeados
+  for (const pd of scrapedPortalData) {
+    if (pd.reliability > 0) {
+      platformData.push(pd);
+      if (!sourcesUsed.includes(pd.source)) sourcesUsed.push(pd.source);
+    }
+  }
+
+  // Agregar datos oficiales
+  const officialSources: PlatformSource[] = ['notariado', 'ine', 'internal_db', 'internal_db'];
+  officialResults.forEach((result, idx) => {
+    const source = officialSources[idx];
+    if (result && result.reliability > 0) {
+      platformData.push(result);
+      if (!sourcesUsed.includes(result.source)) sourcesUsed.push(result.source);
     } else {
-      if (!sourcesFailed.includes(source)) {
-        sourcesFailed.push(source);
-      }
+      if (!sourcesFailed.includes(source)) sourcesFailed.push(source);
     }
   });
 
