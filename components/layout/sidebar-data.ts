@@ -581,7 +581,13 @@ const alquilerResidencialItems = [
     icon: Shield,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
-  // Valoración IA eliminada de aquí — se accede desde Holding/Grupo (evitar duplicado)
+  {
+    name: 'Valoración IA',
+    href: '/valoracion-ia',
+    icon: Brain,
+    roles: ['super_admin', 'administrador', 'gestor'],
+    badge: 'IA',
+  },
   {
     name: 'Seguros',
     href: '/seguros',
