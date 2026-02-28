@@ -201,7 +201,7 @@ export async function generateModelo200(
     where: {
       contract: {
         unit: { building: { companyId } },
-        tipoContrato: { not: 'comercial' },
+        tipo: { not: 'comercial' },
       },
       estado: 'pagado',
       fechaPago: { gte: startDate, lte: endDate },
@@ -213,11 +213,11 @@ export async function generateModelo200(
   const paymentsComercial = await prisma.commercialPayment.findMany({
     where: {
       lease: { space: { building: { companyId } } },
-      status: 'paid',
-      paymentDate: { gte: startDate, lte: endDate },
+      estado: 'pagado',
+      fechaPago: { gte: startDate, lte: endDate },
     },
   });
-  const ingresosComercial = paymentsComercial.reduce((s, p) => s + p.amount, 0);
+  const ingresosComercial = paymentsComercial.reduce((s, p) => s + p.importeBase, 0);
 
   const ingresosBrutos = ingresosResidencial + ingresosComercial;
 
@@ -232,13 +232,16 @@ export async function generateModelo200(
   // Clasificar gastos por categoría
   let ibi = 0, seguros = 0, comunidad = 0, reparaciones = 0, gestion = 0, otrosGastos = 0;
   for (const e of expenses) {
-    const cat = (e.categoria || '').toLowerCase();
-    if (cat.includes('ibi') || cat.includes('impuesto')) ibi += e.monto;
-    else if (cat.includes('seguro')) seguros += e.monto;
-    else if (cat.includes('comunidad')) comunidad += e.monto;
-    else if (cat.includes('reparaci') || cat.includes('mantenimi')) reparaciones += e.monto;
-    else if (cat.includes('gesti') || cat.includes('admin')) gestion += e.monto;
-    else otrosGastos += e.monto;
+    const cat = String(e.categoria || '');
+    switch (cat) {
+      case 'impuestos': ibi += e.monto; break;
+      case 'seguros': seguros += e.monto; break;
+      case 'comunidad': comunidad += e.monto; break;
+      case 'reparaciones': reparaciones += e.monto; break;
+      case 'mantenimiento': reparaciones += e.monto; break;
+      case 'servicios': gestion += e.monto; break;
+      default: otrosGastos += e.monto;
+    }
   }
 
   // Amortizaciones
@@ -341,13 +344,13 @@ export async function generateModelo303(
   const commercialPayments = await prisma.commercialPayment.findMany({
     where: {
       lease: { space: { building: { companyId } } },
-      status: 'paid',
-      paymentDate: { gte: startDate, lte: endDate },
+      estado: 'pagado',
+      fechaPago: { gte: startDate, lte: endDate },
     },
   });
 
   const TIPO_IVA = 21;
-  const baseIVARepercutido = commercialPayments.reduce((s, p) => s + p.amount, 0);
+  const baseIVARepercutido = commercialPayments.reduce((s, p) => s + p.importeBase, 0);
   const ivaRepercutido = Math.round(baseIVARepercutido * TIPO_IVA / 100 * 100) / 100;
 
   // IVA soportado: gastos con IVA deducible del trimestre
@@ -428,16 +431,16 @@ export async function generateModelo347(
       building: { companyId },
       fecha: { gte: startDate, lte: endDate },
     },
-    include: { proveedor: { select: { id: true, nombre: true, cif: true } } },
+    include: { provider: { select: { id: true, nombre: true, cif: true } } },
   });
 
   const proveedorTotals = new Map<string, { nombre: string; cif: string; total: number }>();
   for (const e of expenses) {
-    if (e.proveedor) {
-      const key = e.proveedor.id;
+    if (e.provider) {
+      const key = e.provider.id;
       const current = proveedorTotals.get(key) || {
-        nombre: e.proveedor.nombre,
-        cif: e.proveedor.cif || '',
+        nombre: e.provider.nombre,
+        cif: e.provider.cif || '',
         total: 0,
       };
       current.total += e.monto;

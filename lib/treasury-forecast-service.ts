@@ -94,11 +94,11 @@ export async function generateTreasuryForecast(
   const commercialLeases = await prisma.commercialLease.findMany({
     where: {
       space: { building: { companyId } },
-      status: 'active',
+      estado: 'activo',
     },
-    select: { monthlyRent: true, endDate: true },
+    select: { rentaMensualBase: true, fechaFin: true },
   });
-  const rentaComercialMensual = commercialLeases.reduce((s, l) => s + l.monthlyRent, 0);
+  const rentaComercialMensual = commercialLeases.reduce((s, l) => s + l.rentaMensualBase, 0);
 
   // Hipotecas activas
   const mortgages = await prisma.mortgage.findMany({
@@ -122,13 +122,15 @@ export async function generateTreasuryForecast(
   };
 
   for (const e of expenses) {
-    const cat = (e.categoria || '').toLowerCase();
-    if (cat.includes('ibi')) gastoMensual.ibi += e.monto;
-    else if (cat.includes('comunidad')) gastoMensual.comunidad += e.monto;
-    else if (cat.includes('seguro')) gastoMensual.seguros += e.monto;
-    else if (cat.includes('mantenimi') || cat.includes('reparaci')) gastoMensual.mantenimiento += e.monto;
-    else if (cat.includes('gesti') || cat.includes('admin')) gastoMensual.gestion += e.monto;
-    else gastoMensual.otros += e.monto;
+    const cat = String(e.categoria || '');
+    switch (cat) {
+      case 'impuestos': gastoMensual.ibi += e.monto; break;
+      case 'comunidad': gastoMensual.comunidad += e.monto; break;
+      case 'seguros': gastoMensual.seguros += e.monto; break;
+      case 'mantenimiento': case 'reparaciones': gastoMensual.mantenimiento += e.monto; break;
+      case 'servicios': gastoMensual.gestion += e.monto; break;
+      default: gastoMensual.otros += e.monto;
+    }
   }
 
   // Convertir a mensual (dividir entre 6)

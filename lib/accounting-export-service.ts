@@ -166,7 +166,7 @@ export async function generateDiarioContable(
     },
     include: {
       building: { select: { nombre: true } },
-      proveedor: { select: { nombre: true, cif: true } },
+      provider: { select: { nombre: true, cif: true } },
     },
     orderBy: { fecha: 'asc' },
   });
@@ -185,7 +185,7 @@ export async function generateDiarioContable(
       concepto,
       debe: e.monto,
       haber: 0,
-      documento: e.numeroFactura || `GAS-${e.id.slice(-6)}`,
+      documento: e.facturaPdfPath || `GAS-${e.id.slice(-6)}`,
     });
 
     // Haber: Bancos (paga)
@@ -197,7 +197,7 @@ export async function generateDiarioContable(
       concepto,
       debe: 0,
       haber: e.monto,
-      documento: e.numeroFactura || `GAS-${e.id.slice(-6)}`,
+      documento: e.facturaPdfPath || `GAS-${e.id.slice(-6)}`,
     });
 
     asientoNum++;
@@ -317,17 +317,17 @@ export async function generateLibroFacturasRecibidas(
     },
     include: {
       building: { select: { nombre: true } },
-      proveedor: { select: { nombre: true, cif: true } },
+      provider: { select: { nombre: true, cif: true } },
     },
     orderBy: { fecha: 'asc' },
   });
 
   let factNum = 1;
   const rows: FacturaRecibida[] = expenses.map(e => ({
-    numero: e.numeroFactura || `FR-${ejercicio}-${String(factNum++).padStart(4, '0')}`,
+    numero: e.facturaPdfPath || `FR-${ejercicio}-${String(factNum++).padStart(4, '0')}`,
     fecha: formatDate(e.fecha),
-    proveedor: e.proveedor?.nombre || 'Sin proveedor',
-    nifProveedor: e.proveedor?.cif || '',
+    proveedor: (e as any).provider?.nombre || 'Sin proveedor',
+    nifProveedor: (e as any).provider?.cif || '',
     concepto: e.concepto || e.categoria || 'Gasto',
     baseImponible: e.monto,
     tipoIVA: 0, // Se puede mejorar con detección de IVA
@@ -368,12 +368,14 @@ function formatDate(date: Date | string): string {
 }
 
 function mapCategoriaToCuenta(categoria: string): string {
-  const cat = categoria.toLowerCase();
-  if (cat.includes('ibi') || cat.includes('impuesto')) return CUENTAS_PGC.IBI;
-  if (cat.includes('comunidad')) return CUENTAS_PGC.COMUNIDAD;
-  if (cat.includes('seguro')) return CUENTAS_PGC.SEGUROS;
-  if (cat.includes('reparaci') || cat.includes('mantenimi')) return CUENTAS_PGC.REPARACIONES;
-  if (cat.includes('gesti') || cat.includes('admin')) return CUENTAS_PGC.GESTION;
-  if (cat.includes('suminist') || cat.includes('agua') || cat.includes('luz')) return CUENTAS_PGC.SUMINISTROS;
-  return CUENTAS_PGC.OTROS_GASTOS;
+  // ExpenseCategory enum: mantenimiento, impuestos, seguros, servicios, reparaciones, comunidad, otro
+  switch (categoria) {
+    case 'impuestos': return CUENTAS_PGC.IBI;
+    case 'comunidad': return CUENTAS_PGC.COMUNIDAD;
+    case 'seguros': return CUENTAS_PGC.SEGUROS;
+    case 'reparaciones': return CUENTAS_PGC.REPARACIONES;
+    case 'mantenimiento': return CUENTAS_PGC.REPARACIONES;
+    case 'servicios': return CUENTAS_PGC.GESTION;
+    default: return CUENTAS_PGC.OTROS_GASTOS;
+  }
 }
