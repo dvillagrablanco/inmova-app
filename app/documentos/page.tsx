@@ -224,6 +224,13 @@ export default function DocumentosPage() {
       seguro: 'bg-red-500',
       factura: 'bg-indigo-500',
       contabilidad: 'bg-cyan-500',
+      escritura_constitucion: 'bg-amber-600',
+      modificacion_estatutos: 'bg-amber-500',
+      acta_junta: 'bg-amber-400',
+      poder_notarial: 'bg-teal-500',
+      escritura_compraventa: 'bg-emerald-600',
+      escritura_hipoteca: 'bg-rose-600',
+      certificado_corporativo: 'bg-sky-500',
       otro: 'bg-gray-500',
     };
     return colors[tipo] || 'bg-gray-500';
@@ -239,6 +246,13 @@ export default function DocumentosPage() {
       seguro: 'Seguro',
       factura: 'Factura',
       contabilidad: 'Contabilidad',
+      escritura_constitucion: 'Escritura de constitución',
+      modificacion_estatutos: 'Modificación estatutaria',
+      acta_junta: 'Acta de junta',
+      poder_notarial: 'Poder notarial',
+      escritura_compraventa: 'Escritura compraventa',
+      escritura_hipoteca: 'Escritura hipoteca',
+      certificado_corporativo: 'Certificado corporativo',
       otro: 'Otro',
     };
     return labels[tipo] || tipo;
@@ -422,6 +436,14 @@ export default function DocumentosPage() {
         <SelectItem value="seguro">Seguro</SelectItem>
         <SelectItem value="factura">Factura</SelectItem>
         <SelectItem value="contabilidad">Contabilidad</SelectItem>
+        {/* Documentación societaria */}
+        <SelectItem value="escritura_constitucion">Escritura de constitución</SelectItem>
+        <SelectItem value="modificacion_estatutos">Modificación estatutaria</SelectItem>
+        <SelectItem value="acta_junta">Acta de junta</SelectItem>
+        <SelectItem value="poder_notarial">Poder notarial</SelectItem>
+        <SelectItem value="escritura_compraventa">Escritura de compraventa</SelectItem>
+        <SelectItem value="escritura_hipoteca">Escritura de hipoteca</SelectItem>
+        <SelectItem value="certificado_corporativo">Certificado corporativo (BORM, CIF)</SelectItem>
         <SelectItem value="otro">Otro</SelectItem>
         </SelectContent>
         </Select>
@@ -534,6 +556,13 @@ export default function DocumentosPage() {
         <SelectItem value="seguro">Seguro</SelectItem>
         <SelectItem value="factura">Factura</SelectItem>
         <SelectItem value="contabilidad">Contabilidad</SelectItem>
+        <SelectItem value="escritura_constitucion">Escritura de constitución</SelectItem>
+        <SelectItem value="modificacion_estatutos">Modificación estatutaria</SelectItem>
+        <SelectItem value="acta_junta">Acta de junta</SelectItem>
+        <SelectItem value="poder_notarial">Poder notarial</SelectItem>
+        <SelectItem value="escritura_compraventa">Escritura compraventa</SelectItem>
+        <SelectItem value="escritura_hipoteca">Escritura hipoteca</SelectItem>
+        <SelectItem value="certificado_corporativo">Certificado corporativo</SelectItem>
         <SelectItem value="otro">Otro</SelectItem>
         </SelectContent>
         </Select>
