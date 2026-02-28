@@ -1,9 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-
 import logger from '@/lib/logger';
+import { z } from 'zod';
+
 export const dynamic = 'force-dynamic';
+
+const createConnectionSchema = z.object({
+  nombre: z.string().min(1),
+  plataforma: z.string().min(1),
+  tipo: z.string().optional(),
+  frecuencia: z.string().optional(),
+  direccion: z.string().optional(),
+  entidadesSincronizadas: z.array(z.string()).optional(),
+  configuracion: z.record(z.unknown()).optional(),
+  notas: z.string().optional(),
+});
 export const runtime = 'nodejs';
 
 // Nota: En producción, estos datos deberían almacenarse en la base de datos
@@ -83,29 +95,29 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-
-    // Validar campos requeridos
-    if (!body.nombre || !body.plataforma) {
+    const parsed = createConnectionSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: 'Nombre y plataforma son requeridos' },
+        { error: 'Datos inválidos', details: parsed.error.flatten().fieldErrors },
         { status: 400 }
       );
     }
+    const data = parsed.data;
 
     const newConnection: SyncConnection = {
       id: `conn-${Date.now()}`,
       companyId,
-      nombre: body.nombre,
-      tipo: body.tipo || 'API_EXTERNA',
-      plataforma: body.plataforma,
+      nombre: data.nombre,
+      tipo: data.tipo || 'API_EXTERNA',
+      plataforma: data.plataforma,
       estado: 'ACTIVO',
-      frecuencia: body.frecuencia || 'DIARIO',
+      frecuencia: data.frecuencia || 'DIARIO',
       registrosSincronizados: 0,
       erroresUltimaSinc: 0,
-      direccion: body.direccion || 'BIDIRECCIONAL',
-      entidadesSincronizadas: body.entidadesSincronizadas || [],
-      configuracion: body.configuracion || {},
-      notas: body.notas || '',
+      direccion: data.direccion || 'BIDIRECCIONAL',
+      entidadesSincronizadas: data.entidadesSincronizadas || [],
+      configuracion: data.configuracion || {},
+      notas: data.notas || '',
       createdAt: new Date().toISOString(),
     };
 

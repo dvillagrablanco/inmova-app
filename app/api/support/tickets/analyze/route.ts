@@ -2,20 +2,29 @@ import { NextRequest, NextResponse } from 'next/server';
 import { searchKnowledgeBase, searchFAQs } from '@/lib/knowledge-base';
 import logger from '@/lib/logger';
 import { requireSession } from '@/lib/api-auth-guard';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+const analyzeTicketSchema = z.object({
+  subject: z.string().min(1),
+  description: z.string().min(1),
+});
 
 export async function POST(request: NextRequest) {
-  // Auth guard
   const auth = await requireSession();
   if (!auth.authenticated) return auth.response;
   try {
-  // Auth guard
-  const auth = await requireSession();
-  if (!auth.authenticated) return auth.response;
-    const { subject, description } = await request.json();
+    const body = await request.json();
+    const parsed = analyzeTicketSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Datos inválidos', details: parsed.error.flatten().fieldErrors },
+        { status: 400 }
+      );
+    }
+    const { subject, description } = parsed.data;
     const fullText = `${subject} ${description}`;
 
     // 1. Llamar a LLM para analizar y categorizar

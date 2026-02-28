@@ -8,8 +8,19 @@ import {
 } from '@/lib/str-channel-integration-service';
 import { addDays } from 'date-fns';
 import logger, { logError } from '@/lib/logger';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+
+const syncBodySchema = z.object({
+  channel: z.enum(['airbnb', 'booking', 'vrbo', 'homeaway']),
+  type: z.enum(['calendar', 'bookings', 'prices']),
+  data: z.object({
+    startDate: z.string().optional(),
+    endDate: z.string().optional(),
+    priceUpdates: z.array(z.unknown()).optional(),
+  }).optional(),
+});
 export const runtime = 'nodejs';
 
 /**
@@ -28,22 +39,14 @@ export async function POST(
 
     const { listingId } = params;
     const body = await request.json();
-    const { channel, type, data } = body;
-
-    if (!channel || !type) {
+    const parsed = syncBodySchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: 'Faltan parámetros requeridos' },
+        { error: 'Datos inválidos', details: parsed.error.flatten().fieldErrors },
         { status: 400 },
       );
     }
-
-    // Validar que el canal es válido
-    if (!["airbnb", "booking", "vrbo", "homeaway"].includes(channel)) {
-      return NextResponse.json(
-        { error: 'Canal no válido' },
-        { status: 400 },
-      );
-    }
+    const { channel, type, data } = parsed.data;
 
     const companyId = session?.user?.companyId;
     if (!companyId) {

@@ -6,8 +6,16 @@ import {
   publishToSocialMedia,
   getSocialMediaStats,
 } from '@/lib/social-media-service';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+
+const createPostSchema = z.object({
+  accountId: z.string().min(1),
+  content: z.string().min(1),
+  programar: z.string().optional(),
+  scheduledFor: z.string().optional(),
+});
 export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
@@ -51,8 +59,14 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { accountId, content, programar, scheduledFor } = body;
-
+    const parsed = createPostSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Datos inválidos', details: parsed.error.flatten().fieldErrors },
+        { status: 400 }
+      );
+    }
+    const { accountId, content, scheduledFor, programar } = parsed.data;
     const scheduleDate = scheduledFor || programar;
 
     const result = await publishToSocialMedia(

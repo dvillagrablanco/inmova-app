@@ -1,5 +1,12 @@
+import { z } from 'zod';
+
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+const trackEventSchema = z.object({
+  eventName: z.string().min(1),
+  properties: z.record(z.unknown()).optional(),
+});
 
 /**
  * API: POST /api/analytics/track
@@ -19,19 +26,18 @@ export async function POST(request: NextRequest) {
 
     // 2. Obtener datos del evento
     const body = await request.json();
-    const { eventName, properties } = body;
-
-    // 3. Validar que el eventName sea válido
-    if (!eventName || typeof eventName !== 'string') {
+    const parsed = trackEventSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: 'Invalid eventName' },
+        { error: 'Datos inválidos', details: parsed.error.flatten().fieldErrors },
         { status: 400 }
       );
     }
+    const { eventName, properties } = parsed.data;
 
     // 4. Enviar evento
     const { trackEvent } = (await import('@/lib/analytics-service')) as any;
-    await trackEvent(eventName as AnalyticsEventName, properties || {}, userId);
+    await trackEvent(eventName as AnalyticsEventName, properties ?? {}, userId);
 
     return NextResponse.json({ success: true });
   } catch (error) {

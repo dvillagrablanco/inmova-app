@@ -1,5 +1,18 @@
+import { z } from 'zod';
+
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+const createNotificationSchema = z.object({
+  userId: z.string().optional(),
+  companyId: z.string().optional(),
+  type: z.string().optional().default('info'),
+  title: z.string().min(1),
+  message: z.string().min(1),
+  icon: z.string().optional(),
+  actionLabel: z.string().optional(),
+  actionRoute: z.string().optional(),
+});
 
 /**
  * API: /api/notifications
@@ -75,25 +88,25 @@ export async function POST(request: NextRequest) {
     // Verificar que el usuario sea admin o el sistema
     // (Para demo, permitimos a cualquier usuario crear notificaciones propias)
     const body = await request.json();
-
-    const params: CreateNotificationParams = {
-      userId: body.userId || session.user.id,
-      companyId: body.companyId || session.user.companyId || '',
-      type: body.type || 'info',
-      title: body.title,
-      message: body.message,
-      icon: body.icon,
-      actionLabel: body.actionLabel,
-      actionRoute: body.actionRoute,
-    };
-
-    // Validaciones básicas
-    if (!params.title || !params.message) {
+    const parsed = createNotificationSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: 'Title y message son requeridos' },
+        { error: 'Datos inválidos', details: parsed.error.flatten().fieldErrors },
         { status: 400 }
       );
     }
+    const data = parsed.data;
+
+    const params: CreateNotificationParams = {
+      userId: data.userId || session.user.id,
+      companyId: data.companyId || session.user.companyId || '',
+      type: data.type || 'info',
+      title: data.title,
+      message: data.message,
+      icon: data.icon,
+      actionLabel: data.actionLabel,
+      actionRoute: data.actionRoute,
+    };
 
     const result = await createNotification(params);
 

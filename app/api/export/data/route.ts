@@ -3,9 +3,18 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { exportData } from '@/lib/backup-service';
 import logger, { logError } from '@/lib/logger';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+const exportDataSchema = z.object({
+  model: z.string().min(1),
+  format: z.enum(['json', 'csv']).default('json'),
+  filters: z.record(z.unknown()).optional(),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+});
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,15 +23,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const { model, format = 'json', filters, startDate, endDate } = await req.json();
-    const companyId = (session.user as any).companyId;
-
-    if (!model) {
+    const body = await req.json();
+    const parsed = exportDataSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: 'Modelo requerido' },
+        { error: 'Datos inválidos', details: parsed.error.flatten().fieldErrors },
         { status: 400 }
       );
     }
+    const { model, format, filters, startDate, endDate } = parsed.data;
+    const companyId = (session.user as any).companyId;
 
     const result = await exportData({
       companyId,

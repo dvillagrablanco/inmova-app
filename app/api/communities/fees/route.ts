@@ -7,9 +7,27 @@ import {
   markFeeAsPaid,
   GenerateFeesParams,
 } from '@/lib/services/community-management-service';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+const feesBodySchema = z.union([
+  z.object({
+    action: z.literal('generate'),
+    buildingId: z.string().min(1),
+    companyId: z.string().optional(),
+    periodo: z.string().optional(),
+    tipo: z.string().optional(),
+    montoPorUnidad: z.number().optional(),
+  }),
+  z.object({
+    action: z.literal('mark_paid'),
+    feeId: z.string().min(1),
+    fechaPago: z.string(),
+    metodoPago: z.string().optional(),
+  }),
+]);
 
 
 /**
@@ -60,27 +78,31 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
+    const parsed = feesBodySchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Datos inválidos', details: parsed.error.flatten().fieldErrors },
+        { status: 400 }
+      );
+    }
 
-    if (body.action === 'generate') {
-      // Generar cuotas
+    if (parsed.data.action === 'generate') {
       const params: GenerateFeesParams = {
-        buildingId: body.buildingId,
-        companyId: body.companyId,
-        periodo: body.periodo,
-        tipo: body.tipo as any,
-        montoPorUnidad: body.montoPorUnidad,
+        buildingId: parsed.data.buildingId,
+        companyId: parsed.data.companyId,
+        periodo: parsed.data.periodo,
+        tipo: parsed.data.tipo as any,
+        montoPorUnidad: parsed.data.montoPorUnidad,
       };
-
       const fees = await generateCommunityFees(params);
       return NextResponse.json(fees, { status: 201 });
     }
 
-    if (body.action === 'mark_paid') {
-      // Marcar cuota como pagada
+    if (parsed.data.action === 'mark_paid') {
       const fee = await markFeeAsPaid(
-        body.feeId,
-        new Date(body.fechaPago),
-        body.metodoPago
+        parsed.data.feeId,
+        new Date(parsed.data.fechaPago),
+        parsed.data.metodoPago
       );
       return NextResponse.json(fee);
     }

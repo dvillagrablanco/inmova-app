@@ -3,9 +3,14 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { predictRevenue } from '@/lib/prediction-service';
 import logger, { logError } from '@/lib/logger';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+const revenueSchema = z.object({
+  monthsAhead: z.number().int().min(1).max(24).optional().default(3),
+});
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,7 +19,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const { monthsAhead = 3 } = await request.json();
+    const body = await request.json();
+    const parsed = revenueSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Datos inválidos', details: parsed.error.flatten().fieldErrors },
+        { status: 400 }
+      );
+    }
+    const { monthsAhead } = parsed.data;
     const companyId = session?.user?.companyId;
 
     const predictions = await predictRevenue(companyId, monthsAhead);

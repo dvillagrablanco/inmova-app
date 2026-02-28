@@ -6,9 +6,20 @@ import {
   requestMaintenanceApproval,
 } from '@/lib/enhanced-approval-service';
 import logger from '@/lib/logger';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+const approvalRequestSchema = z.object({
+  type: z.string().min(1),
+  entityId: z.string().optional(),
+  title: z.string().optional(),
+  description: z.string().optional(),
+  amount: z.union([z.string(), z.number()]).optional().transform((v) => (typeof v === 'string' ? parseFloat(v) : v)),
+  entityType: z.string().optional(),
+  metadata: z.record(z.unknown()).optional(),
+});
 
 /**
  * POST /api/approvals/request
@@ -18,7 +29,14 @@ export async function POST(request: Request) {
   try {
     const user = await requireAuth();
     const body = await request.json();
-    const { type, entityId, title, description, amount } = body;
+    const parsed = approvalRequestSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Datos inválidos', details: parsed.error.flatten().fieldErrors },
+        { status: 400 }
+      );
+    }
+    const { type, entityId, title, description, amount, entityType, metadata } = parsed.data;
 
     let approval;
 
@@ -61,11 +79,11 @@ export async function POST(request: Request) {
           type,
           title,
           description,
-          amount: amount ? parseFloat(amount) : undefined,
+          amount: amount ?? undefined,
           requestedBy: user.id,
           entityId,
-          entityType: body.entityType,
-          metadata: body.metadata,
+          entityType,
+          metadata,
         });
         break;
     }

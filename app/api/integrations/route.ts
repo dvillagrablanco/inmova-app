@@ -1,5 +1,13 @@
+import { z } from 'zod';
+
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+const saveIntegrationSchema = z.object({
+  provider: z.string().min(1),
+  credentials: z.record(z.unknown()),
+  settings: z.record(z.unknown()).optional(),
+});
 
 /**
  * API: /api/integrations
@@ -70,14 +78,14 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { provider, credentials, settings } = body;
-
-    if (!provider || !credentials) {
+    const parsed = saveIntegrationSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: 'Provider and credentials are required' },
+        { error: 'Datos inválidos', details: parsed.error.flatten().fieldErrors },
         { status: 400 }
       );
     }
+    const { provider, credentials, settings } = parsed.data;
 
     // Guardar integración
     const integration = await IntegrationManager.saveIntegration({

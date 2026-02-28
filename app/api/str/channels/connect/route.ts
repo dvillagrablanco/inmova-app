@@ -6,8 +6,15 @@ import {
   ChannelCredentials,
 } from '@/lib/str-channel-integration-service';
 import logger, { logError } from '@/lib/logger';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+
+const connectChannelSchema = z.object({
+  listingId: z.string().min(1),
+  channel: z.enum(['airbnb', 'booking', 'vrbo', 'homeaway']),
+  credentials: z.record(z.unknown()).optional(),
+});
 export const runtime = 'nodejs';
 
 /**
@@ -22,22 +29,14 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { listingId, channel, credentials } = body;
-
-    if (!listingId || !channel) {
+    const parsed = connectChannelSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: 'Faltan parámetros requeridos' },
+        { error: 'Datos inválidos', details: parsed.error.flatten().fieldErrors },
         { status: 400 },
       );
     }
-
-    // Validar que el canal es válido
-    if (!["airbnb", "booking", "vrbo", "homeaway"].includes(channel)) {
-      return NextResponse.json(
-        { error: 'Canal no válido' },
-        { status: 400 },
-      );
-    }
+    const { listingId, channel, credentials } = parsed.data;
 
     const companyId = session?.user?.companyId;
     if (!companyId) {
@@ -52,8 +51,8 @@ export async function POST(request: NextRequest) {
     const result = await connectChannel(
       companyId,
       listingId,
-      channel as any,
-      credentials as ChannelCredentials,
+      channel,
+      (credentials || {}) as ChannelCredentials,
     );
 
     if (result.success) {

@@ -7,8 +7,33 @@ import {
   validateCoupon,
 } from '@/lib/coupon-service';
 import logger, { logError } from '@/lib/logger';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+
+const validateCouponSchema = z.object({
+  action: z.literal('validate'),
+  codigo: z.string().min(1),
+  montoCompra: z.union([z.string(), z.number()]).transform((v) => (typeof v === 'string' ? parseFloat(v) : v)),
+  userId: z.string().optional(),
+  tenantId: z.string().optional(),
+});
+
+const createCouponSchema = z.object({
+  action: z.optional(),
+  codigo: z.string().min(1),
+  tipo: z.string().min(1),
+  valor: z.union([z.string(), z.number()]).transform((v) => (typeof v === 'string' ? parseFloat(v) : v)),
+  descripcion: z.string().optional(),
+  usosMaximos: z.union([z.string(), z.number()]).optional().transform((v) => (v != null ? (typeof v === 'string' ? parseInt(v) : v) : undefined)),
+  usosPorUsuario: z.union([z.string(), z.number()]).optional().transform((v) => (v != null ? (typeof v === 'string' ? parseInt(v) : v) : 1)),
+  montoMinimo: z.union([z.string(), z.number()]).optional().transform((v) => (v != null ? (typeof v === 'string' ? parseFloat(v) : v) : undefined)),
+  fechaInicio: z.string(),
+  fechaExpiracion: z.string(),
+  aplicaATodos: z.boolean().optional().default(true),
+  unidadesPermitidas: z.array(z.string()).optional().default([]),
+  planesPermitidos: z.array(z.string()).optional().default([]),
+});
 export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
@@ -51,67 +76,51 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { action } = body;
 
     // Validar cupón
-    if (action === 'validate') {
-      const { codigo, montoCompra, userId, tenantId } = body;
-
-      if (!codigo || !montoCompra) {
+    if (body.action === 'validate') {
+      const validateParsed = validateCouponSchema.safeParse(body);
+      if (!validateParsed.success) {
         return NextResponse.json(
-          { error: 'Código y monto son requeridos' },
+          { error: 'Datos inválidos', details: validateParsed.error.flatten().fieldErrors },
           { status: 400 }
         );
       }
-
+      const { codigo, montoCompra, userId, tenantId } = validateParsed.data;
       const result = await validateCoupon({
         codigo,
         companyId: session.user.companyId,
-        montoCompra: parseFloat(montoCompra),
+        montoCompra,
         userId,
         tenantId,
       });
-
       return NextResponse.json(result);
     }
 
     // Crear cupón
-    const {
-      codigo,
-      tipo,
-      valor,
-      descripcion,
-      usosMaximos,
-      usosPorUsuario,
-      montoMinimo,
-      fechaInicio,
-      fechaExpiracion,
-      aplicaATodos,
-      unidadesPermitidas,
-      planesPermitidos,
-    } = body;
-
-    if (!codigo || !tipo || !valor || !fechaInicio || !fechaExpiracion) {
+    const createParsed = createCouponSchema.safeParse(body);
+    if (!createParsed.success) {
       return NextResponse.json(
-        { error: 'Faltan campos requeridos' },
+        { error: 'Datos inválidos', details: createParsed.error.flatten().fieldErrors },
         { status: 400 }
       );
     }
+    const data = createParsed.data;
 
     const coupon = await createCoupon({
       companyId: session.user.companyId,
-      codigo,
-      tipo: tipo as any,
-      valor: parseFloat(valor),
-      descripcion,
-      usosMaximos: usosMaximos ? parseInt(usosMaximos) : undefined,
-      usosPorUsuario: usosPorUsuario ? parseInt(usosPorUsuario) : 1,
-      montoMinimo: montoMinimo ? parseFloat(montoMinimo) : undefined,
-      fechaInicio: new Date(fechaInicio),
-      fechaExpiracion: new Date(fechaExpiracion),
-      aplicaATodos: aplicaATodos ?? true,
-      unidadesPermitidas: unidadesPermitidas || [],
-      planesPermitidos: planesPermitidos || [],
+      codigo: data.codigo,
+      tipo: data.tipo as any,
+      valor: data.valor,
+      descripcion: data.descripcion,
+      usosMaximos: data.usosMaximos,
+      usosPorUsuario: data.usosPorUsuario ?? 1,
+      montoMinimo: data.montoMinimo,
+      fechaInicio: new Date(data.fechaInicio),
+      fechaExpiracion: new Date(data.fechaExpiracion),
+      aplicaATodos: data.aplicaATodos ?? true,
+      unidadesPermitidas: data.unidadesPermitidas ?? [],
+      planesPermitidos: data.planesPermitidos ?? [],
       creadoPor: session.user.id,
     });
 

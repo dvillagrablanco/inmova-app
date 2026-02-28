@@ -6,8 +6,17 @@ import {
   connectSocialMediaAccount,
   disconnectSocialMediaAccount,
 } from '@/lib/social-media-service';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+
+const connectAccountSchema = z.object({
+  platform: z.string().min(1),
+  accountName: z.string().optional(),
+  accountId: z.string().optional(),
+  accessToken: z.string().optional(),
+  config: z.record(z.unknown()).optional(),
+});
 export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
@@ -35,7 +44,14 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { platform, accountName, accountId, accessToken, config } = body;
+    const parsed = connectAccountSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Datos inválidos', details: parsed.error.flatten().fieldErrors },
+        { status: 400 }
+      );
+    }
+    const { platform, accountName, accountId, accessToken, config } = parsed.data;
 
     const account = await connectSocialMediaAccount(
       session.user.companyId,

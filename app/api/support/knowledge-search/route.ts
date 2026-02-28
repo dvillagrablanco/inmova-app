@@ -2,30 +2,31 @@ import { NextRequest, NextResponse } from 'next/server';
 import { searchArticles } from '@/lib/knowledge-base-data';
 import logger, { logError } from '@/lib/logger';
 import { requireSession } from '@/lib/api-auth-guard';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+const knowledgeSearchSchema = z.object({
+  query: z.string().min(1),
+});
 
 /**
  * API para buscar en la base de conocimientos usando IA
  */
 export async function POST(request: NextRequest) {
-  // Auth guard
   const auth = await requireSession();
   if (!auth.authenticated) return auth.response;
   try {
-  // Auth guard
-  const auth = await requireSession();
-  if (!auth.authenticated) return auth.response;
-    const { query } = await request.json();
-
-    if (!query) {
+    const body = await request.json();
+    const parsed = knowledgeSearchSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: 'Query is required' },
+        { error: 'Datos inválidos', details: parsed.error.flatten().fieldErrors },
         { status: 400 }
       );
     }
+    const { query } = parsed.data;
 
     // Primero buscar con el método tradicional basado en keywords
     const keywordResults = searchArticles(query);

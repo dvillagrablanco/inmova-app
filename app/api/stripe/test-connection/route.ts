@@ -2,9 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import logger from '@/lib/logger';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+const testConnectionSchema = z.object({
+  secretKey: z.string().min(1),
+  publishableKey: z.string().min(1),
+});
 
 export async function POST(req: NextRequest) {
   try {
@@ -21,14 +27,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { secretKey, publishableKey } = await req.json();
-
-    if (!secretKey || !publishableKey) {
+    const body = await req.json();
+    const parsed = testConnectionSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: 'Se requieren secretKey y publishableKey' },
+        { error: 'Datos inválidos', details: parsed.error.flatten().fieldErrors },
         { status: 400 }
       );
     }
+    const { secretKey, publishableKey } = parsed.data;
 
     // Validar formato de las claves
     if (!secretKey.startsWith('sk_')) {

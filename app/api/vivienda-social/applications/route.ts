@@ -17,6 +17,11 @@ const createApplicationSchema = z.object({
   notas: z.string().optional()
 });
 
+const updateApplicationStatusSchema = z.object({
+  id: z.string().min(1),
+  estado: z.string().min(1),
+});
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -62,7 +67,15 @@ export async function PATCH(request: NextRequest) {
     if (!session?.user?.companyId) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
-    const { id, estado } = await request.json();
+    const body = await request.json();
+    const parsed = updateApplicationStatusSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Datos inválidos', details: parsed.error.flatten().fieldErrors },
+        { status: 400 }
+      );
+    }
+    const { id, estado } = parsed.data;
     await ViviendaSocialService.updateApplicationStatus(id, estado);
     return NextResponse.json({ success: true, message: 'Estado actualizado' });
   } catch (error: any) {

@@ -8,8 +8,16 @@ import {
 } from '@/lib/permissions';
 import bcrypt from 'bcryptjs';
 import logger, { logError } from '@/lib/logger';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+
+const userUpdateSchema = z.object({
+  name: z.string().min(2).max(200).optional(),
+  role: z.enum(['super_admin', 'administrador', 'gestor', 'operador']).optional(),
+  activo: z.boolean().optional(),
+  password: z.string().min(8).optional(),
+});
 export const runtime = 'nodejs';
 
 // Lazy Prisma loading (auditoria 2026-02-11)
@@ -66,7 +74,14 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     }
 
     const body = await req.json();
-    const { name, role, activo, password } = body;
+    const parsed = userUpdateSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Datos inválidos', details: parsed.error.flatten().fieldErrors },
+        { status: 400 }
+      );
+    }
+    const { name, role, activo, password } = parsed.data;
 
     const targetUser = await prisma.user.findUnique({
       where: { id: params.id },

@@ -1,5 +1,14 @@
+import { z } from 'zod';
+
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+const markReadSchema = z.object({
+  notificationId: z.string().optional(),
+  markAll: z.boolean().optional(),
+}).refine((data) => data.notificationId || data.markAll, {
+  message: 'Must provide notificationId or markAll=true',
+});
 
 /**
  * API: POST /api/notifications/mark-read
@@ -24,28 +33,35 @@ export async function POST(request: NextRequest) {
 
     // 2. Obtener el ID de la notificación (opcional)
     const body = await request.json();
-    const { notificationId, markAll } = body;
+    const parsed = markReadSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Datos inválidos', details: parsed.error.flatten().fieldErrors },
+        { status: 400 }
+      );
+    }
+    const { notificationId, markAll } = parsed.data;
 
     if (markAll) {
       // Marcar todas como leídas
       const result = await markAllAsRead(session.user.id);
-      return NextResponse.json({ 
-        success: result.success, 
-        count: result.count || 0 
+      return NextResponse.json({
+        success: result.success,
+        count: result.count || 0
       });
-    } else if (notificationId) {
+    }
+    if (notificationId) {
       // Marcar una específica como leída
       const result = await markAsRead(notificationId, session.user.id);
-      return NextResponse.json({ 
-        success: result.success, 
-        count: result.success ? 1 : 0 
+      return NextResponse.json({
+        success: result.success,
+        count: result.success ? 1 : 0
       });
-    } else {
-      return NextResponse.json(
-        { error: 'Must provide notificationId or markAll=true' },
-        { status: 400 }
-      );
     }
+    return NextResponse.json(
+      { error: 'Must provide notificationId or markAll=true' },
+      { status: 400 }
+    );
   } catch (error) {
     return NextResponse.json(
       { error: 'Internal server error' },

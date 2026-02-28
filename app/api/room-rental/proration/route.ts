@@ -3,8 +3,21 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { applyUtilityProrationToUnit, calculateUtilityProration } from '@/lib/room-rental-service';
 import logger, { logError } from '@/lib/logger';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+
+const prorationSchema = z.object({
+  unitId: z.string().min(1),
+  utilities: z.object({
+    electricity: z.number().optional(),
+    water: z.number().optional(),
+    gas: z.number().optional(),
+    internet: z.number().optional(),
+    cleaning: z.number().optional(),
+  }),
+  prorationMethod: z.string().optional(),
+});
 export const runtime = 'nodejs';
 
 /**
@@ -18,30 +31,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const data = await request.json();
-
-    // Validaciones
-    if (!data.unitId || !data.utilities) {
+    const body = await request.json();
+    const parsed = prorationSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: 'Faltan campos requeridos: unitId y utilities' },
+        { error: 'Datos inválidos', details: parsed.error.flatten().fieldErrors },
         { status: 400 }
       );
     }
+    const { unitId, utilities, prorationMethod } = parsed.data;
 
-    const prorationMethod = data.prorationMethod || 'combined';
-
-    // Aplicar prorrateo
     const result = await applyUtilityProrationToUnit(
-      data.unitId,
+      unitId,
       session.user.companyId,
       {
-        electricity: data.utilities.electricity,
-        water: data.utilities.water,
-        gas: data.utilities.gas,
-        internet: data.utilities.internet,
-        cleaning: data.utilities.cleaning,
+        electricity: utilities.electricity,
+        water: utilities.water,
+        gas: utilities.gas,
+        internet: utilities.internet,
+        cleaning: utilities.cleaning,
       },
-      prorationMethod
+      prorationMethod || 'combined'
     );
 
     return NextResponse.json({

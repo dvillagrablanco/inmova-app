@@ -3,8 +3,14 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { disconnectChannel } from '@/lib/str-channel-integration-service';
 import logger, { logError } from '@/lib/logger';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+
+const disconnectChannelSchema = z.object({
+  listingId: z.string().min(1),
+  channel: z.enum(['airbnb', 'booking', 'vrbo', 'homeaway']),
+});
 export const runtime = 'nodejs';
 
 /**
@@ -19,22 +25,14 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { listingId, channel } = body;
-
-    if (!listingId || !channel) {
+    const parsed = disconnectChannelSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: 'Faltan parámetros requeridos' },
+        { error: 'Datos inválidos', details: parsed.error.flatten().fieldErrors },
         { status: 400 },
       );
     }
-
-    // Validar que el canal es válido
-    if (!["airbnb", "booking", "vrbo", "homeaway"].includes(channel)) {
-      return NextResponse.json(
-        { error: 'Canal no válido' },
-        { status: 400 },
-      );
-    }
+    const { listingId, channel } = parsed.data;
 
     logger.info(`[STR API] Desconectando canal ${channel} de listing ${listingId}`);
 

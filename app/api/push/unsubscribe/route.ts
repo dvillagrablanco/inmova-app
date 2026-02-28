@@ -5,9 +5,14 @@ import { authOptions } from '@/lib/auth-options';
 // import { removePushSubscription } from '@/lib/push-notifications';
 import { unsubscribePushNotification } from '@/lib/push-notifications';
 import logger, { logError } from '@/lib/logger';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+const unsubscribeSchema = z.object({
+  endpoint: z.string().min(1),
+});
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,14 +21,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const { endpoint } = await request.json();
-
-    if (!endpoint) {
+    const body = await request.json();
+    const parsed = unsubscribeSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: 'Endpoint requerido' },
+        { error: 'Datos inválidos', details: parsed.error.flatten().fieldErrors },
         { status: 400 }
       );
     }
+    const { endpoint } = parsed.data;
 
     await unsubscribePushNotification(session.user.id, endpoint);
 

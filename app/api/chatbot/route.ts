@@ -1,5 +1,12 @@
+import { z } from 'zod';
+
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+const chatbotSchema = z.object({
+  message: z.string().min(1),
+  includeHistory: z.boolean().optional().default(false),
+});
 
 /**
  * API: POST /api/chatbot
@@ -33,14 +40,14 @@ export async function POST(request: NextRequest) {
 
     // 2. Obtener mensaje del usuario
     const body = await request.json();
-    const { message, includeHistory = false } = body;
-
-    if (!message || typeof message !== 'string') {
+    const parsed = chatbotSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: 'Message is required' },
+        { error: 'Datos inválidos', details: parsed.error.flatten().fieldErrors },
         { status: 400 }
       );
     }
+    const { message, includeHistory } = parsed.data;
 
     // 3. Obtener contexto del usuario
     const onboardingData = user.companyId
@@ -48,7 +55,7 @@ export async function POST(request: NextRequest) {
       : null;
     const companyId = user.companyId || '';
     const conversationHistory =
-      includeHistory && companyId ? await getChatbotHistory(user.id, companyId) : [];
+      (includeHistory ?? false) && companyId ? await getChatbotHistory(user.id, companyId) : [];
 
     const context = {
       userId: user.id,

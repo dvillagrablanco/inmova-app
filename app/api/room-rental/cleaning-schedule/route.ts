@@ -3,8 +3,14 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { generateCleaningSchedule, saveCleaningScheduleToContracts } from '@/lib/room-rental-service';
 import logger, { logError } from '@/lib/logger';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+
+const cleaningScheduleSchema = z.object({
+  unitId: z.string().min(1),
+  startDate: z.string().optional(),
+});
 export const runtime = 'nodejs';
 
 /**
@@ -55,19 +61,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const data = await request.json();
-
-    if (!data.unitId) {
+    const body = await request.json();
+    const parsed = cleaningScheduleSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: 'Falta campo requerido: unitId' },
+        { error: 'Datos inválidos', details: parsed.error.flatten().fieldErrors },
         { status: 400 }
       );
     }
+    const { unitId, startDate } = parsed.data;
 
     const schedule = await saveCleaningScheduleToContracts(
-      data.unitId,
+      unitId,
       session.user.companyId,
-      data.startDate ? new Date(data.startDate) : new Date()
+      startDate ? new Date(startDate) : new Date()
     );
 
     return NextResponse.json({

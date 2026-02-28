@@ -1,9 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-
 import logger from '@/lib/logger';
+import { z } from 'zod';
+
 export const dynamic = 'force-dynamic';
+
+const updateConnectionSchema = z.object({
+  nombre: z.string().min(1).optional(),
+  tipo: z.string().optional(),
+  plataforma: z.string().optional(),
+  estado: z.string().optional(),
+  frecuencia: z.string().optional(),
+  direccion: z.string().optional(),
+  entidadesSincronizadas: z.array(z.string()).optional(),
+  configuracion: z.record(z.unknown()).optional(),
+  notas: z.string().optional(),
+});
 export const runtime = 'nodejs';
 
 // Nota: En producción, estos datos deberían almacenarse en la base de datos
@@ -84,18 +97,25 @@ export async function PUT(
 
     const { id } = await params;
     const body = await request.json();
+    const parsed = updateConnectionSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Datos inv?lidos', details: parsed.error.flatten().fieldErrors },
+        { status: 400 }
+      );
+    }
+    const data = parsed.data;
 
     const connectionIndex = syncConnections.findIndex((conn) => conn.id === id);
 
     if (connectionIndex === -1) {
-      return NextResponse.json({ error: 'Conexión no encontrada' }, { status: 404 });
+      return NextResponse.json({ error: 'Conexi?n no encontrada' }, { status: 404 });
     }
 
-    // Actualizar conexión
     const updatedConnection = {
       ...syncConnections[connectionIndex],
-      ...body,
-      configuracion: body.configuracion || syncConnections[connectionIndex].configuracion,
+      ...data,
+      configuracion: data.configuracion ?? syncConnections[connectionIndex].configuracion,
     };
 
     syncConnections[connectionIndex] = updatedConnection;
