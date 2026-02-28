@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * CHATBOT INTELIGENTE CON GPT-4
+ * CHATBOT INTELIGENTE CON IA
  * Zero-Touch Support System
  */
 
@@ -419,7 +419,7 @@ export function IntelligentChatbot({
                       </Button>
                     </div>
                     <p className="mt-2 text-xs text-gray-500 text-center">
-                      Powered by GPT-4 • <a href="mailto:inmovaapp@gmail.com" className="text-indigo-600 hover:underline">inmovaapp@gmail.com</a>
+                      Powered by IA Avanzada • <a href="mailto:inmovaapp@gmail.com" className="text-indigo-600 hover:underline">inmovaapp@gmail.com</a>
                     </p>
                   </div>
                 </>

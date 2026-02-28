@@ -446,7 +446,7 @@ export default function MigracionPage() {
                       <div className="flex items-center gap-2">
                         <CheckCircle className="h-5 w-5 text-green-600" />
                         <span>
-                          <strong>IA GPT-4 + Blockchain</strong> integrados nativamente
+                          <strong>IA avanzada + Blockchain</strong> integrados nativamente
                         </span>
                       </div>
                       <div className="flex items-center gap-2">

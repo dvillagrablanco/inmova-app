@@ -1,6 +1,6 @@
 /**
  * Formulario de Valoración Automática con IA
- * Componente que permite valorar propiedades usando Anthropic Claude
+ * Componente que permite valorar propiedades usando IA avanzada
  */
 
 'use client';

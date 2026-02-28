@@ -268,7 +268,7 @@ export default function Launch2025Page() {
                 <div className="flex items-start gap-2 text-green-200">
                   <CheckCircle2 className="h-5 w-5 text-green-400 flex-shrink-0 mt-1" />
                   <p>
-                    <strong>IA GPT-4 + Mantenimiento Predictivo</strong> incluidos
+                    <strong>IA avanzada + Mantenimiento Predictivo</strong> incluidos
                   </p>
                 </div>
                 <div className="bg-green-800/30 p-4 rounded-lg mt-4 border-2 border-green-400">

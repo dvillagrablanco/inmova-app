@@ -736,7 +736,7 @@ export function AIDocumentAssistant({
             <span className="text-lg">Asistente IA</span>
           </SheetTitle>
 
-          {/* Badge de Claude - Separado para mejor visualización móvil */}
+          {/* Badge de IA - Separado para mejor visualización móvil */}
           <div className="flex flex-wrap items-center gap-2">
             <TooltipProvider>
               <Tooltip>
@@ -747,11 +747,11 @@ export function AIDocumentAssistant({
                     onClick={() => window.open('/admin/integraciones-plataforma/ia', '_blank')}
                   >
                     <Sparkles className="h-3 w-3 mr-1 text-violet-500" />
-                    Claude 3.5
+                    IA Avanzada
                   </Badge>
                 </TooltipTrigger>
                 <TooltipContent className="bg-white dark:bg-gray-900 border shadow-lg z-[9999]">
-                  <p>Powered by Anthropic Claude 3.5 Sonnet</p>
+                  <p>Powered by IA Avanzada</p>
                   <p className="text-xs text-muted-foreground">Clic para configurar</p>
                 </TooltipContent>
               </Tooltip>
@@ -1052,7 +1052,7 @@ export function AIDocumentAssistant({
 
         <SheetFooter className="mt-6">
           <div className="flex items-center justify-between w-full text-xs text-muted-foreground">
-            <span>Powered by Claude 3.5 Sonnet</span>
+            <span>Powered by IA Avanzada Sonnet</span>
             <Button variant="link" size="sm" className="h-auto p-0 text-xs" asChild>
               <a href="/admin/ai-agents" target="_blank">
                 <ExternalLink className="h-3 w-3 mr-1" />

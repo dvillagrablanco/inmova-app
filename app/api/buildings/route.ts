@@ -61,6 +61,7 @@ export async function GET(req: NextRequest) {
             select: {
               id: true,
               estado: true,
+              rentaMensual: true,
             },
           },
           company: {

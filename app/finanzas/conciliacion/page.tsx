@@ -374,7 +374,7 @@ export default function ConciliacionBancariaPage() {
           matched: totalMatched,
           reconciled: totalReconciled,
           phase: useAI
-            ? `Analizando con IA... (${data.aiCalls || 0} llamadas Claude)`
+            ? `Analizando con IA... (${data.aiCalls || 0} llamadas IA)`
             : 'Analizando por reglas...',
         }));
 
@@ -1119,7 +1119,7 @@ export default function ConciliacionBancariaPage() {
                                     : r.match.method === 'reference_code'
                                       ? 'Referencia'
                                       : r.match.method === 'ai_inference'
-                                        ? 'IA Claude'
+                                        ? 'IA'
                                         : r.match.method === 'gocardless_metadata'
                                           ? 'GoCardless'
                                           : r.match.method}

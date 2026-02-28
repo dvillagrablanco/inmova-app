@@ -494,7 +494,7 @@ export default function EwoorkerLandingPage() {
                 <p className="text-sm opacity-90">
                   IA recomienda subcontratistas ideales basándose en especialidad, zona y rating.
                 </p>
-                <Badge className="mt-4 bg-white/20">Claude AI integrado</Badge>
+                <Badge className="mt-4 bg-white/20">IA avanzada integrada</Badge>
               </CardContent>
             </Card>
 

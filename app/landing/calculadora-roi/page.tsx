@@ -427,7 +427,7 @@ export default function CalculadoraROIPage() {
                     </div>
                     <div className="flex items-center gap-2 text-sm">
                       <CheckCircle className="h-4 w-4 text-green-600" />
-                      <span>IA GPT-4 + Mantenimiento Predictivo</span>
+                      <span>IA avanzada + Mantenimiento Predictivo</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm">
                       <CheckCircle className="h-4 w-4 text-green-600" />

@@ -267,7 +267,7 @@ export function ValuationCard({ propertyId }: ValuationCardProps) {
           </Button>
 
           <p className="text-xs text-muted-foreground text-center">
-            Última valoración generada con Claude 3.5 Sonnet
+            Última valoración generada con IA Avanzada
           </p>
         </CardContent>
       </Card>
