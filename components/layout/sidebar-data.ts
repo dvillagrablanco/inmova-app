@@ -1494,6 +1494,13 @@ const holdingGrupoNavItems = [
     roles: ['super_admin', 'administrador'],
   },
   {
+    name: 'Family Office 360°',
+    href: '/family-office/dashboard',
+    icon: Landmark,
+    roles: ['super_admin', 'administrador'],
+    badge: 'Nuevo',
+  },
+  {
     name: 'Análisis de Activos',
     href: '/inversiones/analisis',
     icon: Calculator,
