@@ -26,7 +26,7 @@ const comparisonFeatures = [
   // FUNCIONALIDADES CORE
   { feature: 'Portal Inquilinos PWA', inmova: true, competitorA: true, competitorB: false, competitorC: true, category: 'core' },
   { feature: 'Portal Propietarios PWA', inmova: true, competitorA: false, competitorB: false, competitorC: true, category: 'core' },
-  { feature: 'Asistente IA GPT-4', inmova: true, competitorA: false, competitorB: false, competitorC: false, category: 'core' },
+  { feature: 'Asistente IA avanzado', inmova: true, competitorA: false, competitorB: false, competitorC: false, category: 'core' },
   { feature: 'Channel Manager Multi-OTA', inmova: true, competitorA: true, competitorB: false, competitorC: true, category: 'core' },
   { feature: 'Firma Digital Integrada', inmova: true, competitorA: true, competitorB: false, competitorC: false, category: 'core' },
   { feature: 'Open Banking', inmova: true, competitorA: false, competitorB: false, competitorC: false, category: 'core' },

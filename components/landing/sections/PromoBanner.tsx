@@ -25,7 +25,7 @@ const campaigns: PromoCampaign[] = [
     code: 'STARTER26',
     title: 'Empieza desde €17,50/mes',
     subtitle: 'Plan Starter al 50% los 3 primeros meses',
-    description: 'Pasa del Excel a gestión profesional. Contratos digitales, cobros automáticos y portal de inquilinos incluidos.',
+    description: 'Pasa de hojas de cálculo a gestión profesional. Contratos digitales, cobros automáticos y portal de inquilinos incluidos.',
     cta: 'Ver oferta',
     ctaHref: '/landing/ofertas#starter26',
     icon: <Sparkles className="h-6 w-6" />,

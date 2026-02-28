@@ -22,7 +22,7 @@ const ADDONS = [
   { id: 'fo_starter', name: '🏦 Family Office Starter', price: 299, desc: 'Patrimonio 360°, 3 bancos, import manual, reporting' },
   { id: 'fo_professional', name: '🏦 Family Office Pro', price: 599, desc: 'Integración bancaria ilimitada, PE completo, simulador fiscal, copiloto IA' },
   { id: 'ia_suite', name: '🤖 Suite IA Completa', price: 49, desc: '10 agentes IA: cobros, renovaciones, screening, negociador' },
-  { id: 'media_estancia', name: '🏠 Media Estancia Pro', price: 39, desc: '9 portales (Álamo, Spotahome...), leads automáticos' },
+  { id: 'media_estancia', name: '🏠 Media Estancia Pro', price: 39, desc: 'Principales plataformas de media estancia, leads automáticos' },
   { id: 'signatures', name: 'Pack 10 Firmas', price: 15, desc: 'Firmas digitales adicionales' },
   { id: 'storage', name: 'Pack 10GB Storage', price: 5, desc: 'Almacenamiento extra' },
   { id: 'ai', name: 'Pack IA Avanzada', price: 10, desc: '50K tokens IA/mes' },
@@ -185,7 +185,7 @@ const plans: PlanData[] = [
 const featureComparison = [
   { feature: 'Verticales de negocio', inmova: '7 verticales', others: '1-2 verticales' },
   { feature: 'Multi-vertical (alquiler + coliving + STR...)', inmova: '✅ Combina libremente', others: '❌ Solo 1 modelo' },
-  { feature: 'Firma digital incluida', inmova: '✅ Signaturit integrado', others: '❌ Limitada o de pago' },
+  { feature: 'Firma digital incluida', inmova: '✅ Firma digital integrada', others: '❌ Limitada o de pago' },
   { feature: 'IA integrada (valoraciones, scoring)', inmova: '✅ Incluida', others: '❌ No disponible' },
   { feature: 'API abierta', inmova: '✅ Desde Business', others: '❌ Solo Enterprise' },
   { feature: 'White-label (tu marca)', inmova: '✅ Disponible', others: '❌ No disponible' },

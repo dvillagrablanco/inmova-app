@@ -44,14 +44,14 @@ const personasContent: Record<string, PersonaContent> = {
     subtitle:
       'Contratos, cobros, incidencias y comunicación con inquilinos: todo automatizado en una sola plataforma. Dedica tu tiempo a lo que importa.',
     painPoints: [
-      'Gestión manual con Excel, WhatsApp y papeles',
+      'Gestión manual con hojas de cálculo, mensajería y papeles',
       'Morosidad de inquilinos sin herramientas de prevención',
       '+10 horas semanales en tareas administrativas repetitivas',
       'Riesgo legal por contratos desactualizados',
     ],
     benefits: [
       'Screening de inquilinos con IA y verificación de solvencia',
-      'Cobros automáticos con Stripe y alertas de impago',
+      'Cobros automáticos con tarjeta y SEPA y alertas de impago',
       'Contratos LAU actualizados con firma digital',
       'Portal de inquilinos: incidencias, pagos y documentos sin llamadas',
     ],
@@ -96,7 +96,7 @@ const personasContent: Record<string, PersonaContent> = {
     subtitle:
       'Dashboard ejecutivo con rentabilidad por propiedad, ocupación en tiempo real y alertas inteligentes. Toma decisiones basadas en datos, no en intuiciones.',
     painPoints: [
-      'Información dispersa entre gestores, Excel y emails',
+      'Información dispersa entre gestores, hojas de cálculo y emails',
       'Sin visibilidad real de rentabilidad neta por activo',
       'Reportes manuales desactualizados al recibirlos',
       'Difícil comparar rendimiento entre propiedades',

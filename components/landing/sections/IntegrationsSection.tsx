@@ -11,7 +11,7 @@ const integrations = [
     desc: 'Automatiza la gestión financiera de tus alquileres',
     gradient: 'from-green-500 to-emerald-500',
     items: [
-      { name: 'Stripe', desc: 'Cobro automático con tarjeta y SEPA' },
+      { name: 'Cobros automáticos', desc: 'Cobro automático con tarjeta y SEPA' },
       { name: 'Conciliación', desc: 'Seguimiento de transferencias bancarias' },
       { name: 'Facturación', desc: 'Recibos y facturas generados al instante' },
     ]
@@ -22,9 +22,9 @@ const integrations = [
     desc: 'Publica propiedades y sincroniza tu agenda',
     gradient: 'from-blue-500 to-indigo-500',
     items: [
-      { name: 'Idealista y Fotocasa', desc: 'Publicación directa en portales' },
-      { name: 'Google Calendar', desc: 'Visitas y vencimientos sincronizados' },
-      { name: 'Outlook', desc: 'Integración con correo corporativo' },
+      { name: 'Portales inmobiliarios', desc: 'Publicación directa en portales' },
+      { name: 'Calendario integrado', desc: 'Visitas y vencimientos sincronizados' },
+      { name: 'Herramientas de productividad', desc: 'Integración con correo corporativo' },
     ]
   },
   {
@@ -45,7 +45,7 @@ const integrations = [
     gradient: 'from-amber-500 to-yellow-500',
     items: [
       { name: 'Plantillas LAU', desc: 'Contratos conformes a normativa vigente' },
-      { name: 'Signaturit', desc: 'Firma digital con plena validez jurídica' },
+      { name: 'Firma digital', desc: 'Firma digital con plena validez jurídica' },
       { name: 'Almacenamiento', desc: 'Documentos organizados en la nube' },
     ]
   },
@@ -66,9 +66,9 @@ const integrations = [
     desc: 'Sincroniza calendarios y reservas de alquiler vacacional',
     gradient: 'from-pink-500 to-rose-500',
     items: [
-      { name: 'Airbnb', desc: 'Sincronización bidireccional' },
-      { name: 'Booking.com', desc: 'Gestión centralizada de reservas' },
-      { name: 'iCal / Vrbo', desc: 'Calendario unificado sin overbooking' },
+      { name: 'Channel manager', desc: 'Sincronización bidireccional' },
+      { name: 'Reservas centralizadas', desc: 'Gestión centralizada de reservas' },
+      { name: 'Calendario unificado', desc: 'Calendario unificado sin reservas duplicadas' },
     ]
   },
 ];

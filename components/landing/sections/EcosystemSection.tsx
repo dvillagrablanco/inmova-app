@@ -23,7 +23,7 @@ import {
 // 7 Verticales de Negocio
 const verticales = [
   { icon: Building2, name: 'Alquiler Residencial', desc: 'Tradicional + Media Estancia', color: 'from-blue-500 to-cyan-500' },
-  { icon: Hotel, name: 'STR (Vacacional)', desc: 'Airbnb, Booking, VRBO', color: 'from-orange-500 to-amber-500' },
+  { icon: Hotel, name: 'STR (Vacacional)', desc: 'Principales plataformas vacacionales', color: 'from-orange-500 to-amber-500' },
   { icon: Home, name: 'Coliving', desc: 'Habitaciones y prorrateo', color: 'from-purple-500 to-pink-500' },
   { icon: TrendingUp, name: 'House Flipping', desc: 'Compra-reforma-venta', color: 'from-green-500 to-emerald-500' },
   { icon: Hammer, name: 'Construcción B2B', desc: 'ewoorker marketplace', color: 'from-orange-600 to-yellow-500' },

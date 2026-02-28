@@ -30,7 +30,7 @@ const testimonials: Testimonial[] = [
     vertical: 'Alquiler',
     avatar: '/testimonials/maria-garcia.jpg',
     rating: 5,
-    quote: 'Pasé de gestionar todo con Excel y WhatsApp a tener todo organizado en un solo lugar. Los cobros automáticos y las alertas de impago me han quitado un peso enorme de encima.',
+    quote: 'Pasé de gestionar todo con hojas de cálculo y mensajería a tener todo organizado en un solo lugar. Los cobros automáticos y las alertas de impago me han quitado un peso enorme de encima.',
     stats: [
       { metric: 'Propiedades', value: '8' },
       { metric: 'Tiempo ahorrado', value: '5h/sem' },
@@ -78,7 +78,7 @@ const testimonials: Testimonial[] = [
     vertical: 'Inversión',
     avatar: '/testimonials/carlos-ruiz.jpg',
     rating: 5,
-    quote: 'Antes hacía cálculos de rentabilidad en Excel que quedaban obsoletos al día siguiente. Ahora tengo rentabilidad neta por activo actualizada en tiempo real. Las decisiones son mucho más claras.',
+    quote: 'Antes hacía cálculos de rentabilidad en hojas de cálculo que quedaban obsoletos al día siguiente. Ahora tengo rentabilidad neta por activo actualizada en tiempo real. Las decisiones son mucho más claras.',
     stats: [
       { metric: 'Propiedades', value: '12' },
       { metric: 'Ciudades', value: '3' },
@@ -94,11 +94,11 @@ const testimonials: Testimonial[] = [
     vertical: 'Vacacional',
     avatar: '/testimonials/roberto-lopez.jpg',
     rating: 5,
-    quote: 'El channel manager sincroniza Airbnb, Booking y Vrbo en tiempo real. Antes usaba 3 herramientas diferentes y siempre tenía problemas de overbooking. Con Inmova todo va en automático.',
+    quote: 'El channel manager sincroniza todas las plataformas vacacionales en tiempo real. Antes usaba 3 herramientas diferentes y siempre tenía problemas de reservas duplicadas. Con Inmova todo va en automático.',
     stats: [
       { metric: 'Apartamentos', value: '22' },
       { metric: 'Canales', value: '3' },
-      { metric: 'Overbookings', value: '0' },
+      { metric: 'Reservas duplicadas', value: '0' },
     ],
     highlight: 'Channel manager multi-plataforma'
   },

@@ -21,7 +21,7 @@ const faqs: FAQItem[] = [
   {
     question: '¿Cuánto tiempo lleva configurar mi cuenta?',
     answer:
-      'El setup inicial toma menos de 3 minutos. Creas tu cuenta, añades tu primera propiedad con nuestro asistente guiado y ya puedes empezar a gestionar. Si tienes datos en Excel u otra plataforma, puedes importarlos con un clic o nuestro equipo los migra por ti sin coste adicional.',
+      'El setup inicial toma menos de 3 minutos. Creas tu cuenta, añades tu primera propiedad con nuestro asistente guiado y ya puedes empezar a gestionar. Si tienes datos en hojas de cálculo u otra plataforma, puedes importarlos con un clic o nuestro equipo los migra por ti sin coste adicional.',
     category: 'general',
   },
   {
@@ -71,13 +71,13 @@ const faqs: FAQItem[] = [
   {
     question: '¿Puedo exportar mis datos si cambio de plataforma?',
     answer:
-      'Sí. Todos tus datos (propiedades, inquilinos, contratos, pagos, documentos) se exportan en formato Excel o PDF en cualquier momento. No hay lock-in de datos.',
+      'Sí. Todos tus datos (propiedades, inquilinos, contratos, pagos, documentos) se exportan en formato de hoja de cálculo o PDF en cualquier momento. No hay lock-in de datos.',
     category: 'technical',
   },
   {
     question: '¿Con qué herramientas se integra?',
     answer:
-      'Inmova se integra nativamente con Stripe (cobros automáticos), Signaturit (firma digital), Google Calendar y Outlook (calendario), portales inmobiliarios (Idealista, Fotocasa), plataformas vacacionales (Airbnb, Booking) y contabilidad. Además, los planes Business y Enterprise incluyen API REST para integraciones personalizadas.',
+      'Inmova se integra nativamente con pasarela de pago (cobros automáticos), firma digital con validez jurídica, calendario y herramientas de productividad, principales portales inmobiliarios, plataformas vacacionales y contabilidad. Además, los planes Business y Enterprise incluyen API REST para integraciones personalizadas.',
     category: 'technical',
   },
   {

@@ -106,7 +106,7 @@ const newModules = [
     title: 'ewoorker (B2B Construcción)',
     desc: 'Plataforma para subcontratación segura en obras con IA',
     features: [
-      'Matching IA con Claude',
+      'Matching con IA avanzada',
       'Gamificación y logros',
       'Sistema de referidos',
       'Analytics dashboard avanzado',
