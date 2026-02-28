@@ -66,11 +66,59 @@ export default function ExportGestoriaPage() {
   const handleExport = async (exportId: string) => {
     setExporting(exportId);
     try {
-      // TODO: Implementar endpoint /api/investment/export?type=xxx&year=xxx
-      await new Promise(r => setTimeout(r, 1000));
-      toast.success(`Export "${exportId}" generado correctamente`);
-    } catch {
-      toast.error('Error generando export');
+      // Mapear IDs de export a tipos de la API contable
+      const apiTypeMap: Record<string, { endpoint: string; tipo?: string; formato?: string }> = {
+        'facturas-emitidas': { endpoint: '/api/investment/export/contable', tipo: 'facturas-emitidas', formato: 'csv' },
+        'facturas-recibidas': { endpoint: '/api/investment/export/contable', tipo: 'facturas-recibidas', formato: 'csv' },
+        'amortizaciones': { endpoint: '/api/investment/depreciation', formato: 'json' },
+        'intereses-hipoteca': { endpoint: '/api/investment/mortgages', formato: 'json' },
+        'resumen-fiscal': { endpoint: '/api/investment/fiscal/modelo-200', formato: 'json' },
+        'modelo-347': { endpoint: '/api/investment/fiscal/modelo-347', formato: 'json' },
+      };
+
+      const config = apiTypeMap[exportId];
+      if (!config) throw new Error('Export no configurado');
+
+      const params = new URLSearchParams({ ejercicio: year });
+      if (config.tipo) params.set('tipo', config.tipo);
+      if (config.formato) params.set('formato', config.formato);
+
+      const res = await fetch(`${config.endpoint}?${params.toString()}`);
+      if (!res.ok) throw new Error('Error del servidor');
+
+      // Si es CSV, descargar como archivo
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('text/csv')) {
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${exportId}_${year}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        toast.success(`${exportId} descargado correctamente`);
+      } else {
+        // JSON: mostrar datos o generar descarga JSON
+        const data = await res.json();
+        if (data.success || data.data) {
+          const blob = new Blob([JSON.stringify(data.data || data, null, 2)], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `${exportId}_${year}.json`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          toast.success(`${exportId} descargado correctamente`);
+        } else {
+          throw new Error(data.error || 'Error generando export');
+        }
+      }
+    } catch (err: any) {
+      toast.error(`Error: ${err.message || 'Error generando export'}`);
     } finally {
       setExporting(null);
     }

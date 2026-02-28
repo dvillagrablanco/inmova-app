@@ -61,6 +61,7 @@ export default function InversionesPage() {
   const [loading, setLoading] = useState(true);
   const [consolidated, setConsolidated] = useState<ConsolidatedData | null>(null);
   const [fiscal, setFiscal] = useState<any>(null);
+  const [fiscalAlerts, setFiscalAlerts] = useState<any[]>([]);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -74,9 +75,10 @@ export default function InversionesPage() {
 
   const loadData = async () => {
     try {
-      const [consolidatedRes, fiscalRes] = await Promise.all([
+      const [consolidatedRes, fiscalRes, alertsRes] = await Promise.all([
         fetch('/api/investment/consolidated'),
         fetch(`/api/investment/fiscal?year=${new Date().getFullYear()}`),
+        fetch('/api/investment/fiscal/alerts'),
       ]);
 
       if (consolidatedRes.ok) {
@@ -86,6 +88,10 @@ export default function InversionesPage() {
       if (fiscalRes.ok) {
         const data = await fiscalRes.json();
         setFiscal(data.data);
+      }
+      if (alertsRes.ok) {
+        const data = await alertsRes.json();
+        setFiscalAlerts(data.data || []);
       }
     } catch (error) {
       toast.error('Error cargando datos de inversion');
@@ -133,6 +139,39 @@ export default function InversionesPage() {
             </Button>
           </div>
         </div>
+
+        {/* Alertas fiscales */}
+        {fiscalAlerts.length > 0 && (
+          <Card className="border-amber-200 bg-amber-50/50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Shield className="h-4 w-4 text-amber-600" />
+                Alertas Fiscales ({fiscalAlerts.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {fiscalAlerts.slice(0, 5).map((alert: any) => (
+                <div key={alert.id} className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-2">
+                    <Badge
+                      variant={alert.urgencia === 'critica' ? 'destructive' : alert.urgencia === 'alta' ? 'destructive' : 'secondary'}
+                      className="text-xs"
+                    >
+                      {alert.urgencia}
+                    </Badge>
+                    <span>{alert.titulo}</span>
+                  </div>
+                  <span className="text-muted-foreground text-xs">{alert.diasRestantes}d</span>
+                </div>
+              ))}
+              {fiscalAlerts.length > 5 && (
+                <Button variant="ghost" size="sm" className="w-full text-xs" onClick={() => router.push('/inversiones/fiscal/modelos')}>
+                  Ver todas ({fiscalAlerts.length})
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* KPIs principales */}
         {p && (
