@@ -27,8 +27,8 @@ const features = [
   },
   {
     icon: Globe,
-    title: '9 Entidades Bancarias',
-    desc: 'Conexión con Banca March, Pictet, UBS, CACEIS, Inversis, Bankinter, Santander, BBVA, CaixaBank. PSD2, SWIFT y OCR.',
+    title: 'Integración Bancaria Universal',
+    desc: 'Conecta con cualquier entidad bancaria: banca privada, gestoras, custodios y banca comercial. Vía PSD2, SWIFT o OCR con IA.',
   },
   {
     icon: Briefcase,
@@ -38,7 +38,7 @@ const features = [
   {
     icon: Banknote,
     title: 'Tesorería 12 Meses',
-    desc: 'Saldos consolidados de 8+ bancos. Previsión mensual de cobros, pagos, hipotecas y fiscal. Alertas de liquidez.',
+    desc: 'Saldos consolidados de todos tus bancos. Previsión mensual de cobros, pagos, hipotecas y fiscal. Alertas de liquidez.',
   },
   {
     icon: Brain,
@@ -52,9 +52,13 @@ const features = [
   },
 ];
 
-const banks = [
-  'Banca March', 'Pictet', 'UBS', 'CACEIS', 'Inversis',
-  'Bankinter', 'Santander', 'BBVA', 'CaixaBank',
+const connectionTypes = [
+  'Banca Privada',
+  'Gestoras de Fondos',
+  'Custodios Internacionales',
+  'Banca Comercial',
+  'Plataformas de Inversión',
+  'Entidades Extranjeras',
 ];
 
 export function FamilyOfficeSection() {
@@ -97,17 +101,17 @@ export function FamilyOfficeSection() {
           ))}
         </div>
 
-        {/* Banks Strip */}
+        {/* Connection Types Strip */}
         <div className="bg-white rounded-2xl p-6 shadow-lg border-2 border-amber-100 mb-12">
           <div className="text-center mb-4">
-            <h3 className="font-bold text-gray-900">Conecta con tus entidades bancarias</h3>
-            <p className="text-sm text-gray-500">PSD2 automático + SWIFT MT940/MT535 + OCR de extractos PDF con IA</p>
+            <h3 className="font-bold text-gray-900">Compatible con cualquier entidad bancaria</h3>
+            <p className="text-sm text-gray-500">3 niveles de integración: PSD2 automático · SWIFT MT940/MT535 · OCR de extractos PDF con IA</p>
           </div>
           <div className="flex flex-wrap justify-center gap-3">
-            {banks.map((bank) => (
-              <div key={bank} className="flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-full border text-sm font-medium text-gray-700">
+            {connectionTypes.map((type) => (
+              <div key={type} className="flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-full border text-sm font-medium text-gray-700">
                 <CheckCircle2 className="h-4 w-4 text-amber-500" />
-                {bank}
+                {type}
               </div>
             ))}
           </div>
@@ -116,9 +120,9 @@ export function FamilyOfficeSection() {
         {/* Pricing */}
         <div className="grid md:grid-cols-3 gap-6 mb-12">
           {[
-            { name: 'FO Starter', price: '€299', features: ['Dashboard 360°', '3 entidades', 'Import manual', 'Reporting básico'] },
-            { name: 'FO Professional', price: '€599', popular: true, features: ['Todas las entidades', 'PSD2 auto-sync', 'PE completo', 'IA Copiloto', 'Modelo 720'] },
-            { name: 'FO Enterprise', price: '€999', features: ['Todo Professional', 'API para MDFF', 'Reporting custom', 'SLA dedicado', 'Onboarding presencial'] },
+            { name: 'FO Starter', price: '€299', features: ['Dashboard 360°', 'Import manual + OCR', 'Modelos tributarios', 'Reporting básico'] },
+            { name: 'FO Professional', price: '€599', popular: true, features: ['Bancos ilimitados (PSD2/SWIFT)', 'Private Equity completo', 'Simulador fiscal + Copiloto IA', 'Tesorería 12 meses'] },
+            { name: 'FO Enterprise', price: '€999', features: ['Todo Professional', 'API para MDFF/gestoría', 'Reporting custom', 'SLA dedicado', 'Onboarding presencial'] },
           ].map((plan, i) => (
             <Card key={i} className={`text-center ${plan.popular ? 'border-amber-500 border-2 shadow-xl ring-2 ring-amber-200' : 'border-2'}`}>
               {plan.popular && (
