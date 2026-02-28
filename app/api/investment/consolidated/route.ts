@@ -32,10 +32,12 @@ export async function GET(request: NextRequest) {
       data: report,
     });
   } catch (error: any) {
-    logger.error('[Investment Consolidated API]:', error);
+    const errorMsg = error?.message || error?.toString() || 'Unknown error';
+    const errorStack = error?.stack?.slice(0, 500) || '';
+    logger.error('[Investment Consolidated API]:', { message: errorMsg, stack: errorStack });
     Sentry.captureException(error);
     return NextResponse.json(
-      { error: 'Error generando reporte consolidado' },
+      { error: 'Error generando reporte consolidado', detail: errorMsg },
       { status: 500 }
     );
   }
