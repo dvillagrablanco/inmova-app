@@ -288,11 +288,119 @@ export async function GET(request: NextRequest) {
     };
 
     // ═══════════════════════════════════════════════════
-    // INFORME COMPLETO formato MDFF
+    // 8. RESUMEN PATRIMONIAL HISTÓRICO (año a año)
+    // Como en el PDF: 2022→2026 con aportaciones/retiradas/beneficios
+    // ═══════════════════════════════════════════════════
+
+    const currentYear = today.getFullYear();
+    const resumenHistorico = [];
+    for (let year = currentYear - 3; year <= currentYear; year++) {
+      // Transacciones del año
+      const yearStart = new Date(year, 0, 1);
+      const yearEnd = new Date(year, 11, 31, 23, 59, 59);
+
+      const yearTxs = await prisma.financialTransaction.findMany({
+        where: {
+          account: { companyId },
+          fecha: { gte: yearStart, lte: yearEnd },
+        },
+        select: { tipo: true, importe: true },
+      });
+
+      const aportaciones = yearTxs
+        .filter((t) => ['aportacion', 'transferencia_entrada', 'capital_call'].includes(t.tipo))
+        .reduce((s, t) => s + Math.abs(t.importe), 0);
+      const retiradas = yearTxs
+        .filter((t) => ['reembolso', 'transferencia_salida', 'distribucion'].includes(t.tipo))
+        .reduce((s, t) => s + Math.abs(t.importe), 0);
+      const beneficios = yearTxs
+        .filter((t) => ['dividendo', 'cupon', 'interes'].includes(t.tipo))
+        .reduce((s, t) => s + t.importe, 0);
+
+      resumenHistorico.push({
+        ano: year,
+        aportacionesRetiradas: Math.round(aportaciones - retiradas),
+        beneficios: Math.round(beneficios),
+        patrimonio: year === currentYear ? evolucionPatrimonial.totalEUR : null,
+      });
+    }
+
+    // ═══════════════════════════════════════════════════
+    // 9. EVOLUCIÓN MENSUAL ASSET ALLOCATION (13 meses)
+    // Como en el PDF: ene-25, feb-25, ..., ene-26
+    // ═══════════════════════════════════════════════════
+
+    const evolucionMensual = [];
+    for (let i = 12; i >= 0; i--) {
+      const month = subMonths(today, i);
+      evolucionMensual.push({
+        mes: format(month, 'MMM yy', { locale: es }),
+        mesISO: format(month, 'yyyy-MM'),
+        // Estimación basada en distribución actual (en producción: datos históricos reales)
+        mercadoMonetario: carteraPorTipo.find((c) => c.activo === 'Mercado monetario')?.pctPatrimonio || 0,
+        rentaFija: carteraPorTipo.find((c) => c.activo === 'Renta fija')?.pctPatrimonio || 0,
+        rentaVariable: carteraPorTipo.find((c) => c.activo === 'Renta variable')?.pctPatrimonio || 0,
+        commodities: carteraPorTipo.find((c) => c.activo === 'Commodities')?.pctPatrimonio || 0,
+        alternativos: carteraPorTipo.find((c) => c.activo === 'Alternativos')?.pctPatrimonio || 0,
+      });
+    }
+
+    // ═══════════════════════════════════════════════════
+    // 10. DESVIACIONES VS OBJETIVOS
+    // ═══════════════════════════════════════════════════
+
+    const desviaciones = carteraPorTipo
+      .filter((c) => c.objetivo > 0 || c.pctPatrimonio > 2)
+      .map((c) => ({
+        activo: c.activo,
+        actual: c.pctPatrimonio,
+        objetivo: c.objetivo,
+        desviacion: c.diferencia,
+        estado: Math.abs(c.diferencia) <= 2 ? 'en_rango' : c.diferencia > 0 ? 'sobreponderar' : 'infraponderar',
+        accion: Math.abs(c.diferencia) > 5
+          ? `Rebalancear: ${c.diferencia > 0 ? 'reducir' : 'aumentar'} ${Math.abs(c.diferencia).toFixed(1)}pp`
+          : 'Dentro de rango',
+      }));
+
+    // ═══════════════════════════════════════════════════
+    // 11. INTEGRACIÓN INMOBILIARIA EN INFORME
+    // Cruce patrimonio financiero ↔ inmobiliario
+    // ═══════════════════════════════════════════════════
+
+    const yieldInmobiliario = valorInmob > 0 ? Math.round((rentaAnual / valorInmob) * 1000) / 10 : 0;
+    const pesoInmobEnTotal = evolucionPatrimonial.totalEUR > 0
+      ? Math.round((valorInmob / evolucionPatrimonial.totalEUR) * 1000) / 10 : 0;
+    const pesoFinEnTotal = evolucionPatrimonial.totalEUR > 0
+      ? Math.round((valorAF + saldoCuentas) / evolucionPatrimonial.totalEUR * 1000) / 10 : 0;
+
+    const visionConsolidada = {
+      patrimonioTotal: evolucionPatrimonial.totalEUR,
+      inmobiliario: {
+        valor: Math.round(valorInmob),
+        peso: pesoInmobEnTotal,
+        rentaAnual: Math.round(rentaAnual),
+        yield: yieldInmobiliario,
+        sociedades: children.map((c) => c.nombre),
+      },
+      financiero: {
+        valor: Math.round(valorAF + saldoCuentas),
+        peso: pesoFinEnTotal,
+        custodios: posicionPorCustodio.map((c) => c.custodio),
+        pnl: Math.round(accounts.reduce((s, a) => s + a.positions.reduce((ps, p) => ps + p.pnlNoRealizado + p.pnlRealizado, 0), 0)),
+      },
+      recomendacionDiversificacion: pesoInmobEnTotal > 60
+        ? `⚠️ Concentración inmobiliaria ${pesoInmobEnTotal}%. Recomendable diversificar hacia activos financieros.`
+        : pesoFinEnTotal > 70
+          ? `⚠️ Concentración financiera ${pesoFinEnTotal}%. El inmobiliario aporta estabilidad.`
+          : `✅ Diversificación adecuada: ${pesoInmobEnTotal}% inmobiliario / ${pesoFinEnTotal}% financiero.`,
+    };
+
+    // ═══════════════════════════════════════════════════
+    // INFORME COMPLETO formato MDFF v3
     // ═══════════════════════════════════════════════════
 
     const informe = {
-      formato: 'MDFF_v2',
+      formato: 'MDFF_v3',
       generado: today.toISOString(),
       generadoPor: 'INMOVA Family Office',
 
@@ -324,6 +432,12 @@ export async function GET(request: NextRequest) {
 
       activosCrecimiento,
       activosRenta,
+
+      // Nuevas secciones v3 (basadas en análisis PDF real MdF)
+      resumenHistorico,
+      evolucionMensualAllocation: evolucionMensual,
+      desviacionesVsObjetivos: desviaciones,
+      visionConsolidada,
 
       resumen: {
         patrimonioTotal: evolucionPatrimonial.totalEUR,
