@@ -23,6 +23,10 @@ import {
   getAggregatedMarketData,
   formatPlatformDataForPrompt,
 } from '@/lib/external-platform-data-service';
+import {
+  analyzeAndValuateProperty,
+  type PropertyForAnalysis,
+} from '@/lib/ai-property-analysis';
 
 import logger from '@/lib/logger';
 import Anthropic from '@anthropic-ai/sdk';
@@ -468,53 +472,58 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const propertyData: PropertyData = {
+    // 7. Preparar datos para IA multi-paso
+    const propertyForAnalysis: PropertyForAnalysis = {
       address: direccion,
       city: ciudad,
       postalCode: validated.codigoPostal || validated.postalCode || '',
       squareMeters: superficie,
       rooms: habitaciones,
       bathrooms: banos,
-      floor: validated.planta || validated.floor || 0,
-      hasElevator:
-        validated.caracteristicas?.includes('ascensor') || validated.hasElevator || false,
-      hasParking:
-        validated.caracteristicas?.includes('garaje') ||
-        validated.caracteristicas?.includes('parking') ||
-        validated.hasParking ||
-        false,
+      floor: validated.planta || validated.floor || undefined,
+      condition: mapCondition(validated.estadoConservacion || validated.condition),
+      yearBuilt: validated.yearBuilt,
+      hasElevator: validated.caracteristicas?.includes('ascensor') || validated.hasElevator || false,
+      hasParking: validated.caracteristicas?.includes('garaje') || validated.caracteristicas?.includes('parking') || validated.hasParking || false,
       hasGarden: validated.caracteristicas?.includes('jardin') || validated.hasGarden || false,
       hasPool: validated.caracteristicas?.includes('piscina') || validated.hasPool || false,
-      condition: mapCondition(validated.estadoConservacion || validated.condition),
-      neighborhood: validated.neighborhood || '',
+      hasTerrace: validated.hasTerrace || validated.caracteristicas?.includes('terraza') || false,
+      hasGarage: validated.caracteristicas?.includes('garaje') || false,
+      neighborhood: validated.neighborhood || undefined,
+      orientacion: validated.orientacion || 'sur',
+      caracteristicas: validated.caracteristicas || [],
+      descripcionAdicional: validated.descripcionAdicional || '',
+      finalidad: validated.finalidad || 'venta',
     };
 
-    // 7. Llamar a Claude AI para valoración completa con datos de plataformas
-    const valuation = await valuatePropertyEnhanced(propertyData, {
-      finalidad: validated.finalidad || 'venta',
-      caracteristicas: validated.caracteristicas || [],
-      orientacion: validated.orientacion || 'sur',
-      descripcionAdicional: validated.descripcionAdicional || '',
-      comparables,
-      platformDataText,
-    });
+    const internalComparablesText = comparables.length > 0
+      ? comparables.map((c: any) => `- ${c.address}: ${c.price}€ (${c.squareMeters}m²)`).join('\n')
+      : '';
 
-    // 7. Normalizar resultados de IA
+    // 8. Valoración IA multi-paso (Fase 1: análisis comparables + Fase 2: valoración experta)
+    const valuation = await analyzeAndValuateProperty(
+      propertyForAnalysis,
+      aggregatedPlatformData || null,
+      platformDataText,
+      internalComparablesText,
+    );
+
+    // 9. Normalizar resultados para compatibilidad con UI
     const normalizedValuation = {
-      estimatedValue: valuation.valorEstimado ?? valuation.estimatedValue ?? 0,
-      minValue: valuation.valorMinimo ?? valuation.minValue ?? 0,
-      maxValue: valuation.valorMaximo ?? valuation.maxValue ?? 0,
-      confidenceScore: valuation.confianza ?? valuation.confidenceScore ?? 60,
-      pricePerM2: valuation.precioM2 ?? valuation.pricePerM2 ?? undefined,
-      reasoning: valuation.analisisMercado ?? valuation.reasoning ?? undefined,
+      estimatedValue: valuation.estimatedValue,
+      minValue: valuation.minValue,
+      maxValue: valuation.maxValue,
+      confidenceScore: valuation.confidenceScore,
+      pricePerM2: valuation.precioM2,
+      reasoning: valuation.reasoning,
       keyFactors: [
         ...(valuation.factoresPositivos || []),
         ...(valuation.factoresNegativos || []),
       ].filter(Boolean),
-      recommendations: valuation.recomendaciones ?? valuation.recommendations ?? [],
-      estimatedRent: valuation.alquilerEstimado ?? valuation.estimatedRent ?? undefined,
-      estimatedROI: valuation.rentabilidadAlquiler ?? valuation.estimatedROI ?? undefined,
-      capRate: valuation.capRate ?? undefined,
+      recommendations: valuation.recomendaciones || [],
+      estimatedRent: valuation.alquilerEstimado,
+      estimatedROI: valuation.rentabilidadAlquiler,
+      capRate: valuation.capRate,
     };
 
     const normalizedTrend = valuation.tendenciaMercado ?? valuation.marketTrend;
@@ -609,10 +618,30 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // 12. Respuesta exitosa - devolver todos los datos incluyendo fuentes de plataformas
+    // 13. Respuesta exitosa - devolver todos los datos incluyendo análisis IA y fuentes
     return NextResponse.json({
       success: true,
-      ...valuation,
+      // Campos de valoración directos (compatibilidad con UI existente)
+      valorEstimado: valuation.estimatedValue,
+      valorMinimo: valuation.minValue,
+      valorMaximo: valuation.maxValue,
+      precioM2: valuation.precioM2,
+      confianza: valuation.confidenceScore,
+      tendenciaMercado: valuation.tendenciaMercado,
+      porcentajeTendencia: valuation.porcentajeTendencia,
+      comparables: valuation.comparables,
+      factoresPositivos: valuation.factoresPositivos,
+      factoresNegativos: valuation.factoresNegativos,
+      recomendaciones: valuation.recomendaciones,
+      analisisMercado: valuation.analisisMercado,
+      tiempoEstimadoVenta: valuation.tiempoEstimadoVenta,
+      rentabilidadAlquiler: valuation.rentabilidadAlquiler,
+      alquilerEstimado: valuation.alquilerEstimado,
+      // Nuevos campos de análisis IA
+      reasoning: valuation.reasoning,
+      metodologiaUsada: valuation.metodologiaUsada,
+      phase1Summary: valuation.phase1Summary,
+      aiSourcesUsed: valuation.sourcesUsed,
       platformSources: aggregatedPlatformData
         ? {
             sourcesUsed: aggregatedPlatformData.sourcesUsed,

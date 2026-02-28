@@ -141,6 +141,7 @@ interface ValoracionResult {
     superficie: number;
     precioM2: number;
     similitud: number;
+    fuente?: string;
   }>;
   factoresPositivos: string[];
   factoresNegativos: string[];
@@ -150,6 +151,10 @@ interface ValoracionResult {
   rentabilidadAlquiler: number;
   alquilerEstimado: number;
   platformSources?: PlatformSources | null;
+  reasoning?: string;
+  metodologiaUsada?: string;
+  phase1Summary?: string;
+  aiSourcesUsed?: string[];
 }
 
 // Características del inmueble
@@ -1216,7 +1221,14 @@ export default function ValoracionIAPage() {
                               className="p-3 bg-muted/50 rounded-lg flex items-center justify-between"
                             >
                               <div>
-                                <p className="font-medium text-sm">{comp.direccion}</p>
+                                <div className="flex items-center gap-2">
+                                  <p className="font-medium text-sm">{comp.direccion}</p>
+                                  {comp.fuente && (
+                                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                                      {comp.fuente}
+                                    </Badge>
+                                  )}
+                                </div>
                                 <p className="text-xs text-muted-foreground">
                                   {comp.superficie}m² • {formatCurrency(comp.precioM2)}/m²
                                 </p>
@@ -1303,6 +1315,63 @@ export default function ValoracionIAPage() {
                       </ul>
                     </AccordionContent>
                   </AccordionItem>
+
+                  {/* Análisis IA Detallado */}
+                  {resultado.reasoning && (
+                    <AccordionItem value="ai-analysis">
+                      <AccordionTrigger>
+                        <span className="flex items-center gap-2">
+                          <Brain className="h-4 w-4 text-violet-500" />
+                          Análisis IA Detallado
+                        </span>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <div className="space-y-4">
+                          {resultado.metodologiaUsada && (
+                            <div className="p-3 bg-violet-50 rounded-lg border border-violet-100">
+                              <p className="text-xs font-medium text-violet-700 uppercase tracking-wide mb-1">
+                                Metodología
+                              </p>
+                              <p className="text-sm text-violet-900">
+                                {resultado.metodologiaUsada}
+                              </p>
+                            </div>
+                          )}
+
+                          <div>
+                            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                              Razonamiento del Tasador IA
+                            </p>
+                            <p className="text-sm text-muted-foreground whitespace-pre-line leading-relaxed">
+                              {resultado.reasoning}
+                            </p>
+                          </div>
+
+                          {resultado.phase1Summary && (
+                            <div className="p-3 bg-muted/50 rounded-lg">
+                              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                                Pre-análisis de comparables (Fase 1)
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                {resultado.phase1Summary}
+                              </p>
+                            </div>
+                          )}
+
+                          {resultado.aiSourcesUsed && resultado.aiSourcesUsed.length > 0 && (
+                            <div className="flex flex-wrap gap-1">
+                              <span className="text-xs text-muted-foreground mr-1">Fuentes IA:</span>
+                              {resultado.aiSourcesUsed.map((source, i) => (
+                                <Badge key={i} variant="secondary" className="text-xs">
+                                  {source === 'claude_ai' ? 'Claude AI' : source}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  )}
 
                   {/* Análisis de Mercado */}
                   <AccordionItem value="mercado">
