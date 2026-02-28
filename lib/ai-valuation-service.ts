@@ -94,8 +94,9 @@ export class AIValuationService {
 
       return result;
     } catch (error: any) {
-      logger.error('[AI Valuation Error]:', error);
-      throw new Error(`Error en valoración: ${error.message}`);
+      const msg = error?.message || error?.error?.message || JSON.stringify(error).slice(0, 300);
+      logger.error('[AI Valuation Error]:', { message: msg, status: error?.status, type: error?.type });
+      throw new Error(`Error en valoración IA: ${msg}`);
     }
   }
 

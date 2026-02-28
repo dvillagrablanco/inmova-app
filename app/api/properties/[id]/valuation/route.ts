@@ -201,7 +201,8 @@ export async function GET(
       },
     });
   } catch (error: any) {
-    logger.error('[Valuation API Error]:', error);
+    const errMsg = error?.message || JSON.stringify(error).slice(0, 300);
+    logger.error('[Valuation API Error]:', { message: errMsg, status: error?.status });
 
     if (error.message.includes('ANTHROPIC_API_KEY')) {
       return NextResponse.json(
