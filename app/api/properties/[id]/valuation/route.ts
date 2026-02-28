@@ -139,11 +139,35 @@ export async function GET(
       squareMeters: prop.superficie,
     }));
 
-    // Realizar valoración con IA
-    const valuation = await AIValuationService.valuateProperty(
-      propertyData,
-      marketData
-    );
+    // Realizar valoración con IA (con fallback si la API falla)
+    let valuation;
+    try {
+      valuation = await AIValuationService.valuateProperty(
+        propertyData,
+        marketData
+      );
+    } catch (aiError: any) {
+      logger.warn('[Valuation] AI failed, using fallback:', aiError?.message?.slice(0, 200));
+      // Fallback: valoración basada en datos de mercado sin IA
+      const preciosBase: Record<string, number> = {
+        'Madrid': 4200, 'Barcelona': 4500, 'Valencia': 2300, 'Sevilla': 2100,
+        'Málaga': 2800, 'Palencia': 1400, 'Valladolid': 1800, 'Benidorm': 2200, 'Marbella': 3500,
+      };
+      const precioM2 = marketData.avgPricePerM2 || preciosBase[city] || 2500;
+      const estimatedValue = Math.round(precioM2 * property.superficie);
+      valuation = {
+        estimatedValue,
+        minValue: Math.round(estimatedValue * 0.9),
+        maxValue: Math.round(estimatedValue * 1.1),
+        confidenceScore: 60,
+        pricePerM2: precioM2,
+        reasoning: `Valoración estimada basada en precio medio de ${city} (${precioM2}€/m²). Para mayor precisión, se recomienda tasación profesional.`,
+        keyFactors: [`Ubicación en ${city}`, `${property.superficie}m²`, `${property.habitaciones || 0} habitaciones`],
+        marketComparison: `Precio medio en ${city}: ${precioM2}€/m²`,
+        investmentPotential: 'MEDIUM' as const,
+        recommendations: ['Solicitar tasación profesional', 'Comparar con ventas recientes en la zona'],
+      };
+    }
 
     // 4. Guardar en caché (no bloqueante)
     ValuationCacheService.set(propertyId, {
