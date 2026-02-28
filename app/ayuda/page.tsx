@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { sanitizeHtml } from '@/lib/sanitize';
 import {
   Search, BookOpen, CreditCard, Building2, Users, FileText,
   Settings, Shield, HelpCircle, ChevronRight, ArrowLeft, Mail,
@@ -41,14 +42,17 @@ export default function AyudaPage() {
             </CardHeader>
             <CardContent>
               <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{
-                __html: article.content
-                  .replace(/^# (.*$)/gm, '<h1 class="text-xl font-bold mt-6 mb-3">$1</h1>')
-                  .replace(/^## (.*$)/gm, '<h2 class="text-lg font-semibold mt-5 mb-2">$1</h2>')
-                  .replace(/^### (.*$)/gm, '<h3 class="text-md font-medium mt-4 mb-1">$1</h3>')
-                  .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                  .replace(/^- (.*$)/gm, '<li class="ml-4">$1</li>')
-                  .replace(/^(\d+)\. (.*$)/gm, '<li class="ml-4"><strong>$1.</strong> $2</li>')
-                  .replace(/\n\n/g, '<br/><br/>')
+                __html: sanitizeHtml(
+                  article.content
+                    .replace(/^# (.*$)/gm, '<h1 class="text-xl font-bold mt-6 mb-3">$1</h1>')
+                    .replace(/^## (.*$)/gm, '<h2 class="text-lg font-semibold mt-5 mb-2">$1</h2>')
+                    .replace(/^### (.*$)/gm, '<h3 class="text-md font-medium mt-4 mb-1">$1</h3>')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/^- (.*$)/gm, '<li class="ml-4">$1</li>')
+                    .replace(/^(\d+)\. (.*$)/gm, '<li class="ml-4"><strong>$1.</strong> $2</li>')
+                    .replace(/\n\n/g, '<br/><br/>'),
+                  { preset: 'rich' }
+                )
               }} />
             </CardContent>
           </Card>

@@ -10,6 +10,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { sanitizeHtml } from '@/lib/sanitize';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -73,11 +74,13 @@ export default function PartnerLandingClient({ data, slug }: Props) {
   });
 
   // CSS personalizado basado en el tema del partner
+  // Sanitizar valores de color para prevenir CSS injection
+  const safeColor = (c: string) => /^#[0-9a-fA-F]{3,8}$|^rgb/.test(c) ? c : '#000000';
   const customStyles = `
     :root {
-      --partner-primary: ${theme.colors.primary};
-      --partner-secondary: ${theme.colors.secondary};
-      --partner-accent: ${theme.colors.accent};
+      --partner-primary: ${safeColor(theme.colors.primary)};
+      --partner-secondary: ${safeColor(theme.colors.secondary)};
+      --partner-accent: ${safeColor(theme.colors.accent)};
     }
   `;
 
