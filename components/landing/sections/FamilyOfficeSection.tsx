@@ -47,8 +47,8 @@ const features = [
   },
   {
     icon: BarChart3,
-    title: 'Modelos Tributarios + MDFF',
-    desc: 'Genera Modelo 202, 200, 303 y 347 automáticamente. Export contable PGC para tu gestoría. Informes formato MDFF.',
+    title: 'Modelos Tributarios + Reporting',
+    desc: 'Genera Modelo 202, 200, 303 y 347 automáticamente. Export contable PGC para tu gestoría. Reporting adaptado a las necesidades de tu family office.',
   },
 ];
 
@@ -122,7 +122,7 @@ export function FamilyOfficeSection() {
           {[
             { name: 'FO Starter', price: '€299', features: ['Dashboard 360°', 'Import manual + OCR', 'Modelos tributarios', 'Reporting básico'] },
             { name: 'FO Professional', price: '€599', popular: true, features: ['Bancos ilimitados (PSD2/SWIFT)', 'Private Equity completo', 'Simulador fiscal + Copiloto IA', 'Tesorería 12 meses'] },
-            { name: 'FO Enterprise', price: '€999', features: ['Todo Professional', 'API para MDFF/gestoría', 'Reporting custom', 'SLA dedicado', 'Onboarding presencial'] },
+            { name: 'FO Enterprise', price: '€999', features: ['Todo Professional', 'API para gestoría y reporting', 'Informes personalizados', 'SLA dedicado', 'Onboarding presencial'] },
           ].map((plan, i) => (
             <Card key={i} className={`text-center ${plan.popular ? 'border-amber-500 border-2 shadow-xl ring-2 ring-amber-200' : 'border-2'}`}>
               {plan.popular && (
