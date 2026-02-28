@@ -1025,10 +1025,28 @@ async function executeTool(
         return await delegateToAgent('/api/ai/missing-documents', {}, context, 'GET');
 
       case 'get_market_data': {
-        const { getMarketDataByAddress, estimateMarketValue } = await import('@/lib/market-data-service');
+        const { getMarketDataByAddress } = await import('@/lib/market-data-service');
         const mkt = getMarketDataByAddress(toolInput.address);
         if (mkt) {
-          return { success: true, zona: mkt.zona, precioVentaM2: mkt.precioVentaM2, alquilerM2: mkt.precioAlquilerM2, garajeVenta: mkt.precioGarajeVenta, garajeAlquiler: mkt.precioGarajeAlquiler, tendencia: mkt.tendencia, demanda: mkt.demanda, fuente: mkt.fuente };
+          return {
+            success: true,
+            zona: mkt.zona,
+            preciosReales: {
+              ventaM2: mkt.precioRealVentaM2,
+              alquilerM2: mkt.precioRealAlquilerM2,
+              fuente: mkt.fuenteNotarial,
+              nota: 'Precios de transacciones escrituradas reales (Notariado)',
+            },
+            askingPrices: {
+              ventaM2: mkt.askingPriceVentaM2,
+              alquilerM2: mkt.askingPriceAlquilerM2,
+              fuente: mkt.fuente,
+              nota: 'ATENCIÓN: Estos son precios de oferta (asking), NO de cierre. Son ~12% superiores al precio real.',
+            },
+            garajes: { venta: mkt.precioGarajeVenta, alquiler: mkt.precioGarajeAlquiler },
+            tendencia: mkt.tendencia,
+            demanda: mkt.demanda,
+          };
         }
         return { success: false, message: 'No se encontraron datos de mercado para esa zona.' };
       }

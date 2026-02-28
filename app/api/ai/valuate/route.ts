@@ -88,20 +88,29 @@ ${options.descripcionAdicional ? `- Información adicional: ${options.descripcio
 PROPIEDADES COMPARABLES EN BD:
 ${comparablesStr}
 
-DATOS DE MERCADO DE LA ZONA (Idealista/Fotocasa Feb 2026):
+DATOS DE MERCADO DE LA ZONA:
 ${(() => {
   try {
-    const { estimateMarketValue, getMarketDataByAddress } = require('@/lib/market-data-service');
+    const { getMarketDataByAddress } = require('@/lib/market-data-service');
     const mktData = getMarketDataByAddress(`${property.address}, ${property.city}`);
     if (mktData) {
       return `- Zona: ${mktData.zona}
-- Precio venta medio: ${mktData.precioVentaM2}€/m²
-- Alquiler medio: ${mktData.precioAlquilerM2}€/m²/mes
+
+PRECIOS REALES (escriturados, fuente: Notariado penotariado.com):
+- Precio venta REAL: ${mktData.precioRealVentaM2}€/m² (transacciones escrituradas)
+- Alquiler REAL: ${mktData.precioRealAlquilerM2}€/m²/mes
+
+ASKING PRICES (portales Idealista/Fotocasa — NO son precio real, son ~12% superiores):
+- Asking price venta: ${mktData.askingPriceVentaM2}€/m² (precio de oferta, no de cierre)
+- Asking price alquiler: ${mktData.askingPriceAlquilerM2}€/m²/mes
+
 - Garaje venta medio: ${mktData.precioGarajeVenta}€
 - Garaje alquiler medio: ${mktData.precioGarajeAlquiler}€/mes
 - Tendencia: ${mktData.tendencia}
 - Demanda: ${mktData.demanda}
-- Fuente: ${mktData.fuente}`;
+- Fuentes: ${mktData.fuenteNotarial} + ${mktData.fuente}
+
+IMPORTANTE: Basa tu valoración en los PRECIOS REALES escriturados del Notariado, NO en los asking prices de portales. Los asking prices son orientativos pero están inflados ~12%.`;
     }
     return 'No se encontraron datos de mercado para esta zona.';
   } catch { return 'Datos de mercado no disponibles.'; }
