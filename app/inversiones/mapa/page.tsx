@@ -86,26 +86,39 @@ export default function MapaCarteraPage() {
     if (status === 'authenticated') loadData();
   }, [status, router]);
 
+  // Extraer ciudad de la dirección (último segmento tras la última coma)
+  const extractCiudad = (direccion: string): string => {
+    if (!direccion) return 'Sin ciudad';
+    const parts = direccion.split(',').map(p => p.trim());
+    // La ciudad suele ser el último segmento (ej: "C/ Reina, 15, Madrid" → "Madrid")
+    const last = parts[parts.length - 1];
+    // Limpiar código postal si lo tiene
+    return last.replace(/^\d{5}\s*/, '').trim() || 'Sin ciudad';
+  };
+
   const loadData = async () => {
     try {
       const res = await fetch('/api/buildings');
       if (!res.ok) throw new Error();
       const data = await res.json();
-      const list = (Array.isArray(data) ? data : data.data || []).map((b: any) => ({
-        id: b.id,
-        nombre: b.nombre,
-        direccion: b.direccion,
-        ciudad: b.ciudad || '',
-        tipo: b.tipo || 'residencial',
-        latitud: b.latitud || null,
-        longitud: b.longitud || null,
-        companyId: b.companyId,
-        companyName: b.company?.nombre || 'Sin sociedad',
-        totalUnidades: b.metrics?.totalUnits || b.totalUnidades || 0,
-        unidadesOcupadas: b.metrics?.occupiedUnits || b.unidadesOcupadas || 0,
-        rentaMensual: b.metrics?.ingresosMensuales || 0,
-        ocupacion: b.metrics?.ocupacionPct || 0,
-      }));
+      const list = (Array.isArray(data) ? data : data.data || [])
+        // Filtrar edificios de test/demo
+        .filter((b: any) => !b.isDemo && !b.nombre?.includes('Test E2E'))
+        .map((b: any) => ({
+          id: b.id,
+          nombre: b.nombre,
+          direccion: b.direccion,
+          ciudad: extractCiudad(b.direccion || ''),
+          tipo: b.tipo || 'residencial',
+          latitud: b.latitud || null,
+          longitud: b.longitud || null,
+          companyId: b.companyId,
+          companyName: b.company?.nombre || 'Sin sociedad',
+          totalUnidades: b.metrics?.totalUnits || b.totalUnidades || 0,
+          unidadesOcupadas: b.metrics?.occupiedUnits || b.unidadesOcupadas || 0,
+          rentaMensual: b.metrics?.ingresosMensuales || 0,
+          ocupacion: b.metrics?.ocupacionPct || 0,
+        }));
       setBuildings(list);
     } catch {
       toast.error('Error cargando edificios');
@@ -221,16 +234,19 @@ export default function MapaCarteraPage() {
           ))}
         </div>
 
-        {/* Mapa embebido (centrado en Madrid por defecto) */}
-        {conCoords.length > 0 && (
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
-                Mapa ({conCoords.length} inmuebles con coordenadas)
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+        {/* Mapa embebido */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <MapPin className="h-4 w-4" />
+              Mapa de Cartera
+              {conCoords.length > 0 && (
+                <Badge variant="secondary" className="text-xs">{conCoords.length} con coordenadas</Badge>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {conCoords.length > 0 ? (
               <div className="aspect-[16/9] md:aspect-[21/9] rounded-lg overflow-hidden border">
                 <iframe
                   src={`https://www.openstreetmap.org/export/embed.html?bbox=${
@@ -249,9 +265,26 @@ export default function MapaCarteraPage() {
                   title="Mapa de cartera"
                 />
               </div>
-            </CardContent>
-          </Card>
-        )}
+            ) : (
+              <div className="aspect-[16/9] md:aspect-[21/9] rounded-lg overflow-hidden border">
+                {/* Vista centrada en España cuando no hay coordenadas */}
+                <iframe
+                  src="https://www.openstreetmap.org/export/embed.html?bbox=-5.5%2C38.5%2C0.5%2C42.0&layer=mapnik"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  loading="lazy"
+                  title="Mapa de cartera"
+                />
+              </div>
+            )}
+            {conCoords.length === 0 && buildings.length > 0 && (
+              <p className="text-xs text-muted-foreground mt-2 text-center">
+                Los inmuebles no tienen coordenadas geográficas. Edita cada edificio para añadir latitud y longitud.
+              </p>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Lista por ciudad */}
         {ciudades.map((ciudad) => {
