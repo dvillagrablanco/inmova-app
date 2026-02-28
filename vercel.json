@@ -20,6 +20,58 @@
     {
       "path": "/api/cron/sync-gocardless",
       "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/cron/fiscal-alerts",
+      "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/annual-depreciation",
+      "schedule": "0 2 1 1 *"
+    },
+    {
+      "path": "/api/cron/check-insurance",
+      "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/cron/daily-summary",
+      "schedule": "0 22 * * *"
+    },
+    {
+      "path": "/api/cron/process-payment-reminders",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/process-scheduled-reports",
+      "schedule": "0 6 * * 1"
+    },
+    {
+      "path": "/api/cron/cleanup-notifications",
+      "schedule": "0 3 * * 0"
+    },
+    {
+      "path": "/api/cron/process-contract-renewals",
+      "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/check-usage-alerts",
+      "schedule": "0 10 * * *"
+    },
+    {
+      "path": "/api/cron/welcome-emails",
+      "schedule": "*/30 * * * *"
+    },
+    {
+      "path": "/api/cron/process-scheduled-emails",
+      "schedule": "*/10 * * * *"
+    },
+    {
+      "path": "/api/cron/process-preventive-maintenance",
+      "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/cron/sync-financial-accounts",
+      "schedule": "0 */6 * * *"
     }
   ],
   "headers": [

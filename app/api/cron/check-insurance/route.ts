@@ -10,12 +10,16 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { requireCronSecret } from '@/lib/api-auth-guard';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
+  const authError = requireCronSecret(request);
+  if (authError) return authError;
+
   try {
     const { getPrismaClient } = await import('@/lib/db');
     const prisma = getPrismaClient();
