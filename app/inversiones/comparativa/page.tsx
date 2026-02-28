@@ -65,16 +65,69 @@ export default function ComparativaPage() {
     if (status === 'authenticated') loadData();
   }, [status, router, year]);
 
+  const [error, setError] = useState<string | null>(null);
+
   const loadData = async () => {
     setLoading(true);
+    setError(null);
     try {
+      // Intentar la API nueva (compare con datos fiscales)
       const res = await fetch(`/api/investment/consolidated/compare?year=${year}`);
       if (res.ok) {
         const json = await res.json();
-        setData(json.data);
+        if (json.data) {
+          setData(json.data);
+          return;
+        }
       }
-    } catch { toast.error('Error cargando comparativa'); }
-    finally { setLoading(false); }
+
+      // Fallback: API consolidated vieja (sin datos fiscales, pero funciona)
+      const resFallback = await fetch('/api/investment/consolidated');
+      if (resFallback.ok) {
+        const json = await resFallback.json();
+        const companies = json.data?.companies || [];
+        // Adaptar formato para la UI
+        setData({
+          year,
+          companies: companies.map((c: any) => ({
+            companyId: c.companyId,
+            companyName: c.companyName,
+            cif: c.cif || '',
+            isHolding: false,
+            totalAssets: c.portfolio?.totalAssets || 0,
+            totalInvestment: Math.round(c.portfolio?.totalInvestment || 0),
+            totalMarketValue: Math.round(c.portfolio?.totalMarketValue || 0),
+            totalDebt: Math.round(c.portfolio?.totalMortgageDebt || 0),
+            equity: Math.round((c.portfolio?.totalMarketValue || 0) - (c.portfolio?.totalMortgageDebt || 0)),
+            ltv: c.portfolio?.ltv || 0,
+            grossYield: c.portfolio?.grossYield || 0,
+            netYield: c.portfolio?.netYield || 0,
+            ingresosBrutos: (c.portfolio?.totalMonthlyIncome || 0) * 12,
+            gastosDeducibles: (c.portfolio?.totalMonthlyExpenses || 0) * 12,
+            baseImponible: 0,
+            cuotaIS: 0,
+            tipoEfectivo: 0,
+            cashFlowPreTax: (c.portfolio?.monthlyCashFlow || 0) * 12,
+            cashFlowPostTax: (c.portfolio?.monthlyCashFlow || 0) * 12,
+            roe: 0,
+            rentabilidadPostImpuestos: c.portfolio?.netYield || 0,
+            cashOnCash: 0,
+          })),
+          best: {
+            highestYield: '',
+            highestCashFlow: '',
+            lowestTax: '',
+            highestROE: '',
+          },
+        });
+      } else {
+        setError('No se pudieron cargar los datos de las sociedades');
+      }
+    } catch {
+      setError('Error de conexión al cargar la comparativa');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fmt = (n: number) =>
@@ -194,10 +247,18 @@ export default function ComparativaPage() {
           </CardContent>
         </Card>
 
-        {companies.length === 0 && (
+        {error && (
+          <Card className="border-red-200 bg-red-50">
+            <CardContent className="p-8 text-center text-red-600">
+              {error}
+            </CardContent>
+          </Card>
+        )}
+
+        {!error && companies.length === 0 && (
           <Card>
             <CardContent className="p-8 text-center text-muted-foreground">
-              No hay sociedades filiales. Configura Viroda y Rovida como filiales de Vidaro en Configuración &gt; Empresas.
+              No hay sociedades configuradas. Configura las filiales del grupo en Configuración &gt; Empresas.
             </CardContent>
           </Card>
         )}
