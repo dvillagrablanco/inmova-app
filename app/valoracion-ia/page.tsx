@@ -150,6 +150,13 @@ interface ValoracionResult {
   tiempoEstimadoVenta: string;
   rentabilidadAlquiler: number;
   alquilerEstimado: number;
+  // Media estancia
+  alquilerMediaEstancia?: number | null;
+  alquilerMediaEstanciaMin?: number | null;
+  alquilerMediaEstanciaMax?: number | null;
+  rentabilidadMediaEstancia?: number | null;
+  ocupacionEstimadaMediaEstancia?: number | null;
+  perfilInquilinoMediaEstancia?: string | null;
   platformSources?: PlatformSources | null;
   reasoning?: string;
   metodologiaUsada?: string;
@@ -579,12 +586,33 @@ export default function ValoracionIAPage() {
       `Tendencia del mercado: ${resultado.tendenciaMercado} (${resultado.porcentajeTendencia}%)`,
       `Tiempo estimado venta: ${resultado.tiempoEstimadoVenta}`,
       '',
-      '── ANÁLISIS DE INVERSIÓN ──────────────────────────────────────',
+      '── ANÁLISIS DE INVERSIÓN — LARGA ESTANCIA (12+ meses) ────────',
       `Alquiler mensual estimado:  ${resultado.alquilerEstimado ? formatCurrency(resultado.alquilerEstimado) + '/mes' : 'N/A'}`,
       `Renta anual estimada:       ${resultado.alquilerEstimado ? formatCurrency(resultado.alquilerEstimado * 12) + '/año' : 'N/A'}`,
       `Rentabilidad bruta anual:   ${resultado.rentabilidadAlquiler ? resultado.rentabilidadAlquiler.toFixed(2) + '%' : 'N/A'}`,
       `Cap Rate:                   ${(resultado as any).capRate ? (resultado as any).capRate.toFixed(2) + '%' : 'N/A'}`,
       '',
+    ];
+
+    if (resultado.alquilerMediaEstancia) {
+      lines.push(
+        '── ANÁLISIS DE INVERSIÓN — MEDIA ESTANCIA (1-11 meses) ──────',
+        `Alquiler mensual estimado:  ${formatCurrency(resultado.alquilerMediaEstancia)}/mes`,
+        resultado.alquilerMediaEstanciaMin && resultado.alquilerMediaEstanciaMax
+          ? `Rango estacional:           ${formatCurrency(resultado.alquilerMediaEstanciaMin)} (baja) — ${formatCurrency(resultado.alquilerMediaEstanciaMax)} (alta)`
+          : '',
+        `Rentabilidad bruta anual:   ${resultado.rentabilidadMediaEstancia ? resultado.rentabilidadMediaEstancia.toFixed(2) + '%' : 'N/A'}`,
+        `Ocupación estimada anual:   ${resultado.ocupacionEstimadaMediaEstancia ? resultado.ocupacionEstimadaMediaEstancia + '%' : 'N/A'}`,
+        resultado.ocupacionEstimadaMediaEstancia
+          ? `Renta anual neta (con ocupación): ${formatCurrency(Math.round(resultado.alquilerMediaEstancia * 12 * (resultado.ocupacionEstimadaMediaEstancia / 100)))}/año`
+          : '',
+        `Premium vs larga estancia:  ${resultado.alquilerEstimado ? '+' + Math.round(((resultado.alquilerMediaEstancia - resultado.alquilerEstimado) / resultado.alquilerEstimado) * 100) + '%' : 'N/A'}`,
+        `Perfil inquilino:           ${resultado.perfilInquilinoMediaEstancia || 'N/A'}`,
+        '',
+      );
+    }
+
+    lines.push(
     ];
 
     if (resultado.metodologiaUsada) {
@@ -1460,41 +1488,139 @@ export default function ValoracionIAPage() {
                   </CardContent>
                 </Card>
 
-                {/* Dashboard de Inversión — siempre visible */}
+                {/* Dashboard de Inversión — Larga + Media Estancia */}
                 <Card>
                   <CardHeader className="pb-3">
                     <CardTitle className="text-base flex items-center gap-2">
                       <Euro className="h-4 w-4" />
-                      Análisis de Inversión
+                      Análisis de Inversión por Alquiler
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                      <div className="p-3 bg-green-50 rounded-lg border border-green-100">
-                        <p className="text-[10px] text-green-600 uppercase tracking-wide font-medium">Alquiler estimado</p>
-                        <p className="text-xl font-bold text-green-800">
-                          {resultado.alquilerEstimado ? `${formatCurrency(resultado.alquilerEstimado)}/mes` : '-'}
+                  <CardContent className="space-y-5">
+                    {/* Larga estancia */}
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="h-2 w-2 rounded-full bg-green-500" />
+                        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          Larga estancia (12+ meses)
                         </p>
                       </div>
-                      <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
-                        <p className="text-[10px] text-blue-600 uppercase tracking-wide font-medium">Rentabilidad bruta</p>
-                        <p className="text-xl font-bold text-blue-800">
-                          {resultado.rentabilidadAlquiler ? `${resultado.rentabilidadAlquiler.toFixed(2)}%` : '-'}
-                        </p>
-                      </div>
-                      <div className="p-3 bg-amber-50 rounded-lg border border-amber-100">
-                        <p className="text-[10px] text-amber-600 uppercase tracking-wide font-medium">Cap Rate</p>
-                        <p className="text-xl font-bold text-amber-800">
-                          {(resultado as any).capRate ? `${(resultado as any).capRate.toFixed(2)}%` : '-'}
-                        </p>
-                      </div>
-                      <div className="p-3 bg-purple-50 rounded-lg border border-purple-100">
-                        <p className="text-[10px] text-purple-600 uppercase tracking-wide font-medium">Renta anual</p>
-                        <p className="text-xl font-bold text-purple-800">
-                          {resultado.alquilerEstimado ? formatCurrency(resultado.alquilerEstimado * 12) : '-'}
-                        </p>
+                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                        <div className="p-3 bg-green-50 rounded-lg border border-green-100">
+                          <p className="text-[10px] text-green-600 uppercase tracking-wide font-medium">Alquiler/mes</p>
+                          <p className="text-xl font-bold text-green-800">
+                            {resultado.alquilerEstimado ? `${formatCurrency(resultado.alquilerEstimado)}` : '-'}
+                          </p>
+                        </div>
+                        <div className="p-3 bg-green-50 rounded-lg border border-green-100">
+                          <p className="text-[10px] text-green-600 uppercase tracking-wide font-medium">Renta anual</p>
+                          <p className="text-xl font-bold text-green-800">
+                            {resultado.alquilerEstimado ? formatCurrency(resultado.alquilerEstimado * 12) : '-'}
+                          </p>
+                        </div>
+                        <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
+                          <p className="text-[10px] text-blue-600 uppercase tracking-wide font-medium">Rentabilidad bruta</p>
+                          <p className="text-xl font-bold text-blue-800">
+                            {resultado.rentabilidadAlquiler ? `${resultado.rentabilidadAlquiler.toFixed(2)}%` : '-'}
+                          </p>
+                        </div>
+                        <div className="p-3 bg-amber-50 rounded-lg border border-amber-100">
+                          <p className="text-[10px] text-amber-600 uppercase tracking-wide font-medium">Cap Rate</p>
+                          <p className="text-xl font-bold text-amber-800">
+                            {(resultado as any).capRate ? `${(resultado as any).capRate.toFixed(2)}%` : '-'}
+                          </p>
+                        </div>
                       </div>
                     </div>
+
+                    {/* Media estancia */}
+                    {resultado.alquilerMediaEstancia ? (
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="h-2 w-2 rounded-full bg-orange-500" />
+                          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                            Media estancia (1-11 meses)
+                          </p>
+                          {resultado.perfilInquilinoMediaEstancia && (
+                            <Badge variant="outline" className="text-[10px] ml-auto">
+                              <Users className="h-3 w-3 mr-1" />
+                              {resultado.perfilInquilinoMediaEstancia}
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                          <div className="p-3 bg-orange-50 rounded-lg border border-orange-100">
+                            <p className="text-[10px] text-orange-600 uppercase tracking-wide font-medium">Alquiler/mes</p>
+                            <p className="text-xl font-bold text-orange-800">
+                              {formatCurrency(resultado.alquilerMediaEstancia)}
+                            </p>
+                            {resultado.alquilerMediaEstanciaMin && resultado.alquilerMediaEstanciaMax && (
+                              <p className="text-[10px] text-orange-500 mt-0.5">
+                                {formatCurrency(resultado.alquilerMediaEstanciaMin)} – {formatCurrency(resultado.alquilerMediaEstanciaMax)}
+                              </p>
+                            )}
+                          </div>
+                          <div className="p-3 bg-orange-50 rounded-lg border border-orange-100">
+                            <p className="text-[10px] text-orange-600 uppercase tracking-wide font-medium">Renta anual estimada</p>
+                            <p className="text-xl font-bold text-orange-800">
+                              {resultado.ocupacionEstimadaMediaEstancia
+                                ? formatCurrency(Math.round(resultado.alquilerMediaEstancia * 12 * (resultado.ocupacionEstimadaMediaEstancia / 100)))
+                                : formatCurrency(resultado.alquilerMediaEstancia * 12)}
+                            </p>
+                            {resultado.ocupacionEstimadaMediaEstancia && (
+                              <p className="text-[10px] text-orange-500 mt-0.5">
+                                con {resultado.ocupacionEstimadaMediaEstancia}% ocupación
+                              </p>
+                            )}
+                          </div>
+                          <div className="p-3 bg-indigo-50 rounded-lg border border-indigo-100">
+                            <p className="text-[10px] text-indigo-600 uppercase tracking-wide font-medium">Rentabilidad bruta</p>
+                            <p className="text-xl font-bold text-indigo-800">
+                              {resultado.rentabilidadMediaEstancia ? `${resultado.rentabilidadMediaEstancia.toFixed(2)}%` : '-'}
+                            </p>
+                          </div>
+                          <div className="p-3 bg-indigo-50 rounded-lg border border-indigo-100">
+                            <p className="text-[10px] text-indigo-600 uppercase tracking-wide font-medium">Premium vs larga</p>
+                            <p className="text-xl font-bold text-indigo-800">
+                              {resultado.alquilerEstimado && resultado.alquilerMediaEstancia
+                                ? `+${Math.round(((resultado.alquilerMediaEstancia - resultado.alquilerEstimado) / resultado.alquilerEstimado) * 100)}%`
+                                : '-'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ) : null}
+
+                    {/* Comparativa visual */}
+                    {resultado.alquilerEstimado > 0 && resultado.alquilerMediaEstancia ? (
+                      <div className="p-3 bg-muted/30 rounded-lg">
+                        <p className="text-xs font-medium text-muted-foreground mb-2">Comparativa mensual</p>
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-3">
+                            <span className="text-xs w-28 shrink-0 text-right">Larga estancia</span>
+                            <div className="flex-1 bg-muted rounded-full h-4 overflow-hidden">
+                              <div
+                                className="h-full bg-green-500 rounded-full flex items-center justify-end pr-2"
+                                style={{ width: `${Math.min(100, (resultado.alquilerEstimado / (resultado.alquilerMediaEstanciaMax || resultado.alquilerMediaEstancia)) * 100)}%` }}
+                              >
+                                <span className="text-[10px] text-white font-medium">{formatCurrency(resultado.alquilerEstimado)}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className="text-xs w-28 shrink-0 text-right">Media estancia</span>
+                            <div className="flex-1 bg-muted rounded-full h-4 overflow-hidden">
+                              <div
+                                className="h-full bg-orange-500 rounded-full flex items-center justify-end pr-2"
+                                style={{ width: '100%' }}
+                              >
+                                <span className="text-[10px] text-white font-medium">{formatCurrency(resultado.alquilerMediaEstancia)}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ) : null}
                   </CardContent>
                 </Card>
 

@@ -637,6 +637,13 @@ export async function POST(request: NextRequest) {
       tiempoEstimadoVenta: valuation.tiempoEstimadoVenta,
       rentabilidadAlquiler: valuation.rentabilidadAlquiler,
       alquilerEstimado: valuation.alquilerEstimado,
+      // Media estancia
+      alquilerMediaEstancia: valuation.alquilerMediaEstancia,
+      alquilerMediaEstanciaMin: valuation.alquilerMediaEstanciaMin,
+      alquilerMediaEstanciaMax: valuation.alquilerMediaEstanciaMax,
+      rentabilidadMediaEstancia: valuation.rentabilidadMediaEstancia,
+      ocupacionEstimadaMediaEstancia: valuation.ocupacionEstimadaMediaEstancia,
+      perfilInquilinoMediaEstancia: valuation.perfilInquilinoMediaEstancia,
       // Nuevos campos de análisis IA
       reasoning: valuation.reasoning,
       metodologiaUsada: valuation.metodologiaUsada,

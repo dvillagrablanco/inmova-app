@@ -104,10 +104,18 @@ export interface AIValuationResult {
   porcentajeTendencia: number;
   tiempoEstimadoVenta: string;
 
-  // Inversión
+  // Inversión — Larga estancia (12+ meses)
   alquilerEstimado: number;
   rentabilidadAlquiler: number;
   capRate: number;
+
+  // Media estancia (1-11 meses)
+  alquilerMediaEstancia: number | null;
+  alquilerMediaEstanciaMin: number | null;
+  alquilerMediaEstanciaMax: number | null;
+  rentabilidadMediaEstancia: number | null;
+  perfilInquilinoMediaEstancia: string | null;
+  ocupacionEstimadaMediaEstancia: number | null; // % anual
 
   // Factores
   factoresPositivos: string[];
@@ -387,7 +395,7 @@ ${internalComparables ? `══════════════════�
 INSTRUCCIONES DE VALORACIÓN
 ═══════════════════════════════════════════════════════
 
-Realiza una valoración profesional en 3 pasos:
+Realiza una valoración profesional en 4 pasos:
 
 PASO 1 — MÉTODO DE COMPARABLES:
 - Usa los comparables con mayor similitud (>70%) como base
@@ -395,11 +403,21 @@ PASO 1 — MÉTODO DE COMPARABLES:
 - Pondera: Notariado (precio real) > Portales (asking price -12%)
 
 PASO 2 — MÉTODO DE CAPITALIZACIÓN:
-- Estima renta mensual basándote en alquileres de la zona
+- Estima renta mensual de LARGA ESTANCIA (contrato 12+ meses) basándote en alquileres de la zona
 - Calcula valor por capitalización (renta anual / cap rate zona)
 - Compara con el valor por comparables
 
-PASO 3 — VALORACIÓN FINAL:
+PASO 3 — ANÁLISIS DE MEDIA ESTANCIA (1-11 meses):
+Si la propiedad es vivienda, calcula también el alquiler de MEDIA ESTANCIA:
+- Estima renta mensual para contratos temporales (1-11 meses)
+- La media estancia suele tener un PREMIUM del 25-60% sobre larga estancia
+  (varía por ciudad: Madrid/Barcelona ~40-60%, ciudades medianas ~25-35%)
+- Considera: zona turística/empresarial, amueblado, servicios incluidos
+- Estima la ocupación anual realista (no 100%; típico 75-90%)
+- Calcula rentabilidad neta considerando la ocupación
+- Indica el perfil típico de inquilino (profesional, estudiante, nómada digital, etc.)
+
+PASO 4 — VALORACIÓN FINAL:
 - Pondera ambos métodos (70% comparables + 30% capitalización)
 - Aplica tu criterio experto para ajustes finales
 - Justifica cada decisión en el reasoning
@@ -417,9 +435,18 @@ Responde SOLO con JSON exacto:
   "tendenciaMercado": "<alcista|bajista|estable>",
   "porcentajeTendencia": <número 0.5-10>,
   "tiempoEstimadoVenta": "<ej: 2-4 meses>",
-  "alquilerEstimado": <entero, €/mes>,
-  "rentabilidadAlquiler": <número, % bruto anual>,
+
+  "alquilerLargaEstancia": <entero, €/mes, contrato 12+ meses>,
+  "rentabilidadLargaEstancia": <número, % bruto anual>,
   "capRate": <número, %>,
+
+  "alquilerMediaEstancia": <entero, €/mes, contrato 1-11 meses>,
+  "alquilerMediaEstanciaMin": <entero, €/mes, temporada baja>,
+  "alquilerMediaEstanciaMax": <entero, €/mes, temporada alta>,
+  "rentabilidadMediaEstancia": <número, % bruto anual considerando ocupación>,
+  "ocupacionEstimadaMediaEstancia": <número, % anual, ej: 80>,
+  "perfilInquilinoMediaEstancia": "<ej: Profesionales en movilidad, estudiantes Erasmus, nómadas digitales>",
+
   "factoresPositivos": ["<factor1>", "<factor2>", "<factor3>"],
   "factoresNegativos": ["<factor1>", "<factor2>"],
   "recomendaciones": ["<recomendación1>", "<recomendación2>", "<recomendación3>"],
@@ -486,9 +513,15 @@ Responde SOLO con JSON exacto:
     tendenciaMercado: raw.tendenciaMercado || 'estable',
     porcentajeTendencia: raw.porcentajeTendencia || 0,
     tiempoEstimadoVenta: raw.tiempoEstimadoVenta || '3-6 meses',
-    alquilerEstimado: raw.alquilerEstimado || 0,
-    rentabilidadAlquiler: raw.rentabilidadAlquiler || 0,
+    alquilerEstimado: raw.alquilerLargaEstancia || raw.alquilerEstimado || 0,
+    rentabilidadAlquiler: raw.rentabilidadLargaEstancia || raw.rentabilidadAlquiler || 0,
     capRate: raw.capRate || 0,
+    alquilerMediaEstancia: raw.alquilerMediaEstancia || null,
+    alquilerMediaEstanciaMin: raw.alquilerMediaEstanciaMin || null,
+    alquilerMediaEstanciaMax: raw.alquilerMediaEstanciaMax || null,
+    rentabilidadMediaEstancia: raw.rentabilidadMediaEstancia || null,
+    perfilInquilinoMediaEstancia: raw.perfilInquilinoMediaEstancia || null,
+    ocupacionEstimadaMediaEstancia: raw.ocupacionEstimadaMediaEstancia || null,
     factoresPositivos: raw.factoresPositivos || [],
     factoresNegativos: raw.factoresNegativos || [],
     recomendaciones: raw.recomendaciones || [],
