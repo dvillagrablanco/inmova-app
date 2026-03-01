@@ -1482,6 +1482,44 @@ export default function ValoracionIAPage() {
                       </div>
                       <Progress value={resultado.confianza} className="h-2" />
                     </div>
+
+                    {/* Resumen rápido de alquileres — visible sin scroll */}
+                    {(resultado.alquilerEstimado > 0 || resultado.alquilerMediaEstancia) && (
+                      <div className="pt-4 border-t space-y-3">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
+                          <Euro className="h-3.5 w-3.5" />
+                          Estimación de alquiler
+                        </p>
+                        <div className="grid grid-cols-2 gap-3">
+                          {resultado.alquilerEstimado > 0 && (
+                            <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+                              <p className="text-[10px] text-green-600 font-medium uppercase">Larga estancia (12+ meses)</p>
+                              <p className="text-2xl font-bold text-green-800">{formatCurrency(resultado.alquilerEstimado)}<span className="text-sm font-normal">/mes</span></p>
+                              {resultado.rentabilidadAlquiler > 0 && (
+                                <p className="text-xs text-green-600 mt-0.5">Rentabilidad: {resultado.rentabilidadAlquiler.toFixed(1)}% bruta</p>
+                              )}
+                            </div>
+                          )}
+                          {resultado.alquilerMediaEstancia && resultado.alquilerMediaEstancia > 0 && (
+                            <div className="p-3 bg-orange-50 rounded-lg border border-orange-200">
+                              <p className="text-[10px] text-orange-600 font-medium uppercase">Media estancia (1-11 meses)</p>
+                              <p className="text-2xl font-bold text-orange-800">{formatCurrency(resultado.alquilerMediaEstancia)}<span className="text-sm font-normal">/mes</span></p>
+                              {resultado.alquilerEstimado > 0 && (
+                                <p className="text-xs text-orange-600 mt-0.5">
+                                  +{Math.round(((resultado.alquilerMediaEstancia - resultado.alquilerEstimado) / resultado.alquilerEstimado) * 100)}% vs larga
+                                  {resultado.ocupacionEstimadaMediaEstancia ? ` · ${resultado.ocupacionEstimadaMediaEstancia}% ocupación` : ''}
+                                </p>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                        {resultado.perfilInquilinoMediaEstancia && (
+                          <p className="text-xs text-muted-foreground">
+                            <span className="font-medium">Perfil media estancia:</span> {resultado.perfilInquilinoMediaEstancia}
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
 
