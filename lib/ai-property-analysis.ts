@@ -501,8 +501,11 @@ Responde SOLO con JSON exacto:
   if (phase1.analyzedComparables.some((c) => c.source === 'pisos_com')) sourcesUsed.push('pisos_com');
   sourcesUsed.push('notariado', 'ine', 'claude_ai');
 
+  const estimatedValue = raw.estimatedValue || raw.valorEstimado || 0;
+  const rental = computeRentalEstimates(raw, estimatedValue);
+
   return {
-    estimatedValue: raw.estimatedValue || raw.valorEstimado || 0,
+    estimatedValue,
     minValue: raw.minValue || raw.valorMinimo || 0,
     maxValue: raw.maxValue || raw.valorMaximo || 0,
     precioM2: raw.precioM2 || 0,
@@ -513,21 +516,87 @@ Responde SOLO con JSON exacto:
     tendenciaMercado: raw.tendenciaMercado || 'estable',
     porcentajeTendencia: raw.porcentajeTendencia || 0,
     tiempoEstimadoVenta: raw.tiempoEstimadoVenta || '3-6 meses',
-    alquilerEstimado: raw.alquilerLargaEstancia || raw.alquilerEstimado || 0,
-    rentabilidadAlquiler: raw.rentabilidadLargaEstancia || raw.rentabilidadAlquiler || 0,
-    capRate: raw.capRate || 0,
-    alquilerMediaEstancia: raw.alquilerMediaEstancia || null,
-    alquilerMediaEstanciaMin: raw.alquilerMediaEstanciaMin || null,
-    alquilerMediaEstanciaMax: raw.alquilerMediaEstanciaMax || null,
-    rentabilidadMediaEstancia: raw.rentabilidadMediaEstancia || null,
-    perfilInquilinoMediaEstancia: raw.perfilInquilinoMediaEstancia || null,
-    ocupacionEstimadaMediaEstancia: raw.ocupacionEstimadaMediaEstancia || null,
+    alquilerEstimado: rental.alquilerEstimado,
+    rentabilidadAlquiler: rental.rentabilidadAlquiler,
+    capRate: rental.capRate,
+    alquilerMediaEstancia: rental.alquilerMediaEstancia,
+    alquilerMediaEstanciaMin: rental.alquilerMediaEstanciaMin,
+    alquilerMediaEstanciaMax: rental.alquilerMediaEstanciaMax,
+    rentabilidadMediaEstancia: rental.rentabilidadMediaEstancia,
+    perfilInquilinoMediaEstancia: rental.perfilInquilinoMediaEstancia,
+    ocupacionEstimadaMediaEstancia: rental.ocupacionEstimadaMediaEstancia,
     factoresPositivos: raw.factoresPositivos || [],
     factoresNegativos: raw.factoresNegativos || [],
     recomendaciones: raw.recomendaciones || [],
     comparables,
     phase1Summary: `Analizados ${phase1.rawComparablesCount} comparables de portales, ${phase1.filteredCount} seleccionados por IA con similitud >40%. Zona: ${phase1.zoneAnalysis.profile}`,
     sourcesUsed,
+  };
+}
+
+// ============================================================================
+// CÁLCULO DE ALQUILERES CON FALLBACK GARANTIZADO
+// ============================================================================
+
+function computeRentalEstimates(raw: any, estimatedValue: number) {
+  // Rentabilidades típicas en España para calcular fallback
+  const YIELD_LARGA = 0.045; // 4.5% bruto anual
+  const YIELD_MEDIA_PREMIUM = 1.40; // media estancia = larga * 1.40
+  const OCUPACION_MEDIA = 82; // % ocupación media estancia
+
+  // Larga estancia: usar valor de la IA si existe, si no calcular
+  let alquilerEstimado = Number(raw.alquilerLargaEstancia || raw.alquilerEstimado || 0);
+  if (alquilerEstimado <= 0 && estimatedValue > 0) {
+    alquilerEstimado = Math.round((estimatedValue * YIELD_LARGA) / 12);
+  }
+
+  let rentabilidadAlquiler = Number(raw.rentabilidadLargaEstancia || raw.rentabilidadAlquiler || 0);
+  if (rentabilidadAlquiler <= 0 && estimatedValue > 0 && alquilerEstimado > 0) {
+    rentabilidadAlquiler = Math.round(((alquilerEstimado * 12) / estimatedValue) * 1000) / 10;
+  }
+
+  let capRate = Number(raw.capRate || 0);
+  if (capRate <= 0 && rentabilidadAlquiler > 0) {
+    capRate = Math.round(rentabilidadAlquiler * 0.75 * 10) / 10; // ~75% del bruto
+  }
+
+  // Media estancia: usar valor de la IA si existe, si no calcular con premium
+  let alquilerMediaEstancia = Number(raw.alquilerMediaEstancia || 0);
+  if (alquilerMediaEstancia <= 0 && alquilerEstimado > 0) {
+    alquilerMediaEstancia = Math.round(alquilerEstimado * YIELD_MEDIA_PREMIUM);
+  }
+
+  let alquilerMediaEstanciaMin = Number(raw.alquilerMediaEstanciaMin || 0);
+  if (alquilerMediaEstanciaMin <= 0 && alquilerMediaEstancia > 0) {
+    alquilerMediaEstanciaMin = Math.round(alquilerMediaEstancia * 0.88);
+  }
+
+  let alquilerMediaEstanciaMax = Number(raw.alquilerMediaEstanciaMax || 0);
+  if (alquilerMediaEstanciaMax <= 0 && alquilerMediaEstancia > 0) {
+    alquilerMediaEstanciaMax = Math.round(alquilerMediaEstancia * 1.15);
+  }
+
+  let rentabilidadMediaEstancia = Number(raw.rentabilidadMediaEstancia || 0);
+  if (rentabilidadMediaEstancia <= 0 && estimatedValue > 0 && alquilerMediaEstancia > 0) {
+    rentabilidadMediaEstancia = Math.round(((alquilerMediaEstancia * 12 * (OCUPACION_MEDIA / 100)) / estimatedValue) * 1000) / 10;
+  }
+
+  const ocupacionEstimadaMediaEstancia = Number(raw.ocupacionEstimadaMediaEstancia || 0) || OCUPACION_MEDIA;
+
+  const perfilInquilinoMediaEstancia =
+    raw.perfilInquilinoMediaEstancia ||
+    'Profesionales en movilidad, ejecutivos temporales, estudiantes de posgrado';
+
+  return {
+    alquilerEstimado,
+    rentabilidadAlquiler,
+    capRate,
+    alquilerMediaEstancia,
+    alquilerMediaEstanciaMin,
+    alquilerMediaEstanciaMax,
+    rentabilidadMediaEstancia,
+    perfilInquilinoMediaEstancia,
+    ocupacionEstimadaMediaEstancia,
   };
 }
 
