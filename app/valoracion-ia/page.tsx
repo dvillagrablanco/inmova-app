@@ -612,9 +612,6 @@ export default function ValoracionIAPage() {
       );
     }
 
-    lines.push(
-    ];
-
     if (resultado.metodologiaUsada) {
       lines.push('── METODOLOGÍA ────────────────────────────────────────────', resultado.metodologiaUsada, '');
     }
