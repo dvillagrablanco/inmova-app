@@ -669,6 +669,7 @@ export default function ContractDetailPage() {
               </CardHeader>
               <CardContent>
                 {contract.payments && contract.payments.length > 0 ? (
+                  <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -695,6 +696,7 @@ export default function ContractDetailPage() {
                       ))}
                     </TableBody>
                   </Table>
+                  </div>
                 ) : (
                   <div className="text-center py-8 text-muted-foreground">
                     <Euro className="h-12 w-12 mx-auto mb-4 opacity-20" />

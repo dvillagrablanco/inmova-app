@@ -225,7 +225,7 @@ export function AuthenticatedLayout({
           id="main-content"
           className={cn(
             'flex-1 overflow-y-auto overflow-x-hidden',
-            isMobile ? 'pb-20' : '', // Espacio para bottom nav en móvil
+            isMobile ? 'pb-24' : '', // Espacio para bottom nav + safe area en móvil
             className
           )}
         >

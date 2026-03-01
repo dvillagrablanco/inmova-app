@@ -544,7 +544,7 @@ function InquilinosPageContent() {
                               </div>
                             </div>
                           </div>
-                          <div className="flex items-center gap-6 text-sm">
+                          <div className="hidden sm:flex items-center gap-6 text-sm">
                             <div className="text-center max-w-[150px]">
                               <p className="text-muted-foreground">Teléfono</p>
                               <p className="font-semibold">{tenant.telefono}</p>

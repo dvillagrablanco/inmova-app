@@ -300,17 +300,18 @@ export default function UnitDetailPage() {
                 </p>
               )}
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Button
                 variant="outline"
+                size="sm"
                 onClick={() => router.push(`/valoracion-ia?unitId=${unit.id}`)}
               >
-                <Brain className="h-4 w-4 mr-2" />
-                Valorar con IA
+                <Brain className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Valorar con IA</span>
               </Button>
-              <Button variant="outline" onClick={() => router.push(`/unidades/${unit.id}/editar`)}>
-                <Edit className="h-4 w-4 mr-2" />
-                Editar
+              <Button variant="outline" size="sm" onClick={() => router.push(`/unidades/${unit.id}/editar`)}>
+                <Edit className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Editar</span>
               </Button>
               <AlertDialog>
                 <AlertDialogTrigger asChild>

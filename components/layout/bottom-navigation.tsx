@@ -58,6 +58,7 @@ export function BottomNavigation() {
       {/* Barra de navegación inferior */}
       <nav
         className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background shadow-lg md:hidden"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
         role="navigation"
         aria-label="Navegación principal móvil"
       >
@@ -72,7 +73,7 @@ export function BottomNavigation() {
                 key={item.href}
                 onClick={() => router.push(item.href)}
                 className={cn(
-                  'flex flex-1 flex-col items-center justify-center gap-1 rounded-lg px-2 py-2 transition-colors max-w-[80px]',
+                  'flex flex-1 flex-col items-center justify-center gap-1 rounded-lg px-2 py-2.5 min-h-[44px] transition-colors',
                   'active:scale-95 active:bg-muted',
                   isActive
                     ? 'text-primary'
