@@ -67,6 +67,71 @@ export async function GET(
   }
 }
 
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const prisma = await getPrisma();
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+  }
+
+  try {
+    const userRole = (session.user as any).role;
+    const sessionCompanyId = session.user.companyId;
+    if (!sessionCompanyId) {
+      return NextResponse.json({ error: 'Empresa no válida' }, { status: 400 });
+    }
+
+    const companyScope = {
+      OR: [
+        { building: { companyId: sessionCompanyId } },
+        { unit: { building: { companyId: sessionCompanyId } } },
+        { tenant: { companyId: sessionCompanyId } },
+        { contract: { unit: { building: { companyId: sessionCompanyId } } } },
+        { folder: { companyId: sessionCompanyId } },
+      ],
+    };
+
+    const existing = await prisma.document.findFirst({
+      where: { AND: [{ id: params.id }, companyScope] },
+    });
+
+    if (!existing) {
+      return NextResponse.json({ error: 'Documento no encontrado' }, { status: 404 });
+    }
+
+    const body = await req.json();
+
+    const updateData: Record<string, any> = {};
+    if (body.nombre !== undefined) updateData.nombre = body.nombre;
+    if (body.tipo !== undefined) updateData.tipo = body.tipo;
+    if (body.descripcion !== undefined) updateData.descripcion = body.descripcion;
+    if (body.tags !== undefined) updateData.tags = body.tags;
+    if (body.fechaVencimiento !== undefined) {
+      updateData.fechaVencimiento = body.fechaVencimiento ? new Date(body.fechaVencimiento) : null;
+    }
+
+    const updated = await prisma.document.update({
+      where: { id: params.id },
+      data: updateData,
+      include: {
+        tenant: { select: { nombreCompleto: true } },
+        unit: { select: { numero: true } },
+        building: { select: { nombre: true } },
+        contract: { select: { id: true } },
+        folder: { select: { nombre: true, color: true } },
+      },
+    });
+
+    return NextResponse.json(updated);
+  } catch (error) {
+    logger.error('Error updating document:', error);
+    return NextResponse.json({ error: 'Error al actualizar documento' }, { status: 500 });
+  }
+}
+
 export async function DELETE(
   req: NextRequest,
   { params }: { params: { id: string } }
