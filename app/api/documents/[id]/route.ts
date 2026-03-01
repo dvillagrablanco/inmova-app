@@ -78,19 +78,39 @@ export async function PUT(
   }
 
   try {
+    const { searchParams } = new URL(req.url);
+    const queryCompanyId = searchParams.get('companyId');
     const userRole = (session.user as any).role;
     const sessionCompanyId = session.user.companyId;
-    if (!sessionCompanyId) {
+    const companyId =
+      queryCompanyId && (userRole === 'super_admin' || userRole === 'soporte')
+        ? queryCompanyId
+        : sessionCompanyId;
+    if (!companyId) {
       return NextResponse.json({ error: 'Empresa no válida' }, { status: 400 });
     }
 
+    // Para super_admin, buscar en todas las empresas accesibles
+    const { resolveCompanyScope } = await import('@/lib/company-scope');
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: userRole as any,
+      primaryCompanyId: companyId,
+      request: req,
+    });
+
+    const companyIds = scope.scopeCompanyIds;
+    const companyIdFilter = companyIds && companyIds.length > 1
+      ? { in: companyIds }
+      : (scope.activeCompanyId || companyId);
+
     const companyScope = {
       OR: [
-        { building: { companyId: sessionCompanyId } },
-        { unit: { building: { companyId: sessionCompanyId } } },
-        { tenant: { companyId: sessionCompanyId } },
-        { contract: { unit: { building: { companyId: sessionCompanyId } } } },
-        { folder: { companyId: sessionCompanyId } },
+        { building: { companyId: companyIdFilter } },
+        { unit: { building: { companyId: companyIdFilter } } },
+        { tenant: { companyId: companyIdFilter } },
+        { contract: { unit: { building: { companyId: companyIdFilter } } } },
+        { folder: { companyId: companyIdFilter } },
       ],
     };
 
