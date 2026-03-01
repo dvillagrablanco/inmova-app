@@ -277,14 +277,14 @@ function generateFallbackValuation(property: PropertyData, finalidad: string) {
 
 // Schema de validación flexible para la nueva página de valoración
 const valuateSchema = z.object({
-  // Campos requeridos
-  superficie: z.number().positive(),
+  // Campos requeridos (coerce para tolerar strings del formulario)
+  superficie: z.coerce.number().positive(),
 
   // Campos opcionales básicos
-  habitaciones: z.number().int().nonnegative().optional().default(0),
-  banos: z.number().int().nonnegative().optional().default(0),
-  antiguedad: z.number().int().nonnegative().optional().default(0),
-  planta: z.number().int().optional().default(0),
+  habitaciones: z.coerce.number().int().nonnegative().optional().default(0),
+  banos: z.coerce.number().int().nonnegative().optional().default(0),
+  antiguedad: z.coerce.number().int().nonnegative().optional().default(0),
+  planta: z.coerce.number().int().optional().default(0),
 
   // Características opcionales
   estadoConservacion: z
@@ -311,18 +311,18 @@ const valuateSchema = z.object({
   city: z.string().optional(),
   province: z.string().optional(),
   neighborhood: z.string().optional(),
-  squareMeters: z.number().positive().optional(),
-  rooms: z.number().int().nonnegative().optional(),
-  bathrooms: z.number().int().nonnegative().optional(),
-  floor: z.number().int().optional(),
+  squareMeters: z.coerce.number().positive().optional(),
+  rooms: z.coerce.number().int().nonnegative().optional(),
+  bathrooms: z.coerce.number().int().nonnegative().optional(),
+  floor: z.coerce.number().int().optional(),
   hasElevator: z.boolean().optional(),
   hasParking: z.boolean().optional(),
   hasGarden: z.boolean().optional(),
   hasPool: z.boolean().optional(),
   hasTerrace: z.boolean().optional(),
   condition: z.enum(['NEW', 'GOOD', 'NEEDS_RENOVATION']).optional(),
-  yearBuilt: z.number().int().min(1800).max(new Date().getFullYear()).optional(),
-  avgPricePerM2: z.number().positive().optional(),
+  yearBuilt: z.coerce.number().int().min(1800).max(new Date().getFullYear()).optional(),
+  avgPricePerM2: z.coerce.number().positive().optional(),
   marketTrend: z.enum(['UP', 'DOWN', 'STABLE']).optional(),
 });
 
