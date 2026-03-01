@@ -1,7 +1,7 @@
 'use client';
 
 import { useSession, signOut } from 'next-auth/react';
-import { User, LogOut, Building2 } from 'lucide-react';
+import { User, LogOut, Building2, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -60,13 +60,26 @@ export function Header() {
           <span className="text-sm font-semibold text-primary">{appName}</span>
         </div>
 
-        {/* Global Search - Responsive */}
+        {/* Global Search - Desktop */}
         <div className="hidden flex-1 md:flex md:max-w-md">
           <EnhancedGlobalSearch />
         </div>
 
         {/* Right Side Actions */}
         <div className="flex items-center gap-1 md:gap-3">
+          {/* Mobile Search Button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden h-10 w-10"
+            onClick={() => {
+              const event = new KeyboardEvent('keydown', { key: 'k', metaKey: true });
+              document.dispatchEvent(event);
+            }}
+            aria-label="Buscar"
+          >
+            <Search className="h-5 w-5" />
+          </Button>
           {/* Notifications Center - Enhanced with real-time notifications */}
           <NotificationCenter />
 

@@ -620,11 +620,13 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
           <button
             onClick={() => moduleCode && handleSidebarModuleToggle(moduleCode, isModActive)}
             disabled={isToggling}
+            aria-label={isModActive ? `Desactivar módulo ${item.name}` : `Activar módulo ${item.name}`}
             className={cn(
-              'w-9 h-5 rounded-full relative transition-colors flex-shrink-0',
+              'w-9 h-5 rounded-full relative transition-colors flex-shrink-0 p-0 touch-manipulation',
               isToggling ? 'opacity-50' : '',
               isModActive ? 'bg-green-500' : 'bg-gray-600'
             )}
+            style={{ minWidth: 36, minHeight: 28 }}
           >
             <span
               className={cn(
@@ -665,10 +667,10 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
               toggleFavorite(item.href);
             }}
             className={cn(
-              'absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity z-10',
-              isFavorite ? 'text-yellow-400' : 'text-gray-400 hover:text-yellow-400'
+              'absolute right-1 top-1/2 -translate-y-1/2 p-2 rounded transition-opacity z-10',
+              isFavorite ? 'text-yellow-400 opacity-100' : 'text-gray-400 hover:text-yellow-400 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100'
             )}
-            title={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+            aria-label={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
           >
             <Star size={14} fill={isFavorite ? 'currentColor' : 'none'} />
           </button>
@@ -709,8 +711,10 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
       <div>
         <button
           onClick={() => setIsExpanded(!isExpanded)}
+          aria-expanded={isExpanded}
+          aria-label={`${item.name} — ${isExpanded ? 'colapsar' : 'expandir'}`}
           className={cn(
-            'flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 text-sm w-full',
+            'flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 text-sm w-full min-h-[44px]',
             isActive
               ? 'bg-gray-800 text-white font-medium'
               : 'text-gray-300 hover:bg-gray-800 hover:text-white'
@@ -735,7 +739,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                     onNavigate?.();
                   }}
                   className={cn(
-                    'flex items-center gap-2 px-3 py-2 rounded-md transition-all duration-200 text-xs',
+                    'flex items-center gap-2 px-3 py-2.5 rounded-md transition-all duration-200 text-xs min-h-[40px]',
                     isSubActive
                       ? 'bg-white text-black font-medium'
                       : 'text-gray-400 hover:bg-gray-800 hover:text-white'
@@ -791,17 +795,19 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
         </button>
         {editModulesMode && isModuleEditable && hasSectionModules && (
           <div className="flex items-center gap-1.5 pr-1 flex-shrink-0">
-            <span className="text-[9px] text-gray-500">
+            <span className="text-[11px] text-gray-500">
               {sectionActiveCount}/{sectionTotal}
             </span>
             <button
               onClick={() => handleSectionToggle(sectionId, !sectionActive)}
               disabled={isSectionToggling}
+              aria-label={sectionActive ? 'Desactivar sección' : 'Activar sección'}
               className={cn(
-                'w-9 h-5 rounded-full relative transition-colors flex-shrink-0',
+                'w-9 h-5 rounded-full relative transition-colors flex-shrink-0 p-0 touch-manipulation',
                 isSectionToggling ? 'opacity-50' : '',
                 sectionActive ? 'bg-green-500' : 'bg-gray-600'
               )}
+              style={{ minWidth: 36, minHeight: 28 }}
               title={sectionActive ? 'Desactivar todo el módulo' : 'Activar todo el módulo'}
             >
               <span
@@ -991,7 +997,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
             {filteredSuperAdminPlatformItems.length > 0 && role === 'super_admin' && (
               <>
                 <div className="px-2 py-3 mb-2 border-t border-gray-800">
-                  <h3 className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">
+                  <h3 className="text-xs font-bold text-indigo-400 uppercase tracking-wider">
                     ⚡ Gestión de Plataforma
                   </h3>
                 </div>
@@ -1022,7 +1028,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
             {/* SELECTOR DE EMPRESA (Siempre visible) */}
             {/* ============================================================== */}
             <div className="px-2 pt-3 pb-1 mb-1 border-t border-gray-800">
-              <h3 className="text-[10px] font-bold text-violet-400 uppercase tracking-wider">
+              <h3 className="text-xs font-bold text-violet-400 uppercase tracking-wider">
                 🏢 Sociedad
               </h3>
             </div>
@@ -1046,10 +1052,10 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
             {role === 'super_admin' && filteredAdministradorEmpresaItems.length > 0 && (
               <>
                 <div className="px-2 py-3 mb-2 border-t border-gray-800">
-                  <h3 className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
+                  <h3 className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
                     🏢 Gestión de Empresas
                   </h3>
-                  <p className="text-[9px] text-gray-500 mt-1">
+                  <p className="text-[11px] text-gray-500 mt-1">
                     Configuración avanzada por empresa
                   </p>
                 </div>
@@ -1112,16 +1118,16 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                 <div className="px-2 py-3 mb-2 border-t border-gray-800">
                   <h3
                     className={cn(
-                      'text-[10px] font-bold uppercase tracking-wider',
+                      'text-xs font-bold uppercase tracking-wider',
                       selectedCompany ? 'text-blue-400' : 'text-gray-500'
                     )}
                   >
                     💰 Explotación de Activos
                   </h3>
-                  <p className="text-[8px] text-gray-500 mt-0.5">Inversión / Rendimiento</p>
+                  <p className="text-[11px] text-gray-500 mt-0.5">Inversión / Rendimiento</p>
                   {/* Mostrar empresa seleccionada para Super Admin */}
                   {role === 'super_admin' && selectedCompany && (
-                    <p className="text-[9px] text-blue-500 mt-1">
+                    <p className="text-[11px] text-blue-500 mt-1">
                       Empresa: {selectedCompany.nombre}
                     </p>
                   )}
@@ -1140,7 +1146,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                       <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                     {filteredCoLivingItems.length > 0 && (
-                      <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">
+                      <div className="ml-2 mt-2 mb-1 text-[11px] text-gray-500 uppercase">
                         Coliving
                       </div>
                     )}
@@ -1148,7 +1154,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                       <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                     {filteredStudentHousingItems.length > 0 && (
-                      <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">
+                      <div className="ml-2 mt-2 mb-1 text-[11px] text-gray-500 uppercase">
                         Student Housing
                       </div>
                     )}
@@ -1170,7 +1176,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                       <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                     {filteredHospitalityItems.length > 0 && (
-                      <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">
+                      <div className="ml-2 mt-2 mb-1 text-[11px] text-gray-500 uppercase">
                         Hospitality
                       </div>
                     )}
@@ -1195,7 +1201,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                 {(expandedSections.construccion || editModulesMode) && (
                   <div className="space-y-1 mt-1">
                     {filteredConstruccionItems.length > 0 && (
-                      <div className="ml-2 mt-1 mb-1 text-[9px] text-gray-500 uppercase">
+                      <div className="ml-2 mt-1 mb-1 text-[11px] text-gray-500 uppercase">
                         Obra Nueva / Reformas
                       </div>
                     )}
@@ -1206,7 +1212,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                       <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                     {filteredFlippingItems.length > 0 && (
-                      <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">
+                      <div className="ml-2 mt-2 mb-1 text-[11px] text-gray-500 uppercase">
                         House Flipping
                       </div>
                     )}
@@ -1214,7 +1220,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                       <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                     {filteredRealEstateDeveloperItems.length > 0 && (
-                      <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">
+                      <div className="ml-2 mt-2 mb-1 text-[11px] text-gray-500 uppercase">
                         Promociones
                       </div>
                     )}
@@ -1222,7 +1228,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                       <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                     {filteredEwoorkerItems.length > 0 && (
-                      <div className="ml-2 mt-2 mb-1 text-[9px] text-amber-500 uppercase">
+                      <div className="ml-2 mt-2 mb-1 text-[11px] text-amber-500 uppercase">
                         🔧 eWoorker (B2B)
                       </div>
                     )}
@@ -1246,7 +1252,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                       <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                     {filteredEspaciosFlexiblesItems.length > 0 && (
-                      <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">
+                      <div className="ml-2 mt-2 mb-1 text-[11px] text-gray-500 uppercase">
                         Espacios Flexibles
                       </div>
                     )}
@@ -1254,7 +1260,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                       <NavItemWithSubs key={item.href} item={item as SidebarItem} />
                     ))}
                     {filteredWarehouseItems.length > 0 && (
-                      <div className="ml-2 mt-2 mb-1 text-[9px] text-gray-500 uppercase">
+                      <div className="ml-2 mt-2 mb-1 text-[11px] text-gray-500 uppercase">
                         Logística / Almacenes
                       </div>
                     )}
@@ -1274,13 +1280,13 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                 <div className="px-2 py-3 mb-2 border-t border-gray-800">
                   <h3
                     className={cn(
-                      'text-[10px] font-bold uppercase tracking-wider',
+                      'text-xs font-bold uppercase tracking-wider',
                       selectedCompany ? 'text-purple-400' : 'text-gray-500'
                     )}
                   >
                     🤝 Servicios de Administración
                   </h3>
-                  <p className="text-[8px] text-gray-500 mt-0.5">B2C / Servicio</p>
+                  <p className="text-[11px] text-gray-500 mt-0.5">B2C / Servicio</p>
                 </div>
               )}
 
@@ -1307,7 +1313,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
             {filteredHoldingGrupoItems.length > 0 && (
               <>
                 <div className="px-2 py-3 mb-2 border-t border-gray-800">
-                  <h3 className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-amber-400">
                     🏛️ Holding / Grupo
                   </h3>
                 </div>
@@ -1328,7 +1334,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
               <div className="px-2 py-3 mb-2 border-t border-gray-800">
                 <h3
                   className={cn(
-                    'text-[10px] font-bold uppercase tracking-wider',
+                    'text-xs font-bold uppercase tracking-wider',
                     role === 'super_admin' && selectedCompany ? 'text-emerald-400' : 'text-gray-500'
                   )}
                 >
@@ -1377,7 +1383,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
             {filteredOperadorItems.length > 0 && (
               <>
                 <div className="px-2 py-3 mb-2 border-t border-gray-800">
-                  <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                  <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">
                     👷 Operador de Campo
                   </h3>
                 </div>
@@ -1395,7 +1401,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
               (role === 'administrador' || role === 'super_admin') && (
                 <>
                   <div className="px-2 py-3 mb-2 border-t border-gray-800">
-                    <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                    <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">
                       ⚙️ Configuración de Mi Empresa
                     </h3>
                   </div>
@@ -1461,7 +1467,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                         <p className="text-xs text-gray-400 truncate">{session.user.email}</p>
                       )}
                       {session.user.role && (
-                        <p className="text-[10px] text-indigo-400 uppercase mt-0.5 font-semibold">
+                        <p className="text-xs text-indigo-400 uppercase mt-0.5 font-semibold">
                           {session.user.role
                             .replace('_', ' ')
                             .replace('super admin', 'Super Admin')}
