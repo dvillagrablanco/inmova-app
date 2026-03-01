@@ -34,6 +34,17 @@ interface ValuationData {
   marketComparison: string;
   investmentPotential: 'LOW' | 'MEDIUM' | 'HIGH';
   recommendations: string[];
+  alquilerEstimado?: number;
+  rentabilidadAlquiler?: number;
+  capRate?: number;
+  alquilerMediaEstancia?: number;
+  alquilerMediaEstanciaMin?: number;
+  alquilerMediaEstanciaMax?: number;
+  rentabilidadMediaEstancia?: number;
+  ocupacionEstimadaMediaEstancia?: number;
+  perfilInquilinoMediaEstancia?: string;
+  metodologiaUsada?: string;
+  tendenciaMercado?: string;
 }
 
 export function ValuationCard({ propertyId }: ValuationCardProps) {
@@ -161,6 +172,50 @@ export function ValuationCard({ propertyId }: ValuationCardProps) {
               <p className="text-sm font-medium">€{valuation.pricePerM2.toLocaleString('es-ES')}/m²</p>
             </div>
           </div>
+
+          {/* Estimación de Alquiler */}
+          {(valuation.alquilerEstimado && valuation.alquilerEstimado > 0) || valuation.alquilerMediaEstancia ? (
+            <div className="space-y-3">
+              <h4 className="text-sm font-medium flex items-center gap-2">
+                <Euro className="h-4 w-4" />
+                Estimación de Alquiler
+              </h4>
+              <div className="grid grid-cols-2 gap-3">
+                {valuation.alquilerEstimado && valuation.alquilerEstimado > 0 && (
+                  <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+                    <p className="text-[10px] text-green-600 font-medium uppercase">Larga estancia (12+ meses)</p>
+                    <p className="text-2xl font-bold text-green-800">
+                      {valuation.alquilerEstimado.toLocaleString('es-ES')}€<span className="text-sm font-normal">/mes</span>
+                    </p>
+                    {valuation.rentabilidadAlquiler && valuation.rentabilidadAlquiler > 0 && (
+                      <p className="text-xs text-green-600 mt-0.5">Rentabilidad: {valuation.rentabilidadAlquiler.toFixed(1)}%</p>
+                    )}
+                  </div>
+                )}
+                {valuation.alquilerMediaEstancia && valuation.alquilerMediaEstancia > 0 && (
+                  <div className="p-3 bg-orange-50 rounded-lg border border-orange-200">
+                    <p className="text-[10px] text-orange-600 font-medium uppercase">Media estancia (1-11 meses)</p>
+                    <p className="text-2xl font-bold text-orange-800">
+                      {valuation.alquilerMediaEstancia.toLocaleString('es-ES')}€<span className="text-sm font-normal">/mes</span>
+                    </p>
+                    {valuation.alquilerEstimado && valuation.alquilerEstimado > 0 && (
+                      <p className="text-xs text-orange-600 mt-0.5">
+                        +{Math.round(((valuation.alquilerMediaEstancia - valuation.alquilerEstimado) / valuation.alquilerEstimado) * 100)}% vs larga
+                        {valuation.ocupacionEstimadaMediaEstancia ? ` · ${valuation.ocupacionEstimadaMediaEstancia}% ocupación` : ''}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+              {valuation.perfilInquilinoMediaEstancia && (
+                <p className="text-xs text-muted-foreground">
+                  <span className="font-medium">Perfil media estancia:</span> {valuation.perfilInquilinoMediaEstancia}
+                </p>
+              )}
+            </div>
+          ) : null}
+
+          <Separator />
 
           {/* Confianza y Potencial */}
           <div className="grid grid-cols-2 gap-4">

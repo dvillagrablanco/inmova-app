@@ -1,15 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { AIValuationService } from '@/lib/ai-valuation-service';
-import { ValuationCacheService } from '@/lib/valuation-cache-service';
 import { CLAUDE_MODEL_PRIMARY } from '@/lib/ai-model-config';
+import { getAggregatedMarketData, formatPlatformDataForPrompt } from '@/lib/external-platform-data-service';
+import { analyzeAndValuateProperty } from '@/lib/ai-property-analysis';
 
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-// Lazy Prisma (auditoria V2)
 async function getPrisma() {
   const { getPrismaClient } = await import('@/lib/db');
   return getPrismaClient();
@@ -73,155 +72,137 @@ export async function GET(
       );
     }
 
-    const address = property.building.direccion || '';
+    const address = property.building?.direccion || '';
     const cityGuess = address
       .split(',')
-      .map((part) => part.trim())
+      .map((part: string) => part.trim())
       .filter(Boolean)
       .pop();
     const city = cityGuess || 'Madrid';
-
-    // Preparar datos para valoración
-    const propertyData = {
-      address,
-      city,
-      neighborhood: undefined,
-      postalCode: undefined,
-      squareMeters: property.superficie,
-      rooms: property.habitaciones || undefined,
-      bathrooms: property.banos || undefined,
-      floor: property.planta || undefined,
-      aireAcondicionado: property.aireAcondicionado,
-      calefaccion: property.calefaccion,
-      terraza: property.terraza,
-      balcon: property.balcon,
-      orientacion: property.orientacion || undefined,
-    };
-
-    // Obtener datos del mercado
-    const marketData = await AIValuationService.getMarketData(
-      city,
-      undefined,
-      undefined
-    );
-
-    // Buscar propiedades similares en la BD
     const buildingCompanyId = property.building?.companyId || session.user.companyId;
+
+    // 1. Obtener datos de mercado de múltiples plataformas (scraping + Notariado + INE)
+    let aggregatedMarketData = null;
+    let platformDataText = '';
+    try {
+      aggregatedMarketData = await getAggregatedMarketData({
+        city,
+        address,
+        companyId: buildingCompanyId,
+        squareMeters: property.superficie,
+        rooms: property.habitaciones || undefined,
+      });
+      platformDataText = formatPlatformDataForPrompt(aggregatedMarketData);
+    } catch (e) {
+      logger.warn('[Valuation] Error obteniendo datos de plataformas:', e);
+    }
+
+    // 2. Buscar comparables internos
     const similarProperties = await prisma.unit.findMany({
       where: {
         building: { companyId: buildingCompanyId },
         id: { not: propertyId },
         buildingId: property.buildingId,
-        superficie: {
-          gte: property.superficie * 0.8,
-          lte: property.superficie * 1.2,
-        },
-        habitaciones: property.habitaciones,
+        superficie: { gte: property.superficie * 0.8, lte: property.superficie * 1.2 },
       },
       select: {
-        id: true,
-        numero: true,
-        superficie: true,
-        rentaMensual: true,
-        building: {
-          select: {
-            direccion: true,
-          },
-        },
+        numero: true, superficie: true, rentaMensual: true,
+        building: { select: { direccion: true } },
       },
       take: 5,
     });
+    const internalComparables = similarProperties
+      .filter((p: any) => p.rentaMensual)
+      .map((p: any) => `- ${p.building?.direccion || address}, Unidad ${p.numero}: ${(p.rentaMensual * 12 * 15).toLocaleString()}€ (${p.superficie}m²)`)
+      .join('\n');
 
-    // Agregar comparables al marketData
-    marketData.similarProperties = similarProperties.map((prop) => ({
-        address: `${prop.building?.direccion || address}, Unidad ${prop.numero}`,
-      price: prop.rentaMensual * 12 * 15, // Estimación valor = renta anual * 15
-      squareMeters: prop.superficie,
-    }));
+    // 3. Valoración IA multi-paso (Fase 1: análisis comparables + Fase 2: valoración experta)
+    const propertyForAI = {
+      address,
+      city,
+      postalCode: '',
+      squareMeters: property.superficie,
+      rooms: property.habitaciones || 0,
+      bathrooms: property.banos || 0,
+      floor: property.planta || undefined,
+      condition: 'GOOD',
+      hasElevator: property.ascensor || false,
+      hasParking: false,
+      hasGarden: false,
+      hasPool: false,
+      hasTerrace: property.terraza || false,
+      hasGarage: false,
+      orientacion: property.orientacion || undefined,
+      finalidad: 'venta',
+    };
 
-    // Realizar valoración con IA (con fallback si la API falla)
-    let valuation;
+    const valuation = await analyzeAndValuateProperty(
+      propertyForAI,
+      aggregatedMarketData,
+      platformDataText,
+      internalComparables,
+    );
+
+    // 4. Guardar en BD
     try {
-      valuation = await AIValuationService.valuateProperty(
-        propertyData,
-        marketData
-      );
-    } catch (aiError: any) {
-      logger.warn('[Valuation] AI failed, using fallback:', aiError?.message?.slice(0, 200));
-      // Fallback: valoración basada en datos de mercado sin IA
-      const preciosBase: Record<string, number> = {
-        'Madrid': 4200, 'Barcelona': 4500, 'Valencia': 2300, 'Sevilla': 2100,
-        'Málaga': 2800, 'Palencia': 1400, 'Valladolid': 1800, 'Benidorm': 2200, 'Marbella': 3500,
-      };
-      const precioM2 = marketData.avgPricePerM2 || preciosBase[city] || 2500;
-      const estimatedValue = Math.round(precioM2 * property.superficie);
-      valuation = {
-        estimatedValue,
-        minValue: Math.round(estimatedValue * 0.9),
-        maxValue: Math.round(estimatedValue * 1.1),
-        confidenceScore: 60,
-        pricePerM2: precioM2,
-        reasoning: `Valoración estimada basada en precio medio de ${city} (${precioM2}€/m²). Para mayor precisión, se recomienda tasación profesional.`,
-        keyFactors: [`Ubicación en ${city}`, `${property.superficie}m²`, `${property.habitaciones || 0} habitaciones`],
-        marketComparison: `Precio medio en ${city}: ${precioM2}€/m²`,
-        investmentPotential: 'MEDIUM' as const,
-        recommendations: ['Solicitar tasación profesional', 'Comparar con ventas recientes en la zona'],
-      };
-    }
-
-    // 4. Guardar en caché (no bloqueante)
-    ValuationCacheService.set(propertyId, {
-      propertyId,
-      ...valuation,
-    }).catch((err) => logger.error('Cache save error:', err));
-
-    // 5. Guardar valoración en BD (histórico)
-    try {
-      const rooms = property.habitaciones ?? 0;
-      const bathrooms = property.banos ?? 0;
-      const postalCode = propertyData.postalCode || '00000';
-
       await prisma.propertyValuation.create({
         data: {
           unitId: propertyId,
           companyId: buildingCompanyId,
-          address: propertyData.address,
-          postalCode,
+          address,
+          postalCode: '',
           city,
-          squareMeters: propertyData.squareMeters,
-          rooms,
-          bathrooms,
+          squareMeters: property.superficie,
+          rooms: property.habitaciones ?? 0,
+          bathrooms: property.banos ?? 0,
           condition: 'GOOD',
           estimatedValue: valuation.estimatedValue,
           minValue: valuation.minValue,
           maxValue: valuation.maxValue,
           confidenceScore: valuation.confidenceScore,
-          pricePerM2: valuation.pricePerM2,
+          pricePerM2: valuation.precioM2,
           reasoning: valuation.reasoning,
-          keyFactors: valuation.keyFactors,
-          comparables: marketData.similarProperties || [],
-          recommendations: valuation.recommendations,
+          keyFactors: valuation.factoresPositivos,
+          recommendations: valuation.recomendaciones,
+          estimatedRent: valuation.alquilerEstimado,
+          estimatedROI: valuation.rentabilidadAlquiler,
+          capRate: valuation.capRate,
           model: CLAUDE_MODEL_PRIMARY,
           requestedBy: session.user.id,
         },
       });
     } catch (dbError) {
       logger.error('Error saving valuation:', dbError);
-      // No fallar si no se puede guardar
     }
 
     return NextResponse.json({
       success: true,
-      data: valuation,
-      metadata: {
-        propertyId,
-        address: `${property.building.direccion}, ${city}`,
-        squareMeters: property.superficie,
-        marketData: {
-          avgPricePerM2: marketData.avgPricePerM2,
-          trend: marketData.marketTrend,
-          comparablesCount: marketData.similarProperties?.length || 0,
-        },
+      data: {
+        estimatedValue: valuation.estimatedValue,
+        minValue: valuation.minValue,
+        maxValue: valuation.maxValue,
+        confidenceScore: valuation.confidenceScore,
+        pricePerM2: valuation.precioM2,
+        reasoning: valuation.reasoning,
+        keyFactors: [...valuation.factoresPositivos, ...valuation.factoresNegativos],
+        marketComparison: valuation.analisisMercado,
+        investmentPotential: valuation.rentabilidadAlquiler >= 5 ? 'HIGH' : valuation.rentabilidadAlquiler >= 3.5 ? 'MEDIUM' : 'LOW',
+        recommendations: valuation.recomendaciones,
+        // Alquiler larga estancia
+        alquilerEstimado: valuation.alquilerEstimado,
+        rentabilidadAlquiler: valuation.rentabilidadAlquiler,
+        capRate: valuation.capRate,
+        // Alquiler media estancia
+        alquilerMediaEstancia: valuation.alquilerMediaEstancia,
+        alquilerMediaEstanciaMin: valuation.alquilerMediaEstanciaMin,
+        alquilerMediaEstanciaMax: valuation.alquilerMediaEstanciaMax,
+        rentabilidadMediaEstancia: valuation.rentabilidadMediaEstancia,
+        ocupacionEstimadaMediaEstancia: valuation.ocupacionEstimadaMediaEstancia,
+        perfilInquilinoMediaEstancia: valuation.perfilInquilinoMediaEstancia,
+        // Metadata
+        metodologiaUsada: valuation.metodologiaUsada,
+        tendenciaMercado: valuation.tendenciaMercado,
+        sourcesUsed: valuation.sourcesUsed,
       },
     });
   } catch (error: any) {
