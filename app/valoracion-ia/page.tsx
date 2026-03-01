@@ -236,7 +236,7 @@ export default function ValoracionIAPage() {
     direccionManual: '',
     ciudadManual: '',
     codigoPostalManual: '',
-    eficienciaEnergetica: '',
+    eficienciaEnergetica: 'none',
   });
 
   // Cargar datos al iniciar
@@ -1213,7 +1213,7 @@ export default function ValoracionIAPage() {
                         <SelectValue placeholder="Sin certificar" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Sin certificar</SelectItem>
+                        <SelectItem value="none">Sin certificar</SelectItem>
                         <SelectItem value="A">A (muy eficiente)</SelectItem>
                         <SelectItem value="B">B</SelectItem>
                         <SelectItem value="C">C</SelectItem>
