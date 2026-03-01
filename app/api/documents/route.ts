@@ -51,7 +51,15 @@ export async function GET(req: NextRequest) {
     const whereFilters: any = {};
     if (tenantId) whereFilters.tenantId = tenantId;
     if (unitId) whereFilters.unitId = unitId;
-    if (buildingId) whereFilters.buildingId = buildingId;
+    if (buildingId) {
+      whereFilters.buildingId = buildingId;
+      if (!unitId) {
+        // Cuando se piden documentos del edificio (sin especificar unidad),
+        // excluir los que pertenecen a una unidad concreta — esos se
+        // muestran en la página de la propiedad, no en la del edificio.
+        whereFilters.unitId = null;
+      }
+    }
     if (contractId) whereFilters.contractId = contractId;
     if (folderId) whereFilters.folderId = folderId;
     if (tipo) whereFilters.tipo = tipo;
