@@ -291,18 +291,27 @@ async function main() {
     }
 
     // Find matching unit (if unitHint provided)
-    let targetUnit = building.units[0]; // Default to first unit
+    // Default to first unit WITH a contract
+    let targetUnit = building.units.find((u) => u.contracts.length > 0) || building.units[0];
     if (fianza.unitHint) {
       const hintLower = fianza.unitHint.toLowerCase().replace(/\s+/g, '');
       const matched = building.units.find((u) => {
         const uNum = u.numero.toLowerCase().replace(/\s+/g, '');
         return (
-          uNum.includes(hintLower) ||
-          hintLower.includes(uNum) ||
-          uNum === hintLower
+          (uNum.includes(hintLower) || hintLower.includes(uNum) || uNum === hintLower) &&
+          u.contracts.length > 0
         );
       });
-      if (matched) targetUnit = matched;
+      // Fallback: match without contract requirement
+      if (matched) {
+        targetUnit = matched;
+      } else {
+        const looseMatch = building.units.find((u) => {
+          const uNum = u.numero.toLowerCase().replace(/\s+/g, '');
+          return uNum.includes(hintLower) || hintLower.includes(uNum);
+        });
+        if (looseMatch && looseMatch.contracts.length > 0) targetUnit = looseMatch;
+      }
     }
 
     if (!targetUnit) {
