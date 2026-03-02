@@ -6,7 +6,8 @@ import { useRouter } from 'next/navigation';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Shield, AlertTriangle, CheckCircle2, Clock, Building2, User } from 'lucide-react';
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import { Shield, AlertTriangle, CheckCircle2, Clock, Building2, User, Home } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function FianzasPage() {
@@ -57,6 +58,21 @@ export default function FianzasPage() {
   return (
     <AuthenticatedLayout>
       <div className="space-y-6 p-6">
+        <Breadcrumb className="mb-4">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/dashboard"><Home className="h-3.5 w-3.5" /></BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/inversiones">Inversiones</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Fianzas</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Fianzas y Depositos</h1>
           <p className="text-gray-500">Control de fianzas depositadas en organismos autonomicos</p>

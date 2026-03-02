@@ -7,7 +7,7 @@ import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Loader2, Home, TrendingUp, PieChart } from 'lucide-react';
+import { Loader2, Home, TrendingUp, PieChart, LayoutDashboard, FileBarChart } from 'lucide-react';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -120,9 +120,25 @@ export default function CarteraPage() {
           </BreadcrumbList>
         </Breadcrumb>
 
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Carteras Financieras — P&L</h1>
-          <p className="text-gray-500">Rendimiento consolidado por gestora y posiciones</p>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Carteras Financieras — P&L</h1>
+            <p className="text-gray-500">Rendimiento consolidado por gestora y posiciones</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Link href="/finanzas/cuadro-de-mandos">
+              <Button variant="ghost" size="sm">
+                <LayoutDashboard className="h-4 w-4 mr-1.5" />
+                Cuadro de Mandos
+              </Button>
+            </Link>
+            <Link href="/inversiones/modelo-720">
+              <Button variant="ghost" size="sm">
+                <FileBarChart className="h-4 w-4 mr-1.5" />
+                Modelo 720
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* KPIs */}

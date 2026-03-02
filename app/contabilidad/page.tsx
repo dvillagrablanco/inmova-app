@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
+import Link from 'next/link';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,6 +22,8 @@ import {
   BarChart3,
   RefreshCw,
   Upload,
+  LayoutDashboard,
+  ArrowRightLeft,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -543,7 +546,25 @@ export default function ContabilidadPage() {
             Fiscalidad
           </p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <Link href="/finanzas/cuadro-de-mandos">
+            <Button variant="ghost" size="sm">
+              <LayoutDashboard className="h-4 w-4 mr-1.5" />
+              Cuadro de Mandos
+            </Button>
+          </Link>
+          <Link href="/contabilidad/intragrupo">
+            <Button variant="ghost" size="sm">
+              <ArrowRightLeft className="h-4 w-4 mr-1.5" />
+              Intragrupo
+            </Button>
+          </Link>
+          <Link href="/contabilidad/integraciones">
+            <Button variant="ghost" size="sm">
+              <Upload className="h-4 w-4 mr-1.5" />
+              Importar
+            </Button>
+          </Link>
           <Button
             onClick={async () => {
               try {

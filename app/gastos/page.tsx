@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
 import { Button } from '@/components/ui/button';
@@ -45,6 +46,8 @@ import {
   Tag,
   Edit,
   Trash2,
+  LayoutDashboard,
+  FileBarChart,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePermissions } from '@/lib/hooks/usePermissions';
@@ -519,7 +522,20 @@ export default function GastosPage() {
                 <h1 className="text-3xl font-bold tracking-tight">Gastos</h1>
                 <p className="text-muted-foreground">Gestiona los gastos de tus propiedades</p>
               </div>
-              {canCreate && (
+              <div className="flex flex-wrap items-center gap-2">
+                <Link href="/finanzas/cuadro-de-mandos">
+                  <Button variant="ghost" size="sm">
+                    <LayoutDashboard className="h-4 w-4 mr-1.5" />
+                    Cuadro de Mandos
+                  </Button>
+                </Link>
+                <Link href="/reportes/financieros">
+                  <Button variant="ghost" size="sm">
+                    <FileBarChart className="h-4 w-4 mr-1.5" />
+                    Reportes
+                  </Button>
+                </Link>
+                {canCreate && (
                 <Dialog open={openDialog} onOpenChange={setOpenDialog}>
                   <DialogTrigger asChild>
                     <Button>
@@ -672,7 +688,8 @@ export default function GastosPage() {
                     </form>
                   </DialogContent>
                 </Dialog>
-              )}
+                )}
+              </div>
             </div>
 
             {/* Diálogo de Edición */}

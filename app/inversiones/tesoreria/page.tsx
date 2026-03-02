@@ -9,9 +9,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import {
   Euro, TrendingUp, TrendingDown, AlertTriangle, Calendar,
-  ArrowUpRight, ArrowDownRight, Wallet,
+  ArrowUpRight, ArrowDownRight, Wallet, Home,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -84,6 +85,21 @@ export default function TesoreriaPage() {
   return (
     <AuthenticatedLayout>
       <div className="space-y-6 p-6">
+        <Breadcrumb className="mb-4">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/dashboard"><Home className="h-3.5 w-3.5" /></BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/inversiones">Inversiones</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Tesorería</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold">Previsión de Tesorería</h1>

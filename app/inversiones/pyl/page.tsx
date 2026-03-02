@@ -6,7 +6,8 @@ import { useRouter } from 'next/navigation';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowUpRight, ArrowDownRight, Euro, Landmark, Minus } from 'lucide-react';
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import { ArrowUpRight, ArrowDownRight, Euro, Landmark, Minus, Home } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function PYLConsolidadoPage() {
@@ -52,6 +53,21 @@ export default function PYLConsolidadoPage() {
     return (
       <AuthenticatedLayout>
         <div className="p-6">
+          <Breadcrumb className="mb-4">
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/dashboard"><Home className="h-3.5 w-3.5" /></BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/inversiones">Inversiones</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>P&L</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
           <h1 className="text-2xl font-bold mb-4">P&L Consolidado</h1>
           <Card><CardContent className="p-8 text-center text-gray-500">Sin datos disponibles.</CardContent></Card>
         </div>
@@ -71,6 +87,21 @@ export default function PYLConsolidadoPage() {
   return (
     <AuthenticatedLayout>
       <div className="space-y-6 p-6">
+        <Breadcrumb className="mb-4">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/dashboard"><Home className="h-3.5 w-3.5" /></BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/inversiones">Inversiones</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>P&L</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
         <div>
           <h1 className="text-2xl font-bold text-gray-900">P&L Consolidado</h1>
           <p className="text-gray-500">Cuenta de resultados anualizada del grupo - {new Date().getFullYear()}</p>

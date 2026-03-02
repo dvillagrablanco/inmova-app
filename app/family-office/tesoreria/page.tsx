@@ -7,7 +7,7 @@ import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Loader2, Home, Wallet, AlertTriangle } from 'lucide-react';
+import { Loader2, Home, Wallet, AlertTriangle, CreditCard, FileBarChart } from 'lucide-react';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -109,9 +109,25 @@ export default function TesoreriaPage() {
           </BreadcrumbList>
         </Breadcrumb>
 
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Tesorería y Cash Forecast</h1>
-          <p className="text-gray-500">Saldo actual y previsión a 6 meses</p>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Tesorería y Cash Forecast</h1>
+            <p className="text-gray-500">Saldo actual y previsión a 6 meses</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Link href="/family-office/cuentas">
+              <Button variant="ghost" size="sm">
+                <CreditCard className="h-4 w-4 mr-1.5" />
+                Cuentas
+              </Button>
+            </Link>
+            <Link href="/inversiones/modelo-720">
+              <Button variant="ghost" size="sm">
+                <FileBarChart className="h-4 w-4 mr-1.5" />
+                Modelo 720
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* Saldo actual */}
