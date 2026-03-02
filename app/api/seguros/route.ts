@@ -19,7 +19,8 @@ export async function GET(request: NextRequest) {
     if (!session?.user?.companyId) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
-
+    const _h = await prisma.company.findUnique({ where: { id: session.user.companyId }, select: { childCompanies: { select: { id: true } } } });
+    const allCompanyIds = _h ? [session.user.companyId, ..._h.childCompanies.map((c: { id: string }) => c.id)] : [session.user.companyId];
     const { searchParams } = new URL(request.url);
     const buildingId = searchParams.get('buildingId');
     const tipo = searchParams.get('tipo');
@@ -27,21 +28,9 @@ export async function GET(request: NextRequest) {
     const queryCompanyId = searchParams.get('companyId');
     const userRole = (session.user as any).role;
 
-    const { resolveCompanyScope } = await import('@/lib/company-scope');
-    const scope = await resolveCompanyScope({
-      userId: session.user.id as string,
-      role: userRole as any,
-      primaryCompanyId: (session.user as any).companyId,
-      request,
-    });
-
-    const companyFilter = scope.scopeCompanyIds.length > 1
-      ? { in: scope.scopeCompanyIds }
-      : scope.activeCompanyId || (session.user as any).companyId;
-
     const seguros = await prisma.insurance.findMany({
       where: {
-        companyId: companyFilter,
+        companyId: { in: allCompanyIds },
         ...(buildingId && { buildingId }),
         ...(tipo && { tipo: tipo as any }),
         ...(estado && { estado: estado as any }),

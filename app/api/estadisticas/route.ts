@@ -5,7 +5,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { resolveAccountingScope } from '@/lib/accounting-scope';
 import { subMonths, startOfMonth, endOfMonth } from 'date-fns';
 import logger from '@/lib/logger';
 
@@ -25,9 +24,9 @@ export async function GET(request: NextRequest) {
     if (!session?.user?.companyId) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
-
-    const scope = await resolveAccountingScope(request, session.user as any);
-    const companyIds = scope?.companyIds || [session.user.companyId];
+    const _h = await prisma.company.findUnique({ where: { id: session.user.companyId }, select: { childCompanies: { select: { id: true } } } });
+    const allCompanyIds = _h ? [session.user.companyId, ..._h.childCompanies.map((c: { id: string }) => c.id)] : [session.user.companyId];
+    const companyIds = allCompanyIds;
 
     // Obtener datos reales de edificios y unidades
     const buildings = await prisma.building.findMany({

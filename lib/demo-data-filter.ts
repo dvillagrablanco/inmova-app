@@ -186,6 +186,28 @@ export function paymentFilterWithCompany(companyId: string): Prisma.PaymentWhere
 }
 
 /**
+ * Helper para crear filtros con múltiples companyIds (consolidación) excluyendo demos
+ * @param companyIds - IDs de empresas (principal + filiales)
+ * @returns Filtro para Payment
+ */
+export function paymentFilterWithCompanies(companyIds: string[]): Prisma.PaymentWhereInput {
+  return {
+    contract: {
+      unit: {
+        building: {
+          companyId: { in: companyIds },
+          isDemo: false,
+          company: excludeDemoCompany,
+        },
+        isDemo: false,
+      },
+      isDemo: false,
+    },
+    isDemo: false,
+  };
+}
+
+/**
  * Helper para crear filtros de companyId para gastos excluyendo demos
  * @param companyId - ID de la empresa
  * @returns Filtro para Expense
@@ -204,6 +226,36 @@ export function expenseFilterWithCompany(companyId: string): Prisma.ExpenseWhere
         unit: {
           building: {
             companyId,
+            isDemo: false,
+            company: excludeDemoCompany,
+          },
+          isDemo: false,
+        },
+      },
+    ],
+    isDemo: false,
+  };
+}
+
+/**
+ * Helper para crear filtros con múltiples companyIds (consolidación) excluyendo demos
+ * @param companyIds - IDs de empresas (principal + filiales)
+ * @returns Filtro para Expense
+ */
+export function expenseFilterWithCompanies(companyIds: string[]): Prisma.ExpenseWhereInput {
+  return {
+    OR: [
+      {
+        building: {
+          companyId: { in: companyIds },
+          isDemo: false,
+          company: excludeDemoCompany,
+        },
+      },
+      {
+        unit: {
+          building: {
+            companyId: { in: companyIds },
             isDemo: false,
             company: excludeDemoCompany,
           },

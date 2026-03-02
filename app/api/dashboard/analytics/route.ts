@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/permissions';
 import logger from '@/lib/logger';
 import { cacheGetOrSet, CacheTTL } from '@/lib/cache';
-import { paymentFilterWithCompany, expenseFilterWithCompany } from '@/lib/demo-data-filter';
+import { paymentFilterWithCompanies, expenseFilterWithCompanies } from '@/lib/demo-data-filter';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -28,10 +28,11 @@ export async function GET() {
   const prisma = await getPrisma();
   try {
     const user = await requireAuth();
-    const companyId = user.companyId;
+    const _h = await prisma.company.findUnique({ where: { id: user.companyId! }, select: { childCompanies: { select: { id: true } } } });
+    const allCompanyIds = _h ? [user.companyId!, ..._h.childCompanies.map((c: { id: string }) => c.id)] : [user.companyId!];
 
     // Usar caché de 5 minutos para analytics
-    const cacheKey = `analytics:monthly:${companyId}`;
+    const cacheKey = `analytics:monthly:${allCompanyIds.join(',')}`;
     
     const analyticsData = await cacheGetOrSet(
       cacheKey,
@@ -46,7 +47,7 @@ export async function GET() {
         // IMPORTANTE: Excluir datos de demostración de las estadísticas
         const payments = await prisma.payment.findMany({
           where: {
-            ...paymentFilterWithCompany(companyId),
+            ...paymentFilterWithCompanies(allCompanyIds),
             estado: 'pagado',
             fechaVencimiento: {
               gte: twelveMonthsAgo,
@@ -63,7 +64,7 @@ export async function GET() {
         // IMPORTANTE: Excluir datos de demostración de las estadísticas
         const expenses = await prisma.expense.findMany({
           where: {
-            ...expenseFilterWithCompany(companyId),
+            ...expenseFilterWithCompanies(allCompanyIds),
             fecha: {
               gte: twelveMonthsAgo,
             },

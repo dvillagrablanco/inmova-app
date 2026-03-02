@@ -18,16 +18,16 @@ export async function GET(request: NextRequest) {
     if (!session?.user?.companyId) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
-
+    const prisma = getPrismaClient();
+    const _h = await prisma.company.findUnique({ where: { id: session.user.companyId }, select: { childCompanies: { select: { id: true } } } });
+    const allCompanyIds = _h ? [session.user.companyId, ..._h.childCompanies.map((c: { id: string }) => c.id)] : [session.user.companyId];
     const { searchParams } = new URL(request.url);
     const assetId = searchParams.get('assetId');
-
-    const prisma = getPrismaClient();
 
     if (assetId) {
       // Tabla de un activo especifico
       const asset = await prisma.assetAcquisition.findFirst({
-        where: { id: assetId, companyId: session.user.companyId },
+        where: { id: assetId, companyId: { in: allCompanyIds } },
       });
       if (!asset) {
         return NextResponse.json({ error: 'Activo no encontrado' }, { status: 404 });
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
 
     // Resumen de amortizaciones de todos los activos
     const assets = await prisma.assetAcquisition.findMany({
-      where: { companyId: session.user.companyId },
+      where: { companyId: { in: allCompanyIds } },
       select: {
         id: true,
         assetType: true,

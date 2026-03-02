@@ -31,16 +31,15 @@ export async function GET(request: NextRequest) {
     if (!session?.user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
-
+    const _h = await prisma.company.findUnique({ where: { id: session.user.companyId! }, select: { childCompanies: { select: { id: true } } } });
+    const allCompanyIds = _h ? [session.user.companyId!, ..._h.childCompanies.map((c: { id: string }) => c.id)] : [session.user.companyId!];
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
     const type = searchParams.get('type');
 
-    const companyId = session.user.companyId;
-
     // Construir filtros
     const whereClause: any = {
-      companyId,
+      companyId: { in: allCompanyIds },
     };
 
     // Filtrar por estado

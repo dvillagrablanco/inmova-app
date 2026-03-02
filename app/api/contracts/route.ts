@@ -28,7 +28,8 @@ export async function GET(req: NextRequest) {
     if (!session) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
-
+    const _h = await prisma.company.findUnique({ where: { id: session.user.companyId! }, select: { childCompanies: { select: { id: true } } } });
+    const allCompanyIds = _h ? [session.user.companyId!, ..._h.childCompanies.map((c: { id: string }) => c.id)] : [session.user.companyId!];
     const scope = await resolveCompanyScope({
       userId: session.user.id as string,
       role: session.user.role as any,
@@ -46,22 +47,13 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '15');
     const skip = (page - 1) * limit;
     // Construir where clause
-    const whereClause =
-      scope.scopeCompanyIds.length > 1
-        ? {
-            unit: {
-              building: {
-                companyId: { in: scope.scopeCompanyIds },
-              },
-            },
-          }
-        : {
-            unit: {
-              building: {
-                companyId: scope.activeCompanyId,
-              },
-            },
-          };
+    const whereClause = {
+      unit: {
+        building: {
+          companyId: { in: allCompanyIds },
+        },
+      },
+    };
 
     // Consulta directa (sin cache para evitar errores de build)
     const [contracts, total] = await Promise.all([

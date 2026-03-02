@@ -80,13 +80,13 @@ export async function GET(request: NextRequest) {
     if (!session?.user?.companyId) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
-
+    const prisma = getPrismaClient();
+    const _h = await prisma.company.findUnique({ where: { id: session.user.companyId }, select: { childCompanies: { select: { id: true } } } });
+    const allCompanyIds = _h ? [session.user.companyId, ..._h.childCompanies.map((c: { id: string }) => c.id)] : [session.user.companyId];
     const { searchParams } = new URL(request.url);
     const parsedPeriod = periodSchema.safeParse(searchParams.get('period'));
     const period: Period = parsedPeriod.success ? parsedPeriod.data : 'month';
     const { start, end, previousStart, previousEnd } = getPeriodRange(period);
-    const prisma = getPrismaClient();
-    const companyId = session.user.companyId;
 
     const paymentBaseWhere: Prisma.PaymentWhereInput = {
       isDemo: false,
@@ -94,7 +94,7 @@ export async function GET(request: NextRequest) {
         isDemo: false,
         unit: {
           isDemo: false,
-          building: { companyId, isDemo: false },
+          building: { companyId: { in: allCompanyIds }, isDemo: false },
         },
       },
     };
@@ -103,8 +103,8 @@ export async function GET(request: NextRequest) {
       isDemo: false,
       fecha: { gte: start, lte: end },
       OR: [
-        { building: { companyId, isDemo: false } },
-        { unit: { isDemo: false, building: { companyId, isDemo: false } } },
+        { building: { companyId: { in: allCompanyIds }, isDemo: false } },
+        { unit: { isDemo: false, building: { companyId: { in: allCompanyIds }, isDemo: false } } },
       ],
     };
 
@@ -116,7 +116,7 @@ export async function GET(request: NextRequest) {
     const [buildings, paidPayments, expenses, previousPaidPayments, previousExpenses, duePayments] =
       await Promise.all([
         prisma.building.findMany({
-          where: { companyId, isDemo: false },
+          where: { companyId: { in: allCompanyIds }, isDemo: false },
           select: {
             id: true,
             nombre: true,

@@ -29,6 +29,8 @@ export async function GET(req: NextRequest) {
   const prisma = await getPrisma();
   try {
     const user = await requireAuth();
+    const _h = await prisma.company.findUnique({ where: { id: user.companyId! }, select: { childCompanies: { select: { id: true } } } });
+    const allCompanyIds = _h ? [user.companyId!, ..._h.childCompanies.map((c: { id: string }) => c.id)] : [user.companyId!];
     const scope = await resolveCompanyScope({
       userId: user.id,
       role: user.role as any,
@@ -45,10 +47,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json([]);
     }
 
-    const whereClause =
-      scope.scopeCompanyIds.length > 1
-        ? { companyId: { in: scope.scopeCompanyIds } }
-        : { companyId: scope.activeCompanyId };
+    const whereClause = { companyId: { in: allCompanyIds } };
 
     const { searchParams: sp2 } = new URL(req.url);
     const usePagination = sp2.has('page') || sp2.has('limit');

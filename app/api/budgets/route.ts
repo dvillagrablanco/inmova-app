@@ -18,7 +18,8 @@ export async function GET(request: NextRequest) {
     if (!session?.user?.companyId) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
-
+    const _h = await prisma.company.findUnique({ where: { id: session.user.companyId }, select: { childCompanies: { select: { id: true } } } });
+    const allCompanyIds = _h ? [session.user.companyId, ..._h.childCompanies.map((c: { id: string }) => c.id)] : [session.user.companyId];
     const { searchParams } = new URL(request.url);
     const estado = searchParams.get('estado');
     const providerId = searchParams.get('providerId');
@@ -26,7 +27,7 @@ export async function GET(request: NextRequest) {
     // Obtener presupuestos de proveedores
     const quotes = await prisma.providerQuote.findMany({
       where: {
-        companyId: session.user.companyId,
+        companyId: { in: allCompanyIds },
         ...(estado && { estado }),
         ...(providerId && { providerId }),
       },
