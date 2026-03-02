@@ -40,7 +40,7 @@ function classifyFianza(cuenta: string, nombre: string, saldo: number, companyId
   const importe = Math.abs(saldo);
   if (importe === 0) return null;
 
-  const n = nombre.toLowerCase();
+  const n = (nombre || '').toLowerCase();
   let buildingHint = '';
   let unitHint = '';
 
@@ -109,7 +109,7 @@ function classifyFianza(cuenta: string, nombre: string, saldo: number, companyId
     else if (n.includes('magaz')) {
       buildingHint = 'Magaz';
       const match = nombre.match(/garaj?\s*(\d+)/i) || nombre.match(/Bl\w*\s*(\d+)/i);
-      unitHint = match ? match[1] : '';
+      unitHint = match?.[1] ?? '';
     }
     // Santos Transportes (genérico)
     else if (n.includes('santos')) {
@@ -124,34 +124,34 @@ function classifyFianza(cuenta: string, nombre: string, saldo: number, companyId
     if (cuenta.startsWith('1800001')) {
       buildingHint = 'Silvela';
       const match = nombre.match(/(\d+º?\s*[A-C])/i) || nombre.match(/Bajo/i);
-      unitHint = match ? match[1].trim() : '';
+      unitHint = match?.[1]?.trim() ?? '';
       // Extract "5,Bajo" or "5,1º A" pattern
       const fullMatch = nombre.match(/SILVELA\s*5[,\s]*([\w\s°º]+)/i);
-      if (fullMatch) unitHint = fullMatch[1].trim();
+      if (fullMatch && fullMatch[1]) unitHint = fullMatch[1].trim();
     }
     // Candelaria Mora: 1800002001-014
     else if (cuenta.startsWith('1800002')) {
       buildingHint = 'Candelaria';
       const match = nombre.match(/(\d+º[A-E])/i) || nombre.match(/(duplex)/i);
-      unitHint = match ? match[1].trim() : '';
+      unitHint = match?.[1]?.trim() ?? '';
     }
     // Reina 15 viviendas: 1800004001-015
     else if (cuenta.startsWith('1800004')) {
       buildingHint = 'Reina 15';
       const match = nombre.match(/(\d+º[A-D])/i);
-      unitHint = match ? match[1].trim() : '';
+      unitHint = match?.[1]?.trim() ?? '';
     }
     // H.Tejada 6 viviendas: 1800005001-012
     else if (cuenta.startsWith('1800005')) {
       buildingHint = 'Tejada';
       const match = nombre.match(/(\d+º[A-C])/i);
-      unitHint = match ? match[1].trim() : '';
+      unitHint = match?.[1]?.trim() ?? '';
     }
     // M.Pelayo viviendas: 1800000001-002
     else if (n.includes('pelayo')) {
       buildingHint = 'Pelayo';
       const match = nombre.match(/(4º\s*dcha|Ático)/i);
-      unitHint = match ? match[1].trim() : '';
+      unitHint = match?.[1]?.trim() ?? '';
     }
     else {
       return null;
