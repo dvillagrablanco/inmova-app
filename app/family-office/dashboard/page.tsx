@@ -10,15 +10,9 @@ import { Button } from '@/components/ui/button';
 import {
   Building2,
   TrendingUp,
-  Euro,
-  Landmark,
   Briefcase,
-  PieChart,
   Wallet,
-  ArrowUpRight,
-  ArrowDownRight,
   Loader2,
-  Plus,
   RefreshCw,
   Home,
 } from 'lucide-react';
@@ -33,11 +27,42 @@ import {
 import { toast } from 'sonner';
 import Link from 'next/link';
 
+interface EdificioData {
+  id: string;
+  nombre: string;
+  direccion: string;
+  unidades: number;
+  ocupadas: number;
+  valor: number;
+  renta: number;
+}
+
+interface CuentaData {
+  id: string;
+  entidad: string;
+  alias: string;
+  divisa: string;
+  valor: number;
+  pnl: number;
+  saldo: number;
+  posiciones: number;
+}
+
+interface ParticipacionData {
+  id: string;
+  nombre: string;
+  cif: string;
+  tipo: string;
+  porcentaje: number;
+  valor: number;
+  coste: number;
+}
+
 interface DashboardData {
-  inmobiliario: { valor: number; rentaMensual: number; edificios: number; unidades: number; ocupacion: number };
-  financiero: { valorTotal: number; pnlTotal: number; pnlPct: number; cuentas: number; posiciones: number };
-  privateEquity: { valorTotal: number; participaciones: number; costeTotal: number };
-  tesoreria: { saldoTotal: number; porEntidad: Record<string, number> };
+  inmobiliario: { valor: number; renta: number; rentaAnual: number; edificios: EdificioData[] };
+  financiero: { valor: number; pnl: number; cuentas: CuentaData[] };
+  privateEquity: { valor: number; participaciones: ParticipacionData[] };
+  tesoreria: { saldo: number; porEntidad: { entidad: string; saldo: number }[] };
   assetAllocation: Record<string, number>;
   patrimonio: { total: number };
 }
@@ -133,8 +158,8 @@ export default function FamilyOfficeDashboardPage() {
                 </div>
                 <div className="text-xs text-gray-500">Inmobiliario</div>
               </div>
-              <div className="text-xl font-bold">{fmt(d?.inmobiliario?.valor || 0)}</div>
-              <div className="text-xs text-gray-400">{(alloc.inmobiliario || 0).toFixed(0)}% del total</div>
+              <div className="text-xl font-bold">{fmt(d?.inmobiliario?.valor ?? 0)}</div>
+              <div className="text-xs text-gray-400">{(alloc.inmobiliario ?? 0).toFixed(0)}% del total</div>
             </CardContent>
           </Card>
           <Card>
@@ -145,9 +170,9 @@ export default function FamilyOfficeDashboardPage() {
                 </div>
                 <div className="text-xs text-gray-500">Financiero</div>
               </div>
-              <div className="text-xl font-bold">{fmt(d?.financiero?.valorTotal || 0)}</div>
-              <div className={`text-xs ${(d?.financiero?.pnlPct || 0) >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                {fmtPct(d?.financiero?.pnlPct || 0)} P&L
+              <div className="text-xl font-bold">{fmt(d?.financiero?.valor ?? 0)}</div>
+              <div className={`text-xs ${(d?.financiero?.pnl ?? 0) >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                {fmt(d?.financiero?.pnl ?? 0)} P&L
               </div>
             </CardContent>
           </Card>
@@ -159,8 +184,8 @@ export default function FamilyOfficeDashboardPage() {
                 </div>
                 <div className="text-xs text-gray-500">Private Equity</div>
               </div>
-              <div className="text-xl font-bold">{fmt(d?.privateEquity?.valorTotal || 0)}</div>
-              <div className="text-xs text-gray-400">{d?.privateEquity?.participaciones || 0} participaciones</div>
+              <div className="text-xl font-bold">{fmt(d?.privateEquity?.valor ?? 0)}</div>
+              <div className="text-xs text-gray-400">{d?.privateEquity?.participaciones?.length ?? 0} participaciones</div>
             </CardContent>
           </Card>
           <Card>
@@ -171,8 +196,8 @@ export default function FamilyOfficeDashboardPage() {
                 </div>
                 <div className="text-xs text-gray-500">Tesorería</div>
               </div>
-              <div className="text-xl font-bold">{fmt(d?.tesoreria?.saldoTotal || 0)}</div>
-              <div className="text-xs text-gray-400">{Object.keys(d?.tesoreria?.porEntidad || {}).length} entidades</div>
+              <div className="text-xl font-bold">{fmt(d?.tesoreria?.saldo ?? 0)}</div>
+              <div className="text-xs text-gray-400">{d?.tesoreria?.porEntidad?.length ?? 0} entidades</div>
             </CardContent>
           </Card>
         </div>
@@ -190,19 +215,26 @@ export default function FamilyOfficeDashboardPage() {
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-500">Edificios</span>
-                  <span className="font-medium">{d?.inmobiliario?.edificios || 0}</span>
+                  <span className="font-medium">{d?.inmobiliario?.edificios?.length ?? 0}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Unidades</span>
-                  <span className="font-medium">{d?.inmobiliario?.unidades || 0}</span>
+                  <span className="font-medium">{d?.inmobiliario?.edificios?.reduce((sum, e) => sum + e.unidades, 0) ?? 0}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Ocupación</span>
-                  <span className="font-medium">{(d?.inmobiliario?.ocupacion || 0).toFixed(1)}%</span>
+                  <span className="font-medium">
+                    {(() => {
+                      const eds = d?.inmobiliario?.edificios ?? [];
+                      const totalU = eds.reduce((s, e) => s + e.unidades, 0);
+                      const totalO = eds.reduce((s, e) => s + e.ocupadas, 0);
+                      return totalU > 0 ? ((totalO / totalU) * 100).toFixed(1) : '0.0';
+                    })()}%
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Renta mensual</span>
-                  <span className="font-bold text-blue-600">{fmt(d?.inmobiliario?.rentaMensual || 0)}</span>
+                  <span className="font-bold text-blue-600">{fmt(d?.inmobiliario?.renta ?? 0)}</span>
                 </div>
               </div>
               <Link href="/inversiones">
@@ -222,16 +254,16 @@ export default function FamilyOfficeDashboardPage() {
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-500">Cuentas</span>
-                  <span className="font-medium">{d?.financiero?.cuentas || 0}</span>
+                  <span className="font-medium">{d?.financiero?.cuentas?.length ?? 0}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Posiciones</span>
-                  <span className="font-medium">{d?.financiero?.posiciones || 0}</span>
+                  <span className="font-medium">{d?.financiero?.cuentas?.reduce((s, c) => s + c.posiciones, 0) ?? 0}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">P&L total</span>
-                  <span className={`font-bold ${(d?.financiero?.pnlTotal || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {fmt(d?.financiero?.pnlTotal || 0)}
+                  <span className={`font-bold ${(d?.financiero?.pnl ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {fmt(d?.financiero?.pnl ?? 0)}
                   </span>
                 </div>
               </div>
@@ -252,15 +284,15 @@ export default function FamilyOfficeDashboardPage() {
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-500">Participaciones</span>
-                  <span className="font-medium">{d?.privateEquity?.participaciones || 0}</span>
+                  <span className="font-medium">{d?.privateEquity?.participaciones?.length ?? 0}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Coste adquisición</span>
-                  <span className="font-medium">{fmt(d?.privateEquity?.costeTotal || 0)}</span>
+                  <span className="font-medium">{fmt(d?.privateEquity?.participaciones?.reduce((s, p) => s + (p.coste ?? 0), 0) ?? 0)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Valor actual</span>
-                  <span className="font-bold text-purple-600">{fmt(d?.privateEquity?.valorTotal || 0)}</span>
+                  <span className="font-bold text-purple-600">{fmt(d?.privateEquity?.valor ?? 0)}</span>
                 </div>
               </div>
             </CardContent>
@@ -275,13 +307,13 @@ export default function FamilyOfficeDashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-1.5 text-sm">
-                {Object.entries(d?.tesoreria?.porEntidad || {}).map(([entidad, saldo]) => (
-                  <div key={entidad} className="flex justify-between">
-                    <span className="text-gray-500">{entidad}</span>
-                    <span className="font-medium">{fmt(saldo as number)}</span>
+                {(d?.tesoreria?.porEntidad ?? []).map((item) => (
+                  <div key={item.entidad} className="flex justify-between">
+                    <span className="text-gray-500">{item.entidad}</span>
+                    <span className="font-medium">{fmt(item.saldo)}</span>
                   </div>
                 ))}
-                {Object.keys(d?.tesoreria?.porEntidad || {}).length === 0 && (
+                {(d?.tesoreria?.porEntidad ?? []).length === 0 && (
                   <div className="text-center text-gray-400 py-4">
                     Sin cuentas registradas. Añade tu primera cuenta.
                   </div>
