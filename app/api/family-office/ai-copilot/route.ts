@@ -35,13 +35,16 @@ export async function POST(request: NextRequest) {
     const children = await prisma.company.findMany({ where: { parentCompanyId: companyId }, select: { id: true, nombre: true } });
     children.forEach((c) => groupIds.push(c.id));
 
-    const [contracts, units, accounts, participations, pendingPayments, overdueCount] = await Promise.all([
+    const [contracts, units, accounts, participations, pendingPayments, overdueCount, suggestions, fianzas, expenses2025] = await Promise.all([
       prisma.contract.findMany({ where: { unit: { building: { companyId: { in: groupIds } } }, estado: 'activo' }, select: { rentaMensual: true } }),
       prisma.unit.findMany({ where: { building: { companyId: { in: groupIds }, isDemo: false } }, select: { estado: true, rentaMensual: true, valorMercado: true, precioCompra: true } }),
       prisma.financialAccount.findMany({ where: { companyId, activa: true }, include: { positions: { select: { nombre: true, valorActual: true, pnlNoRealizado: true, pnlRealizado: true, tipo: true, entidad: true } } } }),
-      prisma.participation.findMany({ where: { companyId, activa: true }, select: { targetCompanyName: true, porcentaje: true, valorContable: true, valorEstimado: true, tipo: true } }),
+      prisma.participation.findMany({ where: { companyId, activa: true }, select: { targetCompanyName: true, porcentaje: true, valorContable: true, valorEstimado: true, tipo: true, tvpi: true, capitalPendiente: true, vehiculoInversor: true } }),
       prisma.payment.count({ where: { contract: { unit: { building: { companyId: { in: groupIds } } } }, estado: 'pendiente' } }),
       prisma.payment.count({ where: { contract: { unit: { building: { companyId: { in: groupIds } } } }, estado: 'atrasado' } }),
+      prisma.smartSuggestion.findMany({ where: { companyId: { in: groupIds }, estado: 'pendiente' }, orderBy: { prioridad: 'asc' }, take: 10, select: { titulo: true, prioridad: true, area: true, accion: true } }),
+      prisma.fianzaDeposit.aggregate({ where: { companyId: { in: groupIds } }, _sum: { importeFianza: true }, _count: { id: true } }),
+      prisma.expense.groupBy({ by: ['categoria'], where: { ejercicio: 2025, building: { companyId: { in: groupIds } } }, _sum: { monto: true } }),
     ]);
 
     const rentaTotal = contracts.reduce((s, c) => s + c.rentaMensual, 0);
@@ -81,7 +84,28 @@ ASSET ALLOCATION:
 - Inmobiliario: ${patrimonioTotal > 0 ? (valorInmob/patrimonioTotal*100).toFixed(1) : 0}%
 - Financiero: ${patrimonioTotal > 0 ? (valorFin/patrimonioTotal*100).toFixed(1) : 0}%
 - Private Equity: ${patrimonioTotal > 0 ? (valorPE/patrimonioTotal*100).toFixed(1) : 0}%
-- Liquidez: ${patrimonioTotal > 0 ? (saldos/patrimonioTotal*100).toFixed(1) : 0}%`;
+- Liquidez: ${patrimonioTotal > 0 ? (saldos/patrimonioTotal*100).toFixed(1) : 0}%
+
+PRIVATE EQUITY DETALLADO:
+${participations.filter(p => p.tipo === 'pe_fund').map(p => `- ${p.targetCompanyName}: TVPI ${p.tvpi?.toFixed(2) || 'N/A'}x, Pendiente: ${Math.round(p.capitalPendiente || 0).toLocaleString('es-ES')}€ (${p.vehiculoInversor || 'directo'})`).join('\n')}
+
+FIANZAS: ${fianzas._count.id} fianzas depositadas, total ${Math.round(fianzas._sum.importeFianza || 0).toLocaleString('es-ES')}€
+
+GASTOS 2025 POR CATEGORÍA:
+${expenses2025.map(e => `- ${e.categoria}: ${Math.round(e._sum.monto || 0).toLocaleString('es-ES')}€`).join('\n')}
+
+SUGERENCIAS INTELIGENTES PENDIENTES (${suggestions.length}):
+${suggestions.map(s => `- [${s.prioridad}] ${s.area}: ${s.titulo} → ${s.accion || 'Sin acción'}`).join('\n')}
+
+FUNCIONALIDADES DISPONIBLES EN LA APP:
+- Cuadro de Mandos Financiero (/finanzas/cuadro-de-mandos): PyG Analítica por centro de coste
+- Family Office 360° (/family-office/dashboard): Visión consolidada patrimonio
+- Private Equity (/family-office/pe): Fondos PE estilo MdF con TVPI, capital calls
+- Modelo 720 (/inversiones/modelo-720): Bienes en el extranjero
+- Estructura del Grupo (/inversiones/grupo): Organigrama societario
+- Sugerencias Inteligentes: Análisis automático con recomendaciones
+- Open Banking: Conexión PSD2 con Bankinter, BBVA, Santander
+- Importación Contable: Upload diarios, CAMT.053, extractos`;
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) return NextResponse.json({ response: 'Copiloto no disponible.' });

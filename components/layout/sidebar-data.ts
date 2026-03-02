@@ -1334,6 +1334,7 @@ const finanzasNavItems = [
     href: '/finanzas/cuadro-de-mandos',
     icon: LayoutDashboard,
     roles: ['super_admin', 'administrador'],
+    dataTour: 'cuadro-mandos-menu',
   },
   {
     name: 'Pagos',
