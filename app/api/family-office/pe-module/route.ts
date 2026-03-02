@@ -13,11 +13,12 @@ async function getPrisma() {
 
 /**
  * GET /api/family-office/pe-module
- * Módulo Private Equity completo:
- * - Participaciones con capital calls y distribuciones
- * - J-curve tracking
- * - DPI, TVPI, IRR metrics
- * - Vintage year analysis
+ * 
+ * Módulo Private Equity estilo MdF Family Partners:
+ * - Tabla "Activos en Crecimiento" con capital management completo
+ * - Rentabilidad mensual por fondo
+ * - Métricas PE: DPI, TVPI, MOIC, IRR
+ * - Agrupación por vehículo inversor (VIBLA SCR vs directo)
  */
 export async function GET(request: NextRequest) {
   const prisma = await getPrisma();
@@ -27,88 +28,130 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
+    const companyId = session.user.companyId;
+
+    // Also include child companies (holding view)
+    const company = await prisma.company.findUnique({
+      where: { id: companyId },
+      include: { childCompanies: { select: { id: true } } },
+    });
+    const allCompanyIds = company
+      ? [company.id, ...company.childCompanies.map((c: { id: string }) => c.id)]
+      : [companyId];
+
     const participations = await prisma.participation.findMany({
-      where: { companyId: session.user.companyId },
-      orderBy: { fechaAdquisicion: 'desc' },
+      where: { companyId: { in: allCompanyIds }, activa: true },
+      orderBy: [{ anoCompromiso: 'asc' }, { targetCompanyName: 'asc' }],
     });
 
-    // Métricas PE por participación
-    const peMetrics = participations.map((p) => {
-      const capitalLlamado = p.capitalLlamado || p.costeAdquisicion;
-      const capitalDistribuido = p.capitalDistribuido || 0;
-      const valorActual = p.valorEstimado || p.valorContable;
-      const compromisoTotal = p.compromisoTotal || p.costeAdquisicion;
+    const r = (n: number) => Math.round(n * 100) / 100;
 
-      // DPI: Distributed to Paid-In
-      const dpi = capitalLlamado > 0 ? capitalDistribuido / capitalLlamado : 0;
-      // TVPI: Total Value to Paid-In (valor actual + distribuciones) / capital llamado
-      const tvpi = capitalLlamado > 0 ? (valorActual + capitalDistribuido) / capitalLlamado : 0;
-      // MOIC: Multiple on Invested Capital
-      const moic = p.costeAdquisicion > 0 ? valorActual / p.costeAdquisicion : 0;
+    // Build fund data for each participation
+    const fondos = participations.map((p) => {
+      const capitalLlamado = p.capitalLlamado ?? p.costeAdquisicion;
+      const capitalDistribuido = p.capitalDistribuido ?? 0;
+      const valorActual = p.valoracionActual ?? p.valorEstimado ?? p.valorContable;
+      const compromisoTotal = p.compromisoTotal ?? p.costeAdquisicion;
+      const capitalPendiente = p.capitalPendiente ?? (compromisoTotal - capitalLlamado);
 
-      // J-curve: años desde inversión
+      // Métricas
+      const tvpi = p.tvpi ?? (capitalLlamado > 0 ? (valorActual + capitalDistribuido) / capitalLlamado : 0);
+      const dpi = p.dpi ?? (capitalLlamado > 0 ? capitalDistribuido / capitalLlamado : 0);
       const anosInversion = (Date.now() - new Date(p.fechaAdquisicion).getTime()) / (365.25 * 24 * 60 * 60 * 1000);
-      // IRR simplificado
-      const irr = anosInversion > 0 ? (Math.pow(tvpi, 1 / anosInversion) - 1) * 100 : 0;
-
-      // Capital pendiente de llamar
-      const capitalPendiente = compromisoTotal - capitalLlamado;
+      const irr = p.irr ?? (anosInversion > 0 ? (Math.pow(Math.max(tvpi, 0.01), 1 / anosInversion) - 1) * 100 : 0);
 
       return {
         id: p.id,
-        sociedad: p.targetCompanyName,
-        cif: p.targetCompanyCIF,
-        tipo: p.tipo,
-        porcentaje: p.porcentaje,
-        fechaAdquisicion: p.fechaAdquisicion,
-        anosInversion: Math.round(anosInversion * 10) / 10,
-        capital: {
-          compromiso: compromisoTotal,
-          llamado: capitalLlamado,
-          pendiente: capitalPendiente,
-          distribuido: capitalDistribuido,
+        nombre: p.targetCompanyName,
+        anoCompromiso: p.anoCompromiso ?? new Date(p.fechaAdquisicion).getFullYear(),
+        vehiculoInversor: p.vehiculoInversor ?? 'DIRECTO',
+        gestora: p.gestora,
+
+        // Capital Management (tabla "Activos en Crecimiento")
+        compromisoTotal: r(compromisoTotal),
+        valoracionActual: r(valorActual),
+        capitalPendiente: r(capitalPendiente),
+        distribucionesAcumuladas: r(capitalDistribuido),
+        capitalLlamado: r(capitalLlamado),
+        // (Val + Dist) / Desemb = TVPI display
+        valorMasDistribuciones: r(valorActual + capitalDistribuido),
+
+        // Métricas
+        tvpi: r(tvpi),
+        dpi: r(dpi),
+        moic: p.moic ?? r(p.costeAdquisicion > 0 ? valorActual / p.costeAdquisicion : 0),
+        irr: r(irr),
+
+        // Rentabilidad periodo (mensual)
+        rentabilidad: {
+          patrimonioInicio: r(p.patrimonioInicioPeriodo ?? 0),
+          patrimonioFin: r(valorActual),
+          desembolsos: r(p.desembolsosPeriodo ?? 0),
+          reembolsos: r(p.reembolsosPeriodo ?? 0),
+          rentabilidadEur: r(p.rentabilidadPeriodoEur ?? 0),
+          rentabilidadPct: r(p.rentabilidadPeriodoPct ?? 0),
         },
-        valoracion: {
-          coste: p.costeAdquisicion,
-          contable: p.valorContable,
-          estimado: valorActual,
-          plusvalia: valorActual - p.costeAdquisicion,
-        },
-        metricas: {
-          dpi: Math.round(dpi * 100) / 100,
-          tvpi: Math.round(tvpi * 100) / 100,
-          moic: Math.round(moic * 100) / 100,
-          irr: Math.round(irr * 10) / 10,
-        },
-        activa: p.activa,
+
+        fechaUltimaValoracion: p.fechaUltimaValoracion ?? p.fechaValoracion,
       };
     });
 
-    // Resumen consolidado PE
-    const activas = peMetrics.filter((p) => p.activa);
-    const totalComprometido = activas.reduce((s, p) => s + p.capital.compromiso, 0);
-    const totalLlamado = activas.reduce((s, p) => s + p.capital.llamado, 0);
-    const totalDistribuido = activas.reduce((s, p) => s + p.capital.distribuido, 0);
-    const totalValor = activas.reduce((s, p) => s + p.valoracion.estimado, 0);
-    const totalCoste = activas.reduce((s, p) => s + p.valoracion.coste, 0);
+    // Resumen consolidado
+    const totalComprometido = fondos.reduce((s, f) => s + f.compromisoTotal, 0);
+    const totalLlamado = fondos.reduce((s, f) => s + f.capitalLlamado, 0);
+    const totalPendiente = fondos.reduce((s, f) => s + f.capitalPendiente, 0);
+    const totalDistribuido = fondos.reduce((s, f) => s + f.distribucionesAcumuladas, 0);
+    const totalValoracion = fondos.reduce((s, f) => s + f.valoracionActual, 0);
+    const totalRentEur = fondos.reduce((s, f) => s + f.rentabilidad.rentabilidadEur, 0);
+    const totalPatrIni = fondos.reduce((s, f) => s + f.rentabilidad.patrimonioInicio, 0);
+
+    // Agrupación por vehículo
+    const vehiculos: Record<string, typeof fondos> = {};
+    for (const f of fondos) {
+      const v = f.vehiculoInversor;
+      if (!vehiculos[v]) vehiculos[v] = [];
+      vehiculos[v].push(f);
+    }
+
+    // Vintage year summary
+    const vintages: Record<number, { count: number; comprometido: number; valoracion: number; tvpiAvg: number }> = {};
+    for (const f of fondos) {
+      const y = f.anoCompromiso;
+      if (!vintages[y]) vintages[y] = { count: 0, comprometido: 0, valoracion: 0, tvpiAvg: 0 };
+      vintages[y].count++;
+      vintages[y].comprometido += f.compromisoTotal;
+      vintages[y].valoracion += f.valoracionActual;
+    }
+    for (const v of Object.values(vintages)) {
+      v.tvpiAvg = v.count > 0 ? r(v.valoracion / v.comprometido) : 0;
+    }
 
     return NextResponse.json({
       success: true,
       resumen: {
-        participaciones: activas.length,
-        totalComprometido: Math.round(totalComprometido),
-        totalLlamado: Math.round(totalLlamado),
-        capitalPendiente: Math.round(totalComprometido - totalLlamado),
-        totalDistribuido: Math.round(totalDistribuido),
-        valorActual: Math.round(totalValor),
-        costeTotal: Math.round(totalCoste),
-        plusvaliaTotal: Math.round(totalValor - totalCoste),
-        dpiGlobal: totalLlamado > 0 ? Math.round((totalDistribuido / totalLlamado) * 100) / 100 : 0,
-        tvpiGlobal: totalLlamado > 0 ? Math.round(((totalValor + totalDistribuido) / totalLlamado) * 100) / 100 : 0,
+        fondos: fondos.length,
+        totalComprometido: r(totalComprometido),
+        totalLlamado: r(totalLlamado),
+        capitalPendiente: r(totalPendiente),
+        totalDistribuido: r(totalDistribuido),
+        valorActual: r(totalValoracion),
+        tvpiGlobal: totalLlamado > 0 ? r((totalValoracion + totalDistribuido) / totalLlamado) : 0,
+        dpiGlobal: totalLlamado > 0 ? r(totalDistribuido / totalLlamado) : 0,
+        rentabilidadPeriodoEur: r(totalRentEur),
+        rentabilidadPeriodoPct: totalPatrIni > 0 ? r((totalRentEur / totalPatrIni) * 100) : 0,
       },
-      participaciones: peMetrics,
+      fondos,
+      vehiculos: Object.entries(vehiculos).map(([nombre, funds]) => ({
+        nombre,
+        fondos: funds.length,
+        totalComprometido: r(funds.reduce((s, f) => s + f.compromisoTotal, 0)),
+        totalValoracion: r(funds.reduce((s, f) => s + f.valoracionActual, 0)),
+      })),
+      vintages: Object.entries(vintages)
+        .sort(([a], [b]) => Number(a) - Number(b))
+        .map(([year, data]) => ({ year: Number(year), ...data })),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[PE Module]:', error);
     return NextResponse.json({ error: 'Error en módulo PE' }, { status: 500 });
   }

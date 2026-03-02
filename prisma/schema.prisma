@@ -16951,12 +16951,31 @@ model Participation {
   valorEstimado     Float?  // Última valoración estimada
   fechaValoracion   DateTime?
 
-  // PE specifics
-  compromisoTotal   Float?  // Total committed
-  capitalLlamado    Float?  // Total called
-  capitalDistribuido Float? // Total distributed
-  dpi               Float?  // Distributed to Paid-In ratio
-  tvpi              Float?  // Total Value to Paid-In ratio
+  // PE specifics - Capital Management
+  compromisoTotal    Float?  // Total committed
+  capitalLlamado     Float?  // Total called/desembolsado
+  capitalPendiente   Float?  // Desembolsos pendientes (compromisoTotal - capitalLlamado)
+  capitalDistribuido Float?  // Total distributed (distribuciones acumuladas)
+
+  // PE specifics - Valoración y Métricas
+  valoracionActual          Float?    // NAV actual del fondo
+  tvpi                      Float?    // Total Value to Paid-In = (Valoración + Distribuciones) / Desembolsos
+  dpi                       Float?    // Distributed to Paid-In = Distribuciones / Desembolsos
+  moic                      Float?    // Multiple on Invested Capital
+  irr                       Float?    // Internal Rate of Return (%)
+
+  // PE specifics - Metadata
+  anoCompromiso             Int?      // Año vintage (2019, 2020, 2023...)
+  vehiculoInversor          String?   // "VIBLA_SCR" | "VIDARO_DIRECTO"
+  gestora                   String?   // "MdF Gestefin" etc.
+  fechaUltimaValoracion     DateTime? // Fecha del último NAV
+
+  // PE specifics - Rentabilidad periodo
+  patrimonioInicioPeriodo   Float?    // NAV al inicio del periodo actual
+  rentabilidadPeriodoEur    Float?    // Rentabilidad € del periodo
+  rentabilidadPeriodoPct    Float?    // Rentabilidad % del periodo
+  desembolsosPeriodo        Float?    // Desembolsos realizados en el periodo
+  reembolsosPeriodo         Float?    // Reembolsos recibidos en el periodo
 
   // Estado
   activa            Boolean @default(true)
@@ -16967,5 +16986,6 @@ model Participation {
 
   @@index([companyId])
   @@index([tipo])
+  @@index([vehiculoInversor])
   @@map("participations")
 }
