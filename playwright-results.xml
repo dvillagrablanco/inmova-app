@@ -1,2 +1,122 @@
-<testsuites id="" name="" tests="0" failures="0" skipped="0" errors="0" time="3.4726760000000003">
+<testsuites id="" name="" tests="5" failures="3" skipped="0" errors="0" time="68.554017">
+<testsuite name="financial-360-connectivity.spec.ts" timestamp="2026-03-02T18:23:21.527Z" hostname="chromium" tests="5" failures="3" skipped="0" time="104.381" errors="0">
+<testcase name="Módulos Financieros - Carga de páginas › Family Office Dashboard carga con quick navigation" classname="financial-360-connectivity.spec.ts" time="30.214">
+<failure message="financial-360-connectivity.spec.ts:61:7 Family Office Dashboard carga con quick navigation" type="FAILURE">
+<![CDATA[  [chromium] › financial-360-connectivity.spec.ts:61:7 › Módulos Financieros - Carga de páginas › Family Office Dashboard carga con quick navigation 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: page.waitForLoadState: Test timeout of 30000ms exceeded.
+
+      61 |   test('Family Office Dashboard carga con quick navigation', async ({ page }) => {
+      62 |     await page.goto(`${BASE_URL}/family-office/dashboard`);
+    > 63 |     await page.waitForLoadState('networkidle');
+         |                ^
+      64 |
+      65 |     await expect(page.locator('text=Dashboard Patrimonial')).toBeVisible({ timeout: 10000 });
+      66 |
+        at /workspace/tests/financial-360-connectivity.spec.ts:63:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/financial-360-connectivity-ee942--carga-con-quick-navigation-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/financial-360-connectivity-ee942--carga-con-quick-navigation-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/financial-360-connectivity-ee942--carga-con-quick-navigation-chromium/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/financial-360-connectivity-ee942--carga-con-quick-navigation-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/financial-360-connectivity-ee942--carga-con-quick-navigation-chromium/video.webm]]
+
+[[ATTACHMENT|test-results/financial-360-connectivity-ee942--carga-con-quick-navigation-chromium/error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Módulos Financieros - Carga de páginas › Family Office Cuentas - botón Conectar banco funciona" classname="financial-360-connectivity.spec.ts" time="7.345">
+</testcase>
+<testcase name="Conectividad entre módulos › Cuadro de Mandos → Family Office" classname="financial-360-connectivity.spec.ts" time="6.43">
+</testcase>
+<testcase name="Conectividad entre módulos › Family Office Dashboard → PE" classname="financial-360-connectivity.spec.ts" time="30.204">
+<failure message="financial-360-connectivity.spec.ts:155:7 Family Office Dashboard → PE" type="FAILURE">
+<![CDATA[  [chromium] › financial-360-connectivity.spec.ts:155:7 › Conectividad entre módulos › Family Office Dashboard → PE 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: page.waitForLoadState: Test timeout of 30000ms exceeded.
+
+      155 |   test('Family Office Dashboard → PE', async ({ page }) => {
+      156 |     await page.goto(`${BASE_URL}/family-office/dashboard`);
+    > 157 |     await page.waitForLoadState('networkidle');
+          |                ^
+      158 |
+      159 |     // Click en Private Equity en quick nav
+      160 |     await page.click('a[href="/family-office/pe"]');
+        at /workspace/tests/financial-360-connectivity.spec.ts:157:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/financial-360-connectivity-f63f5-amily-Office-Dashboard-→-PE-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/financial-360-connectivity-f63f5-amily-Office-Dashboard-→-PE-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/financial-360-connectivity-f63f5-amily-Office-Dashboard-→-PE-chromium/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/financial-360-connectivity-f63f5-amily-Office-Dashboard-→-PE-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/financial-360-connectivity-f63f5-amily-Office-Dashboard-→-PE-chromium/video.webm]]
+
+[[ATTACHMENT|test-results/financial-360-connectivity-f63f5-amily-Office-Dashboard-→-PE-chromium/error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Conectividad entre módulos › Family Office Dashboard → Cuadro de Mandos" classname="financial-360-connectivity.spec.ts" time="30.188">
+<failure message="financial-360-connectivity.spec.ts:166:7 Family Office Dashboard → Cuadro de Mandos" type="FAILURE">
+<![CDATA[  [chromium] › financial-360-connectivity.spec.ts:166:7 › Conectividad entre módulos › Family Office Dashboard → Cuadro de Mandos 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: page.waitForLoadState: Test timeout of 30000ms exceeded.
+
+      166 |   test('Family Office Dashboard → Cuadro de Mandos', async ({ page }) => {
+      167 |     await page.goto(`${BASE_URL}/family-office/dashboard`);
+    > 168 |     await page.waitForLoadState('networkidle');
+          |                ^
+      169 |
+      170 |     await page.click('a[href="/finanzas/cuadro-de-mandos"]');
+      171 |     await page.waitForURL('**/finanzas/cuadro-de-mandos**', { timeout: 10000 });
+        at /workspace/tests/financial-360-connectivity.spec.ts:168:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/financial-360-connectivity-350aa-ashboard-→-Cuadro-de-Mandos-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/financial-360-connectivity-350aa-ashboard-→-Cuadro-de-Mandos-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/financial-360-connectivity-350aa-ashboard-→-Cuadro-de-Mandos-chromium/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/financial-360-connectivity-350aa-ashboard-→-Cuadro-de-Mandos-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/financial-360-connectivity-350aa-ashboard-→-Cuadro-de-Mandos-chromium/video.webm]]
+
+[[ATTACHMENT|test-results/financial-360-connectivity-350aa-ashboard-→-Cuadro-de-Mandos-chromium/error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
 </testsuites>

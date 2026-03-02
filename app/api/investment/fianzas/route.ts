@@ -32,8 +32,17 @@ export async function GET(request: NextRequest) {
     }
 
     const prisma = getPrismaClient();
+    // Include child companies for consolidated view (holding sees filiales)
+    const company = await prisma.company.findUnique({
+      where: { id: session.user.companyId },
+      select: { id: true, childCompanies: { select: { id: true } } },
+    });
+    const allCompanyIds = company
+      ? [company.id, ...company.childCompanies.map((c: { id: string }) => c.id)]
+      : [session.user.companyId];
+
     const fianzas = await prisma.fianzaDeposit.findMany({
-      where: { companyId: session.user.companyId },
+      where: { companyId: { in: allCompanyIds } },
       include: {
         contract: {
           select: {
