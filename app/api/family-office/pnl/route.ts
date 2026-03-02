@@ -25,8 +25,17 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
+    // Consolidated: include child companies
+    const company = await prisma.company.findUnique({
+      where: { id: session.user.companyId },
+      select: { childCompanies: { select: { id: true } } },
+    });
+    const allIds = company
+      ? [session.user.companyId, ...company.childCompanies.map((c: { id: string }) => c.id)]
+      : [session.user.companyId];
+
     const accounts = await prisma.financialAccount.findMany({
-      where: { companyId: session.user.companyId, activa: true },
+      where: { companyId: { in: allIds }, activa: true },
       include: {
         positions: {
           orderBy: { valorActual: 'desc' },

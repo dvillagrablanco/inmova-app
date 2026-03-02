@@ -43,8 +43,17 @@ export async function GET(request: NextRequest) {
 
     const prisma = await getPrisma();
 
+    // Consolidated: include child companies
+    const companyData = await prisma.company.findUnique({
+      where: { id: session.user.companyId },
+      select: { childCompanies: { select: { id: true } } },
+    });
+    const allIds = companyData
+      ? [session.user.companyId, ...companyData.childCompanies.map((c: { id: string }) => c.id)]
+      : [session.user.companyId];
+
     const accounts = await prisma.financialAccount.findMany({
-      where: { companyId: session.user.companyId },
+      where: { companyId: { in: allIds } },
       include: {
         _count: { select: { positions: true, transactions: true } },
         positions: {
