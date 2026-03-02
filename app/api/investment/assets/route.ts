@@ -40,8 +40,18 @@ export async function GET(request: NextRequest) {
     }
 
     const prisma = getPrismaClient();
+
+    // Consolidated: include child companies for group view
+    const companyHierarchy = await prisma.company.findUnique({
+      where: { id: session.user.companyId },
+      select: { childCompanies: { select: { id: true } } },
+    });
+    const allCompanyIds = companyHierarchy
+      ? [session.user.companyId, ...companyHierarchy.childCompanies.map((c: { id: string }) => c.id)]
+      : [session.user.companyId];
+
     const assets = await prisma.assetAcquisition.findMany({
-      where: { companyId: session.user.companyId },
+      where: { companyId: { in: allCompanyIds } },
       include: {
         building: { select: { id: true, nombre: true, direccion: true } },
         unit: { select: { id: true, numero: true, tipo: true } },

@@ -37,40 +37,19 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const companyId = session.user.companyId;
-
-    // Obtener empresa y sus filiales/matriz
-    const company = await prisma.company.findUnique({
-      where: { id: companyId },
-      select: { id: true, nombre: true, parentCompanyId: true },
+    // Consolidated: include child companies for group view
+    const companyHierarchy = await prisma.company.findUnique({
+      where: { id: session.user.companyId },
+      select: { childCompanies: { select: { id: true } } },
     });
-
-    if (!company) {
-      return NextResponse.json({ error: 'Empresa no encontrada' }, { status: 404 });
-    }
-
-    // Obtener IDs del grupo (matriz + filiales)
-    const groupCompanyIds: string[] = [companyId];
-    if (company.parentCompanyId) {
-      groupCompanyIds.push(company.parentCompanyId);
-      const siblings = await prisma.company.findMany({
-        where: { parentCompanyId: company.parentCompanyId },
-        select: { id: true },
-      });
-      siblings.forEach((s: any) => groupCompanyIds.push(s.id));
-    }
-    const children = await prisma.company.findMany({
-      where: { parentCompanyId: companyId },
-      select: { id: true },
-    });
-    children.forEach((c: any) => groupCompanyIds.push(c.id));
-
-    const uniqueIds = [...new Set(groupCompanyIds)];
+    const allCompanyIds = companyHierarchy
+      ? [session.user.companyId, ...companyHierarchy.childCompanies.map((c: { id: string }) => c.id)]
+      : [session.user.companyId];
 
     // Buscar facturas B2B entre empresas del grupo
     const invoices = await prisma.b2BInvoice.findMany({
       where: {
-        companyId: { in: uniqueIds },
+        companyId: { in: allCompanyIds },
       },
       include: {
         company: { select: { id: true, nombre: true } },
@@ -83,7 +62,7 @@ export async function GET(request: NextRequest) {
     // O buscar en accounting transactions de tipo intragrupo
     const intercompanyTxs = await prisma.accountingTransaction.findMany({
       where: {
-        companyId: { in: uniqueIds },
+        companyId: { in: allCompanyIds },
         category: { in: ['ingreso_servicios_intragrupo', 'gasto_intragrupo'] },
       },
       orderBy: { fecha: 'desc' },
@@ -92,7 +71,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      groupCompanies: uniqueIds,
+      groupCompanies: allCompanyIds,
       invoices,
       transactions: intercompanyTxs,
     });

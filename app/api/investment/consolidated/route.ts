@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import logger from '@/lib/logger';
 import * as Sentry from '@sentry/nextjs';
+import { getPrismaClient } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -23,6 +24,17 @@ export async function GET(request: NextRequest) {
     if (!companyId) {
       return NextResponse.json({ error: 'Sin empresa asociada' }, { status: 400 });
     }
+
+    const prisma = getPrismaClient();
+
+    // Consolidated: include child companies for group view
+    const companyHierarchy = await prisma.company.findUnique({
+      where: { id: session.user.companyId },
+      select: { childCompanies: { select: { id: true } } },
+    });
+    const allCompanyIds = companyHierarchy
+      ? [session.user.companyId, ...companyHierarchy.childCompanies.map((c: { id: string }) => c.id)]
+      : [session.user.companyId];
 
     const { getConsolidatedReport } = await import('@/lib/investment-service');
     const report = await getConsolidatedReport(companyId);
