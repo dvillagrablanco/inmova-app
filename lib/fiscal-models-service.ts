@@ -143,7 +143,7 @@ export async function generateModelo202(
   const { calculateFiscalSummary } = await import('@/lib/investment-service');
   const fiscalAnterior = await calculateFiscalSummary(companyId, ejercicio - 1);
 
-  const baseImponibleUltimoIS = fiscalAnterior.baseImponible;
+  const baseImponibleUltimoIS = fiscalAnterior?.baseImponible ?? 0;
   const PORCENTAJE = 18;
   const importePagoFraccionado = Math.round(baseImponibleUltimoIS * PORCENTAJE / 100 * 100) / 100;
 
@@ -276,7 +276,10 @@ export async function generateModelo200(
   // Pagos fraccionados realizados (modelo 202)
   const { calculateFiscalSummary } = await import('@/lib/investment-service');
   const fiscalSummary = await calculateFiscalSummary(companyId, ejercicio);
-  const pagosFraccionados = fiscalSummary.pagosFraccionados.reduce((s, p) => s + p.importe, 0);
+  const pagosFraccionados = (fiscalSummary?.pagosFraccionados ?? []).reduce(
+    (s: number, p: { importe: number }) => s + p.importe,
+    0
+  );
 
   const cuotaDiferencial = Math.round((cuotaLiquida - pagosFraccionados) * 100) / 100;
 
