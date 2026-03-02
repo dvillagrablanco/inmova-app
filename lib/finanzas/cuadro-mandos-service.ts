@@ -26,7 +26,7 @@ import type {
 
 // ─── HELPERS ────────────────────────────────────────────────────────────────
 
-function makePygLine(
+export function makePygLine(
   codigo: string,
   nombre: string,
   importe: number,
@@ -42,7 +42,7 @@ function makePygLine(
   };
 }
 
-function makePygGroup(
+export function makePygGroup(
   subtotalCodigo: string,
   subtotalNombre: string,
   detalle: PygLine[],
@@ -185,7 +185,7 @@ async function getOtrosIngresos(
 
 // ─── CALCULAR PyG ───────────────────────────────────────────────────────────
 
-function buildPygFromExpenses(
+export function buildPygFromExpenses(
   expenses: ExpenseAggregate[],
   ingresosArrendamientos: number,
   otrosIngresos: number,
