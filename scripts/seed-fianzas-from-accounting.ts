@@ -217,10 +217,22 @@ async function main() {
     process.exit(1);
   }
 
-  const COMPANY_MAP: Record<string, string> = {
-    'ROVIDA': 'rovida-gestion',
-    'VIRODA': 'viroda-inversiones',
-  };
+  // Find actual company IDs by name (they may not be the hardcoded ones)
+  const rovidaCompany = await prisma.company.findFirst({
+    where: { nombre: { contains: 'Rovida', mode: 'insensitive' } },
+    select: { id: true, nombre: true },
+  });
+  const virodaCompany = await prisma.company.findFirst({
+    where: { nombre: { contains: 'Viroda', mode: 'insensitive' } },
+    select: { id: true, nombre: true },
+  });
+
+  console.log(`   Rovida: ${rovidaCompany ? `${rovidaCompany.nombre} (${rovidaCompany.id})` : 'NO ENCONTRADA'}`);
+  console.log(`   Viroda: ${virodaCompany ? `${virodaCompany.nombre} (${virodaCompany.id})` : 'NO ENCONTRADA'}\n`);
+
+  const COMPANY_MAP: Record<string, string> = {};
+  if (rovidaCompany) COMPANY_MAP['ROVIDA'] = rovidaCompany.id;
+  if (virodaCompany) COMPANY_MAP['VIRODA'] = virodaCompany.id;
 
   // Classify all fianzas
   const classified: FianzaEntry[] = [];
