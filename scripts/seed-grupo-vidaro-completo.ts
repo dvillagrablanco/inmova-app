@@ -317,13 +317,13 @@ async function seedFinancialPositions(vidaroId: string) {
         nombre: p.nombre,
         tipo: p.tipo,
         cantidad: 0,
-        precioCompra: 0,
+        precioMedio: 0,
         costeTotal: 0,
-        precioActual: 0,
         valorActual: p.valor,
         divisa: 'EUR',
         pnlNoRealizado: 0,
         pnlRealizado: 0,
+        pnlPct: 0,
       },
     });
     created++;
