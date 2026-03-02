@@ -2153,6 +2153,7 @@ model Company {
 
   // Cuadro de Mandos Financiero
   costCenters CostCenter[]
+  smartSuggestions SmartSuggestion[]
 
   // Coliving - Red Social y Servicios Premium
   colivingProfiles        ColivingProfile[]
@@ -16928,6 +16929,72 @@ model FinancialTransaction {
   @@index([fecha])
   @@index([tipo])
   @@map("financial_transactions")
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SISTEMA DE SUGERENCIAS INTELIGENTES DE GESTIÓN
+// ═══════════════════════════════════════════════════════════════
+
+enum SuggestionArea {
+  inmobiliario
+  financiero
+  operacional
+  fiscal
+}
+
+enum SmartSuggestionStatus {
+  pendiente
+  vista
+  aceptada
+  descartada
+  completada
+}
+
+model SmartSuggestion {
+  id        String             @id @default(cuid())
+  companyId String
+
+  // Clasificación
+  area      SuggestionArea
+  prioridad SuggestionPriority   @default(media)
+  estado    SmartSuggestionStatus @default(pendiente)
+  codigo    String // "CONTRACT_EXPIRING", "UNIT_VACANT_30D", "PE_TVPI_LOW", etc.
+
+  // Contenido
+  titulo      String
+  descripcion String  @db.Text
+  accion      String? // "Renovar contrato", "Ajustar precio", etc.
+  enlace      String? // Deep link a la página relevante
+
+  // Contexto
+  entityType String? // "contract", "unit", "participation", "account"
+  entityId   String? // ID del objeto relacionado
+  metadata   Json?   // Datos adicionales (importes, fechas, etc.)
+
+  // Destinatario
+  targetRole String? // "administrador", "gestor", "super_admin"
+  targetUserId String? // Usuario específico (null = todos los del rol)
+
+  // Notificación
+  notificadoInApp  Boolean   @default(false)
+  notificadoEmail  Boolean   @default(false)
+  fechaNotificacion DateTime?
+
+  // Auditoría
+  resueltoPor String?
+  fechaResolucion DateTime?
+  notasResolucion String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, estado])
+  @@index([companyId, area])
+  @@index([prioridad, estado])
+  @@index([createdAt])
+  @@map("smart_suggestions")
 }
 
 model Participation {

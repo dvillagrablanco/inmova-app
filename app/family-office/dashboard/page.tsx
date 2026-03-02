@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { toast } from 'sonner';
 import Link from 'next/link';
+import { SuggestionsWidget } from '@/components/smart-suggestions/SuggestionsWidget';
 
 interface EdificioData {
   id: string;
@@ -222,6 +223,9 @@ export default function FamilyOfficeDashboardPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Sugerencias inteligentes */}
+        <SuggestionsWidget limit={3} />
 
         {/* Detalle por bloque */}
         <div className="grid md:grid-cols-2 gap-6">
