@@ -19,6 +19,7 @@ const PDF_PATH = path.join(__dirname, '..', 'test-files', 'DNI_David_Villagra_.p
 test.describe('Flujo Completo DNI → Formulario', () => {
   
   test('DNI-FLOW: Debe mostrar datos extraídos y permitir aplicarlos al formulario', async ({ page }) => {
+    test.skip(!process.env.ANTHROPIC_API_KEY, 'Requiere ANTHROPIC_API_KEY para procesamiento IA');
     // Configurar timeout largo para este test
     test.setTimeout(180000);
     

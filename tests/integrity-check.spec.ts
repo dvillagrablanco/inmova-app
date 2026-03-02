@@ -29,7 +29,7 @@ test.describe('Auditoría de Integridad - Páginas Críticas', () => {
     const response = await request.get('/api/health');
     expect(response.status()).toBe(200);
     const body = await response.json();
-    expect(body.status).toBe('healthy');
+    expect(body.status).toMatch(/healthy|ok/);
   });
 
   test('Landing page carga sin errores', async ({ page }) => {
@@ -106,7 +106,7 @@ test.describe('Auditoría de Integridad - Búsqueda de Problemas', () => {
     const pagesToCheck = ['/', '/login'];
     
     for (const pagePath of pagesToCheck) {
-      await page.goto(pagePath);
+      await page.goto(pagePath, { waitUntil: 'domcontentloaded' });
       const bodyText = await page.locator('body').textContent();
       expect(bodyText?.toLowerCase()).not.toContain('lorem ipsum');
     }

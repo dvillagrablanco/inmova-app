@@ -7,7 +7,7 @@
 
 import { test, expect, Page } from '@playwright/test';
 
-const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
+const BASE_URL = process.env.PLAYWRIGHT_BASE_URL || process.env.BASE_URL || 'https://inmovaapp.com';
 
 // Páginas críticas a verificar
 const CRITICAL_PAGES = [

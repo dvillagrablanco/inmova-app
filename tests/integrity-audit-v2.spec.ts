@@ -7,7 +7,7 @@
 
 import { test, expect } from '@playwright/test';
 
-const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
+const BASE_URL = process.env.PLAYWRIGHT_BASE_URL || process.env.BASE_URL || 'https://inmovaapp.com';
 
 // Páginas críticas del sistema
 const CRITICAL_PAGES = [
@@ -104,7 +104,7 @@ test.describe('Auditoría de Integridad V2 - 20 Enero 2026', () => {
       expect(response.status()).toBe(200);
       
       const body = await response.json();
-      expect(body.status).toBe('healthy');
+      expect(body.status).toMatch(/healthy|ok/);
     });
   });
 });

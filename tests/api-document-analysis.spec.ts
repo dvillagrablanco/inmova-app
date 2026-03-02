@@ -19,6 +19,7 @@ test.describe('API Document Analysis', () => {
   test.setTimeout(120000);
 
   test('API-001: Debe analizar un PDF de DNI correctamente', async ({ page, context }) => {
+    test.skip(!process.env.ANTHROPIC_API_KEY, 'Requiere ANTHROPIC_API_KEY');
     // Primero hacer login para obtener cookies
     console.log('📍 Paso 0: Iniciando sesión...');
     await page.goto(`${BASE_URL}/login`);
