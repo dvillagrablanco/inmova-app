@@ -260,8 +260,8 @@ async function main() {
       units: {
         include: {
           contracts: {
-            where: { estado: 'activo' },
-            orderBy: { fechaInicio: 'desc' },
+            where: { estado: { in: ['activo', 'vencido'] } },
+            orderBy: [{ estado: 'asc' }, { fechaInicio: 'desc' }],
             take: 1,
           },
         },
