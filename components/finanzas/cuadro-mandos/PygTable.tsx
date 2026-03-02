@@ -58,11 +58,10 @@ function PygRow({
     const pyg = cc.pyg;
     // Navigate the pyg structure using the key
     const keys = pygKey.split('.');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let value: any = pyg;
+    let value: unknown = pyg;
     for (const k of keys) {
-      if (!value) return null;
-      value = value[k];
+      if (!value || typeof value !== 'object') return null;
+      value = (value as Record<string, unknown>)[k];
     }
     if (value && typeof value === 'object' && 'importe' in value) {
       return value as PygLine;
@@ -160,14 +159,15 @@ function PygGroupRows({ group, groupLabel, pygKeyPrefix, centrosCoste }: PygGrou
           {formatPct(group.subtotal.pctSobreInversion)}
         </td>
         {centrosCoste.map((cc) => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const ccPyg = cc.pyg as any;
+          const ccPyg = cc.pyg as Record<string, unknown>;
           const keys = pygKeyPrefix.split('.');
-          let subtotal = ccPyg;
+          let subtotal: unknown = ccPyg;
           for (const k of keys) {
-            subtotal = subtotal?.[k];
+            if (!subtotal || typeof subtotal !== 'object') break;
+            subtotal = (subtotal as Record<string, unknown>)[k];
           }
-          const ccLine = subtotal?.subtotal as PygLine | undefined;
+          const group = subtotal as { subtotal?: PygLine } | undefined;
+          const ccLine = group?.subtotal;
           return (
             <td
               key={cc.id}
