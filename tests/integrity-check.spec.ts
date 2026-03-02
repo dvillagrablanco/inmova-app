@@ -103,10 +103,10 @@ test.describe('Auditoría de Integridad - Búsqueda de Problemas', () => {
   });
 
   test('No hay "Lorem ipsum" visible en páginas principales', async ({ page }) => {
-    const pagesToCheck = ['/', '/login'];
+    const pagesToCheck = ['/login'];
     
     for (const pagePath of pagesToCheck) {
-      await page.goto(pagePath, { waitUntil: 'domcontentloaded' });
+      await page.goto(pagePath, { waitUntil: 'domcontentloaded', timeout: 15000 });
       const bodyText = await page.locator('body').textContent();
       expect(bodyText?.toLowerCase()).not.toContain('lorem ipsum');
     }

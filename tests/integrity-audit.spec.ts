@@ -106,7 +106,17 @@ test.describe('Auditoría de Integridad - Fase 3', () => {
     });
 
     test('Dashboard tiene navegación funcional', async ({ page }) => {
+      // Login first
+      await page.goto(`${BASE_URL}/login`);
+      await page.waitForLoadState('domcontentloaded');
+      await page.fill('input[type="email"]', 'admin@inmova.app');
+      await page.fill('input[type="password"]', 'Admin123!');
+      await page.click('button[type="submit"]');
+      await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 20000 });
+
       await page.goto(`${BASE_URL}/dashboard`);
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(2000);
       
       // Buscar enlaces de navegación
       const navLinks = page.locator('nav a, aside a, [role="navigation"] a');
