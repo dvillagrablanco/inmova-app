@@ -278,6 +278,41 @@ enum ExpenseCategory {
   reparaciones
   comunidad
   otro
+  // Categorías extendidas para PyG Analítica (Cuadro de Mandos Financiero)
+  arrendamientos_gasto
+  servicios_profesionales
+  transportes
+  servicios_bancarios
+  publicidad
+  suministros_luz
+  suministros_agua
+  suministros_gas
+  suministros_telefonia
+  suministros_otros
+  comisiones_gestion
+  ibi
+  basuras
+  tributos_otros
+  sueldos_salarios
+  seguridad_social
+  remuneraciones_consejeros
+  amortizaciones
+  enajenaciones
+  ingresos_financieros
+  intereses
+  comisiones_financieras
+  diferencias_cambio
+  beneficios_participaciones
+  perdidas_participaciones
+  extraordinarios
+  impuesto_sociedades
+}
+
+// Tipo de Centro de Coste para el Cuadro de Mandos Financiero
+enum CostCenterType {
+  directo
+  imputado
+  direccion
 }
 
 enum RoomStatus {
@@ -827,6 +862,9 @@ model Unit {
 
   strListings      STRListing[]      @relation
   flippingProjects FlippingProject[] @relation
+
+  // Cuadro de Mandos Financiero
+  valuationHistory PropertyValuationHistory[]
 
   // Room Rental Module
   rooms            Room[]
@@ -1679,12 +1717,17 @@ model Expense {
   estadoAprobacion     ApprovalStatus? @default(pendiente)
   contasimpleExpenseId String?
   isDemo               Boolean         @default(false) // Marca datos de demostración - excluir de estadísticas
+  // Cuadro de Mandos Financiero
+  costCenterId         String? // Centro de coste asignado
+  subcategoria         String? // Código PyG detallado (E20a01, E21a, etc.)
+  ejercicio            Int? // Año fiscal explícito (para queries rápidas)
   createdAt            DateTime        @default(now())
   updatedAt            DateTime        @updatedAt
 
   building             Building?            @relation(fields: [buildingId], references: [id], onDelete: Cascade)
   unit                 Unit?                @relation(fields: [unitId], references: [id], onDelete: Cascade)
   provider             Provider?            @relation(fields: [providerId], references: [id], onDelete: SetNull)
+  costCenter           CostCenter?          @relation(fields: [costCenterId], references: [id], onDelete: SetNull)
   approvals            Approval[]
   bankTransactions     BankTransaction[]
   conciliacionesManual ConciliacionManual[]
@@ -1697,6 +1740,8 @@ model Expense {
   @@index([buildingId, categoria])
   @@index([buildingId, fecha])
   @@index([createdAt])
+  @@index([costCenterId])
+  @@index([ejercicio])
   @@map("expenses")
 }
 
@@ -2105,6 +2150,9 @@ model Company {
   modelo347Records         Modelo347Record[]
   modelo180Records         Modelo180Record[]
   buildingInspections      BuildingInspection[]
+
+  // Cuadro de Mandos Financiero
+  costCenters CostCenter[]
 
   // Coliving - Red Social y Servicios Premium
   colivingProfiles        ColivingProfile[]
@@ -10695,6 +10743,52 @@ model FinancialAlert {
   @@index([companyId, tipo, estado])
   @@index([severidad, fechaDeteccion])
   @@map("financial_alerts")
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CUADRO DE MANDOS FINANCIERO - Centros de Coste
+// ═══════════════════════════════════════════════════════════════
+
+model CostCenter {
+  id          String         @id @default(cuid())
+  companyId   String
+  codigo      String // "DIR", "CDI", "DF-GEN", "DI-COGE"
+  nombre      String // "Costes Directos", "Costes Directos Imputados"
+  tipo        CostCenterType // directo, imputado, direccion
+  responsable String? // Nombre de la persona responsable
+  activo      Boolean        @default(true)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  company  Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  expenses Expense[]
+
+  @@unique([companyId, codigo])
+  @@index([companyId])
+  @@map("cost_centers")
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CUADRO DE MANDOS FINANCIERO - Historial de Valoraciones
+// ═══════════════════════════════════════════════════════════════
+
+model PropertyValuationHistory {
+  id                 String @id @default(cuid())
+  unitId             String
+  ejercicio          Int // Año fiscal: 2022, 2023, 2024...
+  valorInversion     Float // Valor de inversión (coste de adquisición)
+  valorMercado       Float // Valor de mercado estimado
+  tasaDisponibilidad Float? // 0-1 (proporción del año que estuvo disponible)
+  tasaOcupacion      Float? // 0-1 (proporción del año que estuvo ocupada)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  unit Unit @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@unique([unitId, ejercicio])
+  @@index([unitId])
+  @@index([ejercicio])
+  @@map("property_valuation_history")
 }
 
 // Previsión de cash flow
