@@ -424,9 +424,17 @@ export async function getCuadroMandosData(
 ): Promise<CuadroMandosResponse> {
   const { ejercicio, buildingIds, costCenterIds } = filters;
 
-  // 1. Obtener buildings de la empresa
+  // 1. Obtener buildings de la empresa + filiales (vista consolidada)
+  const company = await prisma.company.findUnique({
+    where: { id: companyId },
+    select: { id: true, childCompanies: { select: { id: true } } },
+  });
+  const allCompanyIds = company
+    ? [company.id, ...company.childCompanies.map((c: { id: string }) => c.id)]
+    : [companyId];
+
   const buildings = await prisma.building.findMany({
-    where: { companyId },
+    where: { companyId: { in: allCompanyIds } },
     select: { id: true },
   });
   const companyBuildingIds = buildings.map((b) => b.id);
@@ -476,7 +484,7 @@ export async function getCuadroMandosData(
 
   // 6. Centros de coste
   const costCenters = await prisma.costCenter.findMany({
-    where: { companyId, activo: true },
+    where: { companyId: { in: allCompanyIds }, activo: true },
     orderBy: { codigo: 'asc' },
   });
 
@@ -518,9 +526,18 @@ export async function getCuadroMandosData(
 // ─── FILTROS DISPONIBLES ────────────────────────────────────────────────────
 
 export async function getFiltrosDisponibles(companyId: string): Promise<FiltrosDisponibles> {
-  // Edificios con unidades
+  // Include child companies for consolidated view
+  const company = await prisma.company.findUnique({
+    where: { id: companyId },
+    select: { childCompanies: { select: { id: true } } },
+  });
+  const allCompanyIds = company
+    ? [companyId, ...company.childCompanies.map((c: { id: string }) => c.id)]
+    : [companyId];
+
+  // Edificios con unidades (across all group companies)
   const edificios = await prisma.building.findMany({
-    where: { companyId },
+    where: { companyId: { in: allCompanyIds } },
     select: {
       id: true,
       nombre: true,
@@ -529,9 +546,9 @@ export async function getFiltrosDisponibles(companyId: string): Promise<FiltrosD
     orderBy: { nombre: 'asc' },
   });
 
-  // Centros de coste
+  // Centros de coste (across all group companies)
   const centrosCoste = await prisma.costCenter.findMany({
-    where: { companyId, activo: true },
+    where: { companyId: { in: allCompanyIds }, activo: true },
     select: { id: true, codigo: true, nombre: true, tipo: true },
     orderBy: { codigo: 'asc' },
   });

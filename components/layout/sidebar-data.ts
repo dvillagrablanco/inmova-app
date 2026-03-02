@@ -14,6 +14,7 @@ import {
   TrendingUp,
   HardHat,
   Briefcase,
+  Globe,
   Sparkles,
   Calendar,
   MessageSquare,
@@ -336,6 +337,7 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/inversiones/fiscal': 'holding_grupo',
   '/inversiones/fiscal/modelos': 'holding_grupo',
   '/inversiones/fiscal/simulador': 'holding_grupo',
+  '/inversiones/modelo-720': 'holding_grupo',
   '/inversiones/tesoreria': 'holding_grupo',
   '/inversiones/pyl': 'holding_grupo',
   '/inversiones/fianzas': 'holding_grupo',
@@ -1612,6 +1614,12 @@ const holdingGrupoNavItems = [
     name: 'Modelos Tributarios',
     href: '/inversiones/fiscal/modelos',
     icon: FileBarChart,
+    roles: ['super_admin', 'administrador'],
+  },
+  {
+    name: 'Modelo 720',
+    href: '/inversiones/modelo-720',
+    icon: Globe,
     roles: ['super_admin', 'administrador'],
   },
   {
