@@ -58,12 +58,39 @@ export async function POST(request: NextRequest) {
 
     let connectionUrl = null;
 
-    // Para PSD2: generar link de autorización
+    // Para PSD2: generar link de autorización via Nordigen
     if (entity.integrationLevel === 'psd2' && entity.nordigenInstitutionId) {
-      // En producción, aquí se llamaría a Nordigen API para crear requisition
-      // Por ahora, simular el flujo
-      connectionUrl = `https://ob.nordigen.com/psd2/start/${entity.nordigenInstitutionId}/${account.id}`;
-      logger.info(`[FO Connect] PSD2 link generated for ${entity.name}`, { accountId: account.id });
+      try {
+        const { createRequisition, isNordigenConfigured } = await import('@/lib/nordigen-service');
+        if (isNordigenConfigured()) {
+          const requisition = await createRequisition({
+            institutionId: entity.nordigenInstitutionId,
+            companyId: session.user.companyId,
+            userId: session.user.id,
+          });
+          if (requisition) {
+            connectionUrl = requisition.link;
+            // Save requisition ID for callback
+            await prisma.financialAccount.update({
+              where: { id: account.id },
+              data: {
+                apiConfig: {
+                  ...((account.apiConfig as Record<string, unknown>) || {}),
+                  nordigenRequisitionId: requisition.requisitionId,
+                },
+              },
+            });
+            logger.info(`[FO Connect] Nordigen requisition created: ${requisition.requisitionId}`);
+          }
+        } else {
+          // Nordigen not configured — provide manual link
+          connectionUrl = `https://ob.nordigen.com/psd2/start/${entity.nordigenInstitutionId}/${account.id}`;
+          logger.info(`[FO Connect] Nordigen not configured, using stub link`);
+        }
+      } catch (err) {
+        logger.warn('[FO Connect] Nordigen requisition failed, using stub:', err);
+        connectionUrl = `https://ob.nordigen.com/psd2/start/${entity.nordigenInstitutionId}/${account.id}`;
+      }
     }
 
     return NextResponse.json({

@@ -46,15 +46,29 @@ export async function GET(request: NextRequest) {
       const config = account.apiConfig as any;
 
       if (account.conexionTipo === 'psd2' && config?.nordigenInstitutionId) {
-        // PSD2: En producción, aquí se llamaría a Nordigen API
-        // GET /api/v2/accounts/{account_id}/balances/
         try {
-          // Simular sync exitoso (en producción: llamada real a Nordigen)
           const saldoAnterior = account.saldoActual;
+          let saldoNuevo = saldoAnterior;
+
+          // Try real Nordigen sync if configured and account has nordigenAccountId
+          if (config.nordigenAccountId) {
+            try {
+              const { getAccountBalances } = await import('@/lib/nordigen-service');
+              const balances = await getAccountBalances(config.nordigenAccountId);
+              if (balances && balances.length > 0) {
+                const main = balances.find((b: { balanceType: string }) => b.balanceType === 'interimAvailable') || balances[0];
+                saldoNuevo = parseFloat(main.balanceAmount?.amount || '0');
+                logger.info(`[Sync] ${account.entidad}: ${saldoAnterior} → ${saldoNuevo}`);
+              }
+            } catch (nordigenErr) {
+              logger.warn(`[Sync] Nordigen error for ${account.entidad}:`, nordigenErr);
+              // Continue with timestamp update only
+            }
+          }
 
           await prisma.financialAccount.update({
             where: { id: account.id },
-            data: { ultimaSync: new Date() },
+            data: { ultimaSync: new Date(), saldoActual: saldoNuevo },
           });
 
           results.push({
@@ -64,7 +78,7 @@ export async function GET(request: NextRequest) {
             conexionTipo: 'psd2',
             synced: true,
             saldoAnterior,
-            saldoNuevo: saldoAnterior, // En producción: saldo real de Nordigen
+            saldoNuevo,
           });
         } catch (err: any) {
           results.push({
