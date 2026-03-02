@@ -4,7 +4,8 @@ const BASE = 'https://inmovaapp.com';
 
 async function login(page) {
   await page.goto(`${BASE}/login`);
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(2000);
   await page.fill('input[name="email"], input[type="email"]', 'admin@inmova.app');
   await page.fill('input[name="password"], input[type="password"]', 'Admin123!');
   await page.click('button[type="submit"]');
@@ -112,7 +113,7 @@ test.describe('Family Office - Audit Visual', () => {
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(3000);
     
-    await expect(page.getByText('Modelo 720')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('heading', { name: /Modelo 720/ })).toBeVisible({ timeout: 10000 });
     
     await page.screenshot({ path: '/tmp/fo_720.png', fullPage: true });
   });

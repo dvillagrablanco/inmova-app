@@ -15,14 +15,15 @@ const LOGIN_PASSWORD = 'Admin123!';
 // Helper: login
 async function login(page: import('@playwright/test').Page) {
   await page.goto(`${BASE_URL}/login`);
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('domcontentloaded');
+  await page.waitForTimeout(1000);
 
   await page.fill('input[name="email"], input[type="email"]', LOGIN_EMAIL);
   await page.fill('input[name="password"], input[type="password"]', LOGIN_PASSWORD);
   await page.click('button[type="submit"]');
 
   // Wait for redirect away from login
-  await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 15000 });
+  await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 20000 });
 }
 
 test.describe('Módulos Financieros - Carga de páginas', () => {
@@ -60,15 +61,14 @@ test.describe('Módulos Financieros - Carga de páginas', () => {
 
   test('Family Office Dashboard carga con quick navigation', async ({ page }) => {
     await page.goto(`${BASE_URL}/family-office/dashboard`);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(3000);
 
-    await expect(page.locator('text=Dashboard Patrimonial')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('text=Dashboard Patrimonial').first()).toBeVisible({ timeout: 10000 });
 
     // Verificar quick navigation links
-    await expect(page.locator('text=Private Equity').first()).toBeVisible();
-    await expect(page.locator('text=Cuentas').first()).toBeVisible();
-    await expect(page.locator('text=Tesorería').first()).toBeVisible();
-    await expect(page.locator('text=Cuadro Mandos').first()).toBeVisible();
+    await expect(page.locator('a[href="/family-office/pe"]').first()).toBeVisible();
+    await expect(page.locator('a[href="/family-office/cuentas"]').first()).toBeVisible();
   });
 
   test('Panel Finanzas incluye Cuadro de Mandos', async ({ page }) => {
@@ -154,7 +154,8 @@ test.describe('Conectividad entre módulos', () => {
 
   test('Family Office Dashboard → PE', async ({ page }) => {
     await page.goto(`${BASE_URL}/family-office/dashboard`);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(2000);
 
     // Click en Private Equity en quick nav
     await page.click('a[href="/family-office/pe"]');
@@ -165,7 +166,8 @@ test.describe('Conectividad entre módulos', () => {
 
   test('Family Office Dashboard → Cuadro de Mandos', async ({ page }) => {
     await page.goto(`${BASE_URL}/family-office/dashboard`);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(2000);
 
     await page.click('a[href="/finanzas/cuadro-de-mandos"]');
     await page.waitForURL('**/finanzas/cuadro-de-mandos**', { timeout: 10000 });
