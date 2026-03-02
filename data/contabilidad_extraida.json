@@ -1,0 +1,3829 @@
+{
+  "ROVIDA": {
+    "ibis": [
+      {
+        "cuenta": "6310000000",
+        "nombre": "Otros Tributos",
+        "importe": 1966.78
+      },
+      {
+        "cuenta": "6310000100",
+        "nombre": "I.B.I  Garaje 13 S1 M.Pelayo 17 Palencia",
+        "importe": 20.13
+      },
+      {
+        "cuenta": "6310000101",
+        "nombre": "I.B.I  Garaje 16 S1 M.Pelayo 17 Palencia",
+        "importe": 41.21
+      },
+      {
+        "cuenta": "6310000102",
+        "nombre": "I.B.I  Garaje 18 S1 M.Pelayo 17 Palencia",
+        "importe": 20.13
+      },
+      {
+        "cuenta": "6310000103",
+        "nombre": "I.B.I  Garaje 19 S1 M.Pelayo 17 Palencia",
+        "importe": 20.13
+      },
+      {
+        "cuenta": "6310000104",
+        "nombre": "I.B.I  Garaje 20 S1 M.Pelayo 17 Palencia",
+        "importe": 20.13
+      },
+      {
+        "cuenta": "6310000105",
+        "nombre": "I.B.I  Garaje 26 S1 M.Pelayo 17 Palencia",
+        "importe": 20.13
+      },
+      {
+        "cuenta": "6310000106",
+        "nombre": "I.B.I  Garaje 27 S1 M.Pelayo 17 Palencia",
+        "importe": 20.13
+      },
+      {
+        "cuenta": "6310000107",
+        "nombre": "I.B.I  Garaje 28 S1 M.Pelayo 17 Palencia",
+        "importe": 20.13
+      },
+      {
+        "cuenta": "6310000108",
+        "nombre": "I.B.I  Garaje 29 S1 M.Pelayo 17 Palencia",
+        "importe": 20.13
+      },
+      {
+        "cuenta": "6310000109",
+        "nombre": "I.B.I  Garaje 30 S1 M.Pelayo 17 Palencia",
+        "importe": 20.13
+      },
+      {
+        "cuenta": "6310000110",
+        "nombre": "I.B.I  Garaje 31 S1 M.Pelayo 17 Palencia",
+        "importe": 20.13
+      },
+      {
+        "cuenta": "6310000111",
+        "nombre": "I.B.I  Garaje 32 S1 M.Pelayo 17 Palencia",
+        "importe": 20.13
+      },
+      {
+        "cuenta": "6310000112",
+        "nombre": "I.B.I  Garaje 33 S1 M.Pelayo 17 Palencia",
+        "importe": 20.13
+      },
+      {
+        "cuenta": "6310000113",
+        "nombre": "I.B.I  Garaje 34 S1 M.Pelayo 17 Palencia",
+        "importe": 20.13
+      },
+      {
+        "cuenta": "6310000114",
+        "nombre": "I.B.I  Garaje 35 S1 M.Pelayo 17 Palencia",
+        "importe": 20.13
+      },
+      {
+        "cuenta": "6310000115",
+        "nombre": "I.B.I  Garaje 36 S1 M.Pelayo 17 Palencia",
+        "importe": 20.13
+      },
+      {
+        "cuenta": "6310000116",
+        "nombre": "I.B.I  Garaje 36A (118/84) S1 M.Pelayo 17 Palencia",
+        "importe": 20.13
+      },
+      {
+        "cuenta": "6310000117",
+        "nombre": "I.B.I  Garaje 36B (119/85) S1 M.Pelayo 17 Palencia",
+        "importe": 20.13
+      },
+      {
+        "cuenta": "6310000118",
+        "nombre": "I.B.I  Garaje 38 S1 M.Pelayo 17 Palencia",
+        "importe": 20.13
+      },
+      {
+        "cuenta": "6310000119",
+        "nombre": "I.B.I  Garaje 76 S2 M.Pelayo 17 Palencia",
+        "importe": 20.13
+      },
+      {
+        "cuenta": "6310000120",
+        "nombre": "I.B.I  Garaje 81 S2 M.Pelayo 17 Palencia",
+        "importe": 20.13
+      },
+      {
+        "cuenta": "6310000121",
+        "nombre": "I.B.I Local M.Pelayo 15 BJ",
+        "importe": 824.96
+      },
+      {
+        "cuenta": "6310000122",
+        "nombre": "I.B.I Local M.Pelayo 15 S1",
+        "importe": 221.61
+      },
+      {
+        "cuenta": "6312002001",
+        "nombre": "I.B.I. Garaje 12 E -2 61 Magaz",
+        "importe": 2.41
+      },
+      {
+        "cuenta": "6312002003",
+        "nombre": "I.B.I. Garaje 12 E -2 63 Magaz",
+        "importe": 9.63
+      },
+      {
+        "cuenta": "6312002008",
+        "nombre": "I.B.I. Garaje 12 E -2 94 Magaz",
+        "importe": 2.41
+      },
+      {
+        "cuenta": "6312003001",
+        "nombre": "I.B.I. Apto Ben. Gemelos 20,Pl 01,Lt C",
+        "importe": 365.61
+      },
+      {
+        "cuenta": "6312003002",
+        "nombre": "I.B.I. Apto Ben. Gemelos 20,Pl 02,Lt C",
+        "importe": 365.61
+      },
+      {
+        "cuenta": "6312003003",
+        "nombre": "I.B.I. Apto Ben. Gemelos 20,Pl 03,Lt C",
+        "importe": 365.61
+      },
+      {
+        "cuenta": "6312003004",
+        "nombre": "I.B.I. Apto Ben. Gemelos 20,Pl 03,Lt D",
+        "importe": 387.12
+      },
+      {
+        "cuenta": "6312003005",
+        "nombre": "I.B.I. Apto Ben. Gemelos 20,Pl 16,Lt D",
+        "importe": 387.12
+      },
+      {
+        "cuenta": "6312003006",
+        "nombre": "I.B.I. Apto Ben. Gemelos 20,Pl 17,Lt D",
+        "importe": 387.12
+      },
+      {
+        "cuenta": "6312003007",
+        "nombre": "I.B.I. Apto Ben. Gemelos 20,Pl 19,Lt C",
+        "importe": 365.61
+      },
+      {
+        "cuenta": "6312003008",
+        "nombre": "I.B.I. Apto Ben. Gemelos 20,Pl 20,Lt D",
+        "importe": 387.12
+      },
+      {
+        "cuenta": "6312003009",
+        "nombre": "I.B.I. Apto Ben. Gemelos 20,Pl 24,Lt D",
+        "importe": 387.12
+      },
+      {
+        "cuenta": "6312003010",
+        "nombre": "I.B.I. Apto Ben. Gemelos 20,Pl 25,Lt D",
+        "importe": 387.12
+      },
+      {
+        "cuenta": "6312003011",
+        "nombre": "I.B.I. Apto Ben. Gemelos 2,Pl 01,Lt D",
+        "importe": 563.21
+      },
+      {
+        "cuenta": "6312003012",
+        "nombre": "I.B.I. Apto Ben. Gemelos 2,Pl 01,Lt E",
+        "importe": 563.21
+      },
+      {
+        "cuenta": "6312003013",
+        "nombre": "I.B.I. Apto Ben. Gemelos 2,Pl 03,Lt B",
+        "importe": 563.21
+      },
+      {
+        "cuenta": "6312003014",
+        "nombre": "I.B.I. Apto Ben. Gemelos 2,Pl 03,Lt E",
+        "importe": 563.21
+      },
+      {
+        "cuenta": "6312003015",
+        "nombre": "I.B.I. Apto Ben. Gemelos 2,Pl 20,Lt B",
+        "importe": 563.21
+      },
+      {
+        "cuenta": "6312003016",
+        "nombre": "I.B.I. Apto Ben. Gemelos 2,Pl 20,Lt C",
+        "importe": 563.21
+      },
+      {
+        "cuenta": "6312003017",
+        "nombre": "I.B.I. Apto Ben. Gemelos 4,Pl 17,Lt C",
+        "importe": 567.5
+      },
+      {
+        "cuenta": "6312003018",
+        "nombre": "I.B.I. Garj Ben. Gemelos 2, B1 ,11",
+        "importe": 29.81
+      },
+      {
+        "cuenta": "6312003019",
+        "nombre": "I.B.I. Garj Ben. Gemelos 2, B2, 12",
+        "importe": 22.93
+      },
+      {
+        "cuenta": "6312004001",
+        "nombre": "I.B.I. El Tomillar de Nagüelles (Málaga)",
+        "importe": 1997.4
+      },
+      {
+        "cuenta": "6312005001",
+        "nombre": "I.B.I. Oficina Av Europa 34B 1 Iz Madrid",
+        "importe": 3707.34
+      },
+      {
+        "cuenta": "6312005002",
+        "nombre": "I.B.I. Garaje 352 S2 Av Europa Madrid",
+        "importe": 28.12
+      },
+      {
+        "cuenta": "6312005003",
+        "nombre": "I.B.I. Garaje 353 S2 Av Europa Madrid",
+        "importe": 23.43
+      },
+      {
+        "cuenta": "6312005004",
+        "nombre": "I.B.I. Garaje 354 S2 Av Europa Madrid",
+        "importe": 28.12
+      },
+      {
+        "cuenta": "6312005005",
+        "nombre": "I.B.I. Garaje 355 S2 Av Europa Madrid",
+        "importe": 28.12
+      },
+      {
+        "cuenta": "6312005006",
+        "nombre": "I.B.I. Garaje 356 S2 Av Europa Madrid",
+        "importe": 28.12
+      },
+      {
+        "cuenta": "6312005007",
+        "nombre": "I.B.I. Garaje 357 S2 Av Europa Madrid",
+        "importe": 23.43
+      },
+      {
+        "cuenta": "6312006000",
+        "nombre": "I.B.I  Garajes Madrid C/Espronceda 32",
+        "importe": 8770.67
+      },
+      {
+        "cuenta": "6312007000",
+        "nombre": "I.B.I  Oficina Constitución 8 2ºA Valladolid",
+        "importe": 2292.78
+      },
+      {
+        "cuenta": "6312007001",
+        "nombre": "I.B.I  Garaje 12 S2 Constitución 5 Valladolid",
+        "importe": 59.79
+      },
+      {
+        "cuenta": "6312007002",
+        "nombre": "I.B.I  Garaje 13 S2 Constitución 5 Valladolid",
+        "importe": 59.79
+      },
+      {
+        "cuenta": "6312007003",
+        "nombre": "I.B.I  Garaje 5 S3 Constitución 5 Valladolid",
+        "importe": 50.59
+      },
+      {
+        "cuenta": "6312007004",
+        "nombre": "I.B.I  Garaje 14 S3 Constitución 5 Valladolid",
+        "importe": 45.99
+      },
+      {
+        "cuenta": "6312008000",
+        "nombre": "I.B.I Nave Valladolid C/Metal 4 TODOS",
+        "importe": 1154.18
+      },
+      {
+        "cuenta": "6312008001",
+        "nombre": "I.B.I Nave Palencia, Avd Cuba 38",
+        "importe": 508.75
+      },
+      {
+        "cuenta": "6312008002",
+        "nombre": "I.B.I Nave Palencia, Avd Cuba 38T T OD OS",
+        "importe": 531.48
+      },
+      {
+        "cuenta": "6312008003",
+        "nombre": "I.B.I Nave Palencia, Avd Cuba 38D T OD OS",
+        "importe": 554.65
+      },
+      {
+        "cuenta": "6312009000",
+        "nombre": "I.B.I Finca de Grijota",
+        "importe": 350.11
+      },
+      {
+        "cuenta": "6312013001",
+        "nombre": "I.B.I Local Barquillo 30,Madrid",
+        "importe": 3175.33
+      },
+      {
+        "cuenta": "6312014001",
+        "nombre": "I.B.I Local grande (1382) Reina 15,Madrid",
+        "importe": 2821.26
+      },
+      {
+        "cuenta": "6312014002",
+        "nombre": "I.B.I Local pequeño (13184) Reina 15,Madrid",
+        "importe": 849.88
+      },
+      {
+        "cuenta": "6312015001",
+        "nombre": "I.B.I Edificio Piamonte 23,Madrid",
+        "importe": 64402.11
+      },
+      {
+        "cuenta": "6312016000",
+        "nombre": "I.B.I Garajes Hernández de Tejada 6, Madrid",
+        "importe": 550.68
+      },
+      {
+        "cuenta": "6313003001",
+        "nombre": "Basuras Apto Ben. Gemelos 20,Pl 01,Lt C",
+        "importe": 193.55
+      },
+      {
+        "cuenta": "6313003002",
+        "nombre": "Basuras Apto Ben. Gemelos 20,Pl 02,Lt C",
+        "importe": 193.55
+      },
+      {
+        "cuenta": "6313003003",
+        "nombre": "Basuras Apto Ben. Gemelos 20,Pl 03,Lt C",
+        "importe": 193.55
+      },
+      {
+        "cuenta": "6313003004",
+        "nombre": "Basuras Apto Ben. Gemelos 20,Pl 03,Lt D",
+        "importe": 193.55
+      },
+      {
+        "cuenta": "6313003005",
+        "nombre": "Basuras Apto Ben. Gemelos 20,Pl 16,Lt D",
+        "importe": 193.55
+      },
+      {
+        "cuenta": "6313003006",
+        "nombre": "Basuras Apto Ben. Gemelos 20,Pl 17,Lt D",
+        "importe": 193.55
+      },
+      {
+        "cuenta": "6313003007",
+        "nombre": "Basuras Apto Ben. Gemelos 20,Pl 19,Lt C",
+        "importe": 193.55
+      },
+      {
+        "cuenta": "6313003008",
+        "nombre": "Basuras Apto Ben. Gemelos 20,Pl 20,Lt D",
+        "importe": 193.55
+      },
+      {
+        "cuenta": "6313003009",
+        "nombre": "Basuras Apto Ben. Gemelos 20,Pl 24,Lt D",
+        "importe": 193.55
+      },
+      {
+        "cuenta": "6313003010",
+        "nombre": "Basuras Apto Ben. Gemelos 20,Pl 25,Lt D",
+        "importe": 193.55
+      },
+      {
+        "cuenta": "6313003011",
+        "nombre": "Basuras Apto Ben. Gemelos II,Pl 01,Lt D",
+        "importe": 193.55
+      },
+      {
+        "cuenta": "6313003012",
+        "nombre": "Basuras Apto Ben. Gemelos II,Pl 03,Lt B",
+        "importe": 193.55
+      },
+      {
+        "cuenta": "6313003013",
+        "nombre": "Basuras Apto Ben. Gemelos II,Pl 03,Lt E",
+        "importe": 193.55
+      },
+      {
+        "cuenta": "6313003014",
+        "nombre": "Basuras Apto Ben. Gemelos II,Pl 20,Lt B",
+        "importe": 193.55
+      },
+      {
+        "cuenta": "6313003015",
+        "nombre": "Basuras Apto Ben. Gemelos II,Pl 20,Lt C",
+        "importe": 193.55
+      },
+      {
+        "cuenta": "6313003016",
+        "nombre": "Basuras Apto Ben. Gemelos IV,Pl 17,Lt C",
+        "importe": 193.55
+      },
+      {
+        "cuenta": "6313003017",
+        "nombre": "Basuras Apto Ben. Gemelos II,Pl 01,Lt E",
+        "importe": 193.55
+      },
+      {
+        "cuenta": "6313004001",
+        "nombre": "Tasa Basuras El Tomillar de Nagüelles",
+        "importe": 185.36
+      },
+      {
+        "cuenta": "6313005001",
+        "nombre": "Tasa Basura Av/ Europa 34B 1izq Madrid",
+        "importe": 927.17
+      },
+      {
+        "cuenta": "6313005002",
+        "nombre": "Basuras y Tasa Gestión Residuos Garaje Pl. -2, 352  Av Europa 34-B Madrid",
+        "importe": 29.14
+      },
+      {
+        "cuenta": "6313005003",
+        "nombre": "Basuras y Tasa Gestión Residuos Garaje Pl. -2, 353 Av Europa 34-B Madrid",
+        "importe": 29.14
+      },
+      {
+        "cuenta": "6313005004",
+        "nombre": "Basuras y Tasa Gestión Residuos Garaje Pl. -2, 354 Av Europa 34-B Madrid",
+        "importe": 29.14
+      },
+      {
+        "cuenta": "6313005005",
+        "nombre": "Basuras y Tasa Gestión Residuos Garaje Pl. -2, 355 Av Europa 34-B Madrid",
+        "importe": 29.14
+      },
+      {
+        "cuenta": "6313005006",
+        "nombre": "Basuras y Tasa Gestión Residuos Garaje Pl. -2, 356 Av Europa 34-B Madrid",
+        "importe": 29.14
+      },
+      {
+        "cuenta": "6313005007",
+        "nombre": "Basuras y Tasa Gestión Residuos Garaje Pl. -2, 357  Av Europa 34-B Madrid",
+        "importe": 29.14
+      },
+      {
+        "cuenta": "6313006001",
+        "nombre": "Tasa Basuras C/ Metal, 4",
+        "importe": 427.91
+      },
+      {
+        "cuenta": "6313007000",
+        "nombre": "Tasa Basuras C/ Constitucion, 8, 2A",
+        "importe": 641.86
+      },
+      {
+        "cuenta": "6313013001",
+        "nombre": "Basuras y Tasa Gestión Residuos Local Calle Barquillo, 30 Madrid",
+        "importe": 1506.44
+      },
+      {
+        "cuenta": "6313014001",
+        "nombre": "Basuras y Tasa Gestión Residuos Local C/ Reina, 15 (grande) Madrid",
+        "importe": 1034.1
+      },
+      {
+        "cuenta": "6313014002",
+        "nombre": "Basuras y Tasa Gestión Residuos Local C/ Reina, 15 (pequeño) Madrid",
+        "importe": 499.94
+      },
+      {
+        "cuenta": "6313015001",
+        "nombre": "Basuras y Tasa Gestión Residuos Piamonte, 23 Madrid",
+        "importe": 6553.95
+      }
+    ],
+    "amortizaciones": [
+      {
+        "cuenta": "6811003001",
+        "nombre": "Dot. Amort. Gemelos XX, T2, 25ºD Apart. Benidorm",
+        "importe": 992.16
+      },
+      {
+        "cuenta": "6811003002",
+        "nombre": "Dot. Amort. Gemelos XX, T2, 16ºD Apart. Benidorm",
+        "importe": 945.72
+      },
+      {
+        "cuenta": "6811003003",
+        "nombre": "Dot. Amort. Gemelos XX, T2, 3ºD Apart. Benidorm",
+        "importe": 875.88
+      },
+      {
+        "cuenta": "6811003004",
+        "nombre": "Dot. Amort. Gemelos XX, T2, 3ºC Apart. Benidorm",
+        "importe": 824.52
+      },
+      {
+        "cuenta": "6811003005",
+        "nombre": "Dot. Amort. Gemelos XX, T2, 2ºC Apart. Benidorm",
+        "importe": 818.64
+      },
+      {
+        "cuenta": "6811003006",
+        "nombre": "Dot. Amort. Gemelos XX, T2, 17ºD Apart. Benidorm",
+        "importe": 948.6
+      },
+      {
+        "cuenta": "6811003007",
+        "nombre": "Dot. Amort. Gemelos XX, T2, 20ºD Apart. Benidorm",
+        "importe": 963.12
+      },
+      {
+        "cuenta": "6811003008",
+        "nombre": "Dot. Amort. Gemelos XX, T2, 19ºC Apart. Benidorm",
+        "importe": 905.88
+      },
+      {
+        "cuenta": "6811003009",
+        "nombre": "Dot. Amort. Gemelos XX, T2, 24ºD Apart. Benidorm",
+        "importe": 986.4
+      },
+      {
+        "cuenta": "6811003010",
+        "nombre": "Dot. Amort. Gemelos XX, T2, 1ºC Apart. Benidorm",
+        "importe": 772.32
+      },
+      {
+        "cuenta": "6811003011",
+        "nombre": "Dot. Amort. Gemelos II, T1, 1ºD Apart. Benidorm",
+        "importe": 1510.92
+      },
+      {
+        "cuenta": "6811003012",
+        "nombre": "Dot. Amort. Gemelos II, T1, 3ºB Apart. Benidorm",
+        "importe": 1585.8
+      },
+      {
+        "cuenta": "6811003013",
+        "nombre": "Dot. Amort. Gemelos II, T1, 20ºB Apart. Benidorm",
+        "importe": 1750.08
+      },
+      {
+        "cuenta": "6811003014",
+        "nombre": "Dot. Amort. Gemelos II, T1, 20ºC Apart. Benidorm",
+        "importe": 1750.08
+      },
+      {
+        "cuenta": "6811003015",
+        "nombre": "Dot. Amort. Gemelos IV, T1, 17ºC Apart. Benidorm",
+        "importe": 1689.0
+      },
+      {
+        "cuenta": "6811003016",
+        "nombre": "Dot. Amort. Gemelos II, T1, 3ºE Apart. Benidorm",
+        "importe": 1559.76
+      },
+      {
+        "cuenta": "6811003017",
+        "nombre": "Dot. Amort. Gemelos II, T1, -1, 10 Garaje Benidorm",
+        "importe": 123.48
+      },
+      {
+        "cuenta": "6811003018",
+        "nombre": "Dot. Amort. Gemelos II, T1, -1, 11 Garaje Benidorm",
+        "importe": 95.04
+      },
+      {
+        "cuenta": "6811003019",
+        "nombre": "Dot. Amort. Gemelos II, T1, 1ºE Apart. Benidorm",
+        "importe": 1508.64
+      },
+      {
+        "cuenta": "6811004001",
+        "nombre": "Dotac.Am. Casa El Tomillar Nagüelles,2",
+        "importe": 4108.44
+      },
+      {
+        "cuenta": "6811005001",
+        "nombre": "Dot.Am. Oficinas Av Europa 34-B Madrid",
+        "importe": 7429.32
+      },
+      {
+        "cuenta": "6811005002",
+        "nombre": "Dot.Am. Garaje Pl. -2, 352  Av Europa 34-B Madrid",
+        "importe": 156.24
+      },
+      {
+        "cuenta": "6811005003",
+        "nombre": "Dot.Am. Garaje Pl. -2, 353  Av Europa 34-B Madrid",
+        "importe": 156.24
+      },
+      {
+        "cuenta": "6811005004",
+        "nombre": "Dot.Am. Garaje Pl. -2, 354  Av Europa 34-B Madrid",
+        "importe": 156.24
+      },
+      {
+        "cuenta": "6811005005",
+        "nombre": "Dot.Am. Garaje Pl. -2, 355  Av Europa 34-B Madrid",
+        "importe": 156.24
+      },
+      {
+        "cuenta": "6811005006",
+        "nombre": "Dot.Am. Garaje Pl. -2, 356  Av Europa 34-B Madrid",
+        "importe": 156.24
+      },
+      {
+        "cuenta": "6811005007",
+        "nombre": "Dot.Am. Garaje Pl. -2, 357  Av Europa 34-B Madrid",
+        "importe": 156.24
+      },
+      {
+        "cuenta": "6811006001",
+        "nombre": "Dotac. Amort. Garajes C/Espronceda, 32 Madrid",
+        "importe": 25913.26
+      },
+      {
+        "cuenta": "6811007001",
+        "nombre": "Dotac. Amortiz. Naves Avda Cuba 48-50-52 Palencia (Sin repartir)",
+        "importe": 35618.76
+      },
+      {
+        "cuenta": "6811008001",
+        "nombre": "Dotac. Amortiz. Local y Sótano C/Menéndez Pelayo, 15 Palencia",
+        "importe": 5141.16
+      },
+      {
+        "cuenta": "6811009001",
+        "nombre": "Dotac. Amortiz. -2, 76 Garaje C/Menéndez Pelayo, 17 Palencia",
+        "importe": 112.92
+      },
+      {
+        "cuenta": "6811009002",
+        "nombre": "Dotac. Amortiz. -2, 81 Garaje C/Menéndez Pelayo, 17 Palencia",
+        "importe": 164.52
+      },
+      {
+        "cuenta": "6811009003",
+        "nombre": "Dotac. Amortiz. -1, 13 Garaje C/Menéndez Pelayo, 17 Palencia",
+        "importe": 164.52
+      },
+      {
+        "cuenta": "6811009004",
+        "nombre": "Dotac. Amortiz. -1, 16 Garaje C/Menéndez Pelayo, 17 Palencia",
+        "importe": 164.52
+      },
+      {
+        "cuenta": "6811009005",
+        "nombre": "Dotac. Amortiz. -1, 18 Garaje C/Menéndez Pelayo, 17 Palencia",
+        "importe": 164.52
+      },
+      {
+        "cuenta": "6811009006",
+        "nombre": "Dotac. Amortiz. -1, 19 Garaje C/Menéndez Pelayo, 17 Palencia",
+        "importe": 164.52
+      },
+      {
+        "cuenta": "6811009007",
+        "nombre": "Dotac. Amortiz. -1, 20 Garaje C/Menéndez Pelayo, 17 Palencia",
+        "importe": 164.52
+      },
+      {
+        "cuenta": "6811009008",
+        "nombre": "Dotac. Amortiz. -1, 26 Garaje C/Menéndez Pelayo, 17 Palencia",
+        "importe": 164.52
+      },
+      {
+        "cuenta": "6811009009",
+        "nombre": "Dotac. Amortiz. -1, 27 Garaje C/Menéndez Pelayo, 17 Palencia",
+        "importe": 164.52
+      },
+      {
+        "cuenta": "6811009010",
+        "nombre": "Dotac. Amortiz. -1, 28 Garaje C/Menéndez Pelayo, 17 Palencia",
+        "importe": 164.52
+      },
+      {
+        "cuenta": "6811009011",
+        "nombre": "Dotac. Amortiz. -1, 29 Garaje C/Menéndez Pelayo, 17 Palencia",
+        "importe": 164.52
+      },
+      {
+        "cuenta": "6811009012",
+        "nombre": "Dotac. Amortiz. -1, 30 Garaje C/Menéndez Pelayo, 17 Palencia",
+        "importe": 164.52
+      },
+      {
+        "cuenta": "6811009013",
+        "nombre": "Dotac. Amortiz. -1, 31 Garaje C/Menéndez Pelayo, 17 Palencia",
+        "importe": 164.52
+      },
+      {
+        "cuenta": "6811009014",
+        "nombre": "Dotac. Amortiz. -1, 32 Garaje C/Menéndez Pelayo, 17 Palencia",
+        "importe": 164.52
+      },
+      {
+        "cuenta": "6811009015",
+        "nombre": "Dotac. Amortiz. -1, 33 Garaje C/Menéndez Pelayo, 17 Palencia",
+        "importe": 164.52
+      },
+      {
+        "cuenta": "6811009016",
+        "nombre": "Dotac. Amortiz. -1, 34 Garaje C/Menéndez Pelayo, 17 Palencia",
+        "importe": 164.52
+      },
+      {
+        "cuenta": "6811009017",
+        "nombre": "Dotac. Amortiz. -1, 35 Garaje C/Menéndez Pelayo, 17 Palencia",
+        "importe": 164.52
+      },
+      {
+        "cuenta": "6811009018",
+        "nombre": "Dotac. Amortiz. -1, 36 Garaje C/Menéndez Pelayo, 17 Palencia",
+        "importe": 164.52
+      },
+      {
+        "cuenta": "6811009019",
+        "nombre": "Dotac. Amortiz. -1, 38 Garaje C/Menéndez Pelayo, 17 Palencia",
+        "importe": 164.52
+      },
+      {
+        "cuenta": "6811009020",
+        "nombre": "Dotac. Amortiz. -1, 84 (118) Garaje C/Menéndez Pelayo, 17 Palencia",
+        "importe": 164.52
+      },
+      {
+        "cuenta": "6811009021",
+        "nombre": "Dotac. Amortiz. -1, 85 (119) Garaje C/Menéndez Pelayo, 17 Palencia",
+        "importe": 164.52
+      },
+      {
+        "cuenta": "6811010001",
+        "nombre": "Dotac. Amortiz. Nave C/ Metal, 4 Valladolid",
+        "importe": 13967.4
+      },
+      {
+        "cuenta": "6811011001",
+        "nombre": "Dotac. Amortiz. Inmueble C/Constitución, 8, 2º A Valladolid",
+        "importe": 5823.6
+      },
+      {
+        "cuenta": "6811012001",
+        "nombre": "Dotac. Amort. Garajes -3, 5 C/ Constitución, 5 Valladolid",
+        "importe": 295.68
+      },
+      {
+        "cuenta": "6811012002",
+        "nombre": "Dotac. Amort. Garajes -3, 14 C/ Constitución, 5 Valladolid",
+        "importe": 295.68
+      },
+      {
+        "cuenta": "6811012003",
+        "nombre": "Dotac. Amort. Garajes -2, 12 C/ Constitución, 5 Valladolid",
+        "importe": 295.68
+      },
+      {
+        "cuenta": "6811012004",
+        "nombre": "Dotac. Amort. Garajes -2, 13 C/ Constitución, 5 Valladolid",
+        "importe": 295.68
+      },
+      {
+        "cuenta": "6811013001",
+        "nombre": "Dotac. Amortiz. Local C/ Barquillo, 30 Madrid (Sin Repartir)",
+        "importe": 2505.6
+      },
+      {
+        "cuenta": "6811014001",
+        "nombre": "Dot. Amort. Local C/ Reina, 15 (grande) Madrid",
+        "importe": 5066.04
+      },
+      {
+        "cuenta": "6811014002",
+        "nombre": "Dot. Amort. Local C/ Reina, 15 (pequeño) Madrid",
+        "importe": 2285.64
+      },
+      {
+        "cuenta": "6811015000",
+        "nombre": "Dot. Amort. Edificio C/ Piamonte, 23 Madrid",
+        "importe": 68996.88
+      },
+      {
+        "cuenta": "6811016000",
+        "nombre": "Dotac. Amort. Garajes C/Hernández de Tejada, 6 Madrid",
+        "importe": 2121.6
+      },
+      {
+        "cuenta": "6815002001",
+        "nombre": "Dotac. Amortiz. Otras Instalaciones Local C/Menéndez Pelayo, 15 Palencia",
+        "importe": 2387.64
+      },
+      {
+        "cuenta": "6815003001",
+        "nombre": "Dot. Am. Otras Instalac. Gem. XX, 25ºD Benidorm",
+        "importe": 158.16
+      },
+      {
+        "cuenta": "6815003002",
+        "nombre": "Dot. Am. Otras Instalac. Gem. XX, 16ºD Benidorm",
+        "importe": 137.16
+      },
+      {
+        "cuenta": "6815003003",
+        "nombre": "Dot. Am. Otras Instalac. Gem. XX, 3ºD Benidorm",
+        "importe": 125.16
+      },
+      {
+        "cuenta": "6815003004",
+        "nombre": "Dot. Am. Otras Instalac. Gem. XX, 3ºC Benidorm",
+        "importe": 137.76
+      },
+      {
+        "cuenta": "6815003005",
+        "nombre": "Dot. Am. Otras Instalac. Gem. XX, 2ºC Benidorm",
+        "importe": 125.16
+      },
+      {
+        "cuenta": "6815003006",
+        "nombre": "Dot. Am. Otras Instalac. Gem. XX, 17ºD Benidorm",
+        "importe": 255.0
+      },
+      {
+        "cuenta": "6815003007",
+        "nombre": "Dot. Am. Otras Instalac. Gem. XX, 20ºD Benidorm",
+        "importe": 125.16
+      },
+      {
+        "cuenta": "6815003008",
+        "nombre": "Dot. Am. Otras Instalac. Gem. XX, 19ºC Benidorm",
+        "importe": 348.36
+      },
+      {
+        "cuenta": "6815003009",
+        "nombre": "Dot. Am. Otras Instalac. Gem. XX, 24ºD Benidorm",
+        "importe": 199.8
+      },
+      {
+        "cuenta": "6815003010",
+        "nombre": "Dot. Am. Otras Instalac. Gem. XX, 1ºC Benidorm",
+        "importe": 348.36
+      },
+      {
+        "cuenta": "6815003011",
+        "nombre": "Dot. Am. Otras Instalac. Gem. II, 1ºD Benidorm",
+        "importe": 188.52
+      },
+      {
+        "cuenta": "6815003012",
+        "nombre": "Dot. Am. Otras Instalac. Gem. II, 3ºB Benidorm",
+        "importe": 252.6
+      },
+      {
+        "cuenta": "6815003013",
+        "nombre": "Dot. Am. Otras Instalac. Gem. II, 20ºB Benidorm",
+        "importe": 244.08
+      },
+      {
+        "cuenta": "6815003014",
+        "nombre": "Dot. Am. Otras Instalac. Gem. II, 20ºC Benidorm",
+        "importe": 511.08
+      },
+      {
+        "cuenta": "6815003015",
+        "nombre": "Dot. Am. Otras Instalac. Gem. IV, 17ºC Benidorm",
+        "importe": 300.72
+      },
+      {
+        "cuenta": "6815003016",
+        "nombre": "Dot. Am. Otras Instalac. Gem. II, 3ºE Benidorm",
+        "importe": 513.12
+      },
+      {
+        "cuenta": "6815003019",
+        "nombre": "Dot. Am. Otras Instalac. Gem. II, 1ºE Benidorm",
+        "importe": 544.53
+      },
+      {
+        "cuenta": "6815004001",
+        "nombre": "Dot.Am.Otras Instal. Vivienda T.Marbella",
+        "importe": 3518.75
+      },
+      {
+        "cuenta": "6815005001",
+        "nombre": "Dot.Am.Otras Instal. Oficinas Madrid Av",
+        "importe": 1821.34
+      },
+      {
+        "cuenta": "6815011001",
+        "nombre": "Dot.Am.Otras Instal. Oficinas C/Constitución, 8 Valladolid",
+        "importe": 60.96
+      },
+      {
+        "cuenta": "6816003001",
+        "nombre": "Dot. Amort. Mobiliario Gemelos XX, 25ºD Benidorm",
+        "importe": 102.78
+      },
+      {
+        "cuenta": "6816003002",
+        "nombre": "Dot. Amort. Mobiliario Gemelos XX, 16ºD Benidorm",
+        "importe": 119.28
+      },
+      {
+        "cuenta": "6816003003",
+        "nombre": "Dot. Amort. Mobiliario Gemelos XX, 3ºD Benidorm",
+        "importe": 442.2
+      },
+      {
+        "cuenta": "6816003004",
+        "nombre": "Dot. Amort. Mobiliario Gemelos XX, 3ºC Benidorm",
+        "importe": 150.36
+      },
+      {
+        "cuenta": "6816003005",
+        "nombre": "Dot. Amort. Mobiliario Gemelos XX, 2ºC Benidorm",
+        "importe": 150.35
+      },
+      {
+        "cuenta": "6816003006",
+        "nombre": "Dot. Amort. Mobiliario Gemelos XX, 17ºD Benidorm",
+        "importe": 115.92
+      },
+      {
+        "cuenta": "6816003007",
+        "nombre": "Dot. Amort. Mobiliario Gemelos XX, 20ºD Benidorm",
+        "importe": 137.15
+      },
+      {
+        "cuenta": "6816003008",
+        "nombre": "Dot. Amort. Mobiliario Gemelos XX, 19ºC Benidorm",
+        "importe": 124.08
+      },
+      {
+        "cuenta": "6816003009",
+        "nombre": "Dot. Amort. Mobiliario Gemelos XX, 24ºD Benidorm",
+        "importe": 378.6
+      },
+      {
+        "cuenta": "6816003010",
+        "nombre": "Dot. Amort. Mobiliario Gemelos XX, 1ºC Benidorm",
+        "importe": 103.32
+      },
+      {
+        "cuenta": "6816003011",
+        "nombre": "Dot. Amort. Mobiliario Gemelos II, 1ºD Benidorm",
+        "importe": 182.88
+      },
+      {
+        "cuenta": "6816003012",
+        "nombre": "Dot. Amort. Mobiliario Gemelos II, 3ºB Benidorm",
+        "importe": 173.99
+      },
+      {
+        "cuenta": "6816003013",
+        "nombre": "Dot. Amort. Mobiliario Gemelos II, 20ºB Benidorm",
+        "importe": 134.02
+      },
+      {
+        "cuenta": "6816003014",
+        "nombre": "Dot. Amort. Mobiliario Gemelos II, 20ºC Benidorm",
+        "importe": 152.28
+      },
+      {
+        "cuenta": "6816003015",
+        "nombre": "Dot. Amort. Mobiliario Gemelos IV, 17ºC Benidorm",
+        "importe": 164.4
+      },
+      {
+        "cuenta": "6816003016",
+        "nombre": "Dot. Amort. Mobiliario Gemelos II, 3ºE Benidorm",
+        "importe": 131.76
+      },
+      {
+        "cuenta": "6816003019",
+        "nombre": "Dot. Amort. Mobiliario Gemelos II, 1ºE Benidorm",
+        "importe": 530.11
+      },
+      {
+        "cuenta": "6816004001",
+        "nombre": "Dot.Amort. Mobiliario Viv. Tomillar Nagü",
+        "importe": 2033.04
+      },
+      {
+        "cuenta": "6816005001",
+        "nombre": "Dot.Amort. Mobiliario Oficinas Madrid",
+        "importe": 3267.49
+      },
+      {
+        "cuenta": "6816006001",
+        "nombre": "Dotac. Amortiz. Mobiliario Inmueble C/Constitución, 8 Valladolid",
+        "importe": 224.24
+      },
+      {
+        "cuenta": "6816008001",
+        "nombre": "Dot. Amortiz. Mobiliario Local C/ Menéndez Pelayo, 15 Palencia",
+        "importe": 1908.0
+      }
+    ],
+    "proveedores": [
+      {
+        "cuenta": "4100000010",
+        "nombre": "Endesa Distribución Eléctrica S.L.",
+        "saldo": -1.39
+      },
+      {
+        "cuenta": "4100000017",
+        "nombre": "Hidralia, Gestión Integral de Aguas de A",
+        "saldo": -18.4
+      },
+      {
+        "cuenta": "4100000018",
+        "nombre": "Repsol Butano S.A.",
+        "saldo": -0.19
+      },
+      {
+        "cuenta": "4100000044",
+        "nombre": "Acosol S.A.",
+        "saldo": 18.4
+      },
+      {
+        "cuenta": "4100000045",
+        "nombre": "Bankinter S.A. (acreedor)",
+        "saldo": 1.23
+      },
+      {
+        "cuenta": "4100000046",
+        "nombre": "Vidaro Inversiones S.L.",
+        "saldo": -0.0
+      },
+      {
+        "cuenta": "4100000089",
+        "nombre": "Gas Natural Redes GLP, S.A.",
+        "saldo": 14.46
+      },
+      {
+        "cuenta": "4100000095",
+        "nombre": "Movistar Prosegur Alarmas , S.L",
+        "saldo": -5.61
+      },
+      {
+        "cuenta": "4100000096",
+        "nombre": "Notarios Padre Damián 40 C.B.",
+        "saldo": -4433.5
+      },
+      {
+        "cuenta": "4100000101",
+        "nombre": "Endesa Energía, S.A.U",
+        "saldo": -663.12
+      },
+      {
+        "cuenta": "4100000102",
+        "nombre": "Arcano Value Added Operativa I, S.L",
+        "saldo": -27.0
+      },
+      {
+        "cuenta": "4100000105",
+        "nombre": "Manuel García Quilón",
+        "saldo": 629.28
+      },
+      {
+        "cuenta": "4100000130",
+        "nombre": "Juan Carlos Villamuza Rodriguez",
+        "saldo": 55.66
+      },
+      {
+        "cuenta": "4100000146",
+        "nombre": "Juárez Pérez, Sonia",
+        "saldo": 51.0
+      },
+      {
+        "cuenta": "4100000153",
+        "nombre": "Electricidad Eleia, S.L",
+        "saldo": -348.32
+      },
+      {
+        "cuenta": "4100000157",
+        "nombre": "Wekiwi SL",
+        "saldo": -100.99
+      },
+      {
+        "cuenta": "4100000166",
+        "nombre": "Comunidad de Madrid",
+        "saldo": 47250.0
+      },
+      {
+        "cuenta": "4100000169",
+        "nombre": "ALUMBRA CORPORATION S.L",
+        "saldo": -118.8
+      },
+      {
+        "cuenta": "4100000172",
+        "nombre": "Inversiones Inmobiliaras Calle Piamonte 23 SL",
+        "saldo": 5000.0
+      },
+      {
+        "cuenta": "4100000181",
+        "nombre": "Repsol Comercializadora de Electricidad y Gas, SLU",
+        "saldo": -27.87
+      },
+      {
+        "cuenta": "4100000187",
+        "nombre": "Gaolania Servicios SL",
+        "saldo": 0.0
+      },
+      {
+        "cuenta": "4100000193",
+        "nombre": "Pescaderías Coruñesas S.L.",
+        "saldo": 48000.0
+      },
+      {
+        "cuenta": "4100000195",
+        "nombre": "Álamo Home Europe S.L",
+        "saldo": 1210.0
+      },
+      {
+        "cuenta": "4100000213",
+        "nombre": "Edificaciones Globales Pénfola S.L.",
+        "saldo": 550.68
+      }
+    ],
+    "seguros": [
+      {
+        "cuenta": "6250000000",
+        "nombre": "Prima de Seguro AXA Tomillar Nagüelles",
+        "importe": 638.18
+      },
+      {
+        "cuenta": "6250000001",
+        "nombre": "Prima Seguro Of Av Europa 34B Madrid",
+        "importe": 370.43
+      },
+      {
+        "cuenta": "6250000004",
+        "nombre": "Prima de seguro Of.Constitución 8 Valladolid",
+        "importe": 497.98
+      },
+      {
+        "cuenta": "6250000005",
+        "nombre": "Prima de seguro Nave Palencia Av.Cuba",
+        "importe": 1801.77
+      },
+      {
+        "cuenta": "6250000006",
+        "nombre": "Prima de seguro Nave Valladolid C/Metal",
+        "importe": 1094.17
+      },
+      {
+        "cuenta": "6250000007",
+        "nombre": "Prima de seguro Local M.Pelayo",
+        "importe": 577.6
+      },
+      {
+        "cuenta": "6250003001",
+        "nombre": "Prima de seguro GXX,Torre 2,25ºD",
+        "importe": 225.14
+      },
+      {
+        "cuenta": "6250003002",
+        "nombre": "Prima de seguro GXX,Torre 2,16ºD",
+        "importe": 199.75
+      },
+      {
+        "cuenta": "6250003003",
+        "nombre": "Prima de seguro GXX,Torre 2,3ºD",
+        "importe": 219.13
+      },
+      {
+        "cuenta": "6250003004",
+        "nombre": "Prima de seguro GXX,Torre 2,3ºC",
+        "importe": 202.29
+      },
+      {
+        "cuenta": "6250003005",
+        "nombre": "Prima de seguro GXX,Torre 2,2ºC",
+        "importe": 223.92
+      },
+      {
+        "cuenta": "6250003006",
+        "nombre": "Prima de seguro GXX,Torre 2,17ºD",
+        "importe": 202.29
+      },
+      {
+        "cuenta": "6250003007",
+        "nombre": "Prima de seguro GXX,Torre 2,20ºD",
+        "importe": 264.15
+      },
+      {
+        "cuenta": "6250003008",
+        "nombre": "Prima de seguro GXX,Torre 2,19ºC",
+        "importe": 202.29
+      },
+      {
+        "cuenta": "6250003009",
+        "nombre": "Prima de seguro GXX,Torre 2,24ºD",
+        "importe": 209.27
+      },
+      {
+        "cuenta": "6250003010",
+        "nombre": "Prima de seguro GXX,Torre 2,1ºC",
+        "importe": 223.74
+      },
+      {
+        "cuenta": "6250003011",
+        "nombre": "Prima de seguro GII,Torre 1,1ºD",
+        "importe": 210.34
+      },
+      {
+        "cuenta": "6250003012",
+        "nombre": "Prima de seguro GII,Torre 1,3º B",
+        "importe": 197.18
+      },
+      {
+        "cuenta": "6250003013",
+        "nombre": "Prima de seguro GII,Torre 1,20ºB",
+        "importe": 237.95
+      },
+      {
+        "cuenta": "6250003014",
+        "nombre": "Prima de seguro GII,Torre 1,20ºC",
+        "importe": 197.18
+      },
+      {
+        "cuenta": "6250003015",
+        "nombre": "Prima de seguro GIV,Torre 1,17ºC",
+        "importe": 218.44
+      },
+      {
+        "cuenta": "6250003016",
+        "nombre": "Prima de seguro GII,Torre 1,3ºE",
+        "importe": 199.76
+      },
+      {
+        "cuenta": "6250003019",
+        "nombre": "Prima de seguro GII,Torre 1,1ºE",
+        "importe": 0.48
+      },
+      {
+        "cuenta": "6250007000",
+        "nombre": "Prima de seguro Local y sótano Prado 10",
+        "importe": 834.11
+      },
+      {
+        "cuenta": "6250015001",
+        "nombre": "Prima de seguro Edificio C/Piamonte 23",
+        "importe": 2790.27
+      }
+    ]
+  },
+  "VIDARO": {
+    "ibis": [
+      {
+        "cuenta": "6310003002",
+        "nombre": "Impto Circulación 8446JJD",
+        "importe": 224.0
+      },
+      {
+        "cuenta": "6310003045",
+        "nombre": "Impuesto Circulación 7601LZV (Alfonso)",
+        "importe": 59.0
+      },
+      {
+        "cuenta": "6310003079",
+        "nombre": "Impuesto Circulación 0643JZL (Rosa Elena)",
+        "importe": 129.0
+      },
+      {
+        "cuenta": "6310003091",
+        "nombre": "Impuesto Circulación 3445KGZ (David)",
+        "importe": 179.0
+      },
+      {
+        "cuenta": "6310003092",
+        "nombre": "Impuesto Circulación 4583KGZ (Vicente Facundo)",
+        "importe": 179.0
+      },
+      {
+        "cuenta": "6319000001",
+        "nombre": "Multas y Sanciones no deducibles",
+        "importe": 69743.03
+      }
+    ],
+    "amortizaciones": [
+      {
+        "cuenta": "6817000001",
+        "nombre": "Dotac. Amortiz. Equipos informáticos",
+        "importe": 1401.99
+      },
+      {
+        "cuenta": "6818000001",
+        "nombre": "Dotac. Amortiz. Elementos de Transporte",
+        "importe": 9611.16
+      }
+    ],
+    "proveedores": [
+      {
+        "cuenta": "4100000024",
+        "nombre": "Colegio de Registradores de España",
+        "saldo": 3.15
+      },
+      {
+        "cuenta": "4100000031",
+        "nombre": "Daviro Inversiones S.L.U.",
+        "saldo": 48.48
+      },
+      {
+        "cuenta": "4100000055",
+        "nombre": "Araoz y Rueda Abogados S.L.P.",
+        "saldo": 15751.83
+      },
+      {
+        "cuenta": "4100000057",
+        "nombre": "Michavila de Fernando Family Partners S.A.",
+        "saldo": 5186.03
+      },
+      {
+        "cuenta": "4100000062",
+        "nombre": "Google Cloud EMEA Limited",
+        "saldo": 69.0
+      },
+      {
+        "cuenta": "4100000082",
+        "nombre": "Banco Bilbao Vizcaya Argentaria S.A.",
+        "saldo": -300.0
+      },
+      {
+        "cuenta": "4100000085",
+        "nombre": "MDEF Gestefin S.A.U. S.G.I.I.C.",
+        "saldo": 8451.57
+      },
+      {
+        "cuenta": "4100000092",
+        "nombre": "Bank Pictet & Cie (Europe) AG Sucursal en España",
+        "saldo": -20.57
+      },
+      {
+        "cuenta": "4100000096",
+        "nombre": "Zucchetti Software Spain S.L.U.",
+        "saldo": -0.0
+      },
+      {
+        "cuenta": "4100000103",
+        "nombre": "ROSA ELENA VILLAGRA, Acreed.xGtos Repres",
+        "saldo": 844.12
+      },
+      {
+        "cuenta": "4100000112",
+        "nombre": "Solred S.A.",
+        "saldo": 782.13
+      },
+      {
+        "cuenta": "4100000113",
+        "nombre": "Ural Motor S.L.",
+        "saldo": -0.0
+      },
+      {
+        "cuenta": "4100000114",
+        "nombre": "Caceis Bank Spain S.A.U.",
+        "saldo": 20.57
+      },
+      {
+        "cuenta": "4100000134",
+        "nombre": "Bankinter S.A.",
+        "saldo": 8747.61
+      },
+      {
+        "cuenta": "4100000852",
+        "nombre": "Autocentro Palencia S.L.",
+        "saldo": -0.0
+      },
+      {
+        "cuenta": "4100001377",
+        "nombre": "VICENTE FACUNDO VILLAGRA, Acreedor por Gtos Repres.",
+        "saldo": 374.66
+      },
+      {
+        "cuenta": "4100001383",
+        "nombre": "DAVID VILLAGRA, Acreedor por Gtos Repres.",
+        "saldo": 3316.04
+      },
+      {
+        "cuenta": "4100001384",
+        "nombre": "Alfonso Calleja Acreedor x gastos representación",
+        "saldo": 116.11
+      },
+      {
+        "cuenta": "4100005000",
+        "nombre": "PDV Gesfasa Desarrollo S.L.U.",
+        "saldo": -1642.94
+      },
+      {
+        "cuenta": "4100007000",
+        "nombre": "Los Girasoles S.A.",
+        "saldo": -7162.22
+      },
+      {
+        "cuenta": "4100008000",
+        "nombre": "Facundo Blanco S.A.U.",
+        "saldo": -5782.79
+      },
+      {
+        "cuenta": "4100009000",
+        "nombre": "Disfasa S.A.U.",
+        "saldo": -23637.34
+      }
+    ],
+    "seguros": [
+      {
+        "cuenta": "6250000045",
+        "nombre": "Seguro 7601LZV (Alfonso)",
+        "importe": 698.94
+      },
+      {
+        "cuenta": "6250000073",
+        "nombre": "Seguro 8446JJD (Vicente)",
+        "importe": 2530.43
+      },
+      {
+        "cuenta": "6250000079",
+        "nombre": "Seguro 0643JZL",
+        "importe": 813.23
+      },
+      {
+        "cuenta": "6250000091",
+        "nombre": "Seguro 3445KGZ (David Villagrá)",
+        "importe": 1638.03
+      },
+      {
+        "cuenta": "6250000092",
+        "nombre": "Seguro 4583KGZ (Vicente Facundo Villagrá)",
+        "importe": 1490.95
+      }
+    ],
+    "inversiones": [
+      {
+        "cuenta": "2500000001",
+        "nombre": "Inv. Fras L/P Accs HELIA ENERG RENOV III SCR SA Isin:ES011161406",
+        "isin": "",
+        "saldo": 1916856.0
+      },
+      {
+        "cuenta": "2500000002",
+        "nombre": "Inv. Fras L/P Fondo Residencias Estudiantes Glogal FIL ISIN: ES0173545023",
+        "isin": "ES0173545023",
+        "saldo": 224864.89
+      },
+      {
+        "cuenta": "2500000047",
+        "nombre": "Acciones Pangaea Oncology SA (Ticket: PANG SM) ISIN: ES0105221008",
+        "isin": "ES0105221008",
+        "saldo": 4343118.29
+      },
+      {
+        "cuenta": "2500000048",
+        "nombre": "Portobello Partnerships Estructurados Fondo I SCR",
+        "isin": "",
+        "saldo": 4810564.42
+      },
+      {
+        "cuenta": "2500000049",
+        "nombre": "Sabadell ASABYS Health Innovation Investments SCR, SA (NIF: A67293829) ISIN:  ES0174313009",
+        "isin": "ES0174313009",
+        "saldo": 4446879.62
+      },
+      {
+        "cuenta": "2500000050",
+        "nombre": "Accs Stonehenge Hotels SCR, SA (CIF A02768406) ISIN:ES0176348003",
+        "isin": "ES0176348003",
+        "saldo": 1635374.0
+      },
+      {
+        "cuenta": "2500000055",
+        "nombre": "Accs Amper S.A. ISIN: ES0109260531",
+        "isin": "ES0109260531",
+        "saldo": 1367159.98
+      },
+      {
+        "cuenta": "2500000074",
+        "nombre": "PART. PIMCO INCOME I (EURHDG) ACC ISIN: IE00B80G9288",
+        "isin": "IE00B80G9288",
+        "saldo": 230551.08
+      },
+      {
+        "cuenta": "2500000092",
+        "nombre": "ROBECO BP US PREMIUM EQ I (EUR) A ISIN: LU0454739615",
+        "isin": "LU0454739615",
+        "saldo": 122952.47
+      },
+      {
+        "cuenta": "2500000104",
+        "nombre": "Shs iShares PLC - iShares Core S&P 500UCITS ETF USD (Dist) Shs USD ISIN: IE0031442068",
+        "isin": "IE0031442068",
+        "saldo": 257276.55
+      },
+      {
+        "cuenta": "2500000151",
+        "nombre": "Green Transition Strategies I SCR ISIN: ES0143279000 CIF: A09989864",
+        "isin": "ES0143279000",
+        "saldo": 935025.0
+      },
+      {
+        "cuenta": "2500000181",
+        "nombre": "AC TITAN INV EN INFRAESTRUCTURAS II CLASE A Isin: ES0150102004",
+        "isin": "",
+        "saldo": 1352800.52
+      },
+      {
+        "cuenta": "2500000185",
+        "nombre": "PART BNP PAR SUS ENH BD 1 ISIN: LU1819949089",
+        "isin": "LU1819949089",
+        "saldo": 849058.37
+      },
+      {
+        "cuenta": "2500000186",
+        "nombre": "PART BKT AHORRO RENTA FIJA ISIN: ES0110053008",
+        "isin": "ES0110053008",
+        "saldo": 880348.09
+      },
+      {
+        "cuenta": "2500000222",
+        "nombre": "MUZNCH GLB SHRT DURTN INVT GRD H ACC EUR ISIN: IE00BJCXFM61",
+        "isin": "IE00BJCXFM61",
+        "saldo": 1519019.29
+      },
+      {
+        "cuenta": "2500000223",
+        "nombre": "ELEVA EUROPEAN SELECTION R EUR ACC ISIN: LU1111643711",
+        "isin": "LU1111643711",
+        "saldo": 1047173.2
+      },
+      {
+        "cuenta": "2500000224",
+        "nombre": "GROUPAMA ENTREPISES R ACC EUR ISIN: FR0013278702",
+        "isin": "FR0013278702",
+        "saldo": 643014.02
+      },
+      {
+        "cuenta": "2500000229",
+        "nombre": "PARVEST BOND EURO MEDIUM TERM PF ACC EUR ISIN: LU0111463849",
+        "isin": "LU0111463849",
+        "saldo": 506960.41
+      },
+      {
+        "cuenta": "2500000230",
+        "nombre": "PICTET-ST MONEY MARKET EUR-I ISIN: LU0128494944",
+        "isin": "LU0128494944",
+        "saldo": 827776.91
+      },
+      {
+        "cuenta": "2500000235",
+        "nombre": "PICTET-EM CORP BDS-HI EUR ISIN: LU0844698075",
+        "isin": "LU0844698075",
+        "saldo": 193639.88
+      },
+      {
+        "cuenta": "2500000238",
+        "nombre": "BDL CONVICTIONS PART.I EUR-ACC ISIN: FR0013289535",
+        "isin": "FR0013289535",
+        "saldo": 499305.92
+      },
+      {
+        "cuenta": "2500000240",
+        "nombre": "SSGA-GL.TR.1-10 BD IDX I EUR H-ACC ISIN: LU2014365915",
+        "isin": "LU2014365915",
+        "saldo": 519906.76
+      },
+      {
+        "cuenta": "2500000241",
+        "nombre": "JPMF-MM ALTERNATIVES S2 EUR H-ACC.- ISIN: LU2050537195",
+        "isin": "LU2050537195",
+        "saldo": 116723.16
+      },
+      {
+        "cuenta": "2500000243",
+        "nombre": "GLOBALREACH MS-GRAHA.MACRO I-AF EUR ISIN: IE00044SJSK2",
+        "isin": "IE00044SJSK2",
+        "saldo": 147192.17
+      },
+      {
+        "cuenta": "2500000253",
+        "nombre": "LAZARD GIF-EM LOC.DEBT P USD-ACC.- ISIN: IE00BD904R66",
+        "isin": "IE00BD904R66",
+        "saldo": 258654.47
+      },
+      {
+        "cuenta": "2500000255",
+        "nombre": "XTRACKERS-MSCI EUROPE 1C -ACC- ISIN: LU0274209237",
+        "isin": "LU0274209237",
+        "saldo": 1160009.14
+      },
+      {
+        "cuenta": "2500000258",
+        "nombre": "LETRAS DEL TESORO ESTADO DE ESPAÑA. VTO 31-05-2026 ISIN: ES0000012L29 -INVERSIS-",
+        "isin": "ES0000012L29",
+        "saldo": 799927.9
+      },
+      {
+        "cuenta": "2500000259",
+        "nombre": "SISF-ASIAN TOTAL RETURN C USD-ACC.- ISIN: LU0326949186 -INVERSIS-",
+        "isin": "LU0326949186",
+        "saldo": 201996.63
+      },
+      {
+        "cuenta": "2500000261",
+        "nombre": "SSGA-GL.ESG SCREE.ENH.EQU.I USD-ACC ISIN: LU1159225991",
+        "isin": "LU1159225991",
+        "saldo": 487434.88
+      },
+      {
+        "cuenta": "2500000264",
+        "nombre": "ZGLDHE SW - ETF ZKB GOLD H-EUR ISIN: CH0103326762 -INVERSIS-",
+        "isin": "CH0103326762",
+        "saldo": 406738.0
+      },
+      {
+        "cuenta": "2500000270",
+        "nombre": "GUINNESS GLB EQ INC Y ACC EUR ISIN: IE00BVYPNZ31 -INVERSIS-",
+        "isin": "IE00BVYPNZ31",
+        "saldo": 251404.77
+      },
+      {
+        "cuenta": "2500000271",
+        "nombre": "BNPP INSTIC EUR I SH TM VNAV A ISIN: LU0094219127 *70971 -INVERSIS-",
+        "isin": "LU0094219127",
+        "saldo": 258232.85
+      },
+      {
+        "cuenta": "2500000272",
+        "nombre": "VERITAS GLOBAL FOCUS C ACC EUR ISIN: IE00B3W2QP15 -INVERSIS-",
+        "isin": "IE00B3W2QP15",
+        "saldo": 168484.3
+      },
+      {
+        "cuenta": "2500000275",
+        "nombre": "ETF ISHARES MSCI WORLD ACC ISIN: IE00B4L5Y983 -INVERSIS-",
+        "isin": "IE00B4L5Y983",
+        "saldo": 285516.8
+      },
+      {
+        "cuenta": "2500000277",
+        "nombre": "SISF EURO CORP BOND C ACC EUR ISIN: LU0113258742 -INVERSIS-",
+        "isin": "LU0113258742",
+        "saldo": 1875694.25
+      },
+      {
+        "cuenta": "2500000278",
+        "nombre": "COMGEST GROWTH EUROPE I AC EUR ISIN: IE00B5WN3467 -INVERSIS-",
+        "isin": "IE00B5WN3467",
+        "saldo": 175590.49
+      },
+      {
+        "cuenta": "2500000279",
+        "nombre": "HERMES ASIA EXJAPN EQ F AC EUR ISIN: IE00B83XD802 -INVERSIS-",
+        "isin": "IE00B83XD802",
+        "saldo": 203765.27
+      },
+      {
+        "cuenta": "2500000280",
+        "nombre": "MAGALLANES EUROPEAN EQUITY I ISIN: LU1330191385 -INVERSIS-",
+        "isin": "LU1330191385",
+        "saldo": 182822.99
+      },
+      {
+        "cuenta": "2500000283",
+        "nombre": "MAN GLG ASIA CREDIT OPPOR IF H ISIN: IE0006UIVA78 -INVERSIS-",
+        "isin": "IE0006UIVA78",
+        "saldo": 204951.82
+      },
+      {
+        "cuenta": "2500000285",
+        "nombre": "EDR FUND BIG DATA P ACC EUR ISIN: LU2225826366 -INVERSIS-",
+        "isin": "LU2225826366",
+        "saldo": 254479.27
+      },
+      {
+        "cuenta": "2500000286",
+        "nombre": "REDWHEEL GBL EQ INCO S ACC EUR ISIN: LU2264081188 -INVERSIS-",
+        "isin": "LU2264081188",
+        "saldo": 256276.1
+      },
+      {
+        "cuenta": "2500000289",
+        "nombre": "MS EURO CORP BOND Z ACC EUR ISIN: LU0360483100",
+        "isin": "LU0360483100",
+        "saldo": 1192591.78
+      },
+      {
+        "cuenta": "2500000291",
+        "nombre": "NXT GNRT EMRG MRK EQ B ACC EUR ISIN: LU1965309831 -INVERSIS-",
+        "isin": "LU1965309831",
+        "saldo": 209181.13
+      },
+      {
+        "cuenta": "2500000292",
+        "nombre": "PACIFIC NTH OF STH EM ALL EQ ISIN: IE00BM8QS764 -INVERSIS-",
+        "isin": "IE00BM8QS764",
+        "saldo": 206626.47
+      },
+      {
+        "cuenta": "2500000293",
+        "nombre": "LIGHTMN EUROPN EQTI FUND-I-EUR ISIN: LU2214500949 -INVERSIS-",
+        "isin": "LU2214500949",
+        "saldo": 180430.42
+      },
+      {
+        "cuenta": "2500000294",
+        "nombre": "BLUEBA-INV.GRADE BD Q EUR-ACC- ISIN: LU1170326638",
+        "isin": "LU1170326638",
+        "saldo": 704554.16
+      },
+      {
+        "cuenta": "2500000297",
+        "nombre": "BLUEBOX GLB TECH FND I ACC USD ISIN: LU1793346666 -INVERSIS-",
+        "isin": "LU1793346666",
+        "saldo": 172459.69
+      },
+      {
+        "cuenta": "2500000300",
+        "nombre": "MI METROPOLIS VALUEFD AC GBP ISIN: GB00BYQPY596 -INVERSIS-",
+        "isin": "GB00BYQPY596",
+        "saldo": 284402.57
+      },
+      {
+        "cuenta": "2500000303",
+        "nombre": "ISHARES WORLD EQUITY INDEX D2 ACC EUR ISIN: LU0875157702",
+        "isin": "LU0875157702",
+        "saldo": 572954.96
+      },
+      {
+        "cuenta": "2500000310",
+        "nombre": "PHYSICAL GOLD (INVESCO)-ETC-311200 ISIN: IE00B579F325",
+        "isin": "IE00B579F325",
+        "saldo": 228522.75
+      },
+      {
+        "cuenta": "2500000311",
+        "nombre": "US SHORT DUR YLD A ACC EURH ISIN: LU0194345913 -INVERSIS-",
+        "isin": "LU0194345913",
+        "saldo": 312104.05
+      },
+      {
+        "cuenta": "2500000314",
+        "nombre": "SPGB 0,8 300727 BONOS Y OBLIGACIONES DEL ESTADO ESPAÑOL VTO 30-07-2027 ISIN: ES0000012G26 -INVERSIS-",
+        "isin": "ES0000012G26",
+        "saldo": 467089.95
+      },
+      {
+        "cuenta": "2500000316",
+        "nombre": "FRTR 250226 DEUDA PUBLICA FRANCESA VTO 25-02-2026 ISIN: FR0013508470",
+        "isin": "FR0013508470",
+        "saldo": 498475.0
+      },
+      {
+        "cuenta": "2500000317",
+        "nombre": "BOND EUR MEDIUM TRIM Z AC EUR ISIN: LU0335987698",
+        "isin": "LU0335987698",
+        "saldo": 1674767.41
+      },
+      {
+        "cuenta": "2500000319",
+        "nombre": "NETHER 150126 DEUDA PUBLICA NETHERLANDS VTO 15-01-2026 ISIN: NL0015000QL2",
+        "isin": "NL0015000QL2",
+        "saldo": 499600.0
+      },
+      {
+        "cuenta": "2500000322",
+        "nombre": "IRISH 150526 DEUDA PUBLICA IRISH GOVT VTO 15-05-2026 ISIN: IE00BVBC9418",
+        "isin": "IE00BVBC9418",
+        "saldo": 501225.68
+      },
+      {
+        "cuenta": "2500000324",
+        "nombre": "GROUPAMA TRESORERIE I ACC EUR *70971 ISIN: FR0000989626 -INVERSIS-",
+        "isin": "FR0000989626",
+        "saldo": 275920.23
+      },
+      {
+        "cuenta": "2500000325",
+        "nombre": "POLAR CAPITAL PLC JAPAN VALUE FUND-I-EU ISIN: IE000B4WLVU3 -INVERSIS-",
+        "isin": "IE000B4WLVU3",
+        "saldo": 166596.95
+      },
+      {
+        "cuenta": "2500000326",
+        "nombre": "JPMIF-GLOBAL SELECT EQUIT.I EUR-ACC ISIN: LU2552654589",
+        "isin": "LU2552654589",
+        "saldo": 294626.41
+      },
+      {
+        "cuenta": "2500000327",
+        "nombre": "MONTL.-C.CR.P.N.A.L./S EQ.INS.PO.EUR ISIN: IE00BG08P667",
+        "isin": "IE00BG08P667",
+        "saldo": 124387.36
+      },
+      {
+        "cuenta": "2500000328",
+        "nombre": "BON REPUBLICA  AUSTRIA 4,85% 15-03-2026 ISIN: AT0000A0DXC2",
+        "isin": "AT0000A0DXC2",
+        "saldo": 730804.99
+      },
+      {
+        "cuenta": "2500000329",
+        "nombre": "BON BELGIUM KINGDOM 1% 22-06-2026 ISIN: BE000337460",
+        "isin": "",
+        "saldo": 700318.69
+      },
+      {
+        "cuenta": "2500000330",
+        "nombre": "BON UBS GROUP 4,625% 17-03-2028 ISIN: CH1255915006",
+        "isin": "CH1255915006",
+        "saldo": 529862.43
+      },
+      {
+        "cuenta": "2500000331",
+        "nombre": "BON EUROPEAN UNION 0% 06-07-2026 ISIN: EU000A3KTGV8",
+        "isin": "EU000A3KTGV8",
+        "saldo": 693182.0
+      },
+      {
+        "cuenta": "2500000332",
+        "nombre": "BON BPCE 0,375% 02-02-2026 ISIN: FR0014007VF4",
+        "isin": "FR0014007VF4",
+        "saldo": 500942.84
+      },
+      {
+        "cuenta": "2500000333",
+        "nombre": "BON Y OBLI. ESTADO 0% 31-01-2026 ISIN: ES0000012G91",
+        "isin": "ES0000012G91",
+        "saldo": 998285.0
+      },
+      {
+        "cuenta": "2500000334",
+        "nombre": "BON ESTADO FRANCES 3-5% 25-04-2026 ISIN: FR0010916924",
+        "isin": "FR0010916924",
+        "saldo": 616936.56
+      },
+      {
+        "cuenta": "2500000335",
+        "nombre": "BON RCI BANQUE SA 4,62 10-26 ISIN: FR001400KXW4",
+        "isin": "FR001400KXW4",
+        "saldo": 408831.64
+      },
+      {
+        "cuenta": "2500000338",
+        "nombre": "EURO FUND A-2 ACC EUR ISIN: LU0090865873",
+        "isin": "LU0090865873",
+        "saldo": 416385.18
+      },
+      {
+        "cuenta": "2500000339",
+        "nombre": "BON REPUBLICA DE ITALIA 3,50% VTO 15-01-2026 Isin: IT0005514473",
+        "isin": "",
+        "saldo": 1016603.4
+      },
+      {
+        "cuenta": "2500000341",
+        "nombre": "BONOS FCC SERVICIO MEDIO AMBIENTE VTO 04-12-2026 Isin: XS2081500907",
+        "isin": "",
+        "saldo": 397115.47
+      },
+      {
+        "cuenta": "2500000342",
+        "nombre": "BONOS UNICREDIT 0,325% VTO 19-01-2026 ISIN: XS2289133915",
+        "isin": "XS2289133915",
+        "saldo": 400894.77
+      },
+      {
+        "cuenta": "2500000343",
+        "nombre": "BONOS AUTOSTRADE LITALIA 1,750% VTO 26-06-2026 ISIN: XS1327504087",
+        "isin": "XS1327504087",
+        "saldo": 402511.48
+      },
+      {
+        "cuenta": "2500000344",
+        "nombre": "BONOS ARCELOR 4,875 VTO 26-09-2026 ISIN: XS2537060746",
+        "isin": "XS2537060746",
+        "saldo": 411372.77
+      },
+      {
+        "cuenta": "2500000345",
+        "nombre": "BONOS INTESA SAN PAOLO 0,625% VTO 24-02-2026 ISIN: XS2304664167",
+        "isin": "XS2304664167",
+        "saldo": 401175.29
+      },
+      {
+        "cuenta": "2500000352",
+        "nombre": "ELEVA EUROEAN SELECTION I EUR ACC ISIN: LU1111643042",
+        "isin": "LU1111643042",
+        "saldo": 112208.5
+      },
+      {
+        "cuenta": "2500000353",
+        "nombre": "POLAR CAPITAL GLBL TECHNOLOGY I ACC EUR ISIN: IE00BM95B514",
+        "isin": "IE00BM95B514",
+        "saldo": 67496.53
+      },
+      {
+        "cuenta": "2500000354",
+        "nombre": "SCHRODEER ISF JAPANESE OPPORT C ACC EUR ISIN: LU1799645038",
+        "isin": "LU1799645038",
+        "saldo": 61254.57
+      },
+      {
+        "cuenta": "2500000355",
+        "nombre": "PICTET EMERGING MARKETS INDEX I ACC EUR ISIN: LU0474967725",
+        "isin": "LU0474967725",
+        "saldo": 217486.19
+      },
+      {
+        "cuenta": "2500000357",
+        "nombre": "GIS EURO BOND BX ACC EUR ISIN: LU0145476148",
+        "isin": "LU0145476148",
+        "saldo": 54254.57
+      },
+      {
+        "cuenta": "2500000358",
+        "nombre": "BNPP EASY JPM ESG EMU GO IG 3-5Y ACC EUR ISIN: LU2533813452",
+        "isin": "LU2533813452",
+        "saldo": 516196.67
+      },
+      {
+        "cuenta": "2500000362",
+        "nombre": "BON CREDIT SUISSE GRO 1,00 06-27 ISIN: CH0483180946",
+        "isin": "CH0483180946",
+        "saldo": 399282.19
+      },
+      {
+        "cuenta": "2500000363",
+        "nombre": "BON BANCO SANTANDER S 4,62 10-27 ISIN: XS2705604077",
+        "isin": "XS2705604077",
+        "saldo": 512944.14
+      },
+      {
+        "cuenta": "2500000364",
+        "nombre": "BON EDP FINANCE BV 1,50 11-27 ISIN: XS1721051495",
+        "isin": "XS1721051495",
+        "saldo": 295233.16
+      },
+      {
+        "cuenta": "2500000365",
+        "nombre": "BON AIB GROUP PLC 0,50 11-27 ISIN: XS2343340852",
+        "isin": "XS2343340852",
+        "saldo": 393435.1
+      },
+      {
+        "cuenta": "2500000366",
+        "nombre": "BON BNP PARIBAS VARIABLE 01-27 ISIN: FR0013398070",
+        "isin": "FR0013398070",
+        "saldo": 509672.98
+      },
+      {
+        "cuenta": "2500000367",
+        "nombre": "OBL BKT 0,625 10-27 ISIN: ES0213679JR9",
+        "isin": "ES0213679JR9",
+        "saldo": 484146.3
+      },
+      {
+        "cuenta": "2500000368",
+        "nombre": "BON BRITISH AMERICAN 1,25 03-27 ISIN: XS1203859928",
+        "isin": "XS1203859928",
+        "saldo": 448570.91
+      },
+      {
+        "cuenta": "2500000369",
+        "nombre": "BON CAIXABANK SA 4,62 05-27 ISIN: XS2623501181",
+        "isin": "XS2623501181",
+        "saldo": 414798.85
+      },
+      {
+        "cuenta": "2500000370",
+        "nombre": "BON SANDOZ FINANCE BV 3,97 04-27 ISIN: XS2715297672",
+        "isin": "XS2715297672",
+        "saldo": 522018.46
+      },
+      {
+        "cuenta": "2500000372",
+        "nombre": "PICTET-EUR CORPORATE BONDS-I EUR ISIN: LU0128472205",
+        "isin": "LU0128472205",
+        "saldo": 350270.88
+      },
+      {
+        "cuenta": "2500000374",
+        "nombre": "MC SICAV AZ VALOR INTERNAT I ISIN: LU1333146287 -INVERSIS-",
+        "isin": "LU1333146287",
+        "saldo": 174917.56
+      },
+      {
+        "cuenta": "2500000377",
+        "nombre": "ZGLDHE SW - ETF ZKB GOLD H-EUR ISIN: CH0103326762 -CACEIS-",
+        "isin": "CH0103326762",
+        "saldo": 698810.5
+      },
+      {
+        "cuenta": "2500000379",
+        "nombre": "EDR FUND BIG DATA P ACC EUR ISIN: LU2225826366 -CACEIS-",
+        "isin": "LU2225826366",
+        "saldo": 448492.89
+      },
+      {
+        "cuenta": "2500000380",
+        "nombre": "GUINNESS GLB EQ INC Y ACC EUR ISIN: IE00BVYPNZ31 -CACEIS-",
+        "isin": "IE00BVYPNZ31",
+        "saldo": 445584.87
+      },
+      {
+        "cuenta": "2500000381",
+        "nombre": "GROUPAMA TRESORERIE I ACC EUR ISIN: FR0000989626 -CACEIS-",
+        "isin": "FR0000989626",
+        "saldo": 740834.67
+      },
+      {
+        "cuenta": "2500000382",
+        "nombre": "HERMES ASIA EXJAPN EQ F AC EUR ISIN: IE00B83XD802 -CACEIS-",
+        "isin": "IE00B83XD802",
+        "saldo": 363212.25
+      },
+      {
+        "cuenta": "2500000383",
+        "nombre": "REDWHEEL GBL EQ INCO S ACC EUR ISIN: LU2264081188 -CACEIS-",
+        "isin": "LU2264081188",
+        "saldo": 454223.29
+      },
+      {
+        "cuenta": "2500000384",
+        "nombre": "VERITAS GLOBAL FOCUS C ACC EUR ISIN: IE00B3W2QP15 -CACEIS-",
+        "isin": "IE00B3W2QP15",
+        "saldo": 298320.62
+      },
+      {
+        "cuenta": "2500000385",
+        "nombre": "MULTIPART KONWAVE GOLD EQ C EU ISIN: LU1425270227 -INVERSIS-",
+        "isin": "LU1425270227",
+        "saldo": 124009.93
+      },
+      {
+        "cuenta": "2500000386",
+        "nombre": "SISF-ASIAN TOTAL RETURN C USD-ACC.- ISIN: LU0326949186 -CACEIS-",
+        "isin": "LU0326949186",
+        "saldo": 357576.36
+      },
+      {
+        "cuenta": "2500000387",
+        "nombre": "BLUEBOX GLB TECH FND I ACC USD ISIN: LU1793346666 -CACEIS-",
+        "isin": "LU1793346666",
+        "saldo": 301586.71
+      },
+      {
+        "cuenta": "2500000389",
+        "nombre": "MUZNCH GLB SHRT DURTN INVT GRD H ACC EUR ISIN: IE00BJCXFM61 -CACEIS-",
+        "isin": "IE00BJCXFM61",
+        "saldo": 608951.49
+      },
+      {
+        "cuenta": "2500000390",
+        "nombre": "MAN GLG ASIA CREDIT OPPOR IF H ISIN: IE0006UIVA78 -CACEIS-",
+        "isin": "IE0006UIVA78",
+        "saldo": 364824.54
+      },
+      {
+        "cuenta": "2500000391",
+        "nombre": "POLAR CAPITAL PLC JAPAN VALUE FUND-I-EU ISIN: IE000B4WLVU3 -CACEIS-",
+        "isin": "IE000B4WLVU3",
+        "saldo": 294642.09
+      },
+      {
+        "cuenta": "2500000394",
+        "nombre": "BNPP INSTIC EUR I SH TM VNAV A ISIN: LU0094219127 -CACEIS-",
+        "isin": "LU0094219127",
+        "saldo": 362437.52
+      },
+      {
+        "cuenta": "2500000395",
+        "nombre": "PACIFIC NTH OF STH EM ALL EQ ISIN: IE00BM8QS764 -CACEIS-",
+        "isin": "IE00BM8QS764",
+        "saldo": 350059.82
+      },
+      {
+        "cuenta": "2500000397",
+        "nombre": "LIGHTMN EUROPN EQTI FUND-I-EUR ISIN: LU2214500949 -CACEIS-",
+        "isin": "LU2214500949",
+        "saldo": 305221.95
+      },
+      {
+        "cuenta": "2500000398",
+        "nombre": "COMGEST GROWTH EUROPE I AC EUR ISIN: IE00B5WN3467 -CACEIS-",
+        "isin": "IE00B5WN3467",
+        "saldo": 296319.9
+      },
+      {
+        "cuenta": "2500000399",
+        "nombre": "MAGALLANES EUROPEAN EQUITY I ISIN: LU1330191385 -CACEIS-",
+        "isin": "LU1330191385",
+        "saldo": 318880.44
+      },
+      {
+        "cuenta": "2500000401",
+        "nombre": "US SHORT DUR YLD A ACC EURH ISIN: LU0194345913 -CACEIS-",
+        "isin": "LU0194345913",
+        "saldo": 529144.82
+      },
+      {
+        "cuenta": "2500000402",
+        "nombre": "NXT GNRT EMRG MRK EQ B ACC EUR ISIN: LU1965309831 -CACEIS-",
+        "isin": "LU1965309831",
+        "saldo": 357666.31
+      },
+      {
+        "cuenta": "2500000403",
+        "nombre": "SISF EURO CORP BOND C ACC EUR ISIN: LU0113258742 -CACEIS-",
+        "isin": "LU0113258742",
+        "saldo": 1189329.66
+      },
+      {
+        "cuenta": "2500000405",
+        "nombre": "LETRAS DEL TESORO ESTADO DE ESPAÑA. VTO 31-05-2026 ISIN: ES0000012L29 -CACEIS-",
+        "isin": "ES0000012L29",
+        "saldo": 1146971.25
+      },
+      {
+        "cuenta": "2500000406",
+        "nombre": "SPGB 0,8 300727 BONOS Y OBLIGACIONES DEL ESTADO ESPAÑOL VTO 30-07-2027 ISIN: ES0000012G26 -CACEIS-",
+        "isin": "ES0000012G26",
+        "saldo": 958815.0
+      },
+      {
+        "cuenta": "2500000407",
+        "nombre": "SISF EURO CORP BOND C ACC EUR ISIN: LU0113258742 -PICTET-",
+        "isin": "LU0113258742",
+        "saldo": 594693.25
+      },
+      {
+        "cuenta": "2500000408",
+        "nombre": "X S&P 500 EQUAL WEIGHT ISIN: IE00BLNMYC90 (INVERSIS)",
+        "isin": "IE00BLNMYC90",
+        "saldo": 268568.0
+      },
+      {
+        "cuenta": "2500000409",
+        "nombre": "MC SICAV AZ VALOR INTERNAT I ISIN: LU1333146287 -CACEIS-",
+        "isin": "LU1333146287",
+        "saldo": 300701.25
+      },
+      {
+        "cuenta": "2500000410",
+        "nombre": "MI METROPOLIS VALUEFD AC GBP ISIN: GB00BYQPY596 -CACEIS-",
+        "isin": "GB00BYQPY596",
+        "saldo": 478430.08
+      },
+      {
+        "cuenta": "2500000411",
+        "nombre": "US STRUCTURED RESEARCH EQUITY FD IN EUR ISIN: LU2783628410 -BANCA MARCH-",
+        "isin": "LU2783628410",
+        "saldo": 279894.51
+      },
+      {
+        "cuenta": "2500000412",
+        "nombre": "AMUNDI INDEX MSCI EUROPE I E ACC EUR ISIN: LU0389811539 -BANCA MARCH-",
+        "isin": "LU0389811539",
+        "saldo": 388661.88
+      },
+      {
+        "cuenta": "2500000414",
+        "nombre": "VANGUARD EURO GOVERMENT BOND EUR ISIN: IE0007472990 -BANCA MARCH-",
+        "isin": "IE0007472990",
+        "saldo": 432672.39
+      },
+      {
+        "cuenta": "2500000415",
+        "nombre": "FO. S S P 500 EQUAL WEIGHT ETF ISIN: IE00BLNMYC90 -CACEIS-",
+        "isin": "IE00BLNMYC90",
+        "saldo": 465760.64
+      },
+      {
+        "cuenta": "2500000416",
+        "nombre": "FO.LAVL GAVEK LA LC DB EX.OPEN-END FUND ISIN: LU2751661898 -CACEIS-",
+        "isin": "LU2751661898",
+        "saldo": 384872.87
+      },
+      {
+        "cuenta": "2500000418",
+        "nombre": "FO.JB MULTIPART GLD ETY C EUR.OPEN-END FU ISIN: LU1425270227 -CACEIS-",
+        "isin": "LU1425270227",
+        "saldo": 266313.34
+      },
+      {
+        "cuenta": "2500000419",
+        "nombre": "SISF-ASIAN TOTAL RETURN C USD-ACC.- ISIN: LU0326949186 -PICTET-",
+        "isin": "LU0326949186",
+        "saldo": 274756.75
+      },
+      {
+        "cuenta": "2500000420",
+        "nombre": "BO.SPAIN LETRAS DEL TESORO 16/01/2026 ISIN: ES0L02601166 -CACEIS-",
+        "isin": "ES0L02601166",
+        "saldo": 524606.25
+      },
+      {
+        "cuenta": "2500000421",
+        "nombre": "VANGUARD-GL.STOCK IDX INST + EUR-ACC ISIN: IE00BFPM9N11 -PICTET-",
+        "isin": "IE00BFPM9N11",
+        "saldo": 870388.96
+      },
+      {
+        "cuenta": "2500000422",
+        "nombre": "LARRAINVIAL GAVEKAL LAT LCL EX ISIN: LU2751661898 -INVERSIS-",
+        "isin": "LU2751661898",
+        "saldo": 202123.79
+      },
+      {
+        "cuenta": "2500000423",
+        "nombre": "LETRAS DEL TESORO DE ESPAÑA SGLT 160126 - SGLT 160126 ISIN: ES0L02601166 -INVERSIS-",
+        "isin": "ES0L02601166",
+        "saldo": 364700.7
+      },
+      {
+        "cuenta": "2500000424",
+        "nombre": "AMUNDI EURO LIQ IC ACC EUR ISIN: FR0010251660 -INVERSIS *16185-",
+        "isin": "FR0010251660",
+        "saldo": 762696.33
+      },
+      {
+        "cuenta": "2500000425",
+        "nombre": "EURIZON BOND EUR SHORT TERM LTE Z AC EUR ISIN: LU0335987268 -INVERSIS *16185-",
+        "isin": "LU0335987268",
+        "saldo": 1332431.1
+      },
+      {
+        "cuenta": "2500000426",
+        "nombre": "SCHRODER ISF EURO CORP BND IZ ACC EUR ISIN: LU1078767826 -BANCA MARCH-",
+        "isin": "LU1078767826",
+        "saldo": 333562.51
+      },
+      {
+        "cuenta": "2500000427",
+        "nombre": "MUZNCH GLB SHRT DURTN INVT GRD H ACC EUR ISIN: IE00BJCXFM61 -BANCA MARCH-",
+        "isin": "IE00BJCXFM61",
+        "saldo": 169964.71
+      },
+      {
+        "cuenta": "2500000428",
+        "nombre": "SILVER 8 PARTNERS LP (MASTER) ISIN: US8272951067 -DIRECTO-",
+        "isin": "US8272951067",
+        "saldo": 296124.95
+      },
+      {
+        "cuenta": "2500000431",
+        "nombre": "FF GERMANY FUND Y ACC EUR ISIN: LU0346388530 -BANCA MARCH GDC-",
+        "isin": "LU0346388530",
+        "saldo": 85700.53
+      },
+      {
+        "cuenta": "2500000432",
+        "nombre": "CT LUX AMERICAN SMALLER COMPANIES IE EUR ISIN: LU2005601161 -BANCA MARCH GDC-",
+        "isin": "LU2005601161",
+        "saldo": 30051.98
+      },
+      {
+        "cuenta": "2500000433",
+        "nombre": "SISF US DOLLAR LIQUIDITY EUR C ACC ISIN: LU0511055591 -BANCA MARCH GDC-",
+        "isin": "LU0511055591",
+        "saldo": 81801.29
+      },
+      {
+        "cuenta": "2500000434",
+        "nombre": "FO.AMUNDI CASH CORPORATE ISIN: FR0010251660 -CACEIS-",
+        "isin": "FR0010251660",
+        "saldo": 520401.13
+      },
+      {
+        "cuenta": "2500000435",
+        "nombre": "UBS (LUX) FUND SOLUTIONS SICAV - BLOOMBERG EUR TREASURY 1-10 UCITS ETF -A EUR -ACC- ISIN: LU0969639474 -PICTET-",
+        "isin": "LU0969639474",
+        "saldo": 220162.8
+      },
+      {
+        "cuenta": "2500000436",
+        "nombre": "PICTET-QUEST AI-DRIVEN GL.EQ.I EUR ISIN: LU2749781550 -PICTET-",
+        "isin": "LU2749781550",
+        "saldo": 671174.0
+      },
+      {
+        "cuenta": "2500000437",
+        "nombre": "BLACKSTONE-G.IG C.BD B EUR FOUN.ACC ISIN: IE000SBSF4A0 -PICTET-",
+        "isin": "IE000SBSF4A0",
+        "saldo": 352100.35
+      },
+      {
+        "cuenta": "2500000438",
+        "nombre": "Bluebay-Financial Cap. BD Q EUR-ACC Isin: LU1163205096 -PICTET-",
+        "isin": "",
+        "saldo": 235819.36
+      },
+      {
+        "cuenta": "2500000439",
+        "nombre": "AMUNIDI PRIME USA RE EUR ACC ISIN: LU3046359249 -BANCA MARCH-",
+        "isin": "LU3046359249",
+        "saldo": 491362.16
+      },
+      {
+        "cuenta": "2500000441",
+        "nombre": "FO. ABANTE SPA. OPP. A EUR ISIN: LU0861897394 -CACEIS-",
+        "isin": "LU0861897394",
+        "saldo": 533781.99
+      },
+      {
+        "cuenta": "2500000442",
+        "nombre": "EXANE FDS 1-OVERDRIVE P EUR-ACC ISIN: LU3030334166 -PICTET-",
+        "isin": "LU3030334166",
+        "saldo": 88612.68
+      },
+      {
+        "cuenta": "2500000443",
+        "nombre": "ABANTE OKAVANGO DELTA I FI ISIN: ES0167211004 -INVERSIS-",
+        "isin": "ES0167211004",
+        "saldo": 303357.26
+      },
+      {
+        "cuenta": "2500000444",
+        "nombre": "Concise Short Term High Yield FD 12 EUR ISIN: IE00BFYV9065 -INVERSIS-",
+        "isin": "IE00BFYV9065",
+        "saldo": 312827.83
+      },
+      {
+        "cuenta": "2500000445",
+        "nombre": "BLACKROCK GF-CONTIN.EUR.FLEX I2 EUR ISIN: LU0888974473 -PICTET-",
+        "isin": "LU0888974473",
+        "saldo": 182060.75
+      },
+      {
+        "cuenta": "2500000446",
+        "nombre": "FO. CONCISE S T HY FUND 12 EUR OPEN-END FUND ISIN:IE00BFYV9065 -CACEIS-",
+        "isin": "IE00BFYV9065",
+        "saldo": 552382.7
+      },
+      {
+        "cuenta": "2500000447",
+        "nombre": "FO.LF CYC GLB EQ UCITS 11 ER AC.OPEN-END FUN ISIN: IE0004PBGJR7 -CACEIS-",
+        "isin": "IE0004PBGJR7",
+        "saldo": 507425.74
+      },
+      {
+        "cuenta": "2500000448",
+        "nombre": "SVELLAND GLOBAL TRADING PARTNERES LP Isin (FIJI): BBG01B21T711 -CACEIS+INVERSIS-",
+        "isin": "",
+        "saldo": 517058.72
+      },
+      {
+        "cuenta": "2500000449",
+        "nombre": "AMUNDI EURO LIQ IC ACC EUR ISIN: FR0010251660 -INVERSIS *70971-",
+        "isin": "FR0010251660",
+        "saldo": 239755.36
+      },
+      {
+        "cuenta": "2500000450",
+        "nombre": "GROUPAMA TRESORERIE I ACC EUR *16185 ISIN: FR0000989626 -INVERSIS-",
+        "isin": "FR0000989626",
+        "saldo": 795491.06
+      },
+      {
+        "cuenta": "2500000451",
+        "nombre": "BNPP INSTIC EUR I SH TM VNAV A ISIN: LU0094219127 *16185 -INVERSIS-",
+        "isin": "LU0094219127",
+        "saldo": 1009502.8
+      },
+      {
+        "cuenta": "2500000452",
+        "nombre": "WT ENERGY TRANSITION METALS - WENT IM ISIN: XS2425848053-INVERSIS *70971-",
+        "isin": "XS2425848053",
+        "saldo": 244754.2
+      },
+      {
+        "cuenta": "2500000453",
+        "nombre": "VANGUARD US GOVERMENT BD INDEX EUR ISIN: IE0007471471 -BANCA MARCH-",
+        "isin": "IE0007471471",
+        "saldo": 108901.85
+      },
+      {
+        "cuenta": "2500000454",
+        "nombre": "WELLINGTON ENDURING ASSETS S ACC EUR ISIN: IE00BJ7HNK78 -BANCA MARCH-",
+        "isin": "IE00BJ7HNK78",
+        "saldo": 53327.07
+      },
+      {
+        "cuenta": "2500000455",
+        "nombre": "EVLI SHORT CORPOR BOND FUND IB2 EUR ACC ISIN: FI4000591854 -BANCA MARCH-",
+        "isin": "FI4000591854",
+        "saldo": 361863.74
+      },
+      {
+        "cuenta": "2500000456",
+        "nombre": "ABRDN II-EUR C.BD S&R INV-D EUR-ACC ISIN: LU0767911984 -PICTET-",
+        "isin": "LU0767911984",
+        "saldo": 470131.76
+      },
+      {
+        "cuenta": "2500000457",
+        "nombre": "BARINGS-GLOBAL H/Y BOND B EUR-ACC ISIN: IE00B55MXX92 -PICTET-",
+        "isin": "IE00B55MXX92",
+        "saldo": 236911.55
+      },
+      {
+        "cuenta": "2500000458",
+        "nombre": "VANGUARD-EM STOCK IDX INST + USD ACC ISIN: IE00BFPM9H50 -PICTET-",
+        "isin": "IE00BFPM9H50",
+        "saldo": 120752.37
+      },
+      {
+        "cuenta": "2500000459",
+        "nombre": "FO.WT ENERGY TRANSITION METALS ISIN: XS2425848053 -CACEIS-",
+        "isin": "XS2425848053",
+        "saldo": 457526.0
+      }
+    ],
+    "intragrupo": [
+      {
+        "cuenta": "4330103001",
+        "nombre": "Viroda Inversiones S.L.U.",
+        "saldo": 0.0
+      },
+      {
+        "cuenta": "4330104001",
+        "nombre": "Rovida S.L.U.",
+        "saldo": 0.0
+      },
+      {
+        "cuenta": "4330109001",
+        "nombre": "Disfasa S.A. (ARC)",
+        "saldo": 950.3
+      }
+    ]
+  },
+  "VIRODA": {
+    "ibis": [
+      {
+        "cuenta": "6310002000",
+        "nombre": "Impuesto Vehículos de Tracción Mecánica P-0511-L",
+        "importe": 73.0
+      },
+      {
+        "cuenta": "6312000000",
+        "nombre": "I.B.I Edificio Manuel Silvela 5,Madrid",
+        "importe": 9192.26
+      },
+      {
+        "cuenta": "6312001000",
+        "nombre": "I.B.I Piso 1ºdcha Menéndez Pelayo 15 Palencia",
+        "importe": 398.41
+      },
+      {
+        "cuenta": "6312001001",
+        "nombre": "I.B.I Piso 4ºdcha Menéndez Pelayo 15 Palencia",
+        "importe": 398.41
+      },
+      {
+        "cuenta": "6312001002",
+        "nombre": "I.B.I Piso 5º-ático Menéndez Pelayo 15 Palencia",
+        "importe": 216.78
+      },
+      {
+        "cuenta": "6312001003",
+        "nombre": "I.B.I Piso Camilo Jose Cela-Marbella",
+        "importe": 1714.6
+      },
+      {
+        "cuenta": "6312001004",
+        "nombre": "I.B.I Garaje 74 Camilo Jose Cela",
+        "importe": 248.25
+      },
+      {
+        "cuenta": "6312001005",
+        "nombre": "Tasa basura piso Camilo Jose Cela-Marbella",
+        "importe": 86.88
+      },
+      {
+        "cuenta": "6312003000",
+        "nombre": "Tasa vado Candelaria Mora 12-14",
+        "importe": 746.1
+      },
+      {
+        "cuenta": "6312003001",
+        "nombre": "I.B.I Piso 1ºA Candelaria Mora 12-14",
+        "importe": 531.59
+      },
+      {
+        "cuenta": "6312003002",
+        "nombre": "I.B.I Piso 1ºB Candelaria Mora 12-14",
+        "importe": 610.83
+      },
+      {
+        "cuenta": "6312003003",
+        "nombre": "I.B.I Piso 1ºC Candelaria Mora 12-14",
+        "importe": 539.91
+      },
+      {
+        "cuenta": "6312003004",
+        "nombre": "I.B.I Piso 1ºD Candelaria Mora 12-14",
+        "importe": 747.2
+      },
+      {
+        "cuenta": "6312003005",
+        "nombre": "I.B.I Piso 1ºE Candelaria Mora 12-14",
+        "importe": 741.51
+      },
+      {
+        "cuenta": "6312003006",
+        "nombre": "I.B.I Piso 2ºA Candelaria Mora 12-14",
+        "importe": 528.08
+      },
+      {
+        "cuenta": "6312003007",
+        "nombre": "I.B.I Piso 2ºB Candelaria Mora 12-14",
+        "importe": 550.55
+      },
+      {
+        "cuenta": "6312003008",
+        "nombre": "I.B.I Piso 2ºC Candelaria Mora 12-14",
+        "importe": 536.4
+      },
+      {
+        "cuenta": "6312003009",
+        "nombre": "I.B.I Piso 3ºA Candelaria Mora 12-14",
+        "importe": 528.08
+      },
+      {
+        "cuenta": "6312003010",
+        "nombre": "I.B.I Piso 3ºB Candelaria Mora 12-14",
+        "importe": 530.46
+      },
+      {
+        "cuenta": "6312003011",
+        "nombre": "I.B.I Piso 3ºC Candelaria Mora 12-14",
+        "importe": 536.4
+      },
+      {
+        "cuenta": "6312003012",
+        "nombre": "I.B.I Piso 4ºA Candelaria Mora 12-14",
+        "importe": 551.68
+      },
+      {
+        "cuenta": "6312003013",
+        "nombre": "I.B.I Piso 4ºB Candelaria Mora 12-14",
+        "importe": 530.46
+      },
+      {
+        "cuenta": "6312003014",
+        "nombre": "I.B.I Piso 4ºC Candelaria Mora 12-14",
+        "importe": 536.4
+      },
+      {
+        "cuenta": "6312004001",
+        "nombre": "I.B.I Piso 1ºA Reina 15",
+        "importe": 597.7
+      },
+      {
+        "cuenta": "6312004002",
+        "nombre": "I.B.I Piso 1ºB Reina 15",
+        "importe": 557.36
+      },
+      {
+        "cuenta": "6312004003",
+        "nombre": "I.B.I Piso 1ºC Reina 15",
+        "importe": 455.65
+      },
+      {
+        "cuenta": "6312004004",
+        "nombre": "I.B.I Piso 1ºD Reina 15",
+        "importe": 360.02
+      },
+      {
+        "cuenta": "6312004005",
+        "nombre": "I.B.I Piso 2ºA Reina 15",
+        "importe": 597.7
+      },
+      {
+        "cuenta": "6312004006",
+        "nombre": "I.B.I Piso 2ºB Reina 15",
+        "importe": 557.36
+      },
+      {
+        "cuenta": "6312004007",
+        "nombre": "I.B.I Piso 2ºC Reina 15",
+        "importe": 455.65
+      },
+      {
+        "cuenta": "6312004008",
+        "nombre": "I.B.I Piso 2ºD Reina 15",
+        "importe": 360.02
+      },
+      {
+        "cuenta": "6312004009",
+        "nombre": "I.B.I Piso 3ºA Reina 15",
+        "importe": 597.7
+      },
+      {
+        "cuenta": "6312004010",
+        "nombre": "I.B.I Piso 3ºB Reina 15",
+        "importe": 557.36
+      },
+      {
+        "cuenta": "6312004011",
+        "nombre": "I.B.I Piso 3ºC Reina 15",
+        "importe": 455.65
+      },
+      {
+        "cuenta": "6312004012",
+        "nombre": "I.B.I Piso 3ºD Reina 15",
+        "importe": 360.02
+      },
+      {
+        "cuenta": "6312004013",
+        "nombre": "I.B.I Piso 4ºA Reina 15",
+        "importe": 1421.17
+      },
+      {
+        "cuenta": "6312004014",
+        "nombre": "I.B.I Piso 4ºB Reina 15",
+        "importe": 557.36
+      },
+      {
+        "cuenta": "6312004015",
+        "nombre": "I.B.I Piso 4ºC Reina 15",
+        "importe": 455.65
+      },
+      {
+        "cuenta": "6312005001",
+        "nombre": "IBI C/ Hernández de Tejada 6 1ºA, Madrid",
+        "importe": 100.12
+      },
+      {
+        "cuenta": "6312005002",
+        "nombre": "IBI C/ Hernández de Tejada 6 1ºB, Madrid",
+        "importe": 93.6
+      },
+      {
+        "cuenta": "6312005003",
+        "nombre": "IBI C/ Hernández de Tejada 6 1ºC, Madrid",
+        "importe": 98.23
+      },
+      {
+        "cuenta": "6312005004",
+        "nombre": "IBI C/ Hernández de Tejada 6 2ºA, Madrid",
+        "importe": 100.12
+      },
+      {
+        "cuenta": "6312005005",
+        "nombre": "IBI C/ Hernández de Tejada 6 2ºB, Madrid",
+        "importe": 93.6
+      },
+      {
+        "cuenta": "6312005006",
+        "nombre": "IBI C/ Hernández de Tejada 6 2ºC, Madrid",
+        "importe": 98.23
+      },
+      {
+        "cuenta": "6312005007",
+        "nombre": "IBI C/ Hernández de Tejada 6 3ºA, Madrid",
+        "importe": 100.12
+      },
+      {
+        "cuenta": "6312005008",
+        "nombre": "IBI C/ Hernández de Tejada 6 3ºB, Madrid",
+        "importe": 93.6
+      },
+      {
+        "cuenta": "6312005009",
+        "nombre": "IBI C/ Hernández de Tejada 6 3ºC, Madrid",
+        "importe": 98.38
+      },
+      {
+        "cuenta": "6312005010",
+        "nombre": "IBI C/ Hernández de Tejada 6 4ºA, Madrid",
+        "importe": 101.55
+      },
+      {
+        "cuenta": "6312005011",
+        "nombre": "IBI C/ Hernández de Tejada 6 4ºB, Madrid",
+        "importe": 69.09
+      },
+      {
+        "cuenta": "6312005012",
+        "nombre": "IBI C/ Hernández de Tejada 6 4ºC, Madrid",
+        "importe": 99.58
+      },
+      {
+        "cuenta": "6313000001",
+        "nombre": "Basuras y Tasa Gestión Residuos C/Manuel Silvela, 5 Madrid",
+        "importe": 2177.39
+      },
+      {
+        "cuenta": "6313003001",
+        "nombre": "Basuras y Tasa Gestión Residuos Candelaria Mora 12-14, 1ºA + Garaje 11 Madrid",
+        "importe": 129.34
+      },
+      {
+        "cuenta": "6313003002",
+        "nombre": "Basuras y Tasa Gestión Residuos Candelaria Mora 12-14, 1ºB + Garaje 11 Madrid",
+        "importe": 152.93
+      },
+      {
+        "cuenta": "6313003003",
+        "nombre": "Basuras y Tasa Gestión Residuos Candelaria Mora 12-14, 1ºC Madrid",
+        "importe": 129.34
+      },
+      {
+        "cuenta": "6313003004",
+        "nombre": "Basuras y Tasa Gestión Residuos Candelaria Mora 12-14, 1ºD Madrid",
+        "importe": 192.81
+      },
+      {
+        "cuenta": "6313003005",
+        "nombre": "Basuras y Tasa Gestión Residuos Candelaria Mora 12-14, 1ºE Madrid",
+        "importe": 192.81
+      },
+      {
+        "cuenta": "6313003006",
+        "nombre": "Basuras y Tasa Gestión Residuos Candelaria Mora 12-14, 2ºA Madrid",
+        "importe": 129.34
+      },
+      {
+        "cuenta": "6313003007",
+        "nombre": "Basuras y Tasa Gestión Residuos Candelaria Mora 12-14, 2ºB Madrid",
+        "importe": 129.34
+      },
+      {
+        "cuenta": "6313003008",
+        "nombre": "Basuras y Tasa Gestión Residuos Candelaria Mora 12-14, 2ºC Madrid",
+        "importe": 129.34
+      },
+      {
+        "cuenta": "6313003009",
+        "nombre": "Basuras y Tasa Gestión Residuos Candelaria Mora 12-14, 3ºA Madrid",
+        "importe": 129.34
+      },
+      {
+        "cuenta": "6313003010",
+        "nombre": "Basuras y Tasa Gestión Residuos Candelaria Mora 12-14, 3ºB Madrid",
+        "importe": 129.34
+      },
+      {
+        "cuenta": "6313003011",
+        "nombre": "Basuras y Tasa Gestión Residuos Candelaria Mora 12-14, 3ºC Madrid",
+        "importe": 129.34
+      },
+      {
+        "cuenta": "6313003012",
+        "nombre": "Basuras y Tasa Gestión Residuos Candelaria Mora 12-14, 4ºA Madrid",
+        "importe": 129.34
+      },
+      {
+        "cuenta": "6313003013",
+        "nombre": "Basuras y Tasa Gestión Residuos Candelaria Mora 12-14, 4ºB Madrid",
+        "importe": 129.34
+      },
+      {
+        "cuenta": "6313003014",
+        "nombre": "Basuras y Tasa Gestión Residuos Candelaria Mora 12-14, 4ºC Madrid",
+        "importe": 129.34
+      },
+      {
+        "cuenta": "6313004001",
+        "nombre": "Basuras y Tasa Gestión Residuos C/Reina 15 1ºA Madrid",
+        "importe": 183.51
+      },
+      {
+        "cuenta": "6313004002",
+        "nombre": "Basuras y Tasa Gestión Residuos C/Reina 15 1ºB Madrid",
+        "importe": 159.92
+      },
+      {
+        "cuenta": "6313004003",
+        "nombre": "Basuras y Tasa Gestión Residuos C/Reina 15 1ºC Madrid",
+        "importe": 141.37
+      },
+      {
+        "cuenta": "6313004004",
+        "nombre": "Basuras y Tasa Gestión Residuos C/Reina 15 1ºD Madrid",
+        "importe": 127.37
+      },
+      {
+        "cuenta": "6313004005",
+        "nombre": "Basuras y Tasa Gestión Residuos C/Reina 15 2ºA Madrid",
+        "importe": 183.51
+      },
+      {
+        "cuenta": "6313004006",
+        "nombre": "Basuras y Tasa Gestión Residuos C/Reina 15 2ºB Madrid",
+        "importe": 159.92
+      },
+      {
+        "cuenta": "6313004007",
+        "nombre": "Basuras y Tasa Gestión Residuos C/Reina 15 2ºC Madrid",
+        "importe": 141.37
+      },
+      {
+        "cuenta": "6313004008",
+        "nombre": "Basuras y Tasa Gestión Residuos C/Reina 15 2ºD Madrid",
+        "importe": 127.37
+      },
+      {
+        "cuenta": "6313004009",
+        "nombre": "Basuras y Tasa Gestión Residuos C/Reina 15 3ºA Madrid",
+        "importe": 183.51
+      },
+      {
+        "cuenta": "6313004010",
+        "nombre": "Basuras y Tasa Gestión Residuos C/Reina 15 3ºB Madrid",
+        "importe": 159.92
+      },
+      {
+        "cuenta": "6313004011",
+        "nombre": "Basuras y Tasa Gestión Residuos C/Reina 15 3ºC Madrid",
+        "importe": 141.37
+      },
+      {
+        "cuenta": "6313004012",
+        "nombre": "Basuras y Tasa Gestión Residuos C/Reina 15 3ºD Madrid",
+        "importe": 127.37
+      },
+      {
+        "cuenta": "6313004013",
+        "nombre": "Basuras y Tasa Gestión Residuos C/Reina 15 4ºA Madrid",
+        "importe": 371.11
+      },
+      {
+        "cuenta": "6313004014",
+        "nombre": "Basuras y Tasa Gestión Residuos C/Reina 15 4ºB Madrid",
+        "importe": 159.92
+      },
+      {
+        "cuenta": "6313004015",
+        "nombre": "Basuras y Tasa Gestión Residuos C/Reina 15 4ºC Madrid",
+        "importe": 141.37
+      },
+      {
+        "cuenta": "6313005001",
+        "nombre": "Basuras y TGR C/ Hernández de Tejada 6 1ºA, Madrid",
+        "importe": 26.17
+      },
+      {
+        "cuenta": "6313005002",
+        "nombre": "Basuras y TGR C/ Hernández de Tejada 6 1ºB, Madrid",
+        "importe": 26.17
+      },
+      {
+        "cuenta": "6313005003",
+        "nombre": "Basuras y TGR C/ Hernández de Tejada 6 1ºC, Madrid",
+        "importe": 26.17
+      },
+      {
+        "cuenta": "6313005004",
+        "nombre": "Basuras y TGR C/ Hernández de Tejada 6 2ºA, Madrid",
+        "importe": 26.17
+      },
+      {
+        "cuenta": "6313005005",
+        "nombre": "Basuras y TGR C/ Hernández de Tejada 6 2ºB, Madrid",
+        "importe": 26.17
+      },
+      {
+        "cuenta": "6313005006",
+        "nombre": "Basuras y TGR C/ Hernández de Tejada 6 2ºC, Madrid",
+        "importe": 26.17
+      },
+      {
+        "cuenta": "6313005007",
+        "nombre": "Basuras y TGR C/ Hernández de Tejada 6 3ºA, Madrid",
+        "importe": 26.17
+      },
+      {
+        "cuenta": "6313005008",
+        "nombre": "Basuras y TGR C/ Hernández de Tejada 6 3ºB, Madrid",
+        "importe": 26.17
+      },
+      {
+        "cuenta": "6313005009",
+        "nombre": "Basuras y TGR C/ Hernández de Tejada 6 3ºC, Madrid",
+        "importe": 26.17
+      },
+      {
+        "cuenta": "6313005010",
+        "nombre": "Basuras y TGR C/ Hernández de Tejada 6 4ºA, Madrid",
+        "importe": 26.17
+      },
+      {
+        "cuenta": "6313005011",
+        "nombre": "Basuras y TGR C/ Hernández de Tejada 6 4ºB, Madrid",
+        "importe": 20.2
+      },
+      {
+        "cuenta": "6313005012",
+        "nombre": "Basuras y TGR C/ Hernández de Tejada 6 4ºC, Madrid",
+        "importe": 26.17
+      }
+    ],
+    "amortizaciones": [
+      {
+        "cuenta": "6811000001",
+        "nombre": "Dot. Amort. Local Madrid, Manuel Silvela, nº 5, Bajo 1+ sótano",
+        "importe": 8490.96
+      },
+      {
+        "cuenta": "6811000002",
+        "nombre": "Dot. Amort. Local Madrid, Manuel Silvela, nº 5, Bajo 2",
+        "importe": 2242.68
+      },
+      {
+        "cuenta": "6811000003",
+        "nombre": "Dot. Amort. Vivienda Madrid, Manuel Silvela, nº 5, 1º A",
+        "importe": 4156.2
+      },
+      {
+        "cuenta": "6811000004",
+        "nombre": "Dot. Amort. Vivienda Madrid, Manuel Silvela, nº 5, 2º A",
+        "importe": 2379.72
+      },
+      {
+        "cuenta": "6811000005",
+        "nombre": "Dot. Amort. Vivienda Madrid, Manuel Silvela, nº 5, 2º A",
+        "importe": 4074.72
+      },
+      {
+        "cuenta": "6811000006",
+        "nombre": "Dot. Amort. Vivienda Madrid, Manuel Silvela, nº 5, 2º B",
+        "importe": 2333.04
+      },
+      {
+        "cuenta": "6811000007",
+        "nombre": "Dot. Amort. Vivienda Madrid, Manuel Silvela, nº 5, 3º A",
+        "importe": 4074.72
+      },
+      {
+        "cuenta": "6811000008",
+        "nombre": "Dot. Amort. Vivienda Madrid, Manuel Silvela, nº 5, 3º B",
+        "importe": 2333.04
+      },
+      {
+        "cuenta": "6811000009",
+        "nombre": "Dot. Amort. Vivienda Madrid, Manuel Silvela, nº 5, 4º A",
+        "importe": 4074.72
+      },
+      {
+        "cuenta": "6811000010",
+        "nombre": "Dot. Amort. Vivienda Madrid, Manuel Silvela, nº 5, 4º B",
+        "importe": 2333.04
+      },
+      {
+        "cuenta": "6811000011",
+        "nombre": "Dot. Amort. Vivienda Madrid, Manuel Silvela, nº 5, 5º A",
+        "importe": 4156.2
+      },
+      {
+        "cuenta": "6811000012",
+        "nombre": "Dot. Amort. Vivienda Madrid, Manuel Silvela, nº 5, 5º B",
+        "importe": 2379.72
+      },
+      {
+        "cuenta": "6811000013",
+        "nombre": "Dot. Amort. Vivienda Madrid, Manuel Silvela, nº 5, 6º A",
+        "importe": 2389.56
+      },
+      {
+        "cuenta": "6811000014",
+        "nombre": "Dot. Amort. Vivienda Madrid, Manuel Silvela, nº 5, 6º B",
+        "importe": 1806.72
+      },
+      {
+        "cuenta": "6811000015",
+        "nombre": "Dot. Amort. Vivienda Madrid, Manuel Silvela, nº 5, 6º C",
+        "importe": 1602.72
+      },
+      {
+        "cuenta": "6811001001",
+        "nombre": "Dot. Amort. Vivienda Palencia, Menéndez Pelayo, nº 15, 1ºD",
+        "importe": 2071.56
+      },
+      {
+        "cuenta": "6811001002",
+        "nombre": "Dot. Amort. Vivienda Palencia, Menéndez Pelayo, nº 15, 4ºD",
+        "importe": 2071.56
+      },
+      {
+        "cuenta": "6811001003",
+        "nombre": "Dot. Amort. Vivienda Palencia, Menéndez Pelayo, nº 15, Atico",
+        "importe": 1127.16
+      },
+      {
+        "cuenta": "6811002001",
+        "nombre": "Dot. Amort. Vivienda Marbella, C/Camilo José Cela, nº 19, 4ºI",
+        "importe": 6251.04
+      },
+      {
+        "cuenta": "6811002002",
+        "nombre": "Dot. Amort. Garaje Marbella, C/Camilo José Cela, nº 19",
+        "importe": 436.2
+      },
+      {
+        "cuenta": "6811003001",
+        "nombre": "Dot. Amort., C/Candelaria Mora 12-14, 1ºA + Garaje 11 Madrid",
+        "importe": 2028.72
+      },
+      {
+        "cuenta": "6811003002",
+        "nombre": "Dot. Amort., C/Candelaria Mora 12-14, 1ºB + Garaje 1 Madrid",
+        "importe": 2450.64
+      },
+      {
+        "cuenta": "6811003003",
+        "nombre": "Dot. Amort., C/Candelaria Mora 12-14, 1ºC +Garaje 14 Madrid",
+        "importe": 2054.76
+      },
+      {
+        "cuenta": "6811003004",
+        "nombre": "Dot. Amort., C/Candelaria Mora 12-14, 1ºD +Garaje 4 Madrid",
+        "importe": 2546.16
+      },
+      {
+        "cuenta": "6811003005",
+        "nombre": "Dot. Amort., C/Candelaria Mora 12-14, 1ºE +Garaje 8 Madrid",
+        "importe": 2544.6
+      },
+      {
+        "cuenta": "6811003006",
+        "nombre": "Dot. Amort., C/Candelaria Mora 12-14, 2ºA +Garaje 12 Madrid",
+        "importe": 2015.64
+      },
+      {
+        "cuenta": "6811003007",
+        "nombre": "Dot. Amort., C/Candelaria Mora 12-14, 2ºB +Garaje 5 Madrid",
+        "importe": 2131.08
+      },
+      {
+        "cuenta": "6811003008",
+        "nombre": "Dot. Amort., C/Candelaria Mora 12-14, 2ºC +Garaje 2 Madrid",
+        "importe": 2041.68
+      },
+      {
+        "cuenta": "6811003009",
+        "nombre": "Dot. Amort., C/Candelaria Mora 12-14, 3ºA +Garaje 13 Madrid",
+        "importe": 2015.64
+      },
+      {
+        "cuenta": "6811003010",
+        "nombre": "Dot. Amort., C/Candelaria Mora 12-14, 3ºB +Garaje 10 Madrid",
+        "importe": 2024.52
+      },
+      {
+        "cuenta": "6811003011",
+        "nombre": "Dot. Amort., C/Candelaria Mora 12-14, 3ºC +Garaje 9 Madrid",
+        "importe": 2041.68
+      },
+      {
+        "cuenta": "6811003012",
+        "nombre": "Dot. Amort., C/Candelaria Mora 12-14, 4ºA +Garaje 3 Madrid",
+        "importe": 2135.28
+      },
+      {
+        "cuenta": "6811003013",
+        "nombre": "Dot. Amort., C/Candelaria Mora 12-14, 4ºB + Garaje 6 Madrid",
+        "importe": 2252.28
+      },
+      {
+        "cuenta": "6811003014",
+        "nombre": "Dot. Amort., C/Candelaria Mora 12-14, 4ºC +Garaje 7 Madrid",
+        "importe": 2248.56
+      },
+      {
+        "cuenta": "6811004001",
+        "nombre": "Dot. Amort., C/ Reina 15, 1ºA Madrid",
+        "importe": 2297.16
+      },
+      {
+        "cuenta": "6811004002",
+        "nombre": "Dot. Amort., C/ Reina 15, 1ºB Madrid",
+        "importe": 1983.48
+      },
+      {
+        "cuenta": "6811004003",
+        "nombre": "Dot. Amort., C/ Reina 15, 1ºC Madrid",
+        "importe": 1622.52
+      },
+      {
+        "cuenta": "6811004004",
+        "nombre": "Dot. Amort., C/ Reina 15, 1ºD Madrid",
+        "importe": 1384.08
+      },
+      {
+        "cuenta": "6811004005",
+        "nombre": "Dot. Amort., C/ Reina 15, 2ºA Madrid",
+        "importe": 2297.16
+      },
+      {
+        "cuenta": "6811004006",
+        "nombre": "Dot. Amort., C/ Reina 15, 2ºB Madrid",
+        "importe": 1983.48
+      },
+      {
+        "cuenta": "6811004007",
+        "nombre": "Dot. Amort., C/ Reina 15, 2ºC Madrid",
+        "importe": 1622.52
+      },
+      {
+        "cuenta": "6811004008",
+        "nombre": "Dot. Amort., C/ Reina 15, 2ºD Madrid",
+        "importe": 1384.08
+      },
+      {
+        "cuenta": "6811004009",
+        "nombre": "Dot. Amort., C/ Reina 15, 3ºA Madrid",
+        "importe": 2297.16
+      },
+      {
+        "cuenta": "6811004010",
+        "nombre": "Dot. Amort., C/ Reina 15, 3ºB Madrid",
+        "importe": 1983.48
+      },
+      {
+        "cuenta": "6811004011",
+        "nombre": "Dot. Amort., C/ Reina 15, 3ºC Madrid",
+        "importe": 1622.52
+      },
+      {
+        "cuenta": "6811004012",
+        "nombre": "Dot. Amort., C/ Reina 15, 3ºD Madrid",
+        "importe": 1384.08
+      },
+      {
+        "cuenta": "6811004013",
+        "nombre": "Dot. Amort., C/ Reina 15, 4ºA Madrid",
+        "importe": 5463.48
+      },
+      {
+        "cuenta": "6811004014",
+        "nombre": "Dot. Amort., C/ Reina 15, 4ºB Madrid",
+        "importe": 1983.48
+      },
+      {
+        "cuenta": "6811004015",
+        "nombre": "Dot. Amort., C/ Reina 15, 4ºC Madrid",
+        "importe": 1622.52
+      },
+      {
+        "cuenta": "6811005001",
+        "nombre": "Dot. Amort., C/ Hernández de Tejada 6, 1ºA Madrid",
+        "importe": 444.58
+      },
+      {
+        "cuenta": "6811005002",
+        "nombre": "Dot. Amort., C/ Hernández de Tejada 6, 1ºB Madrid",
+        "importe": 415.92
+      },
+      {
+        "cuenta": "6811005003",
+        "nombre": "Dot. Amort., C/ Hernández de Tejada 6, 1ºC Madrid",
+        "importe": 436.08
+      },
+      {
+        "cuenta": "6811005004",
+        "nombre": "Dot. Amort., C/ Hernández de Tejada 6, 2ºA Madrid",
+        "importe": 444.48
+      },
+      {
+        "cuenta": "6811005005",
+        "nombre": "Dot. Amort., C/ Hernández de Tejada 6, 2ºB Madrid",
+        "importe": 415.94
+      },
+      {
+        "cuenta": "6811005006",
+        "nombre": "Dot. Amort., C/ Hernández de Tejada 6, 2ºC Madrid",
+        "importe": 437.4
+      },
+      {
+        "cuenta": "6811005007",
+        "nombre": "Dot. Amort., C/ Hernández de Tejada 6, 3ºA Madrid",
+        "importe": 444.42
+      },
+      {
+        "cuenta": "6811005008",
+        "nombre": "Dot. Amort., C/ Hernández de Tejada 6, 3ºB Madrid",
+        "importe": 415.84
+      },
+      {
+        "cuenta": "6811005009",
+        "nombre": "Dot. Amort., C/ Hernández de Tejada 6, 3ºC Madrid",
+        "importe": 438.12
+      },
+      {
+        "cuenta": "6811005010",
+        "nombre": "Dot. Amort., C/ Hernández de Tejada 6, 4ºA Madrid",
+        "importe": 451.98
+      },
+      {
+        "cuenta": "6811005011",
+        "nombre": "Dot. Amort., C/ Hernández de Tejada 6, 4ºB Madrid",
+        "importe": 308.68
+      },
+      {
+        "cuenta": "6811005012",
+        "nombre": "Dot. Amort., C/ Hernández de Tejada 6, 4ºC Madrid",
+        "importe": 441.92
+      },
+      {
+        "cuenta": "6815000000",
+        "nombre": "Dot. Amort. Otras Instal. Edificio Manuel Silvela, 5 (COMUN)",
+        "importe": 210.96
+      },
+      {
+        "cuenta": "6815000001",
+        "nombre": "Dot. Amort. Otras Instal. Manuel Silvela, 5, Local 1 + sótano",
+        "importe": 1045.62
+      },
+      {
+        "cuenta": "6815000002",
+        "nombre": "Dot. Amort. Otras Instal. Manuel Silvela, 5, Bajo",
+        "importe": 234.19
+      },
+      {
+        "cuenta": "6815000003",
+        "nombre": "Dot. Am. Otras Instal. vivienda Manuel Silvela, nº 5, 1ºA",
+        "importe": 5131.08
+      },
+      {
+        "cuenta": "6815000005",
+        "nombre": "Dot. Am. Otras Instal. vivienda Manuel Silvela, nº 5, 2ºA",
+        "importe": 142.4
+      },
+      {
+        "cuenta": "6815000007",
+        "nombre": "Dot. Am. Otras Instal. vivienda Manuel Silvela, nº 5, 3ºA",
+        "importe": 72.0
+      },
+      {
+        "cuenta": "6815000008",
+        "nombre": "Dot. Am. Otras Instal. vivienda Manuel Silvela, nº 5, 3ºB",
+        "importe": 938.4
+      },
+      {
+        "cuenta": "6815000009",
+        "nombre": "Dot. Am. Otras Instal. vivienda Manuel Silvela, nº 5, 4ºA",
+        "importe": 597.6
+      },
+      {
+        "cuenta": "6815000010",
+        "nombre": "Dot. Am. Otras Instal. vivienda Manuel Silvela, nº 5, 4ºB",
+        "importe": 1317.36
+      },
+      {
+        "cuenta": "6815000011",
+        "nombre": "Dot. Am. Otras Instal. vivienda Manuel Silvela, nº 5, 5ºA",
+        "importe": 1531.74
+      },
+      {
+        "cuenta": "6815000012",
+        "nombre": "Dot. Am. Otras Instal. vivienda Manuel Silvela, nº 5, 5ºB",
+        "importe": 1106.76
+      },
+      {
+        "cuenta": "6815000013",
+        "nombre": "Dot. Am. Otras Instal. vivienda Manuel Silvela, nº 5, 6ºA",
+        "importe": 180.75
+      },
+      {
+        "cuenta": "6815000015",
+        "nombre": "Dot. Am. Otras Instal. vivienda Manuel Silvela, nº 5, 6ºC",
+        "importe": 226.44
+      },
+      {
+        "cuenta": "6815001002",
+        "nombre": "Dot. Am. Otras Instal. vivienda Menéndez Pelayo, 15 4ºD",
+        "importe": 65.68
+      },
+      {
+        "cuenta": "6815003000",
+        "nombre": "Dot. Amort., Otras Instal. C/Candelaria Mora 12-14 (ZONAS COMUNES)",
+        "importe": 393.84
+      },
+      {
+        "cuenta": "6815003001",
+        "nombre": "Dot. Amort., Otras Instal. C/Candelaria Mora 12-14, 1ºA + Garaje 11 Madrid",
+        "importe": 6.9
+      },
+      {
+        "cuenta": "6815003002",
+        "nombre": "Dot. Amort., Otras Instal. C/Candelaria Mora 12-14, 1ºB + Garaje 1 Madrid",
+        "importe": 100.68
+      },
+      {
+        "cuenta": "6815003004",
+        "nombre": "Dot. Amort. Otras Instal. C/Candelaria Mora 12-14, 1ºD +Garaje 4 Madrid",
+        "importe": 1238.25
+      },
+      {
+        "cuenta": "6815003005",
+        "nombre": "Dot. Amort. Otras Instal. C/Candelaria Mora 12-14, 1ºE +Garaje 8 Madrid",
+        "importe": 204.21
+      },
+      {
+        "cuenta": "6815003006",
+        "nombre": "Dot. Amort. Otras Instal. C/Candelaria Mora 12-14, 2ºA +Garaje 12 Madrid",
+        "importe": 276.7
+      },
+      {
+        "cuenta": "6815003009",
+        "nombre": "Dot. Amort. Otras Instal. C/Candelaria Mora 12-14, 3ºA +Garaje 13 Madrid",
+        "importe": 158.52
+      },
+      {
+        "cuenta": "6815003010",
+        "nombre": "Dot. Amort. Otras Instal. C/Candelaria Mora 12-14, 3ºB +Garaje 10 Madrid",
+        "importe": 158.52
+      },
+      {
+        "cuenta": "6815003012",
+        "nombre": "Dot. Amort. Otras Instal. C/Candelaria Mora 12-14, 4ºA +Garaje 3 Madrid",
+        "importe": 189.12
+      },
+      {
+        "cuenta": "6815003013",
+        "nombre": "Dot. Amort. Otras Instal. C/Candelaria Mora 12-14, 4ºB + Garaje 6 Madrid",
+        "importe": 183.12
+      },
+      {
+        "cuenta": "6815004000",
+        "nombre": "Dot. Amort., Otras Instal. C/Reina, 15 (ZONAS COMUNES)",
+        "importe": 517.92
+      },
+      {
+        "cuenta": "6815004001",
+        "nombre": "Dot. Amort., Otras Instal. C/Reina, 15, 1ºA",
+        "importe": 455.76
+      },
+      {
+        "cuenta": "6815004002",
+        "nombre": "Dot. Amort., Otras Instal. C/Reina, 15, 1ºB",
+        "importe": 4292.04
+      },
+      {
+        "cuenta": "6815004003",
+        "nombre": "Dot. Amort., Otras Instal. C/Reina, 15, 1ºC",
+        "importe": 533.76
+      },
+      {
+        "cuenta": "6815004004",
+        "nombre": "Dot. Amort., Otras Instal. C/Reina, 15, 1ºD",
+        "importe": 396.96
+      },
+      {
+        "cuenta": "6815004005",
+        "nombre": "Dot. Amort., Otras Instal. C/Reina, 15, 2ºA",
+        "importe": 460.8
+      },
+      {
+        "cuenta": "6815004006",
+        "nombre": "Dot. Amort., Otras Instal. C/Reina, 15, 2ºB",
+        "importe": 4333.08
+      },
+      {
+        "cuenta": "6815004007",
+        "nombre": "Dot. Amort., Otras Instal. C/Reina, 15, 2ºC",
+        "importe": 733.0
+      },
+      {
+        "cuenta": "6815004008",
+        "nombre": "Dot. Amort., Otras Instal. C/Reina, 15, 2ºD",
+        "importe": 372.0
+      },
+      {
+        "cuenta": "6815004009",
+        "nombre": "Dot. Amort., Otras Instal. C/Reina, 15, 3ºA",
+        "importe": 704.64
+      },
+      {
+        "cuenta": "6815004010",
+        "nombre": "Dot. Amort., Otras Instal. C/Reina, 15, 3ºB",
+        "importe": 4256.16
+      },
+      {
+        "cuenta": "6815004011",
+        "nombre": "Dot. Amort., Otras Instal. C/Reina, 15, 3ºC",
+        "importe": 452.64
+      },
+      {
+        "cuenta": "6815004012",
+        "nombre": "Dot. Amort., Otras Instal. C/Reina, 15, 3ºD",
+        "importe": 444.84
+      },
+      {
+        "cuenta": "6815004013",
+        "nombre": "Dot. Amort., Otras Instal. C/Reina, 15, 4ºA",
+        "importe": 504.13
+      },
+      {
+        "cuenta": "6815004014",
+        "nombre": "Dot. Amort., Otras Instal. C/Reina, 15, 4ºB",
+        "importe": 476.15
+      },
+      {
+        "cuenta": "6815004015",
+        "nombre": "Dot. Amort., Otras Instal. C/Reina, 15, 4ºC",
+        "importe": 381.6
+      },
+      {
+        "cuenta": "6815005006",
+        "nombre": "Dot. Amort. Otras Insta. C/Hernández de Tejada, 6 2ºC Madrid",
+        "importe": 4.67
+      },
+      {
+        "cuenta": "6815005009",
+        "nombre": "Dot. Amort. Otras Instal. C/Hernández de Tejada, 6 3ºC Madrid",
+        "importe": 4.67
+      },
+      {
+        "cuenta": "6815005010",
+        "nombre": "Dot. Amort. Otras Instal. C/Hernández de Tejada, 6 4ºA Madrid",
+        "importe": 4.93
+      },
+      {
+        "cuenta": "6815005011",
+        "nombre": "Dot. Amort. Otras Instal. C/Hernández de Tejada, 6 4ºB Madrid",
+        "importe": 3.58
+      },
+      {
+        "cuenta": "6816000001",
+        "nombre": "Dot. Am. Mobiliario Madrid, Manuel Silvela, nº 5, Bajo 1+ sótano",
+        "importe": 1123.2
+      },
+      {
+        "cuenta": "6816000002",
+        "nombre": "Dot. Am. Mobiliario Madrid, Manuel Silvela, nº 5, Bajo",
+        "importe": 365.04
+      },
+      {
+        "cuenta": "6816000003",
+        "nombre": "Dot. Am. Mobiliario Madrid, Manuel Silvela, nº 5, 1ºA",
+        "importe": 3494.64
+      },
+      {
+        "cuenta": "6816000007",
+        "nombre": "Dot. Am. Mobiliario Madrid, Manuel Silvela, nº 5, 3ºA",
+        "importe": 218.62
+      },
+      {
+        "cuenta": "6816000008",
+        "nombre": "Dot. Am. Mobiliario Madrid, Manuel Silvela, nº 5, 3ºB",
+        "importe": 892.32
+      },
+      {
+        "cuenta": "6816000009",
+        "nombre": "Dot. Am. Mobiliario Madrid, Manuel Silvela, nº 5, 4ºA",
+        "importe": 1437.22
+      },
+      {
+        "cuenta": "6816000010",
+        "nombre": "Dot. Am. Mobiliario Madrid, Manuel Silvela, nº 5, 4ºB",
+        "importe": 1605.48
+      },
+      {
+        "cuenta": "6816000011",
+        "nombre": "Dot. Am. Mobiliario Madrid, Manuel Silvela, nº 5, 5ºA",
+        "importe": 1505.08
+      },
+      {
+        "cuenta": "6816000012",
+        "nombre": "Dot. Am. Mobiliario Madrid, Manuel Silvela, nº 5, 5ºB",
+        "importe": 238.56
+      },
+      {
+        "cuenta": "6816000014",
+        "nombre": "Dot. Am. Mobiliario Madrid, Manuel Silvela, nº 5, 6ºB",
+        "importe": 6.48
+      },
+      {
+        "cuenta": "6816000015",
+        "nombre": "Dot. Am. Mobiliario Madrid, Manuel Silvela, nº 5, 6ºC",
+        "importe": 1894.68
+      },
+      {
+        "cuenta": "6816001002",
+        "nombre": "Dot. Amort. Mobiliario vivienda M.Pelayo, 15, 4º D",
+        "importe": 63.95
+      },
+      {
+        "cuenta": "6816001003",
+        "nombre": "Dot. Amort. Mobiliario vivienda M.Pelayo, 15, Ático 5º",
+        "importe": 139.44
+      },
+      {
+        "cuenta": "6816003002",
+        "nombre": "Dot. Amort., Mobiliario C/Candelaria Mora 12-14, 1ºB + Garaje 1 Madrid",
+        "importe": 407.88
+      },
+      {
+        "cuenta": "6816003004",
+        "nombre": "Dot. Amort. Mobiliario C/Candelaria Mora 12-14, 1ºD +Garaje 4 Madrid",
+        "importe": 626.16
+      },
+      {
+        "cuenta": "6816003005",
+        "nombre": "Dot. Amort. Mobiliario C/Candelaria Mora 12-14, 1ºE +Garaje 8 Madrid",
+        "importe": 105.98
+      },
+      {
+        "cuenta": "6816003006",
+        "nombre": "Dot. Amort. Mobiliario C/Candelaria Mora 12-14, 2ºA +Garaje 12 Madrid",
+        "importe": 423.12
+      },
+      {
+        "cuenta": "6816003009",
+        "nombre": "Dot. Amort. Mobiliario C/Candelaria Mora 12-14, 3ºA +Garaje 13 Madrid",
+        "importe": 322.08
+      },
+      {
+        "cuenta": "6816003010",
+        "nombre": "Dot. Amort. Mobiliario C/Candelaria Mora 12-14, 3ºB +Garaje 10 Madrid",
+        "importe": 322.08
+      },
+      {
+        "cuenta": "6816003012",
+        "nombre": "Dot. Amort. Mobiliario C/Candelaria Mora 12-14, 4ºA +Garaje 3 Madrid",
+        "importe": 361.68
+      },
+      {
+        "cuenta": "6816003013",
+        "nombre": "Dot. Amort. Mobiliario C/Candelaria Mora 12-14, 4ºB + Garaje 6 Madrid",
+        "importe": 318.96
+      },
+      {
+        "cuenta": "6816004000",
+        "nombre": "Dot. Amort. Mobiliario C/Reina 15 Madrid, Común pisos",
+        "importe": 64.5
+      },
+      {
+        "cuenta": "6816004001",
+        "nombre": "Dot. Amort. Mobiliario C/Reina 15, 1ºA Madrid",
+        "importe": 705.36
+      },
+      {
+        "cuenta": "6816004002",
+        "nombre": "Dot. Amort. Mobiliario C/Reina 15, 1ºB Madrid",
+        "importe": 804.36
+      },
+      {
+        "cuenta": "6816004003",
+        "nombre": "Dot. Amort. Mobiliario C/Reina 15, 1ºC Madrid",
+        "importe": 574.92
+      },
+      {
+        "cuenta": "6816004004",
+        "nombre": "Dot. Amort. Mobiliario C/Reina 15, 1ºD Madrid",
+        "importe": 718.56
+      },
+      {
+        "cuenta": "6816004005",
+        "nombre": "Dot. Amort. Mobiliario C/Reina 15, 2ºA Madrid",
+        "importe": 705.36
+      },
+      {
+        "cuenta": "6816004006",
+        "nombre": "Dot. Amort. Mobiliario C/Reina 15, 2ºB Madrid",
+        "importe": 690.96
+      },
+      {
+        "cuenta": "6816004007",
+        "nombre": "Dot. Amort. Mobiliario C/Reina 15, 2ºC Madrid",
+        "importe": 574.92
+      },
+      {
+        "cuenta": "6816004008",
+        "nombre": "Dot. Amort. Mobiliario C/Reina 15, 2ºD Madrid",
+        "importe": 695.4
+      },
+      {
+        "cuenta": "6816004009",
+        "nombre": "Dot. Amort. Mobiliario C/Reina 15, 3ºA Madrid",
+        "importe": 705.36
+      },
+      {
+        "cuenta": "6816004010",
+        "nombre": "Dot. Amort. Mobiliario C/Reina 15, 3ºB Madrid",
+        "importe": 696.84
+      },
+      {
+        "cuenta": "6816004011",
+        "nombre": "Dot. Amort. Mobiliario C/Reina 15, 3ºC Madrid",
+        "importe": 589.8
+      },
+      {
+        "cuenta": "6816004012",
+        "nombre": "Dot. Amort. Mobiliario C/Reina 15, 3ºD Madrid",
+        "importe": 695.4
+      },
+      {
+        "cuenta": "6816004013",
+        "nombre": "Dot. Amort. Mobiliario C/Reina 15, 4ºA Madrid",
+        "importe": 1286.16
+      },
+      {
+        "cuenta": "6816004014",
+        "nombre": "Dot. Amort. Mobiliario C/Reina 15, 4ºB Madrid",
+        "importe": 824.32
+      },
+      {
+        "cuenta": "6816004015",
+        "nombre": "Dot. Amort. Mobiliario C/Reina 15, 4ºC Madrid",
+        "importe": 584.64
+      },
+      {
+        "cuenta": "6816005006",
+        "nombre": "Dot. Amort. Mobiliario C/Hernández de Tejada, 6 2ºC Madrid",
+        "importe": 7.94
+      },
+      {
+        "cuenta": "6816005009",
+        "nombre": "Dot. Amort. Mobiliario C/Hernández de Tejada, 6 3ºC Madrid",
+        "importe": 7.94
+      },
+      {
+        "cuenta": "6816005010",
+        "nombre": "Dot. Amort. Mobiliario C/Hernández de Tejada, 6 4ºA Madrid",
+        "importe": 7.94
+      },
+      {
+        "cuenta": "6816005011",
+        "nombre": "Dot. Amort. Mobiliario C/Hernández de Tejada, 6 4ºB Madrid",
+        "importe": 7.94
+      },
+      {
+        "cuenta": "6818000001",
+        "nombre": "Dot. Amort. Vehículo furgoneta P-0511-L Volkswagen",
+        "importe": 80.04
+      }
+    ],
+    "proveedores": [
+      {
+        "cuenta": "4100000052",
+        "nombre": "SERVICIO INTEGRAL DE LIMPIEZAS Y CUBOS, S.L",
+        "saldo": 107.36
+      },
+      {
+        "cuenta": "4100000058",
+        "nombre": "Pablo Llamas S.A",
+        "saldo": 36.65
+      },
+      {
+        "cuenta": "4100000066",
+        "nombre": "Comercial Jeyco S.L",
+        "saldo": 17.51
+      },
+      {
+        "cuenta": "4100000069",
+        "nombre": "Repsol Comercializadora de Electricidad y Gas S.L.U",
+        "saldo": -0.0
+      },
+      {
+        "cuenta": "4100000081",
+        "nombre": "SCHINDLER, S.A",
+        "saldo": 904.01
+      },
+      {
+        "cuenta": "4100000085",
+        "nombre": "CAMARA DE LA PROPIEDAD URBANA DE PALENCIA",
+        "saldo": -1375.0
+      },
+      {
+        "cuenta": "4100000097",
+        "nombre": "Martín Alvarez, Francisco José",
+        "saldo": -0.0
+      },
+      {
+        "cuenta": "4100000099",
+        "nombre": "Miguel Angel Calleja Acreedor por Gtos representación",
+        "saldo": 631.83
+      },
+      {
+        "cuenta": "4100000118",
+        "nombre": "Mª del Carmen Gutiérrez Redondo",
+        "saldo": 31.8
+      },
+      {
+        "cuenta": "4100000122",
+        "nombre": "Securitas Direct España SAU",
+        "saldo": 117.12
+      },
+      {
+        "cuenta": "4100000144",
+        "nombre": "Spotahome, S.L",
+        "saldo": 585.79
+      },
+      {
+        "cuenta": "4100000145",
+        "nombre": "Electricidad Eleia, S.L",
+        "saldo": -379.36
+      },
+      {
+        "cuenta": "4100000154",
+        "nombre": "Wekiwi SL",
+        "saldo": -44.24
+      },
+      {
+        "cuenta": "4100000165",
+        "nombre": "Eni Plenitude Iberia, S.L",
+        "saldo": 65.78
+      },
+      {
+        "cuenta": "4100000190",
+        "nombre": "Imput inversiones generales S.L",
+        "saldo": 2074.79
+      },
+      {
+        "cuenta": "4100000196",
+        "nombre": "Álamo Home Europe S.L",
+        "saldo": 723.98
+      },
+      {
+        "cuenta": "4100000200",
+        "nombre": "GUIDEBRIDGE ASSET MANAGEMENT, SL",
+        "saldo": -0.0
+      },
+      {
+        "cuenta": "4100000213",
+        "nombre": "Edificaciones Globales Pénfola S.L.",
+        "saldo": 3792.87
+      },
+      {
+        "cuenta": "4100000214",
+        "nombre": "Gaolania Servicios SL",
+        "saldo": -0.0
+      },
+      {
+        "cuenta": "4100000218",
+        "nombre": "Juárez Pérez, Sonia",
+        "saldo": 51.0
+      },
+      {
+        "cuenta": "4100000224",
+        "nombre": "Martínez Martino, Maria Eulalia",
+        "saldo": -0.0
+      },
+      {
+        "cuenta": "4100000226",
+        "nombre": "Mantenimiento y regulación térmica S.L",
+        "saldo": 116.51
+      },
+      {
+        "cuenta": "4100001515",
+        "nombre": "Villamuza Rodríguez, Juan Carlos",
+        "saldo": 430.52
+      }
+    ],
+    "seguros": [
+      {
+        "cuenta": "6250000000",
+        "nombre": "Prima seguro Manuel Silvela 5 Edificio y viviendas(parte mob)",
+        "importe": 1781.53
+      },
+      {
+        "cuenta": "6250000002",
+        "nombre": "Prima seguro vehículo P-0511-L",
+        "importe": 757.37
+      },
+      {
+        "cuenta": "6250000006",
+        "nombre": "Prima de seguro Camilo José Cela(Marbella)",
+        "importe": 229.44
+      },
+      {
+        "cuenta": "6250001001",
+        "nombre": "Prima de seguro M.Pelayo 1º dcha",
+        "importe": 232.71
+      },
+      {
+        "cuenta": "6250001002",
+        "nombre": "Prima de seguro M.Pelayo 4º dcha",
+        "importe": 288.53
+      },
+      {
+        "cuenta": "6250001003",
+        "nombre": "Prima de seguro M.Pelayo 5º ático",
+        "importe": 289.05
+      },
+      {
+        "cuenta": "6250003000",
+        "nombre": "Prima de seguro Candelaria Mora 12-14",
+        "importe": 1500.83
+      },
+      {
+        "cuenta": "6250004000",
+        "nombre": "Prima de Seguro Edif.y mob Reina 15",
+        "importe": 1297.89
+      },
+      {
+        "cuenta": "6250005000",
+        "nombre": "Prima de Seguro Edif.y mob Hernandez Tejada, 6",
+        "importe": 1374.27
+      }
+    ]
+  }
+}
