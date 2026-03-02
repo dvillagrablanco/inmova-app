@@ -1327,6 +1327,12 @@ const finanzasNavItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
+    name: 'Cuadro de Mandos',
+    href: '/finanzas/cuadro-de-mandos',
+    icon: LayoutDashboard,
+    roles: ['super_admin', 'administrador'],
+  },
+  {
     name: 'Pagos',
     href: '/pagos',
     icon: CreditCard,
