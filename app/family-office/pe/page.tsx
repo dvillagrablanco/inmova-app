@@ -7,7 +7,8 @@ import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Loader2, Home, Briefcase, TrendingUp, TrendingDown, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
+import { Loader2, Home, Briefcase, TrendingUp, TrendingDown, RefreshCw, ChevronDown, ChevronUp, Landmark } from 'lucide-react';
+import Link from 'next/link';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -143,9 +144,17 @@ export default function PEPage() {
             <h1 className="text-2xl font-bold text-gray-900">Private Equity — Activos en Crecimiento</h1>
             <p className="text-gray-500">Reporting estilo MdF Family Partners · BALDOMERO PE GRUPO</p>
           </div>
-          <Button variant="outline" onClick={loadData} size="sm">
-            <RefreshCw className="h-4 w-4 mr-2" /> Actualizar
-          </Button>
+          <div className="flex items-center gap-2">
+            <Link href="/family-office/dashboard">
+              <Button variant="ghost" size="sm">
+                <Landmark className="h-4 w-4 mr-1.5" />
+                Patrimonio 360°
+              </Button>
+            </Link>
+            <Button variant="outline" onClick={loadData} size="sm">
+              <RefreshCw className="h-4 w-4 mr-2" /> Actualizar
+            </Button>
+          </div>
         </div>
 
         {/* KPIs */}

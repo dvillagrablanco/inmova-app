@@ -138,6 +138,27 @@ export default function FamilyOfficeDashboardPage() {
           </Button>
         </div>
 
+        {/* Quick Navigation */}
+        <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+          {[
+            { label: 'Private Equity', href: '/family-office/pe', icon: Briefcase, color: 'text-purple-600 bg-purple-50' },
+            { label: 'Cuentas', href: '/family-office/cuentas', icon: Building2, color: 'text-blue-600 bg-blue-50' },
+            { label: 'Carteras P&L', href: '/family-office/cartera', icon: TrendingUp, color: 'text-green-600 bg-green-50' },
+            { label: 'Tesorería', href: '/family-office/tesoreria', icon: Wallet, color: 'text-amber-600 bg-amber-50' },
+            { label: 'Cuadro Mandos', href: '/finanzas/cuadro-de-mandos', icon: TrendingUp, color: 'text-indigo-600 bg-indigo-50' },
+            { label: 'Reportes', href: '/reportes/financieros', icon: Building2, color: 'text-gray-600 bg-gray-50' },
+          ].map((item) => (
+            <Link key={item.href} href={item.href}>
+              <div className="flex flex-col items-center gap-1 p-3 rounded-lg border hover:shadow-md transition-shadow cursor-pointer text-center">
+                <div className={`w-8 h-8 rounded-lg ${item.color.split(' ')[1]} flex items-center justify-center`}>
+                  <item.icon className={`h-4 w-4 ${item.color.split(' ')[0]}`} />
+                </div>
+                <span className="text-[10px] font-medium text-gray-700">{item.label}</span>
+              </div>
+            </Link>
+          ))}
+        </div>
+
         {/* Patrimonio Total */}
         <Card className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white">
           <CardContent className="pt-6 pb-4">

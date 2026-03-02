@@ -78,6 +78,16 @@ interface LatestPeriodSummary {
 
 const financeModules: FinanceModule[] = [
   {
+    id: 'cuadro-mandos',
+    title: 'Cuadro de Mandos',
+    description: 'PyG Analítica por centro de coste, KPIs de cartera y comparativo multi-ejercicio',
+    icon: <BarChart3 className="h-6 w-6" />,
+    href: '/finanzas/cuadro-de-mandos',
+    badge: 'Nuevo',
+    statsLabel: 'Director Financiero',
+    available: true,
+  },
+  {
     id: 'conciliacion',
     title: 'Conciliacion Bancaria',
     description: 'Vincula movimientos bancarios con facturas y recibos automaticamente',

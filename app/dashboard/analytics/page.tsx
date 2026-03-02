@@ -296,6 +296,39 @@ export default function AnalyticsPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Cross-links a herramientas financieras */}
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle>Herramientas Financieras</CardTitle>
+          <CardDescription>Accede a análisis financieros avanzados</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <a href="/finanzas/cuadro-de-mandos" className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+              <DollarSign className="h-8 w-8 text-blue-600" />
+              <div>
+                <p className="font-medium text-sm">Cuadro de Mandos</p>
+                <p className="text-xs text-gray-500">PyG Analítica por centro de coste</p>
+              </div>
+            </a>
+            <a href="/family-office/dashboard" className="flex items-center gap-3 p-4 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors">
+              <Home className="h-8 w-8 text-indigo-600" />
+              <div>
+                <p className="font-medium text-sm">Family Office 360°</p>
+                <p className="text-xs text-gray-500">Patrimonio consolidado</p>
+              </div>
+            </a>
+            <a href="/reportes/financieros" className="flex items-center gap-3 p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
+              <FileText className="h-8 w-8 text-green-600" />
+              <div>
+                <p className="font-medium text-sm">Reportes Financieros</p>
+                <p className="text-xs text-gray-500">Análisis por propiedad</p>
+              </div>
+            </a>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

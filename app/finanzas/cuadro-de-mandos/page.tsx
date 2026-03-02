@@ -14,7 +14,8 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { Home, RefreshCw, LayoutDashboard } from 'lucide-react';
+import { Home, RefreshCw, LayoutDashboard, Landmark, FileBarChart } from 'lucide-react';
+import Link from 'next/link';
 import { toast } from 'sonner';
 
 import { KpiCardsRow } from '@/components/finanzas/cuadro-mandos/KpiCardsRow';
@@ -153,6 +154,18 @@ export default function CuadroDeMandosPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Link href="/family-office/dashboard">
+              <Button variant="ghost" size="sm">
+                <Landmark className="h-4 w-4 mr-1.5" />
+                Family Office
+              </Button>
+            </Link>
+            <Link href="/reportes/financieros">
+              <Button variant="ghost" size="sm">
+                <FileBarChart className="h-4 w-4 mr-1.5" />
+                Reportes
+              </Button>
+            </Link>
             <ExportButton data={data} />
             <Button
               variant="outline"

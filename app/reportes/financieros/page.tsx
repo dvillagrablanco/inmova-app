@@ -29,6 +29,7 @@ import {
   Building2,
   ArrowUpRight,
   ArrowDownRight,
+  LayoutDashboard,
 } from 'lucide-react';
 
 interface PropertyStats {
@@ -287,6 +288,10 @@ export default function ReportesFinancierosPage() {
                 <SelectItem value="year">Año</SelectItem>
               </SelectContent>
             </Select>
+            <Button variant="outline" onClick={() => router.push('/finanzas/cuadro-de-mandos')}>
+              <LayoutDashboard className="h-4 w-4 mr-2" />
+              PyG Analítica
+            </Button>
             <Button variant="outline">
               <Download className="h-4 w-4 mr-2" />
               Exportar
