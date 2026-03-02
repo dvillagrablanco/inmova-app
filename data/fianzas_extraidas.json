@@ -1,0 +1,946 @@
+{
+  "ROVIDA": [
+    {
+      "cuenta": "1800000002",
+      "nombre": "Fianza recibida L/P Santos Transportes E",
+      "saldo": -500.0
+    },
+    {
+      "cuenta": "1800000004",
+      "nombre": "Fianza recibida Disfasa Av Europa",
+      "saldo": -3874.0
+    },
+    {
+      "cuenta": "1800000005",
+      "nombre": "Fianza recibida Vidaro  Av Europa",
+      "saldo": -1256.0
+    },
+    {
+      "cuenta": "1800000006",
+      "nombre": "Fianza recibida Incofasa  Av Europa",
+      "saldo": -264.0
+    },
+    {
+      "cuenta": "1800000012",
+      "nombre": "Fianzas recibidas Netservices Av Europa",
+      "saldo": -5200.0
+    },
+    {
+      "cuenta": "1800000013",
+      "nombre": "Fianza recibida Nave Valladolid C/Metal, 4",
+      "saldo": -1700.0
+    },
+    {
+      "cuenta": "1800000014",
+      "nombre": "Fianza recibida Mod.1 C/Constitución 8 (Valladolid)",
+      "saldo": -991.74
+    },
+    {
+      "cuenta": "1800000015",
+      "nombre": "Fianza recibida Mod.2-3 C/Constitución 8 (Valladolid)",
+      "saldo": -4500.0
+    },
+    {
+      "cuenta": "1800000016",
+      "nombre": "Fianza recibida Mod.4 C/Constitución 8 (Valladolid)",
+      "saldo": -661.16
+    },
+    {
+      "cuenta": "1800000017",
+      "nombre": "Fianza recibida Mod.5 C/Constitución 8 (Valladolid)",
+      "saldo": -1190.0
+    },
+    {
+      "cuenta": "1800000018",
+      "nombre": "Fianza recibida Mod.6 C/Constitución 8 (Valladolid)",
+      "saldo": -1074.0
+    },
+    {
+      "cuenta": "1800000019",
+      "nombre": "Fianza recibida Mod.7 C/Constitución 8 (Valladolid)",
+      "saldo": -1100.0
+    },
+    {
+      "cuenta": "1800000020",
+      "nombre": "Fianza recibida Mod.8 C/Constitución 8 (Valladolid)",
+      "saldo": -413.0
+    },
+    {
+      "cuenta": "1800000021",
+      "nombre": "Fianza recibida Local M.Pelayo 15 pta izq",
+      "saldo": -1700.0
+    },
+    {
+      "cuenta": "1800000022",
+      "nombre": "Fianza recibida Local Barquillo 30 Madrid",
+      "saldo": -46000.0
+    },
+    {
+      "cuenta": "1800000023",
+      "nombre": "Fianza recibida Local 1 (Finca 13182) Reina 15 Madrid",
+      "saldo": -9600.0
+    },
+    {
+      "cuenta": "1800000024",
+      "nombre": "Fianza recibida Local 2 (Finca 13184) Reina 15 Madrid",
+      "saldo": -21600.0
+    },
+    {
+      "cuenta": "1800000025",
+      "nombre": "Fianza recibida Edificio Piamonte 23",
+      "saldo": -28915.16
+    },
+    {
+      "cuenta": "1800000026",
+      "nombre": "Fianzas recibida Nave Avd.Cuba-Palencia",
+      "saldo": -16000.0
+    },
+    {
+      "cuenta": "1800000101",
+      "nombre": "Fianza recib.SOT.-2 PLAZA 1 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000102",
+      "nombre": "Fianza recib.SOT.-2 PLAZA 2 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000104",
+      "nombre": "Fianza recib.SOT.-2 PLAZA 4 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000105",
+      "nombre": "Fianza recib.SOT.-2 PLAZA 5 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000106",
+      "nombre": "Fianza recib.SOT.-2 PLAZA 6 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000107",
+      "nombre": "Fianza recib.SOT.-2 PLAZA 7 C/Espronceda",
+      "saldo": -100.0
+    },
+    {
+      "cuenta": "1800000108",
+      "nombre": "Fianza recib.SOT.-2 PLAZA 8 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000109",
+      "nombre": "Fianza recib.SOT.-2 PLAZA 9 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000110",
+      "nombre": "Fianza recib.SOT.-2 PLAZA 10 C/Espronceda",
+      "saldo": -100.0
+    },
+    {
+      "cuenta": "1800000111",
+      "nombre": "Fianza recib.SOT.-2 PLAZA 11 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000112",
+      "nombre": "Fianza recib.SOT.-2 PLAZA 12 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000113",
+      "nombre": "Fianza recib.SOT.-2 PLAZA 13 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000114",
+      "nombre": "Fianza recib.SOT.-2 PLAZA 14 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000115",
+      "nombre": "Fianza recib.SOT.-2 PLAZA 15 C/Espronceda",
+      "saldo": -150.0
+    },
+    {
+      "cuenta": "1800000117",
+      "nombre": "Fianza recib.SOT.-2 PLAZA 38 C/Espronceda",
+      "saldo": -100.0
+    },
+    {
+      "cuenta": "1800000124",
+      "nombre": "Fianza recib.SOT.-2 PLAZA 63 C/Espronceda",
+      "saldo": -100.0
+    },
+    {
+      "cuenta": "1800000125",
+      "nombre": "Fianza recib.SOT.-2 PLAZA 64 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000130",
+      "nombre": "Fianza recib.SOT.-2 PLAZA 72 C/Espronceda",
+      "saldo": -100.0
+    },
+    {
+      "cuenta": "1800000131",
+      "nombre": "Fianza recib.SOT.-2 PLAZA 73 C/Espronceda",
+      "saldo": -100.0
+    },
+    {
+      "cuenta": "1800000132",
+      "nombre": "Fianza recib.SOT.-2 PLAZA 74 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000137",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 1 C/Espronceda",
+      "saldo": -231.4
+    },
+    {
+      "cuenta": "1800000138",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 2 C/Espronceda",
+      "saldo": -231.4
+    },
+    {
+      "cuenta": "1800000139",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 3 C/Espronceda",
+      "saldo": -231.4
+    },
+    {
+      "cuenta": "1800000140",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 4 C/Espronceda",
+      "saldo": -231.4
+    },
+    {
+      "cuenta": "1800000141",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 5 C/Espronceda",
+      "saldo": -231.4
+    },
+    {
+      "cuenta": "1800000142",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 6 C/Espronceda",
+      "saldo": -231.4
+    },
+    {
+      "cuenta": "1800000143",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 7 C/Espronceda",
+      "saldo": -231.4
+    },
+    {
+      "cuenta": "1800000144",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 8 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000145",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 9 C/Espronceda",
+      "saldo": -100.0
+    },
+    {
+      "cuenta": "1800000146",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 10 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000147",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 11 C/Espronceda",
+      "saldo": -100.0
+    },
+    {
+      "cuenta": "1800000148",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 12 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000149",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 13 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000150",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 14 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000152",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 16 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000153",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 17 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000155",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 19 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000156",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 20 C/Espronceda",
+      "saldo": -150.0
+    },
+    {
+      "cuenta": "1800000157",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 21 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000158",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 22 C/Espronceda",
+      "saldo": -100.0
+    },
+    {
+      "cuenta": "1800000159",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 23 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000160",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 24 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000161",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 25 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000162",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 26 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000163",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 27 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000164",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 28 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000165",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 29 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000166",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 30 C/Espronceda",
+      "saldo": -100.0
+    },
+    {
+      "cuenta": "1800000169",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 33 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000170",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 34 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000171",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 35 C/Espronceda",
+      "saldo": -100.0
+    },
+    {
+      "cuenta": "1800000172",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 36 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000173",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 37 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000174",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 38 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000176",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 40 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000177",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 41 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000178",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 42 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000179",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 43 C/Espronceda",
+      "saldo": -100.0
+    },
+    {
+      "cuenta": "1800000180",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 44 C/Espronceda",
+      "saldo": -100.0
+    },
+    {
+      "cuenta": "1800000181",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 45 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000182",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 46 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000183",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 47 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000185",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 49 C/Espronceda",
+      "saldo": -100.0
+    },
+    {
+      "cuenta": "1800000186",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 51 C/Espronceda",
+      "saldo": -100.0
+    },
+    {
+      "cuenta": "1800000187",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 52 C/Espronceda",
+      "saldo": -80.0
+    },
+    {
+      "cuenta": "1800000188",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 53 C/Espronceda",
+      "saldo": -130.0
+    },
+    {
+      "cuenta": "1800000189",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 54 C/Espronceda",
+      "saldo": -100.0
+    },
+    {
+      "cuenta": "1800000190",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 55 C/Espronceda",
+      "saldo": -100.0
+    },
+    {
+      "cuenta": "1800000191",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 56 C/Espronceda",
+      "saldo": -100.0
+    },
+    {
+      "cuenta": "1800000192",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 57 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000193",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 58 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000194",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 59 C/Espronceda",
+      "saldo": -100.0
+    },
+    {
+      "cuenta": "1800000195",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 60 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000196",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 61 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000197",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 62 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000198",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 63 C/Espronceda",
+      "saldo": -100.0
+    },
+    {
+      "cuenta": "1800000199",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 64 C/Espronceda",
+      "saldo": -150.0
+    },
+    {
+      "cuenta": "1800000201",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 66 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000203",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 68 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000204",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 69 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000205",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 70 C/Espronceda",
+      "saldo": -160.0
+    },
+    {
+      "cuenta": "1800000206",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 71 C/Espronceda",
+      "saldo": -160.0
+    },
+    {
+      "cuenta": "1800000208",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 73 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000209",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 74 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000210",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 75 C/Espronceda",
+      "saldo": -150.0
+    },
+    {
+      "cuenta": "1800000211",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 76 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000212",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 77 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000213",
+      "nombre": "Fianza recib.SOT.-3 PLAZA 78 C/Espronceda",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000220",
+      "nombre": "Fianza recib.SOT.-1 PLAZA 20 M.Pelayo 17-Palencia",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000222",
+      "nombre": "Fianza recib.SOT.-1 PLAZA 27 M.Pelayo 17-Palencia",
+      "saldo": -40.0
+    },
+    {
+      "cuenta": "1800000226",
+      "nombre": "Fianza recib.SOT.-1 PLAZA 31 M.Pelayo 17-Palencia",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000227",
+      "nombre": "Fianza recib.SOT.-1 PLAZA 28 M.Pelayo 17-Palencia",
+      "saldo": -100.0
+    },
+    {
+      "cuenta": "1800000231",
+      "nombre": "Fianza recib.SOT.-1 PLAZA 36 M.Pelayo 17-Palencia",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800000235",
+      "nombre": "Fianza recib.SOT.-2 PLAZA 76 M.Pelayo 17-Palencia",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800016102",
+      "nombre": "Fianza recib.SOT.-1 PLAZA 1.2M Hdez de Tejada 6 - Madrid",
+      "saldo": -100.0
+    },
+    {
+      "cuenta": "1800016107",
+      "nombre": "Fianza recib.SOT.-1 PLAZA 1.7M Hdez de Tejada 6 - Madrid",
+      "saldo": -100.0
+    },
+    {
+      "cuenta": "1800016112",
+      "nombre": "Fianza recib.SOT.-1 PLAZA 1.12M Hdez de Tejada 6 - Madrid",
+      "saldo": -100.0
+    },
+    {
+      "cuenta": "1800016113",
+      "nombre": "Fianza recib.SOT.-1 PLAZA 1.13M Hdez de Tejada 6 - Madrid",
+      "saldo": -100.0
+    },
+    {
+      "cuenta": "1800016204",
+      "nombre": "Fianza recib.SOT.-2 PLAZA 04 Hdez de Tejada 6 - Madrid",
+      "saldo": -40.0
+    },
+    {
+      "cuenta": "1800016205",
+      "nombre": "Fianza recib.SOT.-2 PLAZA 05 Hdez de Tejada 6 - Madrid",
+      "saldo": -50.0
+    },
+    {
+      "cuenta": "1800016211",
+      "nombre": "Fianza recib.SOT.-2 PLAZA 11 Hdez de Tejada 6 - Madrid",
+      "saldo": -40.0
+    },
+    {
+      "cuenta": "1800016213",
+      "nombre": "Fianza recib.SOT.-2 PLAZA 13 Hdez de Tejada 6 - Madrid",
+      "saldo": -40.0
+    },
+    {
+      "cuenta": "1800016219",
+      "nombre": "Fianza recib.SOT.-2 PLAZA 19 Hdez de Tejada 6 - Madrid",
+      "saldo": -40.0
+    },
+    {
+      "cuenta": "1800016221",
+      "nombre": "Fianza recib.SOT.-2 PLAZA 21 Hdez de Tejada 6 - Madrid",
+      "saldo": -40.0
+    },
+    {
+      "cuenta": "1800016222",
+      "nombre": "Fianza recib.SOT.-2 PLAZA 22 Hdez de Tejada 6 - Madrid",
+      "saldo": -100.0
+    },
+    {
+      "cuenta": "1800016223",
+      "nombre": "Fianza recib.SOT.-2 PLAZA 23 Hdez de Tejada 6 - Madrid",
+      "saldo": -40.0
+    },
+    {
+      "cuenta": "1800016224",
+      "nombre": "Fianza recib.SOT.-2 PLAZA 24 Hdez de Tejada 6 - Madrid",
+      "saldo": -100.0
+    },
+    {
+      "cuenta": "1800016225",
+      "nombre": "Fianza recib.SOT.-2 PLAZA 25 Hdez de Tejada 6 - Madrid",
+      "saldo": -100.0
+    },
+    {
+      "cuenta": "1800016226",
+      "nombre": "Fianza recib.SOT.-2 PLAZA 26 Hdez de Tejada 6 - Madrid",
+      "saldo": -100.0
+    },
+    {
+      "cuenta": "1800016227",
+      "nombre": "Fianza recib.SOT.-2 PLAZA 27 Hdez de Tejada 6 - Madrid",
+      "saldo": -100.0
+    }
+  ],
+  "VIRODA": [
+    {
+      "cuenta": "1800000001",
+      "nombre": "Fianza recibida M.Pelayo 4ºdcha",
+      "saldo": -1400.0
+    },
+    {
+      "cuenta": "1800000002",
+      "nombre": "Fianza recibida M.Pelayo Ático",
+      "saldo": -2200.0
+    },
+    {
+      "cuenta": "1800001001",
+      "nombre": "Fianza recibida MANUEL SILVELA 5",
+      "saldo": -15000.0
+    },
+    {
+      "cuenta": "1800001002",
+      "nombre": "Fianza recibida MANUEL SILVELA 5,Bajo",
+      "saldo": -10275.87
+    },
+    {
+      "cuenta": "1800001003",
+      "nombre": "Fianza recibida MANUEL SILVELA 5,1º A",
+      "saldo": -15900.0
+    },
+    {
+      "cuenta": "1800001004",
+      "nombre": "Fianza recibida MANUEL SILVELA 5,1º B",
+      "saldo": -2400.0
+    },
+    {
+      "cuenta": "1800001005",
+      "nombre": "Fianza recibida MANUEL SILVELA 5,2º B",
+      "saldo": -3100.0
+    },
+    {
+      "cuenta": "1800001006",
+      "nombre": "Fianza recibida MANUEL SILVELA 5,3º A",
+      "saldo": -5800.0
+    },
+    {
+      "cuenta": "1800001007",
+      "nombre": "Fianza recibida MANUEL SILVELA 5,3º B",
+      "saldo": -9400.0
+    },
+    {
+      "cuenta": "1800001008",
+      "nombre": "Fianza recibida MANUEL SILVELA 5,4º A",
+      "saldo": -6600.0
+    },
+    {
+      "cuenta": "1800001009",
+      "nombre": "Fianza recibida MANUEL SILVELA 5,4º B",
+      "saldo": -4400.0
+    },
+    {
+      "cuenta": "1800001010",
+      "nombre": "Fianza recibida MANUEL SILVELA 5,5º A",
+      "saldo": -12900.0
+    },
+    {
+      "cuenta": "1800001011",
+      "nombre": "Fianza recibida MANUEL SILVELA 5,5º B",
+      "saldo": -4700.0
+    },
+    {
+      "cuenta": "1800001012",
+      "nombre": "Fianza recibida MANUEL SILVELA 5,6º A, Jorge Andújar Hernández",
+      "saldo": -3300.0
+    },
+    {
+      "cuenta": "1800001014",
+      "nombre": "Fianza recibida MANUEL SILVELA 5,6º C",
+      "saldo": -5200.0
+    },
+    {
+      "cuenta": "1800001015",
+      "nombre": "Fianza recibida MANUEL SILVELA 5,2º A",
+      "saldo": -4000.0
+    },
+    {
+      "cuenta": "1800001016",
+      "nombre": "Fianza recibida MANUEL SILVELA 5,6º B,Sofía Lazaro",
+      "saldo": -2700.0
+    },
+    {
+      "cuenta": "1800001017",
+      "nombre": "Fianza recibida MANUEL SILVELA 5,3º A,Tommaso Landi",
+      "saldo": -4000.0
+    },
+    {
+      "cuenta": "1800002001",
+      "nombre": "Fianza recib.CANDELARIA MORA 12,1ºA",
+      "saldo": -1650.0
+    },
+    {
+      "cuenta": "1800002002",
+      "nombre": "Fianza recib.CANDELARIA MORA 12,1ºB",
+      "saldo": -2630.0
+    },
+    {
+      "cuenta": "1800002003",
+      "nombre": "Fianza recib.CANDELARIA MORA 12,1ºC",
+      "saldo": -1300.0
+    },
+    {
+      "cuenta": "1800002004",
+      "nombre": "Fianza recib.CANDELARIA MORA 12,1ºD-duplex",
+      "saldo": -5199.0
+    },
+    {
+      "cuenta": "1800002005",
+      "nombre": "Fianza recib.CANDELARIA MORA 12,1ºE-duplex",
+      "saldo": -3690.0
+    },
+    {
+      "cuenta": "1800002006",
+      "nombre": "Fianza recib.CANDELARIA MORA 12,2ºA",
+      "saldo": -6470.0
+    },
+    {
+      "cuenta": "1800002007",
+      "nombre": "Fianza recib.CANDELARIA MORA 12,2ºB",
+      "saldo": -1300.0
+    },
+    {
+      "cuenta": "1800002008",
+      "nombre": "Fianza recib.CANDELARIA MORA 12,2ºC",
+      "saldo": -1600.0
+    },
+    {
+      "cuenta": "1800002009",
+      "nombre": "Fianza recib.CANDELARIA MORA 12,3ºA",
+      "saldo": -5190.0
+    },
+    {
+      "cuenta": "1800002010",
+      "nombre": "Fianza recib.CANDELARIA MORA 12,3ºB",
+      "saldo": -2560.0
+    },
+    {
+      "cuenta": "1800002011",
+      "nombre": "Fianza recib.CANDELARIA MORA 12,3ºC",
+      "saldo": -1850.0
+    },
+    {
+      "cuenta": "1800002012",
+      "nombre": "Fianza recib.CANDELARIA MORA 12,4ºA",
+      "saldo": -3840.0
+    },
+    {
+      "cuenta": "1800002013",
+      "nombre": "Fianza recib.CANDELARIA MORA 12,4ºB",
+      "saldo": -2560.0
+    },
+    {
+      "cuenta": "1800002014",
+      "nombre": "Fianza recib.CANDELARIA MORA 12,4ºC",
+      "saldo": -1800.0
+    },
+    {
+      "cuenta": "1800004001",
+      "nombre": "Fianza recib.Reina 15, 1ºA",
+      "saldo": -10400.0
+    },
+    {
+      "cuenta": "1800004002",
+      "nombre": "Fianza recib.Reina 15, 1ºB",
+      "saldo": -8400.0
+    },
+    {
+      "cuenta": "1800004003",
+      "nombre": "Fianza recib.Reina 15, 1ºC",
+      "saldo": -12990.0
+    },
+    {
+      "cuenta": "1800004004",
+      "nombre": "Fianza recib.Reina 15, 1ºD",
+      "saldo": -7800.0
+    },
+    {
+      "cuenta": "1800004005",
+      "nombre": "Fianza recib.Reina 15, 2ºA",
+      "saldo": -10600.0
+    },
+    {
+      "cuenta": "1800004006",
+      "nombre": "Fianza recib.Reina 15, 2ºB",
+      "saldo": -10600.0
+    },
+    {
+      "cuenta": "1800004007",
+      "nombre": "Fianza recib.Reina 15, 2ºC",
+      "saldo": -3600.0
+    },
+    {
+      "cuenta": "1800004008",
+      "nombre": "Fianza recib.Reina 15, 2ºD",
+      "saldo": -6725.0
+    },
+    {
+      "cuenta": "1800004009",
+      "nombre": "Fianza recib.Reina 15, 3ºA",
+      "saldo": -15830.49
+    },
+    {
+      "cuenta": "1800004010",
+      "nombre": "Fianza recib.Reina 15, 3ºB",
+      "saldo": -14864.0
+    },
+    {
+      "cuenta": "1800004011",
+      "nombre": "Fianza recib.Reina 15, 3ºC",
+      "saldo": -7100.0
+    },
+    {
+      "cuenta": "1800004012",
+      "nombre": "Fianza recib.Reina 15, 3ºD",
+      "saldo": -13100.0
+    },
+    {
+      "cuenta": "1800004013",
+      "nombre": "Fianza recib.Reina 15, 4ºA",
+      "saldo": -17000.0
+    },
+    {
+      "cuenta": "1800004014",
+      "nombre": "Fianza recib.Reina 15, 4ºB",
+      "saldo": -11000.0
+    },
+    {
+      "cuenta": "1800004015",
+      "nombre": "Fianza recib.Reina 15, 4ºC",
+      "saldo": -10034.0
+    },
+    {
+      "cuenta": "1800005001",
+      "nombre": "Fianza recibida Hernández de Tejada 6, 1ºA",
+      "saldo": -4030.39
+    },
+    {
+      "cuenta": "1800005002",
+      "nombre": "Fianza recibida Hernández de Tejada 6, 1ºB",
+      "saldo": -2840.01
+    },
+    {
+      "cuenta": "1800005003",
+      "nombre": "Fianza recibida Hernández de Tejada 6, 1ºC",
+      "saldo": -4465.67
+    },
+    {
+      "cuenta": "1800005004",
+      "nombre": "Fianza recibida Hernández de Tejada 6, 2ºA",
+      "saldo": -5500.0
+    },
+    {
+      "cuenta": "1800005005",
+      "nombre": "Fianza recibida Hernández de Tejada 6, 2ºB",
+      "saldo": -2977.56
+    },
+    {
+      "cuenta": "1800005006",
+      "nombre": "Fianza recibida Hernández de Tejada 6, 2ºC",
+      "saldo": -945.0
+    },
+    {
+      "cuenta": "1800005007",
+      "nombre": "Fianza recibida Hernández de Tejada 6, 3ºA",
+      "saldo": -4167.58
+    },
+    {
+      "cuenta": "1800005008",
+      "nombre": "Fianza recibida Hernández de Tejada 6, 3ºB",
+      "saldo": -4400.0
+    },
+    {
+      "cuenta": "1800005009",
+      "nombre": "Fianza recibida Hernández de Tejada 6, 3ºC",
+      "saldo": -870.15
+    },
+    {
+      "cuenta": "1800005010",
+      "nombre": "Fianza recibida Hernández de Tejada 6, 4ºA",
+      "saldo": -2940.0
+    },
+    {
+      "cuenta": "1800005011",
+      "nombre": "Fianza recibida Hernández de Tejada 6, 4ºB",
+      "saldo": -602.13
+    },
+    {
+      "cuenta": "1800005012",
+      "nombre": "Fianza recibida Hernández de Tejada 6, 4ºC",
+      "saldo": -4013.76
+    }
+  ]
+}
