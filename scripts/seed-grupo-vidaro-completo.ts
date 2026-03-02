@@ -102,7 +102,7 @@ async function seedParticipadas(vidaroId: string) {
       data: {
         companyId: vidaroId,
         targetCompanyName: p.nombre,
-        tipo: 'holding',
+        tipo: 'filial_100',
         porcentaje: p.porcentaje,
         fechaAdquisicion: new Date(2020, 0, 1),
         costeAdquisicion: 0,
