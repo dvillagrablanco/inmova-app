@@ -13,8 +13,10 @@ async function getPrisma() {
 }
 
 /**
- * GET /api/family-office/dashboard
- * Consolidated view of all patrimonio: inmobiliario + financiero + private equity.
+ * GET /api/family-office/dashboard?view=holding|consolidated
+ *
+ * Vista Holding (default): Solo activos directos del holding. Filiales aparecen como PE.
+ * Vista Consolidado: Suma activos de todo el grupo, elimina participaciones intragrupo.
  */
 export async function GET(request: NextRequest) {
   try {
@@ -25,23 +27,30 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const queryCompanyId = searchParams.get('companyId');
+    const view = (searchParams.get('view') || 'holding') as 'holding' | 'consolidated';
     const companyId = (session.user.role === 'super_admin' && queryCompanyId)
       ? queryCompanyId
       : session.user.companyId;
     const prisma = await getPrisma();
 
-    // Obtener empresa + filiales para vista consolidada
+    // Obtener empresa + filiales
     const company = await prisma.company.findUnique({
       where: { id: companyId },
-      include: { childCompanies: { select: { id: true } } },
+      include: { childCompanies: { select: { id: true, nombre: true, cif: true } } },
     });
-    const allCompanyIds = company
-      ? [company.id, ...company.childCompanies.map((c: any) => c.id)]
-      : [companyId];
 
-    // --- 1. INMOBILIARIO (holding + filiales) ---
+    const childIds = company?.childCompanies?.map((c: any) => c.id) || [];
+    const childCIFs = company?.childCompanies?.map((c: any) => c.cif).filter(Boolean) || [];
+    const allCompanyIds = company ? [company.id, ...childIds] : [companyId];
+
+    // Scope: holding = solo empresa raíz, consolidated = empresa + filiales
+    const scopeIds = view === 'holding' ? [companyId] : allCompanyIds;
+
+    const round2 = (n: number) => Math.round(n * 100) / 100;
+
+    // --- 1. INMOBILIARIO ---
     const buildings = await prisma.building.findMany({
-      where: { companyId: { in: allCompanyIds }, isDemo: false },
+      where: { companyId: { in: scopeIds }, isDemo: false },
       include: {
         units: {
           select: {
@@ -56,6 +65,7 @@ export async function GET(request: NextRequest) {
             },
           },
         },
+        company: { select: { nombre: true } },
       },
     });
 
@@ -75,16 +85,17 @@ export async function GET(request: NextRequest) {
         id: b.id,
         nombre: b.nombre,
         direccion: b.direccion,
+        sociedad: b.company?.nombre || '',
         unidades: b.units.length,
         ocupadas: b.units.filter((u: any) => u.estado === 'ocupada').length,
-        valor: Math.round(valorEdificio * 100) / 100,
-        renta: Math.round(rentaEdificio * 100) / 100,
+        valor: round2(valorEdificio),
+        renta: round2(rentaEdificio),
       };
     });
 
-    // --- 2. FINANCIERO (holding + filiales) ---
+    // --- 2. FINANCIERO ---
     const accounts = await prisma.financialAccount.findMany({
-      where: { companyId: { in: allCompanyIds }, activa: true },
+      where: { companyId: { in: scopeIds }, activa: true },
       include: {
         positions: {
           select: {
@@ -101,22 +112,18 @@ export async function GET(request: NextRequest) {
     let valorFinanciero = 0;
     let pnlFinanciero = 0;
     let tesoreriaTotal = 0;
-
     const tesoreriaPorEntidad: Record<string, number> = {};
+
     const cuentas = accounts.map((acc: any) => {
       const valorCuenta = acc.positions.reduce(
-        (sum: number, p: any) => sum + (p.valorActual || 0),
-        0
+        (sum: number, p: any) => sum + (p.valorActual || 0), 0
       );
       const pnlCuenta = acc.positions.reduce(
-        (sum: number, p: any) => sum + (p.pnlNoRealizado || 0) + (p.pnlRealizado || 0),
-        0
+        (sum: number, p: any) => sum + (p.pnlNoRealizado || 0) + (p.pnlRealizado || 0), 0
       );
 
       valorFinanciero += valorCuenta;
       pnlFinanciero += pnlCuenta;
-
-      // Cash: saldoActual represents available cash in the account
       tesoreriaTotal += acc.saldoActual || 0;
       tesoreriaPorEntidad[acc.entidad] =
         (tesoreriaPorEntidad[acc.entidad] || 0) + (acc.saldoActual || 0);
@@ -126,17 +133,30 @@ export async function GET(request: NextRequest) {
         entidad: acc.entidad,
         alias: acc.alias,
         divisa: acc.divisa,
-        valor: Math.round(valorCuenta * 100) / 100,
-        pnl: Math.round(pnlCuenta * 100) / 100,
+        valor: round2(valorCuenta),
+        pnl: round2(pnlCuenta),
         saldo: acc.saldoActual || 0,
         posiciones: acc.positions.length,
       };
     });
 
-    // --- 3. PRIVATE EQUITY / PARTICIPACIONES (holding + filiales) ---
-    const participations = await prisma.participation.findMany({
-      where: { companyId: { in: allCompanyIds }, activa: true },
+    // --- 3. PRIVATE EQUITY / PARTICIPACIONES ---
+    const allParticipations = await prisma.participation.findMany({
+      where: { companyId: { in: scopeIds }, activa: true },
     });
+
+    // En vista consolidada: excluir participaciones intragrupo (donde el CIF del target = CIF de filial)
+    const participations = view === 'consolidated'
+      ? allParticipations.filter((p: any) => {
+          const targetCIF = p.targetCompanyCIF?.toUpperCase()?.replace(/[-\s]/g, '');
+          if (!targetCIF) return true; // Sin CIF → mantener
+          return !childCIFs.some((cif: string) =>
+            cif?.toUpperCase()?.replace(/[-\s]/g, '') === targetCIF
+          );
+        })
+      : allParticipations;
+
+    const participacionesExcluidas = allParticipations.length - participations.length;
 
     let valorPE = 0;
     const participacionesData = participations.map((p: any) => {
@@ -148,19 +168,25 @@ export async function GET(request: NextRequest) {
         cif: p.targetCompanyCIF,
         tipo: p.tipo,
         porcentaje: p.porcentaje,
-        valor: Math.round(valor * 100) / 100,
+        valor: round2(valor),
         coste: p.costeAdquisicion,
+        esIntragrupo: false,
       };
     });
 
     // --- CONSOLIDATION ---
     const patrimonioTotal = valorInmobiliario + valorFinanciero + valorPE + tesoreriaTotal;
-    const totalForAllocation = patrimonioTotal || 1; // avoid division by zero
-
-    const round2 = (n: number) => Math.round(n * 100) / 100;
+    const totalForAllocation = patrimonioTotal || 1;
 
     return NextResponse.json({
       success: true,
+      view,
+      viewLabel: view === 'holding'
+        ? `Vista Holding — ${company?.nombre || 'Empresa'}`
+        : `Vista Grupo Consolidado — ${company?.nombre || 'Grupo'}`,
+      viewDescription: view === 'holding'
+        ? 'Solo activos directos del holding. Las filiales se reflejan como participaciones en Private Equity.'
+        : `Activos consolidados del grupo (${allCompanyIds.length} sociedades). Se eliminan ${participacionesExcluidas} participaciones intragrupo para evitar doble conteo.`,
       data: {
         inmobiliario: {
           valor: round2(valorInmobiliario),
@@ -176,6 +202,7 @@ export async function GET(request: NextRequest) {
         privateEquity: {
           valor: round2(valorPE),
           participaciones: participacionesData,
+          participacionesIntragrupoExcluidas: view === 'consolidated' ? participacionesExcluidas : 0,
         },
         tesoreria: {
           saldo: round2(tesoreriaTotal),
@@ -193,6 +220,7 @@ export async function GET(request: NextRequest) {
         patrimonio: {
           total: round2(patrimonioTotal),
         },
+        sociedades: view === 'consolidated' ? allCompanyIds.length : 1,
       },
     });
   } catch (error: any) {

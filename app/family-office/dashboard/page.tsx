@@ -15,6 +15,9 @@ import {
   Loader2,
   RefreshCw,
   Home,
+  ToggleLeft,
+  ToggleRight,
+  Info,
 } from 'lucide-react';
 import {
   Breadcrumb,
@@ -73,24 +76,35 @@ export default function FamilyOfficeDashboardPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<DashboardData | null>(null);
+  const [view, setView] = useState<'holding' | 'consolidated'>('holding');
+  const [viewLabel, setViewLabel] = useState('');
+  const [viewDescription, setViewDescription] = useState('');
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login');
-    if (status === 'authenticated') loadData();
-  }, [status, router]);
+    if (status === 'authenticated') loadData(view);
+  }, [status, router, view]);
 
-  const loadData = async () => {
+  const loadData = async (v: 'holding' | 'consolidated' = view) => {
+    setLoading(true);
     try {
-      const res = await fetch('/api/family-office/dashboard');
+      const res = await fetch(`/api/family-office/dashboard?view=${v}`);
       if (res.ok) {
         const json = await res.json();
         setData(json.data || json);
+        setViewLabel(json.viewLabel || '');
+        setViewDescription(json.viewDescription || '');
       }
     } catch {
       toast.error('Error cargando dashboard patrimonial');
     } finally {
       setLoading(false);
     }
+  };
+
+  const toggleView = () => {
+    const next = view === 'holding' ? 'consolidated' : 'holding';
+    setView(next);
   };
 
   const fmt = (n: number) =>
@@ -132,12 +146,40 @@ export default function FamilyOfficeDashboardPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Dashboard Patrimonial 360°</h1>
-            <p className="text-gray-500">Visión consolidada: inmobiliario + financiero + private equity</p>
+            <p className="text-gray-500">{viewLabel || 'Visión patrimonial'}</p>
           </div>
-          <Button variant="outline" onClick={loadData} size="sm">
-            <RefreshCw className="h-4 w-4 mr-2" /> Actualizar
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant={view === 'holding' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setView('holding')}
+              className="text-xs"
+            >
+              {view === 'holding' ? <ToggleRight className="h-4 w-4 mr-1" /> : <ToggleLeft className="h-4 w-4 mr-1" />}
+              Holding
+            </Button>
+            <Button
+              variant={view === 'consolidated' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setView('consolidated')}
+              className="text-xs"
+            >
+              {view === 'consolidated' ? <ToggleRight className="h-4 w-4 mr-1" /> : <ToggleLeft className="h-4 w-4 mr-1" />}
+              Consolidado
+            </Button>
+            <Button variant="ghost" onClick={() => loadData()} size="sm">
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
+
+        {/* View explanation */}
+        {viewDescription && (
+          <div className="flex items-start gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
+            <Info className="h-4 w-4 mt-0.5 shrink-0" />
+            <span>{viewDescription}</span>
+          </div>
+        )}
 
         {/* Quick Navigation */}
         <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
