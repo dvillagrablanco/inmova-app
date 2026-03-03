@@ -21,35 +21,30 @@ const capabilities: AgentCapability[] = [
     name: 'Auditoría Energética',
     description: 'Análisis de consumo y certificado energético',
     category: 'Energía',
-    estimatedTime: '2-3 minutos',
   },
   {
     id: 'recommend_improvements',
     name: 'Recomendar Mejoras',
     description: 'Recomendar mejoras de eficiencia energética',
     category: 'Energía',
-    estimatedTime: '2-3 minutos',
   },
   {
     id: 'calculate_carbon',
     name: 'Huella de Carbono',
     description: 'Calcular huella de carbono del edificio',
     category: 'Sostenibilidad',
-    estimatedTime: '< 1 minuto',
   },
   {
     id: 'esg_score',
     name: 'Puntuación ESG',
     description: 'Calcular puntuación ESG de la propiedad',
     category: 'ESG',
-    estimatedTime: '2-3 minutos',
   },
   {
     id: 'roi_sustainability',
     name: 'ROI Sostenibilidad',
     description: 'Calcular ROI de mejoras de sostenibilidad',
     category: 'Inversión',
-    estimatedTime: '< 1 minuto',
   },
 ];
 
@@ -61,7 +56,7 @@ const tools: AgentTool[] = [
   {
     name: 'energy_audit',
     description:
-      'Realiza análisis de auditoría energética del edificio',
+      'Realiza auditoría energética del edificio. Analiza consumo, calificación y potencial de mejora.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -84,10 +79,7 @@ const tools: AgentTool[] = [
       },
       required: ['buildingType', 'squareMeters', 'yearBuilt'],
     },
-    handler: async (input, context) => {
-      logger.info(
-        `[EnergySustainabilityAgent] energy_audit: ${input.buildingType} ${input.squareMeters}m²`
-      );
+    handler: async (input: any) => {
       const age = new Date().getFullYear() - input.yearBuilt;
       const consumptionEstimate =
         input.squareMeters * (age > 30 ? 120 : age > 15 ? 95 : 75);
@@ -127,29 +119,24 @@ const tools: AgentTool[] = [
       },
       required: ['currentRating', 'buildingAge', 'hasInsulation', 'heatingType'],
     },
-    handler: async (input, context) => {
-      logger.info(
-        `[EnergySustainabilityAgent] recommend_improvements: rating ${input.currentRating}`
-      );
-      return {
-        recommendations: [
-          input.hasInsulation
-            ? 'Mejorar espesor de aislamiento en fachada'
-            : 'Instalar aislamiento térmico en fachada (SATE o similar)',
-          'Sustituir ventanas por doble acristalamiento bajo emisivo',
-          'Instalar bomba de calor para climatización',
-          'Considerar instalación fotovoltaica para autoconsumo',
-        ],
-        estimatedSavings: 850,
-        roi: '5-8 años según inversión',
-        priority: [
-          'Aislamiento (mayor impacto)',
-          'Ventanas',
-          'Sistema de climatización',
-          'Renovables',
-        ],
-      };
-    },
+    handler: async (input: any) => ({
+      recommendations: [
+        input.hasInsulation
+          ? 'Mejorar espesor de aislamiento en fachada'
+          : 'Instalar aislamiento térmico en fachada (SATE o similar)',
+        'Sustituir ventanas por doble acristalamiento bajo emisivo',
+        'Instalar bomba de calor para climatización',
+        'Considerar instalación fotovoltaica para autoconsumo',
+      ],
+      estimatedSavings: 850,
+      roi: '5-8 años según inversión',
+      priority: [
+        'Aislamiento (mayor impacto)',
+        'Ventanas',
+        'Sistema de climatización',
+        'Renovables',
+      ],
+    }),
   },
   {
     name: 'calculate_carbon',
@@ -172,15 +159,12 @@ const tools: AgentTool[] = [
       },
       required: ['electricityKwh', 'squareMeters'],
     },
-    handler: async (input, context) => {
-      logger.info(
-        `[EnergySustainabilityAgent] calculate_carbon: ${input.electricityKwh} kWh`
-      );
+    handler: async (input: any) => {
       const co2Electricity = input.electricityKwh * 0.203; // kg CO2/kWh España
       const co2Gas = (input.gasM3 || 0) * 2.0; // kg CO2/m³ aprox
       const totalCO2 = co2Electricity + co2Gas;
-      const perM2 = input.squareMeters > 0 ? totalCO2 / input.squareMeters : 0;
-
+      const perM2 =
+        input.squareMeters > 0 ? totalCO2 / input.squareMeters : 0;
       return {
         totalCO2: Math.round(totalCO2 * 100) / 100,
         perM2: Math.round(perM2 * 100) / 100,
@@ -213,24 +197,19 @@ const tools: AgentTool[] = [
           type: 'boolean',
           description: '¿Tiene gestión de residuos?',
         },
-        socialImpact: {
-          type: 'string',
-          description: 'Impacto social (opcional)',
-        },
       },
       required: ['energyRating', 'hasRenewable', 'waterEfficiency', 'wasteManagement'],
     },
-    handler: async (input, context) => {
-      logger.info(`[EnergySustainabilityAgent] esg_score calculation`);
+    handler: async (input: any) => {
       const envScore =
-        (['A', 'B', 'C', 'D', 'E', 'F', 'G'].indexOf(input.energyRating?.toUpperCase() || 'G') < 3
+        (['A', 'B', 'C', 'D', 'E', 'F', 'G'].indexOf(
+          input.energyRating?.toUpperCase() || 'G'
+        ) < 3
           ? 70
           : 50) + (input.hasRenewable ? 20 : 0);
-      const socialScore = input.socialImpact ? 75 : 60;
+      const socialScore = 60;
       const govScore = 70;
-
       const score = Math.round((envScore + socialScore + govScore) / 3);
-
       return {
         score: Math.min(100, score),
         breakdown: {
@@ -248,8 +227,7 @@ const tools: AgentTool[] = [
   },
   {
     name: 'roi_sustainability',
-    description:
-      'Calcula ROI de inversiones en sostenibilidad',
+    description: 'Calcula ROI de inversiones en sostenibilidad',
     inputSchema: {
       type: 'object',
       properties: {
@@ -268,19 +246,15 @@ const tools: AgentTool[] = [
       },
       required: ['investmentAmount', 'annualSavings'],
     },
-    handler: async (input, context) => {
-      logger.info(
-        `[EnergySustainabilityAgent] roi_sustainability: inversión ${input.investmentAmount}€`
-      );
+    handler: async (input: any) => {
       const netInvestment = input.investmentAmount - (input.incentives || 0);
       const paybackYears =
         input.annualSavings > 0 ? netInvestment / input.annualSavings : 0;
       const roi10Years =
         input.annualSavings > 0
-          ? (input.annualSavings * 10 / netInvestment) * 100
+          ? (input.annualSavings * 10) / netInvestment * 100
           : 0;
-      const npv = input.annualSavings * 10 - netInvestment; // Simplificado
-
+      const npv = input.annualSavings * 10 - netInvestment;
       return {
         paybackYears: Math.round(paybackYears * 10) / 10,
         roi10Years: Math.round(roi10Years * 100) / 100,
@@ -298,38 +272,18 @@ const tools: AgentTool[] = [
 // CONFIGURACIÓN DEL AGENTE
 // ============================================================================
 
+const systemPrompt = `Eres un experto en eficiencia energética y sostenibilidad ESG para edificios en el mercado español.
+Tus responsabilidades: auditorías energéticas, recomendación de mejoras, cálculo de huella de carbono,
+puntuación ESG y ROI de inversiones en sostenibilidad.
+Conoces la normativa CTE DB-HE, certificaciones LEED/BREEAM/VERDE y factores de emisión CO2 en España.
+Priorizas datos precisos y recomendaciones accionables con indicación de ayudas disponibles.`;
+
 const energySustainabilityConfig: AgentConfig = {
   type: 'energy_sustainability',
   name: 'Agente de Energía y Sostenibilidad ESG',
   description:
-    'Experto en eficiencia energética y ESG. Auditorías, huella de carbono, certificaciones LEED/BREEAM, normativa CTE DB-HE.',
-  systemPrompt: `Eres el Agente de Energía y Sostenibilidad ESG de INMOVA, experto en eficiencia energética y cumplimiento ESG.
-
-Tu rol es:
-- Realizar auditorías energéticas
-- Recomendar mejoras de eficiencia
-- Calcular huella de carbono
-- Calcular puntuación ESG de propiedades
-- Evaluar ROI de inversiones en sostenibilidad
-
-Conocimiento específico:
-- CTE DB-HE (Documento Básico de Ahorro de Energía)
-- Certificación energética de edificios (España)
-- LEED, BREEAM, VERDE
-- Factores de emisión CO2 España
-- Plan de Recuperación y ayudas a la rehabilitación
-- Fondos Next Generation EU para eficiencia
-
-Enfoque:
-- Ser preciso en cálculos de consumo y emisiones
-- Aplicar normativa española vigente
-- Indicar potencial de mejora y prioridades
-- Mencionar ayudas y subvenciones disponibles
-
-Estilo de comunicación:
-- Profesional y técnico
-- Datos con fuentes cuando sea posible
-- Recomendaciones priorizadas y accionables`,
+    'Experto en eficiencia energética y ESG. Auditorías, huella carbono, certificaciones LEED/BREEAM, CTE DB-HE.',
+  systemPrompt,
   capabilities,
   tools,
   model: CLAUDE_MODEL_FAST,
