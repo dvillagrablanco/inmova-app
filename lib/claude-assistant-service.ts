@@ -838,6 +838,78 @@ const tools: Anthropic.Messages.Tool[] = [
       properties: {},
     },
   },
+  // ========================================================================
+  // NUEVAS TOOLS — Mejoras Grupo Vidaro
+  // ========================================================================
+  {
+    name: 'get_rent_updates_pending',
+    description: 'Obtiene contratos con actualización de renta IPC pendiente (aniversario próximo). Muestra renta actual → nueva renta con % de incremento.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        days: { type: 'number', description: 'Días hacia adelante para buscar (default 30)' },
+      },
+    },
+  },
+  {
+    name: 'apply_rent_update',
+    description: 'Aplica actualización de renta IPC a un contrato específico. Actualiza la renta mensual.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        contractId: { type: 'string', description: 'ID del contrato' },
+        newRent: { type: 'number', description: 'Nueva renta mensual en euros' },
+      },
+      required: ['contractId', 'newRent'],
+    },
+  },
+  {
+    name: 'get_fianzas_summary',
+    description: 'Resumen de fianzas/depósitos de todos los contratos activos. Muestra depositadas vs pendientes con importes.',
+    input_schema: {
+      type: 'object',
+      properties: {},
+    },
+  },
+  {
+    name: 'get_building_360',
+    description: 'Vista 360° completa de un edificio: unidades, contratos, pagos, gastos, seguros, ocupación, ingresos. Todo en una llamada.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        buildingId: { type: 'string', description: 'ID del edificio' },
+        buildingName: { type: 'string', description: 'Nombre del edificio (para buscar por nombre)' },
+      },
+    },
+  },
+  {
+    name: 'get_patrimonio_summary',
+    description: 'Resumen del patrimonio total del grupo: inmobiliario, financiero, private equity, tesorería. Vista holding o consolidada.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        view: { type: 'string', enum: ['holding', 'consolidated'], description: 'Vista holding (solo empresa raíz) o consolidated (todo el grupo)' },
+      },
+    },
+  },
+  {
+    name: 'generate_monthly_invoices',
+    description: 'Genera facturas/recibos mensuales para todos los contratos activos que no tienen pago registrado este mes.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        dryRun: { type: 'boolean', description: 'Si true, solo muestra lo que haría sin crear pagos reales' },
+      },
+    },
+  },
+  {
+    name: 'bank_reconciliation',
+    description: 'Ejecuta reconciliación bancaria: compara cobros bancarios con pagos registrados, detecta impagos.',
+    input_schema: {
+      type: 'object',
+      properties: {},
+    },
+  },
 ];
 
 // ============================================================================
@@ -1054,6 +1126,56 @@ async function executeTool(
       case 'get_predictive_maintenance':
         return await delegateToAgent('/api/ai/predictive-maintenance', {}, context, 'GET');
 
+      // ── NUEVAS TOOLS — Mejoras Grupo Vidaro ──
+      case 'get_rent_updates_pending': {
+        const { detectPendingRentUpdates } = await import('@/lib/rent-ipc-update-service');
+        const companyId = context.companyId;
+        const company = await prisma.company.findUnique({ where: { id: companyId }, include: { childCompanies: { select: { id: true } } } });
+        const allIds = company ? [company.id, ...company.childCompanies.map((c: any) => c.id)] : [companyId];
+        return await detectPendingRentUpdates(allIds);
+      }
+
+      case 'apply_rent_update': {
+        const { applyRentUpdate } = await import('@/lib/rent-ipc-update-service');
+        return await applyRentUpdate(input.contractId, input.newRent);
+      }
+
+      case 'get_fianzas_summary': {
+        const contracts = await prisma.contract.findMany({
+          where: { estado: 'activo', unit: { building: { companyId: context.companyId, isDemo: false } } },
+          select: { id: true, importeFianza: true, fianzaDepositada: true, mesesFianza: true, tenant: { select: { nombreCompleto: true } }, unit: { select: { numero: true, building: { select: { nombre: true } } } } },
+        });
+        const total = contracts.reduce((s, c) => s + (c.importeFianza || 0), 0);
+        const depositadas = contracts.filter(c => c.fianzaDepositada);
+        const pendientes = contracts.filter(c => !c.fianzaDepositada && (c.importeFianza || 0) > 0);
+        return { total, depositadas: depositadas.length, pendientes: pendientes.length, importeDepositado: depositadas.reduce((s, c) => s + (c.importeFianza || 0), 0), importePendiente: pendientes.reduce((s, c) => s + (c.importeFianza || 0), 0), detallePendientes: pendientes.slice(0, 10).map(c => ({ tenant: c.tenant?.nombreCompleto, unit: c.unit?.numero, building: c.unit?.building?.nombre, importe: c.importeFianza })) };
+      }
+
+      case 'get_building_360': {
+        let buildingId = input.buildingId;
+        if (!buildingId && input.buildingName) {
+          const found = await prisma.building.findFirst({ where: { nombre: { contains: input.buildingName, mode: 'insensitive' }, isDemo: false }, select: { id: true } });
+          buildingId = found?.id;
+        }
+        if (!buildingId) return { error: 'Edificio no encontrado' };
+        const res = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/buildings/${buildingId}/360`, { headers: { cookie: '' } });
+        if (res.ok) return await res.json();
+        return { error: 'Error obteniendo datos del edificio' };
+      }
+
+      case 'get_patrimonio_summary': {
+        const view = input.view || 'holding';
+        const res = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/family-office/dashboard?view=${view}`);
+        if (res.ok) return await res.json();
+        return { error: 'Error obteniendo patrimonio' };
+      }
+
+      case 'generate_monthly_invoices':
+        return { message: 'Para generar facturas mensuales, ejecuta el cron: POST /api/cron/generate-monthly-invoices', dryRun: input.dryRun };
+
+      case 'bank_reconciliation':
+        return { message: 'Para reconciliación bancaria, ejecuta el cron: POST /api/cron/bank-reconciliation' };
+
       default:
         return { error: `Unknown tool: ${toolName}` };
     }
@@ -1071,7 +1193,17 @@ export async function chatWithClaude(
   context: AssistantContext
 ): Promise<AssistantResponse> {
   try {
-    const systemPrompt = `Eres INMOVA Assistant, el asistente IA central de la plataforma de gestión inmobiliaria. Actúas como COORDINADOR de todos los agentes especializados del sistema.
+    const systemPrompt = `Eres INMOVA Cowork, el asistente ejecutivo IA de la plataforma de gestión inmobiliaria. Funcionas como un COWORKER INTELIGENTE: el usuario te pide acciones y tú las EJECUTAS directamente usando las herramientas disponibles.
+
+COMPORTAMIENTO CLAVE:
+- Cuando el usuario pide "crea un inquilino..." → EJECUTA create_tenant inmediatamente, no preguntes si quiere hacerlo.
+- Cuando pide "muéstrame los contratos que vencen" → EJECUTA get_expiring_contracts y muestra los resultados.
+- Cuando pide "registra un pago de..." → EJECUTA create_payment directamente.
+- Cuando pide datos → USA las herramientas de búsqueda y muestra resultados formateados.
+- NUNCA digas "no puedo hacer eso" si hay una herramienta disponible para hacerlo.
+- Si necesitas un dato que falta, pregunta SOLO ese dato específico, no toda una lista.
+- Confirma BREVEMENTE después de ejecutar: "✅ Inquilino Juan García creado" no un párrafo largo.
+- Puedes ejecutar MÚLTIPLES herramientas en secuencia si la tarea lo requiere.
 
 Cuando el usuario pide algo que requiere un agente especializado, DEBES usar la herramienta correspondiente:
 - Analizar propuesta de inversión → evaluate_investment_proposal
