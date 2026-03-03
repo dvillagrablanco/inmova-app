@@ -472,13 +472,14 @@ export default function GarajesTrasterosPage() {
                                   {plantaUnits.map(u => (
                                     <div
                                       key={u.id}
-                                      title={`${u.numero} — ${u.estado === 'ocupada' ? u.tenant?.nombreCompleto || 'Ocupada' : 'Disponible'} — ${u.rentaMensual}€`}
-                                      className={`w-7 h-7 rounded text-[8px] font-bold flex items-center justify-center cursor-default ${
+                                      title={`${u.numero} — ${u.estado === 'ocupada' ? u.tenant?.nombreCompleto || 'Ocupada' : 'Disponible'} — ${u.rentaMensual}€\nClick para ver ficha`}
+                                      onClick={() => router.push(`/unidades/${u.id}`)}
+                                      className={`w-7 h-7 rounded text-[8px] font-bold flex items-center justify-center cursor-pointer hover:ring-2 hover:ring-indigo-400 hover:scale-110 transition-all ${
                                         u.estado === 'ocupada'
-                                          ? 'bg-green-500 text-white'
+                                          ? 'bg-green-500 text-white hover:bg-green-600'
                                           : u.estado === 'en_mantenimiento'
-                                            ? 'bg-orange-400 text-white'
-                                            : 'bg-gray-200 text-gray-600'
+                                            ? 'bg-orange-400 text-white hover:bg-orange-500'
+                                            : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
                                       }`}
                                     >
                                       {u.numero.replace(/[^\d]/g, '').slice(-3) || u.numero.slice(0, 3)}
@@ -558,7 +559,7 @@ export default function GarajesTrasterosPage() {
                 {filteredUnits.map((unit) => {
                   const statusBadge = getStatusBadge(unit.estado);
                   return (
-                    <Card key={unit.id} className="hover:shadow-lg transition-shadow">
+                    <Card key={unit.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => router.push(`/unidades/${unit.id}`)}>
                       <CardHeader>
                         <div className="flex items-start justify-between">
                           <div className="flex items-center gap-2">
@@ -601,15 +602,21 @@ export default function GarajesTrasterosPage() {
                             <span className="font-medium">Ocupado por:</span> {unit.tenant.nombreCompleto}
                           </div>
                         )}
-                        <div className="flex gap-2 pt-3 border-t">
+                        <div className="flex gap-2 pt-3 border-t" onClick={(e) => e.stopPropagation()}>
+                          <Button
+                            variant="default"
+                            size="sm"
+                            onClick={() => router.push(`/unidades/${unit.id}`)}
+                            className="flex-1"
+                          >
+                            Ver Ficha
+                          </Button>
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => router.push(`/unidades/${unit.id}/editar`)}
-                            className="flex-1"
                           >
-                            <Edit className="h-4 w-4 mr-2" />
-                            Editar
+                            <Edit className="h-4 w-4" />
                           </Button>
                           <Button
                             variant="outline"
