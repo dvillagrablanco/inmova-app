@@ -22,6 +22,7 @@ import { KpiCardsRow } from '@/components/finanzas/cuadro-mandos/KpiCardsRow';
 import { FilterPanel } from '@/components/finanzas/cuadro-mandos/FilterPanel';
 import { PygTable } from '@/components/finanzas/cuadro-mandos/PygTable';
 import { ComparativoEjercicios } from '@/components/finanzas/cuadro-mandos/ComparativoEjercicios';
+import { CostCenterBreakdown } from '@/components/finanzas/cuadro-mandos/CostCenterBreakdown';
 import { ExportButton } from '@/components/finanzas/cuadro-mandos/ExportButton';
 
 import type { CuadroMandosResponse, FiltrosDisponibles, CuadroMandosFilters } from '@/types/finanzas';
@@ -212,6 +213,12 @@ export default function CuadroDeMandosPage() {
             ejercicioActual={filters.ejercicio}
           />
         )}
+
+        {/* Desglose por Centro de Coste */}
+        <section className="mt-6">
+          <h2 className="text-lg font-semibold mb-4">Desglose por Centro de Coste</h2>
+          <CostCenterBreakdown />
+        </section>
       </div>
     </AuthenticatedLayout>
   );

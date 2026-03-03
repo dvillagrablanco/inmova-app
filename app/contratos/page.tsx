@@ -62,6 +62,7 @@ import { SmartBreadcrumbs } from '@/components/navigation/smart-breadcrumbs';
 import { ContextualQuickActions } from '@/components/navigation/contextual-quick-actions';
 import logger, { logError } from '@/lib/logger';
 import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
+import { SignContractButton } from '@/components/firma-digital/SignContractButton';
 
 interface Contract {
   id: string;
@@ -670,6 +671,7 @@ function ContratosPageContent() {
         </div>
         )}
 
+        <div className="flex flex-wrap gap-2">
         <Button
         onClick={() => router.push(`/contratos/${contract.id}`)}
         variant="outline"
@@ -679,6 +681,8 @@ function ContratosPageContent() {
         <Eye className="mr-2 h-4 w-4" />
         Ver Detalles
         </Button>
+        <SignContractButton contractId={contract.id} />
+        </div>
         </div>
 
         <DropdownMenu>

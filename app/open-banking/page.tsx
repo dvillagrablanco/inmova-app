@@ -37,6 +37,7 @@ import {
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { PSD2ConnectionWizard } from '@/components/open-banking/PSD2ConnectionWizard';
 
 interface BankAccount {
   id: string;
@@ -244,6 +245,18 @@ export default function OpenBankingPage() {
             Unión Europea (GoCardless / Nordigen). Nunca almacenamos tus credenciales bancarias.
           </AlertDescription>
         </Alert>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Conectar Banco via PSD2</CardTitle>
+            <CardDescription>
+              Conecta tu cuenta bancaria de forma segura para sincronizar movimientos
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <PSD2ConnectionWizard onComplete={loadData} />
+          </CardContent>
+        </Card>
 
         {/* Stats */}
         <div className="grid gap-4 md:grid-cols-4">
