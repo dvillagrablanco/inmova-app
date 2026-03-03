@@ -11,14 +11,23 @@ import type Anthropic from '@anthropic-ai/sdk';
 // ============================================================================
 
 export type AgentType = 
-  | 'technical_support'      // Servicio Técnico y Mantenimiento
-  | 'customer_service'       // Atención al Cliente
-  | 'commercial_management'  // Gestión Comercial
-  | 'financial_analysis'     // Análisis Financiero
-  | 'legal_compliance'       // Legal y Cumplimiento
-  | 'maintenance_preventive' // Mantenimiento Preventivo
-  | 'document_assistant'     // Asistente Documental
-  | 'general';               // Asistente General / Coordinador
+  | 'technical_support'        // Servicio Técnico y Mantenimiento
+  | 'customer_service'         // Atención al Cliente
+  | 'commercial_management'    // Gestión Comercial
+  | 'financial_analysis'       // Análisis Financiero
+  | 'legal_compliance'         // Legal y Cumplimiento
+  | 'maintenance_preventive'   // Mantenimiento Preventivo
+  | 'document_assistant'       // Asistente Documental
+  | 'tenant_portal'            // Portal del Inquilino
+  | 'accounting_tax'           // Contabilidad e Impuestos
+  | 'community_management'     // Comunidades de Propietarios
+  | 'str_revenue'              // Revenue Management STR
+  | 'marketing_content'        // Marketing y Contenido
+  | 'onboarding_guide'         // Onboarding Inteligente
+  | 'insurance_advisor'        // Asesor de Seguros
+  | 'construction_project'     // Gestión de Obras
+  | 'energy_sustainability'    // Energía y Sostenibilidad ESG
+  | 'general';                 // Asistente General / Coordinador
 
 export type AgentStatus = 'idle' | 'thinking' | 'executing' | 'waiting' | 'completed' | 'error';
 
