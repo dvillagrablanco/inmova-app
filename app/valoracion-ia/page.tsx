@@ -279,7 +279,7 @@ export default function ValoracionIAPage() {
   };
 
   // Cuando se selecciona un activo, rellenar datos automáticamente
-  const handleAssetSelect = (assetId: string) => {
+  const handleAssetSelect = async (assetId: string) => {
     setSelectedAsset(assetId);
 
     if (assetId === 'manual') {
@@ -291,18 +291,80 @@ export default function ValoracionIAPage() {
       if (unit) {
         setFormData((prev) => ({
           ...prev,
-          superficie: unit.superficie?.toString() || '',
-          habitaciones: unit.habitaciones?.toString() || '',
-          banos: unit.banos?.toString() || '',
+          superficie: unit.superficie?.toString() || prev.superficie,
+          habitaciones: unit.habitaciones?.toString() || prev.habitaciones,
+          banos: unit.banos?.toString() || prev.banos,
         }));
         if ((unit as any).referenciaCatastral) {
           setRefCatastral((unit as any).referenciaCatastral);
         }
+
+        // Fetch unit details for characteristics pre-fill
+        try {
+          const res = await fetch(`/api/units/${assetId}`);
+          if (res.ok) {
+            const detail = await res.json();
+            const unitData = detail.data || detail;
+            const chars: string[] = [];
+
+            // Unit-level characteristics
+            if (unitData.aireAcondicionado) chars.push('aire_acondicionado');
+            if (unitData.calefaccion) chars.push('calefaccion');
+            if (unitData.terraza) chars.push('terraza');
+            if (unitData.armarioEmpotrado) chars.push('armarios_empotrados');
+
+            // Building-level characteristics
+            const bld = unitData.building || buildings.find((b) => b.id === selectedBuildingFilter);
+            if (bld) {
+              if ((bld as any).ascensor) chars.push('ascensor');
+              if ((bld as any).garaje) chars.push('garaje');
+              if ((bld as any).trastero) chars.push('trastero');
+              if ((bld as any).piscina) chars.push('piscina');
+              if ((bld as any).jardin) chars.push('jardin');
+            }
+
+            // Pre-fill form fields
+            setFormData((prev) => ({
+              ...prev,
+              superficie: unitData.superficie?.toString() || prev.superficie,
+              habitaciones: unitData.habitaciones?.toString() || prev.habitaciones,
+              banos: unitData.banos?.toString() || prev.banos,
+              planta: unitData.planta?.toString() || prev.planta,
+              caracteristicas: chars.length > 0 ? chars : prev.caracteristicas,
+              direccionManual: (bld as any)?.direccion || prev.direccionManual,
+              ciudadManual: (bld as any)?.ciudad || prev.ciudadManual,
+              codigoPostalManual: (bld as any)?.codigoPostal || prev.codigoPostalManual,
+            }));
+
+            if (chars.length > 0) {
+              toast.success(`${chars.length} características precargadas del inmueble`);
+            }
+          }
+        } catch {
+          // Silent — form already has basic data from units list
+        }
       }
     } else if (assetType === 'building') {
       const building = buildings.find((b: any) => b.id === assetId);
-      if (building?.referenciaCatastral) {
-        setRefCatastral(building.referenciaCatastral);
+      if (building) {
+        if ((building as any).referenciaCatastral) {
+          setRefCatastral((building as any).referenciaCatastral);
+        }
+        // Pre-fill building characteristics
+        const chars: string[] = [];
+        if ((building as any).ascensor) chars.push('ascensor');
+        if ((building as any).garaje) chars.push('garaje');
+        if ((building as any).trastero) chars.push('trastero');
+        if ((building as any).piscina) chars.push('piscina');
+        if ((building as any).jardin) chars.push('jardin');
+
+        setFormData((prev) => ({
+          ...prev,
+          caracteristicas: chars.length > 0 ? chars : prev.caracteristicas,
+          direccionManual: (building as any).direccion || prev.direccionManual,
+          ciudadManual: (building as any).ciudad || prev.ciudadManual,
+          codigoPostalManual: (building as any).codigoPostal || prev.codigoPostalManual,
+        }));
       }
     }
   };
