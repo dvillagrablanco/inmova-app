@@ -147,17 +147,16 @@ export async function getCompanyPortfolio(companyId: string): Promise<PortfolioS
   let totalInvestment = assets.reduce((sum, a) => sum + (a.inversionTotal || a.precioCompra), 0);
   let totalMarketValue = assets.reduce((sum, a) => sum + (a.valorMercadoEstimado || a.precioCompra), 0);
 
-  // Si no hay AssetAcquisitions, sumar rentaMensual de unidades ocupadas
-  // como proxy de ingresos (datos contables de migración)
+  // Renta contratada: suma de rentas de contratos activos
+  const contractedRent = contracts.reduce((sum, c) => sum + (c.rentaMensual || 0), 0);
+
+  // Si no hay AssetAcquisitions, usar renta de unidades ocupadas como proxy
   if (totalInvestment === 0 && totalMonthlyIncome === 0) {
     const unitRents = units
       .filter(u => u.estado === 'ocupada' && u.rentaMensual > 0)
       .reduce((s, u) => s + u.rentaMensual, 0);
-    if (unitRents > contractedRent) {
-      // Usar renta de unidad cuando no hay contratos formales en el sistema
-      const effectiveRent = Math.max(contractedRent, unitRents);
-      // No se asigna valor ficticio - yield queda 0 sin precio de compra real
-    }
+    const effectiveRent = Math.max(contractedRent, unitRents);
+    // No se asigna valor ficticio - yield queda 0 sin precio de compra real
   }
 
   const totalEquity = totalMarketValue - totalMortgageDebt;
