@@ -147,13 +147,17 @@ export default function SimuladorFiscalPage() {
               </CardHeader>
               <CardContent>
                 <form onSubmit={(e) => { e.preventDefault(); const fd = new FormData(e.currentTarget); simulate({ escenario: 'venta_inmueble', assetId: String(fd.get('assetId')), precioVenta: Number(fd.get('precioVenta')), gastosVenta: Number(fd.get('gastosVenta')), plusvaliaMunicipal: Number(fd.get('plusvalia')) }); }} className="space-y-4">
-                  <div><Label>ID del activo (AssetAcquisition)</Label><Input name="assetId" placeholder="cuid del activo" /></div>
+                  <div>
+                    <Label>Activo a vender</Label>
+                    <p className="text-xs text-muted-foreground mb-2">Selecciona desde <a href="/inversiones/activos" className="text-blue-600 underline">la lista de activos</a> y copia el ID, o introduce los datos manualmente</p>
+                    <Input name="assetId" placeholder="ID del activo (ej: cmXXXXXX)" />
+                  </div>
                   <div className="grid grid-cols-3 gap-4">
                     <div><Label>Precio de venta (€)</Label><Input name="precioVenta" type="number" defaultValue="300000" /></div>
                     <div><Label>Gastos venta (€)</Label><Input name="gastosVenta" type="number" defaultValue="10000" /></div>
                     <div><Label>Plusvalía municipal (€)</Label><Input name="plusvalia" type="number" defaultValue="2000" /></div>
                   </div>
-                  <Button type="submit" disabled={loading}><Calculator className="h-4 w-4 mr-2" />Simular</Button>
+                  <Button type="submit" disabled={loading}><Calculator className="h-4 w-4 mr-2" />Simular venta</Button>
                 </form>
               </CardContent>
             </Card>
@@ -163,14 +167,18 @@ export default function SimuladorFiscalPage() {
           <TabsContent value="amortizar">
             <Card>
               <CardHeader>
-                <CardTitle>Simular amortización anticipada</CardTitle>
-                <CardDescription>Ahorro intereses vs pérdida deducción fiscal</CardDescription>
+                <CardTitle>Simular amortización anticipada de hipoteca</CardTitle>
+                <CardDescription>Ahorro de intereses vs pérdida de deducción fiscal</CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={(e) => { e.preventDefault(); const fd = new FormData(e.currentTarget); simulate({ escenario: 'amortizacion_anticipada', mortgageId: String(fd.get('mortgageId')), importeAmortizacion: Number(fd.get('importe')) }); }} className="space-y-4">
-                  <div><Label>ID de la hipoteca</Label><Input name="mortgageId" placeholder="cuid de la hipoteca" /></div>
+                  <div>
+                    <Label>Hipoteca</Label>
+                    <p className="text-xs text-muted-foreground mb-2">Consulta las hipotecas en <a href="/inversiones/hipotecas" className="text-blue-600 underline">la sección de hipotecas</a></p>
+                    <Input name="mortgageId" placeholder="ID de la hipoteca" />
+                  </div>
                   <div><Label>Importe a amortizar (€)</Label><Input name="importe" type="number" defaultValue="30000" /></div>
-                  <Button type="submit" disabled={loading}><Calculator className="h-4 w-4 mr-2" />Simular</Button>
+                  <Button type="submit" disabled={loading}><Calculator className="h-4 w-4 mr-2" />Simular amortización</Button>
                 </form>
               </CardContent>
             </Card>
