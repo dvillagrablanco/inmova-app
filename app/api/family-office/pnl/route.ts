@@ -82,6 +82,8 @@ export async function GET(request: NextRequest) {
       posiciones: number;
       costeTotal: number;
       valorActual: number;
+      saldoCuenta: number;
+      valorTotalConSaldo: number;
       pnlTotal: number;
       pnlPct: number;
       peso: number;
@@ -90,12 +92,14 @@ export async function GET(request: NextRequest) {
     for (const account of accounts) {
       const key = account.entidad;
       if (!byEntidad[key]) {
-        byEntidad[key] = { entidad: key, cuentas: 0, posiciones: 0, costeTotal: 0, valorActual: 0, pnlTotal: 0, pnlPct: 0, peso: 0 };
+        byEntidad[key] = { entidad: key, cuentas: 0, posiciones: 0, costeTotal: 0, valorActual: 0, saldoCuenta: 0, valorTotalConSaldo: 0, pnlTotal: 0, pnlPct: 0, peso: 0 };
       }
       byEntidad[key].cuentas++;
       byEntidad[key].posiciones += account.positions.length;
       byEntidad[key].costeTotal += account.positions.reduce((s, p) => s + p.costeTotal, 0);
       byEntidad[key].valorActual += account.positions.reduce((s, p) => s + p.valorActual, 0);
+      byEntidad[key].saldoCuenta += account.saldoActual || 0;
+      byEntidad[key].valorTotalConSaldo = byEntidad[key].valorActual + byEntidad[key].saldoCuenta;
       byEntidad[key].pnlTotal += account.positions.reduce((s, p) => s + p.pnlNoRealizado + p.pnlRealizado, 0);
     }
 
@@ -117,20 +121,28 @@ export async function GET(request: NextRequest) {
     // Consolidado
     const pnlTotal = allPositions.reduce((s, p) => s + p.pnlTotal, 0);
     const costeTotal = allPositions.reduce((s, p) => s + p.costeTotal, 0);
+    const saldoTotalCuentas = accounts.reduce((s, a) => s + (a.saldoActual || 0), 0);
 
     return NextResponse.json({
       success: true,
       consolidado: {
         valorTotal: Math.round(valorTotal * 100) / 100,
         costeTotal: Math.round(costeTotal * 100) / 100,
+        saldoCuentas: Math.round(saldoTotalCuentas * 100) / 100,
+        valorTotalConSaldo: Math.round((valorTotal + saldoTotalCuentas) * 100) / 100,
         pnlTotal: Math.round(pnlTotal * 100) / 100,
         pnlPct: costeTotal > 0 ? Math.round((pnlTotal / costeTotal) * 1000) / 10 : 0,
         totalPosiciones: allPositions.length,
         totalCuentas: accounts.length,
       },
-      porGestora: Object.values(byEntidad).sort((a, b) => b.valorActual - a.valorActual),
+      porGestora: Object.values(byEntidad)
+        .filter((e) => e.valorActual > 0 || e.posiciones > 0)
+        .sort((a, b) => b.valorActual - a.valorActual),
       porTipo: Object.values(byTipo).sort((a, b) => b.valorActual - a.valorActual),
-      topPosiciones: allPositions.sort((a, b) => Math.abs(b.pnlTotal) - Math.abs(a.pnlTotal)).slice(0, 20),
+      topPosiciones: allPositions
+        .filter((p) => p.valorActual > 0)
+        .sort((a, b) => b.valorActual - a.valorActual)
+        .slice(0, 30),
     });
   } catch (error: any) {
     logger.error('[FO P&L]:', error);

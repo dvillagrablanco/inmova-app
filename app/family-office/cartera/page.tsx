@@ -142,33 +142,42 @@ export default function CarteraPage() {
         </div>
 
         {/* KPIs */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          <Card className="bg-gradient-to-br from-indigo-50 to-white">
+            <CardContent className="pt-4 pb-3">
+              <div className="text-xs text-gray-500 mb-1">Valor Total Cartera</div>
+              <div className="text-xl font-bold text-indigo-700">{fmt((c as any).valorTotalConSaldo || c.valorTotal || 0)}</div>
+              <div className="text-[10px] text-gray-400">{c.totalCuentas || 0} cuentas · {c.totalPosiciones || 0} posiciones</div>
+            </CardContent>
+          </Card>
           <Card>
             <CardContent className="pt-4 pb-3">
-              <div className="text-xs text-gray-500 mb-1">Valor total</div>
+              <div className="text-xs text-gray-500 mb-1">Posiciones (valor mercado)</div>
               <div className="text-xl font-bold">{fmt(c.valorTotal || 0)}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4 pb-3">
+              <div className="text-xs text-gray-500 mb-1">Saldo en cuentas</div>
+              <div className="text-xl font-bold text-blue-600">{fmt((c as any).saldoCuentas || 0)}</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-4 pb-3">
               <div className="text-xs text-gray-500 mb-1">P&L total</div>
               <div className={`text-xl font-bold ${pnlColor(c.pnlTotal || 0)}`}>
-                {fmt(c.pnlTotal || 0)}
+                {c.pnlTotal ? fmt(c.pnlTotal) : 'Sin datos coste'}
+              </div>
+              <div className="text-[10px] text-gray-400">
+                {c.costeTotal ? fmtPct(c.pnlPct || 0) : 'Coste adquisición pendiente'}
               </div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-4 pb-3">
-              <div className="text-xs text-gray-500 mb-1">P&L %</div>
-              <div className={`text-xl font-bold ${pnlColor(c.pnlPct || 0)}`}>
-                {fmtPct(c.pnlPct || 0)}
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4 pb-3">
-              <div className="text-xs text-gray-500 mb-1">Total posiciones</div>
+              <div className="text-xs text-gray-500 mb-1">Posiciones</div>
               <div className="text-xl font-bold">{c.totalPosiciones || 0}</div>
+              <div className="text-[10px] text-gray-400">en {c.totalCuentas || 0} cuentas</div>
             </CardContent>
           </Card>
         </div>
@@ -211,22 +220,22 @@ export default function CarteraPage() {
                 <thead>
                   <tr className="border-b">
                     <th className="text-left py-2 font-medium">Entidad</th>
-                    <th className="text-right py-2 font-medium">Valor</th>
-                    <th className="text-right py-2 font-medium">P&L</th>
-                    <th className="text-right py-2 font-medium">P&L %</th>
+                    <th className="text-right py-2 font-medium">Posiciones</th>
+                    <th className="text-right py-2 font-medium">Valor Posiciones</th>
+                    <th className="text-right py-2 font-medium">Saldo Cuenta</th>
+                    <th className="text-right py-2 font-medium">Total</th>
+                    <th className="text-right py-2 font-medium">Peso</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {gestoras.map((g) => (
+                  {gestoras.map((g: any) => (
                     <tr key={g.entidad} className="border-b last:border-0">
-                      <td className="py-2">{g.entidad}</td>
+                      <td className="py-2 font-medium">{g.entidad}</td>
+                      <td className="text-right py-2 text-gray-500">{g.posiciones}</td>
                       <td className="text-right py-2">{fmt(g.valorActual)}</td>
-                      <td className={`text-right py-2 font-medium ${pnlColor(g.pnlTotal)}`}>
-                        {fmt(g.pnlTotal)}
-                      </td>
-                      <td className={`text-right py-2 font-medium ${pnlColor(g.pnlPct)}`}>
-                        {fmtPct(g.pnlPct)}
-                      </td>
+                      <td className="text-right py-2 text-blue-600">{fmt(g.saldoCuenta || 0)}</td>
+                      <td className="text-right py-2 font-bold">{fmt(g.valorTotalConSaldo || g.valorActual)}</td>
+                      <td className="text-right py-2 text-gray-500">{g.peso}%</td>
                     </tr>
                   ))}
                 </tbody>
