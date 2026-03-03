@@ -71,7 +71,7 @@ export default function IntelligentSupportChatbot() {
     {
       id: '1',
       sender: 'bot',
-      text: '¡Hola! Soy tu asistente inteligente de INMOVA. ¿En qué puedo ayudarte hoy? 🚀',
+      text: '¡Hola! Soy **INMOVA Cowork**, tu asistente ejecutivo con IA. Puedo ejecutar acciones directamente:\n\n• "Muéstrame los contratos que vencen"\n• "Crea un inquilino llamado..."\n• "¿Cuál es el patrimonio del grupo?"\n• "Busca unidades vacías en Espronceda"\n• "Valora el piso de C/ Reina 15"\n\n¿Qué necesitas? 🚀',
       timestamp: new Date()
     }
   ]);
@@ -245,8 +245,8 @@ export default function IntelligentSupportChatbot() {
               <div className="absolute inset-0 bg-white/20 group-hover:bg-white/30 transition-colors" />
               
               {/* Emoticono del asistente */}
-              <span className="text-3xl relative z-10 group-hover:scale-110 transition-transform" role="img" aria-label="Asistente">
-                🤖
+              <span className="text-3xl relative z-10 group-hover:scale-110 transition-transform" role="img" aria-label="INMOVA Cowork">
+                🧠
               </span>
             </Button>
             
@@ -298,9 +298,9 @@ export default function IntelligentSupportChatbot() {
                       <Sparkles className="h-5 w-5" />
                     </div>
                     <div>
-                      <CardTitle className="text-lg">Asistente INMOVA</CardTitle>
+                      <CardTitle className="text-lg">INMOVA Cowork</CardTitle>
                       <CardDescription className="text-primary-foreground/80 text-xs">
-                        Soporte inteligente 24/7
+                        Asistente ejecutivo con IA · 47 acciones
                       </CardDescription>
                     </div>
                   </div>
