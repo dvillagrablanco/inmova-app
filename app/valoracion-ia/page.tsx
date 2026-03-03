@@ -200,6 +200,7 @@ export default function ValoracionIAPage() {
   const [units, setUnits] = useState<Unit[]>([]);
   const [buildings, setBuildings] = useState<Building[]>([]);
   const [selectedAsset, setSelectedAsset] = useState<string>('manual');
+  const [selectedBuildingFilter, setSelectedBuildingFilter] = useState<string>('');
   const [assetType, setAssetType] = useState<'unit' | 'building'>('unit');
   const [resultado, setResultado] = useState<ValoracionResult | null>(null);
 
@@ -784,7 +785,7 @@ export default function ValoracionIAPage() {
                 </TabsTrigger>
               </TabsList>
 
-              {/* Tab: Mis Activos (existente) */}
+              {/* Tab: Mis Activos */}
               <TabsContent value="mis-activos" className="mt-4">
                 <Card>
                   <CardHeader>
@@ -805,6 +806,7 @@ export default function ValoracionIAPage() {
                         onValueChange={(v: 'unit' | 'building') => {
                           setAssetType(v);
                           setSelectedAsset('manual');
+                          setSelectedBuildingFilter('');
                         }}
                       >
                         <SelectTrigger>
@@ -817,33 +819,100 @@ export default function ValoracionIAPage() {
                       </Select>
                     </div>
 
-                    {/* Selector de activo */}
-                    <div className="space-y-2">
-                      <Label>Seleccionar Activo</Label>
-                      <Select value={selectedAsset} onValueChange={handleAssetSelect}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecciona un activo de tu cartera..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="manual">-- Introducir datos manualmente --</SelectItem>
-                          {assetType === 'unit'
-                            ? units.map((unit) => (
-                                <SelectItem key={unit.id} value={unit.id}>
-                                  {unit.building?.nombre || 'Sin edificio'} - Unidad {unit.numero}
-                                  {unit.superficie && ` (${unit.superficie}m²)`}
-                                </SelectItem>
-                              ))
-                            : buildings.map((building) => (
+                    {/* Para unidades: primero seleccionar edificio, luego unidad */}
+                    {assetType === 'unit' && (
+                      <>
+                        <div className="space-y-2">
+                          <Label>1. Seleccionar Edificio</Label>
+                          <Select
+                            value={selectedBuildingFilter}
+                            onValueChange={(v) => {
+                              setSelectedBuildingFilter(v);
+                              setSelectedAsset('manual');
+                              // Auto-rellenar dirección/ciudad del edificio
+                              if (v) {
+                                const building = buildings.find((b) => b.id === v);
+                                if (building) {
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    direccionManual: (building as any).direccion || prev.direccionManual,
+                                    ciudadManual: (building as any).ciudad || prev.ciudadManual,
+                                    codigoPostalManual: (building as any).codigoPostal || prev.codigoPostalManual,
+                                  }));
+                                }
+                              }
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecciona un edificio..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {buildings.map((building) => (
                                 <SelectItem key={building.id} value={building.id}>
-                                  {building.nombre || building.direccion || 'Sin dirección'}
-                                  {building.numeroUnidades
-                                    ? ` (${building.numeroUnidades} unidades)`
-                                    : ''}
+                                  {building.nombre || (building as any).direccion || 'Sin nombre'}
+                                  {building.numeroUnidades ? ` (${building.numeroUnidades} uds)` : ''}
                                 </SelectItem>
                               ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        {selectedBuildingFilter && (
+                          <div className="space-y-2">
+                            <Label>2. Seleccionar Unidad</Label>
+                            <Select value={selectedAsset} onValueChange={handleAssetSelect}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecciona una unidad del edificio..." />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="manual">-- Introducir datos manualmente --</SelectItem>
+                                {units
+                                  .filter((u) => u.building?.id === selectedBuildingFilter)
+                                  .map((unit) => (
+                                    <SelectItem key={unit.id} value={unit.id}>
+                                      Unidad {unit.numero}
+                                      {unit.tipo ? ` (${unit.tipo})` : ''}
+                                      {unit.superficie ? ` — ${unit.superficie}m²` : ''}
+                                      {unit.habitaciones ? ` — ${unit.habitaciones} hab.` : ''}
+                                      {unit.estado ? ` [${unit.estado}]` : ''}
+                                    </SelectItem>
+                                  ))}
+                              </SelectContent>
+                            </Select>
+                            <p className="text-xs text-muted-foreground">
+                              {units.filter((u) => u.building?.id === selectedBuildingFilter).length} unidades en este edificio
+                            </p>
+                          </div>
+                        )}
+
+                        {!selectedBuildingFilter && (
+                          <p className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
+                            Selecciona primero un edificio para ver sus unidades disponibles.
+                          </p>
+                        )}
+                      </>
+                    )}
+
+                    {/* Para edificios: selector directo */}
+                    {assetType === 'building' && (
+                      <div className="space-y-2">
+                        <Label>Seleccionar Edificio</Label>
+                        <Select value={selectedAsset} onValueChange={handleAssetSelect}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecciona un edificio de tu cartera..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="manual">-- Introducir datos manualmente --</SelectItem>
+                            {buildings.map((building) => (
+                              <SelectItem key={building.id} value={building.id}>
+                                {building.nombre || (building as any).direccion || 'Sin dirección'}
+                                {building.numeroUnidades ? ` (${building.numeroUnidades} unidades)` : ''}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </TabsContent>
