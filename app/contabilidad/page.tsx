@@ -30,6 +30,7 @@ import { toast } from 'sonner';
 import { Line, Bar, Pie } from 'react-chartjs-2';
 import logger, { logError } from '@/lib/logger';
 import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
+import { AIContextualButton } from '@/components/ai/AIContextualButton';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -1366,6 +1367,12 @@ export default function ContabilidadPage() {
         context="contabilidad"
         variant="floating"
         position="bottom-right"
+      />
+      <AIContextualButton
+        agentType="accounting_tax"
+        agentName="Asistente Contable IA"
+        agentDescription="IVA, IRPF, modelo 303, categorización de gastos"
+        apiEndpoint="/api/ai/accounting-assistant"
       />
     </div>
     </AuthenticatedLayout>

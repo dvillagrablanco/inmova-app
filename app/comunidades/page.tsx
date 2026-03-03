@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
-
+import { AIContextualButton } from '@/components/ai/AIContextualButton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -324,6 +324,13 @@ export default function ComunidadesPage() {
                 </div>
               </CardContent>
             </Card>
+
+            <AIContextualButton
+              agentType="community_management"
+              agentName="Asistente de Comunidades IA"
+              agentDescription="Actas, votaciones, derramas, convocatorias"
+              apiEndpoint="/api/ai/community-assistant"
+            />
           </div>
         </AuthenticatedLayout>
   );

@@ -16,6 +16,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Home, ArrowLeft, CreditCard, FileText, Wrench, MessageSquare, Bell, Euro, Calendar, CheckCircle2, Clock, AlertTriangle, Download, Send, Building2, User, Phone, Mail } from 'lucide-react';
 import { toast } from 'sonner';
+import { AIContextualButton } from '@/components/ai/AIContextualButton';
 
 export default function PortalInquilinoPage() {
   const { data: _session, status } = useSession();
@@ -208,6 +209,13 @@ export default function PortalInquilinoPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        <AIContextualButton
+          agentType="tenant_portal"
+          agentName="Asistente del Inquilino IA"
+          agentDescription="Pagos, contratos, incidencias, documentos"
+          apiEndpoint="/api/ai/tenant-portal"
+        />
       </div>
     </AuthenticatedLayout>
   );

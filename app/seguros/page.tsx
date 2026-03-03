@@ -83,6 +83,7 @@ import { toast } from 'sonner';
 import { format, addDays, differenceInDays, isPast, isBefore } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
+import { AIContextualButton } from '@/components/ai/AIContextualButton';
 
 interface Insurance {
   id: string;
@@ -895,6 +896,12 @@ export default function SegurosPage() {
 
         {/* Asistente IA de Documentos */}
         <AIDocumentAssistant context="seguros" variant="floating" position="bottom-right" />
+        <AIContextualButton
+          agentType="insurance_advisor"
+          agentName="Asesor de Seguros IA"
+          agentDescription="Coberturas, cotizaciones, infraseguro"
+          apiEndpoint="/api/ai/insurance-advisor"
+        />
       </div>
     </AuthenticatedLayout>
   );
