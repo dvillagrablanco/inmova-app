@@ -86,7 +86,7 @@ export default function ActivosGrupoPage() {
             <h1 className="text-2xl font-bold text-gray-900">Activos del Grupo</h1>
             <p className="text-gray-500">{assets.length} inmuebles en cartera</p>
           </div>
-          <Button onClick={() => toast.info('Formulario de alta de activo pendiente')}>
+          <Button onClick={() => router.push('/inversiones/analisis?tab=escritura')}>
             <Plus className="h-4 w-4 mr-2" />
             Registrar Activo
           </Button>
@@ -129,7 +129,10 @@ export default function ActivosGrupoPage() {
             const cuotaMensual = asset.mortgages?.reduce((s: number, m: any) => s + m.cuotaMensual, 0) || 0;
 
             return (
-              <Card key={asset.id}>
+              <Card key={asset.id} className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => {
+                if (asset.buildingId) router.push(`/edificios/${asset.buildingId}`);
+                else if (asset.unitId) router.push(`/unidades/${asset.unitId}`);
+              }}>
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-3">
