@@ -1,17 +1,11 @@
 /**
  * AI Chat Service
- * Handles conversational AI interactions
+ * Handles conversational AI interactions using Anthropic Claude
  */
 
 import { AIMessage, AIConversation, AIChatOptions, AIChatResponse } from './types';
 import logger from '@/lib/logger';
-import { OpenAIService } from '@/lib/openai-service';
-
-function ensureOpenAIConfigured(): void {
-  if (!process.env.OPENAI_API_KEY) {
-    throw new Error('OPENAI_API_KEY no configurado');
-  }
-}
+import { generateAICompletion } from '@/lib/ai-service';
 
 /**
  * Send a chat message and get AI response
@@ -22,9 +16,7 @@ export async function sendChatMessage(
   options?: AIChatOptions
 ): Promise<AIChatResponse> {
   try {
-    ensureOpenAIConfigured();
-
-    logger.info('Sending chat message to AI', {
+    logger.info('Sending chat message to AI (Claude)', {
       messageLength: message.length,
       model: options?.model || 'default',
     });
@@ -46,13 +38,17 @@ export async function sendChatMessage(
 
     messages.push({ role: 'user', content: message });
 
-    const response = await OpenAIService.chatCompletion(messages);
+    const response = await generateAICompletion(messages, {
+      systemPrompt: options?.systemPrompt,
+      temperature: options?.temperature ?? 0.7,
+      maxTokens: options?.maxTokens ?? 1000,
+    });
 
     return {
       message: response || '',
       metadata: {
-        provider: 'openai',
-        model: options?.model || 'default',
+        provider: 'anthropic',
+        model: options?.model || 'claude',
       },
     };
   } catch (error: any) {
@@ -109,9 +105,7 @@ export async function summarizeConversation(
   conversation: AIConversation
 ): Promise<string> {
   try {
-    ensureOpenAIConfigured();
-
-    logger.info('Summarizing conversation', {
+    logger.info('Summarizing conversation (Claude)', {
       messageCount: conversation.messages.length,
     });
 
@@ -119,14 +113,14 @@ export async function summarizeConversation(
       .map((m) => `${m.role.toUpperCase()}: ${m.content}`)
       .join('\n');
 
-    const summary = await OpenAIService.chatCompletion([
+    const summary = await generateAICompletion(
+      [{ role: 'user', content: transcript }],
       {
-        role: 'system',
-        content:
-          'Resume la conversación de forma breve, en español, destacando acciones y decisiones.',
-      },
-      { role: 'user', content: transcript },
-    ]);
+        systemPrompt: 'Resume la conversación de forma breve, en español, destacando acciones y decisiones.',
+        temperature: 0.3,
+        maxTokens: 500,
+      }
+    );
 
     return summary || '';
   } catch (error: any) {

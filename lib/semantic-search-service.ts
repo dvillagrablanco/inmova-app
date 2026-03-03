@@ -2,9 +2,11 @@
  * Servicio de Búsqueda Semántica
  * 
  * Usa embeddings de OpenAI para búsqueda por similitud vectorial.
- * Permite buscar propiedades por descripción natural.
+ * OpenAI se mantiene como dependencia OPCIONAL solo para embeddings
+ * (Claude no ofrece API de embeddings nativa).
  * 
- * Ejemplo: "piso luminoso cerca del metro con parking"
+ * Si OPENAI_API_KEY no está configurada, la búsqueda semántica
+ * se desactiva gracefully y se usa búsqueda por texto.
  * 
  * @module SemanticSearchService
  */
@@ -14,19 +16,28 @@ import { prisma } from './db';
 import logger from './logger';
 import { redis } from './redis';
 
-// Lazy initialization para evitar errores en build-time
+// Lazy initialization — optional dependency
 let openai: OpenAI | null = null;
+let openaiUnavailableWarned = false;
 
-function getOpenAI(): OpenAI {
-  if (!openai) {
-    if (!process.env.OPENAI_API_KEY) {
-      throw new Error('OPENAI_API_KEY no configurada');
+function getOpenAI(): OpenAI | null {
+  if (openai) return openai;
+  if (!process.env.OPENAI_API_KEY) {
+    if (!openaiUnavailableWarned) {
+      logger.info('[SemanticSearch] OPENAI_API_KEY no configurada — búsqueda semántica desactivada, usando búsqueda por texto');
+      openaiUnavailableWarned = true;
     }
-    openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
+    return null;
   }
+  openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   return openai;
+}
+
+/**
+ * Check if semantic search is available (OpenAI embeddings configured)
+ */
+export function isSemanticSearchAvailable(): boolean {
+  return !!process.env.OPENAI_API_KEY;
 }
 
 // ============================================================================

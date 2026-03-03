@@ -1,12 +1,26 @@
 /**
- * Servicio de IA Mejorado
- * Integra capacidades avanzadas de LLM para asistencia contextual
+ * Servicio de IA Centralizado
+ * 
+ * Usa Anthropic Claude como único proveedor de LLM.
+ * Mantiene la misma interfaz pública para compatibilidad con consumidores existentes.
  */
 
+import Anthropic from '@anthropic-ai/sdk';
+import { CLAUDE_MODEL_FAST, CLAUDE_DEFAULT_MAX_TOKENS } from '@/lib/ai-model-config';
 import logger, { logError } from '@/lib/logger';
 
-const ABACUS_AI_API_URL = 'https://api.abacus.ai/v1/chat/complete';
-const API_KEY = process.env.ABACUSAI_API_KEY;
+// Lazy initialization
+let anthropicClient: Anthropic | null = null;
+
+function getAnthropic(): Anthropic {
+  if (!anthropicClient) {
+    if (!process.env.ANTHROPIC_API_KEY) {
+      throw new Error('ANTHROPIC_API_KEY no configurada');
+    }
+    anthropicClient = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  }
+  return anthropicClient;
+}
 
 export interface AIMessage {
   role: 'system' | 'user' | 'assistant';
@@ -21,47 +35,48 @@ export interface AICompletionOptions {
 }
 
 /**
- * Genera una respuesta de IA usando Abacus.AI
+ * Genera una respuesta de IA usando Anthropic Claude
  */
 export async function generateAICompletion(
   messages: AIMessage[],
   options: AICompletionOptions = {}
 ): Promise<string> {
   const {
-    model = 'gpt-4',
+    model = CLAUDE_MODEL_FAST,
     temperature = 0.7,
     maxTokens = 1000,
     systemPrompt,
   } = options;
 
   try {
-    // Agregar system prompt si se proporciona
-    const allMessages = systemPrompt
-      ? [{ role: 'system' as const, content: systemPrompt }, ...messages]
-      : messages;
+    const anthropic = getAnthropic();
 
-    const response = await fetch(ABACUS_AI_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${API_KEY}`,
-      },
-      body: JSON.stringify({
-        model,
-        messages: allMessages,
-        temperature,
-        max_tokens: maxTokens,
-      }),
-    });
+    // Separate system messages from conversation messages
+    const systemContent = systemPrompt 
+      || messages.filter(m => m.role === 'system').map(m => m.content).join('\n')
+      || undefined;
 
-    if (!response.ok) {
-      throw new Error(`API respondió con status ${response.status}`);
+    const conversationMessages = messages
+      .filter(m => m.role !== 'system')
+      .map(m => ({ role: m.role as 'user' | 'assistant', content: m.content }));
+
+    // Ensure first message is from user (Anthropic requirement)
+    if (conversationMessages.length === 0 || conversationMessages[0].role !== 'user') {
+      conversationMessages.unshift({ role: 'user', content: 'Responde a la solicitud.' });
     }
 
-    const data = await response.json();
-    return data.choices[0]?.message?.content || '';
+    const response = await anthropic.messages.create({
+      model,
+      max_tokens: maxTokens,
+      temperature,
+      ...(systemContent ? { system: systemContent } : {}),
+      messages: conversationMessages,
+    });
+
+    const content = response.content[0];
+    return content.type === 'text' ? content.text : '';
   } catch (error) {
-    logError(error as Error, { message: 'Error generando completación de IA' });
+    logError(error as Error, { message: 'Error generando completación de IA (Claude)' });
     throw error;
   }
 }
@@ -95,7 +110,6 @@ Genera sugerencias relevantes.`;
       { systemPrompt, temperature: 0.8, maxTokens: 500 }
     );
 
-    // Parsear el JSON de la respuesta
     const suggestions = JSON.parse(response);
     return Array.isArray(suggestions) ? suggestions : [];
   } catch (error) {
