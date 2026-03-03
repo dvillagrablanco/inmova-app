@@ -23,6 +23,15 @@ export { CommercialManagementAgent } from './commercial-management-agent';
 export { FinancialAnalysisAgent } from './financial-analysis-agent';
 export { LegalComplianceAgent } from './legal-compliance-agent';
 export { DocumentAssistantAgent } from './document-assistant-agent';
+export { STRRevenueAgent } from './str-revenue-agent';
+export { MarketingContentAgent } from './marketing-content-agent';
+export { OnboardingGuideAgent } from './onboarding-guide-agent';
+export { TenantPortalAgent } from './tenant-portal-agent';
+export { AccountingTaxAgent } from './accounting-tax-agent';
+export { CommunityManagementAgent } from './community-management-agent';
+export { InsuranceAdvisorAgent } from './insurance-advisor-agent';
+export { ConstructionProjectAgent } from './construction-project-agent';
+export { EnergySustainabilityAgent } from './energy-sustainability-agent';
 
 // ============================================================================
 // COORDINADOR
@@ -82,6 +91,36 @@ export const SYSTEM_INFO = {
       type: 'legal_compliance',
       name: 'Agente de Legal y Cumplimiento',
       description: 'Aspectos legales y cumplimiento normativo',
+    },
+    {
+      type: 'tenant_portal',
+      name: 'Asistente del Portal Inquilino',
+      description: 'Pagos, contratos, mantenimiento y documentos para inquilinos',
+    },
+    {
+      type: 'accounting_tax',
+      name: 'Asistente de Contabilidad e Impuestos',
+      description: 'IVA, IRPF, modelo 303/115/130',
+    },
+    {
+      type: 'community_management',
+      name: 'Asistente de Comunidades de Propietarios',
+      description: 'Actas, votaciones, derramas, LPH',
+    },
+    {
+      type: 'insurance_advisor',
+      name: 'Asesor de Seguros Inmobiliarios',
+      description: 'Cobertura, infraseguro, comparativa de presupuestos',
+    },
+    {
+      type: 'construction_project',
+      name: 'Agente de Gestión de Obras y Reformas',
+      description: 'Costes, plazos, calidad, normativa CTE',
+    },
+    {
+      type: 'energy_sustainability',
+      name: 'Agente de Energía y Sostenibilidad ESG',
+      description: 'Auditorías, huella carbono, certificaciones LEED/BREEAM',
     },
   ],
   capabilities: {

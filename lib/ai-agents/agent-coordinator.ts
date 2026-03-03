@@ -28,6 +28,15 @@ import { CommercialManagementAgent } from './commercial-management-agent';
 import { FinancialAnalysisAgent } from './financial-analysis-agent';
 import { LegalComplianceAgent } from './legal-compliance-agent';
 import { DocumentAssistantAgent } from './document-assistant-agent';
+import { TenantPortalAgent } from './tenant-portal-agent';
+import { AccountingTaxAgent } from './accounting-tax-agent';
+import { CommunityManagementAgent } from './community-management-agent';
+import { STRRevenueAgent } from './str-revenue-agent';
+import { MarketingContentAgent } from './marketing-content-agent';
+import { OnboardingGuideAgent } from './onboarding-guide-agent';
+import { InsuranceAdvisorAgent } from './insurance-advisor-agent';
+import { ConstructionProjectAgent } from './construction-project-agent';
+import { EnergySustainabilityAgent } from './energy-sustainability-agent';
 
 // ============================================================================
 // REGISTRO DE AGENTES
@@ -42,6 +51,15 @@ agentRegistry.set('commercial_management', new CommercialManagementAgent());
 agentRegistry.set('financial_analysis', new FinancialAnalysisAgent());
 agentRegistry.set('legal_compliance', new LegalComplianceAgent());
 agentRegistry.set('document_assistant', new DocumentAssistantAgent());
+agentRegistry.set('tenant_portal', new TenantPortalAgent());
+agentRegistry.set('accounting_tax', new AccountingTaxAgent());
+agentRegistry.set('community_management', new CommunityManagementAgent());
+agentRegistry.set('str_revenue', new STRRevenueAgent());
+agentRegistry.set('marketing_content', new MarketingContentAgent());
+agentRegistry.set('onboarding_guide', new OnboardingGuideAgent());
+agentRegistry.set('insurance_advisor', new InsuranceAdvisorAgent());
+agentRegistry.set('construction_project', new ConstructionProjectAgent());
+agentRegistry.set('energy_sustainability', new EnergySustainabilityAgent());
 
 // ============================================================================
 // COORDINADOR PRINCIPAL
@@ -226,9 +244,19 @@ export class AgentCoordinator {
     // Verificar cada agente en orden de prioridad
     const agentsToCheck: AgentType[] = [
       'technical_support', // Prioridad alta para emergencias
+      'tenant_portal', // Inquilinos - prioridad si userType es tenant
       'legal_compliance', // Alta por urgencia legal
+      'accounting_tax', // Contabilidad e impuestos
+      'insurance_advisor', // Seguros inmobiliarios
+      'construction_project', // Obras y reformas
+      'energy_sustainability', // Energía y ESG
+      'community_management', // Comunidades de propietarios
       'financial_analysis', // Media-alta por impacto
+      'str_revenue', // Revenue management STR
+      'marketing_content', // Marketing y contenido
+      'onboarding_guide', // Onboarding
       'commercial_management', // Media
+      'document_assistant', // Documentos
       'customer_service', // Default - maneja consultas generales
     ];
 
@@ -260,7 +288,10 @@ export class AgentCoordinator {
     const messageLower = originalMessage.toLowerCase();
     const agentKeywords: Record<string, string[]> = {
       technical_support: ['reparar', 'arreglar', 'mantenimiento', 'técnico', 'emergencia'],
+      tenant_portal: ['pago', 'contrato', 'incidencia', 'recibo', 'mantenimiento'],
       legal_compliance: ['legal', 'contrato', 'abogado', 'demanda', 'cláusula'],
+      accounting_tax: ['factura', 'impuesto', 'iva', 'irpf', 'contabilidad', 'declaración', 'modelo 303'],
+      community_management: ['comunidad', 'propietarios', 'acta', 'votación', 'derrama', 'junta', 'convocatoria'],
       financial_analysis: ['financiero', 'rentabilidad', 'roi', 'ingresos', 'gastos'],
       commercial_management: ['venta', 'lead', 'cliente', 'propuesta', 'comercial'],
       document_assistant: [
@@ -273,6 +304,9 @@ export class AgentCoordinator {
         'ocr',
         'imagen',
       ],
+      insurance_advisor: ['seguro', 'póliza', 'cobertura', 'siniestro', 'prima', 'asegurar'],
+      construction_project: ['obra', 'reforma', 'construcción', 'presupuesto obra', 'CTE', 'licencia'],
+      energy_sustainability: ['energía', 'sostenibilidad', 'ESG', 'certificado energético', 'huella carbono', 'LEED', 'BREEAM'],
     };
 
     for (const [agentType, keywords] of Object.entries(agentKeywords)) {
