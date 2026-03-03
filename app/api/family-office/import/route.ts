@@ -54,6 +54,14 @@ const IMPORT_TYPES = [
     method: 'POST',
     accepts: '.pdf',
   },
+  {
+    id: 'insurance-policy',
+    name: 'Póliza de Seguro',
+    description: 'Extrae datos estructurados de pólizas PDF (AXA, Mapfre, etc.)',
+    endpoint: '/api/family-office/import/insurance-policy',
+    method: 'POST',
+    accepts: '.pdf',
+  },
 ];
 
 export async function GET(request: NextRequest) {
