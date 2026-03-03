@@ -114,7 +114,7 @@ export interface SettingField {
 // ============================================================================
 
 export const INTEGRATION_PROVIDERS: IntegrationProvider[] = [
-  // ========== PAGOS ==========
+  // ========== PAGOS (todos tienen lib service) ==========
   {
     id: 'stripe',
     name: 'Stripe',
@@ -122,7 +122,7 @@ export const INTEGRATION_PROVIDERS: IntegrationProvider[] = [
     description: 'Pagos online con tarjeta y suscripciones',
     logo: '/integrations/stripe.svg',
     website: 'https://stripe.com',
-    status: 'active',
+    status: 'active', // lib/stripe-config.ts + 4 servicios + 8 API routes
     credentialFields: [
       { key: 'publishableKey', label: 'Publishable Key', type: 'text', required: true },
       { key: 'secretKey', label: 'Secret Key', type: 'password', required: true },
@@ -135,7 +135,7 @@ export const INTEGRATION_PROVIDERS: IntegrationProvider[] = [
     category: 'payment',
     description: 'Pagos con cuenta PayPal',
     logo: '/integrations/paypal.svg',
-    status: 'active',
+    status: 'active', // lib/paypal-integration.ts
     credentialFields: [
       { key: 'clientId', label: 'Client ID', type: 'text', required: true },
       { key: 'clientSecret', label: 'Client Secret', type: 'password', required: true },
@@ -146,25 +146,12 @@ export const INTEGRATION_PROVIDERS: IntegrationProvider[] = [
     ],
   },
   {
-    id: 'redsys',
-    name: 'Redsys (PSD2)',
-    category: 'payment',
-    description: 'TPV bancario español con 3D Secure',
-    logo: '/integrations/redsys.svg',
-    status: 'active',
-    credentialFields: [
-      { key: 'merchantCode', label: 'Código de Comercio', type: 'text', required: true },
-      { key: 'terminal', label: 'Terminal', type: 'text', required: true },
-      { key: 'secretKey', label: 'Clave Secreta', type: 'password', required: true },
-    ],
-  },
-  {
     id: 'bizum',
     name: 'Bizum',
     category: 'payment',
     description: 'Pagos instantáneos P2P en España',
     logo: '/integrations/bizum.svg',
-    status: 'active',
+    status: 'active', // lib/bizum-integration.ts + API routes
     credentialFields: [
       { key: 'merchantId', label: 'Merchant ID', type: 'text', required: true },
       { key: 'secretKey', label: 'Secret Key', type: 'password', required: true },
@@ -184,10 +171,10 @@ export const INTEGRATION_PROVIDERS: IntegrationProvider[] = [
     id: 'gocardless',
     name: 'GoCardless',
     category: 'payment',
-    description: 'Domiciliaciones bancarias SEPA, BACS, ACH',
+    description: 'Domiciliaciones bancarias SEPA, BACS, ACH + Open Banking',
     logo: '/integrations/gocardless.svg',
     website: 'https://gocardless.com',
-    status: 'active',
+    status: 'active', // lib/gocardless-integration.ts + lib/nordigen-service.ts + 16 API routes
     credentialFields: [
       { key: 'accessToken', label: 'Access Token', type: 'password', required: true, helpText: 'Token de API de GoCardless' },
       { key: 'environment', label: 'Entorno', type: 'select', required: true, options: [
@@ -201,9 +188,6 @@ export const INTEGRATION_PROVIDERS: IntegrationProvider[] = [
         { value: 'sepa_core', label: 'SEPA Core (Europa)' },
         { value: 'bacs', label: 'BACS (UK)' },
         { value: 'ach', label: 'ACH (USA)' },
-        { value: 'autogiro', label: 'Autogiro (Suecia)' },
-        { value: 'becs', label: 'BECS (Australia)' },
-        { value: 'pad', label: 'PAD (Canadá)' },
       ]},
     ],
   },
@@ -216,7 +200,7 @@ export const INTEGRATION_PROVIDERS: IntegrationProvider[] = [
     description: 'SMS y WhatsApp Business API',
     logo: '/integrations/twilio.svg',
     website: 'https://twilio.com',
-    status: 'active',
+    status: 'active', // lib/twilio-integration.ts + lib/sms-service.ts + 4 API routes
     credentialFields: [
       { key: 'accountSid', label: 'Account SID', type: 'text', required: true },
       { key: 'authToken', label: 'Auth Token', type: 'password', required: true },
@@ -231,23 +215,9 @@ export const INTEGRATION_PROVIDERS: IntegrationProvider[] = [
     description: 'Email transaccional y marketing',
     logo: '/integrations/sendgrid.svg',
     website: 'https://sendgrid.com',
-    status: 'active',
+    status: 'active', // lib/sendgrid-service.ts
     credentialFields: [
       { key: 'apiKey', label: 'API Key', type: 'password', required: true },
-    ],
-  },
-  {
-    id: 'crisp',
-    name: 'Crisp',
-    category: 'communication',
-    description: 'Chat en vivo y soporte al cliente',
-    logo: '/integrations/crisp.svg',
-    website: 'https://crisp.chat',
-    status: 'active',
-    credentialFields: [
-      { key: 'websiteId', label: 'Website ID', type: 'text', required: true },
-      { key: 'pluginId', label: 'Plugin ID', type: 'text', required: false },
-      { key: 'pluginKey', label: 'Plugin Key', type: 'password', required: false },
     ],
   },
 
@@ -258,7 +228,7 @@ export const INTEGRATION_PROVIDERS: IntegrationProvider[] = [
     category: 'channel_manager',
     description: 'Sincronización con Airbnb',
     logo: '/integrations/airbnb.svg',
-    status: 'active',
+    status: 'active', // lib/airbnb-integration.ts + API routes
     credentialFields: [
       { key: 'clientId', label: 'Client ID', type: 'text', required: true },
       { key: 'clientSecret', label: 'Client Secret', type: 'password', required: true },
@@ -274,7 +244,7 @@ export const INTEGRATION_PROVIDERS: IntegrationProvider[] = [
     category: 'channel_manager',
     description: 'Conectividad con Booking.com',
     logo: '/integrations/booking.svg',
-    status: 'active',
+    status: 'active', // lib/booking-integration.ts
     credentialFields: [
       { key: 'hotelId', label: 'Hotel ID', type: 'text', required: true },
       { key: 'username', label: 'Username', type: 'text', required: true },
@@ -286,15 +256,29 @@ export const INTEGRATION_PROVIDERS: IntegrationProvider[] = [
     ],
   },
 
-  // ========== CONTABILIDAD ==========
+  // ========== CONTABILIDAD / ERP ==========
   {
     id: 'contasimple',
     name: 'ContaSimple',
     category: 'accounting',
     description: 'Contabilidad para autónomos',
     logo: '/integrations/contasimple.svg',
-    status: 'active',
+    status: 'active', // lib/contasimple-integration-service.ts + lib/inmova-contasimple-bridge.ts
     credentialFields: [
+      { key: 'apiKey', label: 'API Key', type: 'password', required: true },
+      { key: 'companyId', label: 'ID Empresa', type: 'text', required: true },
+    ],
+  },
+  {
+    id: 'zucchetti',
+    name: 'Zucchetti',
+    category: 'accounting',
+    description: 'Software de gestión empresarial',
+    logo: '/integrations/zucchetti.svg',
+    website: 'https://zucchetti.es',
+    status: 'active', // lib/zucchetti-altai-service.ts + lib/zucchetti-token-crypto.ts
+    credentialFields: [
+      { key: 'apiEndpoint', label: 'API Endpoint', type: 'url', required: true },
       { key: 'apiKey', label: 'API Key', type: 'password', required: true },
       { key: 'companyId', label: 'ID Empresa', type: 'text', required: true },
     ],
@@ -305,297 +289,35 @@ export const INTEGRATION_PROVIDERS: IntegrationProvider[] = [
     category: 'accounting',
     description: 'ERP y facturación online',
     logo: '/integrations/holded.svg',
-    status: 'active',
+    status: 'active', // lib/holded-integration-service.ts
     credentialFields: [
       { key: 'apiKey', label: 'API Key', type: 'password', required: true },
     ],
   },
-
-  // ========== REDES SOCIALES ==========
   {
-    id: 'pomelli',
-    name: 'Pomelli',
-    category: 'social_media',
-    description: 'Gestión multi-canal de redes sociales',
-    logo: '/integrations/pomelli.svg',
-    status: 'active',
+    id: 'sage',
+    name: 'Sage',
+    category: 'accounting',
+    description: 'Gestión empresarial y contabilidad',
+    logo: '/integrations/sage.svg',
+    website: 'https://sage.com',
+    status: 'active', // lib/sage-integration-service.ts
     credentialFields: [
-      { key: 'apiKey', label: 'API Key', type: 'text', required: true },
-      { key: 'apiSecret', label: 'API Secret', type: 'password', required: true },
-      { key: 'webhookUrl', label: 'Webhook URL', type: 'url', required: false },
-    ],
-  },
-
-  // ========== FIRMA DIGITAL ==========
-  {
-    id: 'docusign',
-    name: 'DocuSign',
-    category: 'signature',
-    description: 'Firma electrónica de contratos',
-    logo: '/integrations/docusign.svg',
-    website: 'https://docusign.com',
-    status: 'active',
-    credentialFields: [
-      { key: 'integrationKey', label: 'Integration Key', type: 'text', required: true },
-      { key: 'userId', label: 'User ID', type: 'text', required: true },
-      { key: 'accountId', label: 'Account ID', type: 'text', required: true },
-      { key: 'privateKey', label: 'Private Key (RSA)', type: 'password', required: true },
-      { key: 'environment', label: 'Entorno', type: 'select', required: true, options: [
-        { value: 'demo', label: 'Demo/Sandbox' },
-        { value: 'production', label: 'Producción' },
-      ]},
-    ],
-  },
-  {
-    id: 'signaturit',
-    name: 'Signaturit',
-    category: 'signature',
-    description: 'Firma electrónica cualificada eIDAS (España/UE)',
-    logo: '/integrations/signaturit.svg',
-    website: 'https://signaturit.com',
-    status: 'active',
-    credentialFields: [
-      { key: 'apiToken', label: 'API Token', type: 'password', required: true },
+      { key: 'apiKey', label: 'API Key', type: 'password', required: true },
+      { key: 'companyId', label: 'Company ID', type: 'text', required: true },
       { key: 'environment', label: 'Entorno', type: 'select', required: true, options: [
         { value: 'sandbox', label: 'Sandbox' },
         { value: 'production', label: 'Producción' },
       ]},
     ],
   },
-
-  // ========== OPEN BANKING ==========
-  {
-    id: 'bankinter',
-    name: 'Bankinter Open Banking',
-    category: 'banking',
-    description: 'Acceso a cuentas bancarias',
-    logo: '/integrations/bankinter.svg',
-    status: 'beta',
-    credentialFields: [
-      { key: 'clientId', label: 'Client ID', type: 'text', required: true },
-      { key: 'clientSecret', label: 'Client Secret', type: 'password', required: true },
-    ],
-  },
-  {
-    id: 'openbanking',
-    name: 'Open Banking (PSD2)',
-    category: 'banking',
-    description: 'Conexión con bancos españoles vía API PSD2',
-    logo: '/integrations/openbanking.svg',
-    website: 'https://www.berlin-group.org',
-    status: 'active',
-    credentialFields: [
-      { key: 'clientId', label: 'Client ID', type: 'text', required: true },
-      { key: 'clientSecret', label: 'Client Secret', type: 'password', required: true },
-      { key: 'certificate', label: 'Certificado eIDAS', type: 'password', required: true },
-    ],
-  },
-
-  // ========== ANALYTICS ==========
-  {
-    id: 'google-analytics',
-    name: 'Google Analytics 4',
-    category: 'analytics',
-    description: 'Análisis de tráfico web y comportamiento',
-    logo: '/integrations/google-analytics.svg',
-    website: 'https://analytics.google.com',
-    status: 'active',
-    credentialFields: [
-      { key: 'measurementId', label: 'Measurement ID', type: 'text', required: true, placeholder: 'Measurement ID' },
-      { key: 'apiSecret', label: 'API Secret', type: 'password', required: false },
-    ],
-  },
-  {
-    id: 'hotjar',
-    name: 'Hotjar',
-    category: 'analytics',
-    description: 'Mapas de calor y grabaciones de sesiones',
-    logo: '/integrations/hotjar.svg',
-    website: 'https://hotjar.com',
-    status: 'active',
-    credentialFields: [
-      { key: 'siteId', label: 'Site ID', type: 'text', required: true },
-      { key: 'hotjarVersion', label: 'Versión', type: 'text', required: false, placeholder: '6' },
-    ],
-  },
-
-  // ========== ALMACENAMIENTO ==========
-  {
-    id: 'aws-s3',
-    name: 'Amazon S3',
-    category: 'storage',
-    description: 'Almacenamiento de documentos en la nube',
-    logo: '/integrations/aws-s3.svg',
-    website: 'https://aws.amazon.com/s3',
-    status: 'active',
-    credentialFields: [
-      { key: 'accessKeyId', label: 'Access Key ID', type: 'text', required: true },
-      { key: 'secretAccessKey', label: 'Secret Access Key', type: 'password', required: true },
-      { key: 'region', label: 'Región', type: 'select', required: true, options: [
-        { value: 'eu-west-1', label: 'EU (Irlanda)' },
-        { value: 'eu-west-3', label: 'EU (París)' },
-        { value: 'eu-central-1', label: 'EU (Frankfurt)' },
-        { value: 'us-east-1', label: 'US East (N. Virginia)' },
-      ]},
-      { key: 'bucket', label: 'Bucket Name', type: 'text', required: true },
-    ],
-  },
-
-  // ========== CHANNEL MANAGERS (Nuevos) ==========
-  {
-    id: 'expedia',
-    name: 'Expedia',
-    category: 'channel_manager',
-    description: 'EPS - Expedia Partner Solutions API',
-    logo: '/integrations/expedia.svg',
-    status: 'active',
-    credentialFields: [
-      { key: 'partnerId', label: 'Partner ID', type: 'text', required: true },
-      { key: 'apiKey', label: 'API Key', type: 'text', required: true },
-      { key: 'apiSecret', label: 'API Secret', type: 'password', required: true },
-      { key: 'environment', label: 'Entorno', type: 'select', required: true, options: [
-        { value: 'test', label: 'Test' },
-        { value: 'production', label: 'Production' },
-      ]},
-    ],
-  },
-  {
-    id: 'vrbo',
-    name: 'VRBO / HomeAway',
-    category: 'channel_manager',
-    description: 'Alquileres vacacionales (Expedia Group)',
-    logo: '/integrations/vrbo.svg',
-    status: 'active',
-    credentialFields: [
-      { key: 'clientId', label: 'Client ID', type: 'text', required: true },
-      { key: 'clientSecret', label: 'Client Secret', type: 'password', required: true },
-      { key: 'partnerId', label: 'Partner ID', type: 'text', required: true },
-      { key: 'environment', label: 'Entorno', type: 'select', required: true, options: [
-        { value: 'sandbox', label: 'Sandbox' },
-        { value: 'production', label: 'Production' },
-      ]},
-    ],
-  },
-
-  // ========== REDES SOCIALES ==========
-  {
-    id: 'facebook',
-    name: 'Facebook Business',
-    category: 'social_media',
-    description: 'Gestión de páginas de Facebook e Instagram',
-    logo: '/integrations/facebook.svg',
-    website: 'https://business.facebook.com',
-    status: 'active',
-    credentialFields: [
-      { key: 'appId', label: 'App ID', type: 'text', required: true },
-      { key: 'appSecret', label: 'App Secret', type: 'password', required: true },
-      { key: 'pageId', label: 'Page ID', type: 'text', required: false, helpText: 'ID de tu página de Facebook' },
-      { key: 'accessToken', label: 'Access Token', type: 'password', required: true },
-    ],
-  },
-  {
-    id: 'linkedin',
-    name: 'LinkedIn',
-    category: 'social_media',
-    description: 'Publicación en LinkedIn Company Pages',
-    logo: '/integrations/linkedin.svg',
-    website: 'https://linkedin.com',
-    status: 'active',
-    credentialFields: [
-      { key: 'clientId', label: 'Client ID', type: 'text', required: true },
-      { key: 'clientSecret', label: 'Client Secret', type: 'password', required: true },
-      { key: 'organizationId', label: 'Organization ID', type: 'text', required: false },
-    ],
-  },
-  {
-    id: 'twitter',
-    name: 'Twitter/X',
-    category: 'social_media',
-    description: 'Publicación automática en Twitter/X',
-    logo: '/integrations/twitter.svg',
-    website: 'https://developer.twitter.com',
-    status: 'active',
-    credentialFields: [
-      { key: 'apiKey', label: 'API Key', type: 'text', required: true },
-      { key: 'apiSecret', label: 'API Secret', type: 'password', required: true },
-      { key: 'accessToken', label: 'Access Token', type: 'text', required: true },
-      { key: 'accessTokenSecret', label: 'Access Token Secret', type: 'password', required: true },
-    ],
-  },
-  {
-    id: 'idealista',
-    name: 'Idealista',
-    category: 'social_media',
-    description: 'Publicación de inmuebles en Idealista',
-    logo: '/integrations/idealista.svg',
-    website: 'https://idealista.com',
-    status: 'active',
-    credentialFields: [
-      { key: 'apiKey', label: 'API Key', type: 'password', required: true },
-      { key: 'secret', label: 'Secret', type: 'password', required: true },
-    ],
-  },
-  {
-    id: 'fotocasa',
-    name: 'Fotocasa',
-    category: 'social_media',
-    description: 'Publicación de inmuebles en Fotocasa',
-    logo: '/integrations/fotocasa.svg',
-    website: 'https://fotocasa.es',
-    status: 'active',
-    credentialFields: [
-      { key: 'apiKey', label: 'API Key', type: 'password', required: true },
-      { key: 'agencyId', label: 'Agency ID', type: 'text', required: true },
-    ],
-  },
-  {
-    id: 'habitaclia',
-    name: 'Habitaclia',
-    category: 'social_media',
-    description: 'Portal inmobiliario líder en Cataluña',
-    logo: '/integrations/habitaclia.svg',
-    website: 'https://habitaclia.com',
-    status: 'active',
-    credentialFields: [
-      { key: 'apiKey', label: 'API Key', type: 'password', required: true },
-      { key: 'agencyId', label: 'ID Agencia', type: 'text', required: true },
-    ],
-  },
-  {
-    id: 'pisos',
-    name: 'Pisos.com',
-    category: 'social_media',
-    description: 'Buscador de pisos en España',
-    logo: '/integrations/pisos.svg',
-    website: 'https://pisos.com',
-    status: 'active',
-    credentialFields: [
-      { key: 'apiKey', label: 'API Key', type: 'password', required: true },
-      { key: 'clientId', label: 'Client ID', type: 'text', required: true },
-    ],
-  },
-  {
-    id: 'yaencontre',
-    name: 'yaencontré',
-    category: 'social_media',
-    description: 'Portal inmobiliario yaencontré',
-    logo: '/integrations/yaencontre.svg',
-    website: 'https://yaencontre.com',
-    status: 'active',
-    credentialFields: [
-      { key: 'apiKey', label: 'API Key', type: 'password', required: true },
-      { key: 'userId', label: 'User ID', type: 'text', required: true },
-    ],
-  },
-
-  // ========== CONTABILIDAD (Nuevos) ==========
   {
     id: 'quickbooks',
     name: 'QuickBooks',
     category: 'accounting',
     description: 'Contabilidad y facturación (Intuit)',
     logo: '/integrations/quickbooks.svg',
-    status: 'active',
+    status: 'active', // lib/integrations/quickbooks.ts
     credentialFields: [
       { key: 'clientId', label: 'Client ID', type: 'text', required: true },
       { key: 'clientSecret', label: 'Client Secret', type: 'password', required: true },
@@ -611,23 +333,120 @@ export const INTEGRATION_PROVIDERS: IntegrationProvider[] = [
     category: 'accounting',
     description: 'Contabilidad cloud (UK, AU, NZ)',
     logo: '/integrations/xero.svg',
-    status: 'active',
+    status: 'coming_soon', // Sin lib service
     credentialFields: [
       { key: 'clientId', label: 'Client ID', type: 'text', required: true },
       { key: 'clientSecret', label: 'Client Secret', type: 'password', required: true },
     ],
   },
+
+  // ========== REDES SOCIALES / PORTALES ==========
   {
-    id: 'sage',
-    name: 'Sage',
-    category: 'accounting',
-    description: 'Gestión empresarial y contabilidad',
-    logo: '/integrations/sage.svg',
-    website: 'https://sage.com',
-    status: 'active',
+    id: 'pomelli',
+    name: 'Pomelli',
+    category: 'social_media',
+    description: 'Gestión multi-canal de redes sociales',
+    logo: '/integrations/pomelli.svg',
+    status: 'active', // lib/pomelli-integration.ts
+    credentialFields: [
+      { key: 'apiKey', label: 'API Key', type: 'text', required: true },
+      { key: 'apiSecret', label: 'API Secret', type: 'password', required: true },
+      { key: 'webhookUrl', label: 'Webhook URL', type: 'url', required: false },
+    ],
+  },
+  {
+    id: 'facebook',
+    name: 'Facebook Business',
+    category: 'social_media',
+    description: 'Gestión de páginas de Facebook e Instagram',
+    logo: '/integrations/facebook.svg',
+    website: 'https://business.facebook.com',
+    status: 'active', // lib/facebook-integration.ts + lib/oauth-service.ts
+    credentialFields: [
+      { key: 'appId', label: 'App ID', type: 'text', required: true },
+      { key: 'appSecret', label: 'App Secret', type: 'password', required: true },
+      { key: 'pageId', label: 'Page ID', type: 'text', required: false, helpText: 'ID de tu página de Facebook' },
+      { key: 'accessToken', label: 'Access Token', type: 'password', required: true },
+    ],
+  },
+  {
+    id: 'linkedin',
+    name: 'LinkedIn',
+    category: 'social_media',
+    description: 'Publicación en LinkedIn Company Pages',
+    logo: '/integrations/linkedin.svg',
+    website: 'https://linkedin.com',
+    status: 'active', // lib/linkedin-scraper.ts + lib/oauth-service.ts
+    credentialFields: [
+      { key: 'clientId', label: 'Client ID', type: 'text', required: true },
+      { key: 'clientSecret', label: 'Client Secret', type: 'password', required: true },
+      { key: 'organizationId', label: 'Organization ID', type: 'text', required: false },
+    ],
+  },
+  {
+    id: 'idealista',
+    name: 'Idealista',
+    category: 'social_media',
+    description: 'Publicación de inmuebles en Idealista',
+    logo: '/integrations/idealista.svg',
+    website: 'https://idealista.com',
+    status: 'active', // lib/scraping/idealista-scraper.ts
     credentialFields: [
       { key: 'apiKey', label: 'API Key', type: 'password', required: true },
-      { key: 'companyId', label: 'Company ID', type: 'text', required: true },
+      { key: 'secret', label: 'Secret', type: 'password', required: true },
+    ],
+  },
+  {
+    id: 'fotocasa',
+    name: 'Fotocasa',
+    category: 'social_media',
+    description: 'Publicación de inmuebles en Fotocasa',
+    logo: '/integrations/fotocasa.svg',
+    website: 'https://fotocasa.es',
+    status: 'active', // lib/scraping/fotocasa-scraper.ts
+    credentialFields: [
+      { key: 'apiKey', label: 'API Key', type: 'password', required: true },
+      { key: 'agencyId', label: 'Agency ID', type: 'text', required: true },
+    ],
+  },
+  {
+    id: 'habitaclia',
+    name: 'Habitaclia',
+    category: 'social_media',
+    description: 'Portal inmobiliario líder en Cataluña',
+    logo: '/integrations/habitaclia.svg',
+    website: 'https://habitaclia.com',
+    status: 'active', // lib/scraping/habitaclia-scraper.ts
+    credentialFields: [
+      { key: 'apiKey', label: 'API Key', type: 'password', required: true },
+      { key: 'agencyId', label: 'ID Agencia', type: 'text', required: true },
+    ],
+  },
+  {
+    id: 'pisos',
+    name: 'Pisos.com',
+    category: 'social_media',
+    description: 'Buscador de pisos en España',
+    logo: '/integrations/pisos.svg',
+    website: 'https://pisos.com',
+    status: 'active', // lib/scraping/pisos-com-scraper.ts
+    credentialFields: [
+      { key: 'apiKey', label: 'API Key', type: 'password', required: true },
+      { key: 'clientId', label: 'Client ID', type: 'text', required: true },
+    ],
+  },
+
+  // ========== FIRMA DIGITAL ==========
+  {
+    id: 'signaturit',
+    name: 'Signaturit',
+    category: 'signature',
+    description: 'Firma electrónica cualificada eIDAS (España/UE)',
+    logo: '/integrations/signaturit.svg',
+    website: 'https://signaturit.com',
+    status: 'active', // lib/signaturit-service.ts + webhook
+    credentialFields: [
+      { key: 'apiToken', label: 'API Token', type: 'password', required: true },
       { key: 'environment', label: 'Entorno', type: 'select', required: true, options: [
         { value: 'sandbox', label: 'Sandbox' },
         { value: 'production', label: 'Producción' },
@@ -635,61 +454,59 @@ export const INTEGRATION_PROVIDERS: IntegrationProvider[] = [
     ],
   },
   {
-    id: 'alegra',
-    name: 'Alegra',
-    category: 'accounting',
-    description: 'Facturación y contabilidad online',
-    logo: '/integrations/alegra.svg',
-    website: 'https://alegra.com',
-    status: 'active',
+    id: 'docusign',
+    name: 'DocuSign',
+    category: 'signature',
+    description: 'Firma electrónica de contratos',
+    logo: '/integrations/docusign.svg',
+    website: 'https://docusign.com',
+    status: 'active', // lib/digital-signature-service.ts + callback route
     credentialFields: [
-      { key: 'email', label: 'Email', type: 'text', required: true },
-      { key: 'apiToken', label: 'API Token', type: 'password', required: true },
-    ],
-  },
-  {
-    id: 'a3',
-    name: 'A3 Software',
-    category: 'accounting',
-    description: 'Contabilidad profesional A3',
-    logo: '/integrations/a3.svg',
-    website: 'https://a3software.com',
-    status: 'active',
-    credentialFields: [
-      { key: 'apiKey', label: 'API Key', type: 'password', required: true },
-      { key: 'companyCode', label: 'Código Empresa', type: 'text', required: true },
-    ],
-  },
-  {
-    id: 'zucchetti',
-    name: 'Zucchetti',
-    category: 'accounting',
-    description: 'Software de gestión empresarial',
-    logo: '/integrations/zucchetti.svg',
-    website: 'https://zucchetti.es',
-    status: 'active',
-    credentialFields: [
-      { key: 'apiEndpoint', label: 'API Endpoint', type: 'url', required: true },
-      { key: 'apiKey', label: 'API Key', type: 'password', required: true },
-      { key: 'companyId', label: 'ID Empresa', type: 'text', required: true },
-    ],
-  },
-  {
-    id: 'plaid',
-    name: 'Plaid',
-    category: 'banking',
-    description: 'Agregador bancario internacional',
-    logo: '/integrations/plaid.svg',
-    website: 'https://plaid.com',
-    status: 'active',
-    credentialFields: [
-      { key: 'clientId', label: 'Client ID', type: 'text', required: true },
-      { key: 'secret', label: 'Secret', type: 'password', required: true },
+      { key: 'integrationKey', label: 'Integration Key', type: 'text', required: true },
+      { key: 'userId', label: 'User ID', type: 'text', required: true },
+      { key: 'accountId', label: 'Account ID', type: 'text', required: true },
+      { key: 'privateKey', label: 'Private Key (RSA)', type: 'password', required: true },
       { key: 'environment', label: 'Entorno', type: 'select', required: true, options: [
-        { value: 'sandbox', label: 'Sandbox' },
-        { value: 'development', label: 'Development' },
-        { value: 'production', label: 'Production' },
+        { value: 'demo', label: 'Demo/Sandbox' },
+        { value: 'production', label: 'Producción' },
       ]},
+    ],
+  },
+
+  // ========== ANALYTICS ==========
+  {
+    id: 'google-analytics',
+    name: 'Google Analytics 4',
+    category: 'analytics',
+    description: 'Análisis de tráfico web y comportamiento',
+    logo: '/integrations/google-analytics.svg',
+    website: 'https://analytics.google.com',
+    status: 'active', // lib/analytics.ts
+    credentialFields: [
+      { key: 'measurementId', label: 'Measurement ID', type: 'text', required: true, placeholder: 'G-XXXXXXXXXX' },
+      { key: 'apiSecret', label: 'API Secret', type: 'password', required: false },
+    ],
+  },
+
+  // ========== ALMACENAMIENTO ==========
+  {
+    id: 'aws-s3',
+    name: 'Amazon S3',
+    category: 'storage',
+    description: 'Almacenamiento de documentos en la nube',
+    logo: '/integrations/aws-s3.svg',
+    website: 'https://aws.amazon.com/s3',
+    status: 'active', // lib/s3.ts + lib/aws-s3-service.ts + lib/aws-config.ts
+    credentialFields: [
+      { key: 'accessKeyId', label: 'Access Key ID', type: 'text', required: true },
+      { key: 'secretAccessKey', label: 'Secret Access Key', type: 'password', required: true },
+      { key: 'region', label: 'Región', type: 'select', required: true, options: [
+        { value: 'eu-west-1', label: 'EU (Irlanda)' },
+        { value: 'eu-west-3', label: 'EU (París)' },
+        { value: 'eu-central-1', label: 'EU (Frankfurt)' },
+        { value: 'us-east-1', label: 'US East (N. Virginia)' },
+      ]},
+      { key: 'bucket', label: 'Bucket Name', type: 'text', required: true },
     ],
   },
 ];
