@@ -90,3 +90,4 @@ scripts/deploy-ssh-paramiko.py
 
 # DF financial data (confidential)
 data/df-files/
+data/vidaro-files/
