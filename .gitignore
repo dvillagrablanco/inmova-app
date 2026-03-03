@@ -87,3 +87,6 @@ scripts/deploy-ssh-paramiko.py
 !app/api/**/cambiar-password/
 !app/api/**/cambiar-password/**
 !lib/password-reset.ts
+
+# DF financial data (confidential)
+data/df-files/
