@@ -1397,15 +1397,35 @@ Cuando uses herramientas:
 }
 
 // ============================================================================
+// HELPER: Obtener todos los IDs del grupo (holding + filiales)
+// ============================================================================
+async function getGroupCompanyIds(companyId: string): Promise<string[]> {
+  try {
+    const company = await prisma.company.findUnique({
+      where: { id: companyId },
+      include: { childCompanies: { select: { id: true } } },
+    });
+    if (company?.childCompanies?.length) {
+      return [company.id, ...company.childCompanies.map((c: any) => c.id)];
+    }
+    return [companyId];
+  } catch {
+    return [companyId];
+  }
+}
+
+// ============================================================================
 // IMPLEMENTACIONES DE TOOLS
 // ============================================================================
 
 async function searchBuildings(input: any, context: AssistantContext) {
   const { query, limit = 10 } = input;
+  const groupIds = await getGroupCompanyIds(context.companyId);
 
   const buildings = await prisma.building.findMany({
     where: {
-      companyId: context.companyId,
+      companyId: { in: groupIds },
+      isDemo: false,
       OR: [
         { nombre: { contains: query, mode: 'insensitive' } },
         { direccion: { contains: query, mode: 'insensitive' } },
@@ -1600,9 +1620,10 @@ async function getTenantDetails(input: any, context: AssistantContext) {
 
 async function searchContracts(input: any, context: AssistantContext) {
   const { status, tenantId, buildingId, limit = 10 } = input;
+  const groupIds = await getGroupCompanyIds(context.companyId);
 
   const where: any = {
-    companyId: context.companyId,
+    companyId: { in: groupIds },
   };
 
   if (status) {
@@ -1858,17 +1879,18 @@ async function searchTasks(input: any, context: AssistantContext) {
 
 async function getDashboardStats(input: any, context: AssistantContext) {
   const { includeFinancial = true, includeMaintenance = true } = input;
+  const groupIds = await getGroupCompanyIds(context.companyId);
 
   const [buildingsCount, unitsCount, tenantsCount, contractsCount] = await Promise.all([
-    prisma.building.count({ where: { companyId: context.companyId } }),
+    prisma.building.count({ where: { companyId: { in: groupIds }, isDemo: false } }),
     prisma.unit.count({
       where: {
         building: {
-          companyId: context.companyId,
+          companyId: { in: groupIds }, isDemo: false,
         },
       },
     }),
-    prisma.tenant.count({ where: { companyId: context.companyId } }),
+    prisma.tenant.count({ where: { companyId: { in: groupIds } } }),
     prisma.contract.count({
       where: {
         unit: {
@@ -2535,27 +2557,30 @@ async function searchDocuments(input: any, context: AssistantContext) {
 }
 
 async function getExpiringContracts(input: any, context: AssistantContext) {
-  const dias = input.dias ?? 60;
+  const dias = input.dias ?? 300; // Default 300 days to cover end of year
   const now = new Date();
   const limitDate = new Date(now.getTime() + dias * 24 * 60 * 60 * 1000);
+  const groupIds = await getGroupCompanyIds(context.companyId);
   const contracts = await prisma.contract.findMany({
     where: {
       estado: 'activo',
       fechaFin: { gte: now, lte: limitDate },
-      unit: { building: { companyId: context.companyId } },
+      unit: { building: { companyId: { in: groupIds }, isDemo: false } },
     },
     include: {
       tenant: { select: { nombreCompleto: true, email: true } },
       unit: { select: { numero: true, building: { select: { nombre: true, direccion: true } } } },
     },
     orderBy: { fechaFin: 'asc' },
+    take: 50,
   });
   return { success: true, count: contracts.length, contracts };
 }
 
 async function getVacantUnits(input: any, context: AssistantContext) {
+  const groupIds = await getGroupCompanyIds(context.companyId);
   const where: any = {
-    building: { companyId: context.companyId },
+    building: { companyId: { in: groupIds }, isDemo: false },
     estado: 'disponible',
     contracts: {
       none: { estado: 'activo' },
