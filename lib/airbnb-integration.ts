@@ -95,7 +95,7 @@ export class AirbnbClient {
           client_secret: this.clientSecret,
           grant_type: 'authorization_code',
           code: authorizationCode,
-          redirect_uri: `${process.env.NEXT_PUBLIC_URL}/integrations/airbnb/callback`,
+          redirect_uri: `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/api/airbnb/callback`,
         }),
       });
 
