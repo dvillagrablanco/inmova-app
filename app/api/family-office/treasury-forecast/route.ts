@@ -32,20 +32,23 @@ export async function GET(request: NextRequest) {
       ? queryCompanyId
       : session.user.companyId;
 
-    // Saldo actual en cuentas
-    const accounts = await prisma.financialAccount.findMany({
-      where: { companyId, activa: true },
-      select: { saldoActual: true, entidad: true },
-    });
-    const saldoActual = accounts.reduce((s, a) => s + a.saldoActual, 0);
+    const today = new Date();
 
-    // Renta mensual estimada (contratos activos del grupo)
-    const groupIds = [companyId];
-    const children = await prisma.company.findMany({
-      where: { parentCompanyId: companyId },
-      select: { id: true },
+    // Group scope: holding + filiales
+    const company = await prisma.company.findUnique({
+      where: { id: companyId },
+      include: { childCompanies: { select: { id: true, nombre: true } } },
     });
-    children.forEach((c) => groupIds.push(c.id));
+    const groupIds = company
+      ? [company.id, ...company.childCompanies.map((c: any) => c.id)]
+      : [companyId];
+
+    // Saldo actual en cuentas (TODO el grupo)
+    const accounts = await prisma.financialAccount.findMany({
+      where: { companyId: { in: groupIds }, activa: true },
+      select: { saldoActual: true, entidad: true, alias: true },
+    });
+    const saldoActual = accounts.reduce((s, a) => s + (a.saldoActual || 0), 0);
 
     const contracts = await prisma.contract.findMany({
       where: { unit: { building: { companyId: { in: groupIds } } }, estado: 'activo' },
@@ -53,13 +56,17 @@ export async function GET(request: NextRequest) {
     });
     const rentaMensual = contracts.reduce((s, c) => s + c.rentaMensual, 0);
 
-    // Gastos mensuales estimados
-    const expenses = await prisma.expense.findMany({
-      where: { building: { companyId: { in: groupIds } }, isDemo: false },
+    // Gastos mensuales estimados (últimos 6 meses → media mensual)
+    const sixMonthsAgo = new Date(today.getTime() - 180 * 24 * 60 * 60 * 1000);
+    const recentExpenses = await prisma.expense.findMany({
+      where: {
+        building: { companyId: { in: groupIds }, isDemo: false },
+        fecha: { gte: sixMonthsAgo },
+      },
       select: { monto: true },
     });
-    const gastosMensualesEstimados = expenses.length > 0
-      ? expenses.reduce((s, e) => s + e.monto, 0) / 12 : 0;
+    const gastosMensualesEstimados = recentExpenses.length > 0
+      ? recentExpenses.reduce((s, e) => s + e.monto, 0) / 6 : 0;
 
     // Hipotecas mensuales
     let hipotecaMensual = 0;
@@ -72,7 +79,6 @@ export async function GET(request: NextRequest) {
     } catch { /* model may not exist */ }
 
     // Proyectar 6 meses
-    const today = new Date();
     let saldoProyectado = saldoActual;
     const forecast = [];
 
@@ -113,9 +119,23 @@ export async function GET(request: NextRequest) {
       alertas.push(`🔴 DÉFICIT de tesorería previsto. Necesitas financiación o reducir gastos.`);
     }
 
+    // Desglose por entidad bancaria
+    const porEntidad: Record<string, number> = {};
+    for (const acc of accounts) {
+      const key = acc.entidad || 'Sin entidad';
+      porEntidad[key] = (porEntidad[key] || 0) + (acc.saldoActual || 0);
+    }
+    const desglose = Object.entries(porEntidad)
+      .filter(([_, saldo]) => saldo > 0)
+      .map(([entidad, saldo]) => ({ entidad, saldo: Math.round(saldo) }))
+      .sort((a, b) => b.saldo - a.saldo);
+
     return NextResponse.json({
       success: true,
       saldoActual: Math.round(saldoActual),
+      totalCuentas: accounts.length,
+      sociedades: groupIds.length,
+      porEntidad: desglose,
       flujosMensuales: {
         cobros: Math.round(rentaMensual),
         gastos: Math.round(gastosMensualesEstimados),
