@@ -65,3 +65,6 @@ export async function authorizeCronRequest(
 
   return { authorized: true, status: 200 };
 }
+
+/** Alias for authorizeCronRequest (used by cron routes) */
+export const verifyCronAuth = authorizeCronRequest;
