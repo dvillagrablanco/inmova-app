@@ -47,7 +47,7 @@ export {
 // ============================================================================
 // VERSIÓN
 // ============================================================================
-export const AI_AGENTS_VERSION = '1.0.0';
+export const AI_AGENTS_VERSION = '2.0.0';
 
 // ============================================================================
 // INFORMACIÓN DEL SISTEMA
@@ -108,6 +108,21 @@ export const SYSTEM_INFO = {
       description: 'Actas, votaciones, derramas, LPH',
     },
     {
+      type: 'str_revenue',
+      name: 'Agente de Revenue Management STR',
+      description: 'Pricing dinámico, ocupación, reviews y análisis competitivo para alquiler vacacional',
+    },
+    {
+      type: 'marketing_content',
+      name: 'Agente de Marketing y Contenido',
+      description: 'Descripciones para portales, social media, SEO y traducciones',
+    },
+    {
+      type: 'onboarding_guide',
+      name: 'Agente de Onboarding Inteligente',
+      description: 'Setup personalizado, sugerencia de módulos y guía paso a paso',
+    },
+    {
       type: 'insurance_advisor',
       name: 'Asesor de Seguros Inmobiliarios',
       description: 'Cobertura, infraseguro, comparativa de presupuestos',
@@ -131,5 +146,5 @@ export const SYSTEM_INFO = {
     metricsTracking: true,
     escalationToHuman: true,
   },
-  powered_by: 'Anthropic Claude 3.5 Sonnet',
+  powered_by: 'Anthropic Claude (claude-sonnet-4-6)',
 };
