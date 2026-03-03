@@ -26,7 +26,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const companyId = session.user.companyId;
+    const { searchParams } = new URL(request.url);
+    const queryCompanyId = searchParams.get('companyId');
+    const companyId = (session.user.role === 'super_admin' && queryCompanyId)
+      ? queryCompanyId
+      : session.user.companyId;
 
     // Saldo actual en cuentas
     const accounts = await prisma.financialAccount.findMany({

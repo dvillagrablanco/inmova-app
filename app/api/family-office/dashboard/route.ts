@@ -23,7 +23,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const companyId = session.user.companyId;
+    const { searchParams } = new URL(request.url);
+    const queryCompanyId = searchParams.get('companyId');
+    const companyId = (session.user.role === 'super_admin' && queryCompanyId)
+      ? queryCompanyId
+      : session.user.companyId;
     const prisma = await getPrisma();
 
     // Obtener empresa + filiales para vista consolidada

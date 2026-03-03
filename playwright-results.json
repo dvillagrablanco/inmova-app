@@ -11,7 +11,7 @@
     "grepInvert": null,
     "maxFailures": 0,
     "metadata": {
-      "actualWorkers": 2
+      "actualWorkers": 1
     },
     "preserveOutput": "always",
     "reporter": [
@@ -49,7 +49,7 @@
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
-          "actualWorkers": 2
+          "actualWorkers": 1
         },
         "id": "chromium",
         "name": "chromium",
@@ -66,7 +66,7 @@
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
-          "actualWorkers": 2
+          "actualWorkers": 1
         },
         "id": "firefox",
         "name": "firefox",
@@ -83,7 +83,7 @@
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
-          "actualWorkers": 2
+          "actualWorkers": 1
         },
         "id": "webkit",
         "name": "webkit",
@@ -100,7 +100,7 @@
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
-          "actualWorkers": 2
+          "actualWorkers": 1
         },
         "id": "Mobile Chrome",
         "name": "Mobile Chrome",
@@ -117,7 +117,7 @@
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
-          "actualWorkers": 2
+          "actualWorkers": 1
         },
         "id": "Mobile Safari",
         "name": "Mobile Safari",
@@ -134,7 +134,7 @@
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
-          "actualWorkers": 2
+          "actualWorkers": 1
         },
         "id": "iPad",
         "name": "iPad",
@@ -162,304 +162,59 @@
   },
   "suites": [
     {
-      "title": "financial-360-connectivity.spec.ts",
-      "file": "financial-360-connectivity.spec.ts",
+      "title": "pe_check.spec.ts",
+      "file": "pe_check.spec.ts",
       "column": 0,
       "line": 0,
-      "specs": [],
-      "suites": [
+      "specs": [
         {
-          "title": "Módulos Financieros - Carga de páginas",
-          "file": "financial-360-connectivity.spec.ts",
-          "line": 28,
-          "column": 6,
-          "specs": [
+          "title": "PE screenshot",
+          "ok": true,
+          "tags": [],
+          "tests": [
             {
-              "title": "Family Office Dashboard carga con quick navigation",
-              "ok": false,
-              "tags": [],
-              "tests": [
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
                 {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 7589,
+                  "errors": [],
+                  "stdout": [
                     {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "timedOut",
-                      "duration": 30214,
-                      "error": {
-                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
-                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
-                      },
-                      "errors": [
-                        {
-                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
-                        },
-                        {
-                          "location": {
-                            "file": "/workspace/tests/financial-360-connectivity.spec.ts",
-                            "column": 16,
-                            "line": 63
-                          },
-                          "message": "Error: page.waitForLoadState: Test timeout of 30000ms exceeded.\n\n  61 |   test('Family Office Dashboard carga con quick navigation', async ({ page }) => {\n  62 |     await page.goto(`${BASE_URL}/family-office/dashboard`);\n> 63 |     await page.waitForLoadState('networkidle');\n     |                ^\n  64 |\n  65 |     await expect(page.locator('text=Dashboard Patrimonial')).toBeVisible({ timeout: 10000 });\n  66 |\n    at /workspace/tests/financial-360-connectivity.spec.ts:63:16"
-                        }
-                      ],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-03-02T18:23:22.003Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "screenshot",
-                          "contentType": "image/png",
-                          "path": "/workspace/test-results/financial-360-connectivity-ee942--carga-con-quick-navigation-chromium/test-failed-1.png"
-                        },
-                        {
-                          "name": "video",
-                          "contentType": "video/webm",
-                          "path": "/workspace/test-results/financial-360-connectivity-ee942--carga-con-quick-navigation-chromium/video.webm"
-                        },
-                        {
-                          "name": "error-context",
-                          "contentType": "text/markdown",
-                          "path": "/workspace/test-results/financial-360-connectivity-ee942--carga-con-quick-navigation-chromium/error-context.md"
-                        }
-                      ]
+                      "text": "Screenshot saved\n"
                     }
                   ],
-                  "status": "unexpected"
-                }
-              ],
-              "id": "f36c3222632802e9a5ef-c428fed5242b16566935",
-              "file": "financial-360-connectivity.spec.ts",
-              "line": 61,
-              "column": 7
-            },
-            {
-              "title": "Family Office Cuentas - botón Conectar banco funciona",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-03-03T04:54:48.639Z",
                   "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
-                      "status": "passed",
-                      "duration": 7345,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-03-02T18:23:22.016Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
+                  "attachments": []
                 }
               ],
-              "id": "f36c3222632802e9a5ef-4584154dc27b6618a536",
-              "file": "financial-360-connectivity.spec.ts",
-              "line": 82,
-              "column": 7
+              "status": "expected"
             }
-          ]
-        },
-        {
-          "title": "Conectividad entre módulos",
-          "file": "financial-360-connectivity.spec.ts",
-          "line": 119,
-          "column": 6,
-          "specs": [
-            {
-              "title": "Cuadro de Mandos → Family Office",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
-                      "status": "passed",
-                      "duration": 6430,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-03-02T18:23:29.484Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "f36c3222632802e9a5ef-b9523fc5af70cbc07a5d",
-              "file": "financial-360-connectivity.spec.ts",
-              "line": 124,
-              "column": 7
-            },
-            {
-              "title": "Family Office Dashboard → PE",
-              "ok": false,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
-                      "status": "timedOut",
-                      "duration": 30204,
-                      "error": {
-                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
-                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
-                      },
-                      "errors": [
-                        {
-                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
-                        },
-                        {
-                          "location": {
-                            "file": "/workspace/tests/financial-360-connectivity.spec.ts",
-                            "column": 16,
-                            "line": 157
-                          },
-                          "message": "Error: page.waitForLoadState: Test timeout of 30000ms exceeded.\n\n  155 |   test('Family Office Dashboard → PE', async ({ page }) => {\n  156 |     await page.goto(`${BASE_URL}/family-office/dashboard`);\n> 157 |     await page.waitForLoadState('networkidle');\n      |                ^\n  158 |\n  159 |     // Click en Private Equity en quick nav\n  160 |     await page.click('a[href=\"/family-office/pe\"]');\n    at /workspace/tests/financial-360-connectivity.spec.ts:157:16"
-                        }
-                      ],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-03-02T18:23:35.925Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "screenshot",
-                          "contentType": "image/png",
-                          "path": "/workspace/test-results/financial-360-connectivity-f63f5-amily-Office-Dashboard-→-PE-chromium/test-failed-1.png"
-                        },
-                        {
-                          "name": "video",
-                          "contentType": "video/webm",
-                          "path": "/workspace/test-results/financial-360-connectivity-f63f5-amily-Office-Dashboard-→-PE-chromium/video.webm"
-                        },
-                        {
-                          "name": "error-context",
-                          "contentType": "text/markdown",
-                          "path": "/workspace/test-results/financial-360-connectivity-f63f5-amily-Office-Dashboard-→-PE-chromium/error-context.md"
-                        }
-                      ]
-                    }
-                  ],
-                  "status": "unexpected"
-                }
-              ],
-              "id": "f36c3222632802e9a5ef-f1f57dc840619c986933",
-              "file": "financial-360-connectivity.spec.ts",
-              "line": 155,
-              "column": 7
-            },
-            {
-              "title": "Family Office Dashboard → Cuadro de Mandos",
-              "ok": false,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 2,
-                      "parallelIndex": 0,
-                      "status": "timedOut",
-                      "duration": 30188,
-                      "error": {
-                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
-                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
-                      },
-                      "errors": [
-                        {
-                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
-                        },
-                        {
-                          "location": {
-                            "file": "/workspace/tests/financial-360-connectivity.spec.ts",
-                            "column": 16,
-                            "line": 168
-                          },
-                          "message": "Error: page.waitForLoadState: Test timeout of 30000ms exceeded.\n\n  166 |   test('Family Office Dashboard → Cuadro de Mandos', async ({ page }) => {\n  167 |     await page.goto(`${BASE_URL}/family-office/dashboard`);\n> 168 |     await page.waitForLoadState('networkidle');\n      |                ^\n  169 |\n  170 |     await page.click('a[href=\"/finanzas/cuadro-de-mandos\"]');\n  171 |     await page.waitForURL('**/finanzas/cuadro-de-mandos**', { timeout: 10000 });\n    at /workspace/tests/financial-360-connectivity.spec.ts:168:16"
-                        }
-                      ],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-03-02T18:23:52.843Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "screenshot",
-                          "contentType": "image/png",
-                          "path": "/workspace/test-results/financial-360-connectivity-350aa-ashboard-→-Cuadro-de-Mandos-chromium/test-failed-1.png"
-                        },
-                        {
-                          "name": "video",
-                          "contentType": "video/webm",
-                          "path": "/workspace/test-results/financial-360-connectivity-350aa-ashboard-→-Cuadro-de-Mandos-chromium/video.webm"
-                        },
-                        {
-                          "name": "error-context",
-                          "contentType": "text/markdown",
-                          "path": "/workspace/test-results/financial-360-connectivity-350aa-ashboard-→-Cuadro-de-Mandos-chromium/error-context.md"
-                        }
-                      ]
-                    }
-                  ],
-                  "status": "unexpected"
-                }
-              ],
-              "id": "f36c3222632802e9a5ef-e1f11b008ca33ddce4c8",
-              "file": "financial-360-connectivity.spec.ts",
-              "line": 166,
-              "column": 7
-            }
-          ]
+          ],
+          "id": "53c3a48366c77031e6e9-67046b50a9ea47f2041d",
+          "file": "pe_check.spec.ts",
+          "line": 3,
+          "column": 5
         }
       ]
     }
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-03-02T18:23:14.673Z",
-    "duration": 68554.017,
-    "expected": 2,
+    "startTime": "2026-03-03T04:54:44.372Z",
+    "duration": 12000.14,
+    "expected": 1,
     "skipped": 0,
-    "unexpected": 3,
+    "unexpected": 0,
     "flaky": 0
   }
 }

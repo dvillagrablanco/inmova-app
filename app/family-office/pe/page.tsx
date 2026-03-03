@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -82,6 +82,7 @@ const tvpiColor = (n: number) => (n >= 1 ? 'text-green-600' : n >= 0.9 ? 'text-y
 export default function PEPage() {
   const { status } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<PEData | null>(null);
   const [showRentabilidad, setShowRentabilidad] = useState(false);
@@ -93,7 +94,11 @@ export default function PEPage() {
 
   const loadData = async () => {
     try {
-      const res = await fetch('/api/family-office/pe-module');
+      const companyId = searchParams.get('companyId');
+      const url = companyId
+        ? `/api/family-office/pe-module?companyId=${companyId}`
+        : '/api/family-office/pe-module';
+      const res = await fetch(url);
       if (res.ok) {
         const json = await res.json();
         setData(json);

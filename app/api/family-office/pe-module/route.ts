@@ -28,7 +28,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const companyId = session.user.companyId;
+    // Super admin can pass companyId as query param (empresa seleccionada)
+    const { searchParams } = new URL(request.url);
+    const queryCompanyId = searchParams.get('companyId');
+    const companyId = (session.user.role === 'super_admin' && queryCompanyId)
+      ? queryCompanyId
+      : session.user.companyId;
 
     // Also include child companies (holding view)
     const company = await prisma.company.findUnique({
