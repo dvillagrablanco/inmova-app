@@ -89,30 +89,52 @@ export interface FiscalSummary {
  * Usa AssetAcquisition si existen, sino calcula KPIs directamente
  * de buildings/units/contracts/payments (datos operativos reales).
  */
-export async function getCompanyPortfolio(companyId: string): Promise<PortfolioSummary> {
+/**
+ * Get portfolio summary for a company.
+ * @param companyId - Company ID
+ * @param consolidateHolding - If true and company is a holding, consolidate subsidiaries.
+ *                             Default: true. Set false for comparativa per-company view.
+ */
+export async function getCompanyPortfolio(companyId: string, consolidateHolding = true): Promise<PortfolioSummary> {
+  // Check if this company is a holding (has child companies)
+  const company = await prisma.company.findUnique({
+    where: { id: companyId },
+    include: { childCompanies: { select: { id: true } } },
+  });
+  
+  const isHolding = consolidateHolding && company?.childCompanies && company.childCompanies.length > 0;
+  
+  // For holdings (when consolidating): query across all group companies
+  // For subsidiaries or non-consolidated: query only their own data
+  const scopeIds = isHolding 
+    ? [companyId, ...company!.childCompanies.map((c: any) => c.id)]
+    : [companyId];
+  
+  const scopeFilter = { in: scopeIds };
+
   const [assets, buildings, units, contracts, payments, expenses, mortgages] = await Promise.all([
     prisma.assetAcquisition.findMany({
-      where: { companyId },
+      where: { companyId: scopeFilter },
       include: { mortgages: true },
     }),
     prisma.building.findMany({
-      where: { companyId, isDemo: false },
+      where: { companyId: scopeFilter, isDemo: false },
       include: { units: true },
     }),
     prisma.unit.findMany({
-      where: { building: { companyId, isDemo: false } },
+      where: { building: { companyId: scopeFilter, isDemo: false } },
       include: {
         contracts: { where: { estado: 'activo' } },
       },
     }),
     prisma.contract.findMany({
-      where: { unit: { building: { companyId, isDemo: false } }, estado: 'activo' },
+      where: { unit: { building: { companyId: scopeFilter, isDemo: false } }, estado: 'activo' },
       select: { rentaMensual: true },
     }),
     // Pagos del ultimo mes
     prisma.payment.findMany({
       where: {
-        contract: { unit: { building: { companyId, isDemo: false } } },
+        contract: { unit: { building: { companyId: scopeFilter, isDemo: false } } },
         estado: 'pagado',
         fechaPago: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
       },
@@ -120,12 +142,12 @@ export async function getCompanyPortfolio(companyId: string): Promise<PortfolioS
     // Gastos del ultimo mes
     prisma.expense.findMany({
       where: {
-        building: { companyId, isDemo: false },
+        building: { companyId: scopeFilter, isDemo: false },
         fecha: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
       },
     }),
     prisma.mortgage.findMany({
-      where: { companyId, estado: 'activa' },
+      where: { companyId: scopeFilter, estado: 'activa' },
     }),
   ]);
 
@@ -409,7 +431,8 @@ export async function getConsolidatedReport(parentCompanyId: string): Promise<Co
 
     if (!company) continue;
 
-    const portfolio = await getCompanyPortfolio(companyId);
+    // For consolidated report: don't consolidate holdings (show each company separately)
+    const portfolio = await getCompanyPortfolio(companyId, false);
 
     // Cargar activos con rentabilidad para la comparativa
     const companyAssets = await getCompanyAssetPerformance(companyId);
@@ -486,13 +509,20 @@ export async function calculateFiscalSummary(
 
   const company = await prisma.company.findUnique({
     where: { id: companyId },
-    select: { nombre: true, cif: true },
+    include: { childCompanies: { select: { id: true } } },
   });
+
+  // For holdings: consolidate fiscal data from all subsidiaries
+  const isHolding = company?.childCompanies && company.childCompanies.length > 0;
+  const scopeIds = isHolding
+    ? [companyId, ...company!.childCompanies.map((c: any) => c.id)]
+    : [companyId];
+  const scopeFilter = { in: scopeIds };
 
   // Ingresos: pagos recibidos en el ano
   const payments = await prisma.payment.findMany({
     where: {
-      contract: { unit: { building: { companyId } } },
+      contract: { unit: { building: { companyId: scopeFilter } } },
       estado: 'pagado',
       fechaPago: { gte: startDate, lte: endDate },
     },
@@ -502,7 +532,7 @@ export async function calculateFiscalSummary(
   // Gastos deducibles
   const expenses = await prisma.expense.findMany({
     where: {
-      building: { companyId },
+      building: { companyId: scopeFilter },
       fecha: { gte: startDate, lte: endDate },
     },
   });
@@ -511,7 +541,7 @@ export async function calculateFiscalSummary(
   // Amortizaciones del ano
   const depreciations = await prisma.depreciationEntry.findMany({
     where: {
-      asset: { companyId },
+      asset: { companyId: scopeFilter },
       ano: year,
     },
   });
@@ -520,7 +550,7 @@ export async function calculateFiscalSummary(
   // Intereses de hipoteca del ano (gasto deducible adicional)
   const mortgagePayments = await prisma.mortgagePayment.findMany({
     where: {
-      mortgage: { companyId },
+      mortgage: { companyId: scopeFilter },
       fecha: { gte: startDate, lte: endDate },
       pagado: true,
     },

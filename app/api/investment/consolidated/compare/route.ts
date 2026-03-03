@@ -41,7 +41,9 @@ export async function GET(request: NextRequest) {
 
     const comparisons = await Promise.all(
       allCompanies.map(async (co) => {
-        const portfolio = await getCompanyPortfolio(co.id);
+        const isHoldingCompany = co.id === company.id && company.childCompanies.length > 0;
+        // Holdings: show consolidated, subsidiaries: show own data
+        const portfolio = await getCompanyPortfolio(co.id, isHoldingCompany);
         const fiscal = await calculateFiscalSummary(co.id, year);
 
         const annualIncome = portfolio.totalMonthlyIncome * 12;
@@ -62,9 +64,9 @@ export async function GET(request: NextRequest) {
 
         return {
           companyId: co.id,
-          companyName: co.nombre,
+          companyName: isHoldingCompany ? `${co.nombre} (Consolidado)` : co.nombre,
           cif: co.cif || '',
-          isHolding: co.parentCompanyId === null && company.childCompanies.length > 0,
+          isHolding: isHoldingCompany,
           // Portfolio
           totalAssets: portfolio.totalAssets,
           totalInvestment: Math.round(portfolio.totalInvestment),
