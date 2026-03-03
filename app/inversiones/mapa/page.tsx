@@ -247,27 +247,75 @@ export default function MapaCarteraPage() {
           </CardHeader>
           <CardContent>
             {conCoords.length > 0 ? (
-              <div className="aspect-[16/9] md:aspect-[21/9] rounded-lg overflow-hidden border">
-                <iframe
-                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${
-                    Math.min(...conCoords.map((b) => b.longitud!)) - 0.05
-                  }%2C${
-                    Math.min(...conCoords.map((b) => b.latitud!)) - 0.02
-                  }%2C${
-                    Math.max(...conCoords.map((b) => b.longitud!)) + 0.05
-                  }%2C${
-                    Math.max(...conCoords.map((b) => b.latitud!)) + 0.02
-                  }&layer=mapnik`}
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  loading="lazy"
-                  title="Mapa de cartera"
-                />
+              <div className="space-y-3">
+                {/* Mapa visual con puntos posicionados */}
+                <div className="relative aspect-[16/9] md:aspect-[21/9] rounded-lg overflow-hidden border bg-gray-100">
+                  <iframe
+                    src={`https://www.openstreetmap.org/export/embed.html?bbox=${
+                      Math.min(...conCoords.map((b) => b.longitud!)) - 0.5
+                    }%2C${
+                      Math.min(...conCoords.map((b) => b.latitud!)) - 0.3
+                    }%2C${
+                      Math.max(...conCoords.map((b) => b.longitud!)) + 0.5
+                    }%2C${
+                      Math.max(...conCoords.map((b) => b.latitud!)) + 0.3
+                    }&layer=mapnik`}
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    loading="lazy"
+                    title="Mapa de cartera"
+                  />
+                  {/* Overlay con pins posicionados sobre el iframe */}
+                  <div className="absolute inset-0 pointer-events-none">
+                    {(() => {
+                      const minLat = Math.min(...conCoords.map(b => b.latitud!)) - 0.3;
+                      const maxLat = Math.max(...conCoords.map(b => b.latitud!)) + 0.3;
+                      const minLng = Math.min(...conCoords.map(b => b.longitud!)) - 0.5;
+                      const maxLng = Math.max(...conCoords.map(b => b.longitud!)) + 0.5;
+                      return conCoords.map((b) => {
+                        const x = ((b.longitud! - minLng) / (maxLng - minLng)) * 100;
+                        const y = ((maxLat - b.latitud!) / (maxLat - minLat)) * 100;
+                        return (
+                          <div
+                            key={b.id}
+                            className="absolute pointer-events-auto cursor-pointer group"
+                            style={{ left: `${x}%`, top: `${y}%`, transform: 'translate(-50%, -100%)' }}
+                            onClick={() => setSelectedBuilding(b)}
+                          >
+                            <div className={`w-6 h-6 rounded-full ${getCompanyColor(b.companyName)} border-2 border-white shadow-lg flex items-center justify-center text-white text-[8px] font-bold hover:scale-150 transition-transform`}>
+                              {b.totalUnidades || '•'}
+                            </div>
+                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 bg-black text-white text-[10px] px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                              {b.nombre} · {b.totalUnidades} uds · {fmt(b.rentaMensual)}/mes
+                            </div>
+                          </div>
+                        );
+                      });
+                    })()}
+                  </div>
+                </div>
+
+                {/* Links para ver en Google Maps */}
+                <div className="flex flex-wrap gap-2">
+                  {conCoords.slice(0, 8).map((b) => (
+                    <a
+                      key={b.id}
+                      href={`https://www.google.com/maps?q=${b.latitud},${b.longitud}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-blue-600 hover:underline flex items-center gap-1"
+                    >
+                      <MapPin className="h-3 w-3" /> {b.nombre}
+                    </a>
+                  ))}
+                  {conCoords.length > 8 && (
+                    <span className="text-xs text-gray-400">+{conCoords.length - 8} más</span>
+                  )}
+                </div>
               </div>
             ) : (
               <div className="aspect-[16/9] md:aspect-[21/9] rounded-lg overflow-hidden border">
-                {/* Vista centrada en España cuando no hay coordenadas */}
                 <iframe
                   src="https://www.openstreetmap.org/export/embed.html?bbox=-5.5%2C38.5%2C0.5%2C42.0&layer=mapnik"
                   width="100%"
@@ -277,11 +325,6 @@ export default function MapaCarteraPage() {
                   title="Mapa de cartera"
                 />
               </div>
-            )}
-            {conCoords.length === 0 && buildings.length > 0 && (
-              <p className="text-xs text-muted-foreground mt-2 text-center">
-                Los inmuebles no tienen coordenadas geográficas. Edita cada edificio para añadir latitud y longitud.
-              </p>
             )}
           </CardContent>
         </Card>
