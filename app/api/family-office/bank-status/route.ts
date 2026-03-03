@@ -30,9 +30,18 @@ export async function GET(request: NextRequest) {
       ? queryCompanyId
       : session.user.companyId;
 
-    // Cuentas conectadas
+    // Group scope
+    const company = await prisma.company.findUnique({
+      where: { id: companyId },
+      include: { childCompanies: { select: { id: true } } },
+    });
+    const groupIds = company
+      ? [company.id, ...company.childCompanies.map((c: any) => c.id)]
+      : [companyId];
+
+    // Cuentas conectadas (todo el grupo)
     const accounts = await prisma.financialAccount.findMany({
-      where: { companyId, activa: true },
+      where: { companyId: { in: groupIds }, activa: true },
       select: {
         id: true,
         entidad: true,
