@@ -1387,11 +1387,14 @@ Cuando uses herramientas:
     logger.info(`✅ Claude completed - Tools used: ${toolsUsed.join(', ') || 'none'}`);
 
     return result;
-  } catch (error) {
-    logger.error('Error in chatWithClaude:', error);
+  } catch (error: any) {
+    const errMsg = error?.message || error?.toString() || 'Unknown error';
+    const errStack = error?.stack?.substring(0, 500) || '';
+    const errStatus = error?.status || '';
+    logger.error(`Error in chatWithClaude: ${errMsg}`, { status: errStatus, stack: errStack });
     return {
       type: 'text',
-      content: 'Lo siento, hubo un error procesando tu solicitud. Por favor, inténtalo de nuevo.',
+      content: `Error: ${errMsg.substring(0, 200)}. Por favor, inténtalo de nuevo.`,
     };
   }
 }
