@@ -29,7 +29,11 @@ const verticales = [
     icon: Building2,
     title: 'Alquiler Residencial',
     desc: 'Largo plazo (12+ meses) y media estancia (1-11 meses) con contratos LAU automatizados',
-    features: ['Contratos LAU actualizados', 'Screening IA de solvencia', 'Check-in digital y firma electrónica'],
+    features: [
+      'Contratos LAU actualizados',
+      'Screening IA de solvencia',
+      'Check-in digital y firma electrónica',
+    ],
     gradient: 'from-blue-500 to-teal-500',
     color: 'blue',
   },
@@ -45,7 +49,11 @@ const verticales = [
     icon: Home,
     title: 'Coliving / Habitaciones',
     desc: 'Gestión individual por habitación con prorrateo de suministros y matching de roommates',
-    features: ['Prorrateo automático luz/agua/gas', 'Matching IA de compatibilidad', 'Reglas de convivencia digitales'],
+    features: [
+      'Prorrateo automático luz/agua/gas',
+      'Matching IA de compatibilidad',
+      'Reglas de convivencia digitales',
+    ],
     gradient: 'from-purple-500 to-pink-500',
     color: 'purple',
   },
@@ -53,7 +61,11 @@ const verticales = [
     icon: TrendingUp,
     title: 'House Flipping',
     desc: 'Control completo del ciclo compra-reforma-venta con análisis de rentabilidad',
-    features: ['Cálculo ROI/TIR en tiempo real', 'Timeline de reforma', 'Control de presupuestos por partida'],
+    features: [
+      'Cálculo ROI/TIR en tiempo real',
+      'Timeline de reforma',
+      'Control de presupuestos por partida',
+    ],
     gradient: 'from-green-500 to-emerald-500',
     color: 'green',
   },
@@ -61,7 +73,11 @@ const verticales = [
     icon: Hammer,
     title: 'Construcción B2B',
     desc: 'Marketplace de subcontratación con compliance legal automático (ewoorker)',
-    features: ['Compliance Ley 32/2006', 'Escrow de pagos seguros', 'Marketplace de subcontratistas'],
+    features: [
+      'Compliance Ley 32/2006',
+      'Escrow de pagos seguros',
+      'Marketplace de subcontratistas',
+    ],
     gradient: 'from-orange-600 to-yellow-500',
     color: 'orange',
     badge: 'B2B',
@@ -70,7 +86,11 @@ const verticales = [
     icon: Building,
     title: 'Comunidades de Propietarios',
     desc: 'Administración de fincas con votaciones telemáticas y portal de comuneros',
-    features: ['Juntas y votaciones online', 'Gestión de cuotas y derramas', 'Portal del comunero 24/7'],
+    features: [
+      'Juntas y votaciones online',
+      'Gestión de cuotas y derramas',
+      'Portal del comunero 24/7',
+    ],
     gradient: 'from-cyan-500 to-blue-500',
     color: 'cyan',
   },
@@ -78,7 +98,11 @@ const verticales = [
     icon: DollarSign,
     title: 'Alquiler Comercial',
     desc: 'Locales, oficinas y naves industriales con IVA 21%, modelo 303 y facturación automática',
-    features: ['Contratos comerciales con IVA', 'Modelo 303 IVA trimestral', 'Gestión de CAM y repercusión'],
+    features: [
+      'Contratos comerciales con IVA',
+      'Modelo 303 IVA trimestral',
+      'Gestión de CAM y repercusión',
+    ],
     gradient: 'from-rose-500 to-red-500',
     color: 'rose',
     badge: 'NUEVO',
@@ -95,7 +119,11 @@ const verticales = [
     icon: TrendingUp,
     title: 'Family Office & Wealth',
     desc: 'Control patrimonial 360°: inmuebles + carteras financieras + private equity + tesorería multi-banco',
-    features: ['Dashboard patrimonial consolidado', 'Integración bancaria universal (PSD2, SWIFT, OCR)', 'Simulador fiscal y copiloto IA'],
+    features: [
+      'Dashboard patrimonial consolidado',
+      'Integración bancaria universal (PSD2, SWIFT, OCR)',
+      'Simulador fiscal y copiloto IA',
+    ],
     gradient: 'from-amber-500 to-yellow-600',
     color: 'amber',
     badge: 'Add-on',
@@ -106,9 +134,14 @@ const verticales = [
 const modulosTransversales = [
   {
     icon: Calendar,
-    title: 'Contratos Digitales',
-    desc: 'Genera y firma contratos LAU conformes a la normativa vigente',
-    benefits: ['Plantillas legales actualizadas', 'Firma digital integrada con validez jurídica', 'Renovaciones y alertas automáticas'],
+    title: 'Contratos y Workflows',
+    desc: 'Alta rápida de inquilinos en 4 pasos, renovación automática con IPC, y workflow de salida',
+    benefits: [
+      'Wizard de alta: inquilino→unidad→contrato en minutos',
+      'Actualización masiva de rentas por IPC',
+      'Workflow de salida con liquidación de fianza',
+      'Dashboard de vencimientos global',
+    ],
     gradient: 'from-blue-600 to-cyan-600',
     usedBy: 'Todos los verticales',
     badge: 'INCLUIDO',
@@ -117,15 +150,24 @@ const modulosTransversales = [
     icon: Shield,
     title: 'Gestión Documental',
     desc: 'Almacena, organiza y controla vencimientos de toda tu documentación',
-    benefits: ['DNI, contratos, escrituras, seguros', 'Alertas de vencimiento automáticas', 'Exportación masiva en 1 clic'],
+    benefits: [
+      'DNI, contratos, escrituras, seguros',
+      'Alertas de vencimiento automáticas',
+      'Exportación masiva en 1 clic',
+    ],
     gradient: 'from-green-600 to-emerald-600',
     usedBy: 'Todos los verticales',
   },
   {
     icon: DollarSign,
     title: 'Cobros y Pagos',
-    desc: 'Cobros automáticos con tarjeta y SEPA, recordatorios y conciliación bancaria',
-    benefits: ['Cobro automático con tarjeta/SEPA', 'Recibos y facturas generadas al instante', 'Histórico de pagos y morosidad'],
+    desc: 'Cobro en 1 click, cobro masivo, SEPA, facturación automática y control de morosidad',
+    benefits: [
+      'Cobro individual o masivo con 1 click',
+      'Facturas automáticas con nº secuencial',
+      'Informe de morosidad con días de retraso',
+      'Previsión de tesorería a 12 meses',
+    ],
     gradient: 'from-purple-500 to-pink-500',
     usedBy: 'Todos los verticales',
   },
@@ -133,7 +175,11 @@ const modulosTransversales = [
     icon: Camera,
     title: 'Galería y Multimedia',
     desc: 'Fotos, planos y documentos visuales asociados a cada propiedad',
-    benefits: ['Fotos ilimitadas con organización', 'Compartir galería con inquilinos', 'Exportación para portales inmobiliarios'],
+    benefits: [
+      'Fotos ilimitadas con organización',
+      'Compartir galería con inquilinos',
+      'Exportación para portales inmobiliarios',
+    ],
     gradient: 'from-pink-500 to-rose-500',
     usedBy: 'Todos los verticales',
   },
@@ -141,15 +187,65 @@ const modulosTransversales = [
     icon: Wifi,
     title: 'Comunicación Multicanal',
     desc: 'Email, SMS y chat integrado con inquilinos, propietarios y proveedores',
-    benefits: ['Chat directo desde la plataforma', 'Notificaciones por email y SMS', 'Historial completo de conversaciones'],
+    benefits: [
+      'Chat directo desde la plataforma',
+      'Notificaciones por email y SMS',
+      'Historial completo de conversaciones',
+    ],
     gradient: 'from-cyan-500 to-blue-500',
+    usedBy: 'Todos los verticales',
+  },
+  {
+    icon: Sparkles,
+    title: 'Inteligencia Artificial Integrada',
+    desc: 'IA predictiva que anticipa problemas, optimiza rentas y automatiza decisiones',
+    benefits: [
+      'Predicción de morosidad antes de que ocurra',
+      'Valoración automática de inmuebles con IA',
+      'Detección de anomalías financieras',
+      'Sugerencia de renta óptima por zona',
+    ],
+    gradient: 'from-violet-600 to-fuchsia-600',
+    usedBy: 'Todos los verticales',
+    badge: 'IA',
+  },
+  {
+    icon: Briefcase,
+    title: 'Family Office & Holding',
+    desc: 'Gestión patrimonial 360° para grupos de empresas con múltiples sociedades',
+    benefits: [
+      'Dashboard consolidado del grupo',
+      'P&L por sociedad comparativo',
+      'Portfolio Private Equity con TVPI/DPI',
+      'Informes trimestrales PDF automáticos',
+    ],
+    gradient: 'from-amber-600 to-yellow-600',
+    usedBy: 'Grupos inmobiliarios',
+    badge: 'PREMIUM',
+  },
+  {
+    icon: Zap,
+    title: 'Automatización Total',
+    desc: 'Workflows automáticos que eliminan tareas repetitivas y reducen errores',
+    benefits: [
+      'Facturación automática al cobrar',
+      'Escalado inteligente de impagos (4 niveles)',
+      'Generación automática de pagos mensuales',
+      'Renovación de contratos con IPC',
+    ],
+    gradient: 'from-rose-500 to-red-500',
     usedBy: 'Todos los verticales',
   },
   {
     icon: Link2,
     title: 'Integraciones y API',
-    desc: 'Conecta con portales inmobiliarios, calendarios y tu software de contabilidad',
-    benefits: ['Principales portales inmobiliarios', 'Calendario y herramientas de productividad', 'API REST para integraciones custom'],
+    desc: 'Conecta con Zucchetti/Altai, portales inmobiliarios y tu software contable',
+    benefits: [
+      'Sync contable automático con Zucchetti',
+      'Remesas SEPA para cobros bancarios',
+      'Conciliación bancaria con auto-matching',
+      'API REST completa',
+    ],
     gradient: 'from-indigo-500 to-purple-500',
     usedBy: 'Todos los verticales',
   },
@@ -170,8 +266,8 @@ export function FeaturesSection() {
             Una Sola Plataforma
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Desde alquiler residencial hasta construcción B2B. Inmova cubre todo el ciclo inmobiliario
-            con módulos especializados para cada modelo de negocio.
+            Desde alquiler residencial hasta construcción B2B. Inmova cubre todo el ciclo
+            inmobiliario con módulos especializados para cada modelo de negocio.
           </p>
         </div>
 
@@ -297,7 +393,10 @@ export function FeaturesSection() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/register">
-              <Button size="lg" className="bg-white text-gray-900 hover:bg-gray-100 font-bold border-2 border-gray-300">
+              <Button
+                size="lg"
+                className="bg-white text-gray-900 hover:bg-gray-100 font-bold border-2 border-gray-300"
+              >
                 <Zap className="h-5 w-5 mr-2" />
                 Empezar Gratis Ahora
               </Button>
