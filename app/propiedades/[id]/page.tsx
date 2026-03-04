@@ -152,12 +152,12 @@ export default function PropiedadDetallesPage() {
   };
 
   const getEstadoBadge = (estado: string) => {
-    const badges: Record<string, { variant: any; label: string }> = {
-      ocupada: { variant: 'default', label: 'Ocupada' },
-      disponible: { variant: 'secondary', label: 'Disponible' },
-      en_mantenimiento: { variant: 'outline', label: 'Mantenimiento' },
+    const badges: Record<string, { variant: any; label: string; className: string }> = {
+      ocupada: { variant: 'default', label: 'Ocupada', className: 'bg-green-600 text-white border-green-600 hover:bg-green-700' },
+      disponible: { variant: 'default', label: 'Disponible', className: 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700' },
+      en_mantenimiento: { variant: 'default', label: 'Mantenimiento', className: 'bg-amber-500 text-white border-amber-500 hover:bg-amber-600' },
     };
-    return badges[estado] || { variant: 'default', label: estado };
+    return badges[estado] || { variant: 'default', label: estado, className: 'bg-gray-600 text-white border-gray-600' };
   };
 
   const getTipoLabel = (tipo: string) => {
@@ -255,7 +255,7 @@ export default function PropiedadDetallesPage() {
               <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight break-words">
                 {property.building.nombre} - {property.numero}
               </h1>
-              <Badge variant={estadoBadge.variant}>{estadoBadge.label}</Badge>
+              <Badge variant={estadoBadge.variant} className={estadoBadge.className}>{estadoBadge.label}</Badge>
             </div>
             <div className="flex items-center gap-2 text-muted-foreground text-sm">
               <MapPin className="h-4 w-4 flex-shrink-0" />

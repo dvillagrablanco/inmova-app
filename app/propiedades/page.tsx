@@ -213,12 +213,12 @@ export default function PropiedadesPage() {
 
   // Funciones de utilidad
   const getEstadoBadge = (estado: string) => {
-    const badges: Record<string, { variant: any; label: string; color: string }> = {
-      ocupada: { variant: 'default', label: 'Ocupada', color: 'bg-green-500' },
-      disponible: { variant: 'secondary', label: 'Disponible', color: 'bg-blue-500' },
-      en_mantenimiento: { variant: 'outline', label: 'Mantenimiento', color: 'bg-yellow-500' },
+    const badges: Record<string, { variant: any; label: string; className: string }> = {
+      ocupada: { variant: 'default', label: 'Ocupada', className: 'bg-green-600 text-white border-green-600 hover:bg-green-700' },
+      disponible: { variant: 'default', label: 'Disponible', className: 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700' },
+      en_mantenimiento: { variant: 'default', label: 'Mantenimiento', className: 'bg-amber-500 text-white border-amber-500 hover:bg-amber-600' },
     };
-    return badges[estado] || { variant: 'default', label: estado, color: 'bg-gray-500' };
+    return badges[estado] || { variant: 'default', label: estado, className: 'bg-gray-600 text-white border-gray-600' };
   };
 
   const getTipoLabel = (tipo: string) => {
@@ -562,7 +562,7 @@ export default function PropiedadesPage() {
                           </div>
                         )}
                         <div className="absolute top-2 right-2">
-                          <Badge variant={estadoBadge.variant}>{estadoBadge.label}</Badge>
+                          <Badge variant={estadoBadge.variant} className={estadoBadge.className}>{estadoBadge.label}</Badge>
                         </div>
                       </div>
 
@@ -732,7 +732,7 @@ export default function PropiedadesPage() {
                                   <h3 className="text-xl font-bold">
                                     {property.building.nombre} - {property.numero}
                                   </h3>
-                                  <Badge variant={estadoBadge.variant}>{estadoBadge.label}</Badge>
+                                  <Badge variant={estadoBadge.variant} className={estadoBadge.className}>{estadoBadge.label}</Badge>
                                 </div>
                                 <div className="flex items-center gap-2 text-muted-foreground">
                                   <MapPin className="h-4 w-4" />

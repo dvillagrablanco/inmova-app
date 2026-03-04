@@ -1460,11 +1460,11 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-white truncate">
+                      <p className="text-sm font-medium text-white truncate" title={session.user.name || 'Usuario'}>
                         {session.user.name || 'Usuario'}
                       </p>
                       {session.user.email && (
-                        <p className="text-xs text-gray-400 truncate">{session.user.email}</p>
+                        <p className="text-xs text-gray-400 truncate" title={session.user.email}>{session.user.email}</p>
                       )}
                       {session.user.role && (
                         <p className="text-xs text-indigo-400 uppercase mt-0.5 font-semibold">

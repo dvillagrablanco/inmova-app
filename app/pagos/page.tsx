@@ -251,7 +251,7 @@ function PagosPage() {
             />
 
             {/* Header Section con Quick Actions */}
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-4">
               <div className="flex items-start gap-3 min-w-0">
                 <div>
                   <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Pagos</h1>

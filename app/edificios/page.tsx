@@ -183,13 +183,13 @@ function EdificiosPageContent() {
   if (!session) return null;
 
   const getTipoBadge = (tipo: string) => {
-    const badges: Record<string, { variant: any; label: string }> = {
-      residencial: { variant: 'default', label: 'Residencial' },
-      comercial: { variant: 'secondary', label: 'Comercial' },
-      mixto: { variant: 'outline', label: 'Mixto' },
-      industrial: { variant: 'destructive', label: 'Industrial' },
+    const badges: Record<string, { variant: any; label: string; className: string }> = {
+      residencial: { variant: 'default', label: 'Residencial', className: 'bg-indigo-600 text-white border-indigo-600' },
+      comercial: { variant: 'default', label: 'Comercial', className: 'bg-purple-600 text-white border-purple-600' },
+      mixto: { variant: 'default', label: 'Mixto', className: 'bg-teal-600 text-white border-teal-600' },
+      industrial: { variant: 'default', label: 'Industrial', className: 'bg-orange-600 text-white border-orange-600' },
     };
-    return badges[tipo.toLowerCase()] || { variant: 'default', label: tipo };
+    return badges[tipo.toLowerCase()] || { variant: 'default', label: tipo, className: 'bg-gray-600 text-white' };
   };
 
   return (
@@ -378,7 +378,7 @@ function EdificiosPageContent() {
         <div className="space-y-3">
         <div className="flex items-center justify-between">
         <span className="text-sm text-muted-foreground">Tipo</span>
-        <Badge variant={tipoBadge.variant}>{tipoBadge.label}</Badge>
+        <Badge variant={tipoBadge.variant} className={tipoBadge.className}>{tipoBadge.label}</Badge>
         </div>
         <div className="flex items-center justify-between">
         <span className="text-sm text-muted-foreground">Año</span>
@@ -445,7 +445,7 @@ function EdificiosPageContent() {
         <span>{building.direccion}</span>
         </div>
         </div>
-        <Badge variant={tipoBadge.variant}>{tipoBadge.label}</Badge>
+        <Badge variant={tipoBadge.variant} className={tipoBadge.className}>{tipoBadge.label}</Badge>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -532,7 +532,7 @@ function EdificiosPageContent() {
         <MapPin className="h-3 w-3" />
         {building.direccion}
         </span>
-        <Badge variant={tipoBadge.variant} className="text-xs">
+        <Badge variant={tipoBadge.variant} className={`text-xs ${tipoBadge.className}`}>
         {tipoBadge.label}
         </Badge>
         </div>
