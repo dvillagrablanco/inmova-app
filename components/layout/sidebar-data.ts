@@ -1484,6 +1484,7 @@ const operacionesNavItems = [
     roles: ['super_admin', 'administrador', 'gestor', 'operador'],
     subItems: [
       { name: 'Solicitudes', href: '/mantenimiento', icon: Wrench },
+      { name: 'Vista Kanban', href: '/mantenimiento/kanban', icon: ClipboardList },
       { name: 'Preventivo', href: '/mantenimiento-pro', icon: Calendar },
     ],
   },

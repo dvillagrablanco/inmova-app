@@ -436,6 +436,42 @@ export default function PropiedadDetallesPage() {
                 </CardContent>
               </Card>
             )}
+
+            {/* Historial / Timeline */}
+            {property.contracts && property.contracts.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Calendar className="h-5 w-5" />
+                    Historial
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="relative pl-6 space-y-4">
+                    <div className="absolute left-2 top-0 bottom-0 w-0.5 bg-gray-200" />
+                    {property.contracts
+                      .sort((a, b) => new Date(b.fechaInicio).getTime() - new Date(a.fechaInicio).getTime())
+                      .map((contract) => (
+                        <div key={contract.id} className="relative">
+                          <div className={`absolute -left-4 top-1 w-3 h-3 rounded-full border-2 border-white ${
+                            contract.estado === 'activo' ? 'bg-green-500' : 'bg-gray-400'
+                          }`} />
+                          <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+                            <div className="flex items-center justify-between">
+                              <Badge variant={contract.estado === 'activo' ? 'default' : 'secondary'} className={contract.estado === 'activo' ? 'bg-green-600 text-white' : ''}>
+                                {contract.estado}
+                              </Badge>
+                              <span className="text-xs text-gray-500">
+                                {new Date(contract.fechaInicio).toLocaleDateString('es-ES')} — {new Date(contract.fechaFin).toLocaleDateString('es-ES')}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           {/* Columna Lateral */}
