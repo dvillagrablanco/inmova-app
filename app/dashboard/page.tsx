@@ -52,6 +52,7 @@ interface DashboardData {
   kpis: {
     ingresosTotalesMensuales: number;
     numeroPropiedades: number;
+    totalEdificios: number;
     tasaOcupacion: number;
     tasaOcupacionCore: number;
     tasaMorosidad: number;
@@ -341,9 +342,10 @@ function DashboardPageContent() {
             icon={TrendingUp}
           />
           <KPICard
-            title="Total Propiedades"
+            title="Total Unidades"
             value={Number(data.kpis.numeroPropiedades || 0)}
             icon={Building2}
+            subtitle={`${data.kpis.totalEdificios || 0} edificios`}
           />
           <KPICard
             title="Ocupación (sin garajes)"

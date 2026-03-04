@@ -441,6 +441,20 @@ export async function GET(request: NextRequest) {
     }
 
     let gastosTotales = fallbackGastos;
+    // Fallback: si el mes actual no tiene gastos, usar promedio de últimos 3 meses
+    if (gastosTotales === 0) {
+      const gastos3meses = await prisma.expense.aggregate({
+        where: {
+          building: { companyId: companyFilter },
+          fecha: { gte: subMonths(currentMonth, 3), lte: endDate },
+        },
+        _sum: { monto: true },
+      });
+      const total3m = Number(gastos3meses._sum.monto || 0);
+      if (total3m > 0) {
+        gastosTotales = Math.round(total3m / 3);
+      }
+    }
     if (gastosTotales === 0 && accountingMonthTotals.gastos > 0) {
       gastosTotales = accountingMonthTotals.gastos;
     }
@@ -503,7 +517,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       kpis: {
         ingresosTotalesMensuales,
-        numeroPropiedades: totalBuildings,
+        numeroPropiedades: totalUnits,
+        totalEdificios: totalBuildings,
         tasaOcupacion: Number(tasaOcupacion.toFixed(1)),
         tasaOcupacionCore: Number(tasaOcupacionCore.toFixed(1)),
         tasaMorosidad: Number(tasaMorosidad.toFixed(1)),

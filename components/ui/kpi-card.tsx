@@ -13,6 +13,7 @@ interface KPICardProps {
     isPositive: boolean;
   };
   suffix?: string;
+  subtitle?: string;
   className?: string;
 }
 
@@ -23,20 +24,21 @@ export const KPICard = memo(function KPICard({
   icon: Icon, 
   trend, 
   suffix = '', 
+  subtitle,
   className = '' 
 }: KPICardProps) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.15 }}
       className={`bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow ${className}`}
     >
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <p className="text-sm font-medium text-gray-600 mb-2">{title}</p>
           <div className="flex items-baseline gap-2">
-            <h3 className="text-3xl font-bold text-gray-900 animate-count-up">
+            <h3 className="text-3xl font-bold text-gray-900">
               {typeof value === 'number' ? value.toLocaleString('es-ES') : value}
             </h3>
             {suffix && <span className="text-lg text-gray-600">{suffix}</span>}
@@ -49,6 +51,9 @@ export const KPICard = memo(function KPICard({
             >
               {trend.isPositive ? '+' : '-'}{Math.abs(trend.value)}%
             </p>
+          )}
+          {subtitle && (
+            <p className="text-xs text-gray-500 mt-1">{subtitle}</p>
           )}
         </div>
         <div className="p-3 bg-gray-50 rounded-lg">
