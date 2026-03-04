@@ -1663,6 +1663,12 @@ const holdingGrupoNavItems = [
     roles: ['super_admin', 'administrador'],
   },
   {
+    name: 'Benchmark Mercado',
+    href: '/inversiones/benchmark',
+    icon: TrendingUp,
+    roles: ['super_admin', 'administrador'],
+  },
+  {
     name: 'Mapa de Cartera',
     href: '/inversiones/mapa',
     icon: MapPin,
