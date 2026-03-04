@@ -1381,6 +1381,12 @@ const finanzasNavItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
+    name: 'Fiscal Trimestral',
+    href: '/finanzas/fiscal-trimestral',
+    icon: Calculator,
+    roles: ['super_admin', 'administrador'],
+  },
+  {
     name: 'Conciliación Bancaria',
     href: '/finanzas/conciliacion',
     icon: ArrowRightLeft,
@@ -1394,6 +1400,7 @@ const finanzasNavItems = [
     subItems: [
       { name: 'Renovar en Lote', href: '/renovaciones-contratos', icon: ClipboardList },
       { name: 'Actualización IPC', href: '/contratos/actualizacion-ipc', icon: TrendingUp },
+      { name: 'Plantillas', href: '/contratos/plantillas', icon: FileText },
     ],
   },
   {

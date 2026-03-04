@@ -134,6 +134,25 @@ export async function POST(
       }
     }
 
+    // Notify admin/gestor about payment received
+    try {
+      const { sendEmail } = await import('@/lib/email-config');
+      const adminUsers = await prisma.user.findMany({
+        where: { companyId: scope.activeCompanyId, role: 'administrador', activo: true },
+        select: { email: true },
+      });
+      const monto = Number(payment.monto).toLocaleString('es-ES', { minimumFractionDigits: 2 });
+      const inquilino = payment.contract?.tenant?.nombreCompleto || '';
+      const unidad = `${payment.contract?.unit?.building?.nombre} - ${payment.contract?.unit?.numero}`;
+      for (const admin of adminUsers) {
+        await sendEmail({
+          to: admin.email,
+          subject: `✅ Pago recibido - ${inquilino} (€${monto})`,
+          html: `<p>Pago de <strong>${inquilino}</strong> por <strong>€${monto}</strong> en ${unidad} marcado como cobrado.</p>`,
+        }).catch(() => {});
+      }
+    } catch { /* non-blocking */ }
+
     return NextResponse.json({
       success: true,
       payment: {
