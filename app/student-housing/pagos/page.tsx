@@ -145,9 +145,9 @@ export default function StudentHousingPagosPage() {
       .filter((p) => p.estado === 'pendiente' || p.estado === 'vencido')
       .reduce((acc, p) => acc + p.monto, 0),
     vencidos: pagos.filter((p) => p.estado === 'vencido').length,
-    tasaCobro: Math.round(
-      (pagos.filter((p) => p.estado === 'pagado').length / pagos.length) * 100
-    ),
+    tasaCobro: pagos.length > 0
+      ? Math.round((pagos.filter((p) => p.estado === 'pagado').length / pagos.length) * 100)
+      : 0,
   };
 
   return (

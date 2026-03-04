@@ -124,7 +124,7 @@ export default function StudentHousingDashboardPage() {
         <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
           <p className="text-yellow-700 text-sm">
             <AlertTriangle className="h-4 w-4 inline mr-2" />
-            Mostrando datos de ejemplo. {error}
+            Mostrando datos de ejemplo. Los datos en tiempo real no están disponibles en este momento.
           </p>
         </div>
       )}

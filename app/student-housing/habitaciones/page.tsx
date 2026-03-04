@@ -210,7 +210,7 @@ export default function StudentHousingHabitacionesPage() {
               <div>
                 <p className="text-sm text-muted-foreground">Ocupación</p>
                 <p className="text-2xl font-bold">
-                  {Math.round((camasOcupadas / totalCamas) * 100)}%
+                  {totalCamas > 0 ? Math.round((camasOcupadas / totalCamas) * 100) : 0}%
                 </p>
               </div>
               <Users className="h-8 w-8 text-green-500 opacity-80" />
@@ -260,11 +260,11 @@ export default function StudentHousingHabitacionesPage() {
                   </span>
                 </div>
                 <Progress
-                  value={(edificio.ocupadas / edificio.total) * 100}
+                  value={edificio.total > 0 ? (edificio.ocupadas / edificio.total) * 100 : 0}
                   className="h-2"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  {Math.round((edificio.ocupadas / edificio.total) * 100)}% ocupación
+                    {edificio.total > 0 ? Math.round((edificio.ocupadas / edificio.total) * 100) : 0}% ocupación
                 </p>
               </div>
             ))}

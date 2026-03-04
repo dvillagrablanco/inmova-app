@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
 
     // --- 1. INMOBILIARIO ---
     const buildings = await prisma.building.findMany({
-      where: { companyId: { in: scopeIds }, isDemo: false },
+      where: { companyId: { in: scopeIds } },
       include: {
         units: {
           select: {
@@ -72,7 +72,11 @@ export async function GET(request: NextRequest) {
     let valorInmobiliario = 0;
     let rentaMensualTotal = 0;
     const edificios = buildings.map((b: any) => {
-      const valorEdificio = b.units.reduce((sum: number, u: any) => sum + (u.valorMercado || 0), 0);
+      const valorEdificio = b.units.reduce((sum: number, u: any) => {
+        // Si no hay valorMercado, estimar como renta anual × 15
+        const valor = u.valorMercado || ((u.contracts?.[0]?.rentaMensual || u.rentaMensual || 0) * 12 * 15);
+        return sum + valor;
+      }, 0);
       const rentaEdificio = b.units.reduce((sum: number, u: any) => {
         const contractRenta = u.contracts?.[0]?.rentaMensual;
         return sum + (contractRenta || u.rentaMensual || 0);

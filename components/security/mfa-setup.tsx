@@ -31,6 +31,8 @@ interface MFASetupData {
 
 export function MFASetup() {
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [mfaError, setMfaError] = useState<string | null>(null);
   const [mfaStatus, setMfaStatus] = useState<MFAStatus | null>(null);
   const [showSetup, setShowSetup] = useState(false);
   const [setupData, setSetupData] = useState<MFASetupData | null>(null);
@@ -45,13 +47,19 @@ export function MFASetup() {
 
   const fetchMFAStatus = async () => {
     try {
+      setMfaError(null);
       const response = await fetch('/api/auth/mfa/status');
       if (response.ok) {
         const data = await response.json();
         setMfaStatus(data.data);
+      } else {
+        setMfaError('No se pudo cargar el estado de seguridad');
       }
     } catch (error) {
       console.error('Error fetching MFA status:', error);
+      setMfaError('Error de conexión al verificar MFA');
+    } finally {
+      setInitialLoading(false);
     }
   };
 
@@ -184,7 +192,7 @@ export function MFASetup() {
     toast.success('Códigos descargados');
   };
 
-  if (!mfaStatus) {
+  if (initialLoading) {
     return (
       <Card>
         <CardHeader>
@@ -196,6 +204,28 @@ export function MFASetup() {
             Cargando estado de seguridad...
           </CardDescription>
         </CardHeader>
+      </Card>
+    );
+  }
+
+  if (mfaError || !mfaStatus) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Shield className="h-5 w-5" />
+            Autenticación de Dos Factores (MFA)
+          </CardTitle>
+          <CardDescription>
+            {mfaError || 'El servicio MFA no está disponible en este momento.'}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button variant="outline" size="sm" onClick={fetchMFAStatus}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Reintentar
+          </Button>
+        </CardContent>
       </Card>
     );
   }
