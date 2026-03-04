@@ -160,8 +160,8 @@ export function AdvancedAnalytics({ monthlyData }: AdvancedAnalyticsProps) {
               <YAxis width={70} tickFormatter={formatYAxis} tick={{ fontSize: 11 }} />
               <Tooltip formatter={(value: number) => `€${Number(value).toFixed(0)}`} />
               <Legend />
-              <Bar dataKey="ingresos" fill="#000000" name="Ingresos" />
-              <Bar dataKey="gastos" fill="#EF4444" name="Gastos" />
+              <Bar dataKey="ingresos" fill="#000000" name="Ingresos" animationDuration={800} animationBegin={0} />
+              <Bar dataKey="gastos" fill="#EF4444" name="Gastos" animationDuration={800} animationBegin={200} />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>

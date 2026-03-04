@@ -557,8 +557,22 @@ export default function PropiedadesPage() {
                             className="object-cover group-hover:scale-105 transition-transform"
                           />
                         ) : (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <Building2 className="h-12 w-12 text-muted-foreground/50" />
+                          <div
+                            className="absolute inset-0 flex items-center justify-center"
+                            style={{
+                              background:
+                                property.tipo === 'vivienda'
+                                  ? 'linear-gradient(135deg, #dbeafe 0%, #ede9fe 100%)'
+                                  : property.tipo === 'local'
+                                    ? 'linear-gradient(135deg, #fae8ff 0%, #fce7f3 100%)'
+                                    : property.tipo === 'garaje'
+                                      ? 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)'
+                                      : property.tipo === 'oficina'
+                                        ? 'linear-gradient(135deg, #d1fae5 0%, #cffafe 100%)'
+                                        : 'linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)',
+                            }}
+                          >
+                            <Building2 className="h-12 w-12 text-muted-foreground/30" />
                           </div>
                         )}
                         <div className="absolute top-2 right-2">
