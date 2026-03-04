@@ -3,6 +3,8 @@
  * Track events and conversions
  */
 
+import logger from '@/lib/logger';
+
 export interface GA4Event {
   name: string;
   params?: Record<string, any>;

@@ -3,6 +3,8 @@
  * @module mapbox-service
  */
 
+import logger from '@/lib/logger';
+
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
 const MAPBOX_API_URL = 'https://api.mapbox.com';
 

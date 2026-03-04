@@ -3,6 +3,8 @@
  * Send notifications to Slack channels
  */
 
+import logger from '@/lib/logger';
+
 export interface SlackMessage {
   text: string;
   channel?: string;
