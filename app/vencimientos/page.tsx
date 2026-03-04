@@ -107,9 +107,9 @@ export default function VencimientosPage() {
       try {
         const [expiringRes, alertsRes, paymentsRes, segurosRes] = await Promise.all([
           fetch('/api/contracts/expiring?days=90'),
-          fetch('/api/dashboard/alerts?fresh=true'),
+          fetch('/api/dashboard/alerts'),
           fetch('/api/payments?limit=100'),
-          fetch('/api/seguros').catch(() => ({ ok: false })),
+          fetch('/api/seguros').catch(() => ({ ok: false } as Response)),
         ]);
 
         const timeline: TimelineItem[] = [];
@@ -182,23 +182,29 @@ export default function VencimientosPage() {
         }
 
         if (segurosRes.ok) {
-          const seguros: InsuranceItem[] = await segurosRes.json();
-          const futureEnd = addMonths(today, 4);
-          for (const s of seguros) {
-            const date = new Date(s.fechaVencimiento);
-            if (date > futureEnd) continue;
-            const daysUntil = differenceInDays(date, today);
-            timeline.push({
-              id: `seguro-${s.id}`,
-              date,
-              type: 'seguro',
-              description: `Seguro ${s.tipo || 'general'} - ${s.aseguradora || ''} ${s.building?.nombre || ''}`.trim(),
-              entityId: s.id,
-              entityType: 'insurance',
-              daysUntil,
-              link: `/seguros/${s.id}`,
-              extra: s.numeroPoliza,
-            });
+          try {
+            const segurosRaw = await (segurosRes as Response).json();
+            const seguros: InsuranceItem[] = Array.isArray(segurosRaw) ? segurosRaw : (segurosRaw?.data || []);
+            const futureEnd = addMonths(today, 4);
+            for (const s of seguros) {
+              if (!s.fechaVencimiento) continue;
+              const date = new Date(s.fechaVencimiento);
+              if (isNaN(date.getTime()) || date > futureEnd) continue;
+              const daysUntil = differenceInDays(date, today);
+              timeline.push({
+                id: `seguro-${s.id}`,
+                date,
+                type: 'seguro',
+                description: `Seguro ${s.tipo || 'general'} - ${s.aseguradora || ''} ${s.building?.nombre || ''}`.trim(),
+                entityId: s.id,
+                entityType: 'insurance',
+                daysUntil,
+                link: `/seguros/${s.id}`,
+                extra: s.numeroPoliza,
+              });
+            }
+          } catch {
+            // Seguros API may return unexpected format
           }
         }
 
@@ -237,10 +243,10 @@ export default function VencimientosPage() {
     return { monthStart, monthItems, byType };
   });
 
-  const typeLabels = {
-    contrato: { label: 'Contratos', icon: FileText },
-    pago: { label: 'Pagos', icon: Euro },
-    seguro: { label: 'Seguros', icon: Shield },
+  const typeLabels: Record<string, { label: string; icon: typeof FileText }> = {
+    contratos: { label: 'Contratos', icon: FileText },
+    pagos: { label: 'Pagos', icon: Euro },
+    seguros: { label: 'Seguros', icon: Shield },
   };
 
   return (
