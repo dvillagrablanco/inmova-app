@@ -1362,6 +1362,12 @@ const finanzasNavItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
+    name: 'Previsión 12 meses',
+    href: '/finanzas/prevision',
+    icon: BarChart3,
+    roles: ['super_admin', 'administrador'],
+  },
+  {
     name: 'Conciliación Bancaria',
     href: '/finanzas/conciliacion',
     icon: ArrowRightLeft,
@@ -1374,7 +1380,7 @@ const finanzasNavItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
     subItems: [
       { name: 'Renovar en Lote', href: '/renovaciones-contratos', icon: ClipboardList },
-      { name: 'Actualización IPC', href: '/renovaciones-contratos?ipc=true', icon: TrendingUp },
+      { name: 'Actualización IPC', href: '/contratos/actualizacion-ipc', icon: TrendingUp },
     ],
   },
   {
@@ -1478,6 +1484,7 @@ const operacionesNavItems = [
     roles: ['super_admin', 'administrador', 'gestor', 'operador'],
     subItems: [
       { name: 'Solicitudes', href: '/mantenimiento', icon: Wrench },
+      { name: 'Vista Kanban', href: '/mantenimiento/kanban', icon: ClipboardList },
       { name: 'Preventivo', href: '/mantenimiento-pro', icon: Calendar },
     ],
   },
@@ -1598,6 +1605,12 @@ const holdingGrupoNavItems = [
     name: 'Comparativa Sociedades',
     href: '/inversiones/comparativa',
     icon: BarChart3,
+    roles: ['super_admin', 'administrador'],
+  },
+  {
+    name: 'Comparativa Edificios',
+    href: '/inversiones/comparativa-edificios',
+    icon: Building2,
     roles: ['super_admin', 'administrador'],
   },
   {

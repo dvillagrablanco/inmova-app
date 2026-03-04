@@ -45,6 +45,37 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+  const prisma = await getPrisma();
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    const body = await req.json();
+    const { estado } = body;
+
+    if (!estado) {
+      return NextResponse.json({ error: 'Campo estado requerido' }, { status: 400 });
+    }
+
+    const maintenanceRequest = await prisma.maintenanceRequest.update({
+      where: { id: params.id },
+      data: { estado },
+    });
+
+    return NextResponse.json(maintenanceRequest);
+  } catch (error) {
+    logger.error('Error updating maintenance request:', error);
+    Sentry.captureException(error);
+    return NextResponse.json(
+      { error: 'Error al actualizar solicitud de mantenimiento' },
+      { status: 500 }
+    );
+  }
+}
+
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   const prisma = await getPrisma();
   try {
