@@ -52,6 +52,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { FilterChips } from '@/components/ui/filter-chips';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
+import { ExportCSVButton } from '@/components/ui/export-csv-button';
 import { toast } from 'sonner';
 import logger, { logError } from '@/lib/logger';
 
@@ -382,6 +383,63 @@ function PagosPage() {
                 </CardContent>
               </Card>
             </div>
+
+            {/* Export + Batch Actions */}
+            {viewMode === 'list' && payments.length > 0 && (
+              <div className="flex items-center gap-2 flex-wrap">
+                <ExportCSVButton
+                  data={payments.map(p => ({
+                    inquilino: p.contract.tenant.nombreCompleto,
+                    edificio: p.contract.unit.building.nombre,
+                    unidad: p.contract.unit.numero,
+                    monto: Number(p.monto),
+                    estado: p.estado,
+                    fechaVencimiento: p.fechaVencimiento,
+                    fechaPago: p.fechaPago || '',
+                    periodo: p.periodo || '',
+                  }))}
+                  filename="pagos"
+                  columns={[
+                    { key: 'inquilino', label: 'Inquilino' },
+                    { key: 'edificio', label: 'Edificio' },
+                    { key: 'unidad', label: 'Unidad' },
+                    { key: 'monto', label: 'Importe' },
+                    { key: 'estado', label: 'Estado' },
+                    { key: 'fechaVencimiento', label: 'Vencimiento' },
+                    { key: 'fechaPago', label: 'Fecha Pago' },
+                    { key: 'periodo', label: 'Periodo' },
+                  ]}
+                />
+                {pendientesCount > 0 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={async () => {
+                      const pendientes = payments.filter(p => p.estado.toLowerCase() === 'pendiente').map(p => p.id);
+                      if (pendientes.length === 0) return;
+                      if (!confirm(`¿Marcar ${pendientes.length} pagos pendientes como cobrados?`)) return;
+                      try {
+                        const res = await fetch('/api/payments/batch-mark-paid', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ paymentIds: pendientes }),
+                        });
+                        if (res.ok) {
+                          const data = await res.json();
+                          toast.success(`${data.updated} pagos marcados como cobrados`);
+                          setPayments(prev => prev.map(p => pendientes.includes(p.id) ? { ...p, estado: 'pagado', fechaPago: new Date().toISOString() } : p));
+                        } else {
+                          toast.error('Error al procesar cobro masivo');
+                        }
+                      } catch { toast.error('Error de conexión'); }
+                    }}
+                  >
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Cobrar todos pendientes ({pendientesCount})
+                  </Button>
+                )}
+              </div>
+            )}
 
             {/* Calendar View */}
             {viewMode === 'calendar' && (

@@ -519,6 +519,12 @@ const dashboardNavItems = [
     dataTour: 'dashboard-link',
   },
   {
+    name: 'Mi Día',
+    href: '/hoy',
+    icon: Calendar,
+    roles: ['administrador', 'gestor', 'super_admin'],
+  },
+  {
     name: 'Vista Ejecutiva',
     href: '/dashboard/ejecutivo',
     icon: TrendingUp,
