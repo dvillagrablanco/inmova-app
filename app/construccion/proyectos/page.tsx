@@ -445,7 +445,7 @@ export default function ConstruccionProyectosPage() {
                 <div>
                   <p className="text-sm text-muted-foreground">Presupuesto</p>
                   <p className="text-2xl font-bold">
-                    {stats.presupuestoTotal > 0 ? formatCurrency(stats.presupuestoTotal) : '-'}
+                    {stats.presupuestoTotal > 0 ? formatCurrency(stats.presupuestoTotal) : '0 €'}
                   </p>
                 </div>
                 <Euro className="h-8 w-8 text-emerald-500" />
@@ -459,7 +459,7 @@ export default function ConstruccionProyectosPage() {
                 <div>
                   <p className="text-sm text-muted-foreground">Gastado</p>
                   <p className="text-2xl font-bold text-amber-600">
-                    {stats.gastoTotal > 0 ? formatCurrency(stats.gastoTotal) : '-'}
+                    {stats.gastoTotal > 0 ? formatCurrency(stats.gastoTotal) : '0 €'}
                   </p>
                 </div>
                 <TrendingUp className="h-8 w-8 text-amber-500" />

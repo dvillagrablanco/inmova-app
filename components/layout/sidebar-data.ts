@@ -626,7 +626,7 @@ const strNavItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
-    name: 'Propiedades',
+    name: 'Anuncios',
     href: '/str/listings',
     icon: Home,
     roles: ['super_admin', 'administrador', 'gestor'],

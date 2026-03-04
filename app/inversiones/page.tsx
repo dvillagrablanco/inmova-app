@@ -305,7 +305,7 @@ export default function InversionesPage() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-500">Deuda hipotecaria</span>
-                      <span className="font-medium text-red-600">-{formatCurrency(p.totalMortgageDebt)}</span>
+                      <span className="font-medium text-red-600">{p.totalMortgageDebt > 0 ? `-${formatCurrency(p.totalMortgageDebt)}` : formatCurrency(0)}</span>
                     </div>
                     <div className="border-t pt-2 flex justify-between font-bold">
                       <span>Patrimonio neto</span>
@@ -335,11 +335,11 @@ export default function InversionesPage() {
                       <span className="text-gray-500 flex items-center gap-1">
                         <Landmark className="h-3 w-3 text-orange-500" /> Cuotas hipotecas
                       </span>
-                      <span className="font-medium text-orange-600">-{formatCurrency(p.totalMortgagePayments)}</span>
+                      <span className="font-medium text-orange-600">{p.totalMortgagePayments > 0 ? `-${formatCurrency(p.totalMortgagePayments)}` : formatCurrency(0)}</span>
                     </div>
-                    <div className="border-t pt-2 flex justify-between font-bold">
-                      <span>Cash-flow neto</span>
-                      <span className={p.monthlyCashFlow >= 0 ? 'text-green-600' : 'text-red-600'}>
+                    <div className="border-t pt-2 flex justify-between font-bold gap-2">
+                      <span className="shrink-0">Cash-flow neto</span>
+                      <span className={`whitespace-nowrap ${p.monthlyCashFlow >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                         {formatCurrency(p.monthlyCashFlow)}
                       </span>
                     </div>

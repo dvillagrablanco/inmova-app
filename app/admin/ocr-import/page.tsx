@@ -73,7 +73,7 @@ export default function OCRImportPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
-      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf'];
       if (!validTypes.includes(selectedFile.type)) {
         toast.error('Por favor selecciona una imagen válida (JPG, PNG, WEBP)');
         return;
@@ -358,7 +358,7 @@ export default function OCRImportPage() {
                         type="file"
                         id="file-upload"
                         className="hidden"
-                        accept="image/jpeg,image/jpg,image/png,image/webp"
+                        accept="image/jpeg,image/jpg,image/png,image/webp,application/pdf"
                         onChange={handleFileChange}
                       />
                       <Button asChild>

@@ -104,7 +104,7 @@ export function ContextualQuickActions(props: ContextualQuickActionsProps) {
             <action.icon className="h-4 w-4" />
             {action.label}
             {action.badge && (
-              <Badge variant="secondary" className="ml-1 text-xs">
+              <Badge variant="secondary" className="ml-1 text-xs" title={`${action.badge} pendientes`}>
                 {action.badge}
               </Badge>
             )}

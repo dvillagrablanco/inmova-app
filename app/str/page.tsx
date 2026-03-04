@@ -214,7 +214,7 @@ export default function STRDashboardPage() {
             <CardContent>
               <div className="text-2xl font-bold">{stats.occupancyRate.toFixed(1)}%</div>
               <p className="text-xs text-gray-500">
-                {stats.averageRating.toFixed(1)}⭐ rating promedio
+                de las propiedades activas
               </p>
             </CardContent>
           </Card>
@@ -255,7 +255,7 @@ export default function STRDashboardPage() {
 
         {/* Tabs with Charts */}
         <Tabs defaultValue="revenue" className="space-y-4">
-          <TabsList>
+          <TabsList className="w-full sm:w-auto">
             <TabsTrigger value="revenue">Ingresos</TabsTrigger>
             <TabsTrigger value="channels">Canales</TabsTrigger>
             <TabsTrigger value="listings">Top Anuncios</TabsTrigger>

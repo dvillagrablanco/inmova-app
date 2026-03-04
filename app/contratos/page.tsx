@@ -105,6 +105,7 @@ function ContratosPageContent() {
     Array<{ id: string; label: string; value: string }>
   >([]);
   const [externalDocs, setExternalDocs] = useState<any[]>([]);
+  const [showAllDocs, setShowAllDocs] = useState(false);
   const [allUnits, setAllUnits] = useState<BuildingUnit[]>([]);
 
   // Delete confirmation dialog state
@@ -562,7 +563,7 @@ function ContratosPageContent() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {externalDocs.map((doc: any) => (
+                {(showAllDocs ? externalDocs : externalDocs.slice(0, 6)).map((doc: any) => (
                   <div
                     key={doc.id}
                     className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer flex items-center gap-3"
@@ -585,6 +586,15 @@ function ContratosPageContent() {
                   </div>
                 ))}
               </div>
+              {externalDocs.length > 6 && !showAllDocs && (
+                <Button
+                  variant="outline"
+                  className="mt-4"
+                  onClick={() => setShowAllDocs(true)}
+                >
+                  Ver todos ({externalDocs.length})
+                </Button>
+              )}
             </CardContent>
           </Card>
         )}

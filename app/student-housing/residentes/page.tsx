@@ -236,8 +236,7 @@ export default function StudentHousingResidentesPage() {
               />
             </div>
             <Select value={filterEdificio} onValueChange={setFilterEdificio}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <Building className="h-4 w-4 mr-2" />
+              <SelectTrigger className="w-full sm:w-[200px]">
                 <SelectValue placeholder="Edificio" />
               </SelectTrigger>
               <SelectContent>
@@ -248,8 +247,7 @@ export default function StudentHousingResidentesPage() {
               </SelectContent>
             </Select>
             <Select value={filterEstado} onValueChange={setFilterEstado}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <Filter className="h-4 w-4 mr-2" />
+              <SelectTrigger className="w-full sm:w-[200px]">
                 <SelectValue placeholder="Estado" />
               </SelectTrigger>
               <SelectContent>

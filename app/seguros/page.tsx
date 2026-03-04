@@ -494,7 +494,7 @@ export default function SegurosPage() {
                   type="file"
                   accept=".zip,.xlsx,.xls,.csv"
                   onChange={(e) => setImportFile(e.target.files?.[0] || null)}
-                  className="border rounded-md px-3 py-2 w-full"
+                  className="border rounded-md px-3 py-2 w-full text-sm file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 cursor-pointer"
                 />
               </div>
               <div className="text-sm text-muted-foreground">
@@ -607,7 +607,7 @@ export default function SegurosPage() {
                 <TrendingUp className="h-6 w-6 text-green-600" />
               </div>
               <div>
-                <h3 className="font-semibold">Análisis de Siniestralidad</h3>
+                <h3 className="font-semibold truncate">Análisis de Siniestralidad</h3>
                 <p className="text-sm text-muted-foreground">Dashboard y reportes de seguros</p>
               </div>
             </CardContent>

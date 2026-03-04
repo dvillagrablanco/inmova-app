@@ -636,7 +636,7 @@ export default function ContabilidadPage() {
                 type="file"
                 accept=".csv,.xlsx,.xls"
                 onChange={(e) => setImportFile(e.target.files?.[0] || null)}
-                className="border rounded-md px-3 py-2 w-full"
+                className="border rounded-md px-3 py-2 w-full text-sm file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 cursor-pointer"
               />
             </div>
             <div>
