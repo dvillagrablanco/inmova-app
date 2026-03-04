@@ -1374,7 +1374,7 @@ const finanzasNavItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
     subItems: [
       { name: 'Renovar en Lote', href: '/renovaciones-contratos', icon: ClipboardList },
-      { name: 'Actualización IPC', href: '/renovaciones-contratos?ipc=true', icon: TrendingUp },
+      { name: 'Actualización IPC', href: '/contratos/actualizacion-ipc', icon: TrendingUp },
     ],
   },
   {

@@ -100,6 +100,40 @@ export async function POST(
       tenant: payment.contract?.tenant?.nombreCompleto,
     });
 
+    // Send receipt email to tenant (async, don't block response)
+    const tenantEmail = payment.contract?.tenant?.email;
+    if (tenantEmail) {
+      try {
+        const { sendEmail } = await import('@/lib/email-config');
+        const monto = Number(payment.monto).toLocaleString('es-ES', { minimumFractionDigits: 2 });
+        const fecha = fechaPago.toLocaleDateString('es-ES');
+        const unidad = `${payment.contract?.unit?.building?.nombre} - ${payment.contract?.unit?.numero}`;
+        const inquilino = payment.contract?.tenant?.nombreCompleto || '';
+        await sendEmail({
+          to: tenantEmail,
+          subject: `Recibo de pago - ${payment.periodo || 'Alquiler'}`,
+          html: `
+            <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px;">
+              <h2 style="color:#16a34a;">✓ Pago Recibido</h2>
+              <p>Estimado/a <strong>${inquilino}</strong>,</p>
+              <p>Confirmamos la recepción de su pago:</p>
+              <table style="width:100%;border-collapse:collapse;margin:16px 0;">
+                <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666;">Concepto</td><td style="padding:8px;border-bottom:1px solid #eee;font-weight:bold;">${payment.periodo || 'Alquiler mensual'}</td></tr>
+                <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666;">Unidad</td><td style="padding:8px;border-bottom:1px solid #eee;">${unidad}</td></tr>
+                <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666;">Importe</td><td style="padding:8px;border-bottom:1px solid #eee;font-weight:bold;font-size:18px;color:#16a34a;">€${monto}</td></tr>
+                <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666;">Fecha</td><td style="padding:8px;border-bottom:1px solid #eee;">${fecha}</td></tr>
+                <tr><td style="padding:8px;color:#666;">Método</td><td style="padding:8px;">${metodoPago}</td></tr>
+              </table>
+              <p style="color:#666;font-size:12px;">Este recibo se ha generado automáticamente. Conserve este email como comprobante.</p>
+            </div>
+          `,
+        });
+        logger.info('[Payment] Receipt email sent', { paymentId, tenantEmail });
+      } catch (emailError) {
+        logger.warn('[Payment] Failed to send receipt email', { paymentId, error: emailError });
+      }
+    }
+
     return NextResponse.json({
       success: true,
       payment: {
