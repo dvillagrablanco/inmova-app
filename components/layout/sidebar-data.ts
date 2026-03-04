@@ -1669,6 +1669,18 @@ const holdingGrupoNavItems = [
     roles: ['super_admin', 'administrador'],
   },
   {
+    name: 'Distribuciones PE',
+    href: '/inversiones/distribuciones',
+    icon: Euro,
+    roles: ['super_admin', 'administrador'],
+  },
+  {
+    name: 'P&L Sociedades',
+    href: '/inversiones/pyl-sociedades',
+    icon: BarChart3,
+    roles: ['super_admin', 'administrador'],
+  },
+  {
     name: 'Mapa de Cartera',
     href: '/inversiones/mapa',
     icon: MapPin,
