@@ -52,6 +52,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { FilterChips } from '@/components/ui/filter-chips';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
+import { toast } from 'sonner';
 import logger, { logError } from '@/lib/logger';
 
 interface Payment {
@@ -552,14 +553,39 @@ function PagosPage() {
                               )}
                             </div>
 
-                            <Button
-                              onClick={() => router.push(`/pagos/${payment.id}`)}
-                              variant="outline"
-                              size="sm"
-                              className="w-full sm:w-auto"
-                            >
-                              Ver Detalles
-                            </Button>
+                            <div className="flex gap-2 flex-wrap">
+                              <Button
+                                onClick={() => router.push(`/pagos/${payment.id}`)}
+                                variant="outline"
+                                size="sm"
+                              >
+                                Ver Detalles
+                              </Button>
+                              {payment.estado.toLowerCase() === 'pendiente' && (
+                                <Button
+                                  size="sm"
+                                  className="bg-green-600 hover:bg-green-700 text-white"
+                                  onClick={async (e) => {
+                                    e.stopPropagation();
+                                    try {
+                                      const res = await fetch(`/api/payments/${payment.id}/mark-paid`, { method: 'POST' });
+                                      if (res.ok) {
+                                        toast.success('Pago marcado como cobrado');
+                                        setPayments(prev => prev.map(p => p.id === payment.id ? { ...p, estado: 'pagado', fechaPago: new Date().toISOString() } : p));
+                                      } else {
+                                        const data = await res.json();
+                                        toast.error(data.error || 'Error al marcar pago');
+                                      }
+                                    } catch {
+                                      toast.error('Error de conexión');
+                                    }
+                                  }}
+                                >
+                                  <CheckCircle className="h-4 w-4 mr-1" />
+                                  Marcar Cobrado
+                                </Button>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </CardContent>

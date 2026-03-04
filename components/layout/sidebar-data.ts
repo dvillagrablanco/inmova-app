@@ -518,6 +518,18 @@ const dashboardNavItems = [
     roles: ['administrador', 'gestor', 'operador'], // super_admin usa /admin/dashboard
     dataTour: 'dashboard-link',
   },
+  {
+    name: 'Vista Ejecutiva',
+    href: '/dashboard/ejecutivo',
+    icon: TrendingUp,
+    roles: ['administrador', 'super_admin'],
+  },
+  {
+    name: 'Alertas',
+    href: '/alertas',
+    icon: AlertTriangle,
+    roles: ['administrador', 'gestor', 'super_admin'],
+  },
 ];
 
 // 2. VERTICALES DE NEGOCIO - Agrupadas por modelo de negocio

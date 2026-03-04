@@ -19,6 +19,7 @@ import { LanguageSelector } from '@/components/LanguageSelector';
 import { ExternalPortalsNotifications } from '@/components/admin/external-portals-notifications';
 import { NotificationDropdown } from '@/components/notifications/NotificationDropdown';
 import NotificationCenter from '@/components/NotificationCenter';
+import { ThemeToggleButton } from '@/components/theme/ThemeToggle';
 
 export function Header() {
   const { data: session } = useSession() || {};
@@ -80,6 +81,9 @@ export function Header() {
           >
             <Search className="h-5 w-5" />
           </Button>
+          <div className="hidden md:block">
+            <ThemeToggleButton />
+          </div>
           {/* Notifications Center - Enhanced with real-time notifications */}
           <NotificationCenter />
 
