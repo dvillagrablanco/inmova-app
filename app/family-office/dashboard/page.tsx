@@ -18,6 +18,7 @@ import {
   ToggleLeft,
   ToggleRight,
   Info,
+  FileText,
 } from 'lucide-react';
 import {
   Breadcrumb,
@@ -166,6 +167,26 @@ export default function FamilyOfficeDashboardPage() {
             >
               {view === 'consolidated' ? <ToggleRight className="h-4 w-4 mr-1" /> : <ToggleLeft className="h-4 w-4 mr-1" />}
               Consolidado
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-xs"
+              onClick={async () => {
+                try {
+                  const res = await fetch(`/api/family-office/report?view=${view}`);
+                  if (res.ok) {
+                    const { html } = await res.json();
+                    const w = window.open('', '_blank');
+                    if (w) { w.document.write(html); w.document.close(); w.print(); }
+                  } else {
+                    toast.error('Error generando informe');
+                  }
+                } catch { toast.error('Error de conexión'); }
+              }}
+            >
+              <FileText className="h-4 w-4 mr-1" />
+              PDF
             </Button>
             <Button variant="ghost" onClick={() => loadData()} size="sm">
               <RefreshCw className="h-4 w-4" />

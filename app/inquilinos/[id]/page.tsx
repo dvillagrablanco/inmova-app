@@ -161,6 +161,29 @@ export default function TenantDetailPage() {
                 <Edit className="mr-2 h-4 w-4" />
                 Editar
               </Button>
+              <Button
+                variant="outline"
+                onClick={async () => {
+                  try {
+                    const res = await fetch('/api/portal-inquilino/invitations/create', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ tenantId: tenant.id, email: tenant.email }),
+                    });
+                    if (res.ok) {
+                      toast.success('Invitación enviada al inquilino');
+                    } else {
+                      const data = await res.json();
+                      toast.error(data.error || 'Error al enviar invitación');
+                    }
+                  } catch {
+                    toast.error('Error de conexión');
+                  }
+                }}
+              >
+                <Mail className="mr-2 h-4 w-4" />
+                Invitar al Portal
+              </Button>
             </div>
           </div>
         </div>

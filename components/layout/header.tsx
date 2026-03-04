@@ -20,6 +20,7 @@ import { ExternalPortalsNotifications } from '@/components/admin/external-portal
 import { NotificationDropdown } from '@/components/notifications/NotificationDropdown';
 import NotificationCenter from '@/components/NotificationCenter';
 import { ThemeToggleButton } from '@/components/theme/ThemeToggle';
+import { CompanySelector } from './CompanySelector';
 
 export function Header() {
   const { data: session } = useSession() || {};
@@ -55,6 +56,13 @@ export function Header() {
             </div>
           </div>
         </div>
+
+        {/* Company Selector for admins with multiple companies */}
+        {(userRole === 'administrador' || userRole === 'super_admin') && (
+          <div className="hidden md:block">
+            <CompanySelector className="text-sm" />
+          </div>
+        )}
 
         {/* Logo/Nombre en móvil */}
         <div className="flex items-center md:hidden">

@@ -283,11 +283,13 @@ export default function MapaCarteraPage() {
                             style={{ left: `${x}%`, top: `${y}%`, transform: 'translate(-50%, -100%)' }}
                             onClick={() => setSelectedBuilding(b)}
                           >
-                            <div className={`w-6 h-6 rounded-full ${getCompanyColor(b.companyName)} border-2 border-white shadow-lg flex items-center justify-center text-white text-[8px] font-bold hover:scale-150 transition-transform`}>
+                            <div className={`w-6 h-6 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-white text-[8px] font-bold hover:scale-150 transition-transform ${
+                              b.ocupacion >= 80 ? 'bg-green-500' : b.ocupacion >= 50 ? 'bg-amber-500' : 'bg-red-500'
+                            }`}>
                               {b.totalUnidades || '•'}
                             </div>
                             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 bg-black text-white text-[10px] px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                              {b.nombre} · {b.totalUnidades} uds · {fmt(b.rentaMensual)}/mes
+                              {b.nombre} · {b.ocupacion.toFixed(0)}% ocup. · {fmt(b.rentaMensual)}/mes
                             </div>
                           </div>
                         );

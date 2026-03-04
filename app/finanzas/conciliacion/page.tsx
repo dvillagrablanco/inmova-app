@@ -67,6 +67,7 @@ import {
   XCircle,
   ChevronLeft,
   ChevronRight,
+  Upload,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format, parseISO } from 'date-fns';
@@ -677,11 +678,12 @@ export default function ConciliacionBancariaPage() {
 
         {/* Tabs principales */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-2 max-w-md">
+          <TabsList className="grid w-full grid-cols-3 max-w-lg">
             <TabsTrigger value="movimientos">
               Movimientos ({stats.totalTransactions.toLocaleString('es-ES')})
             </TabsTrigger>
             <TabsTrigger value="sugerencias">Sugerencias IA</TabsTrigger>
+            <TabsTrigger value="importar">Importar CSV</TabsTrigger>
           </TabsList>
 
           {/* Tab: Movimientos */}
@@ -1189,6 +1191,44 @@ export default function ConciliacionBancariaPage() {
                       {cat.label}
                     </Button>
                   ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Tab: Importar CSV */}
+          <TabsContent value="importar" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Importar Extracto Bancario</CardTitle>
+                <CardDescription>
+                  Sube un archivo CSV o OFX con los movimientos bancarios para conciliar automáticamente.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                  <Upload className="mx-auto h-10 w-10 text-gray-400 mb-3" />
+                  <p className="text-sm text-gray-600 mb-2">
+                    <span className="font-medium text-primary">Haz click para seleccionar</span> o arrastra un archivo
+                  </p>
+                  <p className="text-xs text-gray-500">Formatos soportados: CSV, OFX, CAMT.053 (máx. 10MB)</p>
+                  <input
+                    type="file"
+                    accept=".csv,.ofx,.xml"
+                    className="mt-4 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 cursor-pointer"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        toast.success(`Archivo "${file.name}" seleccionado. La importación está en desarrollo.`);
+                      }
+                    }}
+                  />
+                </div>
+                <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-md p-4">
+                  <p className="text-sm text-blue-800 dark:text-blue-200">
+                    <strong>Formato CSV esperado:</strong> Fecha, Concepto, Importe, Saldo. 
+                    Los movimientos se conciliarán automáticamente con los pagos pendientes por importe y fecha.
+                  </p>
                 </div>
               </CardContent>
             </Card>
