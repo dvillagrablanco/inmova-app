@@ -1398,6 +1398,12 @@ const finanzasNavItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
+    name: 'Fianzas',
+    href: '/fianzas',
+    icon: Shield,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
     name: 'Fiscal Trimestral',
     href: '/finanzas/fiscal-trimestral',
     icon: Calculator,
