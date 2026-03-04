@@ -84,7 +84,7 @@ export default function ActivosGrupoPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Activos del Grupo</h1>
-            <p className="text-gray-500">{assets.length} inmuebles en cartera</p>
+            <p className="text-gray-500">{assets.length} activos registrados en inversiones</p>
           </div>
           <Button onClick={() => router.push('/inversiones/analisis?tab=escritura')}>
             <Plus className="h-4 w-4 mr-2" />

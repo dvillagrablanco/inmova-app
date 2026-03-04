@@ -382,7 +382,7 @@ function EdificiosPageContent() {
         </div>
         <div className="flex items-center justify-between">
         <span className="text-sm text-muted-foreground">Año</span>
-        <span className="text-sm font-medium">{building.anoConstructor}</span>
+        <span className="text-sm font-medium">{building.anoConstructor > 1800 ? building.anoConstructor : 'N/D'}</span>
         </div>
         <div className="flex items-center justify-between">
         <span className="text-sm text-muted-foreground">Unidades</span>
@@ -451,7 +451,7 @@ function EdificiosPageContent() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div>
         <p className="text-sm text-muted-foreground">Año construcción</p>
-        <p className="text-lg font-semibold">{building.anoConstructor}</p>
+        <p className="text-lg font-semibold">{building.anoConstructor > 1800 ? building.anoConstructor : 'N/D'}</p>
         </div>
         <div>
         <p className="text-sm text-muted-foreground">Unidades</p>

@@ -663,7 +663,7 @@ export default function ConciliacionBancariaPage() {
                       </Badge>
                     </div>
                     <p className="text-sm font-medium text-primary">{account.companyName}</p>
-                    <p className="text-sm text-muted-foreground mb-1">{account.iban}</p>
+                    <p className="text-sm text-muted-foreground mb-1">{account.iban && /^[A-Z]{2}\d{2}/.test(account.iban) ? account.iban : 'IBAN no disponible'}</p>
                     <p className="text-xs text-muted-foreground">
                       Última sync:{' '}
                       {format(parseISO(account.lastSync), 'd MMM HH:mm', { locale: es })}

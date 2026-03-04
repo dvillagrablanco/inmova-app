@@ -203,7 +203,7 @@ export default function ComparativaPage() {
                     {companies.map(c => (
                       <th key={c.companyId} className="text-right p-4 font-medium">
                         <div>{c.companyName}</div>
-                        <div className="text-xs text-muted-foreground font-normal">{c.cif}</div>
+                        {c.cif && !c.cif.includes('XXXX') && <div className="text-xs text-muted-foreground font-normal">{c.cif}</div>}
                         {c.isHolding && <Badge variant="secondary" className="text-xs mt-1">Holding</Badge>}
                       </th>
                     ))}

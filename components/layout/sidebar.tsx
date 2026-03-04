@@ -899,7 +899,13 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
           {/* Logo */}
           <div className="p-6 border-b border-gray-800">
             <div className="relative w-full h-12">
-              <Image src={logo} alt={appName} fill className="object-contain" priority />
+              {logo ? (
+                <Image src={logo} alt={appName} fill className="object-contain" priority />
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <span className="text-lg font-bold text-white">{appName}</span>
+                </div>
+              )}
             </div>
             <p className="text-xs text-gray-400 mt-2 text-center">{appName}</p>
           </div>

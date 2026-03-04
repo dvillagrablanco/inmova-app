@@ -617,8 +617,8 @@ export default function PropiedadesPage() {
                         <div className="pt-3 border-t">
                           <div className="flex items-center justify-between">
                             <span className="text-sm text-muted-foreground">Renta mensual</span>
-                            <span className="text-xl font-bold text-green-600">
-                              €{property.rentaMensual.toLocaleString('es-ES')}
+                            <span className={`text-xl font-bold ${property.rentaMensual > 0 ? 'text-green-600' : 'text-gray-400'}`}>
+                              {property.rentaMensual > 0 ? `€${property.rentaMensual.toLocaleString('es-ES')}` : 'Sin asignar'}
                             </span>
                           </div>
                         </div>
@@ -767,8 +767,8 @@ export default function PropiedadesPage() {
                               )}
                               <div>
                                 <p className="text-sm text-muted-foreground">Renta/mes</p>
-                                <p className="text-lg font-semibold text-green-600">
-                                  €{property.rentaMensual.toLocaleString('es-ES')}
+                                <p className={`text-lg font-semibold ${property.rentaMensual > 0 ? 'text-green-600' : 'text-gray-400'}`}>
+                                  {property.rentaMensual > 0 ? `€${property.rentaMensual.toLocaleString('es-ES')}` : 'Sin asignar'}
                                 </p>
                               </div>
                             </div>

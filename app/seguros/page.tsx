@@ -577,6 +577,21 @@ export default function SegurosPage() {
           </Card>
         </div>
 
+        {/* Alerta de pólizas vencidas */}
+        {stats.vencidos > 0 && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+            <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-medium text-red-800">
+                {stats.vencidos} {stats.vencidos === 1 ? 'póliza vencida' : 'pólizas vencidas'} requieren renovación
+              </p>
+              <p className="text-sm text-red-600 mt-1">
+                Revisa las pólizas vencidas y solicita renovación para mantener la cobertura activa.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Acceso Rápido - Cotizaciones y Proveedores */}
         <div className="grid gap-4 md:grid-cols-3">
           <Card className="cursor-pointer hover:shadow-md transition-shadow border-blue-200 bg-blue-50/50" onClick={() => router.push('/seguros/cotizaciones')}>

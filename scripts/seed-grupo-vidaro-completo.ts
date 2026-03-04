@@ -48,7 +48,7 @@ async function seedVibla(vidaroId: string) {
 
   const vibla = await upsertCompany('vibla-pe-scr', {
     nombre: 'VIBLA Private Equity SCR S.A.',
-    cif: 'A-XXXXXXXX',
+    cif: 'A-00000000',
     ciudad: 'Madrid',
     pais: 'España',
     activo: true,
