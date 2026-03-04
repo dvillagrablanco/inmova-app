@@ -91,6 +91,12 @@ export function EnhancedGlobalSearch({ open: externalOpen, onOpenChange }: Enhan
   const [isSearching, setIsSearching] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [searchScope, setSearchScope] = useState<'all' | 'buildings' | 'tenants' | 'contracts'>('all');
+  const [isMac, setIsMac] = useState(false);
+
+  // Detectar OS de forma SSR-safe (evita hydration mismatch)
+  useEffect(() => {
+    setIsMac(/(Mac|iPhone|iPod|iPad)/i.test(navigator.userAgent));
+  }, []);
 
   const open = externalOpen !== undefined ? externalOpen : internalOpen;
   const setOpen = onOpenChange || setInternalOpen;
@@ -391,7 +397,7 @@ export function EnhancedGlobalSearch({ open: externalOpen, onOpenChange }: Enhan
         {/* Footer with tips */}
         <div className="border-t px-4 py-2 text-xs text-muted-foreground">
           <div className="flex items-center justify-between">
-            <span>Tip: Usa {typeof navigator !== 'undefined' && /(Mac|iPhone|iPod|iPad)/i.test(navigator.userAgent) ? '⌘K' : 'Ctrl+K'} para abrir/cerrar</span>
+            <span>Tip: Usa {isMac ? '⌘K' : 'Ctrl+K'} para abrir/cerrar</span>
             <div className="flex gap-2">
               <kbd className="rounded bg-muted px-1">↑↓</kbd>
               <span>navegar</span>

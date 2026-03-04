@@ -221,7 +221,7 @@ export const contractUpdateSchema = contractBaseSchema
 // PAGOS (PAYMENTS)
 // ====================================
 
-export const paymentCreateSchema = z.object({
+const paymentBaseSchema = z.object({
   contractId: z.string().uuid('ID de contrato inválido'),
   monto: z
     .number()
@@ -242,7 +242,24 @@ export const paymentCreateSchema = z.object({
   periodo: z.string().max(200).optional(),
 });
 
-export const paymentUpdateSchema = paymentCreateSchema.partial().omit({ contractId: true });
+// Validación adicional: fechaVencimiento no más de 5 años en el futuro
+const validateFutureDate = (data: { fechaVencimiento?: string | Date }) => {
+  if (!data.fechaVencimiento) return true;
+  const maxDate = new Date();
+  maxDate.setFullYear(maxDate.getFullYear() + 5);
+  const fecha = typeof data.fechaVencimiento === 'string' ? new Date(data.fechaVencimiento) : data.fechaVencimiento;
+  return fecha <= maxDate;
+};
+
+export const paymentCreateSchema = paymentBaseSchema.refine(validateFutureDate, {
+  message: 'La fecha de vencimiento no puede ser más de 5 años en el futuro',
+  path: ['fechaVencimiento'],
+});
+
+export const paymentUpdateSchema = paymentBaseSchema.partial().omit({ contractId: true }).refine(validateFutureDate, {
+  message: 'La fecha de vencimiento no puede ser más de 5 años en el futuro',
+  path: ['fechaVencimiento'],
+});
 
 // ====================================
 // MANTENIMIENTO (MAINTENANCE)
