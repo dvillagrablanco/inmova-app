@@ -153,6 +153,14 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       },
     });
 
+    // Al finalizar contrato (vencido), marcar unidad como disponible
+    if (estado === 'vencido' && contract.unitId) {
+      await prisma.unit.update({
+        where: { id: contract.unitId },
+        data: { estado: 'disponible', tenantId: null },
+      });
+    }
+
     // Invalidar cachés relacionados
     if (companyId) {
       await invalidateContractsCache(companyId);

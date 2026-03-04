@@ -64,6 +64,7 @@ import {
   LogIn,
   Coffee,
   Banknote,
+  Receipt,
   ArrowRightLeft,
 } from 'lucide-react';
 
@@ -537,6 +538,12 @@ const dashboardNavItems = [
     icon: AlertTriangle,
     roles: ['administrador', 'gestor', 'super_admin'],
   },
+  {
+    name: 'Vencimientos',
+    href: '/vencimientos',
+    icon: CalendarCheck,
+    roles: ['administrador', 'gestor', 'super_admin'],
+  },
 ];
 
 // 2. VERTICALES DE NEGOCIO - Agrupadas por modelo de negocio
@@ -576,6 +583,10 @@ const alquilerResidencialItems = [
     icon: Users,
     roles: ['super_admin', 'administrador', 'gestor'],
     dataTour: 'inquilinos-menu',
+    subItems: [
+      { name: 'Lista', href: '/inquilinos', icon: Users },
+      { name: 'Alta Rápida', href: '/inquilinos/alta-rapida', icon: UserPlus },
+    ],
   },
   {
     name: 'Matching',
@@ -1381,6 +1392,18 @@ const finanzasNavItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
+    name: 'Facturas',
+    href: '/facturas',
+    icon: Receipt,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Fianzas',
+    href: '/fianzas',
+    icon: Shield,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
     name: 'Fiscal Trimestral',
     href: '/finanzas/fiscal-trimestral',
     icon: Calculator,
@@ -1637,6 +1660,12 @@ const holdingGrupoNavItems = [
     name: 'Yield Tracker',
     href: '/inversiones/yield',
     icon: Percent,
+    roles: ['super_admin', 'administrador'],
+  },
+  {
+    name: 'Benchmark Mercado',
+    href: '/inversiones/benchmark',
+    icon: TrendingUp,
     roles: ['super_admin', 'administrador'],
   },
   {

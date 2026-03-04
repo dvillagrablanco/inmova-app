@@ -57,7 +57,7 @@ export async function POST(
         contract: {
           include: {
             tenant: { select: { nombreCompleto: true, email: true } },
-            unit: { select: { numero: true, building: { select: { nombre: true } } } },
+            unit: { select: { numero: true, id: true, building: { select: { id: true, nombre: true } } } },
           },
         },
       },
@@ -152,6 +152,28 @@ export async function POST(
         }).catch(() => {});
       }
     } catch { /* non-blocking */ }
+
+    // Auto-create accounting transaction for Zucchetti sync
+    try {
+      const buildingId = payment.contract?.unit?.building?.id;
+      await prisma.accountingTransaction.create({
+        data: {
+          companyId: scope.activeCompanyId,
+          buildingId: buildingId ?? undefined,
+          unitId: payment.contract?.unit?.id ?? undefined,
+          tipo: 'ingreso',
+          categoria: 'ingreso_renta',
+          concepto: `Cobro alquiler ${payment.periodo || ''} - ${payment.contract?.tenant?.nombreCompleto || ''}`,
+          monto: Number(payment.monto),
+          fecha: fechaPago,
+          referencia: `PAY-${paymentId}`,
+          paymentId: paymentId,
+        },
+      });
+      logger.info('[Payment] Accounting transaction created for Zucchetti sync', { paymentId });
+    } catch (accErr) {
+      logger.warn('[Payment] Failed to create accounting transaction', { paymentId, error: accErr });
+    }
 
     return NextResponse.json({
       success: true,
