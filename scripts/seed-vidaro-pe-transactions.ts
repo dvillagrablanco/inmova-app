@@ -23,7 +23,9 @@ import * as dotenv from 'dotenv';
 import * as fs from 'fs';
 import * as path from 'path';
 
-dotenv.config();
+// Load env: try .env.production first, then .env
+dotenv.config({ path: '.env.production' });
+dotenv.config(); // fallback
 const prisma = new PrismaClient();
 
 // Fund metadata
