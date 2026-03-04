@@ -729,18 +729,23 @@ const tools: Anthropic.Messages.Tool[] = [
   // ========================================================================
   {
     name: 'evaluate_investment_proposal',
-    description: 'Evalúa una propuesta de inversión inmobiliaria de un broker. Analiza precio, yields, riesgos y emite veredicto: COMPRAR/NEGOCIAR/DESCARTAR. Usar cuando el usuario pide analizar una oportunidad de compra.',
+    description:
+      'Evalúa una propuesta de inversión inmobiliaria de un broker. Analiza precio, yields, riesgos y emite veredicto: COMPRAR/NEGOCIAR/DESCARTAR. Usar cuando el usuario pide analizar una oportunidad de compra.',
     input_schema: {
       type: 'object',
       properties: {
-        proposalText: { type: 'string', description: 'Texto de la propuesta del broker o descripción del activo' },
+        proposalText: {
+          type: 'string',
+          description: 'Texto de la propuesta del broker o descripción del activo',
+        },
       },
       required: ['proposalText'],
     },
   },
   {
     name: 'simulate_acquisition',
-    description: 'Simula la compra de un inmueble: calcula yield, cash-flow, ROI, impacto fiscal, proyección a 10 años. Usar cuando preguntan "qué pasaría si compramos X".',
+    description:
+      'Simula la compra de un inmueble: calcula yield, cash-flow, ROI, impacto fiscal, proyección a 10 años. Usar cuando preguntan "qué pasaría si compramos X".',
     input_schema: {
       type: 'object',
       properties: {
@@ -754,7 +759,8 @@ const tools: Anthropic.Messages.Tool[] = [
   },
   {
     name: 'negotiate_deal',
-    description: 'Genera estrategia de negociación para una compra. Calcula contraoferta, argumentos, concesiones. Usar cuando piden "cómo negociar" o "qué ofrecer".',
+    description:
+      'Genera estrategia de negociación para una compra. Calcula contraoferta, argumentos, concesiones. Usar cuando piden "cómo negociar" o "qué ofrecer".',
     input_schema: {
       type: 'object',
       properties: {
@@ -767,21 +773,26 @@ const tools: Anthropic.Messages.Tool[] = [
   },
   {
     name: 'screen_tenant',
-    description: 'Analiza solvencia de un candidato a inquilino. Calcula score de riesgo y recomendación. Usar cuando piden "evaluar inquilino" o "verificar solvencia".',
+    description:
+      'Analiza solvencia de un candidato a inquilino. Calcula score de riesgo y recomendación. Usar cuando piden "evaluar inquilino" o "verificar solvencia".',
     input_schema: {
       type: 'object',
       properties: {
         tenantName: { type: 'string', description: 'Nombre del candidato' },
         rentaMensual: { type: 'number', description: 'Renta mensual de la vivienda' },
         ingresosMensuales: { type: 'number', description: 'Ingresos mensuales del candidato' },
-        tipoContrato: { type: 'string', description: 'Tipo contrato laboral: indefinido, temporal, autónomo' },
+        tipoContrato: {
+          type: 'string',
+          description: 'Tipo contrato laboral: indefinido, temporal, autónomo',
+        },
       },
       required: ['tenantName', 'rentaMensual'],
     },
   },
   {
     name: 'generate_rental_contract',
-    description: 'Genera un contrato de arrendamiento LAU personalizado. Usar cuando piden "crear contrato" o "generar contrato".',
+    description:
+      'Genera un contrato de arrendamiento LAU personalizado. Usar cuando piden "crear contrato" o "generar contrato".',
     input_schema: {
       type: 'object',
       properties: {
@@ -790,14 +801,18 @@ const tools: Anthropic.Messages.Tool[] = [
         address: { type: 'string' },
         unitNumber: { type: 'string' },
         rentaMensual: { type: 'number' },
-        tipo: { type: 'string', description: 'vivienda_habitual, temporada, local_comercial, garaje' },
+        tipo: {
+          type: 'string',
+          description: 'vivienda_habitual, temporada, local_comercial, garaje',
+        },
       },
       required: ['tenantName', 'address', 'rentaMensual'],
     },
   },
   {
     name: 'check_delinquency_risk',
-    description: 'Obtiene el score de riesgo de morosidad de los inquilinos. Usar cuando preguntan por morosos, riesgo de impago, o inquilinos problemáticos.',
+    description:
+      'Obtiene el score de riesgo de morosidad de los inquilinos. Usar cuando preguntan por morosos, riesgo de impago, o inquilinos problemáticos.',
     input_schema: {
       type: 'object',
       properties: {},
@@ -805,7 +820,8 @@ const tools: Anthropic.Messages.Tool[] = [
   },
   {
     name: 'optimize_rents',
-    description: 'Analiza qué unidades están rentando por debajo del mercado y calcula potencial de incremento. Usar cuando preguntan por "optimizar rentas" o "subir precios".',
+    description:
+      'Analiza qué unidades están rentando por debajo del mercado y calcula potencial de incremento. Usar cuando preguntan por "optimizar rentas" o "subir precios".',
     input_schema: {
       type: 'object',
       properties: {},
@@ -813,7 +829,8 @@ const tools: Anthropic.Messages.Tool[] = [
   },
   {
     name: 'find_missing_documents',
-    description: 'Detecta documentación faltante: contratos sin PDF, DNIs caducados, seguros vencidos. Usar cuando preguntan por "documentos pendientes" o "qué falta".',
+    description:
+      'Detecta documentación faltante: contratos sin PDF, DNIs caducados, seguros vencidos. Usar cuando preguntan por "documentos pendientes" o "qué falta".',
     input_schema: {
       type: 'object',
       properties: {},
@@ -821,18 +838,23 @@ const tools: Anthropic.Messages.Tool[] = [
   },
   {
     name: 'get_market_data',
-    description: 'Obtiene datos de mercado (Idealista/Fotocasa) para una zona: precio venta/m², alquiler/m², tendencia. Usar cuando preguntan por "precios de mercado" o "comparar con zona".',
+    description:
+      'Obtiene datos de mercado (Idealista/Fotocasa) para una zona: precio venta/m², alquiler/m², tendencia. Usar cuando preguntan por "precios de mercado" o "comparar con zona".',
     input_schema: {
       type: 'object',
       properties: {
-        address: { type: 'string', description: 'Dirección o zona (ej: Chamberí, Silvela, Espronceda)' },
+        address: {
+          type: 'string',
+          description: 'Dirección o zona (ej: Chamberí, Silvela, Espronceda)',
+        },
       },
       required: ['address'],
     },
   },
   {
     name: 'get_predictive_maintenance',
-    description: 'Analiza patrones de averías por edificio y predice próximas incidencias. Usar cuando preguntan por "mantenimiento preventivo" o "averías recurrentes".',
+    description:
+      'Analiza patrones de averías por edificio y predice próximas incidencias. Usar cuando preguntan por "mantenimiento preventivo" o "averías recurrentes".',
     input_schema: {
       type: 'object',
       properties: {},
@@ -843,7 +865,8 @@ const tools: Anthropic.Messages.Tool[] = [
   // ========================================================================
   {
     name: 'get_rent_updates_pending',
-    description: 'Obtiene contratos con actualización de renta IPC pendiente (aniversario próximo). Muestra renta actual → nueva renta con % de incremento.',
+    description:
+      'Obtiene contratos con actualización de renta IPC pendiente (aniversario próximo). Muestra renta actual → nueva renta con % de incremento.',
     input_schema: {
       type: 'object',
       properties: {
@@ -853,7 +876,8 @@ const tools: Anthropic.Messages.Tool[] = [
   },
   {
     name: 'apply_rent_update',
-    description: 'Aplica actualización de renta IPC a un contrato específico. Actualiza la renta mensual.',
+    description:
+      'Aplica actualización de renta IPC a un contrato específico. Actualiza la renta mensual.',
     input_schema: {
       type: 'object',
       properties: {
@@ -865,7 +889,8 @@ const tools: Anthropic.Messages.Tool[] = [
   },
   {
     name: 'get_fianzas_summary',
-    description: 'Resumen de fianzas/depósitos de todos los contratos activos. Muestra depositadas vs pendientes con importes.',
+    description:
+      'Resumen de fianzas/depósitos de todos los contratos activos. Muestra depositadas vs pendientes con importes.',
     input_schema: {
       type: 'object',
       properties: {},
@@ -873,38 +898,52 @@ const tools: Anthropic.Messages.Tool[] = [
   },
   {
     name: 'get_building_360',
-    description: 'Vista 360° completa de un edificio: unidades, contratos, pagos, gastos, seguros, ocupación, ingresos. Todo en una llamada.',
+    description:
+      'Vista 360° completa de un edificio: unidades, contratos, pagos, gastos, seguros, ocupación, ingresos. Todo en una llamada.',
     input_schema: {
       type: 'object',
       properties: {
         buildingId: { type: 'string', description: 'ID del edificio' },
-        buildingName: { type: 'string', description: 'Nombre del edificio (para buscar por nombre)' },
+        buildingName: {
+          type: 'string',
+          description: 'Nombre del edificio (para buscar por nombre)',
+        },
       },
     },
   },
   {
     name: 'get_patrimonio_summary',
-    description: 'Resumen del patrimonio total del grupo: inmobiliario, financiero, private equity, tesorería. Vista holding o consolidada.',
+    description:
+      'Resumen del patrimonio total del grupo: inmobiliario, financiero, private equity, tesorería. Vista holding o consolidada.',
     input_schema: {
       type: 'object',
       properties: {
-        view: { type: 'string', enum: ['holding', 'consolidated'], description: 'Vista holding (solo empresa raíz) o consolidated (todo el grupo)' },
+        view: {
+          type: 'string',
+          enum: ['holding', 'consolidated'],
+          description: 'Vista holding (solo empresa raíz) o consolidated (todo el grupo)',
+        },
       },
     },
   },
   {
     name: 'generate_monthly_invoices',
-    description: 'Genera facturas/recibos mensuales para todos los contratos activos que no tienen pago registrado este mes.',
+    description:
+      'Genera facturas/recibos mensuales para todos los contratos activos que no tienen pago registrado este mes.',
     input_schema: {
       type: 'object',
       properties: {
-        dryRun: { type: 'boolean', description: 'Si true, solo muestra lo que haría sin crear pagos reales' },
+        dryRun: {
+          type: 'boolean',
+          description: 'Si true, solo muestra lo que haría sin crear pagos reales',
+        },
       },
     },
   },
   {
     name: 'bank_reconciliation',
-    description: 'Ejecuta reconciliación bancaria: compara cobros bancarios con pagos registrados, detecta impagos.',
+    description:
+      'Ejecuta reconciliación bancaria: compara cobros bancarios con pagos registrados, detecta impagos.',
     input_schema: {
       type: 'object',
       properties: {},
@@ -945,7 +984,11 @@ async function delegateToAgent(
     }
 
     const errorText = await res.text().catch(() => '');
-    return { success: false, error: `Agent returned ${res.status}`, details: errorText.substring(0, 200) };
+    return {
+      success: false,
+      error: `Agent returned ${res.status}`,
+      details: errorText.substring(0, 200),
+    };
   } catch (error: any) {
     logger.warn(`[Agent Delegate] Error calling ${apiPath}:`, error.message);
     return { success: false, error: `Error connecting to agent: ${error.message}` };
@@ -1058,18 +1101,28 @@ async function executeTool(
 
       // ========== AGENTES ESPECIALIZADOS ==========
       case 'evaluate_investment_proposal':
-        return await delegateToAgent('/api/ai/evaluate-proposal', { proposalText: toolInput.proposalText }, context);
+        return await delegateToAgent(
+          '/api/ai/evaluate-proposal',
+          { proposalText: toolInput.proposalText },
+          context
+        );
 
       case 'simulate_acquisition':
-        return await delegateToAgent('/api/investment/simulate-acquisition', {
-          precioCompra: toolInput.precioCompra,
-          rentaMensualEstimada: toolInput.rentaMensualEstimada,
-          hipoteca: toolInput.hipotecaCapital ? {
-            capitalInicial: toolInput.hipotecaCapital,
-            interes: toolInput.hipotecaInteres || 3,
-            plazoAnos: 25,
-          } : undefined,
-        }, context);
+        return await delegateToAgent(
+          '/api/investment/simulate-acquisition',
+          {
+            precioCompra: toolInput.precioCompra,
+            rentaMensualEstimada: toolInput.rentaMensualEstimada,
+            hipoteca: toolInput.hipotecaCapital
+              ? {
+                  capitalInicial: toolInput.hipotecaCapital,
+                  interes: toolInput.hipotecaInteres || 3,
+                  plazoAnos: 25,
+                }
+              : undefined,
+          },
+          context
+        );
 
       case 'negotiate_deal':
         return await delegateToAgent('/api/ai/negotiation-agent', toolInput, context);
@@ -1078,14 +1131,18 @@ async function executeTool(
         return await delegateToAgent('/api/ai/tenant-screening', toolInput, context);
 
       case 'generate_rental_contract':
-        return await delegateToAgent('/api/ai/generate-contract', {
-          ...toolInput,
-          buildingName: toolInput.address,
-          deposito: (toolInput.rentaMensual || 0) * 2,
-          duracionMeses: 12,
-          fechaInicio: new Date().toISOString().split('T')[0],
-          tipo: toolInput.tipo || 'vivienda_habitual',
-        }, context);
+        return await delegateToAgent(
+          '/api/ai/generate-contract',
+          {
+            ...toolInput,
+            buildingName: toolInput.address,
+            deposito: (toolInput.rentaMensual || 0) * 2,
+            duracionMeses: 12,
+            fechaInicio: new Date().toISOString().split('T')[0],
+            tipo: toolInput.tipo || 'vivienda_habitual',
+          },
+          context
+        );
 
       case 'check_delinquency_risk':
         return await delegateToAgent('/api/ai/delinquency-risk', {}, context, 'GET');
@@ -1130,8 +1187,13 @@ async function executeTool(
       case 'get_rent_updates_pending': {
         const { detectPendingRentUpdates } = await import('@/lib/rent-ipc-update-service');
         const companyId = context.companyId;
-        const company = await prisma.company.findUnique({ where: { id: companyId }, include: { childCompanies: { select: { id: true } } } });
-        const allIds = company ? [company.id, ...company.childCompanies.map((c: any) => c.id)] : [companyId];
+        const company = await prisma.company.findUnique({
+          where: { id: companyId },
+          include: { childCompanies: { select: { id: true } } },
+        });
+        const allIds = company
+          ? [company.id, ...company.childCompanies.map((c: any) => c.id)]
+          : [companyId];
         return await detectPendingRentUpdates(allIds);
       }
 
@@ -1142,39 +1204,80 @@ async function executeTool(
 
       case 'get_fianzas_summary': {
         const contracts = await prisma.contract.findMany({
-          where: { estado: 'activo', unit: { building: { companyId: context.companyId, isDemo: false } } },
-          select: { id: true, importeFianza: true, fianzaDepositada: true, mesesFianza: true, tenant: { select: { nombreCompleto: true } }, unit: { select: { numero: true, building: { select: { nombre: true } } } } },
+          where: {
+            estado: 'activo',
+            unit: { building: { companyId: context.companyId, isDemo: false } },
+          },
+          select: {
+            id: true,
+            importeFianza: true,
+            fianzaDepositada: true,
+            mesesFianza: true,
+            tenant: { select: { nombreCompleto: true } },
+            unit: { select: { numero: true, building: { select: { nombre: true } } } },
+          },
         });
         const total = contracts.reduce((s, c) => s + (c.importeFianza || 0), 0);
-        const depositadas = contracts.filter(c => c.fianzaDepositada);
-        const pendientes = contracts.filter(c => !c.fianzaDepositada && (c.importeFianza || 0) > 0);
-        return { total, depositadas: depositadas.length, pendientes: pendientes.length, importeDepositado: depositadas.reduce((s, c) => s + (c.importeFianza || 0), 0), importePendiente: pendientes.reduce((s, c) => s + (c.importeFianza || 0), 0), detallePendientes: pendientes.slice(0, 10).map(c => ({ tenant: c.tenant?.nombreCompleto, unit: c.unit?.numero, building: c.unit?.building?.nombre, importe: c.importeFianza })) };
+        const depositadas = contracts.filter((c) => c.fianzaDepositada);
+        const pendientes = contracts.filter(
+          (c) => !c.fianzaDepositada && (c.importeFianza || 0) > 0
+        );
+        return {
+          total,
+          depositadas: depositadas.length,
+          pendientes: pendientes.length,
+          importeDepositado: depositadas.reduce((s, c) => s + (c.importeFianza || 0), 0),
+          importePendiente: pendientes.reduce((s, c) => s + (c.importeFianza || 0), 0),
+          detallePendientes: pendientes
+            .slice(0, 10)
+            .map((c) => ({
+              tenant: c.tenant?.nombreCompleto,
+              unit: c.unit?.numero,
+              building: c.unit?.building?.nombre,
+              importe: c.importeFianza,
+            })),
+        };
       }
 
       case 'get_building_360': {
         let buildingId = input.buildingId;
         if (!buildingId && input.buildingName) {
-          const found = await prisma.building.findFirst({ where: { nombre: { contains: input.buildingName, mode: 'insensitive' }, isDemo: false }, select: { id: true } });
+          const found = await prisma.building.findFirst({
+            where: { nombre: { contains: input.buildingName, mode: 'insensitive' }, isDemo: false },
+            select: { id: true },
+          });
           buildingId = found?.id;
         }
         if (!buildingId) return { error: 'Edificio no encontrado' };
-        const res = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/buildings/${buildingId}/360`, { headers: { cookie: '' } });
+        const res = await fetch(
+          `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/buildings/${buildingId}/360`,
+          { headers: { cookie: '' } }
+        );
         if (res.ok) return await res.json();
         return { error: 'Error obteniendo datos del edificio' };
       }
 
       case 'get_patrimonio_summary': {
         const view = input.view || 'holding';
-        const res = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/family-office/dashboard?view=${view}`);
+        const res = await fetch(
+          `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/family-office/dashboard?view=${view}`
+        );
         if (res.ok) return await res.json();
         return { error: 'Error obteniendo patrimonio' };
       }
 
       case 'generate_monthly_invoices':
-        return { message: 'Para generar facturas mensuales, ejecuta el cron: POST /api/cron/generate-monthly-invoices', dryRun: input.dryRun };
+        return {
+          message:
+            'Para generar facturas mensuales, ejecuta el cron: POST /api/cron/generate-monthly-invoices',
+          dryRun: input.dryRun,
+        };
 
       case 'bank_reconciliation':
-        return { message: 'Para reconciliación bancaria, ejecuta el cron: POST /api/cron/bank-reconciliation' };
+        return {
+          message:
+            'Para reconciliación bancaria, ejecuta el cron: POST /api/cron/bank-reconciliation',
+        };
 
       default:
         return { error: `Unknown tool: ${toolName}` };
@@ -1271,8 +1374,71 @@ PREMIUM:
 - VALORAR ACTIVOS: Estimar valor venta/alquiler por dirección o ref. catastral
 - CONSULTAR CATASTRO: Datos catastrales (superficie, uso, año)
 
+NUEVAS FUNCIONALIDADES DISPONIBLES EN LA PLATAFORMA (informar al usuario si pregunta):
+
+📊 INTELIGENCIA ARTIFICIAL:
+- Valoración automática de inmuebles con IA (/valoracion-ia) — estima valor de venta/alquiler
+- Predicción de morosidad — anticipa qué inquilinos tienen riesgo de impago
+- Renta óptima — sugiere el precio ideal basado en mercado y comparables
+- Detección de anomalías financieras — identifica pagos duplicados o gastos inusuales
+- Alertas de oportunidad — detecta propiedades con renta por debajo de mercado
+- Clasificación automática de documentos con IA
+
+💼 FAMILY OFFICE & HOLDING:
+- Dashboard Patrimonial 360° (/family-office/dashboard) — visión consolidada del grupo
+- Vista Ejecutiva (/dashboard/ejecutivo) — KPIs consolidados patrimonio+operativo+alertas
+- P&L por sociedad (/inversiones/pyl-sociedades) — comparativa entre empresas del grupo
+- Distribuciones PE (/inversiones/distribuciones) — tracker de fondos de Private Equity
+- Informe trimestral PDF — generación automática para socios
+- Informe patrimonial PDF descargable
+- Portal del propietario read-only (/portal-propietario/dashboard)
+
+⚡ AUTOMATIZACIÓN:
+- Bandeja "Mi Día" (/hoy) — todo lo que necesitas hacer hoy en un solo lugar
+- Cobro en 1 click — marcar pago como cobrado con envío automático de recibo
+- Cobro masivo — cobrar todos los pagos pendientes de una vez
+- Facturación automática (/facturas) — genera facturas con nº secuencial al cobrar
+- Generación automática de pagos mensuales (cron)
+- Escalado automático de impagos en 4 niveles (amable→firme→formal→legal)
+- Resumen semanal por email al administrador
+- Renovación de contratos con IPC (/contratos/actualizacion-ipc)
+- Remesas SEPA para cobros bancarios (/api/payments/sepa-export)
+
+📋 WORKFLOWS:
+- Alta rápida de inquilino (/inquilinos/alta-rapida) — wizard de 4 pasos
+- Workflow de salida (/contratos/[id]/finalizar) — liquidación + fianza + cierre
+- Plantillas de contratos (/contratos/plantillas) — modelos predefinidos reutilizables
+- Dashboard de vencimientos (/vencimientos) — calendario global de deadlines
+
+📈 ANÁLISIS E INFORMES:
+- Centro de Alertas (/alertas) — filtros por tipo y severidad
+- Informe de Morosidad (/morosidad) — detalle por inquilino con días de retraso
+- Yield Tracker (/inversiones/yield) — rentabilidad por propiedad
+- Benchmark de Mercado (/inversiones/benchmark) — comparativa renta vs mercado
+- Comparativa de Edificios (/inversiones/comparativa-edificios)
+- Previsión de tesorería 12 meses (/finanzas/prevision)
+- Estimación fiscal trimestral (/finanzas/fiscal-trimestral) — IVA, IRPF por modelo
+- Scoring de inquilinos (/api/tenants/scoring) — Health Score 0-100
+- Export CSV en cualquier tabla
+
+🔧 OPERACIONES:
+- Kanban de mantenimiento (/mantenimiento/kanban) — vista visual por columnas
+- Checklist de inspección digital (/inspecciones/checklist) — entrada/salida inquilino
+- Evaluación de proveedores (/proveedores/evaluacion) — rating y historial
+- Gestión de fianzas (/fianzas) — depósitos y devoluciones
+- Conciliación bancaria con auto-matching (/finanzas/conciliacion)
+- Auditoría de cambios (/admin/auditoria) — quién cambió qué y cuándo
+
+🎨 EXPERIENCIA:
+- Modo oscuro (toggle en header)
+- Selector de sociedad para admins con múltiples empresas
+- Avatares coloridos por inquilino
+- Indicador de conexión online/offline
+- Semáforo de salud de la cartera
+
 Cuando el usuario suba un documento, analízalo automáticamente y sugiere acciones.
 Responde siempre en español. Sé conciso y útil.
+Si el usuario pregunta por una funcionalidad, indícale la ruta exacta donde encontrarla.
 
 Contexto del usuario:
 - Nombre: ${context.userName}
@@ -1889,7 +2055,8 @@ async function getDashboardStats(input: any, context: AssistantContext) {
     prisma.unit.count({
       where: {
         building: {
-          companyId: { in: groupIds }, isDemo: false,
+          companyId: { in: groupIds },
+          isDemo: false,
         },
       },
     }),
