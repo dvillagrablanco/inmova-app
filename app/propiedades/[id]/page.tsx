@@ -439,7 +439,7 @@ export default function PropiedadDetallesPage() {
           </div>
 
           {/* Columna Lateral */}
-          <div className="space-y-4 sm:space-y-6">
+          <div className="space-y-4 sm:space-y-6 lg:sticky lg:top-6 lg:self-start">
             {/* Precio */}
             <Card>
               <CardHeader>

@@ -27,6 +27,12 @@ interface AdvancedAnalyticsProps {
   }>;
 }
 
+const formatYAxis = (value: number) => {
+  if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
+  if (value >= 1000) return `${(value / 1000).toFixed(0)}K`;
+  return value.toString();
+};
+
 export function AdvancedAnalytics({ monthlyData }: AdvancedAnalyticsProps) {
   // Calcular tendencias
   const lastMonth = monthlyData[monthlyData.length - 1]?.neto || 0;
@@ -109,7 +115,7 @@ export function AdvancedAnalytics({ monthlyData }: AdvancedAnalyticsProps) {
               </defs>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="mes" />
-              <YAxis />
+              <YAxis width={70} tickFormatter={formatYAxis} tick={{ fontSize: 11 }} />
               <Tooltip formatter={(value: number) => `€${Number(value).toFixed(0)}`} />
               <Legend />
               <Area
@@ -151,7 +157,7 @@ export function AdvancedAnalytics({ monthlyData }: AdvancedAnalyticsProps) {
             <BarChart data={monthlyData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="mes" />
-              <YAxis />
+              <YAxis width={70} tickFormatter={formatYAxis} tick={{ fontSize: 11 }} />
               <Tooltip formatter={(value: number) => `€${Number(value).toFixed(0)}`} />
               <Legend />
               <Bar dataKey="ingresos" fill="#000000" name="Ingresos" />
@@ -172,7 +178,7 @@ export function AdvancedAnalytics({ monthlyData }: AdvancedAnalyticsProps) {
             <LineChart data={monthlyData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="mes" />
-              <YAxis />
+              <YAxis width={70} tickFormatter={formatYAxis} tick={{ fontSize: 11 }} />
               <Tooltip formatter={(value: number) => `€${Number(value).toFixed(0)}`} />
               <Legend />
               <Line

@@ -335,14 +335,14 @@ function EdificiosPageContent() {
         {filteredBuildings.map((building) => {
         const tipoBadge = getTipoBadge(building.tipo);
         return (
-        <Card key={building.id} className="hover:shadow-lg transition-shadow">
+        <Card key={building.id} className="hover:shadow-lg transition-shadow h-full flex flex-col">
         <CardHeader>
         <div className="flex items-start justify-between">
-        <div className="space-y-1 flex-1">
-        <CardTitle className="text-lg">{building.nombre}</CardTitle>
+        <div className="space-y-1 flex-1 min-w-0">
+        <CardTitle className="text-lg line-clamp-1">{building.nombre}</CardTitle>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <MapPin className="h-4 w-4" />
-        <span>{building.direccion}</span>
+        <MapPin className="h-4 w-4 flex-shrink-0" />
+        <span className="line-clamp-1">{building.direccion}</span>
         </div>
         </div>
         <DropdownMenu>
@@ -374,8 +374,8 @@ function EdificiosPageContent() {
         </DropdownMenu>
         </div>
         </CardHeader>
-        <CardContent>
-        <div className="space-y-3">
+        <CardContent className="flex-1 flex flex-col">
+        <div className="space-y-3 flex-1">
         <div className="flex items-center justify-between">
         <span className="text-sm text-muted-foreground">Tipo</span>
         <Badge variant={tipoBadge.variant} className={tipoBadge.className}>{tipoBadge.label}</Badge>
