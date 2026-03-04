@@ -58,6 +58,7 @@ import {
   Brain,
   Calculator,
   MapPin,
+  Percent,
   Crown,
   Landmark,
   LogIn,
@@ -1374,6 +1375,12 @@ const finanzasNavItems = [
     roles: ['super_admin', 'administrador'],
   },
   {
+    name: 'Informe Morosidad',
+    href: '/morosidad',
+    icon: AlertTriangle,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
     name: 'Conciliación Bancaria',
     href: '/finanzas/conciliacion',
     icon: ArrowRightLeft,
@@ -1617,6 +1624,12 @@ const holdingGrupoNavItems = [
     name: 'Comparativa Edificios',
     href: '/inversiones/comparativa-edificios',
     icon: Building2,
+    roles: ['super_admin', 'administrador'],
+  },
+  {
+    name: 'Yield Tracker',
+    href: '/inversiones/yield',
+    icon: Percent,
     roles: ['super_admin', 'administrador'],
   },
   {
