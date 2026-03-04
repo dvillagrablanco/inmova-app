@@ -51,7 +51,7 @@ interface EnhancedGlobalSearchProps {
 const SEARCH_SHORTCUTS = [
   { prefix: '@', description: 'Buscar por nombre', example: '@Juan' },
   { prefix: '#', description: 'Buscar por ID', example: '#12345' },
-  { prefix: '$', description: 'Buscar por importe', example: '$500' },
+  { prefix: '€', description: 'Buscar por importe', example: '€500' },
   { prefix: '/', description: 'Navegar directo', example: '/edificios' },
   { prefix: '*', description: 'Buscar en todo', example: '*pendiente' },
 ];
@@ -139,7 +139,7 @@ export function EnhancedGlobalSearch({ open: externalOpen, onOpenChange }: Enhan
     } else if (trimmed.startsWith('#')) {
       searchType = 'id';
       searchQuery = trimmed.slice(1);
-    } else if (trimmed.startsWith('$')) {
+    } else if (trimmed.startsWith('€') || trimmed.startsWith('$')) {
       searchType = 'amount';
       searchQuery = trimmed.slice(1);
     } else if (trimmed.startsWith('*')) {
@@ -391,7 +391,7 @@ export function EnhancedGlobalSearch({ open: externalOpen, onOpenChange }: Enhan
         {/* Footer with tips */}
         <div className="border-t px-4 py-2 text-xs text-muted-foreground">
           <div className="flex items-center justify-between">
-            <span>Tip: Usa ⌘K para abrir/cerrar</span>
+            <span>Tip: Usa {typeof navigator !== 'undefined' && /(Mac|iPhone|iPod|iPad)/i.test(navigator.userAgent) ? '⌘K' : 'Ctrl+K'} para abrir/cerrar</span>
             <div className="flex gap-2">
               <kbd className="rounded bg-muted px-1">↑↓</kbd>
               <span>navegar</span>

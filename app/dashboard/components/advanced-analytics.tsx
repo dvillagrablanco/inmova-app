@@ -132,15 +132,15 @@ export function AdvancedAnalytics({ monthlyData }: AdvancedAnalyticsProps) {
           <div className="mt-4 grid grid-cols-3 gap-4">
             <div className="rounded-lg border p-3">
               <p className="text-xs text-muted-foreground">Promedio Ingresos</p>
-              <p className="text-lg font-bold">€{avgIngresos.toFixed(0)}</p>
+              <p className="text-lg font-bold">€{Math.round(avgIngresos).toLocaleString('es-ES')}</p>
             </div>
             <div className="rounded-lg border p-3">
               <p className="text-xs text-muted-foreground">Promedio Gastos</p>
-              <p className="text-lg font-bold text-red-500">€{avgGastos.toFixed(0)}</p>
+              <p className="text-lg font-bold text-red-500">€{Math.round(avgGastos).toLocaleString('es-ES')}</p>
             </div>
             <div className="rounded-lg border p-3">
               <p className="text-xs text-muted-foreground">Promedio Neto</p>
-              <p className="text-lg font-bold text-green-500">€{avgNeto.toFixed(0)}</p>
+              <p className="text-lg font-bold text-green-500">€{Math.round(avgNeto).toLocaleString('es-ES')}</p>
             </div>
           </div>
         </CardContent>

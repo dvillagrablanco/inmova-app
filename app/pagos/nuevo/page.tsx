@@ -41,9 +41,13 @@ export default function NuevoPagoPage() {
   const { data: session, status } = useSession() || {};
   const [isLoading, setIsLoading] = useState(false);
   const [contracts, setContracts] = useState<Contract[]>([]);
+  // Generar periodo actual: "Marzo 2026"
+  const currentPeriod = new Date().toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+  const capitalizedPeriod = currentPeriod.charAt(0).toUpperCase() + currentPeriod.slice(1);
+
   const [formData, setFormData] = useState({
     contractId: '',
-    periodo: '',
+    periodo: capitalizedPeriod,
     monto: '0',
     fechaVencimiento: '',
     fechaPago: '',
@@ -211,7 +215,7 @@ export default function NuevoPagoPage() {
                     value={formData.periodo}
                     onChange={handleChange}
                     required
-                    placeholder="Enero 2024"
+                    placeholder="Ej: Marzo 2026"
                   />
                 </div>
 

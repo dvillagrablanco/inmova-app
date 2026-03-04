@@ -30,6 +30,17 @@ export function PropertyMap({
 
   const fullAddress = city ? `${address}, ${city}` : address;
 
+  // Limpiar dirección para geocodificación: eliminar piso/puerta que confunden al geocoder
+  const cleanAddressForGeocoding = (addr: string): string => {
+    return addr
+      .replace(/,?\s*\d+[ºª°]\s*[A-Za-z]?\b/g, '')   // "2ºA", "3º B", "1ª"
+      .replace(/,?\s*(bajo|ático|entresuelo|principal|ent|bjo|átic|piso)\s*\w*/gi, '')
+      .replace(/,?\s*\d+[ºª°]\b/g, '')                  // "2º" solo
+      .replace(/,\s*,/g, ',')                             // doble coma
+      .replace(/,\s*$/g, '')                              // coma final
+      .trim();
+  };
+
   useEffect(() => {
     const geocode = async () => {
       // Si ya tenemos coordenadas, usarlas directamente
@@ -41,7 +52,8 @@ export function PropertyMap({
 
       // Geocodificar con Nominatim (OpenStreetMap, gratuito)
       try {
-        const query = encodeURIComponent(fullAddress);
+        const cleanedAddress = cleanAddressForGeocoding(fullAddress);
+        const query = encodeURIComponent(cleanedAddress);
         const res = await fetch(
           `https://nominatim.openstreetmap.org/search?format=json&q=${query}&limit=1`,
           { headers: { 'User-Agent': 'InmovaApp/1.0' } }
