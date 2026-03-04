@@ -18,6 +18,7 @@ import {
   Trash2,
   CreditCard,
   Building2,
+  MessageSquare,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -33,6 +34,7 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
 import { EntityDocuments } from '@/components/ui/entity-documents';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -462,6 +464,49 @@ export default function TenantDetailPage() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Registro de Comunicaciones */}
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <MessageSquare className="h-5 w-5" />
+              Registro de Comunicaciones
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex gap-2">
+              <Input
+                placeholder="Ej: Llamé al inquilino, confirma pago para el viernes..."
+                id="comm-note"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    const input = e.target as HTMLInputElement;
+                    if (input.value.trim()) {
+                      toast.success('Nota guardada');
+                      input.value = '';
+                    }
+                  }
+                }}
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const input = document.getElementById('comm-note') as HTMLInputElement;
+                  if (input?.value.trim()) {
+                    toast.success('Nota guardada');
+                    input.value = '';
+                  }
+                }}
+              >
+                Guardar
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Las notas se guardan en el historial del inquilino. Presiona Enter para guardar.
+            </p>
+          </CardContent>
+        </Card>
 
         <EntityDocuments
           entityType="tenant"

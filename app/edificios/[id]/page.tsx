@@ -252,7 +252,15 @@ export default function EdificioDetallesPage() {
       .reduce((acc, u) => acc + (u.rentaMensual || 0), 0);
     const ocupacionPct = building.units.length > 0 ? (ocupadas / building.units.length) * 100 : 0;
 
-    return { ocupadas, disponibles, ingresos, ocupacionPct };
+    const enMantenimiento = building.units.filter(
+      (u) => u.estado?.toLowerCase() === 'en_mantenimiento'
+    ).length;
+    const superficieTotal = building.units.reduce((acc, u) => acc + (u.superficie || 0), 0);
+    const yieldEstimado = superficieTotal > 0 && ingresos > 0
+      ? ((ingresos * 12) / (superficieTotal * 4500)) * 100
+      : 0;
+
+    return { ocupadas, disponibles, enMantenimiento, ingresos, ocupacionPct, superficieTotal, yieldEstimado };
   };
 
   if (status === 'loading' || isLoading) {

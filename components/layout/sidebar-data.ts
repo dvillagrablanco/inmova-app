@@ -58,6 +58,7 @@ import {
   Brain,
   Calculator,
   MapPin,
+  Percent,
   Crown,
   Landmark,
   LogIn,
@@ -517,6 +518,12 @@ const dashboardNavItems = [
     icon: LayoutDashboard,
     roles: ['administrador', 'gestor', 'operador'], // super_admin usa /admin/dashboard
     dataTour: 'dashboard-link',
+  },
+  {
+    name: 'Mi Día',
+    href: '/hoy',
+    icon: Calendar,
+    roles: ['administrador', 'gestor', 'super_admin'],
   },
   {
     name: 'Vista Ejecutiva',
@@ -1368,6 +1375,18 @@ const finanzasNavItems = [
     roles: ['super_admin', 'administrador'],
   },
   {
+    name: 'Informe Morosidad',
+    href: '/morosidad',
+    icon: AlertTriangle,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Fiscal Trimestral',
+    href: '/finanzas/fiscal-trimestral',
+    icon: Calculator,
+    roles: ['super_admin', 'administrador'],
+  },
+  {
     name: 'Conciliación Bancaria',
     href: '/finanzas/conciliacion',
     icon: ArrowRightLeft,
@@ -1381,6 +1400,7 @@ const finanzasNavItems = [
     subItems: [
       { name: 'Renovar en Lote', href: '/renovaciones-contratos', icon: ClipboardList },
       { name: 'Actualización IPC', href: '/contratos/actualizacion-ipc', icon: TrendingUp },
+      { name: 'Plantillas', href: '/contratos/plantillas', icon: FileText },
     ],
   },
   {
@@ -1611,6 +1631,12 @@ const holdingGrupoNavItems = [
     name: 'Comparativa Edificios',
     href: '/inversiones/comparativa-edificios',
     icon: Building2,
+    roles: ['super_admin', 'administrador'],
+  },
+  {
+    name: 'Yield Tracker',
+    href: '/inversiones/yield',
+    icon: Percent,
     roles: ['super_admin', 'administrador'],
   },
   {
