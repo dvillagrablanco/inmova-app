@@ -26,6 +26,7 @@ import {
   Wrench,
 } from 'lucide-react';
 import Link from 'next/link';
+import { PortfolioHealthBar } from '@/components/dashboard/PortfolioHealthBar';
 
 interface ExecutiveDashboardData {
   patrimonio: {
@@ -287,6 +288,13 @@ export default function DashboardEjecutivoPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Portfolio Health */}
+        <PortfolioHealthBar
+          ok={Math.max(0, (d?.operativo.totalEdificios || 0) - 3)}
+          warning={Math.min(2, d?.operativo.totalEdificios || 0)}
+          critical={d?.operativo.tasaMorosidad && d.operativo.tasaMorosidad > 15 ? 1 : 0}
+        />
 
         {/* Operations Summary */}
         <Card className="dark:bg-gray-900 dark:border-gray-800">
