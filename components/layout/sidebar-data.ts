@@ -1362,6 +1362,12 @@ const finanzasNavItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
+    name: 'Previsión 12 meses',
+    href: '/finanzas/prevision',
+    icon: BarChart3,
+    roles: ['super_admin', 'administrador'],
+  },
+  {
     name: 'Conciliación Bancaria',
     href: '/finanzas/conciliacion',
     icon: ArrowRightLeft,
@@ -1598,6 +1604,12 @@ const holdingGrupoNavItems = [
     name: 'Comparativa Sociedades',
     href: '/inversiones/comparativa',
     icon: BarChart3,
+    roles: ['super_admin', 'administrador'],
+  },
+  {
+    name: 'Comparativa Edificios',
+    href: '/inversiones/comparativa-edificios',
+    icon: Building2,
     roles: ['super_admin', 'administrador'],
   },
   {
