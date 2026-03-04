@@ -56,6 +56,7 @@ export class TwilioClient {
   private accountSid: string;
   private authToken: string;
   private phoneNumber: string;
+  private fromNumber: string;
   private whatsappNumber?: string;
   private baseUrl: string = 'https://api.twilio.com/2010-04-01';
 
@@ -63,6 +64,7 @@ export class TwilioClient {
     this.accountSid = config.accountSid;
     this.authToken = config.authToken;
     this.phoneNumber = config.phoneNumber;
+    this.fromNumber = process.env.TWILIO_FROM_NUMBER || config.phoneNumber;
     this.whatsappNumber = config.whatsappNumber;
   }
 
@@ -98,8 +100,10 @@ export class TwilioClient {
    */
   async sendSMS(params: SendMessageParams): Promise<MessageResult> {
     try {
-      const from = this.phoneNumber;
       const to = this.normalizePhoneNumber(params.to);
+      // Alphanumeric Sender ID (e.g. "INMOVA") for countries that support it (Spain, EU).
+      // Falls back to phone number for USA/Canada where alphanumeric is not supported.
+      const from = to.startsWith('+1') ? this.phoneNumber : this.fromNumber;
 
       const body = new URLSearchParams({
         From: from,
