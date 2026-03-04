@@ -20,6 +20,7 @@ import { ExternalPortalsNotifications } from '@/components/admin/external-portal
 import { NotificationDropdown } from '@/components/notifications/NotificationDropdown';
 import NotificationCenter from '@/components/NotificationCenter';
 import { ThemeToggleButton } from '@/components/theme/ThemeToggle';
+import { ConnectionStatus } from '@/components/ui/connection-status';
 import { CompanySelector } from './CompanySelector';
 
 export function Header() {
@@ -89,6 +90,9 @@ export function Header() {
           >
             <Search className="h-5 w-5" />
           </Button>
+          <div className="hidden md:block">
+            <ConnectionStatus />
+          </div>
           <div className="hidden md:block">
             <ThemeToggleButton />
           </div>

@@ -53,6 +53,7 @@ import { FilterChips } from '@/components/ui/filter-chips';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { ExportCSVButton } from '@/components/ui/export-csv-button';
+import { AvatarInitials } from '@/components/ui/avatar-initials';
 import { toast } from 'sonner';
 import logger, { logError } from '@/lib/logger';
 
@@ -556,6 +557,7 @@ function PagosPage() {
                             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                               <div className="space-y-2 min-w-0 flex-1">
                                 <div className="flex items-center gap-2 flex-wrap">
+                                  <AvatarInitials name={payment.contract.tenant.nombreCompleto} size="sm" />
                                   <h3 className="text-base sm:text-lg font-semibold break-words">
                                     {payment.contract.tenant.nombreCompleto}
                                   </h3>
