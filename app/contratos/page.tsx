@@ -16,6 +16,7 @@ import {
   AlertTriangle,
   Clock,
   Trash2,
+  PenTool,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -62,7 +63,6 @@ import { SmartBreadcrumbs } from '@/components/navigation/smart-breadcrumbs';
 import { ContextualQuickActions } from '@/components/navigation/contextual-quick-actions';
 import logger, { logError } from '@/lib/logger';
 import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
-import { SignContractButton } from '@/components/firma-digital/SignContractButton';
 
 interface Contract {
   id: string;
@@ -691,7 +691,15 @@ function ContratosPageContent() {
         <Eye className="mr-2 h-4 w-4" />
         Ver Detalles
         </Button>
-        <SignContractButton contractId={contract.id} />
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full sm:w-auto"
+          onClick={() => toast.info('Firma digital en preparación - próximamente con Signaturit')}
+        >
+          <PenTool className="mr-2 h-4 w-4" />
+          Firma Digital
+        </Button>
         </div>
         </div>
 
