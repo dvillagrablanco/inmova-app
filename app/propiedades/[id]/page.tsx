@@ -40,6 +40,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { PropertyMap } from '@/components/property/PropertyMap';
 import { ValuationCard } from '@/components/property/ValuationCard';
 import { DeletePropertyDialog } from '@/components/property/DeletePropertyDialog';
+import { InsuranceCoverageCard } from '@/components/property/InsuranceCoverageCard';
 import { PhotoGallery } from '@/components/ui/photo-gallery';
 import { EntityDocuments } from '@/components/ui/entity-documents';
 
@@ -516,6 +517,9 @@ export default function PropiedadDetallesPage() {
                 )}
               </CardContent>
             </Card>
+
+            {/* Cobertura de Seguro */}
+            <InsuranceCoverageCard unitId={property.id} />
 
             {/* Inquilino Actual */}
             {property.tenant && (
