@@ -1442,14 +1442,19 @@ Actúas como un **equipo senior completo** con las siguientes especialidades:
 5. **Optimizar SEO** para viralización de contenido inmobiliario
 
 ### Verticales Implementadas
-- ✅ **Gestión de Propiedades**: Inmuebles, habitaciones, contratos
-- ✅ **Gestión de Inquilinos**: Pagos, comunicación, incidencias
+- ✅ **Gestión de Propiedades**: Inmuebles, habitaciones, contratos, seguros, CEE
+- ✅ **Gestión de Inquilinos**: Pagos, comunicación, incidencias, matching IA
 - ✅ **Gestión de Comunidades**: Votaciones, gastos comunes, convocatorias
 - ✅ **CRM Inmobiliario**: Leads, actividades, pipeline de ventas
 - ✅ **Coliving**: Paquetes, eventos, matching de inquilinos
-- 🟡 **IA & Automatización**: En desarrollo (valoración, chatbots)
-- 🔴 **Tours Virtuales**: Pendiente
-- 🔴 **Firma Digital**: Pendiente
+- ✅ **IA & Automatización**: Valoración, chatbots, oportunidades, análisis inversión, clasificación incidencias
+- ✅ **Tours Virtuales**: Páginas + API + viewer implementados
+- ✅ **Oportunidades Inversión**: 51 features, 5 fuentes mercado, pipeline Kanban
+- ✅ **Family Office**: PE import, posiciones financieras, participaciones
+- ✅ **Seguros**: Carga S3, parametrización, cobertura edificio→unidad
+- ✅ **Monitoreo**: Dashboard admin, health checks, CI/CD
+- 🟡 **Firma Digital**: Pendiente (Signaturit/DocuSign)
+- 🟡 **Social Media Auto**: Pendiente (publicación automática RRSS)
 
 ---
 
@@ -1501,7 +1506,7 @@ Actúas como un **equipo senior completo** con las siguientes especialidades:
 - **Pagos**: Stripe (stripe, @stripe/stripe-js, @stripe/react-stripe-js)
 - **Email**: Nodemailer 7.0.11
 - **SMS**: Twilio 5.10.7
-- **Storage**: AWS S3 (@aws-sdk/client-s3, @aws-sdk/s3-request-presigner)
+- **Storage**: AWS S3 (@aws-sdk/client-s3, @aws-sdk/s3-request-presigner) — Bucket: `inmova` (eu-north-1)
 - **Cache/Queue**: BullMQ 5.65.1, ioredis 5.8.2, @upstash/redis
 - **Monitoring**: @sentry/nextjs 10.32.1
 - **AI**: @anthropic-ai/sdk 0.71.2
@@ -1509,9 +1514,11 @@ Actúas como un **equipo senior completo** con las siguientes especialidades:
 - **Maps**: mapbox-gl
 
 ### Testing
-- **Unit/Integration Tests**: Vitest 4.0.16 + @vitest/ui + @testing-library/react
+- **Unit/Integration Tests**: Vitest 4.0.16 + @vitest/ui + @testing-library/react (~1050 tests)
 - **E2E Tests**: Playwright 1.57.0
 - **Accessibility**: @axe-core/cli, pa11y
+- **CI/CD**: GitHub Actions (.github/workflows/ci.yml)
+- **Thresholds**: 80% cobertura (lines/functions/statements), 75% branches
 - **Nota**: Jest fue eliminado (Feb 2026). Todo consolidado en Vitest.
 
 ### Herramientas de Desarrollo
@@ -7071,13 +7078,218 @@ Antes de CADA deployment, verificar:
 ✅ Dependencias limpiadas (Apollo, GraphQL, pdf-lib, webpack, Jest)
 ✅ IE11 eliminado de browserslist
 ✅ error.tsx + loading.tsx en 10 secciones principales
+```
 
-Pendiente: Fix DATABASE_URL placeholder en produccion
-Pendiente: ESLint ignoreDuringBuilds aun activo
+**Sprint Mar 2026 — Oportunidades de Inversión + Seguridad + DevOps**:
+```
+✅ Tests: 1050+ passing (Vitest), threshold 80%
+✅ DATABASE_URL producción: VERIFICADO (real, no placeholder)
+✅ ESLint ignoreDuringBuilds: true (incompatibilidad ESLint 9 + Next 14, lint vía husky)
+✅ Account Lockout: 5 intentos → 15min bloqueo (lib/account-lockout.ts)
+✅ Cloudflare Turnstile CAPTCHA: lib/turnstile.ts (graceful degradation)
+✅ File Validation: magic bytes check PDF/XLSX/JPEG/PNG/CSV (lib/file-validation.ts)
+✅ CI/CD: .github/workflows/ci.yml (lint→test→build→security)
+✅ Monitoring Dashboard: /admin/monitoring (system, memory, DB, integrations)
+✅ Backup Verification: scripts/verify-backup.sh (pg_dump+restore test)
+✅ Redis Caching: dashboard API con TTL 5min
+✅ i18n: messages/es.json + messages/en.json (infraestructura next-intl)
+✅ PWA: manifest.json completo, ServiceWorkerRegister, InstallPrompt
+✅ Mobile: BottomNavigation, useSwipe hook
+✅ Oportunidades Inversión: 51 features (ver sección dedicada)
+✅ Seguros: 12 PDFs cargados en S3, 9 pólizas parametrizadas
+✅ Market Opportunities: BOE subastas, banca, divergencia IA, tendencias, crowdfunding
+✅ Investment Calculators: hipoteca, sensibilidad, fiscal, portfolio impact
+✅ AI Chat contextual por oportunidad
+✅ Pipeline Kanban con funnel metrics
+✅ Due Diligence checklist contextual
+✅ Exit Strategy Simulator + Renovation Calculator
 ```
 
 ---
 
-**Última actualización**: 3 de enero de 2026 - 18:30 UTC
-**Versión**: 2.3.0 (añadidos aprendizajes críticos de producción)
+## 🆕 MÓDULO: OPORTUNIDADES DE INVERSIÓN (Mar 2026)
+
+### Arquitectura
+
+```
+/inversiones/oportunidades/page.tsx  → UI principal (51 features)
+/api/investment/opportunities/       → API con AI + market data
+/api/investment/opportunities/score/ → Scoring unificado (1-100)
+/api/ai/opportunity-chat/            → Chat IA contextual
+/api/ai/investment-analysis/         → Análisis profundo IA
+/api/ai/analyze-proposal/            → Análisis propuestas broker
+/lib/market-opportunities.ts         → 5 fuentes de mercado
+/lib/investment-calculators.ts       → Hipoteca, fiscal, sensibilidad
+/components/investment/              → RadarChart, Funnel, ExitStrategy, Renovation, Neighborhood
+```
+
+### Fuentes de Datos (sin registro)
+1. **Subastas BOE** — subastas.boe.es (judiciales, notariales, AEAT)
+2. **Inmuebles Banca** — Haya, Solvia, Aliseda, Anida, Servihabitat
+3. **Detector IA Divergencia** — zonas infravaloradas vs media
+4. **Tendencias Emergentes IA** — barrios en crecimiento acelerado
+5. **Crowdfunding** — Urbanitae, Wecity (datos públicos)
+
+### Features Implementadas (51)
+- KPIs dashboard (8 métricas), filtros avanzados (6 campos + presets guardados)
+- Sort por 5 campos, vista cards + tabla, favoritos localStorage
+- Score IA unificado (1-100), pipeline Kanban (6 etapas), funnel metrics
+- Chat IA contextual, análisis profundo IA, propuestas broker
+- Hipoteca inline, sensibilidad (6 escenarios), fiscal (ITP/IBI/IRPF)
+- Portfolio impact, exit strategy (mantener/vender/refinanciar)
+- Reforma (4 niveles con ROI), vecindario, due diligence checklist
+- Tags, notas, documentos, watchlist, compartir, historial
+- Comparador con radar chart SVG + tabla fiscal
+- Bulk actions, export CSV/PDF, alertas
+- Scoring vs portfolio, link a valoración IA
+
+### Reglas para Modificar este Módulo
+- **NO romper el pipeline Kanban** — usa localStorage, no BD
+- **calcScore()** es client-side para evitar API calls — mantener consistencia
+- **MarketOpp interface** es el tipo base — no modificar sin actualizar todos los consumidores
+- **Expanded card** tiene muchos sub-componentes — testear en mobile
+- **S3 para documentos** — usar `seguros/grupo-vidaro/` como path base
+
+---
+
+## 🆕 SEGURIDAD IMPLEMENTADA (Mar 2026)
+
+### Account Lockout (`lib/account-lockout.ts`)
+- **5 intentos fallidos** → bloqueo **15 minutos**
+- In-memory Map (por proceso PM2), limpieza automática cada 5min
+- Integrado en `lib/auth-options.ts` → authorize()
+- `clearLockout()` al login exitoso
+- `getLockoutStats()` para monitoreo admin
+
+### Cloudflare Turnstile (`lib/turnstile.ts`)
+- **Graceful degradation**: sin `TURNSTILE_SECRET_KEY` → skip verificación
+- Server-side verification via `challenges.cloudflare.com/turnstile/v0/siteverify`
+- Env: `TURNSTILE_SECRET_KEY`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`
+- Para activar: crear widget en Cloudflare Dashboard → Turnstile
+
+### File Validation (`lib/file-validation.ts`)
+- **Magic bytes** detection (no confiar en Content-Type ni extensión)
+- Soportados: PDF, JPEG, PNG, GIF, WEBP, XLSX, XLS, ZIP, CSV, TXT
+- Contextos: `document`, `image`, `proposal`, `any`
+- Detección de contenido peligroso en archivos texto (`<script>`, `eval(`, etc.)
+- Tamaños máx: imagen 10MB, documento 50MB
+
+### Uso en APIs
+```typescript
+import { validateFile } from '@/lib/file-validation';
+
+const buffer = Buffer.from(await file.arrayBuffer());
+const result = validateFile(buffer, file.name, 'document');
+if (!result.valid) {
+  return NextResponse.json({ error: result.error }, { status: 400 });
+}
+```
+
+---
+
+## 🆕 CI/CD PIPELINE (Mar 2026)
+
+### GitHub Actions (`.github/workflows/ci.yml`)
+```
+Push/PR to main →
+  1. 🔍 Lint (ESLint)
+  2. 🧪 Test (Vitest, ~1050 tests)
+  3. 🏗️ Build (Next.js)
+  4. 🔒 Security Audit (npm audit)
+```
+
+### Vitest Config
+- **Thresholds**: 80% (lines, functions, statements), 75% (branches)
+- **Pool**: forks (maxForks: 2)
+- **Timeout**: 10s per test
+- **Exclusiones**: e2e/, playwright specs, node_modules
+
+### Tests Clave
+```
+__tests__/lib/market-opportunities.test.ts  → 10 tests (fuentes mercado)
+__tests__/lib/investment-calculators.test.ts → 11 tests (hipoteca/fiscal/sensibilidad)
+__tests__/lib/account-lockout.test.ts       → 6 tests (lockout behavior)
+__tests__/lib/file-validation.test.ts       → 8 tests (magic bytes)
+```
+
+---
+
+## 🆕 MONITORING (Mar 2026)
+
+### Dashboard Admin (`/admin/monitoring`)
+- System: uptime, PID, Node version, platform
+- Memory: RSS, heap used/total, heap %
+- Database: connection status
+- Security: accounts tracked/locked
+- Integrations: estado de cada servicio (NextAuth, Stripe, Anthropic, SMTP, S3, Turnstile, Sentry)
+
+### API (`/api/admin/monitoring`)
+- Solo accesible por SUPERADMIN
+- Runtime: `nodejs`, Dynamic: `force-dynamic`
+- No cachear — siempre datos en tiempo real
+
+---
+
+## 🆕 GESTIÓN DE SEGUROS (Mar 2026)
+
+### Modelo de Datos (`Insurance`)
+```
+numeroPoliza, aseguradora, tipo (comunidad/hogar/comercio/otro)
+nombreAsegurado, telefonoAseguradora, emailAseguradora, contactoAgente
+cobertura (JSON string[]), sumaAsegurada, franquicia
+fechaInicio, fechaVencimiento, primaMensual, primaAnual
+estado (activa/vencida/cancelada), renovacionAutomatica
+urlDocumento (S3 URL), documentosAdjuntos (JSON)
+buildingId, unitId, companyId
+```
+
+### S3 Storage
+- Bucket: `inmova` (eu-north-1)
+- Path: `seguros/grupo-vidaro/{poliza}_{filename}.pdf`
+- Documentos: PDF de pólizas completas
+
+### Propagación Edificio → Unidad
+- `InsuranceCoverageCard` componente muestra cobertura en detalle propiedad
+- API `/api/units/[id]/insurance-coverage` busca póliza directa + póliza de edificio
+- Cobertura de edificio se propaga automáticamente a todas las unidades
+
+### Carga de Seguros desde Google Drive
+- Script: `scripts/load-seguros-gdrive.ts`
+- Extrae datos de PDF via pdftotext
+- Sube a S3 y crea/actualiza Insurance en BD
+- Detecta duplicados por `numeroPoliza`
+
+---
+
+## 🆕 SERVICIOS DE IA DISPONIBLES (Mar 2026)
+
+| Servicio | Endpoint | Modelo | Uso |
+|----------|----------|--------|-----|
+| Valoración inmueble | `/valoracion-ia` | Claude 3.5 | Tasación con comparables |
+| Oportunidades inversión | `/api/investment/opportunities` | Claude 3.5 | Generación con portfolio |
+| Análisis profundo | `/api/ai/investment-analysis` | Claude 3.5 | 7 dimensiones |
+| Propuestas broker | `/api/ai/analyze-proposal` | Claude 3.5 | Extracción + veredicto |
+| Chat oportunidad | `/api/ai/opportunity-chat` | Claude 3.5 | Contextual por opp |
+| Clasificar incidencia | `/api/incidents/classify` | Claude 3.5 | Categoría + urgencia + coste |
+| Matching inquilino | `/api/matching/find` | Scoring ML | Compatibilidad 0-100 |
+| Onboarding | `/api/ai/onboarding` | Claude 3.5 | Conversacional adaptativo |
+| Landing chatbot | `/api/landing/chat` | Claude 3.5 | Comercial + ofertas |
+| Asistente soporte | `/api/support/chatbot` | Claude 3.5 | FAQ + tickets |
+
+### Regla: Fallback Local
+**TODOS** los servicios IA DEBEN tener fallback local si `ANTHROPIC_API_KEY` no está configurada.
+```typescript
+try {
+  const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  // ... AI call
+} catch {
+  // Fallback: respuesta estática o heurística
+  return generateLocalFallback(input);
+}
+```
+
+---
+
+**Última actualización**: 5 de marzo de 2026 - 20:00 UTC
+**Versión**: 3.0.0 (Sprint Mar 2026: Oportunidades + Seguridad + DevOps + Seguros S3)
 **Mantenido por**: Equipo Inmova

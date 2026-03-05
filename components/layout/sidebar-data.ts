@@ -1667,6 +1667,11 @@ const holdingGrupoNavItems = [
     name: 'Oportunidades IA',
     href: '/inversiones/oportunidades',
     icon: Search,
+  },
+  {
+    name: 'Mapa Patrimonio',
+    href: '/inversiones/mapa',
+    icon: MapPin,
     roles: ['super_admin', 'administrador'],
     badge: 'IA',
   },
