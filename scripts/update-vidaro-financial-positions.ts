@@ -40,13 +40,13 @@ const CARTERA_MAP: Record<string, { entidad: string; tipoEntidad: string }> = {
   '1142.09': { entidad: 'Amper', tipoEntidad: 'banca_privada' },
 };
 
-// Map tipo activo to our categories
+// Map tipo activo to FinancialInstrumentType enum
 const TIPO_MAP: Record<string, string> = {
-  'Renta fija': 'renta_fija',
-  'Renta variable': 'renta_variable',
-  'Mercado monetario': 'monetario',
-  'Commodities': 'commodities',
-  'Alternativos': 'alternativos',
+  'Renta fija': 'bono',
+  'Renta variable': 'fondo_inversion',
+  'Mercado monetario': 'deposito',
+  'Commodities': 'etf',
+  'Alternativos': 'otro_instrumento',
 };
 
 async function main() {
