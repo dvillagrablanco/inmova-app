@@ -173,14 +173,17 @@ const nextConfig = {
           },
         ],
       },
-      // CSP header global (auditoria V2)
+      // Security headers global (auditoria V3 Mar 2026)
       {
         source: '/(.*)',
         headers: [
-          {
-            key: 'Content-Security-Policy',
-            value: cspDirectives,
-          },
+          { key: 'Content-Security-Policy', value: cspDirectives },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          { key: 'X-XSS-Protection', value: '1; mode=block' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'Permissions-Policy', value: 'geolocation=(), microphone=(), camera=(), payment=(self)' },
+          ...(process.env.NODE_ENV === 'production' ? [{ key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' }] : []),
         ],
       },
     ];

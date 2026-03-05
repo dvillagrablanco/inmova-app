@@ -29,6 +29,15 @@ export async function GET(req: NextRequest) {
   const prisma = await getPrisma();
   try {
     const user = await requireAuth();
+
+    // Redis cache (2 min TTL)
+    try {
+      const { get, set } = await import('@/lib/cache-service');
+      const cacheKey = `buildings:${user.companyId}`;
+      const cached = await get(cacheKey);
+      if (cached) return NextResponse.json(cached);
+    } catch {} // Redis not configured
+
     const _h = await prisma.company.findUnique({ where: { id: user.companyId! }, select: { childCompanies: { select: { id: true } } } });
     const allCompanyIds = _h ? [user.companyId!, ..._h.childCompanies.map((c: { id: string }) => c.id)] : [user.companyId!];
     const scope = await resolveCompanyScope({
