@@ -19,15 +19,30 @@ interface RateLimitConfig {
 
 // Rate limits por tipo de operacion - SEGURIDAD BALANCEADA
 export const RATE_LIMITS = {
-  // Auth endpoints - estricto para prevenir brute force
+  // Auth endpoints - MUY estricto para prevenir brute force
   auth: {
     interval: 5 * 60 * 1000, // 5 minutos
     uniqueTokenPerInterval: 10,
+  },
+  // Login específico - más estricto aún
+  login: {
+    interval: 15 * 60 * 1000, // 15 minutos
+    uniqueTokenPerInterval: 5,
   },
   // Payment endpoints - moderado
   payment: {
     interval: 60 * 1000,
     uniqueTokenPerInterval: 50,
+  },
+  // Export/download - limitado para evitar scraping
+  export: {
+    interval: 60 * 1000,
+    uniqueTokenPerInterval: 10,
+  },
+  // AI endpoints - costosos, limitar más
+  ai: {
+    interval: 60 * 1000,
+    uniqueTokenPerInterval: 20,
   },
   // API general - balanceado
   api: {
@@ -36,6 +51,16 @@ export const RATE_LIMITS = {
   },
   // Lectura - permisivo pero razonable
   read: {
+    interval: 60 * 1000,
+    uniqueTokenPerInterval: 200,
+  },
+  // GDPR - muy limitado
+  gdpr: {
+    interval: 60 * 60 * 1000, // 1 hora
+    uniqueTokenPerInterval: 3,
+  },
+  // Webhooks - permisivo (vienen de servicios)
+  webhook: {
     interval: 60 * 1000,
     uniqueTokenPerInterval: 200,
   },
