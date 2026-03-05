@@ -256,8 +256,10 @@ function OpportunityCard({
 }) {
   const [expanded, setExpanded] = useState(false);
   const tipoClass = tipoBadgeClass(opp.tipo);
-  const riesgoClass = RIESGO_BADGE_CLASS[opp.riesgo?.toLowerCase()] || 'bg-secondary text-secondary-foreground';
-  const recClass = RECOMENDACION_BADGE_CLASS[opp.recomendacion] || 'bg-secondary text-secondary-foreground';
+  const riesgoKey = (opp.riesgo || 'medio').toLowerCase();
+  const riesgoClass = RIESGO_BADGE_CLASS[riesgoKey] || 'bg-secondary text-secondary-foreground';
+  const recKey = opp.recomendacion || 'Analizar';
+  const recClass = RECOMENDACION_BADGE_CLASS[recKey] || 'bg-secondary text-secondary-foreground';
 
   return (
     <Card className="overflow-hidden transition-shadow hover:shadow-md">
