@@ -247,13 +247,11 @@ export default function OportunidadesPage() {
   );
 }
 
-function OpportunityCard({
-  opp,
-  tipoBadgeClass,
-}: {
+function OpportunityCard(props: {
   opp: Opportunity;
   tipoBadgeClass: (t: string) => string;
 }) {
+  const { opp, tipoBadgeClass } = props;
   const [expanded, setExpanded] = useState(false);
   const tipoClass = tipoBadgeClass(opp.tipo);
   const riesgoKey = (opp.riesgo || 'medio').toLowerCase();
