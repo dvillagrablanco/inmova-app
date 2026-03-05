@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>INMOVA — Presentación para Grupo Vidaro</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+  
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', sans-serif; color: #1a1a1a; font-size: 13px; line-height: 1.7; }
+  
+  .page { padding: 50px 60px; min-height: 100vh; page-break-after: always; position: relative; }
+  .page:last-child { page-break-after: avoid; }
+  
+  /* Cover */
+  .cover { background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4338ca 100%); color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+  .cover .logo { font-size: 52px; font-weight: 800; letter-spacing: -2px; margin-bottom: 16px; }
+  .cover .tagline { font-size: 18px; font-weight: 300; opacity: 0.8; margin-bottom: 60px; }
+  .cover h1 { font-size: 36px; font-weight: 700; margin-bottom: 12px; line-height: 1.2; }
+  .cover .subtitle { font-size: 16px; font-weight: 400; opacity: 0.7; }
+  .cover .date { position: absolute; bottom: 40px; font-size: 12px; opacity: 0.5; }
+  .cover .confidential { position: absolute; top: 40px; right: 60px; font-size: 10px; text-transform: uppercase; letter-spacing: 2px; opacity: 0.4; padding: 4px 12px; border: 1px solid rgba(255,255,255,0.3); border-radius: 4px; }
+  
+  /* Headers */
+  h2 { font-size: 22px; font-weight: 700; color: #4338ca; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #e5e7eb; }
+  h3 { font-size: 15px; font-weight: 700; color: #1e1b4b; margin: 18px 0 8px; }
+  h4 { font-size: 13px; font-weight: 600; color: #6366f1; margin: 12px 0 6px; }
+  
+  p { margin-bottom: 8px; color: #374151; }
+  
+  /* KPI boxes */
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 16px 0; }
+  .kpi { border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; text-align: center; }
+  .kpi .number { font-size: 28px; font-weight: 800; color: #4338ca; }
+  .kpi .label { font-size: 10px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+  
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 12px; }
+  th { background: #f8fafc; padding: 10px 12px; text-align: left; font-weight: 600; border-bottom: 2px solid #e5e7eb; color: #374151; }
+  td { padding: 8px 12px; border-bottom: 1px solid #f3f4f6; color: #4b5563; }
+  tr:hover td { background: #fafafa; }
+  
+  /* Feature grid */
+  .features { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin: 16px 0; }
+  .feature { padding: 14px; border: 1px solid #e5e7eb; border-radius: 8px; border-left: 3px solid #6366f1; }
+  .feature .title { font-weight: 700; font-size: 13px; color: #1e1b4b; margin-bottom: 4px; }
+  .feature .desc { font-size: 11px; color: #6b7280; }
+  
+  /* Comparison */
+  .compare-yes { color: #16a34a; font-weight: 700; }
+  .compare-no { color: #dc2626; }
+  .compare-partial { color: #d97706; }
+  
+  /* Callout */
+  .callout { background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 8px; padding: 16px 20px; margin: 16px 0; }
+  .callout.green { background: #f0fdf4; border-color: #bbf7d0; }
+  .callout.amber { background: #fffbeb; border-color: #fde68a; }
+  .callout h4 { margin-top: 0; }
+  
+  /* Footer */
+  .page-footer { position: absolute; bottom: 30px; left: 60px; right: 60px; display: flex; justify-content: space-between; font-size: 9px; color: #9ca3af; border-top: 1px solid #f3f4f6; padding-top: 8px; }
+  
+  /* Lists */
+  ul { padding-left: 18px; margin: 6px 0; }
+  li { margin-bottom: 3px; color: #4b5563; font-size: 12px; }
+  
+  /* Print */
+  @media print {
+    .page { padding: 30px 40px; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<!-- PAGE 1: COVER -->
+<div class="page cover">
+  <div class="confidential">Confidencial</div>
+  <div class="logo">INMOVA</div>
+  <div class="tagline">Plataforma PropTech de Gestión Inmobiliaria</div>
+  <h1>Propuesta de Plataforma Tecnológica<br>para el Grupo Vidaro</h1>
+  <div class="subtitle">88+ módulos · 7 verticales · IA predictiva integrada</div>
+  <div class="date">Marzo 2026 · Documento confidencial</div>
+</div>
+
+<!-- PAGE 2: RESUMEN EJECUTIVO -->
+<div class="page">
+  <h2>1. Resumen Ejecutivo</h2>
+  
+  <p><strong>INMOVA</strong> es la plataforma de gestión inmobiliaria más completa del mercado español, diseñada específicamente para grupos inmobiliarios con múltiples sociedades, activos diversificados y necesidades avanzadas de reporting.</p>
+  
+  <div class="kpi-row">
+    <div class="kpi"><div class="number">88+</div><div class="label">Módulos</div></div>
+    <div class="kpi"><div class="number">7</div><div class="label">Verticales</div></div>
+    <div class="kpi"><div class="number">IA</div><div class="label">Predictiva</div></div>
+    <div class="kpi"><div class="number">360°</div><div class="label">Family Office</div></div>
+  </div>
+  
+  <h3>¿Por qué INMOVA para Vidaro?</h3>
+  <ul>
+    <li><strong>Multi-sociedad nativo:</strong> Gestión consolidada de Vidaro, Viroda, Rovida, Facundo, Disfasa, VIBLA y todas las filiales desde una sola plataforma</li>
+    <li><strong>Family Office 360°:</strong> Dashboard patrimonial consolidado con Private Equity (TVPI/DPI), P&L por sociedad e informes trimestrales PDF automáticos</li>
+    <li><strong>IA predictiva:</strong> Valoración automática de inmuebles, predicción de morosidad, renta óptima por zona, detección de anomalías financieras</li>
+    <li><strong>Automatización total:</strong> Facturación automática, cobro masivo 1-click, remesas SEPA, escalado de impagos, renovación IPC, generación de pagos</li>
+    <li><strong>Integración contable:</strong> Sincronización directa con Zucchetti/Altai, ContaSimple, y conciliación bancaria con auto-matching</li>
+  </ul>
+  
+  <div class="callout green">
+    <h4>🔒 Soporte y mantenimiento garantizado</h4>
+    <p>La plataforma está bajo mi gestión directa y supervisión técnica continua. Yo personalmente me encargo del mantenimiento, actualizaciones, resolución de incidencias y soporte prioritario. No depende de un proveedor externo — tenéis acceso directo a quien conoce el sistema al 100%.</p>
+  </div>
+
+  <div class="page-footer">
+    <span>INMOVA — Propuesta Grupo Vidaro</span>
+    <span>Página 2</span>
+  </div>
+</div>
+
+<!-- PAGE 3: FUNCIONALIDADES CORE -->
+<div class="page">
+  <h2>2. Funcionalidades Principales</h2>
+  
+  <h3>2.1 Gestión Operativa Diaria</h3>
+  <div class="features">
+    <div class="feature">
+      <div class="title">📋 Bandeja "Mi Día"</div>
+      <div class="desc">Todo lo pendiente hoy en un solo lugar: pagos a cobrar, contratos por vencer, incidencias abiertas. El gestor sabe qué hacer sin buscar en 5 secciones.</div>
+    </div>
+    <div class="feature">
+      <div class="title">💰 Cobro en 1 Click</div>
+      <div class="desc">Marcar pagos como cobrados individualmente o en lote (cobro masivo). Envía recibo automático por email al inquilino y notificación al gestor.</div>
+    </div>
+    <div class="feature">
+      <div class="title">📄 Facturación Automática</div>
+      <div class="desc">Al cobrar, genera factura con numeración secuencial, datos fiscales del arrendador y arrendatario, IVA si aplica, retención IRPF.</div>
+    </div>
+    <div class="feature">
+      <div class="title">📋 Contratos y Workflows</div>
+      <div class="desc">Alta de inquilino en 4 pasos (wizard), renovación con IPC masivo, workflow de salida con liquidación de fianza, plantillas reutilizables.</div>
+    </div>
+    <div class="feature">
+      <div class="title">🔔 Alertas y Vencimientos</div>
+      <div class="desc">Dashboard global de vencimientos: contratos, seguros, certificaciones, pagos. Escalado automático de impagos en 4 niveles con email.</div>
+    </div>
+    <div class="feature">
+      <div class="title">🔧 Mantenimiento Kanban</div>
+      <div class="desc">Vista visual de incidencias por columnas (Pendiente → En Progreso → Resuelto). Checklist de inspección digital para entrada/salida de inquilinos.</div>
+    </div>
+  </div>
+  
+  <h3>2.2 Inteligencia Artificial Integrada</h3>
+  <div class="features">
+    <div class="feature">
+      <div class="title">🤖 Valoración Automática de Inmuebles</div>
+      <div class="desc">Estima valor de venta y alquiler con IA (Claude), cruzando datos de mercado, comparables internos y conocimiento del tasador IA. Informe PDF profesional.</div>
+    </div>
+    <div class="feature">
+      <div class="title">📈 Predicción de Morosidad</div>
+      <div class="desc">Anticipa qué inquilinos tienen riesgo de impago antes de que ocurra, basándose en historial de pagos, tendencias y scoring comportamental.</div>
+    </div>
+    <div class="feature">
+      <div class="title">💡 Renta Óptima por Zona</div>
+      <div class="desc">Al crear o renovar contrato, sugiere el precio ideal basado en comparables del mercado y la cartera propia. Maximiza ingresos sin perder inquilinos.</div>
+    </div>
+    <div class="feature">
+      <div class="title">🔍 Anomalías Financieras</div>
+      <div class="desc">Detecta automáticamente pagos duplicados, gastos inusuales, y patrones de retraso crecientes. Previene errores y fraudes.</div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span>INMOVA — Propuesta Grupo Vidaro</span>
+    <span>Página 3</span>
+  </div>
+</div>
+
+<!-- PAGE 4: FAMILY OFFICE + ANALYTICS -->
+<div class="page">
+  <h2>3. Family Office & Analytics</h2>
+  
+  <h3>3.1 Dashboard Patrimonial 360° (específico para Vidaro)</h3>
+  <p>Vista consolidada de todo el patrimonio del grupo en una sola pantalla:</p>
+  <div class="features">
+    <div class="feature">
+      <div class="title">🏢 Inmobiliario</div>
+      <div class="desc">6 edificios, 60+ unidades, ocupación por edificio, renta mensual total, yield por propiedad. Mapa de cartera con colores por ocupación.</div>
+    </div>
+    <div class="feature">
+      <div class="title">💎 Private Equity</div>
+      <div class="desc">6 fondos PE (Helia III, Stonehenge, Asabys, Portobello, Green Trans, Titan II). Capital calls, distribuciones, TVPI, DPI. Importación automática desde Excel/PDF de MdF.</div>
+    </div>
+    <div class="feature">
+      <div class="title">📊 Financiero</div>
+      <div class="desc">7 carteras (Inversis, Bankinter, Pictet, Banca March, RE Inversis, CACEIS, Amper). 156 posiciones, €67.4M. Actualización desde informes MdF.</div>
+    </div>
+    <div class="feature">
+      <div class="title">📋 P&L por Sociedad</div>
+      <div class="desc">Comparativa de ingresos, gastos y beneficio neto entre las 9 sociedades del grupo. Identifica las más y menos rentables.</div>
+    </div>
+  </div>
+  
+  <h3>3.2 Analytics y Reporting</h3>
+  <table>
+    <thead><tr><th>Informe</th><th>Descripción</th><th>Frecuencia</th></tr></thead>
+    <tbody>
+      <tr><td>Dashboard Ejecutivo</td><td>KPIs consolidados: patrimonio, cash-flow, ocupación, alertas</td><td>Tiempo real</td></tr>
+      <tr><td>Informe Morosidad</td><td>Detalle por inquilino con días de retraso y acciones</td><td>Tiempo real</td></tr>
+      <tr><td>Yield Tracker</td><td>Rentabilidad por propiedad vs mercado</td><td>Tiempo real</td></tr>
+      <tr><td>Benchmark Mercado</td><td>Comparativa renta actual vs precio de mercado por zona</td><td>Tiempo real</td></tr>
+      <tr><td>Previsión Tesorería</td><td>Proyección cash-flow 12 meses con vencimientos</td><td>Mensual</td></tr>
+      <tr><td>Estimación Fiscal</td><td>IVA, IRPF (modelos 303, 115, 111) estimados por trimestre</td><td>Trimestral</td></tr>
+      <tr><td>Informe Trimestral PDF</td><td>Resumen patrimonial para socios con PE, activos, cash-flow</td><td>Trimestral</td></tr>
+      <tr><td>Scoring Inquilinos</td><td>Health Score 0-100 por inquilino basado en comportamiento</td><td>Tiempo real</td></tr>
+    </tbody>
+  </table>
+
+  <div class="page-footer">
+    <span>INMOVA — Propuesta Grupo Vidaro</span>
+    <span>Página 4</span>
+  </div>
+</div>
+
+<!-- PAGE 5: COMPARATIVA -->
+<div class="page">
+  <h2>4. Comparativa con Otras Soluciones</h2>
+  
+  <table>
+    <thead>
+      <tr><th>Funcionalidad</th><th>INMOVA</th><th>Solución A</th><th>Solución B</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Módulos disponibles</td><td class="compare-yes">88+</td><td class="compare-partial">~20</td><td class="compare-partial">~15</td></tr>
+      <tr><td>Verticales de negocio</td><td class="compare-yes">7</td><td class="compare-no">1</td><td class="compare-no">1</td></tr>
+      <tr><td>Multi-sociedad / Holding</td><td class="compare-yes">✅ Nativo</td><td class="compare-no">❌</td><td class="compare-no">❌</td></tr>
+      <tr><td>IA predictiva (valoración, morosidad)</td><td class="compare-yes">✅ Claude integrado</td><td class="compare-no">❌</td><td class="compare-no">❌</td></tr>
+      <tr><td>Family Office / Private Equity</td><td class="compare-yes">✅ Completo</td><td class="compare-no">❌</td><td class="compare-no">❌</td></tr>
+      <tr><td>Facturación automática</td><td class="compare-yes">✅ Con nº secuencial</td><td class="compare-partial">⚠️ Básica</td><td class="compare-yes">✅</td></tr>
+      <tr><td>Cobro masivo 1-click</td><td class="compare-yes">✅</td><td class="compare-no">❌</td><td class="compare-no">❌</td></tr>
+      <tr><td>Remesas SEPA</td><td class="compare-yes">✅ XML pain.008</td><td class="compare-no">❌</td><td class="compare-partial">⚠️ Addon</td></tr>
+      <tr><td>Integración Zucchetti/Altai</td><td class="compare-yes">✅ Directa</td><td class="compare-no">❌</td><td class="compare-no">❌</td></tr>
+      <tr><td>Conciliación bancaria auto</td><td class="compare-yes">✅ Auto-matching</td><td class="compare-no">❌</td><td class="compare-partial">⚠️ Manual</td></tr>
+      <tr><td>Onboarding con IA</td><td class="compare-yes">✅ Conversacional</td><td class="compare-no">❌</td><td class="compare-no">❌</td></tr>
+      <tr><td>Portal inquilinos</td><td class="compare-yes">✅</td><td class="compare-yes">✅</td><td class="compare-yes">✅</td></tr>
+      <tr><td>Portal proveedores</td><td class="compare-yes">✅</td><td class="compare-no">❌</td><td class="compare-no">❌</td></tr>
+      <tr><td>Portal propietarios read-only</td><td class="compare-yes">✅</td><td class="compare-no">❌</td><td class="compare-no">❌</td></tr>
+      <tr><td>Workflows (alta→gestión→salida)</td><td class="compare-yes">✅ Completos</td><td class="compare-partial">⚠️ Parcial</td><td class="compare-partial">⚠️ Parcial</td></tr>
+      <tr><td>Informe PDF patrimonial</td><td class="compare-yes">✅ Automático</td><td class="compare-no">❌</td><td class="compare-no">❌</td></tr>
+      <tr><td>Importar datos PE (Excel/PDF)</td><td class="compare-yes">✅ Con IA</td><td class="compare-no">❌</td><td class="compare-no">❌</td></tr>
+      <tr><td>Gestión seguros + propagación</td><td class="compare-yes">✅ Edificio→Unidades</td><td class="compare-no">❌</td><td class="compare-no">❌</td></tr>
+      <tr><td>Precio (200 propiedades)</td><td class="compare-yes">€199/mes</td><td class="compare-no">~€560/mes</td><td class="compare-partial">~€750/mes</td></tr>
+      <tr><td>Sin permanencia</td><td class="compare-yes">✅ Mes a mes</td><td class="compare-no">❌ 12 meses</td><td class="compare-no">❌ 12 meses</td></tr>
+    </tbody>
+  </table>
+  
+  <div class="callout">
+    <h4>💡 Diferencial clave</h4>
+    <p>INMOVA es la <strong>única plataforma del mercado español</strong> que combina gestión operativa inmobiliaria + Family Office + IA predictiva + multi-sociedad en una sola herramienta. Las alternativas requieren 3-4 herramientas distintas para cubrir lo que INMOVA ofrece de forma integrada.</p>
+  </div>
+
+  <div class="page-footer">
+    <span>INMOVA — Propuesta Grupo Vidaro</span>
+    <span>Página 5</span>
+  </div>
+</div>
+
+<!-- PAGE 6: SOPORTE + DATOS VIDARO -->
+<div class="page">
+  <h2>5. Soporte, Mantenimiento y Datos Actuales</h2>
+  
+  <div class="callout green">
+    <h4>🛡️ Compromiso de Soporte y Continuidad</h4>
+    <p>Quiero abordar directamente la principal preocupación: <strong>¿quién mantiene esto?</strong></p>
+    <p style="margin-top: 8px;">La respuesta es simple: <strong>yo personalmente</strong>. INMOVA está bajo mi gestión técnica directa:</p>
+    <ul>
+      <li><strong>Mantenimiento continuo:</strong> actualizaciones, correcciones, optimizaciones — sin esperar a un proveedor externo</li>
+      <li><strong>Soporte directo:</strong> cualquier incidencia se resuelve conmigo, sin tickets ni colas de espera</li>
+      <li><strong>Evolución personalizada:</strong> si Vidaro necesita algo nuevo, se desarrolla a medida — no depende del roadmap de un tercero</li>
+      <li><strong>Conocimiento total:</strong> conozco el 100% del código, la arquitectura y los datos del grupo — no hay dependencia de documentación</li>
+      <li><strong>Servidor propio:</strong> infraestructura dedicada en Europa, no compartida, con backups diarios y SLA 99.9%</li>
+      <li><strong>Sin riesgo de vendor lock-in:</strong> los datos son vuestros, exportables en cualquier momento</li>
+    </ul>
+    <p style="margin-top: 8px;">La ventaja competitiva aquí es clara: tenéis acceso directo al desarrollador que conoce vuestro negocio, vuestras sociedades y vuestros datos. Ningún proveedor externo puede ofrecer eso.</p>
+  </div>
+  
+  <h3>5.1 Datos del Grupo Vidaro ya cargados en INMOVA</h3>
+  <table>
+    <thead><tr><th>Dato</th><th>Detalle</th></tr></thead>
+    <tbody>
+      <tr><td>Sociedades</td><td>9 filiales + holding (Vidaro, Viroda, Rovida, Facundo, Disfasa, Los Girasoles, PDV Gesfasa, Industrial y Comercial, VIBLA SCR)</td></tr>
+      <tr><td>Edificios</td><td>6 edificios: Silvela 5, Tejada 6, Candelaria 14, Reina 15, Pelayo 15, Marbella</td></tr>
+      <tr><td>Unidades</td><td>60+ unidades parametrizadas con inquilinos, rentas y contratos</td></tr>
+      <tr><td>Private Equity</td><td>6 fondos PE con historial completo de transacciones (€13.5M calls, €1.8M distribuciones)</td></tr>
+      <tr><td>Carteras financieras</td><td>7 carteras, 156 posiciones, €67.4M valor total</td></tr>
+      <tr><td>Cuentas bancarias</td><td>22 cuentas en BBVA, Bankinter, CaixaBank, UBS, Pictet, etc.</td></tr>
+      <tr><td>Seguros</td><td>4 pólizas cargadas (Allianz, AXA) con propagación a unidades</td></tr>
+      <tr><td>Certificados energéticos</td><td>25+ CEE cargados con calificación y validez</td></tr>
+    </tbody>
+  </table>
+  
+  <h3>5.2 Renta mensual por edificio (datos actualizados marzo 2026)</h3>
+  <table>
+    <thead><tr><th>Edificio</th><th>Ciudad</th><th>Unidades</th><th>Renta/mes</th><th>Ocupación</th></tr></thead>
+    <tbody>
+      <tr><td>Manuel Silvela 5</td><td>Madrid</td><td>15</td><td>€39.146</td><td>100%</td></tr>
+      <tr><td>Hernández de Tejada 6</td><td>Madrid</td><td>12</td><td>€15.191</td><td>100%</td></tr>
+      <tr><td>Candelaria Mora 14</td><td>Valladolid</td><td>14</td><td>€16.547</td><td>100%</td></tr>
+      <tr><td>C/Reina 15</td><td>Madrid</td><td>15</td><td>€35.300</td><td>100%</td></tr>
+      <tr><td>Menéndez Pelayo 15</td><td>Palencia</td><td>3</td><td>€1.389</td><td>67%</td></tr>
+      <tr><td><strong>TOTAL</strong></td><td></td><td><strong>59</strong></td><td><strong>€107.573</strong></td><td><strong>~98%</strong></td></tr>
+    </tbody>
+  </table>
+  
+  <div class="page-footer">
+    <span>INMOVA — Propuesta Grupo Vidaro</span>
+    <span>Página 6</span>
+  </div>
+</div>
+
+<!-- PAGE 7: PRÓXIMOS PASOS -->
+<div class="page">
+  <h2>6. Próximos Pasos</h2>
+  
+  <h3>Acceso inmediato</h3>
+  <p>La plataforma está <strong>operativa y accesible ahora mismo</strong> con todos los datos del grupo cargados:</p>
+  <table>
+    <thead><tr><th>Acceso</th><th>URL</th></tr></thead>
+    <tbody>
+      <tr><td>Plataforma</td><td><strong>https://inmovaapp.com</strong></td></tr>
+      <tr><td>Dashboard Ejecutivo</td><td>https://inmovaapp.com/dashboard/ejecutivo</td></tr>
+      <tr><td>Family Office 360°</td><td>https://inmovaapp.com/family-office/dashboard</td></tr>
+      <tr><td>Valoración con IA</td><td>https://inmovaapp.com/valoracion-ia</td></tr>
+      <tr><td>Bandeja del Día</td><td>https://inmovaapp.com/hoy</td></tr>
+    </tbody>
+  </table>
+  
+  <h3>Plan de adopción sugerido</h3>
+  <table>
+    <thead><tr><th>Fase</th><th>Plazo</th><th>Acción</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Fase 1</strong></td><td>Semana 1-2</td><td>Revisión de datos cargados, correcciones, alta de documentación pendiente (seguros, CEE)</td></tr>
+      <tr><td><strong>Fase 2</strong></td><td>Semana 3-4</td><td>Formación a usuarios: gestión diaria, cobros, contratos, reporting</td></tr>
+      <tr><td><strong>Fase 3</strong></td><td>Mes 2</td><td>Activación de automatizaciones: facturación, SEPA, IPC, alertas</td></tr>
+      <tr><td><strong>Fase 4</strong></td><td>Mes 3+</td><td>Uso avanzado: IA predictiva, Family Office reporting, benchmark mercado</td></tr>
+    </tbody>
+  </table>
+  
+  <h3>Condiciones para el Grupo Vidaro</h3>
+  <div class="callout green">
+    <h4>Plan Owner — Todo incluido sin coste de licencia</h4>
+    <p>El Grupo Vidaro opera bajo el <strong>Plan Owner</strong>: acceso completo a todos los módulos, addons, IA y funcionalidades sin límites ni coste de licencia. La plataforma está dedicada al grupo y evoluciona según sus necesidades.</p>
+  </div>
+  
+  <div style="text-align: center; margin-top: 40px; padding: 30px; background: linear-gradient(135deg, #eef2ff, #f0fdf4); border-radius: 12px;">
+    <p style="font-size: 16px; font-weight: 700; color: #1e1b4b; margin-bottom: 4px;">¿Preguntas o sugerencias?</p>
+    <p style="font-size: 13px; color: #6b7280;">Estoy disponible para una demo en vivo, resolver dudas o ajustar cualquier aspecto de la plataforma.</p>
+  </div>
+  
+  <div class="page-footer">
+    <span>INMOVA — Propuesta Grupo Vidaro</span>
+    <span>Página 7</span>
+  </div>
+</div>
+
+</body>
+</html>
