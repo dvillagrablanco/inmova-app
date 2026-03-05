@@ -282,10 +282,10 @@ function OpportunityCard(props: {
             <strong>Yield Bruto:</strong> {opp.yieldBruto?.toFixed(1)}%
           </span>
           <span>
-            <strong>Cap Rate:</strong> {opp.capRate?.toFixed(1) ?? '-'}%
+            <strong>Cap Rate:</strong> {opp.capRate ? opp.capRate.toFixed(1) : '-'}%
           </span>
           <span>
-            <strong>ROI 5 años:</strong> {opp.roi5anos?.toFixed(0) ?? '-'}%
+            <strong>ROI 5 años:</strong> {opp.roi5anos ? opp.roi5anos.toFixed(0) : '-'}%
           </span>
         </div>
         <p className="text-sm text-muted-foreground">{opp.argumentacion}</p>
@@ -328,10 +328,10 @@ function OpportunityCard(props: {
               <div className="rounded-md border bg-muted/50 p-3 text-sm">
                 <p className="mb-1 font-medium">Cash-flow</p>
                 <div className="grid grid-cols-2 gap-2">
-                  <span>Mensual: {opp.kpis.cashFlowMensual?.toLocaleString('es-ES') ?? '-'} €</span>
-                  <span>Anual: {opp.kpis.cashFlowAnual?.toLocaleString('es-ES') ?? '-'} €</span>
-                  <span>Gastos: {opp.kpis.gastosEstimados?.toLocaleString('es-ES') ?? '-'} €</span>
-                  <span>Hipoteca: {opp.kpis.hipotecaMensual?.toLocaleString('es-ES') ?? '0'} €</span>
+                  <span>Mensual: {opp.kpis?.cashFlowMensual ? opp.kpis.cashFlowMensual.toLocaleString('es-ES') : '-'} €</span>
+                  <span>Anual: {opp.kpis?.cashFlowAnual ? opp.kpis.cashFlowAnual.toLocaleString('es-ES') : '-'} €</span>
+                  <span>Gastos: {opp.kpis?.gastosEstimados ? opp.kpis.gastosEstimados.toLocaleString('es-ES') : '-'} €</span>
+                  <span>Hipoteca: {opp.kpis?.hipotecaMensual ? opp.kpis.hipotecaMensual.toLocaleString('es-ES') : '0'} €</span>
                 </div>
                 {opp.paybackAnos != null && (
                   <p className="mt-2 text-muted-foreground">
