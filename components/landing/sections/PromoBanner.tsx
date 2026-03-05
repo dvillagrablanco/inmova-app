@@ -21,41 +21,53 @@ interface PromoCampaign {
 
 const campaigns: PromoCampaign[] = [
   {
-    id: 'starter26',
-    code: 'STARTER26',
-    title: 'Empieza desde €17,50/mes',
-    subtitle: 'Plan Starter al 50% los 3 primeros meses',
-    description: 'Pasa de hojas de cálculo a gestión profesional. Contratos digitales, cobros automáticos y portal de inquilinos incluidos.',
-    cta: 'Ver oferta',
-    ctaHref: '/landing/ofertas#starter26',
+    id: 'launch2026',
+    code: 'LAUNCH2026',
+    title: '🚀 Lanzamiento: 3 meses al 50%',
+    subtitle: 'Cualquier plan al 50% de descuento los 3 primeros meses',
+    description: 'Celebramos el lanzamiento de 88+ módulos con IA predictiva. Starter desde €44,50/mes, Profesional desde €99,50/mes. Sin permanencia.',
+    cta: 'Activar oferta',
+    ctaHref: '/register?coupon=LAUNCH2026',
     icon: <Sparkles className="h-6 w-6" />,
     gradient: 'from-amber-500 via-orange-500 to-red-500',
     textGradient: 'from-amber-600 to-red-600'
   },
   {
-    id: 'coliving26',
-    code: 'COLIVING26',
-    title: 'Coliving con Prorrateo Automático',
-    subtitle: 'Primer mes GRATIS + 20% dto. durante 6 meses',
-    description: 'Gestiona habitaciones con prorrateo de luz, agua y gas por inquilino. Plan Professional con todo incluido.',
-    cta: 'Ver oferta',
-    ctaHref: '/landing/ofertas#coliving26',
+    id: 'ia-free',
+    code: 'IAFREE2026',
+    title: '🤖 Addon IA Inmobiliaria GRATIS 2 meses',
+    subtitle: 'Valoración IA + Predicción morosidad + Renta óptima sin coste',
+    description: 'Activa el addon IA Inmobiliaria (€149/mes) gratis durante 2 meses con cualquier plan. Descubre la IA predictiva que anticipa impagos.',
+    cta: 'Probar IA gratis',
+    ctaHref: '/register?coupon=IAFREE2026',
     icon: <TrendingUp className="h-6 w-6" />,
-    gradient: 'from-green-500 via-emerald-500 to-teal-500',
-    textGradient: 'from-green-600 to-teal-600'
+    gradient: 'from-violet-500 via-purple-500 to-fuchsia-500',
+    textGradient: 'from-violet-600 to-fuchsia-600'
   },
   {
     id: 'switch26',
-    code: 'SWITCH26',
-    title: '¿Vienes de otra plataforma?',
-    subtitle: 'Igualamos tu precio actual + Upgrade gratis',
-    description: 'Migración de datos incluida sin coste. Más verticales, más funcionalidades, mismo precio. Sin permanencia.',
-    cta: 'Ver oferta',
-    ctaHref: '/landing/ofertas#switch26',
+    code: 'SWITCH2026',
+    title: '🔄 ¿Vienes de otra plataforma?',
+    subtitle: 'Migración gratis + 30% dto. 6 meses + Upgrade de plan',
+    description: 'Te migramos los datos sin coste y te damos un 30% de descuento durante 6 meses. Más módulos, más verticales, mejor precio.',
+    cta: 'Solicitar migración',
+    ctaHref: '/landing/contacto?motivo=migracion',
     icon: <ArrowRightLeft className="h-6 w-6" />,
-    gradient: 'from-indigo-500 via-purple-500 to-pink-500',
-    textGradient: 'from-indigo-600 to-pink-600'
-  }
+    gradient: 'from-indigo-500 via-blue-500 to-cyan-500',
+    textGradient: 'from-indigo-600 to-cyan-600'
+  },
+  {
+    id: 'pack-completo',
+    code: 'PACK2026',
+    title: '💎 Pack Completo: primer mes a €249',
+    subtitle: 'Los 5 addons premium al 50% el primer mes (después €499/mes)',
+    description: 'IA + Family Office + Automatización + Analytics + Operaciones. Todo por €249 el primer mes. La suite más completa del mercado.',
+    cta: 'Activar Pack Completo',
+    ctaHref: '/register?coupon=PACK2026',
+    icon: <Sparkles className="h-6 w-6" />,
+    gradient: 'from-emerald-500 via-green-500 to-teal-500',
+    textGradient: 'from-emerald-600 to-teal-600'
+  },
 ];
 
 export function PromoBanner() {
