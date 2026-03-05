@@ -6,6 +6,7 @@ import { Header } from './header';
 import { BottomNavigation } from './bottom-navigation';
 import { OnboardingChecklist } from '@/components/tutorials/OnboardingChecklist';
 import { FirstTimeSetupWizard } from '@/components/tutorials/FirstTimeSetupWizard';
+import { AIOnboardingChat } from '@/components/onboarding/AIOnboardingChat';
 import { usePathname, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useIsMobile } from '@/lib/hooks/useMediaQuery';
@@ -244,9 +245,9 @@ export function AuthenticatedLayout({
         <BottomNavigation />
       </div>
 
-      {/* Setup Wizard - Primera vez (NO para superadmin) */}
+      {/* AI Onboarding Chat - Primera vez (NO para superadmin) */}
       {showSetupWizard && session?.user?.role !== 'super_admin' && (
-        <FirstTimeSetupWizard onComplete={handleCompleteSetup} onSkip={handleSkipSetup} />
+        <AIOnboardingChat onComplete={handleCompleteSetup} onSkip={handleSkipSetup} />
       )}
 
       {/* Onboarding Checklist - Hasta completar (NO para superadmin) */}
