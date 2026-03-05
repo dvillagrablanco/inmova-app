@@ -284,9 +284,6 @@ export function getBankPropertyOpportunities(): MarketOpportunity[] {
 // ============================================================================
 
 export function getDivergenceOpportunities(portfolioData?: any): MarketOpportunity[] {
-  // Detect properties in the portfolio that are undervalued vs market
-  const { IPV_STATIC } = require('@/lib/public-market-apis');
-
   const divergences: MarketOpportunity[] = [];
 
   // Zones where current prices are notably below the national trend
