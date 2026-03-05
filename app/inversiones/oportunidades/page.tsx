@@ -47,8 +47,6 @@ export default function OportunidadesPage() {
   const [portfolioStats, setPortfolioStats] = useState<any>(null);
   const [marketIndicators, setMarketIndicators] = useState<any[]>([]);
   const [marketSources, setMarketSources] = useState<any[]>([]);
-  const [marketIndicators, setMarketIndicators] = useState<any[]>([]);
-  const [marketSources, setMarketSources] = useState<any[]>([]);
 
   // Simulator state
   const [simPrecio, setSimPrecio] = useState('');
