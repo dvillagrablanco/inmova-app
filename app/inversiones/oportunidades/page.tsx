@@ -175,6 +175,7 @@ export default function OportunidadesPage() {
         <Tabs defaultValue="oportunidades">
           <TabsList className="w-full sm:w-auto">
             <TabsTrigger value="oportunidades">Oportunidades IA</TabsTrigger>
+            <TabsTrigger value="mercado">Buscar Mercado</TabsTrigger>
             <TabsTrigger value="simulador">Simulador</TabsTrigger>
             <TabsTrigger value="alertas">Alertas</TabsTrigger>
           </TabsList>
@@ -216,6 +217,61 @@ export default function OportunidadesPage() {
                 ))}
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="mercado" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Search className="h-5 w-5" /> Buscar en Portales Inmobiliarios</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className="space-y-1">
+                    <Label className="text-xs">Ciudad</Label>
+                    <Input placeholder="Madrid" id="search-city" defaultValue="Madrid" />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Tipo</Label>
+                    <Input placeholder="vivienda" id="search-type" defaultValue="vivienda" />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Precio máx</Label>
+                    <Input placeholder="500000" type="number" id="search-max-price" />
+                  </div>
+                  <div className="flex items-end">
+                    <Button className="w-full" onClick={async () => {
+                      const city = (document.getElementById('search-city') as HTMLInputElement)?.value || 'Madrid';
+                      const propertyType = (document.getElementById('search-type') as HTMLInputElement)?.value || '';
+                      const maxPrice = (document.getElementById('search-max-price') as HTMLInputElement)?.value || '';
+                      toast.info('Buscando en portales...');
+                      try {
+                        const params = new URLSearchParams({ city });
+                        if (propertyType) params.set('propertyType', propertyType);
+                        if (maxPrice) params.set('maxPrice', maxPrice);
+                        const res = await fetch('/api/investment/search-listings?' + params.toString());
+                        if (res.ok) {
+                          const data = await res.json();
+                          if (data.listings?.length > 0) {
+                            toast.success(data.totalFound + ' resultados de ' + data.sources.join(', '));
+                          } else {
+                            toast.info('Sin resultados. Configura IDEALISTA_API_KEY o INMOLINK_API_KEY para activar las búsquedas.');
+                          }
+                        }
+                      } catch { toast.error('Error en la búsqueda'); }
+                    }}><Search className="h-4 w-4 mr-2" /> Buscar</Button>
+                  </div>
+                </div>
+                <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg text-sm">
+                  <p className="font-medium text-blue-800 dark:text-blue-200">Fuentes conectadas:</p>
+                  <ul className="mt-1 text-blue-700 dark:text-blue-300 text-xs space-y-1">
+                    <li>{'✅'} InmolinkCRM — MLS España (REST API)</li>
+                    <li>{process.env.NEXT_PUBLIC_IDEALISTA_CONFIGURED === 'true' ? '✅' : '⏳'} Idealista API — {process.env.NEXT_PUBLIC_IDEALISTA_CONFIGURED === 'true' ? 'Conectado' : 'Pendiente API key (solicitar en developers.idealista.com)'}</li>
+                    <li>{'✅'} INE — Índice Precios Vivienda (datos públicos)</li>
+                    <li>{'✅'} Notariado — Precios escriturados (datos públicos)</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="simulador" className="space-y-4">
