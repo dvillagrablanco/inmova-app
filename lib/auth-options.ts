@@ -62,6 +62,19 @@ export const authOptions: NextAuthOptions = {
             throw new Error('Credenciales inválidas');
           }
 
+          // Account lockout check
+          try {
+            const { isAccountLocked } = require('./account-lockout');
+            const lockStatus = isAccountLocked(credentials.email);
+            if (lockStatus.locked) {
+              await addConstantDelay();
+              throw new Error(`Cuenta bloqueada temporalmente. Intenta en ${Math.ceil(lockStatus.remainingSeconds / 60)} minutos.`);
+            }
+          } catch (lockErr: any) {
+            if (lockErr.message?.includes('bloqueada')) throw lockErr;
+            // If lockout module fails, continue without it
+          }
+
           // Intentar autenticar como usuario normal
           const prisma = getPrismaClient();
           if (!prisma) {
@@ -92,6 +105,17 @@ export const authOptions: NextAuthOptions = {
           if (user) {
             // Usuario encontrado - validar credenciales y estado
             if (!user.password || !isPasswordValid) {
+              // Record failed attempt for lockout
+              try {
+                const { recordFailedAttempt } = require('./account-lockout');
+                const result = recordFailedAttempt(credentials.email);
+                if (result.locked) {
+                  await addConstantDelay();
+                  throw new Error(`Demasiados intentos. Cuenta bloqueada 15 minutos.`);
+                }
+              } catch (lockErr: any) {
+                if (lockErr.message?.includes('bloqueada') || lockErr.message?.includes('intentos')) throw lockErr;
+              }
               await addConstantDelay();
               throw new Error('Email o contraseña incorrectos');
             }
@@ -117,6 +141,9 @@ export const authOptions: NextAuthOptions = {
               }
             }
             
+            // Clear lockout on successful login
+            try { const { clearLockout } = require('./account-lockout'); clearLockout(credentials.email); } catch {}
+
             await addConstantDelay();
             return {
               id: user.id,
