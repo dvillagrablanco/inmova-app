@@ -7,119 +7,115 @@ import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
-  MapPin,
-  Building2,
-  Euro,
-  Percent,
-  Loader2,
-  ExternalLink,
-  Home,
-  Car,
-  Store,
-  Warehouse,
+  Home, MapPin, Building2, RefreshCw, Euro, TrendingUp, AlertTriangle, Shield,
 } from 'lucide-react';
 import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
+  Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { toast } from 'sonner';
-import Link from 'next/link';
 
-interface BuildingOnMap {
+interface BuildingMapData {
   id: string;
   nombre: string;
   direccion: string;
   ciudad: string;
-  tipo: string;
-  latitud: number | null;
-  longitud: number | null;
-  companyId: string;
-  companyName: string;
-  totalUnidades: number;
-  unidadesOcupadas: number;
-  rentaMensual: number;
-  ocupacion: number;
+  lat: number;
+  lng: number;
+  company: string;
+  totalUnits: number;
+  occupiedUnits: number;
+  occupancy: number;
+  monthlyRent: number;
+  hasInsurance: boolean;
+  insuranceExpiring: boolean;
+  pendingMaintenance: number;
+  yieldEstimated: number;
 }
 
-const tipoIcon: Record<string, any> = {
-  residencial: Home,
-  comercial: Store,
-  mixto: Building2,
-  garaje: Car,
-  industrial: Warehouse,
+// Geocoding approximations for known addresses
+const KNOWN_COORDS: Record<string, [number, number]> = {
+  'hernandez de tejada': [40.4350, -3.6780],
+  'candelaria mora': [41.6520, -4.7245],
+  'reina': [40.4250, -3.7010],
+  'piamonte': [40.4255, -3.6985],
+  'manuel silvela': [40.4340, -3.6930],
+  'menendez pelayo': [40.4100, -3.6830],
+  'prado': [40.4140, -3.6930],
+  'cuba': [41.6510, -4.7300],
+  'metal': [41.6400, -4.7350],
+  'constitución': [41.6530, -4.7260],
+  'espronceda': [40.4320, -3.7000],
+  'barquillo': [40.4230, -3.6950],
+  'europa': [41.6480, -4.7210],
+  'tomillar': [40.4500, -3.7500],
+  'gemelos': [36.7200, -4.4100],
+  'camilo jose cela': [36.5100, -4.8900],
+  'grijota': [42.0100, -4.5700],
 };
 
-const COMPANY_COLORS: Record<string, string> = {};
-const COLOR_PALETTE = [
-  'bg-indigo-500',
-  'bg-emerald-500',
-  'bg-rose-500',
-  'bg-amber-500',
-  'bg-cyan-500',
-];
-
-function getCompanyColor(companyName: string): string {
-  if (!COMPANY_COLORS[companyName]) {
-    const idx = Object.keys(COMPANY_COLORS).length % COLOR_PALETTE.length;
-    COMPANY_COLORS[companyName] = COLOR_PALETTE[idx];
+function getCoords(name: string): [number, number] {
+  const lower = name.toLowerCase();
+  for (const [key, coords] of Object.entries(KNOWN_COORDS)) {
+    if (lower.includes(key)) return coords;
   }
-  return COMPANY_COLORS[companyName];
+  return [40.4168, -3.7038]; // Madrid default
 }
 
-export default function MapaCarteraPage() {
+function getOccupancyColor(occ: number): string {
+  if (occ >= 90) return '#16a34a';
+  if (occ >= 70) return '#d97706';
+  if (occ >= 50) return '#ea580c';
+  return '#dc2626';
+}
+
+export default function MapaPatrimonioPage() {
   const { status } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [buildings, setBuildings] = useState<BuildingOnMap[]>([]);
-  const [selectedBuilding, setSelectedBuilding] = useState<BuildingOnMap | null>(null);
+  const [buildings, setBuildings] = useState<BuildingMapData[]>([]);
+  const [colorBy, setColorBy] = useState<'occupancy' | 'yield' | 'insurance'>('occupancy');
+  const [selectedBuilding, setSelectedBuilding] = useState<BuildingMapData | null>(null);
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login');
-      return;
-    }
+    if (status === 'unauthenticated') router.push('/login');
     if (status === 'authenticated') loadData();
   }, [status, router]);
 
-  // Extraer ciudad de la dirección (último segmento tras la última coma)
-  const extractCiudad = (direccion: string): string => {
-    if (!direccion) return 'Sin ciudad';
-    const parts = direccion.split(',').map(p => p.trim());
-    // La ciudad suele ser el último segmento (ej: "C/ Reina, 15, Madrid" → "Madrid")
-    const last = parts[parts.length - 1];
-    // Limpiar código postal si lo tiene
-    return last.replace(/^\d{5}\s*/, '').trim() || 'Sin ciudad';
-  };
-
   const loadData = async () => {
+    setLoading(true);
     try {
-      const res = await fetch('/api/buildings?limit=200');
-      if (!res.ok) throw new Error();
-      const data = await res.json();
-      const list = (Array.isArray(data) ? data : data.data || [])
-        // Filtrar edificios de test/demo
-        .filter((b: any) => !b.isDemo && !b.nombre?.includes('Test E2E'))
-        .map((b: any) => ({
-          id: b.id,
-          nombre: b.nombre,
-          direccion: b.direccion,
-          ciudad: extractCiudad(b.direccion || ''),
-          tipo: b.tipo || 'residencial',
-          latitud: b.latitud || null,
-          longitud: b.longitud || null,
-          companyId: b.companyId,
-          companyName: b.company?.nombre || 'Sin sociedad',
-          totalUnidades: b.metrics?.totalUnits || b.totalUnidades || 0,
-          unidadesOcupadas: b.metrics?.occupiedUnits || b.unidadesOcupadas || 0,
-          rentaMensual: b.metrics?.ingresosMensuales || 0,
-          ocupacion: b.metrics?.ocupacionPct || 0,
-        }));
-      setBuildings(list);
+      const res = await fetch('/api/buildings');
+      if (res.ok) {
+        const data = await res.json();
+        const blds = (data.buildings || data || []).map((b: any) => {
+          const totalUnits = b.units?.length || b._count?.units || 0;
+          const occupiedUnits = b.units?.filter((u: any) => u.tenantId || u.estado === 'ocupada').length || 0;
+          const occupancy = totalUnits > 0 ? Math.round((occupiedUnits / totalUnits) * 100) : 0;
+          const monthlyRent = b.units?.reduce((s: number, u: any) => s + (u.rentaMensual || 0), 0) || 0;
+          const coords = getCoords(b.nombre || b.direccion || '');
+          return {
+            id: b.id,
+            nombre: b.nombre || b.direccion || 'Sin nombre',
+            direccion: b.direccion || '',
+            ciudad: b.ciudad || (coords[0] > 41 ? 'Valladolid' : coords[0] < 37 ? 'Marbella' : 'Madrid'),
+            lat: coords[0],
+            lng: coords[1],
+            company: b.company?.nombre || '',
+            totalUnits,
+            occupiedUnits,
+            occupancy,
+            monthlyRent,
+            hasInsurance: (b.insurances?.length || 0) > 0,
+            insuranceExpiring: false,
+            pendingMaintenance: b.maintenanceRequests?.filter((m: any) => m.status !== 'completado').length || 0,
+            yieldEstimated: monthlyRent > 0 && b.valorMercado ? ((monthlyRent * 12) / b.valorMercado) * 100 : 0,
+          };
+        });
+        setBuildings(blds);
+      }
     } catch {
       toast.error('Error cargando edificios');
     } finally {
@@ -127,281 +123,185 @@ export default function MapaCarteraPage() {
     }
   };
 
-  const fmt = (n: number) =>
-    new Intl.NumberFormat('es-ES', {
-      style: 'currency',
-      currency: 'EUR',
-      maximumFractionDigits: 0,
-    }).format(n);
+  const fmt = (n: number) => new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
 
-  // Agrupar por ciudad
-  const ciudades = [...new Set(buildings.map((b) => b.ciudad || 'Sin ciudad'))].sort();
-  const sociedades = [...new Set(buildings.map((b) => b.companyName))].sort();
+  // Aggregate KPIs
+  const totalUnits = buildings.reduce((s, b) => s + b.totalUnits, 0);
+  const totalOccupied = buildings.reduce((s, b) => s + b.occupiedUnits, 0);
+  const totalRent = buildings.reduce((s, b) => s + b.monthlyRent, 0);
+  const insuredCount = buildings.filter(b => b.hasInsurance).length;
+  const avgOccupancy = totalUnits > 0 ? Math.round((totalOccupied / totalUnits) * 100) : 0;
 
-  // KPIs totales
-  const totalEdificios = buildings.length;
-  const totalUnidades = buildings.reduce((s, b) => s + b.totalUnidades, 0);
-  const totalOcupadas = buildings.reduce((s, b) => s + b.unidadesOcupadas, 0);
-  const totalRenta = buildings.reduce((s, b) => s + b.rentaMensual, 0);
-  const ocupacionMedia = totalUnidades > 0 ? (totalOcupadas / totalUnidades) * 100 : 0;
+  // Group by city
+  const cities = [...new Set(buildings.map(b => b.ciudad))].sort();
 
-  // Edificios con coordenadas para mapa
-  const conCoords = buildings.filter((b) => b.latitud && b.longitud);
-
-  if (loading) {
-    return (
-      <AuthenticatedLayout>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-        </div>
-      </AuthenticatedLayout>
-    );
-  }
+  if (loading) return <AuthenticatedLayout><div className="max-w-7xl mx-auto space-y-4"><Skeleton className="h-8 w-64" /><Skeleton className="h-[500px]" /></div></AuthenticatedLayout>;
 
   return (
     <AuthenticatedLayout>
-      <div className="space-y-6 p-4 md:p-6">
-        {/* Breadcrumb */}
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/dashboard">
-                <Home className="h-4 w-4" />
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/inversiones">Inversiones</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Mapa de Cartera</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+      <div className="max-w-7xl mx-auto space-y-5">
+        <Breadcrumb><BreadcrumbList>
+          <BreadcrumbItem><BreadcrumbLink href="/dashboard"><Home className="h-4 w-4" /></BreadcrumbLink></BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem><BreadcrumbLink href="/inversiones">Inversiones</BreadcrumbLink></BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem><BreadcrumbPage>Mapa de Patrimonio</BreadcrumbPage></BreadcrumbItem>
+        </BreadcrumbList></Breadcrumb>
 
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Mapa de Cartera</h1>
-          <p className="text-gray-500">
-            Vista geográfica de {totalEdificios} inmuebles en {ciudades.length} ciudades
-          </p>
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <div>
+            <h1 className="text-2xl font-bold flex items-center gap-2"><MapPin className="h-6 w-6" /> Mapa de Patrimonio</h1>
+            <p className="text-sm text-muted-foreground">{buildings.length} edificios · {totalUnits} unidades · {cities.length} ciudades</p>
+          </div>
+          <div className="flex gap-2">
+            <Select value={colorBy} onValueChange={(v) => setColorBy(v as any)}>
+              <SelectTrigger className="w-[150px]"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="occupancy">Color: Ocupación</SelectItem>
+                <SelectItem value="yield">Color: Yield</SelectItem>
+                <SelectItem value="insurance">Color: Seguro</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button variant="outline" size="sm" onClick={loadData}><RefreshCw className="h-4 w-4 mr-1" /> Actualizar</Button>
+          </div>
         </div>
 
         {/* KPIs */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          <Card>
-            <CardContent className="pt-4 pb-3">
-              <div className="text-xs text-gray-500">Inmuebles</div>
-              <div className="text-xl font-bold">{totalEdificios}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4 pb-3">
-              <div className="text-xs text-gray-500">Unidades</div>
-              <div className="text-xl font-bold">{totalUnidades}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4 pb-3">
-              <div className="text-xs text-gray-500">Ocupación</div>
-              <div className="text-xl font-bold text-green-600">{ocupacionMedia.toFixed(1)}%</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4 pb-3">
-              <div className="text-xs text-gray-500">Renta mensual</div>
-              <div className="text-xl font-bold text-indigo-600">{fmt(totalRenta)}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4 pb-3">
-              <div className="text-xs text-gray-500">Ciudades</div>
-              <div className="text-xl font-bold">{ciudades.length}</div>
-            </CardContent>
-          </Card>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          <Card><CardContent className="pt-4 pb-3 text-center"><p className="text-[10px] text-muted-foreground uppercase">Edificios</p><p className="text-xl font-bold">{buildings.length}</p></CardContent></Card>
+          <Card><CardContent className="pt-4 pb-3 text-center"><p className="text-[10px] text-muted-foreground uppercase">Unidades</p><p className="text-xl font-bold">{totalUnits}</p></CardContent></Card>
+          <Card><CardContent className="pt-4 pb-3 text-center"><p className="text-[10px] text-muted-foreground uppercase">Ocupación</p><p className={`text-xl font-bold ${avgOccupancy >= 80 ? 'text-green-600' : 'text-amber-600'}`}>{avgOccupancy}%</p></CardContent></Card>
+          <Card><CardContent className="pt-4 pb-3 text-center"><p className="text-[10px] text-muted-foreground uppercase">Renta/mes</p><p className="text-xl font-bold text-green-600">{fmt(totalRent)}</p></CardContent></Card>
+          <Card><CardContent className="pt-4 pb-3 text-center"><p className="text-[10px] text-muted-foreground uppercase">Asegurados</p><p className="text-xl font-bold">{insuredCount}/{buildings.length}</p></CardContent></Card>
         </div>
 
-        {/* Leyenda sociedades */}
-        <div className="flex flex-wrap gap-3">
-          {sociedades.map((s) => (
-            <div key={s} className="flex items-center gap-2 text-sm">
-              <div className={`w-3 h-3 rounded-full ${getCompanyColor(s)}`} />
-              <span className="font-medium text-gray-700">{s}</span>
-              <Badge variant="secondary" className="text-xs">
-                {buildings.filter((b) => b.companyName === s).length}
-              </Badge>
-            </div>
-          ))}
-        </div>
-
-        {/* Mapa embebido */}
+        {/* Map visualization (SVG-based since Mapbox may not have token) */}
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <MapPin className="h-4 w-4" />
-              Mapa de Cartera
-              {conCoords.length > 0 && (
-                <Badge variant="secondary" className="text-xs">{conCoords.length} con coordenadas</Badge>
-              )}
-            </CardTitle>
-          </CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">Vista geográfica</CardTitle></CardHeader>
           <CardContent>
-            {conCoords.length > 0 ? (
-              <div className="space-y-3">
-                {/* Mapa visual con puntos posicionados */}
-                <div className="relative aspect-[16/9] md:aspect-[21/9] rounded-lg overflow-hidden border bg-gray-100">
-                  <iframe
-                    src={`https://www.openstreetmap.org/export/embed.html?bbox=${
-                      Math.min(...conCoords.map((b) => b.longitud!)) - 0.5
-                    }%2C${
-                      Math.min(...conCoords.map((b) => b.latitud!)) - 0.3
-                    }%2C${
-                      Math.max(...conCoords.map((b) => b.longitud!)) + 0.5
-                    }%2C${
-                      Math.max(...conCoords.map((b) => b.latitud!)) + 0.3
-                    }&layer=mapnik`}
-                    width="100%"
-                    height="100%"
-                    style={{ border: 0 }}
-                    loading="lazy"
-                    title="Mapa de cartera"
-                  />
-                  {/* Overlay con pins posicionados sobre el iframe */}
-                  <div className="absolute inset-0 pointer-events-none">
-                    {(() => {
-                      const minLat = Math.min(...conCoords.map(b => b.latitud!)) - 0.3;
-                      const maxLat = Math.max(...conCoords.map(b => b.latitud!)) + 0.3;
-                      const minLng = Math.min(...conCoords.map(b => b.longitud!)) - 0.5;
-                      const maxLng = Math.max(...conCoords.map(b => b.longitud!)) + 0.5;
-                      return conCoords.map((b) => {
-                        const x = ((b.longitud! - minLng) / (maxLng - minLng)) * 100;
-                        const y = ((maxLat - b.latitud!) / (maxLat - minLat)) * 100;
-                        return (
-                          <div
-                            key={b.id}
-                            className="absolute pointer-events-auto cursor-pointer group"
-                            style={{ left: `${x}%`, top: `${y}%`, transform: 'translate(-50%, -100%)' }}
-                            onClick={() => setSelectedBuilding(b)}
-                          >
-                            <div className={`w-6 h-6 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-white text-[8px] font-bold hover:scale-150 transition-transform ${
-                              b.ocupacion >= 80 ? 'bg-green-500' : b.ocupacion >= 50 ? 'bg-amber-500' : 'bg-red-500'
-                            }`}>
-                              {b.totalUnidades || '•'}
-                            </div>
-                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 bg-black text-white text-[10px] px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                              {b.nombre} · {b.ocupacion.toFixed(0)}% ocup. · {fmt(b.rentaMensual)}/mes
-                            </div>
-                          </div>
-                        );
-                      });
-                    })()}
-                  </div>
-                </div>
+            <div className="relative bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden" style={{ height: 420 }}>
+              {/* SVG Map of Spain with building pins */}
+              <svg viewBox="35.5 35.5 7 7" width="100%" height="100%" className="absolute inset-0">
+                {/* Spain simplified outline */}
+                <rect x="35.5" y="35.5" width="7" height="7" fill="transparent" />
+                
+                {/* City labels */}
+                {cities.map(city => {
+                  const cityBuildings = buildings.filter(b => b.ciudad === city);
+                  if (cityBuildings.length === 0) return null;
+                  const avgLat = cityBuildings.reduce((s, b) => s + b.lat, 0) / cityBuildings.length;
+                  const avgLng = cityBuildings.reduce((s, b) => s + b.lng, 0) / cityBuildings.length;
+                  // Transform to SVG coords (longitude = x, latitude = y inverted)
+                  const x = avgLng + 7; // Shift longitude to positive
+                  const y = 83.5 - avgLat; // Invert latitude
+                  return (
+                    <g key={city}>
+                      <text x={x} y={y - 0.15} textAnchor="middle" className="text-[0.12px] fill-current font-bold">{city}</text>
+                      <text x={x} y={y + 0.05} textAnchor="middle" className="text-[0.08px] fill-muted-foreground">{cityBuildings.length} edificios</text>
+                    </g>
+                  );
+                })}
 
-                {/* Links para ver en Google Maps */}
-                <div className="flex flex-wrap gap-2">
-                  {conCoords.slice(0, 8).map((b) => (
-                    <a
-                      key={b.id}
-                      href={`https://www.google.com/maps?q=${b.latitud},${b.longitud}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs text-blue-600 hover:underline flex items-center gap-1"
-                    >
-                      <MapPin className="h-3 w-3" /> {b.nombre}
-                    </a>
-                  ))}
-                  {conCoords.length > 8 && (
-                    <span className="text-xs text-gray-400">+{conCoords.length - 8} más</span>
-                  )}
-                </div>
+                {/* Building pins */}
+                {buildings.map(b => {
+                  const x = b.lng + 7;
+                  const y = 83.5 - b.lat;
+                  const color = colorBy === 'occupancy' ? getOccupancyColor(b.occupancy)
+                    : colorBy === 'yield' ? (b.yieldEstimated > 7 ? '#16a34a' : b.yieldEstimated > 4 ? '#d97706' : '#dc2626')
+                    : b.hasInsurance ? '#16a34a' : '#dc2626';
+                  const isSelected = selectedBuilding?.id === b.id;
+                  return (
+                    <g key={b.id} onClick={() => setSelectedBuilding(isSelected ? null : b)} className="cursor-pointer">
+                      <circle cx={x} cy={y} r={isSelected ? 0.08 : 0.05} fill={color} stroke="white" strokeWidth={0.015} opacity={0.9} />
+                      {isSelected && (
+                        <text x={x} y={y - 0.1} textAnchor="middle" className="text-[0.06px] fill-current font-medium">{b.nombre.slice(0, 20)}</text>
+                      )}
+                    </g>
+                  );
+                })}
+              </svg>
+
+              {/* Legend */}
+              <div className="absolute bottom-2 left-2 bg-white/90 dark:bg-gray-900/90 rounded p-2 text-[10px]">
+                <p className="font-bold mb-1">{colorBy === 'occupancy' ? 'Ocupación' : colorBy === 'yield' ? 'Yield' : 'Seguro'}</p>
+                {colorBy === 'occupancy' ? (
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-green-600" /> ≥90%</div>
+                    <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-amber-500" /> 70-90%</div>
+                    <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-orange-500" /> 50-70%</div>
+                    <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-red-600" /> &lt;50%</div>
+                  </div>
+                ) : colorBy === 'yield' ? (
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-green-600" /> &gt;7%</div>
+                    <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-amber-500" /> 4-7%</div>
+                    <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-red-600" /> &lt;4%</div>
+                  </div>
+                ) : (
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-green-600" /> Asegurado</div>
+                    <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-red-600" /> Sin seguro</div>
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="aspect-[16/9] md:aspect-[21/9] rounded-lg overflow-hidden border">
-                <iframe
-                  src="https://www.openstreetmap.org/export/embed.html?bbox=-5.5%2C38.5%2C0.5%2C42.0&layer=mapnik"
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  loading="lazy"
-                  title="Mapa de cartera"
-                />
-              </div>
-            )}
+            </div>
           </CardContent>
         </Card>
 
-        {/* Lista por ciudad */}
-        {ciudades.map((ciudad) => {
-          const edificios = buildings.filter(
-            (b) => (b.ciudad || 'Sin ciudad') === ciudad
-          );
-          const ciudadRenta = edificios.reduce((s, b) => s + b.rentaMensual, 0);
-          const ciudadUnidades = edificios.reduce((s, b) => s + b.totalUnidades, 0);
+        {/* Selected building detail */}
+        {selectedBuilding && (
+          <Card className="border-blue-500 border-2">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Building2 className="h-4 w-4" /> {selectedBuilding.nombre}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-6 gap-3 text-xs">
+                <div><p className="text-muted-foreground">Dirección</p><p className="font-medium">{selectedBuilding.direccion}</p></div>
+                <div><p className="text-muted-foreground">Sociedad</p><p className="font-medium">{selectedBuilding.company}</p></div>
+                <div><p className="text-muted-foreground">Unidades</p><p className="font-bold">{selectedBuilding.occupiedUnits}/{selectedBuilding.totalUnits}</p></div>
+                <div><p className="text-muted-foreground">Ocupación</p><p className={`font-bold ${selectedBuilding.occupancy >= 80 ? 'text-green-600' : 'text-amber-600'}`}>{selectedBuilding.occupancy}%</p></div>
+                <div><p className="text-muted-foreground">Renta/mes</p><p className="font-bold text-green-600">{fmt(selectedBuilding.monthlyRent)}</p></div>
+                <div><p className="text-muted-foreground">Seguro</p>{selectedBuilding.hasInsurance ? <Badge className="bg-green-600 text-white">✓</Badge> : <Badge variant="destructive">Sin seguro</Badge>}</div>
+              </div>
+              <div className="flex gap-2 mt-3">
+                <Button variant="outline" size="sm" onClick={() => router.push(`/edificios/${selectedBuilding.id}`)}>Ver edificio</Button>
+                <Button variant="outline" size="sm" onClick={() => router.push(`/seguros?building=${selectedBuilding.id}`)}>Ver seguro</Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
+        {/* Buildings by city */}
+        {cities.map(city => {
+          const cityBuildings = buildings.filter(b => b.ciudad === city);
           return (
-            <div key={ciudad}>
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-indigo-600" />
-                  {ciudad}
-                  <Badge variant="secondary">{edificios.length} inmuebles</Badge>
-                </h3>
-                <div className="text-sm text-gray-500">
-                  {ciudadUnidades} uds · {fmt(ciudadRenta)}/mes
+            <Card key={city}>
+              <CardHeader className="pb-2"><CardTitle className="text-sm">{city} ({cityBuildings.length} edificios)</CardTitle></CardHeader>
+              <CardContent>
+                <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
+                  {cityBuildings.map(b => (
+                    <div key={b.id} className="p-3 border rounded-lg hover:shadow-sm transition-shadow cursor-pointer" onClick={() => setSelectedBuilding(b)}>
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className="text-sm font-medium">{b.nombre}</p>
+                          <p className="text-xs text-muted-foreground">{b.company}</p>
+                        </div>
+                        <div className="flex gap-1">
+                          {b.hasInsurance ? <Shield className="h-3 w-3 text-green-600" /> : <AlertTriangle className="h-3 w-3 text-red-500" />}
+                        </div>
+                      </div>
+                      <div className="flex gap-3 mt-2 text-xs">
+                        <span>{b.occupiedUnits}/{b.totalUnits} uds</span>
+                        <span className={b.occupancy >= 80 ? 'text-green-600' : 'text-amber-600'}>{b.occupancy}%</span>
+                        <span className="text-green-600">{fmt(b.monthlyRent)}/mes</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </div>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-                {edificios.map((b) => {
-                  const Icon = tipoIcon[b.tipo] || Building2;
-                  return (
-                    <Link key={b.id} href={`/edificios/${b.id}`}>
-                      <Card className="hover:shadow-lg transition-all cursor-pointer group">
-                        <CardContent className="pt-4 pb-3">
-                          <div className="flex items-start justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                              <div
-                                className={`w-8 h-8 rounded-lg flex items-center justify-center ${getCompanyColor(
-                                  b.companyName
-                                )} text-white`}
-                              >
-                                <Icon className="h-4 w-4" />
-                              </div>
-                              <div>
-                                <div className="font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors text-sm">
-                                  {b.nombre}
-                                </div>
-                                <div className="text-xs text-gray-500">{b.companyName}</div>
-                              </div>
-                            </div>
-                            <Badge
-                              className={`text-xs ${
-                                b.ocupacion >= 90
-                                  ? 'bg-green-100 text-green-700'
-                                  : b.ocupacion >= 70
-                                    ? 'bg-yellow-100 text-yellow-700'
-                                    : 'bg-red-100 text-red-700'
-                              }`}
-                            >
-                              {b.ocupacion.toFixed(0)}%
-                            </Badge>
-                          </div>
-                          <div className="text-xs text-gray-500 mb-2">{b.direccion}</div>
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="text-gray-500">
-                              {b.unidadesOcupadas}/{b.totalUnidades} uds
-                            </span>
-                            <span className="font-semibold text-indigo-600">
-                              {fmt(b.rentaMensual)}/mes
-                            </span>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           );
         })}
       </div>
