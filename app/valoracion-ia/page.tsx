@@ -482,20 +482,32 @@ export default function ValoracionIAPage() {
 
       if (activeTab === 'mercado' && catastroData) {
         direccion = direccion || catastroData.direccion || '';
-        ciudad = ciudad || catastroData.municipio || 'Madrid';
+        ciudad = ciudad || catastroData.municipio || '';
         codigoPostal = codigoPostal || catastroData.codigoPostal || '';
       } else if (selectedAsset && selectedAsset !== 'manual' && assetType === 'unit') {
         const unit = units.find((u) => u.id === selectedAsset);
         direccion = direccion || unit?.building?.direccion || '';
-        ciudad = ciudad || unit?.building?.ciudad || 'Madrid';
+        ciudad = ciudad || unit?.building?.ciudad || '';
         unitId = selectedAsset;
       } else if (selectedAsset && selectedAsset !== 'manual' && assetType === 'building') {
         const building = buildings.find((b) => b.id === selectedAsset);
         direccion = direccion || building?.direccion || '';
-        ciudad = ciudad || building?.ciudad || 'Madrid';
+        ciudad = ciudad || building?.ciudad || '';
       }
 
-      if (!ciudad) ciudad = 'Madrid';
+      // Intentar extraer ciudad de la dirección si no se proporcionó
+      if (!ciudad && direccion) {
+        const parts = direccion.split(',').map((p: string) => p.trim()).filter(Boolean);
+        if (parts.length >= 2) {
+          ciudad = parts[parts.length - 1]; // Última parte suele ser la ciudad
+        }
+      }
+
+      if (!ciudad) {
+        toast.error('Indica la ciudad del inmueble para una valoración precisa');
+        setValorando(false);
+        return;
+      }
 
       const response = await fetch('/api/ai/valuate', {
         method: 'POST',
@@ -739,17 +751,127 @@ export default function ValoracionIAPage() {
     lines.push('');
     lines.push('Generado por Inmova App — https://inmovaapp.com');
 
+    // Generate professional PDF via HTML print
     const content = lines.filter(l => l !== undefined).join('\n');
-    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `informe-valoracion-inmova-${new Date().toISOString().split('T')[0]}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    toast.success('Informe descargado');
+    const htmlContent = `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Informe de Valoración - INMOVA</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1a1a1a; padding: 40px; font-size: 13px; line-height: 1.6; }
+  .header { text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 3px solid #4F46E5; }
+  .header h1 { font-size: 22px; font-weight: 700; color: #4F46E5; }
+  .header .subtitle { color: #666; margin-top: 4px; font-size: 12px; }
+  .header .logo { font-size: 28px; font-weight: 800; color: #4F46E5; letter-spacing: -1px; margin-bottom: 8px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 20px 0; }
+  .kpi { border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px; text-align: center; }
+  .kpi .label { font-size: 10px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+  .kpi .value { font-size: 20px; font-weight: 700; margin-top: 4px; color: #1a1a1a; }
+  .kpi .value.green { color: #16a34a; }
+  .kpi .value.blue { color: #4F46E5; }
+  .section { margin: 20px 0; }
+  .section h2 { font-size: 14px; font-weight: 700; color: #4F46E5; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .section p, .section li { font-size: 12px; color: #333; }
+  .section ul { padding-left: 16px; }
+  .section li { margin-bottom: 4px; }
+  .data-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f3f4f6; }
+  .data-row .label { color: #666; }
+  .data-row .value { font-weight: 600; }
+  .comparables { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; }
+  .comparables th { background: #f9fafb; padding: 8px; text-align: left; font-weight: 600; border-bottom: 2px solid #e5e7eb; }
+  .comparables td { padding: 6px 8px; border-bottom: 1px solid #f3f4f6; }
+  .factors { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .factor-list { font-size: 11px; }
+  .factor-list .positive { color: #16a34a; }
+  .factor-list .negative { color: #dc2626; }
+  .footer { margin-top: 30px; padding-top: 15px; border-top: 2px solid #4F46E5; text-align: center; font-size: 10px; color: #999; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 600; }
+  .badge-green { background: #dcfce7; color: #16a34a; }
+  .badge-blue { background: #dbeafe; color: #2563eb; }
+  .badge-amber { background: #fef3c7; color: #d97706; }
+  @media print { body { padding: 20px; } }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="logo">INMOVA</div>
+  <h1>Informe de Valoración de Activo Inmobiliario</h1>
+  <p class="subtitle">${fecha} · Análisis Multi-Plataforma con IA · Ref: VAL-${Date.now().toString(36).toUpperCase()}</p>
+</div>
+
+<div class="kpi-grid">
+  <div class="kpi"><div class="label">Valor Estimado</div><div class="value green">${formatCurrency(resultado.valorEstimado)}</div></div>
+  <div class="kpi"><div class="label">Rango</div><div class="value">${formatCurrency(resultado.valorMinimo)} — ${formatCurrency(resultado.valorMaximo)}</div></div>
+  <div class="kpi"><div class="label">Precio/m²</div><div class="value blue">${formatCurrency(resultado.precioM2)}</div></div>
+</div>
+
+<div class="section">
+  <h2>Datos del Inmueble</h2>
+  <div class="data-row"><span class="label">Dirección</span><span class="value">${formData.direccionManual || '—'}</span></div>
+  <div class="data-row"><span class="label">Ciudad</span><span class="value">${formData.ciudadManual || '—'}</span></div>
+  <div class="data-row"><span class="label">Superficie</span><span class="value">${formData.superficie} m²</span></div>
+  <div class="data-row"><span class="label">Habitaciones / Baños</span><span class="value">${formData.habitaciones || '—'} / ${formData.banos || '—'}</span></div>
+  <div class="data-row"><span class="label">Estado</span><span class="value">${formData.estadoConservacion}</span></div>
+  <div class="data-row"><span class="label">Confianza</span><span class="value">${resultado.confianza}%</span></div>
+  <div class="data-row"><span class="label">Tendencia</span><span class="value">${resultado.tendenciaMercado} (${resultado.porcentajeTendencia}%)</span></div>
+</div>
+
+${resultado.alquilerEstimado ? `<div class="section">
+  <h2>Análisis de Inversión</h2>
+  <div class="data-row"><span class="label">Alquiler mensual estimado</span><span class="value">${formatCurrency(resultado.alquilerEstimado)}/mes</span></div>
+  <div class="data-row"><span class="label">Renta anual</span><span class="value">${formatCurrency(resultado.alquilerEstimado * 12)}/año</span></div>
+  <div class="data-row"><span class="label">Rentabilidad bruta</span><span class="value">${resultado.rentabilidadAlquiler?.toFixed(2) || '—'}%</span></div>
+  <div class="data-row"><span class="label">Tiempo estimado venta</span><span class="value">${resultado.tiempoEstimadoVenta || '—'}</span></div>
+</div>` : ''}
+
+${resultado.reasoning ? `<div class="section">
+  <h2>Razonamiento del Tasador IA</h2>
+  <p>${resultado.reasoning}</p>
+</div>` : ''}
+
+${resultado.factoresPositivos?.length || resultado.factoresNegativos?.length ? `<div class="section">
+  <h2>Factores Clave</h2>
+  <div class="factors">
+    <div class="factor-list">${resultado.factoresPositivos?.map((f: string) => `<p class="positive">✓ ${f}</p>`).join('') || ''}</div>
+    <div class="factor-list">${resultado.factoresNegativos?.map((f: string) => `<p class="negative">✗ ${f}</p>`).join('') || ''}</div>
+  </div>
+</div>` : ''}
+
+${resultado.comparables?.length ? `<div class="section">
+  <h2>Propiedades Comparables</h2>
+  <table class="comparables">
+    <thead><tr><th>Dirección</th><th>Precio</th><th>Superficie</th><th>€/m²</th><th>Similitud</th></tr></thead>
+    <tbody>${resultado.comparables.map((c: any) => `<tr><td>${c.direccion}</td><td>${formatCurrency(c.precio)}</td><td>${c.superficie}m²</td><td>${formatCurrency(c.precioM2)}</td><td>${Math.round(c.similitud * 100)}%</td></tr>`).join('')}</tbody>
+  </table>
+</div>` : ''}
+
+${resultado.analisisMercado ? `<div class="section">
+  <h2>Análisis de Mercado</h2>
+  <p>${resultado.analisisMercado}</p>
+</div>` : ''}
+
+${resultado.recomendaciones?.length ? `<div class="section">
+  <h2>Recomendaciones</h2>
+  <ul>${resultado.recomendaciones.map((r: string) => `<li>${r}</li>`).join('')}</ul>
+</div>` : ''}
+
+<div class="footer">
+  <p><strong>INMOVA</strong> — Plataforma PropTech de Gestión Inmobiliaria</p>
+  <p>Esta valoración es una estimación basada en datos de mercado y análisis de IA. No sustituye a una tasación oficial.</p>
+  <p>inmovaapp.com · ${fecha}</p>
+</div>
+</body>
+</html>`;
+
+    const w = window.open('', '_blank');
+    if (w) {
+      w.document.write(htmlContent);
+      w.document.close();
+      setTimeout(() => w.print(), 500);
+    }
+    toast.success('Informe PDF generado — usa Ctrl+P para guardar como PDF');
   };
 
   // Obtener color de tendencia
