@@ -183,8 +183,9 @@ async function main() {
       await prisma.financialAccount.update({
         where: { id: account.id },
         data: {
-          saldo: totals.total,
-          ultimaActualizacion: new Date(),
+          saldoActual: totals.total,
+          valorMercado: totals.total,
+          ultimaSync: new Date(),
         },
       });
       accountsUpdated++;
@@ -197,8 +198,9 @@ async function main() {
           numeroCuenta: carteraCode,
           alias,
           divisa: 'EUR',
-          saldo: totals.total,
-          ultimaActualizacion: new Date(),
+          saldoActual: totals.total,
+          valorMercado: totals.total,
+          ultimaSync: new Date(),
         },
       });
       accountsCreated++;
@@ -217,19 +219,15 @@ async function main() {
 
       const data = {
         nombre: pos.activo,
-        tipo: TIPO_MAP[pos.tipo] || 'otro',
+        tipo: (TIPO_MAP[pos.tipo] || 'otro') as any,
         divisa: pos.divisa,
         cantidad: pos.cantidad,
-        precioCompra: pos.valorCompra > 0 && pos.cantidad > 0 ? pos.valorCompra / pos.cantidad : 0,
-        precioActual: pos.valorActual > 0 && pos.cantidad > 0 ? pos.valorActual / pos.cantidad : 0,
-        valorCompra: pos.valorCompra,
+        precioMedio: pos.valorCompra > 0 && pos.cantidad > 0 ? pos.valorCompra / pos.cantidad : 0,
         valorActual: pos.valorActual,
-        plusvalia: pos.plusvalia,
-        plusvaliaPct: pos.plusvaliaPct,
-        rentabilidadMes: pos.rentMes,
-        rentabilidadAnio: pos.rentAnio,
-        rentabilidad12m: pos.rent12m,
-        fechaValor: pos.fecha,
+        costeTotal: pos.valorCompra,
+        pnlNoRealizado: pos.plusvalia,
+        pnlPct: pos.plusvaliaPct,
+        ultimaActualizacion: pos.fecha,
       };
 
       if (existing) {
