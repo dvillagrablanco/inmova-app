@@ -210,17 +210,18 @@ export function PricingSection() {
         {/* Header */}
         <div className="text-center mb-12">
           <Badge className="mb-4 bg-white text-gray-900 border-2 border-green-400 px-4 py-2 font-bold shadow-sm">
-            <span className="text-green-700">✓</span> 7 Verticales · Precios Transparentes · Add-ons Flexibles
+            <span className="text-green-700">✓</span> 88+ Módulos · 7 Verticales · IA Integrada · Sin Permanencia
           </Badge>
           <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-            Elige el Plan que se Adapta a Ti
+            La Plataforma Más Completa del Mercado
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-2">
-            Una plataforma con <strong className="text-indigo-600">7 verticales de negocio</strong>. 
-            Escoge las que necesitas y escala cuando quieras.
+            Donde otras herramientas ofrecen 10-25 módulos para 1 modelo de negocio, INMOVA te da{' '}
+            <strong className="text-indigo-600">88+ módulos, 7 verticales y IA predictiva</strong>{' '}
+            desde €3.56/propiedad/mes.
           </p>
           <p className="text-lg text-gray-500">
-            30 días gratis · Sin tarjeta de crédito · Sin permanencia
+            30 días gratis · Sin tarjeta de crédito · Sin permanencia · Migración asistida
           </p>
         </div>
 
