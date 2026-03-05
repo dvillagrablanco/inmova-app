@@ -212,6 +212,43 @@ export default function OportunidadesPage() {
                           {opp.factoresRiesgo && opp.factoresRiesgo.map((f, i) => <p key={i} className="text-red-600">✗ {f}</p>)}
                         </div>
                       )}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full mt-2"
+                        onClick={async () => {
+                          toast.info('Analizando con IA... (puede tardar ~30 segundos)');
+                          try {
+                            const res = await fetch('/api/ai/investment-analysis', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ property: {
+                                city: opp.ubicacion, price: opp.precioEstimado,
+                                surface: opp.precioEstimado / (opp.precioEstimado / (opp.superficieM2 || 80)),
+                                propertyType: opp.tipo, rooms: 0,
+                                estimatedRent: opp.rentaMensualEstimada, estimatedYield: opp.yieldBruto,
+                                pricePerM2: opp.precioM2 || 0,
+                              }}),
+                            });
+                            if (res.ok) {
+                              const data = await res.json();
+                              const a = data.analysis;
+                              const msg = [
+                                `🎯 ${a.recomendacion?.veredicto} (confianza ${a.recomendacion?.confianza}%)`,
+                                `\n📊 ${a.resumenEjecutivo}`,
+                                `\n💰 Yield neto: ${a.analisisFinanciero?.yieldNetoEstimado}% | TIR: ${a.analisisFinanciero?.tirEstimada}%`,
+                                `\n⚠️ Riesgo: ${a.analisisRiesgo?.nivelGlobal} (${a.analisisRiesgo?.puntuacion}/10)`,
+                                `\n💵 Precio máx recomendado: ${a.recomendacion?.precioMaximoRecomendado?.toLocaleString('es-ES')}€`,
+                                a.recomendacion?.proximosPasos ? `\n📋 Próximos pasos: ${a.recomendacion.proximosPasos.join(', ')}` : '',
+                              ].join('');
+                              toast.success(msg, { duration: 15000 });
+                            } else { toast.error('Error en análisis IA'); }
+                          } catch { toast.error('Error de conexión'); }
+                        }}
+                      >
+                        <TrendingUp className="h-4 w-4 mr-2" />
+                        Análisis IA Profundo
+                      </Button>
                     </CardContent>
                   </Card>
                 ))}
@@ -294,7 +331,32 @@ export default function OportunidadesPage() {
                     <Input type="number" placeholder="3000" value={simGastos} onChange={e => setSimGastos(e.target.value)} />
                   </div>
                 </div>
-                <Button onClick={simulate}><Calculator className="h-4 w-4 mr-2" /> Calcular</Button>
+                <div className="flex gap-2">
+                  <Button onClick={simulate}><Calculator className="h-4 w-4 mr-2" /> Calcular</Button>
+                  <Button variant="outline" onClick={async () => {
+                    if (!simPrecio || !simRenta) { toast.error('Introduce precio y renta'); return; }
+                    toast.info('Analizando inversión con IA...');
+                    try {
+                      const res = await fetch('/api/ai/investment-analysis', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ property: {
+                          city: 'Madrid', price: parseFloat(simPrecio),
+                          surface: 80, propertyType: 'vivienda',
+                          estimatedRent: parseFloat(simRenta),
+                        }}),
+                      });
+                      if (res.ok) {
+                        const data = await res.json();
+                        const a = data.analysis;
+                        toast.success(
+                          `🎯 ${a.recomendacion?.veredicto} (${a.recomendacion?.confianza}%)\n${a.resumenEjecutivo}\nYield neto: ${a.analisisFinanciero?.yieldNetoEstimado}% | Riesgo: ${a.analisisRiesgo?.nivelGlobal}`,
+                          { duration: 12000 }
+                        );
+                      }
+                    } catch { toast.error('Error IA'); }
+                  }}><TrendingUp className="h-4 w-4 mr-2" /> Análisis IA</Button>
+                </div>
 
                 {simResult && (
                   <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mt-4">
