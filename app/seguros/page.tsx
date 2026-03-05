@@ -803,6 +803,16 @@ export default function SegurosPage() {
                               </span>
                             )}
                           </div>
+                          {seguro.alcance === 'edificio' && (
+                            <Badge variant="outline" className="text-xs mt-1 bg-blue-50 text-blue-700 border-blue-200">
+                              🏢 Cubre todo el edificio ({seguro.unidadesCubiertas || 0} unidades)
+                            </Badge>
+                          )}
+                          {seguro.alcance === 'unidad' && (
+                            <Badge variant="outline" className="text-xs mt-1 bg-green-50 text-green-700 border-green-200">
+                              🏠 Unidad individual
+                            </Badge>
+                          )}
                         </TableCell>
                         <TableCell>
                           <div className="space-y-1">

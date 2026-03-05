@@ -43,7 +43,30 @@ export async function GET(request: NextRequest) {
       orderBy: { fechaVencimiento: 'asc' },
     });
 
-    return NextResponse.json(seguros);
+    // Enrich with coverage scope and unit counts
+    const enriched = await Promise.all(
+      seguros.map(async (seguro: any) => {
+        const isBuilding = seguro.buildingId && !seguro.unitId;
+        let unidadesCubiertas = 0;
+
+        if (isBuilding) {
+          unidadesCubiertas = await prisma.unit.count({
+            where: { buildingId: seguro.buildingId },
+          });
+        }
+
+        return {
+          ...seguro,
+          alcance: isBuilding ? 'edificio' : seguro.unitId ? 'unidad' : 'empresa',
+          unidadesCubiertas: isBuilding ? unidadesCubiertas : seguro.unitId ? 1 : 0,
+          diasHastaVencimiento: Math.ceil(
+            (new Date(seguro.fechaVencimiento).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+          ),
+        };
+      })
+    );
+
+    return NextResponse.json(enriched);
   } catch (error) {
     logger.error('Error:', error);
     return NextResponse.json({ error: 'Error al obtener seguros' }, { status: 500 });
