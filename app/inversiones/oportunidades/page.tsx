@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
@@ -16,8 +16,8 @@ import {
   TrendingUp, Building2, Home, RefreshCw, Calculator, Bell, Euro, Search, Loader2,
   Star, StarOff, Download, ArrowUpDown, LayoutGrid, LayoutList, Filter, X,
   MapPin, FileDown, CheckSquare, Timer, MessageSquare, Share2, Tag,
-  Shield, Banknote, BarChart3, ChevronDown, ChevronUp, Send, Landmark, Hash,
-  FileText, StickyNote, Save, Copy, Hammer, DoorOpen, Target, Crosshair,
+  Shield, BarChart3, ChevronDown, ChevronUp, Send, Landmark,
+  FileText, StickyNote, Save, Hammer, DoorOpen, Target, Crosshair,
 } from 'lucide-react';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { toast } from 'sonner';
@@ -84,13 +84,9 @@ export default function OportunidadesPage() {
 
   // Tags
   const [userTags, setUserTags] = useState<Record<string, string[]>>({});
-  const [tagInput, setTagInput] = useState('');
 
   // Checklist
   const [checklist, setChecklist] = useState<Record<string, Set<string>>>({});
-
-  // Scores
-  const [scores, setScores] = useState<Record<string, { score: number; label: string }>>({});
 
   // Chat
   const [chatOpp, setChatOpp] = useState<MarketOpp | null>(null);
@@ -99,17 +95,12 @@ export default function OportunidadesPage() {
   const [chatLoading, setChatLoading] = useState(false);
 
   // Mortgage calculator
-  const [mortgageOpp, setMortgageOpp] = useState<MarketOpp | null>(null);
   const [mortgageDown, setMortgageDown] = useState('20');
   const [mortgageRate, setMortgageRate] = useState('3.5');
   const [mortgageTerm, setMortgageTerm] = useState('25');
 
-  // Sensitivity
-  const [sensitivityOpp, setSensitivityOpp] = useState<MarketOpp | null>(null);
-
   // Fiscal
-  const [fiscalOpp, setFiscalOpp] = useState<MarketOpp | null>(null);
-  const [ownerType, setOwnerType] = useState<'persona_fisica' | 'sociedad'>('sociedad');
+  const [ownerType] = useState<'persona_fisica' | 'sociedad'>('sociedad');
 
   // Expanded card
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -130,7 +121,6 @@ export default function OportunidadesPage() {
 
   // Watchlist
   const [watchlist, setWatchlist] = useState<Record<string, number>>({}); // id → target price
-  const [watchInput, setWatchInput] = useState('');
 
   // Documents
   const [oppDocs, setOppDocs] = useState<Record<string, { name: string; date: string }[]>>({});
@@ -267,7 +257,6 @@ export default function OportunidadesPage() {
   // Fiscal
   const calcFiscal = (opp: MarketOpp) => {
     const p = opp.price; const rent = simForOpp(opp).rent * 12; const exp = p * 0.015;
-    const isNew = false;
     const itpRate = opp.location.includes('Madrid') ? 0.06 : opp.location.includes('Barcelona') ? 0.10 : opp.location.includes('Málaga') ? 0.07 : 0.08;
     const itp = Math.round(p * itpRate);
     const notaria = Math.round(p * 0.003 + 300);
@@ -529,7 +518,7 @@ export default function OportunidadesPage() {
                         {/* Tags */}
                         <div className="flex items-center gap-1 flex-wrap">
                           {(userTags[mo.id] || []).map(t => <Badge key={t} variant="secondary" className="text-[9px] h-4 cursor-pointer" onClick={() => { const n = { ...userTags }; n[mo.id] = (n[mo.id] || []).filter(x => x !== t); saveTags(n); }}><Tag className="h-2 w-2 mr-0.5" />{t} ×</Badge>)}
-                          <Input className="h-5 w-16 text-[9px] px-1" placeholder="+tag" value={tagInput} onChange={e => setTagInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && tagInput.trim()) { const n = { ...userTags }; n[mo.id] = [...(n[mo.id] || []), tagInput.trim()]; saveTags(n); setTagInput(''); } }} />
+                          <Input className="h-5 w-16 text-[9px] px-1" placeholder="+tag" id={`tag-${mo.id}`} onKeyDown={e => { if (e.key === 'Enter') { const el = e.target as HTMLInputElement; if (el.value.trim()) { const n = { ...userTags }; n[mo.id] = [...(n[mo.id] || []), el.value.trim()]; saveTags(n); el.value = ''; } } }} />
                         </div>
 
                         {/* Expand/Collapse */}
@@ -646,7 +635,7 @@ export default function OportunidadesPage() {
                               {watchlist[mo.id] ? (
                                 <span className="flex items-center gap-1"><strong>{fmt(watchlist[mo.id])}</strong><button onClick={() => { const n = { ...watchlist }; delete n[mo.id]; saveWatchlist(n); }} className="text-red-400">×</button>{mo.price <= watchlist[mo.id] && <Badge className="bg-green-600 text-white text-[8px]">✓ Alcanzado</Badge>}</span>
                               ) : (
-                                <div className="flex gap-0.5"><Input className="h-5 w-20 text-[9px] px-1" type="number" placeholder="€" value={watchInput} onChange={e => setWatchInput(e.target.value)} /><Button variant="ghost" size="sm" className="h-5 text-[9px] px-1" onClick={() => { if (watchInput) { saveWatchlist({ ...watchlist, [mo.id]: parseFloat(watchInput) }); setWatchInput(''); addHistory(mo.id, `Watch: ${watchInput}€`); } }}>Set</Button></div>
+                                <div className="flex gap-0.5"><Input className="h-5 w-20 text-[9px] px-1" type="number" placeholder="€" id={`watch-${mo.id}`} /><Button variant="ghost" size="sm" className="h-5 text-[9px] px-1" onClick={() => { const el = document.getElementById(`watch-${mo.id}`) as HTMLInputElement; const val = el?.value; if (val) { saveWatchlist({ ...watchlist, [mo.id]: parseFloat(val) }); el.value = ''; addHistory(mo.id, `Watch: ${val}€`); } }}>Set</Button></div>
                               )}
                             </div>
 
@@ -746,12 +735,12 @@ export default function OportunidadesPage() {
           {showCompare && (
             <TabsContent value="comparar" className="space-y-4">
               <Card><CardHeader><CardTitle className="text-sm">⚖️ Comparación</CardTitle></CardHeader><CardContent>
-                {compareIds.size < 2 ? <p className="text-sm text-muted-foreground">Selecciona 2-3 oportunidades.</p> : (<>
+                {compareIds.size < 2 ? <p className="text-sm text-muted-foreground">Selecciona 2-3 oportunidades.</p> : (
+                  <div className="space-y-4">
                   {/* Radar Chart */}
-                  <div className="flex justify-center mb-4">
+                  <div className="flex justify-center">
                     <RadarChart
                       data={allMarketItems.filter(m => compareIds.has(m.id)).map((c, i) => {
-                        const sc = calcScore(c);
                         const yS = Math.min(100, (c.estimatedYield || 0) * 10);
                         const dS = Math.min(100, c.discount * 2);
                         const rS = c.riskLevel === 'bajo' ? 100 : c.riskLevel === 'medio' ? 60 : 20;
@@ -761,8 +750,8 @@ export default function OportunidadesPage() {
                       })}
                     />
                   </div>
-                </>)}
-                {compareIds.size >= 2 && (
+                  {/* Table */}
+                  {(
                   <div className="overflow-x-auto"><table className="w-full text-xs"><thead><tr className="border-b"><th className="p-2 text-left w-28">Métrica</th>
                     {allMarketItems.filter(m => compareIds.has(m.id)).map(c => <th key={c.id} className="p-2 text-center min-w-[180px]">{c.title.slice(0, 35)}</th>)}
                   </tr></thead><tbody>
@@ -786,8 +775,10 @@ export default function OportunidadesPage() {
                       </tr>
                     ))}
                   </tbody></table></div>
+                  )}
+                  <Button variant="outline" size="sm" className="mt-2" onClick={() => { setCompareIds(new Set()); setShowCompare(false); }}><X className="h-3 w-3 mr-1" /> Limpiar</Button>
+                  </div>
                 )}
-                <Button variant="outline" size="sm" className="mt-2" onClick={() => { setCompareIds(new Set()); setShowCompare(false); }}><X className="h-3 w-3 mr-1" /> Limpiar</Button>
               </CardContent></Card>
             </TabsContent>
           )}
