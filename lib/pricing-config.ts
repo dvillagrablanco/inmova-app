@@ -713,7 +713,7 @@ export const PROMO_CAMPAIGNS: Record<string, PromoCampaign> = {
     duration: 12,
     validFrom: new Date('2026-01-01'),
     validUntil: new Date('2026-03-31'),
-    targetAudience: 'Usuarios de otras plataformas (Homming, Rentger, etc.)',
+    targetAudience: 'Usuarios de otras plataformas de gestión inmobiliaria',
     message: 'Trae tu última factura y te damos INMOVA al mismo precio pero con el plan superior'
   },
   
