@@ -17,9 +17,15 @@ import {
   Star, StarOff, Download, ArrowUpDown, LayoutGrid, LayoutList, Filter, X,
   MapPin, FileDown, CheckSquare, Timer, MessageSquare, Share2, Tag,
   Shield, Banknote, BarChart3, ChevronDown, ChevronUp, Send, Landmark, Hash,
+  FileText, StickyNote, Save, Copy, Hammer, DoorOpen, Target, Crosshair,
 } from 'lucide-react';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { toast } from 'sonner';
+import { RadarChart } from '@/components/investment/RadarChart';
+import { FunnelMetrics } from '@/components/investment/FunnelMetrics';
+import { ExitStrategySimulator } from '@/components/investment/ExitStrategySimulator';
+import { RenovationCalculator } from '@/components/investment/RenovationCalculator';
+import { NeighborhoodAnalysis } from '@/components/investment/NeighborhoodAnalysis';
 
 // ============================================================================
 // TYPES
@@ -111,6 +117,24 @@ export default function OportunidadesPage() {
   // History
   const [viewHistory, setViewHistory] = useState<{ id: string; date: string; action: string }[]>([]);
 
+  // Notes
+  const [notes, setNotes] = useState<Record<string, string[]>>({});
+
+  // Saved filters
+  const [savedFilters, setSavedFilters] = useState<{ name: string; filters: any }[]>([]);
+  const [filterPresetName, setFilterPresetName] = useState('');
+
+  // Bulk selection
+  const [bulkSelected, setBulkSelected] = useState<Set<string>>(new Set());
+  const [bulkMode, setBulkMode] = useState(false);
+
+  // Watchlist
+  const [watchlist, setWatchlist] = useState<Record<string, number>>({}); // id → target price
+  const [watchInput, setWatchInput] = useState('');
+
+  // Documents
+  const [oppDocs, setOppDocs] = useState<Record<string, { name: string; date: string }[]>>({});
+
   // Simulator
   const [simPrecio, setSimPrecio] = useState('');
   const [simRenta, setSimRenta] = useState('');
@@ -128,13 +152,27 @@ export default function OportunidadesPage() {
   const [analyzingId, setAnalyzingId] = useState<string | null>(null);
 
   useEffect(() => { if (status === 'unauthenticated') router.push('/login'); if (status === 'authenticated') loadData(); }, [status, router]);
-  useEffect(() => { try { const s = localStorage.getItem('inmova-opp-favs'); if (s) setFavorites(new Set(JSON.parse(s))); const p = localStorage.getItem('inmova-opp-pipeline'); if (p) setPipeline(JSON.parse(p)); const t = localStorage.getItem('inmova-opp-tags'); if (t) setUserTags(JSON.parse(t)); const c = localStorage.getItem('inmova-opp-checks'); if (c) { const parsed = JSON.parse(c); const rebuilt: Record<string, Set<string>> = {}; Object.entries(parsed).forEach(([k, v]) => { rebuilt[k] = new Set(v as string[]); }); setChecklist(rebuilt); } const h = localStorage.getItem('inmova-opp-history'); if (h) setViewHistory(JSON.parse(h)); } catch {} }, []);
+  useEffect(() => { try {
+    const s = localStorage.getItem('inmova-opp-favs'); if (s) setFavorites(new Set(JSON.parse(s)));
+    const p = localStorage.getItem('inmova-opp-pipeline'); if (p) setPipeline(JSON.parse(p));
+    const t = localStorage.getItem('inmova-opp-tags'); if (t) setUserTags(JSON.parse(t));
+    const c = localStorage.getItem('inmova-opp-checks'); if (c) { const parsed = JSON.parse(c); const rebuilt: Record<string, Set<string>> = {}; Object.entries(parsed).forEach(([k, v]) => { rebuilt[k] = new Set(v as string[]); }); setChecklist(rebuilt); }
+    const h = localStorage.getItem('inmova-opp-history'); if (h) setViewHistory(JSON.parse(h));
+    const n = localStorage.getItem('inmova-opp-notes'); if (n) setNotes(JSON.parse(n));
+    const sf = localStorage.getItem('inmova-opp-savedfilters'); if (sf) setSavedFilters(JSON.parse(sf));
+    const w = localStorage.getItem('inmova-opp-watchlist'); if (w) setWatchlist(JSON.parse(w));
+    const d = localStorage.getItem('inmova-opp-docs'); if (d) setOppDocs(JSON.parse(d));
+  } catch {} }, []);
 
   const persist = useCallback((key: string, val: any) => { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} }, []);
   const saveFavs = useCallback((n: Set<string>) => { setFavorites(n); persist('inmova-opp-favs', [...n]); }, [persist]);
   const savePipeline = useCallback((n: Record<string, PipelineStage>) => { setPipeline(n); persist('inmova-opp-pipeline', n); }, [persist]);
   const saveTags = useCallback((n: Record<string, string[]>) => { setUserTags(n); persist('inmova-opp-tags', n); }, [persist]);
   const saveChecks = useCallback((n: Record<string, Set<string>>) => { setChecklist(n); const serialized: Record<string, string[]> = {}; Object.entries(n).forEach(([k, v]) => { serialized[k] = [...v]; }); persist('inmova-opp-checks', serialized); }, [persist]);
+  const saveNotes = useCallback((n: Record<string, string[]>) => { setNotes(n); persist('inmova-opp-notes', n); }, [persist]);
+  const saveSavedFilters = useCallback((n: { name: string; filters: any }[]) => { setSavedFilters(n); persist('inmova-opp-savedfilters', n); }, [persist]);
+  const saveWatchlist = useCallback((n: Record<string, number>) => { setWatchlist(n); persist('inmova-opp-watchlist', n); }, [persist]);
+  const saveDocs = useCallback((n: Record<string, { name: string; date: string }[]>) => { setOppDocs(n); persist('inmova-opp-docs', n); }, [persist]);
   const addHistory = useCallback((id: string, action: string) => { const entry = { id, date: new Date().toISOString(), action }; setViewHistory(prev => { const n = [entry, ...prev].slice(0, 50); persist('inmova-opp-history', n); return n; }); }, [persist]);
 
   const loadData = async () => { setLoading(true); try { const res = await fetch('/api/investment/opportunities'); if (res.ok) { const d = await res.json(); setPortfolioStats(d.portfolioStats || null); setOpportunities(d.opportunities || []); setMarketOpps(d.marketOpportunities || null); setMarketIndicators(d.marketIndicators || []); setMarketSources(d.marketSources || []); } } catch { toast.error('Error cargando'); } finally { setLoading(false); } };
@@ -412,7 +450,17 @@ export default function OportunidadesPage() {
                   <div><Label className="text-[10px]">Riesgo</Label><Select value={filterRisk} onValueChange={setFilterRisk}><SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">Todos</SelectItem><SelectItem value="bajo">🟢 Bajo</SelectItem><SelectItem value="medio">🟡 Medio</SelectItem><SelectItem value="alto">🔴 Alto</SelectItem></SelectContent></Select></div>
                   {allTags.length > 0 && <div><Label className="text-[10px]">Tag</Label><Select value={filterTag} onValueChange={setFilterTag}><SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">Todos</SelectItem>{allTags.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select></div>}
                 </div>
-                <Button variant="ghost" size="sm" className="mt-1 text-[10px]" onClick={() => { setFilterCategory('all'); setFilterProvince('all'); setFilterMinYield(''); setFilterMaxPrice(''); setFilterRisk('all'); setFilterTag('all'); }}><X className="h-3 w-3 mr-1" /> Limpiar</Button>
+                <div className="flex gap-1 mt-1 flex-wrap items-center">
+                  <Button variant="ghost" size="sm" className="text-[10px]" onClick={() => { setFilterCategory('all'); setFilterProvince('all'); setFilterMinYield(''); setFilterMaxPrice(''); setFilterRisk('all'); setFilterTag('all'); }}><X className="h-3 w-3 mr-1" /> Limpiar</Button>
+                  <span className="text-[9px] text-muted-foreground">|</span>
+                  <Input className="h-5 w-24 text-[9px] px-1" placeholder="Nombre preset" value={filterPresetName} onChange={e => setFilterPresetName(e.target.value)} />
+                  <Button variant="ghost" size="sm" className="text-[10px] h-5" onClick={() => { if (!filterPresetName) return; saveSavedFilters([...savedFilters, { name: filterPresetName, filters: { filterCategory, filterProvince, filterMinYield, filterMaxPrice, filterRisk, filterTag } }]); setFilterPresetName(''); toast.success('Filtro guardado'); }}><Save className="h-2.5 w-2.5 mr-0.5" /> Guardar</Button>
+                  {savedFilters.map((sf, i) => (
+                    <Badge key={i} variant="outline" className="text-[9px] cursor-pointer hover:bg-blue-50" onClick={() => { const f = sf.filters; setFilterCategory(f.filterCategory || 'all'); setFilterProvince(f.filterProvince || 'all'); setFilterMinYield(f.filterMinYield || ''); setFilterMaxPrice(f.filterMaxPrice || ''); setFilterRisk(f.filterRisk || 'all'); setFilterTag(f.filterTag || 'all'); }}>
+                      {sf.name} <button className="ml-0.5" onClick={e => { e.stopPropagation(); saveSavedFilters(savedFilters.filter((_, j) => j !== i)); }}>×</button>
+                    </Badge>
+                  ))}
+                </div>
               </CardContent></Card>
             )}
 
@@ -552,6 +600,68 @@ export default function OportunidadesPage() {
                                 );
                               })}
                             </div>
+
+                            {/* Exit strategy */}
+                            {mo.price > 0 && (
+                              <div className="text-[10px]">
+                                <p className="font-medium mb-1"><DoorOpen className="h-3 w-3 inline mr-1" />Estrategia de salida</p>
+                                <ExitStrategySimulator price={mo.price} estimatedYield={mo.estimatedYield || 0} location={mo.location} />
+                              </div>
+                            )}
+
+                            {/* Renovation calculator */}
+                            {mo.price > 0 && (
+                              <div className="text-[10px]">
+                                <p className="font-medium mb-1"><Hammer className="h-3 w-3 inline mr-1" />Calculadora de reforma</p>
+                                <RenovationCalculator surface={mo.surface || 80} currentPrice={mo.price} location={mo.location} />
+                              </div>
+                            )}
+
+                            {/* Neighborhood analysis */}
+                            <div className="bg-gray-50 dark:bg-gray-800 p-2 rounded text-[10px]">
+                              <NeighborhoodAnalysis location={mo.location} category={mo.category} />
+                            </div>
+
+                            {/* Notes */}
+                            <div className="text-[10px]">
+                              <p className="font-medium mb-1"><StickyNote className="h-3 w-3 inline mr-1" />Notas</p>
+                              {(notes[mo.id] || []).map((n, i) => <div key={i} className="p-1 bg-yellow-50 dark:bg-yellow-950 rounded mb-0.5 flex justify-between"><span>{n}</span><button onClick={() => { const upd = { ...notes }; upd[mo.id] = (upd[mo.id] || []).filter((_, j) => j !== i); saveNotes(upd); }} className="text-red-400">×</button></div>)}
+                              <div className="flex gap-1 mt-1">
+                                <Input className="h-5 flex-1 text-[9px] px-1" placeholder="Añadir nota..." id={`note-${mo.id}`} onKeyDown={e => { if (e.key === 'Enter') { const el = document.getElementById(`note-${mo.id}`) as HTMLInputElement; if (el.value.trim()) { const upd = { ...notes }; upd[mo.id] = [...(upd[mo.id] || []), el.value.trim()]; saveNotes(upd); el.value = ''; addHistory(mo.id, 'Nota añadida'); } } }} />
+                              </div>
+                            </div>
+
+                            {/* Documents */}
+                            <div className="text-[10px]">
+                              <p className="font-medium mb-1"><FileText className="h-3 w-3 inline mr-1" />Documentos ({(oppDocs[mo.id] || []).length})</p>
+                              {(oppDocs[mo.id] || []).map((d, i) => <div key={i} className="text-muted-foreground flex justify-between"><span>📄 {d.name} ({d.date})</span><button onClick={() => { const upd = { ...oppDocs }; upd[mo.id] = (upd[mo.id] || []).filter((_, j) => j !== i); saveDocs(upd); }} className="text-red-400">×</button></div>)}
+                              <input type="file" className="hidden" id={`doc-${mo.id}`} onChange={e => { const f = e.target.files?.[0]; if (f) { const upd = { ...oppDocs }; upd[mo.id] = [...(upd[mo.id] || []), { name: f.name, date: new Date().toLocaleDateString('es-ES') }]; saveDocs(upd); addHistory(mo.id, `Doc: ${f.name}`); toast.success('Documento registrado'); } }} />
+                              <Button variant="ghost" size="sm" className="h-5 text-[9px] mt-0.5" onClick={() => document.getElementById(`doc-${mo.id}`)?.click()}><FileText className="h-2.5 w-2.5 mr-0.5" /> Adjuntar</Button>
+                            </div>
+
+                            {/* Watchlist / target price */}
+                            <div className="flex items-center gap-1 text-[10px]">
+                              <Target className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-muted-foreground">Precio objetivo:</span>
+                              {watchlist[mo.id] ? (
+                                <span className="flex items-center gap-1"><strong>{fmt(watchlist[mo.id])}</strong><button onClick={() => { const n = { ...watchlist }; delete n[mo.id]; saveWatchlist(n); }} className="text-red-400">×</button>{mo.price <= watchlist[mo.id] && <Badge className="bg-green-600 text-white text-[8px]">✓ Alcanzado</Badge>}</span>
+                              ) : (
+                                <div className="flex gap-0.5"><Input className="h-5 w-20 text-[9px] px-1" type="number" placeholder="€" value={watchInput} onChange={e => setWatchInput(e.target.value)} /><Button variant="ghost" size="sm" className="h-5 text-[9px] px-1" onClick={() => { if (watchInput) { saveWatchlist({ ...watchlist, [mo.id]: parseFloat(watchInput) }); setWatchInput(''); addHistory(mo.id, `Watch: ${watchInput}€`); } }}>Set</Button></div>
+                              )}
+                            </div>
+
+                            {/* Scoring vs portfolio */}
+                            {portfolioStats && (
+                              <div className="flex items-center gap-2 text-[10px]">
+                                <Crosshair className="h-3 w-3 text-muted-foreground" />
+                                <span>Score vs portfolio: <strong className={sc > 60 ? 'text-green-600' : 'text-amber-600'}>{sc}/100</strong> (yield portfolio: {portfolioStats.avgYield}% → esta: {mo.estimatedYield || 0}%)</span>
+                              </div>
+                            )}
+
+                            {/* Link to valuation */}
+                            <Button variant="outline" size="sm" className="h-6 text-[10px] w-full" onClick={() => router.push(`/valoracion-ia?ciudad=${encodeURIComponent(mo.location)}&precio=${mo.price}&superficie=${mo.surface || 80}`)}>
+                              <TrendingUp className="h-3 w-3 mr-1" /> Valorar con IA →
+                            </Button>
                           </div>
                         )}
 
@@ -574,6 +684,35 @@ export default function OportunidadesPage() {
 
           {/* ===== PIPELINE TAB ===== */}
           <TabsContent value="pipeline" className="space-y-4">
+            {/* Funnel metrics */}
+            <Card><CardHeader className="pb-2"><CardTitle className="text-sm">📊 Métricas de funnel</CardTitle></CardHeader><CardContent>
+              <FunnelMetrics pipeline={pipeline} totalOpps={allMarketItems.length} />
+              <div className="grid grid-cols-3 gap-2 mt-3 text-[10px]">
+                <div className="bg-gray-50 dark:bg-gray-800 p-2 rounded text-center"><p className="text-muted-foreground">En análisis</p><p className="font-bold text-blue-600">{Object.values(pipeline).filter(v => v === 'analizada' || v === 'negociacion').length}</p></div>
+                <div className="bg-gray-50 dark:bg-gray-800 p-2 rounded text-center"><p className="text-muted-foreground">Valor pipeline</p><p className="font-bold text-green-600">{fmt(allMarketItems.filter(m => ['analizada', 'negociacion', 'ofertada'].includes(pipeline[m.id])).reduce((s, m) => s + m.price, 0))}</p></div>
+                <div className="bg-gray-50 dark:bg-gray-800 p-2 rounded text-center"><p className="text-muted-foreground">Adquiridas</p><p className="font-bold">{Object.values(pipeline).filter(v => v === 'adquirida').length}</p></div>
+              </div>
+            </CardContent></Card>
+
+            {/* Bulk actions */}
+            <div className="flex gap-2 items-center flex-wrap">
+              <Button variant={bulkMode ? 'default' : 'outline'} size="sm" onClick={() => { setBulkMode(!bulkMode); setBulkSelected(new Set()); }}>
+                <CheckSquare className="h-3 w-3 mr-1" /> {bulkMode ? 'Cancelar selección' : 'Selección múltiple'}
+              </Button>
+              {bulkMode && bulkSelected.size > 0 && (
+                <>
+                  <span className="text-xs text-muted-foreground">{bulkSelected.size} seleccionadas</span>
+                  <Select onValueChange={v => { bulkSelected.forEach(id => { savePipeline({ ...pipeline, [id]: v as PipelineStage }); }); setBulkSelected(new Set()); toast.success(`${bulkSelected.size} oportunidades → ${v}`); }}>
+                    <SelectTrigger className="h-7 text-xs w-[130px]"><SelectValue placeholder="Mover a..." /></SelectTrigger>
+                    <SelectContent>{PIPELINE_STAGES.map(s => <SelectItem key={s.key} value={s.key}>{s.icon} {s.label}</SelectItem>)}</SelectContent>
+                  </Select>
+                  <Button variant="outline" size="sm" onClick={() => { const tag = prompt('Tag para todas:'); if (tag) { bulkSelected.forEach(id => { const upd = { ...userTags }; upd[id] = [...(upd[id] || []), tag]; saveTags(upd); }); toast.success(`Tag "${tag}" añadido a ${bulkSelected.size}`); } }}>
+                    <Tag className="h-3 w-3 mr-1" /> Tag
+                  </Button>
+                </>
+              )}
+            </div>
+
             <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
               {PIPELINE_STAGES.map(stage => {
                 const items = allMarketItems.filter(m => (pipeline[m.id] || 'descubierta') === stage.key);
@@ -584,7 +723,10 @@ export default function OportunidadesPage() {
                       {items.length === 0 && <p className="text-xs text-muted-foreground italic">Vacío</p>}
                       {items.map(mo => (
                         <div key={mo.id} className="p-2 bg-white dark:bg-gray-900 rounded border text-[10px] space-y-1">
-                          <p className="font-medium truncate">{mo.title}</p>
+                          <div className="flex items-center gap-1">
+                            {bulkMode && <input type="checkbox" checked={bulkSelected.has(mo.id)} onChange={() => { const n = new Set(bulkSelected); if (n.has(mo.id)) n.delete(mo.id); else n.add(mo.id); setBulkSelected(n); }} />}
+                            <p className="font-medium truncate flex-1">{mo.title}</p>
+                          </div>
                           <p className="text-muted-foreground">{mo.location} · {fmt(mo.price)}</p>
                           <div className="flex gap-1">
                             {mo.estimatedYield ? <Badge variant="outline" className="text-[8px]">{mo.estimatedYield}%</Badge> : null}
@@ -604,7 +746,23 @@ export default function OportunidadesPage() {
           {showCompare && (
             <TabsContent value="comparar" className="space-y-4">
               <Card><CardHeader><CardTitle className="text-sm">⚖️ Comparación</CardTitle></CardHeader><CardContent>
-                {compareIds.size < 2 ? <p className="text-sm text-muted-foreground">Selecciona 2-3 oportunidades.</p> : (
+                {compareIds.size < 2 ? <p className="text-sm text-muted-foreground">Selecciona 2-3 oportunidades.</p> : (<>
+                  {/* Radar Chart */}
+                  <div className="flex justify-center mb-4">
+                    <RadarChart
+                      data={allMarketItems.filter(m => compareIds.has(m.id)).map((c, i) => {
+                        const sc = calcScore(c);
+                        const yS = Math.min(100, (c.estimatedYield || 0) * 10);
+                        const dS = Math.min(100, c.discount * 2);
+                        const rS = c.riskLevel === 'bajo' ? 100 : c.riskLevel === 'medio' ? 60 : 20;
+                        const liq = ['Madrid', 'Barcelona', 'Málaga', 'Valencia'].some(x => c.location.includes(x)) ? 90 : 50;
+                        const pot = c.category === 'tendencia' ? 95 : c.category === 'divergencia' ? 85 : c.category === 'subasta' ? 65 : 50;
+                        return { label: c.title.slice(0, 20), color: ['#3b82f6', '#10b981', '#f59e0b'][i], values: [yS, dS, rS, liq, pot] };
+                      })}
+                    />
+                  </div>
+                </>)}
+                {compareIds.size >= 2 && (
                   <div className="overflow-x-auto"><table className="w-full text-xs"><thead><tr className="border-b"><th className="p-2 text-left w-28">Métrica</th>
                     {allMarketItems.filter(m => compareIds.has(m.id)).map(c => <th key={c.id} className="p-2 text-center min-w-[180px]">{c.title.slice(0, 35)}</th>)}
                   </tr></thead><tbody>
