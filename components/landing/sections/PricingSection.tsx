@@ -17,16 +17,14 @@ const VERTICALES = [
   { id: 'servicios', name: 'Servicios Pro', icon: Briefcase },
 ];
 
-// Add-ons disponibles
+// Add-ons Premium disponibles
 const ADDONS = [
-  { id: 'fo_360', name: '🏦 Family Office 360°', price: 249, desc: 'Dashboard patrimonial, P&L sociedades, Private Equity, informes PDF' },
-  { id: 'ia_pro', name: '🤖 IA Predictiva Pro', price: 149, desc: 'Predicción morosidad, renta óptima, anomalías, valoración IA avanzada' },
-  { id: 'auto_pro', name: '⚡ Automatización Pro', price: 99, desc: 'Facturación auto, SEPA, escalado impagos, sync contable Zucchetti' },
-  { id: 'signatures', name: 'Pack 10 Firmas', price: 15, desc: 'Firmas digitales adicionales' },
-  { id: 'storage', name: 'Pack 10GB Storage', price: 5, desc: 'Almacenamiento extra' },
-  { id: 'sms', name: 'Pack 50 SMS', price: 8, desc: 'Notificaciones SMS' },
-  { id: 'whitelabel', name: 'White-label', price: 49, desc: 'Tu marca, tu dominio' },
-  { id: 'api', name: 'Acceso API', price: 29, desc: 'Integraciones personalizadas' },
+  { id: 'ia_inmobiliaria', name: '🤖 IA Inmobiliaria', price: 149, yearlyPrice: 1490, desc: 'Valoración IA, predicción morosidad, renta óptima, anomalías, clasificación docs, asistente IA' },
+  { id: 'family_office', name: '💼 Family Office 360°', price: 249, yearlyPrice: 2490, desc: 'Dashboard patrimonial, P&L sociedades, Private Equity (TVPI/DPI), informes PDF trimestrales' },
+  { id: 'automatizacion', name: '⚡ Automatización Pro', price: 99, yearlyPrice: 990, desc: 'Facturación auto, SEPA, escalado impagos (4 niveles), sync Zucchetti, conciliación bancaria' },
+  { id: 'analytics', name: '📈 Analytics Avanzado', price: 79, yearlyPrice: 790, desc: 'Morosidad detallada, yield tracker, benchmark mercado, previsión 12m, fiscal trimestral' },
+  { id: 'operaciones', name: '🔧 Operaciones Pro', price: 69, yearlyPrice: 690, desc: 'Kanban mantenimiento, checklist inspección, evaluación proveedores, workflows completos' },
+  { id: 'pack_completo', name: '🚀 Pack Completo', price: 499, yearlyPrice: 4990, desc: 'Los 5 addons incluidos — Ahorra 23% vs compra individual (€645/mes)', highlight: true },
 ];
 
 interface PlanData {
@@ -57,23 +55,23 @@ interface PlanData {
 const plans: PlanData[] = [
   {
     name: 'Starter',
-    price: '€35',
+    price: '€89',
     period: '/mes',
-    yearlyPrice: '€350/año',
+    yearlyPrice: '€890/año',
     yearlySavings: '2 meses gratis',
-    properties: '1-5 propiedades',
-    costPerProperty: '€7/prop',
+    properties: 'Hasta 25 propiedades',
+    costPerProperty: '€3.56/prop',
     verticales: 1,
     verticalesDesc: '1 vertical a elegir',
     limits: {
-      users: '1 usuario',
-      signatures: '2 firmas/mes',
-      storage: '1 GB',
-      ai: 'No incluido',
+      users: '2 usuarios',
+      signatures: '5 firmas/mes',
+      storage: '5 GB',
+      ai: 'Básico (onboarding IA)',
       sms: 'No incluido',
       api: false,
       whiteLabel: false,
-      support: 'Email',
+      support: 'Email + Chat',
     },
     features: [
       'Gestión completa de propiedades y edificios',
@@ -87,22 +85,22 @@ const plans: PlanData[] = [
     highlight: 'Para propietarios particulares',
   },
   {
-    name: 'Professional',
-    price: '€59',
+    name: 'Profesional',
+    price: '€199',
     period: '/mes',
-    yearlyPrice: '€590/año',
+    yearlyPrice: '€1.990/año',
     yearlySavings: '2 meses gratis',
-    properties: '6-25 propiedades',
-    costPerProperty: '€2.36/prop',
+    properties: 'Hasta 200 propiedades',
+    costPerProperty: '€1/prop',
     verticales: 3,
     verticalesDesc: 'Hasta 3 verticales',
     popular: true,
     limits: {
-      users: '3 usuarios',
-      signatures: '5 firmas/mes',
-      storage: '5 GB',
-      ai: '5K tokens/mes',
-      sms: 'No incluido',
+      users: '5 usuarios',
+      signatures: '10 firmas/mes',
+      storage: '10 GB',
+      ai: '10K tokens/mes',
+      sms: '25 SMS/mes',
       api: false,
       whiteLabel: false,
       support: 'Chat prioritario',
@@ -122,75 +120,70 @@ const plans: PlanData[] = [
     highlight: 'El más elegido por gestores',
   },
   {
-    name: 'Business',
-    price: '€129',
+    name: 'Empresarial',
+    price: '€499',
     period: '/mes',
-    yearlyPrice: '€1.290/año',
+    yearlyPrice: '€4.990/año',
     yearlySavings: '2 meses gratis',
-    properties: '26-100 propiedades',
-    costPerProperty: '€1.29/prop',
+    properties: 'Hasta 1000 propiedades',
+    costPerProperty: '€0.50/prop',
     verticales: 7,
     verticalesDesc: 'Los 7 verticales',
     limits: {
-      users: '10 usuarios',
-      signatures: '15 firmas/mes',
-      storage: '20 GB',
+      users: '15 usuarios',
+      signatures: '25 firmas/mes',
+      storage: '50 GB',
       ai: '50K tokens/mes',
-      sms: '25 SMS/mes',
+      sms: '50 SMS/mes',
       api: true,
       whiteLabel: false,
-      support: 'Prioritario + Gestor',
+      support: 'Prioritario + Gestor dedicado',
     },
     features: [
-      'Todo de Professional +',
+      'Todo de Profesional +',
       'Los 7 verticales completos',
-      'IA predictiva: morosidad, renta óptima, anomalías',
-      'Remesas SEPA y conciliación bancaria auto-matching',
-      'Escalado automático de impagos (4 niveles)',
-      'Previsión tesorería 12 meses + fiscal trimestral',
-      'Yield tracker y benchmark de mercado',
-      'Kanban mantenimiento + checklist inspección',
-      'Workflow salida inquilino con liquidación',
-      'Scoring inquilinos + evaluación proveedores',
-      'API REST + integración Zucchetti/Altai',
+      '88+ módulos incluidos',
       'Dashboard ejecutivo consolidado',
+      'API REST + integración Zucchetti/Altai',
+      'CRM inmobiliario con pipeline',
+      'Gestor de cuenta dedicado',
+      'Personalización de marca (colores, logo)',
+      'Addons disponibles como complemento',
     ],
-    highlight: 'Para gestoras en crecimiento',
+    highlight: 'Para gestoras profesionales',
   },
   {
-    name: 'Enterprise',
-    price: '€299',
+    name: 'Enterprise+',
+    price: '€998',
     period: '/mes',
-    yearlyPrice: '€2.990/año',
+    yearlyPrice: '€9.980/año',
     yearlySavings: '2 meses gratis',
-    properties: '+100 propiedades',
-    costPerProperty: 'Desde €0.50/prop',
+    properties: 'Ilimitadas',
+    costPerProperty: 'Todo incluido',
     verticales: 7,
-    verticalesDesc: '7 verticales + Custom',
+    verticalesDesc: '7 verticales + Todos los addons',
     limits: {
       users: 'Ilimitados',
-      signatures: '50 firmas/mes',
-      storage: '50 GB',
-      ai: '100K tokens/mes',
-      sms: '100 SMS/mes',
+      signatures: 'Ilimitadas',
+      storage: '200 GB',
+      ai: 'Ilimitado (todos los addons IA)',
+      sms: '200 SMS/mes',
       api: true,
       whiteLabel: true,
-      support: '24/7 + Account Manager',
+      support: '24/7 + Account Manager dedicado',
     },
     features: [
-      'Todo de Business +',
-      'Family Office 360°: patrimonio consolidado',
-      'P&L por sociedad + Private Equity (TVPI/DPI)',
-      'Informes trimestrales PDF automáticos para socios',
-      'Portal propietario read-only',
-      'Distribuciones PE y estructura del grupo',
-      'White-label incluido (tu marca, tu dominio)',
-      'Asientos contables auto → Zucchetti/Altai',
-      'Auditoría completa de cambios',
-      'SLA 99.9% + Account Manager dedicado',
+      'Todo de Empresarial + Pack Completo incluido',
+      '🤖 IA Inmobiliaria: valoración, predicción, anomalías',
+      '💼 Family Office 360°: patrimonio, PE, P&L sociedades',
+      '⚡ Automatización Pro: SEPA, Zucchetti, escalado',
+      '📈 Analytics Avanzado: yield, benchmark, fiscal',
+      '🔧 Operaciones Pro: kanban, inspecciones, proveedores',
+      'White-label + SLA 99.9% + Account Manager',
       'Migración asistida + formación presencial',
+      'Propiedades ilimitadas + usuarios ilimitados',
     ],
-    highlight: 'Para grandes gestoras y fondos',
+    highlight: 'Todo incluido — Para fondos y holdings',
   },
 ];
 
@@ -360,30 +353,50 @@ export function PricingSection() {
         </div>
 
         {/* Add-ons Section */}
-        <div className="max-w-4xl mx-auto mb-16">
+        <div className="max-w-5xl mx-auto mb-16">
           <div className="text-center mb-8">
             <Badge className="mb-3 bg-white text-gray-900 border-2 border-purple-400 font-bold shadow-sm">
               <Zap className="h-3 w-3 mr-1 inline text-purple-600" />
-              Mejoras Opcionales
+              Addons Premium
             </Badge>
             <h3 className="text-2xl font-bold text-gray-800">
-              ¿Necesitas más? Añade lo que necesites
+              Potencia tu plan con addons especializados
             </h3>
             <p className="text-gray-600 mt-2">
-              Paga solo por lo que uses. Sin compromisos.
+              Funcionalidades avanzadas que puedes añadir a cualquier plan. Ahorra 17% con pago anual.
             </p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-4">
-            {ADDONS.map((addon) => (
-              <div key={addon.id} className="bg-white p-4 rounded-xl border-2 border-gray-100 hover:border-purple-300 transition-all">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-semibold text-gray-800">{addon.name}</span>
-                  <Badge variant="secondary" className="bg-purple-100 text-purple-700">
-                    €{addon.price}/mes
-                  </Badge>
+            {ADDONS.map((addon: any) => (
+              <div
+                key={addon.id}
+                className={`p-5 rounded-xl border-2 transition-all ${
+                  addon.highlight
+                    ? 'bg-gradient-to-br from-indigo-50 to-violet-50 border-indigo-400 shadow-lg ring-2 ring-indigo-200 md:col-span-3'
+                    : 'bg-white border-gray-100 hover:border-purple-300'
+                }`}
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
+                  <span className={`font-bold ${addon.highlight ? 'text-lg text-indigo-900' : 'text-gray-800'}`}>
+                    {addon.name}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className={addon.highlight ? 'bg-indigo-600 text-white text-sm px-3' : 'bg-purple-100 text-purple-700'}>
+                      €{addon.price}/mes
+                    </Badge>
+                    <span className="text-xs text-gray-400">
+                      o €{addon.yearlyPrice?.toLocaleString('es-ES')}/año
+                    </span>
+                  </div>
                 </div>
-                <p className="text-sm text-gray-500">{addon.desc}</p>
+                <p className={`text-sm ${addon.highlight ? 'text-indigo-700 font-medium' : 'text-gray-500'}`}>{addon.desc}</p>
+                {addon.highlight && (
+                  <div className="mt-3 flex items-center gap-2 text-xs text-indigo-600 font-semibold">
+                    <CheckCircle className="h-4 w-4" />
+                    Incluye: IA Inmobiliaria + Family Office + Automatización + Analytics + Operaciones
+                  </div>
+                )}
               </div>
             ))}
           </div>

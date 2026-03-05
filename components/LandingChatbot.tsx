@@ -33,7 +33,7 @@ const FAQ_RESPONSES: Record<
 > = {
   precio: {
     answer:
-      'INMOVA ofrece 4 planes:\n\n• Starter (€35/mes): Hasta 5 propiedades, dashboard, cobros, onboarding IA\n• Professional (€59/mes): Hasta 25 prop., cobro masivo, facturación auto, IA\n• Business (€129/mes): Hasta 100 prop., IA predictiva, SEPA, Zucchetti, analytics\n• Enterprise (€299/mes): +100 prop., Family Office 360°, PE, white-label, SLA 99.9%\n\n30 días gratis en todos los planes. Sin permanencia.',
+      'INMOVA ofrece 4 planes base + addons premium:\n\n📋 PLANES BASE:\n• Starter (€89/mes): 25 propiedades, gestión completa, onboarding IA\n• Profesional (€199/mes): 200 prop., cobro masivo, facturación auto, IA\n• Empresarial (€499/mes): 1000 prop., 88 módulos, 7 verticales, API\n• Enterprise+ (€998/mes): Todo ilimitado + Pack Completo addons\n\n🚀 ADDONS PREMIUM:\n• IA Inmobiliaria (€149/mes): Predicción, valoración, anomalías\n• Family Office 360° (€249/mes): Patrimonio, PE, P&L\n• Automatización Pro (€99/mes): SEPA, Zucchetti, escalado\n• Analytics Avanzado (€79/mes): Yield, benchmark, fiscal\n• Operaciones Pro (€69/mes): Kanban, inspecciones\n• 🚀 Pack Completo (€499/mes): Los 5 — Ahorra 23%\n\n30 días gratis. Sin permanencia.',
     followUp: [
       { label: 'Probar gratis 30 días', value: 'trial' },
       { label: 'Ver comparativa de planes', value: 'planes' },
