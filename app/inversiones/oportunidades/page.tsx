@@ -12,11 +12,23 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
-  TrendingUp, Building2, Home, RefreshCw, Calculator, Bell, Euro, Search, Loader2,
+  TrendingUp,
+  Building2,
+  Home,
+  RefreshCw,
+  Calculator,
+  Bell,
+  Euro,
+  Search,
+  Loader2,
 } from 'lucide-react';
 import {
-  Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList,
-  BreadcrumbPage, BreadcrumbSeparator,
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { toast } from 'sonner';
 
@@ -36,7 +48,12 @@ interface Opportunity {
   recomendacion: string;
   factoresPositivos: string[];
   factoresRiesgo: string[];
-  kpis: { cashFlowMensual: number; cashFlowAnual: number; gastosEstimados: number; hipotecaMensual: number };
+  kpis: {
+    cashFlowMensual: number;
+    cashFlowAnual: number;
+    gastosEstimados: number;
+    hipotecaMensual: number;
+  };
 }
 
 export default function OportunidadesPage() {
@@ -44,6 +61,7 @@ export default function OportunidadesPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
+  const [marketOpps, setMarketOpps] = useState<any>(null);
   const [portfolioStats, setPortfolioStats] = useState<any>(null);
   const [marketIndicators, setMarketIndicators] = useState<any[]>([]);
   const [marketSources, setMarketSources] = useState<any[]>([]);
@@ -67,6 +85,7 @@ export default function OportunidadesPage() {
         const data = await res.json();
         setPortfolioStats(data.portfolioStats || null);
         setOpportunities(data.opportunities || []);
+        setMarketOpps(data.marketOpportunities || null);
         setMarketIndicators(data.marketIndicators || []);
         setMarketSources(data.marketSources || []);
       }
@@ -81,15 +100,29 @@ export default function OportunidadesPage() {
     const precio = parseFloat(simPrecio);
     const renta = parseFloat(simRenta);
     const gastos = parseFloat(simGastos) || 0;
-    if (!precio || !renta) { toast.error('Introduce precio y renta'); return; }
-    const yieldBruto = (renta * 12 / precio) * 100;
+    if (!precio || !renta) {
+      toast.error('Introduce precio y renta');
+      return;
+    }
+    const yieldBruto = ((renta * 12) / precio) * 100;
     const yieldNeto = ((renta * 12 - gastos) / precio) * 100;
     const cashFlowAnual = renta * 12 - gastos;
     const payback = cashFlowAnual > 0 ? precio / cashFlowAnual : 0;
-    setSimResult({ yieldBruto, yieldNeto, cashFlowAnual, cashFlowMensual: cashFlowAnual / 12, payback });
+    setSimResult({
+      yieldBruto,
+      yieldNeto,
+      cashFlowAnual,
+      cashFlowMensual: cashFlowAnual / 12,
+      payback,
+    });
   };
 
-  const fmt = (n: number) => new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
+  const fmt = (n: number) =>
+    new Intl.NumberFormat('es-ES', {
+      style: 'currency',
+      currency: 'EUR',
+      maximumFractionDigits: 0,
+    }).format(n);
 
   const getRiesgoColor = (r: string) => {
     if (r === 'bajo') return 'bg-green-100 text-green-800';
@@ -108,7 +141,11 @@ export default function OportunidadesPage() {
       <AuthenticatedLayout>
         <div className="max-w-6xl mx-auto space-y-4">
           <Skeleton className="h-8 w-64" />
-          <div className="grid gap-4 md:grid-cols-3">{[1,2,3].map(i => <Skeleton key={i} className="h-48" />)}</div>
+          <div className="grid gap-4 md:grid-cols-3">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-48" />
+            ))}
+          </div>
         </div>
       </AuthenticatedLayout>
     );
@@ -119,28 +156,64 @@ export default function OportunidadesPage() {
       <div className="max-w-6xl mx-auto space-y-6">
         <Breadcrumb>
           <BreadcrumbList>
-            <BreadcrumbItem><BreadcrumbLink href="/dashboard"><Home className="h-4 w-4" /></BreadcrumbLink></BreadcrumbItem>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/dashboard">
+                <Home className="h-4 w-4" />
+              </BreadcrumbLink>
+            </BreadcrumbItem>
             <BreadcrumbSeparator />
-            <BreadcrumbItem><BreadcrumbLink href="/inversiones">Inversiones</BreadcrumbLink></BreadcrumbItem>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/inversiones">Inversiones</BreadcrumbLink>
+            </BreadcrumbItem>
             <BreadcrumbSeparator />
-            <BreadcrumbItem><BreadcrumbPage>Oportunidades</BreadcrumbPage></BreadcrumbItem>
+            <BreadcrumbItem>
+              <BreadcrumbPage>Oportunidades</BreadcrumbPage>
+            </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
 
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold flex items-center gap-2"><Search className="h-6 w-6" /> Oportunidades de Inversión</h1>
-            <p className="text-muted-foreground">Análisis de mercado con IA para detectar las mejores inversiones</p>
+            <h1 className="text-2xl font-bold flex items-center gap-2">
+              <Search className="h-6 w-6" /> Oportunidades de Inversión
+            </h1>
+            <p className="text-muted-foreground">
+              Análisis de mercado con IA para detectar las mejores inversiones
+            </p>
           </div>
-          <Button variant="outline" size="sm" onClick={loadData}><RefreshCw className="h-4 w-4 mr-2" /> Actualizar</Button>
+          <Button variant="outline" size="sm" onClick={loadData}>
+            <RefreshCw className="h-4 w-4 mr-2" /> Actualizar
+          </Button>
         </div>
 
         {portfolioStats && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Card><CardContent className="pt-6 text-center"><p className="text-xs text-muted-foreground">Unidades</p><p className="text-2xl font-bold">{portfolioStats.totalUnits}</p></CardContent></Card>
-            <Card><CardContent className="pt-6 text-center"><p className="text-xs text-muted-foreground">Ocupación</p><p className="text-2xl font-bold">{portfolioStats.occupancy}%</p></CardContent></Card>
-            <Card><CardContent className="pt-6 text-center"><p className="text-xs text-muted-foreground">Renta/mes</p><p className="text-2xl font-bold text-green-600">{fmt(portfolioStats.monthlyRent)}</p></CardContent></Card>
-            <Card><CardContent className="pt-6 text-center"><p className="text-xs text-muted-foreground">Yield Medio</p><p className="text-2xl font-bold text-blue-600">{portfolioStats.avgYield}%</p></CardContent></Card>
+            <Card>
+              <CardContent className="pt-6 text-center">
+                <p className="text-xs text-muted-foreground">Unidades</p>
+                <p className="text-2xl font-bold">{portfolioStats.totalUnits}</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6 text-center">
+                <p className="text-xs text-muted-foreground">Ocupación</p>
+                <p className="text-2xl font-bold">{portfolioStats.occupancy}%</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6 text-center">
+                <p className="text-xs text-muted-foreground">Renta/mes</p>
+                <p className="text-2xl font-bold text-green-600">
+                  {fmt(portfolioStats.monthlyRent)}
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6 text-center">
+                <p className="text-xs text-muted-foreground">Yield Medio</p>
+                <p className="text-2xl font-bold text-blue-600">{portfolioStats.avgYield}%</p>
+              </CardContent>
+            </Card>
           </div>
         )}
 
@@ -148,16 +221,30 @@ export default function OportunidadesPage() {
         {marketIndicators.length > 0 && (
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm flex items-center gap-2"><TrendingUp className="h-4 w-4" /> Indicadores de Mercado (INE + Notariado + Banco España)</CardTitle>
+              <CardTitle className="text-sm flex items-center gap-2">
+                <TrendingUp className="h-4 w-4" /> Indicadores de Mercado (INE + Notariado + Banco
+                España)
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
                 {marketIndicators.map((ind: any, i: number) => (
                   <div key={i} className="p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <p className="font-medium">{ind.ccaa}</p>
-                    <p className="text-muted-foreground">{ind.precioMedioM2 ? `${ind.precioMedioM2}€/m²` : ''}</p>
-                    <p className={ind.variacionAnual > 10 ? 'text-red-600 font-bold' : ind.variacionAnual > 5 ? 'text-amber-600' : 'text-green-600'}>
-                      {ind.variacionAnual > 0 ? '+' : ''}{ind.variacionAnual}% anual
+                    <p className="text-muted-foreground">
+                      {ind.precioMedioM2 ? `${ind.precioMedioM2}€/m²` : ''}
+                    </p>
+                    <p
+                      className={
+                        ind.variacionAnual > 10
+                          ? 'text-red-600 font-bold'
+                          : ind.variacionAnual > 5
+                            ? 'text-amber-600'
+                            : 'text-green-600'
+                      }
+                    >
+                      {ind.variacionAnual > 0 ? '+' : ''}
+                      {ind.variacionAnual}% anual
                     </p>
                     <p className="text-muted-foreground capitalize">{ind.tendencia}</p>
                   </div>
@@ -183,34 +270,75 @@ export default function OportunidadesPage() {
 
           <TabsContent value="oportunidades" className="space-y-4">
             {opportunities.length === 0 ? (
-              <Card><CardContent className="py-12 text-center text-muted-foreground">No se generaron oportunidades. Haz clic en Actualizar.</CardContent></Card>
+              <Card>
+                <CardContent className="py-12 text-center text-muted-foreground">
+                  No se generaron oportunidades. Haz clic en Actualizar.
+                </CardContent>
+              </Card>
             ) : (
               <div className="grid gap-4 md:grid-cols-2">
                 {opportunities.map((opp) => (
                   <Card key={opp.id} className="hover:shadow-md transition-shadow">
                     <CardHeader className="pb-3">
                       <div className="flex flex-wrap gap-1.5 mb-2">
-                        <Badge variant="outline" className="text-xs capitalize">{opp.tipo.replace('_', ' ')}</Badge>
-                        <Badge className={getRiesgoColor(opp.riesgo) + ' text-xs'}>{opp.riesgo}</Badge>
-                        <Badge className={getRecColor(opp.recomendacion) + ' text-xs'}>{opp.recomendacion}</Badge>
+                        <Badge variant="outline" className="text-xs capitalize">
+                          {opp.tipo.replace('_', ' ')}
+                        </Badge>
+                        <Badge className={getRiesgoColor(opp.riesgo) + ' text-xs'}>
+                          {opp.riesgo}
+                        </Badge>
+                        <Badge className={getRecColor(opp.recomendacion) + ' text-xs'}>
+                          {opp.recomendacion}
+                        </Badge>
                       </div>
                       <CardTitle className="text-base">{opp.titulo}</CardTitle>
                       <p className="text-sm text-muted-foreground">{opp.ubicacion}</p>
                     </CardHeader>
                     <CardContent className="space-y-3">
                       <div className="grid grid-cols-2 gap-2 text-sm">
-                        <div><span className="text-muted-foreground">Precio:</span> <strong>{fmt(opp.precioEstimado)}</strong></div>
-                        <div><span className="text-muted-foreground">Yield:</span> <strong className="text-green-600">{opp.yieldBruto ? opp.yieldBruto.toFixed(1) : '-'}%</strong></div>
-                        <div><span className="text-muted-foreground">Cap Rate:</span> <strong>{opp.capRate ? opp.capRate.toFixed(1) : '-'}%</strong></div>
-                        <div><span className="text-muted-foreground">ROI 5a:</span> <strong>{opp.roi5anos ? opp.roi5anos.toFixed(0) : '-'}%</strong></div>
-                        <div><span className="text-muted-foreground">Payback:</span> <strong>{opp.paybackAnos || '-'} años</strong></div>
-                        <div><span className="text-muted-foreground">Cash-flow:</span> <strong>{opp.kpis ? fmt(opp.kpis.cashFlowMensual) + '/mes' : '-'}</strong></div>
+                        <div>
+                          <span className="text-muted-foreground">Precio:</span>{' '}
+                          <strong>{fmt(opp.precioEstimado)}</strong>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Yield:</span>{' '}
+                          <strong className="text-green-600">
+                            {opp.yieldBruto ? opp.yieldBruto.toFixed(1) : '-'}%
+                          </strong>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Cap Rate:</span>{' '}
+                          <strong>{opp.capRate ? opp.capRate.toFixed(1) : '-'}%</strong>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">ROI 5a:</span>{' '}
+                          <strong>{opp.roi5anos ? opp.roi5anos.toFixed(0) : '-'}%</strong>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Payback:</span>{' '}
+                          <strong>{opp.paybackAnos || '-'} años</strong>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Cash-flow:</span>{' '}
+                          <strong>{opp.kpis ? fmt(opp.kpis.cashFlowMensual) + '/mes' : '-'}</strong>
+                        </div>
                       </div>
-                      <p className="text-sm text-muted-foreground leading-relaxed">{opp.argumentacion}</p>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {opp.argumentacion}
+                      </p>
                       {opp.factoresPositivos && opp.factoresPositivos.length > 0 && (
                         <div className="text-xs space-y-1">
-                          {opp.factoresPositivos.map((f, i) => <p key={i} className="text-green-700">✓ {f}</p>)}
-                          {opp.factoresRiesgo && opp.factoresRiesgo.map((f, i) => <p key={i} className="text-red-600">✗ {f}</p>)}
+                          {opp.factoresPositivos.map((f, i) => (
+                            <p key={i} className="text-green-700">
+                              ✓ {f}
+                            </p>
+                          ))}
+                          {opp.factoresRiesgo &&
+                            opp.factoresRiesgo.map((f, i) => (
+                              <p key={i} className="text-red-600">
+                                ✗ {f}
+                              </p>
+                            ))}
                         </div>
                       )}
                       <Button
@@ -223,13 +351,20 @@ export default function OportunidadesPage() {
                             const res = await fetch('/api/ai/investment-analysis', {
                               method: 'POST',
                               headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ property: {
-                                city: opp.ubicacion, price: opp.precioEstimado,
-                                surface: opp.precioEstimado / (opp.precioEstimado / (opp.superficieM2 || 80)),
-                                propertyType: opp.tipo, rooms: 0,
-                                estimatedRent: opp.rentaMensualEstimada, estimatedYield: opp.yieldBruto,
-                                pricePerM2: opp.precioM2 || 0,
-                              }}),
+                              body: JSON.stringify({
+                                property: {
+                                  city: opp.ubicacion,
+                                  price: opp.precioEstimado,
+                                  surface:
+                                    opp.precioEstimado /
+                                    (opp.precioEstimado / (opp.superficieM2 || 80)),
+                                  propertyType: opp.tipo,
+                                  rooms: 0,
+                                  estimatedRent: opp.rentaMensualEstimada,
+                                  estimatedYield: opp.yieldBruto,
+                                  pricePerM2: opp.precioM2 || 0,
+                                },
+                              }),
                             });
                             if (res.ok) {
                               const data = await res.json();
@@ -240,11 +375,17 @@ export default function OportunidadesPage() {
                                 `\n💰 Yield neto: ${a.analisisFinanciero?.yieldNetoEstimado}% | TIR: ${a.analisisFinanciero?.tirEstimada}%`,
                                 `\n⚠️ Riesgo: ${a.analisisRiesgo?.nivelGlobal} (${a.analisisRiesgo?.puntuacion}/10)`,
                                 `\n💵 Precio máx recomendado: ${a.recomendacion?.precioMaximoRecomendado?.toLocaleString('es-ES')}€`,
-                                a.recomendacion?.proximosPasos ? `\n📋 Próximos pasos: ${a.recomendacion.proximosPasos.join(', ')}` : '',
+                                a.recomendacion?.proximosPasos
+                                  ? `\n📋 Próximos pasos: ${a.recomendacion.proximosPasos.join(', ')}`
+                                  : '',
                               ].join('');
                               toast.success(msg, { duration: 15000 });
-                            } else { toast.error('Error en análisis IA'); }
-                          } catch { toast.error('Error de conexión'); }
+                            } else {
+                              toast.error('Error en análisis IA');
+                            }
+                          } catch {
+                            toast.error('Error de conexión');
+                          }
                         }}
                       >
                         <TrendingUp className="h-4 w-4 mr-2" />
@@ -255,15 +396,129 @@ export default function OportunidadesPage() {
                 ))}
               </div>
             )}
+            {/* Market Opportunities from all sources */}
+            {marketOpps && marketOpps.totalCount > 0 && (
+              <div className="space-y-4 mt-6">
+                <h3 className="text-lg font-bold flex items-center gap-2">
+                  <Euro className="h-5 w-5" /> Oportunidades de Mercado ({marketOpps.totalCount}{' '}
+                  detectadas)
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  Fuentes: {marketOpps.sources?.join(', ')}
+                </p>
+
+                {[
+                  {
+                    key: 'auctions',
+                    title: '⚖️ Subastas Judiciales (BOE)',
+                    items: marketOpps.auctions,
+                  },
+                  {
+                    key: 'bankProperties',
+                    title: '🏦 Inmuebles de Banca',
+                    items: marketOpps.bankProperties,
+                  },
+                  {
+                    key: 'divergences',
+                    title: '🔍 Zonas Infravaloradas (IA)',
+                    items: marketOpps.divergences,
+                  },
+                  {
+                    key: 'trends',
+                    title: '📈 Tendencias Emergentes (IA)',
+                    items: marketOpps.trends,
+                  },
+                  {
+                    key: 'crowdfunding',
+                    title: '🏗️ Crowdfunding Inmobiliario',
+                    items: marketOpps.crowdfunding,
+                  },
+                ].map(
+                  (section) =>
+                    section.items?.length > 0 && (
+                      <Card key={section.key}>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm">{section.title}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="grid gap-3 md:grid-cols-2">
+                            {section.items.map((mo: any) => (
+                              <div
+                                key={mo.id}
+                                className="p-3 border rounded-lg hover:shadow-sm transition-shadow"
+                              >
+                                <div className="flex items-start justify-between mb-1">
+                                  <span className="text-sm font-medium">{mo.title}</span>
+                                  {mo.discount > 0 && (
+                                    <Badge className="bg-green-600 text-white text-xs">
+                                      -{mo.discount}%
+                                    </Badge>
+                                  )}
+                                </div>
+                                <p className="text-xs text-muted-foreground mb-2">
+                                  {mo.location} · {mo.source}
+                                </p>
+                                <div className="flex flex-wrap gap-2 text-xs mb-2">
+                                  {mo.price > 0 && (
+                                    <span>
+                                      <strong>{fmt(mo.price)}</strong>
+                                    </span>
+                                  )}
+                                  {mo.estimatedYield > 0 && (
+                                    <span className="text-green-600">
+                                      Yield {mo.estimatedYield}%
+                                    </span>
+                                  )}
+                                  {mo.surface > 0 && <span>{mo.surface}m²</span>}
+                                  <Badge
+                                    variant="outline"
+                                    className={
+                                      mo.riskLevel === 'bajo'
+                                        ? 'text-green-700'
+                                        : mo.riskLevel === 'alto'
+                                          ? 'text-red-700'
+                                          : 'text-amber-700'
+                                    }
+                                  >
+                                    {mo.riskLevel}
+                                  </Badge>
+                                </div>
+                                <p className="text-xs text-muted-foreground line-clamp-2">
+                                  {mo.description}
+                                </p>
+                                {mo.url && (
+                                  <a
+                                    href={mo.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-xs text-blue-600 hover:underline mt-1 inline-block"
+                                  >
+                                    Ver fuente →
+                                  </a>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )
+                )}
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="propuestas" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Building2 className="h-5 w-5" /> Analizar Propuesta de Broker / Inmobiliaria</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Building2 className="h-5 w-5" /> Analizar Propuesta de Broker / Inmobiliaria
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">Sube un PDF, Excel o imagen con la propuesta de inversión. La IA extraerá los datos, identificará qué falta, y dará un veredicto completo.</p>
+                <p className="text-sm text-muted-foreground">
+                  Sube un PDF, Excel o imagen con la propuesta de inversión. La IA extraerá los
+                  datos, identificará qué falta, y dará un veredicto completo.
+                </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -299,7 +554,10 @@ export default function OportunidadesPage() {
                     const file = fileEl?.files?.[0];
                     const text = textEl?.value;
 
-                    if (!file && !text) { toast.error('Sube un archivo o escribe la propuesta'); return; }
+                    if (!file && !text) {
+                      toast.error('Sube un archivo o escribe la propuesta');
+                      return;
+                    }
 
                     toast.info('Analizando propuesta con IA... (puede tardar ~45 segundos)');
 
@@ -309,7 +567,10 @@ export default function OportunidadesPage() {
                       if (text) fd.append('text', text);
                       fd.append('broker', brokerEl?.value || '');
 
-                      const res = await fetch('/api/ai/analyze-proposal', { method: 'POST', body: fd });
+                      const res = await fetch('/api/ai/analyze-proposal', {
+                        method: 'POST',
+                        body: fd,
+                      });
 
                       if (res.ok) {
                         const data = await res.json();
@@ -340,7 +601,9 @@ export default function OportunidadesPage() {
 
                         if (a.preguntasParaBroker?.length > 0) {
                           parts.push('', '📞 PREGUNTAS PARA EL BROKER:');
-                          a.preguntasParaBroker.slice(0, 3).forEach((q: string) => parts.push(`  → ${q}`));
+                          a.preguntasParaBroker
+                            .slice(0, 3)
+                            .forEach((q: string) => parts.push(`  → ${q}`));
                         }
 
                         if (a.alertasRojas?.length > 0) {
@@ -350,7 +613,9 @@ export default function OportunidadesPage() {
 
                         if (v?.proximosPasos?.length > 0) {
                           parts.push('', '📋 PRÓXIMOS PASOS:');
-                          v.proximosPasos.forEach((p: string, i: number) => parts.push(`  ${i+1}. ${p}`));
+                          v.proximosPasos.forEach((p: string, i: number) =>
+                            parts.push(`  ${i + 1}. ${p}`)
+                          );
                         }
 
                         toast.success(parts.join('\n'), { duration: 30000 });
@@ -358,7 +623,9 @@ export default function OportunidadesPage() {
                         const err = await res.json();
                         toast.error(err.error || 'Error analizando propuesta');
                       }
-                    } catch { toast.error('Error de conexión'); }
+                    } catch {
+                      toast.error('Error de conexión');
+                    }
                   }}
                 >
                   <TrendingUp className="h-4 w-4 mr-2" />
@@ -379,7 +646,9 @@ export default function OportunidadesPage() {
           <TabsContent value="mercado" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Search className="h-5 w-5" /> Buscar en Portales Inmobiliarios</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Search className="h-5 w-5" /> Buscar en Portales Inmobiliarios
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -396,33 +665,59 @@ export default function OportunidadesPage() {
                     <Input placeholder="500000" type="number" id="search-max-price" />
                   </div>
                   <div className="flex items-end">
-                    <Button className="w-full" onClick={async () => {
-                      const city = (document.getElementById('search-city') as HTMLInputElement)?.value || 'Madrid';
-                      const propertyType = (document.getElementById('search-type') as HTMLInputElement)?.value || '';
-                      const maxPrice = (document.getElementById('search-max-price') as HTMLInputElement)?.value || '';
-                      toast.info('Buscando en portales...');
-                      try {
-                        const params = new URLSearchParams({ city });
-                        if (propertyType) params.set('propertyType', propertyType);
-                        if (maxPrice) params.set('maxPrice', maxPrice);
-                        const res = await fetch('/api/investment/search-listings?' + params.toString());
-                        if (res.ok) {
-                          const data = await res.json();
-                          if (data.listings?.length > 0) {
-                            toast.success(data.totalFound + ' resultados de ' + data.sources.join(', '));
-                          } else {
-                            toast.info('Sin resultados. Configura IDEALISTA_API_KEY o INMOLINK_API_KEY para activar las búsquedas.');
+                    <Button
+                      className="w-full"
+                      onClick={async () => {
+                        const city =
+                          (document.getElementById('search-city') as HTMLInputElement)?.value ||
+                          'Madrid';
+                        const propertyType =
+                          (document.getElementById('search-type') as HTMLInputElement)?.value || '';
+                        const maxPrice =
+                          (document.getElementById('search-max-price') as HTMLInputElement)
+                            ?.value || '';
+                        toast.info('Buscando en portales...');
+                        try {
+                          const params = new URLSearchParams({ city });
+                          if (propertyType) params.set('propertyType', propertyType);
+                          if (maxPrice) params.set('maxPrice', maxPrice);
+                          const res = await fetch(
+                            '/api/investment/search-listings?' + params.toString()
+                          );
+                          if (res.ok) {
+                            const data = await res.json();
+                            if (data.listings?.length > 0) {
+                              toast.success(
+                                data.totalFound + ' resultados de ' + data.sources.join(', ')
+                              );
+                            } else {
+                              toast.info(
+                                'Sin resultados. Configura IDEALISTA_API_KEY o INMOLINK_API_KEY para activar las búsquedas.'
+                              );
+                            }
                           }
+                        } catch {
+                          toast.error('Error en la búsqueda');
                         }
-                      } catch { toast.error('Error en la búsqueda'); }
-                    }}><Search className="h-4 w-4 mr-2" /> Buscar</Button>
+                      }}
+                    >
+                      <Search className="h-4 w-4 mr-2" /> Buscar
+                    </Button>
                   </div>
                 </div>
                 <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg text-sm">
-                  <p className="font-medium text-blue-800 dark:text-blue-200">Fuentes conectadas:</p>
+                  <p className="font-medium text-blue-800 dark:text-blue-200">
+                    Fuentes conectadas:
+                  </p>
                   <ul className="mt-1 text-blue-700 dark:text-blue-300 text-xs space-y-1">
                     <li>{'✅'} InmolinkCRM — MLS España (REST API)</li>
-                    <li>{process.env.NEXT_PUBLIC_IDEALISTA_CONFIGURED === 'true' ? '✅' : '⏳'} Idealista API — {process.env.NEXT_PUBLIC_IDEALISTA_CONFIGURED === 'true' ? 'Conectado' : 'Pendiente API key (solicitar en developers.idealista.com)'}</li>
+                    <li>
+                      {process.env.NEXT_PUBLIC_IDEALISTA_CONFIGURED === 'true' ? '✅' : '⏳'}{' '}
+                      Idealista API —{' '}
+                      {process.env.NEXT_PUBLIC_IDEALISTA_CONFIGURED === 'true'
+                        ? 'Conectado'
+                        : 'Pendiente API key (solicitar en developers.idealista.com)'}
+                    </li>
                     <li>{'✅'} INE — Índice Precios Vivienda (datos públicos)</li>
                     <li>{'✅'} Notariado — Precios escriturados (datos públicos)</li>
                   </ul>
@@ -434,57 +729,119 @@ export default function OportunidadesPage() {
           <TabsContent value="simulador" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Calculator className="h-5 w-5" /> Simulador de Inversión</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Calculator className="h-5 w-5" /> Simulador de Inversión
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label>Precio compra (€)</Label>
-                    <Input type="number" placeholder="350000" value={simPrecio} onChange={e => setSimPrecio(e.target.value)} />
+                    <Input
+                      type="number"
+                      placeholder="350000"
+                      value={simPrecio}
+                      onChange={(e) => setSimPrecio(e.target.value)}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>Renta mensual (€)</Label>
-                    <Input type="number" placeholder="1500" value={simRenta} onChange={e => setSimRenta(e.target.value)} />
+                    <Input
+                      type="number"
+                      placeholder="1500"
+                      value={simRenta}
+                      onChange={(e) => setSimRenta(e.target.value)}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>Gastos anuales (€)</Label>
-                    <Input type="number" placeholder="3000" value={simGastos} onChange={e => setSimGastos(e.target.value)} />
+                    <Input
+                      type="number"
+                      placeholder="3000"
+                      value={simGastos}
+                      onChange={(e) => setSimGastos(e.target.value)}
+                    />
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button onClick={simulate}><Calculator className="h-4 w-4 mr-2" /> Calcular</Button>
-                  <Button variant="outline" onClick={async () => {
-                    if (!simPrecio || !simRenta) { toast.error('Introduce precio y renta'); return; }
-                    toast.info('Analizando inversión con IA...');
-                    try {
-                      const res = await fetch('/api/ai/investment-analysis', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ property: {
-                          city: 'Madrid', price: parseFloat(simPrecio),
-                          surface: 80, propertyType: 'vivienda',
-                          estimatedRent: parseFloat(simRenta),
-                        }}),
-                      });
-                      if (res.ok) {
-                        const data = await res.json();
-                        const a = data.analysis;
-                        toast.success(
-                          `🎯 ${a.recomendacion?.veredicto} (${a.recomendacion?.confianza}%)\n${a.resumenEjecutivo}\nYield neto: ${a.analisisFinanciero?.yieldNetoEstimado}% | Riesgo: ${a.analisisRiesgo?.nivelGlobal}`,
-                          { duration: 12000 }
-                        );
+                  <Button onClick={simulate}>
+                    <Calculator className="h-4 w-4 mr-2" /> Calcular
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={async () => {
+                      if (!simPrecio || !simRenta) {
+                        toast.error('Introduce precio y renta');
+                        return;
                       }
-                    } catch { toast.error('Error IA'); }
-                  }}><TrendingUp className="h-4 w-4 mr-2" /> Análisis IA</Button>
+                      toast.info('Analizando inversión con IA...');
+                      try {
+                        const res = await fetch('/api/ai/investment-analysis', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            property: {
+                              city: 'Madrid',
+                              price: parseFloat(simPrecio),
+                              surface: 80,
+                              propertyType: 'vivienda',
+                              estimatedRent: parseFloat(simRenta),
+                            },
+                          }),
+                        });
+                        if (res.ok) {
+                          const data = await res.json();
+                          const a = data.analysis;
+                          toast.success(
+                            `🎯 ${a.recomendacion?.veredicto} (${a.recomendacion?.confianza}%)\n${a.resumenEjecutivo}\nYield neto: ${a.analisisFinanciero?.yieldNetoEstimado}% | Riesgo: ${a.analisisRiesgo?.nivelGlobal}`,
+                            { duration: 12000 }
+                          );
+                        }
+                      } catch {
+                        toast.error('Error IA');
+                      }
+                    }}
+                  >
+                    <TrendingUp className="h-4 w-4 mr-2" /> Análisis IA
+                  </Button>
                 </div>
 
                 {simResult && (
                   <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mt-4">
-                    <Card><CardContent className="pt-4 text-center"><p className="text-xs text-muted-foreground">Yield Bruto</p><p className="text-xl font-bold text-green-600">{simResult.yieldBruto.toFixed(2)}%</p></CardContent></Card>
-                    <Card><CardContent className="pt-4 text-center"><p className="text-xs text-muted-foreground">Yield Neto</p><p className="text-xl font-bold text-blue-600">{simResult.yieldNeto.toFixed(2)}%</p></CardContent></Card>
-                    <Card><CardContent className="pt-4 text-center"><p className="text-xs text-muted-foreground">Cash-flow/mes</p><p className="text-xl font-bold">{fmt(simResult.cashFlowMensual)}</p></CardContent></Card>
-                    <Card><CardContent className="pt-4 text-center"><p className="text-xs text-muted-foreground">Cash-flow/año</p><p className="text-xl font-bold">{fmt(simResult.cashFlowAnual)}</p></CardContent></Card>
-                    <Card><CardContent className="pt-4 text-center"><p className="text-xs text-muted-foreground">Payback</p><p className="text-xl font-bold">{simResult.payback.toFixed(1)} años</p></CardContent></Card>
+                    <Card>
+                      <CardContent className="pt-4 text-center">
+                        <p className="text-xs text-muted-foreground">Yield Bruto</p>
+                        <p className="text-xl font-bold text-green-600">
+                          {simResult.yieldBruto.toFixed(2)}%
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="pt-4 text-center">
+                        <p className="text-xs text-muted-foreground">Yield Neto</p>
+                        <p className="text-xl font-bold text-blue-600">
+                          {simResult.yieldNeto.toFixed(2)}%
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="pt-4 text-center">
+                        <p className="text-xs text-muted-foreground">Cash-flow/mes</p>
+                        <p className="text-xl font-bold">{fmt(simResult.cashFlowMensual)}</p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="pt-4 text-center">
+                        <p className="text-xs text-muted-foreground">Cash-flow/año</p>
+                        <p className="text-xl font-bold">{fmt(simResult.cashFlowAnual)}</p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="pt-4 text-center">
+                        <p className="text-xs text-muted-foreground">Payback</p>
+                        <p className="text-xl font-bold">{simResult.payback.toFixed(1)} años</p>
+                      </CardContent>
+                    </Card>
                   </div>
                 )}
               </CardContent>
@@ -494,10 +851,15 @@ export default function OportunidadesPage() {
           <TabsContent value="alertas">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Bell className="h-5 w-5" /> Alertas de Inversión</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Bell className="h-5 w-5" /> Alertas de Inversión
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">Configura alertas para recibir notificaciones cuando se detecten oportunidades que cumplan tus criterios.</p>
+                <p className="text-sm text-muted-foreground">
+                  Configura alertas para recibir notificaciones cuando se detecten oportunidades que
+                  cumplan tus criterios.
+                </p>
                 {[
                   { desc: 'Edificio Madrid centro < €3.000/m²', active: true },
                   { desc: 'Local comercial yield > 8%', active: false },
@@ -505,10 +867,15 @@ export default function OportunidadesPage() {
                 ].map((alert, i) => (
                   <div key={i} className="flex items-center justify-between p-3 border rounded-lg">
                     <span className="text-sm">{alert.desc}</span>
-                    <Badge variant={alert.active ? 'default' : 'secondary'}>{alert.active ? 'Activa' : 'Inactiva'}</Badge>
+                    <Badge variant={alert.active ? 'default' : 'secondary'}>
+                      {alert.active ? 'Activa' : 'Inactiva'}
+                    </Badge>
                   </div>
                 ))}
-                <p className="text-xs text-muted-foreground italic">Las alertas se activarán próximamente con integración de APIs de portales inmobiliarios.</p>
+                <p className="text-xs text-muted-foreground italic">
+                  Las alertas se activarán próximamente con integración de APIs de portales
+                  inmobiliarios.
+                </p>
               </CardContent>
             </Card>
           </TabsContent>
