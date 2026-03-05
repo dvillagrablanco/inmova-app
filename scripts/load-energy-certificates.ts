@@ -130,50 +130,51 @@ async function main() {
 
     console.log(`  📜 ${building.nombre} - ${unidad}: ${certs.length} docs (válido hasta ${mainCert.validezHasta})`);
 
-    // Create certification record
+    // Create energy certificate record
+    if (!unit) {
+      console.log(`    ⚠️ Unidad no encontrada: ${unidad} en ${building.nombre}`);
+      continue;
+    }
+
     try {
-      // Check if certification already exists
-      const existing = await prisma.certification.findFirst({
-        where: {
-          companyId: viroda.id,
-          buildingId: building.id,
-          tipo: 'CEE',
-          numero: { contains: unidad, mode: 'insensitive' },
-        },
+      const existing = await prisma.energyCertificate.findFirst({
+        where: { unitId: unit.id, companyId: viroda.id },
       });
 
-      if (!existing) {
-        await prisma.certification.create({
+      const certData = {
+        calificacion: (mainCert.calificacion || 'E') as any,
+        fechaEmision: new Date('2024-01-01'),
+        fechaVencimiento: new Date(mainCert.validezHasta),
+        vigente: new Date(mainCert.validezHasta) > new Date(),
+        nombreTecnico: 'Técnico Certificador',
+        urlCertificado: `certificados/${mainCert.archivo}`,
+        notas: `${certs.length} documentos: ${certs.map(c => c.tipo).join(', ')}. Cargado desde Google Drive.`,
+      };
+
+      if (existing) {
+        await prisma.energyCertificate.update({
+          where: { id: existing.id },
+          data: certData,
+        });
+        unitsUpdated++;
+      } else {
+        await prisma.energyCertificate.create({
           data: {
             companyId: viroda.id,
-            buildingId: building.id,
-            unitId: unit?.id || undefined,
-            tipo: 'CEE',
-            numero: `CEE-${building.nombre.substring(0, 3).toUpperCase()}-${unidad.replace(/[^a-zA-Z0-9]/g, '')}`,
-            descripcion: `Certificado de Eficiencia Energética - ${building.nombre} ${unidad}`,
-            organismoEmisor: 'Comunidad Autónoma',
-            fechaEmision: new Date('2024-01-01'),
-            fechaVencimiento: new Date(mainCert.validezHasta),
-            estado: new Date(mainCert.validezHasta) > new Date() ? 'vigente' : 'vencido',
-            calificacion: mainCert.calificacion,
-            documentoPath: `certificados/${mainCert.archivo}`,
-            notas: `${certs.length} documentos: ${certs.map(c => c.tipo).join(', ')}`,
+            unitId: unit.id,
+            ...certData,
           },
         });
         docsCreated++;
-      } else {
-        // Update validity
-        await prisma.certification.update({
-          where: { id: existing.id },
-          data: {
-            fechaVencimiento: new Date(mainCert.validezHasta),
-            estado: new Date(mainCert.validezHasta) > new Date() ? 'vigente' : 'vencido',
-          },
-        });
-        unitsUpdated++;
       }
+
+      // Also update the unit's certificadoEnergetico field
+      await prisma.unit.update({
+        where: { id: unit.id },
+        data: { certificadoEnergetico: mainCert.calificacion },
+      });
     } catch (err: any) {
-      console.log(`    ⚠️ Error: ${err.message?.substring(0, 60)}`);
+      console.log(`    ⚠️ Error: ${err.message?.substring(0, 80)}`);
     }
   }
 
