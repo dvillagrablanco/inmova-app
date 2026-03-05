@@ -136,10 +136,39 @@ REGLAS DE RESPUESTA:
 9. Si preguntan por seguridad → "HTTPS, encriptación, backups diarios, GDPR compliant, servidor propio en Europa"
 10. Si preguntan por API → "API REST completa desde plan Empresarial"
 
+🎁 OFERTAS DE LANZAMIENTO ACTIVAS (¡promuévelas activamente!):
+
+1. LAUNCH2026 — 50% descuento 3 meses en CUALQUIER plan
+   - Starter: €44,50/mes (en vez de €89). Ahorro: €133,50
+   - Profesional: €99,50/mes (en vez de €199). Ahorro: €298,50
+   - Empresarial: €249,50/mes (en vez de €499). Ahorro: €748,50
+   - Válido hasta 30 junio 2026. Máx 500 usos.
+   - Registrarse en: inmovaapp.com/register?coupon=LAUNCH2026
+
+2. IAFREE2026 — Addon IA Inmobiliaria GRATIS 2 meses
+   - Valoración IA + predicción morosidad + renta óptima sin coste
+   - Valor: €298 de ahorro (€149/mes × 2 meses)
+   - Combinable con cualquier plan
+   - Registrarse en: inmovaapp.com/register?coupon=IAFREE2026
+
+3. SWITCH2026 — Para migraciones: 30% dto. 6 meses + migración gratis
+   - Para clientes que vienen de otra plataforma
+   - Migración de datos 100% gratuita
+   - Ahorro de hasta €1.797
+   - Contactar: inmovaapp.com/landing/contacto?motivo=migracion
+
+4. PACK2026 — Pack Completo (5 addons) al 50% primer mes
+   - Los 5 addons por €249 (en vez de €499)
+   - IA + Family Office + Automatización + Analytics + Operaciones
+   - Para planes Empresarial y Enterprise+
+   - Registrarse en: inmovaapp.com/register?coupon=PACK2026
+
+REGLA: Si el usuario muestra interés en registrarse, SIEMPRE menciona la oferta LAUNCH2026 (50% dto.) o la que mejor encaje. Da el código y la URL directa.
+
 SIEMPRE termina con UNA llamada a la acción clara:
-- "¿Te gustaría probarlo gratis 30 días?" 
-- "¿Quieres que te hagamos una demo personalizada?"
-- "Puedes registrarte ahora en inmovaapp.com"
+- "Con el código LAUNCH2026 tienes 50% los 3 primeros meses. ¿Te registras?"
+- "¿Te gustaría probarlo gratis 30 días + 50% de descuento después?"
+- "Puedes registrarte ahora en inmovaapp.com/register?coupon=LAUNCH2026"
 
 NUNCA:
 - Inventes funcionalidades que no existen
@@ -177,8 +206,11 @@ function getLocalResponse(message: string): string {
     return '🔒 Seguridad de nivel empresarial:\n\n• Servidor propio en Europa (no compartido)\n• HTTPS + encriptación de datos\n• Backups automáticos diarios\n• Cumplimiento GDPR completo\n• Autenticación 2FA disponible\n• SLA 99.9% en plan Enterprise+\n\n¿Alguna duda más sobre seguridad?';
 
   if (m.includes('hola') || m.includes('buenas') || m.includes('hey'))
-    return '¡Hola! 👋 Bienvenido a INMOVA, la plataforma de gestión inmobiliaria más completa de España.\n\n¿En qué puedo ayudarte?\n\n💰 Precios y planes\n✨ Funcionalidades\n🤖 IA integrada\n📞 Contactar con ventas';
+    return '¡Hola! 👋 Bienvenido a INMOVA.\n\n🚀 Oferta de lanzamiento: 50% de descuento los 3 primeros meses con el código LAUNCH2026.\n\n¿En qué puedo ayudarte?\n\n💰 Precios y planes\n✨ Funcionalidades\n🤖 IA integrada\n🎁 Ofertas activas';
+
+  if (m.includes('oferta') || m.includes('descuento') || m.includes('cupón') || m.includes('cupon') || m.includes('promo'))
+    return '🎁 Ofertas de lanzamiento activas:\n\n🚀 LAUNCH2026: 50% dto. 3 meses (Starter desde €44,50/mes)\n🤖 IAFREE2026: Addon IA gratis 2 meses (valor €298)\n🔄 SWITCH2026: Migración gratis + 30% dto. 6 meses\n💎 PACK2026: Pack Completo al 50% primer mes (€249)\n\n¿Cuál te interesa? Te doy el enlace directo para activarla.';
 
   // Default: commercial catch-all
-  return `¡Buena pregunta! 😊 INMOVA es la plataforma PropTech más completa del mercado español con 88+ módulos, 7 verticales de negocio e IA predictiva integrada.\n\nDesde €89/mes para propietarios hasta €998/mes para grandes holdings.\n\n¿Te gustaría probarlo gratis 30 días? Sin tarjeta ni compromiso.`;
+  return `¡Buena pregunta! 😊 INMOVA es la plataforma PropTech más completa del mercado español con 88+ módulos, 7 verticales e IA predictiva.\n\n🚀 Oferta de lanzamiento: 50% dto. 3 meses con código LAUNCH2026.\n\n¿Te gustaría probarlo? inmovaapp.com/register?coupon=LAUNCH2026`;
 }
