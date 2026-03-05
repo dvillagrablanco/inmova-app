@@ -1675,6 +1675,13 @@ const holdingGrupoNavItems = [
     roles: ['super_admin', 'administrador'],
   },
   {
+    name: 'Importar PE (MdF)',
+    href: '/inversiones/pe-import',
+    icon: Upload,
+    roles: ['super_admin', 'administrador'],
+    badge: 'IA',
+  },
+  {
     name: 'P&L Sociedades',
     href: '/inversiones/pyl-sociedades',
     icon: BarChart3,
