@@ -123,6 +123,21 @@ export function InsuranceCoverageCard({ unitId }: { unitId: string }) {
                 {policy.sumaAsegurada && (
                   <p className="text-xs">Suma asegurada: <strong>{fmt(policy.sumaAsegurada)}</strong></p>
                 )}
+                {(policy as any).cobertura && (
+                  <details className="mt-1">
+                    <summary className="text-xs text-muted-foreground cursor-pointer hover:text-foreground">
+                      Ver coberturas de tu unidad
+                    </summary>
+                    <div className="mt-1 p-2 bg-gray-50 dark:bg-gray-900 rounded text-xs text-muted-foreground leading-relaxed">
+                      {(policy as any).cobertura.split(/[.,;]/).filter((c: string) => c.trim()).map((c: string, i: number) => (
+                        <p key={i} className="flex items-start gap-1 mb-0.5">
+                          <span className="text-green-500 flex-shrink-0">✓</span>
+                          <span>{c.trim()}</span>
+                        </p>
+                      ))}
+                    </div>
+                  </details>
+                )}
                 <div className="flex gap-2 pt-1">
                   <Link href={`/seguros/${policy.id}`}>
                     <Button variant="outline" size="sm" className="text-xs h-7">
