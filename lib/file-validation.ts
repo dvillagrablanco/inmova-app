@@ -1,273 +1,186 @@
-import logger, { logError } from './logger';
-import path from 'path';
-import crypto from 'crypto';
-
 /**
- * Configuración de validación de archivos por tipo
+ * File Validation Service
+ * 
+ * Validates uploaded files by checking magic bytes (file signatures)
+ * instead of relying on Content-Type headers or file extensions.
+ * 
+ * OWASP A08:2021 – Software and Data Integrity Failures
  */
-interface FileTypeConfig {
-  mimeTypes: string[];
-  maxSize: number; // en bytes
-  extensions: string[];
-  magicNumbers?: Buffer[]; // Bytes de cabecera para validación profunda
-}
 
-/**
- * Configuraciones predefinidas por categoría de archivo
- */
-export const FILE_TYPE_CONFIGS: Record<string, FileTypeConfig> = {
-  image: {
-    mimeTypes: [
-      'image/jpeg',
-      'image/jpg',
-      'image/png',
-      'image/gif',
-      'image/webp',
-      'image/svg+xml',
-    ],
-    maxSize: 10 * 1024 * 1024, // 10MB
-    extensions: ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'],
-    magicNumbers: [
-      Buffer.from([0xff, 0xd8, 0xff]), // JPEG
-      Buffer.from([0x89, 0x50, 0x4e, 0x47]), // PNG
-      Buffer.from([0x47, 0x49, 0x46, 0x38]), // GIF
-    ],
-  },
-  document: {
-    mimeTypes: [
-      'application/pdf',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'application/vnd.ms-excel',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    ],
-    maxSize: 20 * 1024 * 1024, // 20MB
-    extensions: ['.pdf', '.doc', '.docx', '.xls', '.xlsx'],
-    magicNumbers: [
-      Buffer.from([0x25, 0x50, 0x44, 0x46]), // PDF
-      Buffer.from([0xd0, 0xcf, 0x11, 0xe0]), // DOC/XLS (OLE)
-      Buffer.from([0x50, 0x4b, 0x03, 0x04]), // DOCX/XLSX (ZIP)
-    ],
-  },
-  csv: {
-    mimeTypes: ['text/csv', 'application/vnd.ms-excel', 'text/plain'],
-    maxSize: 50 * 1024 * 1024, // 50MB
-    extensions: ['.csv', '.txt'],
-  },
-  archive: {
-    mimeTypes: [
-      'application/zip',
-      'application/x-zip-compressed',
-      'multipart/x-zip',
-      'application/octet-stream',
-    ],
-    maxSize: 200 * 1024 * 1024, // 200MB
-    extensions: ['.zip'],
-    magicNumbers: [Buffer.from([0x50, 0x4b, 0x03, 0x04])], // ZIP
-  },
-  video: {
-    mimeTypes: ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime'],
-    maxSize: 100 * 1024 * 1024, // 100MB
-    extensions: ['.mp4', '.webm', '.ogv', '.mov'],
-  },
-  audio: {
-    mimeTypes: ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/webm'],
-    maxSize: 20 * 1024 * 1024, // 20MB
-    extensions: ['.mp3', '.wav', '.ogg', '.webm'],
-  },
+import logger from '@/lib/logger';
+
+// File signatures (magic bytes)
+const FILE_SIGNATURES: { mime: string; ext: string; bytes: number[]; offset?: number }[] = [
+  // Images
+  { mime: 'image/jpeg', ext: 'jpg', bytes: [0xFF, 0xD8, 0xFF] },
+  { mime: 'image/png', ext: 'png', bytes: [0x89, 0x50, 0x4E, 0x47] },
+  { mime: 'image/gif', ext: 'gif', bytes: [0x47, 0x49, 0x46, 0x38] },
+  { mime: 'image/webp', ext: 'webp', bytes: [0x52, 0x49, 0x46, 0x46], offset: 0 }, // RIFF....WEBP
+  { mime: 'image/svg+xml', ext: 'svg', bytes: [0x3C, 0x73, 0x76, 0x67] }, // <svg
+  
+  // Documents
+  { mime: 'application/pdf', ext: 'pdf', bytes: [0x25, 0x50, 0x44, 0x46] }, // %PDF
+  
+  // Office (ZIP-based: xlsx, docx, pptx)
+  { mime: 'application/zip', ext: 'zip', bytes: [0x50, 0x4B, 0x03, 0x04] }, // PK
+  { mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', ext: 'xlsx', bytes: [0x50, 0x4B, 0x03, 0x04] },
+  { mime: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', ext: 'docx', bytes: [0x50, 0x4B, 0x03, 0x04] },
+  
+  // Legacy Office
+  { mime: 'application/vnd.ms-excel', ext: 'xls', bytes: [0xD0, 0xCF, 0x11, 0xE0] },
+  
+  // CSV/Text (starts with printable ASCII)
+  { mime: 'text/csv', ext: 'csv', bytes: [] }, // No signature, validated by content
+  { mime: 'text/plain', ext: 'txt', bytes: [] },
+];
+
+// Allowed MIME types by context
+export const ALLOWED_TYPES = {
+  document: ['application/pdf', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel', 'text/csv', 'text/plain', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+  image: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'],
+  proposal: ['application/pdf', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel', 'text/csv', 'image/jpeg', 'image/png'],
+  any: ['application/pdf', 'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel', 'text/csv', 'application/zip'],
 };
 
-/**
- * Resultado de la validación
- */
-export interface FileValidationResult {
-  isValid: boolean;
-  errors: string[];
-  warnings: string[];
-  sanitizedFileName?: string;
-  fileType?: string;
+export const MAX_FILE_SIZES: Record<string, number> = {
+  image: 10 * 1024 * 1024,    // 10MB
+  document: 50 * 1024 * 1024, // 50MB
+  proposal: 25 * 1024 * 1024, // 25MB
+  any: 50 * 1024 * 1024,      // 50MB
+};
+
+interface ValidationResult {
+  valid: boolean;
+  detectedMime: string | null;
+  detectedExt: string | null;
+  error?: string;
 }
 
 /**
- * Sanitiza el nombre de archivo para prevenir ataques
+ * Detect file type from buffer using magic bytes
  */
-export function sanitizeFileName(fileName: string): string {
-  // Remover path traversal
-  let sanitized = path.basename(fileName);
+export function detectFileType(buffer: Buffer | Uint8Array): { mime: string; ext: string } | null {
+  if (!buffer || buffer.length < 4) return null;
 
-  // Remover caracteres peligrosos
-  sanitized = sanitized.replace(/[^a-zA-Z0-9._-]/g, '_');
-
-  // Prevenir nombres que empiecen con punto (archivos ocultos)
-  if (sanitized.startsWith('.')) {
-    sanitized = '_' + sanitized;
-  }
-
-  // Limitar longitud
-  const ext = path.extname(sanitized);
-  const name = path.basename(sanitized, ext);
-  const maxLength = 200;
-
-  if (name.length > maxLength) {
-    sanitized = name.substring(0, maxLength) + ext;
-  }
-
-  // Añadir timestamp único si es necesario
-  const timestamp = Date.now();
-  const hash = crypto.createHash('md5').update(fileName + timestamp).digest('hex').substring(0, 8);
-  sanitized = `${name}_${hash}${ext}`;
-
-  return sanitized;
-}
-
-/**
- * Detecta el tipo de archivo basado en magic numbers
- */
-export function detectFileTypeFromBuffer(buffer: Buffer): string | null {
-  for (const [type, config] of Object.entries(FILE_TYPE_CONFIGS)) {
-    if (!config.magicNumbers) continue;
-
-    for (const magicNumber of config.magicNumbers) {
-      if (buffer.slice(0, magicNumber.length).equals(magicNumber)) {
-        return type;
+  for (const sig of FILE_SIGNATURES) {
+    if (sig.bytes.length === 0) continue; // Skip text types
+    
+    const offset = sig.offset || 0;
+    let match = true;
+    
+    for (let i = 0; i < sig.bytes.length; i++) {
+      if (buffer[offset + i] !== sig.bytes[i]) {
+        match = false;
+        break;
       }
     }
+    
+    if (match) {
+      // Special case: WEBP needs additional check
+      if (sig.ext === 'webp') {
+        if (buffer.length >= 12 && buffer[8] === 0x57 && buffer[9] === 0x45 && buffer[10] === 0x42 && buffer[11] === 0x50) {
+          return { mime: sig.mime, ext: sig.ext };
+        }
+        continue;
+      }
+      return { mime: sig.mime, ext: sig.ext };
+    }
+  }
+
+  // Check if it's text/CSV (printable ASCII)
+  const isTextual = Array.from(buffer.slice(0, 512)).every(b => 
+    (b >= 0x20 && b <= 0x7E) || b === 0x0A || b === 0x0D || b === 0x09 || b === 0xC3 || b === 0xC2 // UTF-8 common chars
+  );
+  if (isTextual) {
+    const header = Buffer.from(buffer.slice(0, 200)).toString('utf-8');
+    if (header.includes(',') || header.includes(';') || header.includes('\t')) {
+      return { mime: 'text/csv', ext: 'csv' };
+    }
+    return { mime: 'text/plain', ext: 'txt' };
   }
 
   return null;
 }
 
 /**
- * Valida un archivo según su categoría
+ * Validate a file upload
+ * @param buffer - File contents as Buffer
+ * @param declaredName - Original filename
+ * @param context - Upload context ('document', 'image', 'proposal', 'any')
  */
-export async function validateFile(
-  file: File | { name: string; type: string; size: number; buffer?: Buffer },
-  category: keyof typeof FILE_TYPE_CONFIGS
-): Promise<FileValidationResult> {
-  const result: FileValidationResult = {
-    isValid: true,
-    errors: [],
-    warnings: [],
-  };
-
-  const config = FILE_TYPE_CONFIGS[category];
-  if (!config) {
-    result.isValid = false;
-    result.errors.push(`Categoría de archivo no válida: ${category}`);
-    return result;
+export function validateFile(
+  buffer: Buffer | Uint8Array,
+  declaredName: string,
+  context: keyof typeof ALLOWED_TYPES = 'any'
+): ValidationResult {
+  // 1. Check size
+  const maxSize = MAX_FILE_SIZES[context] || MAX_FILE_SIZES.any;
+  if (buffer.length > maxSize) {
+    return {
+      valid: false,
+      detectedMime: null,
+      detectedExt: null,
+      error: `Archivo demasiado grande (${Math.round(buffer.length / 1024 / 1024)}MB). Máximo: ${Math.round(maxSize / 1024 / 1024)}MB`,
+    };
   }
 
-  // Validar MIME type
-  if (!config.mimeTypes.includes(file.type)) {
-    result.isValid = false;
-    result.errors.push(
-      `Tipo de archivo no permitido. Tipos permitidos: ${config.mimeTypes.join(', ')}`
-    );
+  // 2. Detect real type from magic bytes
+  const detected = detectFileType(buffer);
+  if (!detected) {
+    logger.warn(`[FileValidation] Unknown file type for: ${declaredName}`);
+    return {
+      valid: false,
+      detectedMime: null,
+      detectedExt: null,
+      error: 'Tipo de archivo no reconocido',
+    };
   }
 
-  // Validar extensión
-  const ext = path.extname(file.name).toLowerCase();
-  if (!config.extensions.includes(ext)) {
-    result.isValid = false;
-    result.errors.push(
-      `Extensión de archivo no permitida. Extensiones permitidas: ${config.extensions.join(', ')}`
-    );
+  // 3. Check against allowed types
+  const allowed = ALLOWED_TYPES[context];
+  // For ZIP-based formats (xlsx, docx), the detected MIME might be application/zip
+  const isAllowed = allowed.some(mime => {
+    if (detected.mime === 'application/zip') {
+      // Check file extension for Office formats
+      const ext = declaredName.split('.').pop()?.toLowerCase();
+      if (ext === 'xlsx' && mime.includes('spreadsheet')) return true;
+      if (ext === 'docx' && mime.includes('wordprocessing')) return true;
+      if (mime === 'application/zip') return true;
+      return false;
+    }
+    return detected.mime === mime || (detected.mime === 'text/csv' && mime === 'text/plain');
+  });
+
+  if (!isAllowed) {
+    logger.warn(`[FileValidation] Blocked file: ${declaredName} (detected: ${detected.mime}, context: ${context})`);
+    return {
+      valid: false,
+      detectedMime: detected.mime,
+      detectedExt: detected.ext,
+      error: `Tipo de archivo no permitido: ${detected.ext}. Permitidos: ${allowed.map(m => m.split('/').pop()).join(', ')}`,
+    };
   }
 
-  // Validar tamaño
-  if (file.size > config.maxSize) {
-    result.isValid = false;
-    const maxSizeMB = (config.maxSize / (1024 * 1024)).toFixed(2);
-    result.errors.push(`El archivo excede el tamaño máximo de ${maxSizeMB}MB`);
-  }
-
-  if (file.size === 0) {
-    result.isValid = false;
-    result.errors.push('El archivo está vacío');
-  }
-
-  // Validar magic numbers si está disponible el buffer
-  if ('buffer' in file && file.buffer && config.magicNumbers) {
-    const detectedType = detectFileTypeFromBuffer(file.buffer);
-    if (detectedType !== category) {
-      result.warnings.push(
-        'El contenido del archivo no coincide con su extensión. Esto podría indicar un archivo corrupto o malicioso.'
-      );
+  // 4. Check for dangerous content in text files
+  if (detected.mime.startsWith('text/')) {
+    const content = Buffer.from(buffer.slice(0, 2000)).toString('utf-8');
+    const dangerousPatterns = ['<script', 'javascript:', 'onerror=', 'onload=', 'eval(', 'exec('];
+    for (const pattern of dangerousPatterns) {
+      if (content.toLowerCase().includes(pattern)) {
+        logger.warn(`[FileValidation] Dangerous content in ${declaredName}: ${pattern}`);
+        return {
+          valid: false,
+          detectedMime: detected.mime,
+          detectedExt: detected.ext,
+          error: 'Contenido potencialmente peligroso detectado',
+        };
+      }
     }
   }
 
-  // Sanitizar nombre de archivo
-  result.sanitizedFileName = sanitizeFileName(file.name);
-  result.fileType = category;
-
-  // Logging
-  if (!result.isValid) {
-    logError(new Error('File validation failed'), {
-      fileName: file.name,
-      fileType: file.type,
-      fileSize: file.size,
-      category,
-      errors: result.errors,
-    });
-  } else if (result.warnings.length > 0) {
-    logger.warn('File validation warnings', {
-      fileName: file.name,
-      warnings: result.warnings,
-    });
-  }
-
-  return result;
-}
-
-/**
- * Valida múltiples archivos
- */
-export async function validateFiles(
-  files: File[],
-  category: keyof typeof FILE_TYPE_CONFIGS
-): Promise<FileValidationResult[]> {
-  const results = await Promise.all(files.map((file) => validateFile(file, category)));
-  return results;
-}
-
-/**
- * Valida un archivo de imagen específicamente
- */
-export async function validateImageFile(file: File): Promise<FileValidationResult> {
-  return validateFile(file, 'image');
-}
-
-/**
- * Valida un archivo de documento específicamente
- */
-export async function validateDocumentFile(file: File): Promise<FileValidationResult> {
-  return validateFile(file, 'document');
-}
-
-/**
- * Valida un archivo CSV específicamente
- */
-export async function validateCSVFile(file: File): Promise<FileValidationResult> {
-  return validateFile(file, 'csv');
-}
-
-/**
- * Middleware para validación de archivos en API routes
- */
-export async function validateUploadedFile(
-  file: File | { name: string; type: string; size: number; buffer?: Buffer },
-  category: keyof typeof FILE_TYPE_CONFIGS
-): Promise<void> {
-  const result = await validateFile(file, category);
-
-  if (!result.isValid) {
-    throw new Error(`Validación de archivo fallida: ${result.errors.join(', ')}`);
-  }
-
-  if (result.warnings.length > 0) {
-    logger.warn('File upload warnings', {
-      fileName: file.name,
-      warnings: result.warnings,
-    });
-  }
+  return {
+    valid: true,
+    detectedMime: detected.mime,
+    detectedExt: detected.ext,
+  };
 }

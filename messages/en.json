@@ -1,0 +1,85 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "filter": "Filter",
+    "export": "Export",
+    "import": "Import",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "yes": "Yes",
+    "no": "No",
+    "confirm": "Confirm",
+    "close": "Close",
+    "refresh": "Refresh",
+    "noResults": "No results",
+    "error": "Error",
+    "success": "Success"
+  },
+  "auth": {
+    "login": "Log in",
+    "logout": "Log out",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot your password?",
+    "register": "Sign up",
+    "loginError": "Invalid email or password",
+    "accountLocked": "Account temporarily locked"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "properties": "Properties",
+    "tenants": "Tenants",
+    "payments": "Payments",
+    "contracts": "Contracts",
+    "occupancy": "Occupancy",
+    "monthlyRent": "Monthly rent",
+    "pendingPayments": "Pending payments"
+  },
+  "properties": {
+    "title": "Properties",
+    "newProperty": "New property",
+    "address": "Address",
+    "city": "City",
+    "price": "Price",
+    "rooms": "Rooms",
+    "bathrooms": "Bathrooms",
+    "surface": "Surface",
+    "status": "Status",
+    "available": "Available",
+    "rented": "Rented",
+    "maintenance": "Maintenance"
+  },
+  "tenants": {
+    "title": "Tenants",
+    "newTenant": "New tenant",
+    "name": "Name",
+    "phone": "Phone",
+    "dni": "ID Number",
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "payments": {
+    "title": "Payments",
+    "newPayment": "New payment",
+    "amount": "Amount",
+    "dueDate": "Due date",
+    "paid": "Paid",
+    "pending": "Pending",
+    "overdue": "Overdue",
+    "markAsPaid": "Mark as paid"
+  },
+  "errors": {
+    "generic": "An error occurred",
+    "notFound": "Not found",
+    "unauthorized": "Unauthorized",
+    "forbidden": "Forbidden",
+    "serverError": "Server error"
+  }
+}

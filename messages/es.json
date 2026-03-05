@@ -1,0 +1,85 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "create": "Crear",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "export": "Exportar",
+    "import": "Importar",
+    "back": "Volver",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "yes": "Sí",
+    "no": "No",
+    "confirm": "Confirmar",
+    "close": "Cerrar",
+    "refresh": "Actualizar",
+    "noResults": "Sin resultados",
+    "error": "Error",
+    "success": "Éxito"
+  },
+  "auth": {
+    "login": "Iniciar sesión",
+    "logout": "Cerrar sesión",
+    "email": "Email",
+    "password": "Contraseña",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "register": "Registrarse",
+    "loginError": "Email o contraseña incorrectos",
+    "accountLocked": "Cuenta bloqueada temporalmente"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "properties": "Propiedades",
+    "tenants": "Inquilinos",
+    "payments": "Pagos",
+    "contracts": "Contratos",
+    "occupancy": "Ocupación",
+    "monthlyRent": "Renta mensual",
+    "pendingPayments": "Pagos pendientes"
+  },
+  "properties": {
+    "title": "Propiedades",
+    "newProperty": "Nueva propiedad",
+    "address": "Dirección",
+    "city": "Ciudad",
+    "price": "Precio",
+    "rooms": "Habitaciones",
+    "bathrooms": "Baños",
+    "surface": "Superficie",
+    "status": "Estado",
+    "available": "Disponible",
+    "rented": "Ocupada",
+    "maintenance": "Mantenimiento"
+  },
+  "tenants": {
+    "title": "Inquilinos",
+    "newTenant": "Nuevo inquilino",
+    "name": "Nombre",
+    "phone": "Teléfono",
+    "dni": "DNI/NIE",
+    "active": "Activo",
+    "inactive": "Inactivo"
+  },
+  "payments": {
+    "title": "Pagos",
+    "newPayment": "Nuevo pago",
+    "amount": "Importe",
+    "dueDate": "Fecha vencimiento",
+    "paid": "Pagado",
+    "pending": "Pendiente",
+    "overdue": "Vencido",
+    "markAsPaid": "Marcar como pagado"
+  },
+  "errors": {
+    "generic": "Ha ocurrido un error",
+    "notFound": "No encontrado",
+    "unauthorized": "No autorizado",
+    "forbidden": "Sin permisos",
+    "serverError": "Error del servidor"
+  }
+}

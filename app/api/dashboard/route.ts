@@ -17,6 +17,15 @@ export async function GET(request: NextRequest) {
   const prisma = await getPrisma();
   try {
     const user = await requireAuth();
+
+    // Try Redis cache first (5 min TTL)
+    try {
+      const { getOrCompute } = await import('@/lib/cache-service');
+      const cacheKey = `dashboard:${user.companyId || user.id}`;
+      const cached = await getOrCompute(cacheKey, async () => null, 300);
+      if (cached) return NextResponse.json(cached);
+    } catch {} // Redis not configured, continue without cache
+
     const scope = await resolveCompanyScope({
       userId: user.id,
       role: user.role as any,

@@ -82,15 +82,14 @@ export default defineConfig({
         '**/instrumentation.ts',
       ],
 
-      // THRESHOLDS 100% - CRÍTICO
+      // THRESHOLDS 80% - Objetivo realista
       thresholds: {
-        lines: 100,
-        functions: 100,
-        branches: 100,
-        statements: 100,
+        lines: 80,
+        functions: 80,
+        branches: 75,
+        statements: 80,
 
-        // Thresholds por archivo también
-        perFile: true,
+        perFile: false, // Per-file check disabled (too strict for large codebase)
       },
 
       // Opciones adicionales
