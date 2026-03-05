@@ -59,6 +59,7 @@ import {
   Calculator,
   MapPin,
   Percent,
+  Search,
   Crown,
   Landmark,
   LogIn,
@@ -1661,6 +1662,13 @@ const holdingGrupoNavItems = [
     href: '/inversiones/yield',
     icon: Percent,
     roles: ['super_admin', 'administrador'],
+  },
+  {
+    name: 'Oportunidades IA',
+    href: '/inversiones/oportunidades',
+    icon: Search,
+    roles: ['super_admin', 'administrador'],
+    badge: 'IA',
   },
   {
     name: 'Benchmark Mercado',
