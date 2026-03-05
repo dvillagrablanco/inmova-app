@@ -44,7 +44,10 @@ export async function GET(request: NextRequest) {
       occupiedUnits: 0,
       totalRent: 0,
       totalSurface: 0,
-      byType: {} as Record<string, { count: number; rent: number; surface: number; avgRentPerM2: number }>,
+      byType: {} as Record<
+        string,
+        { count: number; rent: number; surface: number; avgRentPerM2: number }
+      >,
     };
 
     for (const b of buildings) {
@@ -68,9 +71,10 @@ export async function GET(request: NextRequest) {
       data.avgRentPerM2 = data.surface > 0 ? data.rent / data.surface : 0;
     }
 
-    const avgYield = portfolioStats.totalSurface > 0
-      ? ((portfolioStats.totalRent * 12) / (portfolioStats.totalSurface * 4500)) * 100
-      : 0;
+    const avgYield =
+      portfolioStats.totalSurface > 0
+        ? ((portfolioStats.totalRent * 12) / (portfolioStats.totalSurface * 4500)) * 100
+        : 0;
 
     // 2. Get market data from multiple sources
     let marketData: any[] = [];
@@ -84,16 +88,20 @@ export async function GET(request: NextRequest) {
     // 3. Get public API data (INE IPV, mortgage rates)
     let publicMarketData: any = null;
     try {
-      const { getMarketContext, IPV_STATIC, DATA_SOURCES_INFO } = await import('@/lib/public-market-apis');
+      const { getMarketContext, IPV_STATIC, DATA_SOURCES_INFO } =
+        await import('@/lib/public-market-apis');
       // Get data for main cities where Vidaro operates
       const contexts = await Promise.all(
-        ['Madrid', 'Marbella', 'Valladolid', 'Palencia'].map(city => getMarketContext(city))
+        ['Madrid', 'Marbella', 'Valladolid', 'Palencia'].map((city) => getMarketContext(city))
       );
       publicMarketData = {
         regions: contexts,
         ipvNacional: IPV_STATIC,
-        availableSources: Object.values(DATA_SOURCES_INFO).map(s => ({
-          name: s.name, tipo: s.tipo, coste: s.coste, estado: s.estado,
+        availableSources: Object.values(DATA_SOURCES_INFO).map((s) => ({
+          name: s.name,
+          tipo: s.tipo,
+          coste: s.coste,
+          estado: s.estado,
         })),
       };
     } catch (err) {
@@ -106,30 +114,45 @@ export async function GET(request: NextRequest) {
       avgYield,
       marketData,
       companyId,
-      publicMarketData,
+      publicMarketData
     );
 
-    return NextResponse.json({
+    // Also include market opportunities from all sources
+    let marketOpps = null;
+    try {
+      const { getAllMarketOpportunities } = await import('@/lib/market-opportunities');
+      marketOpps = getAllMarketOpportunities();
+    } catch (err) {
+      logger.warn('[Opportunities] Market opportunities error:', err);
+    }
+
+    // Merge into response
+    const finalResponse = {
       portfolioStats: {
         totalUnits: portfolioStats.totalUnits,
-        occupancy: portfolioStats.totalUnits > 0
-          ? ((portfolioStats.occupiedUnits / portfolioStats.totalUnits) * 100).toFixed(1)
-          : '0',
+        occupancy:
+          portfolioStats.totalUnits > 0
+            ? ((portfolioStats.occupiedUnits / portfolioStats.totalUnits) * 100).toFixed(1)
+            : '0',
         monthlyRent: Math.round(portfolioStats.totalRent),
         avgYield: avgYield.toFixed(2),
         byType: portfolioStats.byType,
       },
       opportunities,
+      marketOpportunities: marketOpps || undefined,
       marketSources: publicMarketData?.availableSources || [],
-      marketIndicators: publicMarketData?.regions?.map((r: any) => ({
-        ccaa: r.ccaa,
-        variacionAnual: r.staticData?.variacionAnual || r.ipv?.variacionAnual || 0,
-        precioMedioM2: r.staticData?.precioMedioM2 || 0,
-        tendencia: r.staticData?.tendencia || 'sin datos',
-        hipotecaMedia: r.hipotecaMedia,
-      })) || [],
+      marketIndicators:
+        publicMarketData?.regions?.map((r: any) => ({
+          ccaa: r.ccaa,
+          variacionAnual: r.staticData?.variacionAnual || r.ipv?.variacionAnual || 0,
+          precioMedioM2: r.staticData?.precioMedioM2 || 0,
+          tendencia: r.staticData?.tendencia || 'sin datos',
+          hipotecaMedia: r.hipotecaMedia,
+        })) || [],
       generatedAt: new Date().toISOString(),
-    });
+    };
+
+    return NextResponse.json(finalResponse);
   } catch (error: any) {
     logger.error('[Opportunities Error]:', error);
     return NextResponse.json({ error: 'Error generando oportunidades' }, { status: 500 });
@@ -141,19 +164,25 @@ async function generateOpportunities(
   avgYield: number,
   marketData: any[],
   companyId: string,
-  publicMarketData?: any,
+  publicMarketData?: any
 ) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
 
   // Build market context
-  const marketContext = marketData.map(z =>
-    `${z.zona}: Venta ${z.precioRealVentaM2}€/m², Alquiler ${z.precioRealAlquilerM2}€/m²/mes, Tendencia ${z.tendencia}, Demanda ${z.demanda}`
-  ).join('\n');
+  const marketContext = marketData
+    .map(
+      (z) =>
+        `${z.zona}: Venta ${z.precioRealVentaM2}€/m², Alquiler ${z.precioRealAlquilerM2}€/m²/mes, Tendencia ${z.tendencia}, Demanda ${z.demanda}`
+    )
+    .join('\n');
 
   // Build portfolio context
-  const portfolioContext = Object.entries(portfolio.byType).map(([tipo, data]: [string, any]) =>
-    `${tipo}: ${data.count} uds, renta media ${data.avgRentPerM2.toFixed(2)}€/m²/mes`
-  ).join(', ');
+  const portfolioContext = Object.entries(portfolio.byType)
+    .map(
+      ([tipo, data]: [string, any]) =>
+        `${tipo}: ${data.count} uds, renta media ${data.avgRentPerM2.toFixed(2)}€/m²/mes`
+    )
+    .join(', ');
 
   if (!apiKey) {
     // Return rule-based opportunities
@@ -167,9 +196,10 @@ async function generateOpportunities(
     const response = await anthropic.messages.create({
       model: process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-6',
       max_tokens: 4096,
-      messages: [{
-        role: 'user',
-        content: `Eres un analista de inversiones inmobiliarias experto en el mercado español. Genera oportunidades de inversión basándote en estos datos:
+      messages: [
+        {
+          role: 'user',
+          content: `Eres un analista de inversiones inmobiliarias experto en el mercado español. Genera oportunidades de inversión basándote en estos datos:
 
 CARTERA ACTUAL DEL CLIENTE:
 - ${portfolio.totalUnits} unidades, ${portfolio.occupiedUnits} ocupadas
@@ -181,9 +211,14 @@ DATOS DE MERCADO POR ZONA (fuente: Notariado + Idealista):
 ${marketContext}
 
 INDICADORES MACROECONÓMICOS (fuente: INE + Banco de España):
-${publicMarketData?.regions?.map((r: any) =>
-  `${r.ccaa}: Precio medio ${r.staticData?.precioMedioM2 || '?'}€/m², Variación anual ${r.staticData?.variacionAnual || '?'}%, Tendencia: ${r.staticData?.tendencia || '?'}`
-).join('\n') || 'Sin datos INE disponibles'}
+${
+  publicMarketData?.regions
+    ?.map(
+      (r: any) =>
+        `${r.ccaa}: Precio medio ${r.staticData?.precioMedioM2 || '?'}€/m², Variación anual ${r.staticData?.variacionAnual || '?'}%, Tendencia: ${r.staticData?.tendencia || '?'}`
+    )
+    .join('\n') || 'Sin datos INE disponibles'
+}
 
 Tipo interés hipotecario medio: ${publicMarketData?.regions?.[0]?.hipotecaMedia?.tipoInteres || 3.45}%
 LTV medio financiación: ${publicMarketData?.regions?.[0]?.hipotecaMedia?.ltv || 70}%
@@ -231,7 +266,8 @@ Para cada oportunidad devuelve JSON:
 
 Usa precios REALES del mercado español 2025-2026. Sé específico con ubicaciones y argumenta con datos.
 Responde SOLO con el JSON, sin texto adicional.`,
-      }],
+        },
+      ],
     });
 
     const text = response.content[0]?.type === 'text' ? response.content[0].text : '';
@@ -248,9 +284,9 @@ Responde SOLO con el JSON, sin texto adicional.`,
 }
 
 function generateLocalOpportunities(portfolio: any, avgYield: number, marketData: any[]) {
-  const madrid = marketData.find(z => z.zona?.includes('Chamberí')) || marketData[0];
-  const marbella = marketData.find(z => z.zona?.includes('Marbella'));
-  const valladolid = marketData.find(z => z.zona?.includes('Valladolid'));
+  const madrid = marketData.find((z) => z.zona?.includes('Chamberí')) || marketData[0];
+  const marbella = marketData.find((z) => z.zona?.includes('Marbella'));
+  const valladolid = marketData.find((z) => z.zona?.includes('Valladolid'));
 
   return [
     {
@@ -269,8 +305,17 @@ function generateLocalOpportunities(portfolio: any, avgYield: number, marketData
       paybackAnos: 17,
       riesgo: 'medio',
       argumentacion: `Edificio completo en zona consolidada con alta demanda de alquiler. Yield bruto estimado del 5.76% con renta media de €20/m²/mes. La zona tiene tendencia alcista y baja vacancia (<3%). Posibilidad de optimizar rentas en renovaciones.`,
-      kpis: { cashFlowMensual: 8500, cashFlowAnual: 102000, gastosEstimados: 42000, hipotecaMensual: 7500 },
-      factoresPositivos: ['Zona consolidada con alta demanda', 'Diversificación de inquilinos', 'Revalorización anual 3-5%'],
+      kpis: {
+        cashFlowMensual: 8500,
+        cashFlowAnual: 102000,
+        gastosEstimados: 42000,
+        hipotecaMensual: 7500,
+      },
+      factoresPositivos: [
+        'Zona consolidada con alta demanda',
+        'Diversificación de inquilinos',
+        'Revalorización anual 3-5%',
+      ],
       factoresRiesgo: ['Inversión inicial alta', 'Posible regulación de alquileres'],
       recomendacion: 'Analizar',
     },
@@ -290,8 +335,17 @@ function generateLocalOpportunities(portfolio: any, avgYield: number, marketData
       paybackAnos: 11,
       riesgo: 'medio',
       argumentacion: `Local en zona turística con flujo peatonal alto. Yield bruto del 9.33%, muy superior a la media residencial. Contratos comerciales son más largos (5-10 años) y con IPC. Demanda creciente post-COVID en hostelería premium.`,
-      kpis: { cashFlowMensual: 2800, cashFlowAnual: 33600, gastosEstimados: 8400, hipotecaMensual: 1400 },
-      factoresPositivos: ['Yield alto (>9%)', 'Contratos largos con IPC', 'Zona turística consolidada'],
+      kpis: {
+        cashFlowMensual: 2800,
+        cashFlowAnual: 33600,
+        gastosEstimados: 8400,
+        hipotecaMensual: 1400,
+      },
+      factoresPositivos: [
+        'Yield alto (>9%)',
+        'Contratos largos con IPC',
+        'Zona turística consolidada',
+      ],
       factoresRiesgo: ['Dependencia del sector hostelería', 'Rotación si cierra el negocio'],
       recomendacion: 'Comprar',
     },
@@ -311,8 +365,17 @@ function generateLocalOpportunities(portfolio: any, avgYield: number, marketData
       paybackAnos: 13,
       riesgo: 'bajo',
       argumentacion: `Vivienda en zona con altísima demanda de media estancia (profesionales, estudiantes, expatriados). Renta 30-40% superior a larga estancia. Ocupación estimada >90% anual. Zona con la mayor demanda de alquiler temporal de Madrid.`,
-      kpis: { cashFlowMensual: 1600, cashFlowAnual: 19200, gastosEstimados: 7200, hipotecaMensual: 1100 },
-      factoresPositivos: ['Demanda altísima de media estancia', 'Premium 30-40% vs larga estancia', 'Zona trendy con revalorización'],
+      kpis: {
+        cashFlowMensual: 1600,
+        cashFlowAnual: 19200,
+        gastosEstimados: 7200,
+        hipotecaMensual: 1100,
+      },
+      factoresPositivos: [
+        'Demanda altísima de media estancia',
+        'Premium 30-40% vs larga estancia',
+        'Zona trendy con revalorización',
+      ],
       factoresRiesgo: ['Mayor gestión operativa', 'Regulación alquiler temporal'],
       recomendacion: 'Comprar',
     },
@@ -332,8 +395,17 @@ function generateLocalOpportunities(portfolio: any, avgYield: number, marketData
       paybackAnos: 13,
       riesgo: 'medio',
       argumentacion: `Oficina en zona empresarial prime. Posibilidad de modelo coworking (€350-500/puesto) multiplica la rentabilidad x2-3. Demanda creciente de oficinas flexibles. Contratos corporativos con garantías.`,
-      kpis: { cashFlowMensual: 2800, cashFlowAnual: 33600, gastosEstimados: 14400, hipotecaMensual: 1800 },
-      factoresPositivos: ['Modelo coworking multiplica renta', 'Zona empresarial AAA', 'Contratos corporativos estables'],
+      kpis: {
+        cashFlowMensual: 2800,
+        cashFlowAnual: 33600,
+        gastosEstimados: 14400,
+        hipotecaMensual: 1800,
+      },
+      factoresPositivos: [
+        'Modelo coworking multiplica renta',
+        'Zona empresarial AAA',
+        'Contratos corporativos estables',
+      ],
       factoresRiesgo: ['Teletrabajo reduce demanda', 'Inversión en acondicionamiento'],
       recomendacion: 'Analizar',
     },
@@ -353,8 +425,17 @@ function generateLocalOpportunities(portfolio: any, avgYield: number, marketData
       paybackAnos: 13,
       riesgo: 'bajo',
       argumentacion: `Garajes en zona con restricciones Madrid Central/ZBE. Inversión defensiva con gestión mínima. Sin impagos relevantes (el propietario necesita el garaje). Revalorización por restricciones de tráfico crecientes.`,
-      kpis: { cashFlowMensual: 2050, cashFlowAnual: 24600, gastosEstimados: 3000, hipotecaMensual: 0 },
-      factoresPositivos: ['Inversión defensiva, bajo riesgo', 'Gestión mínima', 'ZBE Madrid incrementa demanda'],
+      kpis: {
+        cashFlowMensual: 2050,
+        cashFlowAnual: 24600,
+        gastosEstimados: 3000,
+        hipotecaMensual: 0,
+      },
+      factoresPositivos: [
+        'Inversión defensiva, bajo riesgo',
+        'Gestión mínima',
+        'ZBE Madrid incrementa demanda',
+      ],
       factoresRiesgo: ['Liquidez limitada', 'Yield estable pero sin crecimiento rápido'],
       recomendacion: 'Comprar',
     },
@@ -374,9 +455,22 @@ function generateLocalOpportunities(portfolio: any, avgYield: number, marketData
       paybackAnos: 10,
       riesgo: 'alto',
       argumentacion: `Edificio en zona emergente a precio por debajo de mercado (€2.400/m² vs €3.500+ reformado). Inversión en reforma de €300-400K → valor post-reforma €2.5-3M. Yield del 10% post-reforma en alquiler premium. Zona con gentrificación acelerada.`,
-      kpis: { cashFlowMensual: 7000, cashFlowAnual: 84000, gastosEstimados: 36000, hipotecaMensual: 4500 },
-      factoresPositivos: ['Margen de revalorización >100%', 'Zona en gentrificación', 'Yield post-reforma >10%'],
-      factoresRiesgo: ['Riesgo de obra (plazos, costes)', 'Inversión adicional en reforma', 'Zona con incertidumbre social'],
+      kpis: {
+        cashFlowMensual: 7000,
+        cashFlowAnual: 84000,
+        gastosEstimados: 36000,
+        hipotecaMensual: 4500,
+      },
+      factoresPositivos: [
+        'Margen de revalorización >100%',
+        'Zona en gentrificación',
+        'Yield post-reforma >10%',
+      ],
+      factoresRiesgo: [
+        'Riesgo de obra (plazos, costes)',
+        'Inversión adicional en reforma',
+        'Zona con incertidumbre social',
+      ],
       recomendacion: 'Analizar',
     },
   ];
