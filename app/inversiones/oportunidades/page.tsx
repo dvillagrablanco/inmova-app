@@ -173,8 +173,9 @@ export default function OportunidadesPage() {
         )}
 
         <Tabs defaultValue="oportunidades">
-          <TabsList className="w-full sm:w-auto">
+          <TabsList className="w-full sm:w-auto flex-wrap">
             <TabsTrigger value="oportunidades">Oportunidades IA</TabsTrigger>
+            <TabsTrigger value="propuestas">Propuestas Broker</TabsTrigger>
             <TabsTrigger value="mercado">Buscar Mercado</TabsTrigger>
             <TabsTrigger value="simulador">Simulador</TabsTrigger>
             <TabsTrigger value="alertas">Alertas</TabsTrigger>
@@ -254,6 +255,125 @@ export default function OportunidadesPage() {
                 ))}
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="propuestas" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Building2 className="h-5 w-5" /> Analizar Propuesta de Broker / Inmobiliaria</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground">Sube un PDF, Excel o imagen con la propuesta de inversión. La IA extraerá los datos, identificará qué falta, y dará un veredicto completo.</p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Nombre del broker/inmobiliaria</Label>
+                    <Input placeholder="Ej: Engel & Völkers, Lucas Fox..." id="broker-name" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Documento de la propuesta</Label>
+                    <input
+                      type="file"
+                      accept=".pdf,.xlsx,.xls,.csv,.jpg,.jpeg,.png,.webp"
+                      id="proposal-file"
+                      className="text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 cursor-pointer w-full"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>O describe la propuesta en texto</Label>
+                  <textarea
+                    id="proposal-text"
+                    className="w-full min-h-[100px] p-3 border rounded-lg text-sm resize-y"
+                    placeholder="Pega aquí el email del broker, la descripción del inmueble, datos financieros... La IA analizará todo lo que le des."
+                  />
+                </div>
+
+                <Button
+                  className="w-full"
+                  onClick={async () => {
+                    const brokerEl = document.getElementById('broker-name') as HTMLInputElement;
+                    const fileEl = document.getElementById('proposal-file') as HTMLInputElement;
+                    const textEl = document.getElementById('proposal-text') as HTMLTextAreaElement;
+                    const file = fileEl?.files?.[0];
+                    const text = textEl?.value;
+
+                    if (!file && !text) { toast.error('Sube un archivo o escribe la propuesta'); return; }
+
+                    toast.info('Analizando propuesta con IA... (puede tardar ~45 segundos)');
+
+                    try {
+                      const fd = new FormData();
+                      if (file) fd.append('file', file);
+                      if (text) fd.append('text', text);
+                      fd.append('broker', brokerEl?.value || '');
+
+                      const res = await fetch('/api/ai/analyze-proposal', { method: 'POST', body: fd });
+
+                      if (res.ok) {
+                        const data = await res.json();
+                        const a = data.analysis;
+                        const v = a.veredicto;
+
+                        // Build rich result message
+                        const parts = [
+                          `🎯 VEREDICTO: ${v?.decision} (confianza ${v?.confianza}%)`,
+                          v?.resumen,
+                          '',
+                          `📊 Datos extraídos:`,
+                          `  Tipo: ${a.datosExtraidos?.tipoInmueble || '?'} | Ubicación: ${a.datosExtraidos?.ubicacion || '?'}`,
+                          `  Precio: ${a.datosExtraidos?.precioVenta ? a.datosExtraidos.precioVenta.toLocaleString('es-ES') + '€' : '?'} | Superficie: ${a.datosExtraidos?.superficie || '?'}m²`,
+                          `  Renta actual: ${a.datosExtraidos?.rentaActual ? a.datosExtraidos.rentaActual.toLocaleString('es-ES') + '€/mes' : '?'}`,
+                          '',
+                          `💰 Yield: ${a.analisisFinanciero?.yieldNetoEstimado || '?'}% neto | ROI 5a: ${a.analisisFinanciero?.roi5anos || '?'}%`,
+                          `💵 Precio justo: ${a.analisisFinanciero?.precioJusto?.toLocaleString('es-ES') || '?'}€`,
+                          `⚠️ Riesgo: ${a.analisisRiesgo?.nivel} (${a.analisisRiesgo?.puntuacion}/10)`,
+                        ];
+
+                        if (a.datosQueFaltan?.length > 0) {
+                          parts.push('', `❓ DATOS QUE FALTAN (${a.datosQueFaltan.length}):`);
+                          a.datosQueFaltan.slice(0, 5).forEach((d: any) => {
+                            parts.push(`  [${d.importancia}] ${d.dato}: ${d.porQue}`);
+                          });
+                        }
+
+                        if (a.preguntasParaBroker?.length > 0) {
+                          parts.push('', '📞 PREGUNTAS PARA EL BROKER:');
+                          a.preguntasParaBroker.slice(0, 3).forEach((q: string) => parts.push(`  → ${q}`));
+                        }
+
+                        if (a.alertasRojas?.length > 0) {
+                          parts.push('', '🚨 ALERTAS ROJAS:');
+                          a.alertasRojas.forEach((al: string) => parts.push(`  ⛔ ${al}`));
+                        }
+
+                        if (v?.proximosPasos?.length > 0) {
+                          parts.push('', '📋 PRÓXIMOS PASOS:');
+                          v.proximosPasos.forEach((p: string, i: number) => parts.push(`  ${i+1}. ${p}`));
+                        }
+
+                        toast.success(parts.join('\n'), { duration: 30000 });
+                      } else {
+                        const err = await res.json();
+                        toast.error(err.error || 'Error analizando propuesta');
+                      }
+                    } catch { toast.error('Error de conexión'); }
+                  }}
+                >
+                  <TrendingUp className="h-4 w-4 mr-2" />
+                  Analizar Propuesta con IA
+                </Button>
+
+                <div className="p-3 bg-amber-50 dark:bg-amber-950 rounded-lg text-xs text-amber-800 dark:text-amber-200">
+                  <p className="font-medium">Formatos soportados:</p>
+                  <p>📄 PDF (propuestas, fichas técnicas, informes de valoración)</p>
+                  <p>📊 Excel (datos financieros, tablas de propiedades)</p>
+                  <p>📷 Imágenes (capturas de email, folletos)</p>
+                  <p>📝 Texto (copia-pega del email o descripción del broker)</p>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="mercado" className="space-y-4">
