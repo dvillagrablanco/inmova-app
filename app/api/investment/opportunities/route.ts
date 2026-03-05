@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
       ? ((portfolioStats.totalRent * 12) / (portfolioStats.totalSurface * 4500)) * 100
       : 0;
 
-    // 2. Get market data
+    // 2. Get market data from multiple sources
     let marketData: any[] = [];
     try {
       const { getAllMarketData } = await import('@/lib/market-data-service');
@@ -81,12 +81,32 @@ export async function GET(request: NextRequest) {
       // Market data not available
     }
 
-    // 3. Generate opportunities with AI
+    // 3. Get public API data (INE IPV, mortgage rates)
+    let publicMarketData: any = null;
+    try {
+      const { getMarketContext, IPV_STATIC, DATA_SOURCES_INFO } = await import('@/lib/public-market-apis');
+      // Get data for main cities where Vidaro operates
+      const contexts = await Promise.all(
+        ['Madrid', 'Marbella', 'Valladolid', 'Palencia'].map(city => getMarketContext(city))
+      );
+      publicMarketData = {
+        regions: contexts,
+        ipvNacional: IPV_STATIC,
+        availableSources: Object.values(DATA_SOURCES_INFO).map(s => ({
+          name: s.name, tipo: s.tipo, coste: s.coste, estado: s.estado,
+        })),
+      };
+    } catch (err) {
+      logger.warn('[Opportunities] Error fetching public market data:', err);
+    }
+
+    // 4. Generate opportunities with AI + enriched data
     const opportunities = await generateOpportunities(
       portfolioStats,
       avgYield,
       marketData,
       companyId,
+      publicMarketData,
     );
 
     return NextResponse.json({
@@ -100,6 +120,14 @@ export async function GET(request: NextRequest) {
         byType: portfolioStats.byType,
       },
       opportunities,
+      marketSources: publicMarketData?.availableSources || [],
+      marketIndicators: publicMarketData?.regions?.map((r: any) => ({
+        ccaa: r.ccaa,
+        variacionAnual: r.staticData?.variacionAnual || r.ipv?.variacionAnual || 0,
+        precioMedioM2: r.staticData?.precioMedioM2 || 0,
+        tendencia: r.staticData?.tendencia || 'sin datos',
+        hipotecaMedia: r.hipotecaMedia,
+      })) || [],
       generatedAt: new Date().toISOString(),
     });
   } catch (error: any) {
@@ -113,6 +141,7 @@ async function generateOpportunities(
   avgYield: number,
   marketData: any[],
   companyId: string,
+  publicMarketData?: any,
 ) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
 
@@ -148,8 +177,17 @@ CARTERA ACTUAL DEL CLIENTE:
 - Yield medio: ${avgYield.toFixed(2)}%
 - Por tipo: ${portfolioContext}
 
-DATOS DE MERCADO POR ZONA:
+DATOS DE MERCADO POR ZONA (fuente: Notariado + Idealista):
 ${marketContext}
+
+INDICADORES MACROECONÓMICOS (fuente: INE + Banco de España):
+${publicMarketData?.regions?.map((r: any) =>
+  `${r.ccaa}: Precio medio ${r.staticData?.precioMedioM2 || '?'}€/m², Variación anual ${r.staticData?.variacionAnual || '?'}%, Tendencia: ${r.staticData?.tendencia || '?'}`
+).join('\n') || 'Sin datos INE disponibles'}
+
+Tipo interés hipotecario medio: ${publicMarketData?.regions?.[0]?.hipotecaMedia?.tipoInteres || 3.45}%
+LTV medio financiación: ${publicMarketData?.regions?.[0]?.hipotecaMedia?.ltv || 70}%
+Plazo medio hipoteca: ${publicMarketData?.regions?.[0]?.hipotecaMedia?.plazoMedio || 24} años
 
 Genera exactamente 6 oportunidades de inversión diversificadas:
 1. Edificio residencial completo (para alquiler larga estancia)

@@ -45,6 +45,10 @@ export default function OportunidadesPage() {
   const [loading, setLoading] = useState(true);
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [portfolioStats, setPortfolioStats] = useState<any>(null);
+  const [marketIndicators, setMarketIndicators] = useState<any[]>([]);
+  const [marketSources, setMarketSources] = useState<any[]>([]);
+  const [marketIndicators, setMarketIndicators] = useState<any[]>([]);
+  const [marketSources, setMarketSources] = useState<any[]>([]);
 
   // Simulator state
   const [simPrecio, setSimPrecio] = useState('');
@@ -65,6 +69,8 @@ export default function OportunidadesPage() {
         const data = await res.json();
         setPortfolioStats(data.portfolioStats || null);
         setOpportunities(data.opportunities || []);
+        setMarketIndicators(data.marketIndicators || []);
+        setMarketSources(data.marketSources || []);
       }
     } catch {
       toast.error('Error cargando oportunidades');
@@ -138,6 +144,34 @@ export default function OportunidadesPage() {
             <Card><CardContent className="pt-6 text-center"><p className="text-xs text-muted-foreground">Renta/mes</p><p className="text-2xl font-bold text-green-600">{fmt(portfolioStats.monthlyRent)}</p></CardContent></Card>
             <Card><CardContent className="pt-6 text-center"><p className="text-xs text-muted-foreground">Yield Medio</p><p className="text-2xl font-bold text-blue-600">{portfolioStats.avgYield}%</p></CardContent></Card>
           </div>
+        )}
+
+        {/* Market indicators from public APIs */}
+        {marketIndicators.length > 0 && (
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2"><TrendingUp className="h-4 w-4" /> Indicadores de Mercado (INE + Notariado + Banco España)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                {marketIndicators.map((ind: any, i: number) => (
+                  <div key={i} className="p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <p className="font-medium">{ind.ccaa}</p>
+                    <p className="text-muted-foreground">{ind.precioMedioM2 ? `${ind.precioMedioM2}€/m²` : ''}</p>
+                    <p className={ind.variacionAnual > 10 ? 'text-red-600 font-bold' : ind.variacionAnual > 5 ? 'text-amber-600' : 'text-green-600'}>
+                      {ind.variacionAnual > 0 ? '+' : ''}{ind.variacionAnual}% anual
+                    </p>
+                    <p className="text-muted-foreground capitalize">{ind.tendencia}</p>
+                  </div>
+                ))}
+              </div>
+              {marketSources.length > 0 && (
+                <p className="text-xs text-muted-foreground mt-2">
+                  Fuentes: {marketSources.map((s: any) => s.name).join(', ')}
+                </p>
+              )}
+            </CardContent>
+          </Card>
         )}
 
         <Tabs defaultValue="oportunidades">
