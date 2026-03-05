@@ -219,7 +219,7 @@ async function main() {
 
       const data = {
         nombre: pos.activo,
-        tipo: (TIPO_MAP[pos.tipo] || 'otro') as any,
+        tipo: (TIPO_MAP[pos.tipo] || 'otro_instrumento') as any,
         divisa: pos.divisa,
         cantidad: pos.cantidad,
         precioMedio: pos.valorCompra > 0 && pos.cantidad > 0 ? pos.valorCompra / pos.cantidad : 0,
