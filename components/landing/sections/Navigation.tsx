@@ -5,7 +5,14 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { Building2, Sparkles, Menu, X, HardHat } from 'lucide-react';
+import {
+  Building2, Sparkles, Menu, X, HardHat, ChevronDown,
+  Users, Home, Briefcase, Hammer, Handshake,
+} from 'lucide-react';
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuSeparator, DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -63,11 +70,55 @@ export function Navigation() {
 
           {/* Auth Buttons - SIEMPRE VISIBLES */}
           <div className="flex items-center gap-2 sm:gap-3">
-            <Link href="/login" className="hidden sm:block">
-              <Button variant="outline" className="border-gray-300 text-gray-900 hover:bg-gray-100 hover:border-gray-400 font-semibold text-xs sm:text-sm px-2 sm:px-4">
-                Iniciar Sesión
-              </Button>
-            </Link>
+            <div className="hidden sm:block">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="border-gray-300 text-gray-900 hover:bg-gray-100 hover:border-gray-400 font-semibold text-xs sm:text-sm px-2 sm:px-4">
+                    Iniciar Sesión
+                    <ChevronDown className="ml-1 h-3 w-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem asChild>
+                    <Link href="/login" className="flex items-center gap-2 cursor-pointer">
+                      <Users className="h-4 w-4 text-emerald-600" />
+                      <div><p className="font-medium">Gestor / Admin</p><p className="text-xs text-muted-foreground">Panel de gestión</p></div>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/portal-inquilino/login" className="flex items-center gap-2 cursor-pointer">
+                      <Home className="h-4 w-4 text-indigo-600" />
+                      <div><p className="font-medium">Inquilino</p><p className="text-xs text-muted-foreground">Pagos e incidencias</p></div>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/portal-propietario/dashboard" className="flex items-center gap-2 cursor-pointer">
+                      <Building2 className="h-4 w-4 text-amber-600" />
+                      <div><p className="font-medium">Propietario</p><p className="text-xs text-muted-foreground">Rentabilidad y activos</p></div>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/portal-proveedor/login" className="flex items-center gap-2 cursor-pointer">
+                      <Briefcase className="h-4 w-4 text-blue-600" />
+                      <div><p className="font-medium">Proveedor</p><p className="text-xs text-muted-foreground">Órdenes y facturación</p></div>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/partners/login" className="flex items-center gap-2 cursor-pointer">
+                      <Handshake className="h-4 w-4 text-rose-600" />
+                      <div><p className="font-medium">Partner</p><p className="text-xs text-muted-foreground">Comisiones y recursos</p></div>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/ewoorker/dashboard" className="flex items-center gap-2 cursor-pointer">
+                      <Hammer className="h-4 w-4 text-orange-600" />
+                      <div><p className="font-medium">Construcción</p><p className="text-xs text-muted-foreground">ewoorker B2B</p></div>
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
             <Link href="/register">
               <Button className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white shadow-lg shadow-indigo-500/50 text-xs sm:text-sm px-3 sm:px-4">
                 <span className="sm:hidden">Empezar</span>
@@ -117,11 +168,39 @@ export function Navigation() {
                     )
                   ))}
                   <div className="border-t pt-4 mt-4 space-y-3">
-                    <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
-                      <Button variant="outline" className="w-full border-gray-400 text-gray-900 hover:bg-gray-100 font-semibold">
-                        Iniciar Sesión
-                      </Button>
-                    </Link>
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Acceder como:</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
+                        <Button variant="outline" size="sm" className="w-full text-xs justify-start gap-1.5">
+                          <Users className="h-3.5 w-3.5 text-emerald-600" /> Gestor
+                        </Button>
+                      </Link>
+                      <Link href="/portal-inquilino/login" onClick={() => setMobileMenuOpen(false)}>
+                        <Button variant="outline" size="sm" className="w-full text-xs justify-start gap-1.5">
+                          <Home className="h-3.5 w-3.5 text-indigo-600" /> Inquilino
+                        </Button>
+                      </Link>
+                      <Link href="/portal-propietario/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                        <Button variant="outline" size="sm" className="w-full text-xs justify-start gap-1.5">
+                          <Building2 className="h-3.5 w-3.5 text-amber-600" /> Propietario
+                        </Button>
+                      </Link>
+                      <Link href="/portal-proveedor/login" onClick={() => setMobileMenuOpen(false)}>
+                        <Button variant="outline" size="sm" className="w-full text-xs justify-start gap-1.5">
+                          <Briefcase className="h-3.5 w-3.5 text-blue-600" /> Proveedor
+                        </Button>
+                      </Link>
+                      <Link href="/partners/login" onClick={() => setMobileMenuOpen(false)}>
+                        <Button variant="outline" size="sm" className="w-full text-xs justify-start gap-1.5">
+                          <Handshake className="h-3.5 w-3.5 text-rose-600" /> Partner
+                        </Button>
+                      </Link>
+                      <Link href="/ewoorker/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                        <Button variant="outline" size="sm" className="w-full text-xs justify-start gap-1.5">
+                          <Hammer className="h-3.5 w-3.5 text-orange-600" /> Construcción
+                        </Button>
+                      </Link>
+                    </div>
                     <Link href="/register" onClick={() => setMobileMenuOpen(false)}>
                       <Button className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 text-white">
                         Comenzar Gratis
