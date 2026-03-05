@@ -137,7 +137,8 @@ IMPORTANTE: Basa tu valoración en los PRECIOS REALES escriturados del Notariado
 FINALIDAD: ${options.finalidad === 'venta' ? 'Venta' : options.finalidad === 'alquiler' ? 'Alquiler' : 'Venta y Alquiler'}
 
 Tu tarea: Proporciona una VALORACIÓN COMPLETA en formato JSON EXACTO como se muestra abajo.
-Considera el mercado español actual (2024-2025), la ubicación en ${property.city}, y todas las características.
+
+IMPORTANTE: El inmueble está en ${property.city.toUpperCase()}. Basa tu valoración EXCLUSIVAMENTE en el mercado de ${property.city}, NO en el de otra ciudad. Usa precios de mercado reales de ${property.city} y su zona en el momento actual (2025-2026).
 
 Responde SOLO con el JSON, sin texto adicional:
 {
@@ -385,9 +386,13 @@ export async function POST(request: NextRequest) {
     const validated = valuateSchema.parse(body);
 
     // 4. Obtener datos de múltiples plataformas externas
-    const ciudad = validated.ciudad || validated.city || 'Madrid';
-    const direccion = validated.direccion || validated.address || 'Centro';
+    const ciudad = validated.ciudad || validated.city || '';
+    const direccion = validated.direccion || validated.address || '';
     const superficie = validated.superficie || validated.squareMeters || 80;
+
+    if (!ciudad) {
+      return NextResponse.json({ error: 'Ciudad requerida para la valoración' }, { status: 400 });
+    }
     const habitaciones = validated.habitaciones || validated.rooms || 2;
 
     let aggregatedPlatformData;
