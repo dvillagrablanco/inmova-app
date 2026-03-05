@@ -186,101 +186,53 @@ export function LandingChatbot() {
     setInputValue('');
     setIsTyping(true);
 
-    // Simular tiempo de respuesta
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      // Call AI-powered commercial chatbot
+      const history = messages
+        .filter((m) => m.sender !== 'system')
+        .slice(-8)
+        .map((m) => ({ role: m.sender === 'user' ? 'user' : 'assistant', content: m.text }));
 
-    // Buscar respuesta relevante
-    const lowerMessage = userMessage.toLowerCase();
-    let responded = false;
+      const res = await fetch('/api/landing/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: userMessage, history }),
+      });
 
-    // Detectar intenciones clave
-    const intentions: Record<string, string[]> = {
-      precio: ['precio', 'coste', 'cost', 'cuánto', 'cuanto', 'tarifa', 'plan'],
-      funcionalidades: [
-        'módulo',
-        'modulo',
-        'función',
-        'funcion',
-        'característica',
-        'caracteristica',
-        'qué hace',
-        'que hace',
-        'funcionalidad',
-      ],
-      ia: [
-        'inteligencia artificial',
-        ' ia ',
-        'ai ',
-        'valoración',
-        'valoracion',
-        'predicción',
-        'prediccion',
-        'morosidad',
-        'claude',
-        'machine learning',
-      ],
-      'family-office': [
-        'family office',
-        'holding',
-        'patrimonio',
-        'sociedad',
-        'grupo empresarial',
-        'private equity',
-        'consolidado',
-      ],
-      analytics: [
-        'analytics',
-        'analítica',
-        'analitica',
-        'reporte',
-        'informe',
-        'kpi',
-        'dashboard',
-        'métricas',
-        'metricas',
-        'yield',
-        'benchmark',
-      ],
-      demo: ['demo', 'demostración', 'demostracion', 'ver', 'mostrar'],
-      comparativa: [
-        'comparar',
-        'competencia',
-        'competidor',
-        'alternativa',
-        'vs',
-        'diferencia',
-        'único',
-        'unico',
-        'mejor',
-      ],
-      habitaciones: ['habitación', 'habitacion', 'roommate', 'coliving', 'compartir'],
-      trial: ['gratis', 'free', 'trial', 'prueba gratuita'],
-      contacto: ['contacto', 'llamar', 'email', 'teléfono', 'telefono', 'hablar'],
-    };
-
-    for (const [key, keywords] of Object.entries(intentions)) {
-      if (keywords.some((keyword) => lowerMessage.includes(keyword))) {
-        const response = FAQ_RESPONSES[key];
-        if (response) {
-          addBotMessage(response.answer, response.followUp ? 'options' : 'text', response.followUp);
-          responded = true;
-          break;
-        }
+      if (res.ok) {
+        const data = await res.json();
+        addBotMessage(data.response || 'Disculpa, ¿puedes reformular tu pregunta?');
+      } else {
+        addBotMessage(getLocalFallback(userMessage));
       }
-    }
-
-    if (!responded) {
-      addBotMessage(
-        'Entiendo. ¿Te gustaría que un experto de INMOVA te contacte para resolver tus dudas específicas?',
-        'options',
-        [
-          { label: 'Sí, quiero que me contacten', value: 'contact' },
-          { label: 'Ver opciones principales', value: 'menu' },
-        ]
-      );
+    } catch {
+      addBotMessage(getLocalFallback(userMessage));
     }
 
     setIsTyping(false);
+  };
+
+  // Fallback local cuando la API no está disponible
+  const getLocalFallback = (msg: string): string => {
+    const m = msg.toLowerCase();
+    const keywords: Record<string, string[]> = {
+      precio: ['precio', 'coste', 'cuánto', 'cuanto', 'plan', 'tarifa'],
+      funcionalidades: ['módulo', 'función', 'característica', 'qué hace'],
+      ia: ['inteligencia artificial', 'ia', 'valoración', 'predicción', 'morosidad'],
+      'family-office': ['family office', 'holding', 'patrimonio', 'sociedad'],
+      analytics: ['analytics', 'reporte', 'kpi', 'dashboard', 'métricas'],
+      demo: ['demo', 'probar', 'prueba'],
+      comparativa: ['comparar', 'diferencia', 'mejor', 'único'],
+      contacto: ['contacto', 'llamar', 'email', 'teléfono'],
+      trial: ['gratis', 'free', 'trial'],
+    };
+    for (const [key, kws] of Object.entries(keywords)) {
+      if (kws.some((kw) => m.includes(kw))) {
+        const faq = FAQ_RESPONSES[key];
+        if (faq) return faq.answer;
+      }
+    }
+    return '¡Gracias por tu interés! 😊 INMOVA es la plataforma PropTech más completa de España con 88+ módulos e IA integrada. ¿Te gustaría probarlo gratis 30 días? Regístrate en inmovaapp.com';
   };
 
   const handleOptionClick = async (value: string) => {
