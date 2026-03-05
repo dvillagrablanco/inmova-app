@@ -801,10 +801,10 @@ Puedes exportar a:
     id: 'kb-024',
     category: 'gestion',
     title: 'Cómo importar mis propiedades desde otro software',
-    excerpt: 'Migra tus datos desde Excel, Homming, Rentger u otros',
-    content: `# Importar datos\n\n## Desde Excel/CSV\n1. Ve a **Administración > Importar**\n2. Descarga la plantilla Excel\n3. Rellena tus datos (edificios, unidades, inquilinos)\n4. Sube el archivo\n5. INMOVA importará todo automáticamente\n\n## Desde otro software\nSi vienes de Homming, Rentger u otra plataforma, contacta en inmovaapp@gmail.com y te ayudamos con la migración gratuita.\n\n## Datos que puedes importar\n- Edificios y unidades\n- Inquilinos\n- Contratos activos\n- Histórico de pagos`,
+    excerpt: 'Migra tus datos desde Excel u otro software de gestión',
+    content: `# Importar datos\n\n## Desde Excel/CSV\n1. Ve a **Administración > Importar**\n2. Descarga la plantilla Excel\n3. Rellena tus datos (edificios, unidades, inquilinos)\n4. Sube el archivo\n5. INMOVA importará todo automáticamente\n\n## Desde otro software\nSi vienes de otra plataforma de gestión inmobiliaria, contacta en inmovaapp@gmail.com y te ayudamos con la migración gratuita.\n\n## Datos que puedes importar\n- Edificios y unidades\n- Inquilinos\n- Contratos activos\n- Histórico de pagos`,
     tags: ['importar', 'migración', 'excel'],
-    keywords: ['importar', 'migrar', 'Excel', 'CSV', 'datos', 'Homming', 'Rentger'],
+    keywords: ['importar', 'migrar', 'Excel', 'CSV', 'datos', 'otro software', 'migración'],
   },
   {
     id: 'kb-025',

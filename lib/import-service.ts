@@ -76,7 +76,7 @@ export const SYSTEM_MAPPINGS = {
       dni: ['documento', 'nif_nie']
     }
   },
-  nester: {
+  generic_platform: {
     buildings: {
       nombre: ['property_name', 'building'],
       direccion: ['full_address', 'street_address'],
