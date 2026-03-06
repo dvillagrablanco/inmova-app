@@ -101,9 +101,8 @@ export default function AnalisisInversionPage() {
   const [brokerAnalysis, setBrokerAnalysis] = useState<any>(null);
   const [brokerLoading, setBrokerLoading] = useState(false);
 
-  // Datos de contraste de mercado (paralelo al análisis de broker)
+  // Datos de contraste de mercado (metodología profesional de tasación)
   const [marketContext, setMarketContext] = useState<any>(null);
-  const [portfolioComps, setPortfolioComps] = useState<any[]>([]);
   const [precioVsBroker, setPrecioVsBroker] = useState<any>(null);
   const [platformSummary, setPlatformSummary] = useState<any>(null);
 
@@ -422,9 +421,8 @@ export default function AnalisisInversionPage() {
       const extracted = data.data;
       setBrokerAnalysis(extracted);
 
-      // Store market context data from parallel analysis
+      // Store market context data from parallel analysis (public market data only)
       if (data.marketContext) setMarketContext(data.marketContext);
-      if (data.portfolioComps) setPortfolioComps(data.portfolioComps);
       if (data.precioVsBroker) setPrecioVsBroker(data.precioVsBroker);
       if (data.platformSummary) setPlatformSummary(data.platformSummary);
 
@@ -1410,16 +1408,16 @@ Estado: Reformado 2018"
                 </Card>
               )}
 
-              {/* ── CONTRASTE DE MERCADO (datos paralelos) ── */}
-              {(marketContext || precioVsBroker || portfolioComps.length > 0) && (
+              {/* ── CONTRASTE DE MERCADO — Metodología Profesional de Tasación ── */}
+              {(marketContext || precioVsBroker) && (
                 <Card className="border-2 border-blue-200 bg-blue-50/20">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-lg">
                       <BarChart3 className="h-5 w-5 text-blue-600" />
-                      Contraste de Mercado Independiente
+                      Valoración Independiente de Mercado
                     </CardTitle>
                     <CardDescription>
-                      Datos reales de mercado obtenidos en paralelo al análisis IA
+                      Datos reales de transacciones (Notariado) + ofertas actuales (portales) — Metodología ECO/805/2003
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -1533,39 +1531,6 @@ Estado: Reformado 2018"
                         <p className="text-xs text-gray-400 mt-1">
                           Fuentes: {marketContext.fuentePrecioReal || 'Notariado'}, {marketContext.fuenteAsking || 'Idealista/Fotocasa'}
                         </p>
-                      </div>
-                    )}
-
-                    {/* Portfolio comparables */}
-                    {portfolioComps.length > 0 && (
-                      <div>
-                        <h4 className="font-medium text-sm mb-2">Comparables del Portfolio Propio ({portfolioComps.length})</h4>
-                        <div className="overflow-x-auto">
-                          <table className="w-full text-sm">
-                            <thead>
-                              <tr className="border-b text-left text-xs text-gray-500">
-                                <th className="pb-1 pr-3">Edificio</th>
-                                <th className="pb-1 pr-3">Tipo</th>
-                                <th className="pb-1 pr-3">m²</th>
-                                <th className="pb-1 pr-3">Renta</th>
-                                <th className="pb-1 pr-3">€/m²</th>
-                                <th className="pb-1">Yield</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {portfolioComps.slice(0, 8).map((c: any, i: number) => (
-                                <tr key={i} className="border-b border-gray-100">
-                                  <td className="py-1 pr-3 font-medium">{c.edificio} {c.numero}</td>
-                                  <td className="py-1 pr-3 capitalize">{c.tipo}</td>
-                                  <td className="py-1 pr-3">{c.superficie}</td>
-                                  <td className="py-1 pr-3">{c.renta?.toLocaleString('es-ES')}€</td>
-                                  <td className="py-1 pr-3">{c.eurM2?.toFixed(1)}€</td>
-                                  <td className="py-1">{c.yieldBruto ? `${c.yieldBruto}%` : '-'}</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
                       </div>
                     )}
 

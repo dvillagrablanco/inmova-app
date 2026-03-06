@@ -116,7 +116,7 @@ Responde SIEMPRE en formato JSON con esta estructura exacta:
 }`;
 
 // ============================================================================
-// HELPERS: Market data & portfolio comparables (run in parallel)
+// HELPERS: Market data (metodología profesional de tasación)
 // ============================================================================
 
 async function getMarketDataSafe(address: string): Promise<any> {
@@ -134,89 +134,69 @@ async function getPlatformDataSafe(city: string, postalCode?: string, address?: 
   } catch { return null; }
 }
 
-async function getPortfolioComparables(companyId: string, tipoActivo?: string, superficieRef?: number): Promise<any[]> {
-  try {
-    const { getPrismaClient } = await import('@/lib/db');
-    const prisma = getPrismaClient();
-    const where: any = {
-      building: { companyId, isDemo: false },
-      estado: 'ocupada',
-      rentaMensual: { gt: 0 },
-    };
-    if (tipoActivo) where.tipo = tipoActivo;
-    if (superficieRef && superficieRef > 0) {
-      where.superficie = { gte: superficieRef * 0.5, lte: superficieRef * 2 };
-    }
-    const units = await prisma.unit.findMany({
-      where,
-      select: {
-        numero: true, tipo: true, superficie: true, rentaMensual: true, precioCompra: true,
-        building: { select: { nombre: true, direccion: true } },
-      },
-      take: 20,
-      orderBy: { rentaMensual: 'desc' },
-    });
-    return units.map((u: any) => ({
-      edificio: u.building?.nombre || '',
-      direccion: u.building?.direccion || '',
-      tipo: u.tipo,
-      numero: u.numero,
-      superficie: u.superficie,
-      renta: u.rentaMensual,
-      precioCompra: u.precioCompra,
-      yieldBruto: u.precioCompra && u.precioCompra > 0
-        ? Number(((u.rentaMensual * 12 / u.precioCompra) * 100).toFixed(2))
-        : null,
-      eurM2: u.superficie > 0 ? Number((u.rentaMensual / u.superficie).toFixed(2)) : null,
-    }));
-  } catch { return []; }
-}
-
-function buildMarketContextPrompt(marketData: any, platformData: any, portfolioComps: any[]): string {
+/**
+ * Construye el contexto de mercado para inyectar en el prompt de Claude.
+ * Usa EXCLUSIVAMENTE datos de mercado público (Notariado, portales, INE).
+ * NO usa portfolio del inversor como comparable (cada activo tiene sus circunstancias).
+ */
+function buildMarketContextPrompt(marketData: any, platformData: any): string {
   const parts: string[] = [];
 
-  parts.push('\n\n## DATOS DE MERCADO INDEPENDIENTES (CONTRASTA con la propuesta del broker)');
+  parts.push(`\n
+## DATOS DE MERCADO INDEPENDIENTES — METODOLOGÍA DE TASACIÓN PROFESIONAL
+
+Aplica los 3 métodos de valoración profesional (Orden ECO/805/2003):
+
+### MÉTODO 1: COMPARACIÓN (Método de Mercado)
+Usa los datos de transacciones reales y ofertas actuales para determinar €/m² de mercado.
+Aplica coeficientes de homogeneización por: superficie, planta, estado, antigüedad, orientación.
+El asking price de portales debe ajustarse -10% a -15% para estimar precio de cierre real.`);
 
   if (marketData) {
-    parts.push(`\n### Precios reales escriturados (Notariado)
-- Zona: ${marketData.zona}
-- Precio venta REAL escriturado: ${marketData.precioRealVentaM2}€/m²
-- Alquiler REAL: ${marketData.precioRealAlquilerM2}€/m²/mes
-- Asking price portales: ${marketData.askingPriceVentaM2}€/m² (Idealista/Fotocasa, ~12% sobre real)
+    parts.push(`
+DATOS DE ZONA — ${marketData.zona}:
+- Precio venta REAL escriturado (Notariado): ${marketData.precioRealVentaM2}€/m²
+- Asking price portales (Idealista/Fotocasa): ${marketData.askingPriceVentaM2}€/m² (ajustar -12% para cierre)
+- Alquiler real zona: ${marketData.precioRealAlquilerM2}€/m²/mes
 - Alquiler portales: ${marketData.askingPriceAlquilerM2}€/m²/mes
-- Garaje venta: ${marketData.precioGarajeVenta}€ | Garaje alquiler: ${marketData.precioGarajeAlquiler}€/mes
-- Tendencia: ${marketData.tendencia} | Demanda: ${marketData.demanda}`);
+- Garaje venta medio zona: ${marketData.precioGarajeVenta}€
+- Garaje alquiler medio zona: ${marketData.precioGarajeAlquiler}€/mes
+- Tendencia: ${marketData.tendencia} | Demanda: ${marketData.demanda}
+- Fuentes: ${marketData.fuenteNotarial || 'Notariado'}, ${marketData.fuente || 'Idealista/Fotocasa'}`);
   }
 
   if (platformData?.promptText) {
-    parts.push(`\n### Datos de plataformas (Idealista, Fotocasa, INE, Notariado)\n${platformData.promptText}`);
+    parts.push(`\nDATOS MULTI-FUENTE (scraped):\n${platformData.promptText}`);
   }
 
-  if (portfolioComps.length > 0) {
-    const avgYield = portfolioComps.filter(c => c.yieldBruto).reduce((s, c) => s + c.yieldBruto, 0)
-      / (portfolioComps.filter(c => c.yieldBruto).length || 1);
-    const avgEurM2 = portfolioComps.filter(c => c.eurM2).reduce((s, c) => s + c.eurM2, 0)
-      / (portfolioComps.filter(c => c.eurM2).length || 1);
-    parts.push(`\n### Portfolio del inversor (comparables propios)
-- ${portfolioComps.length} unidades similares en cartera
-- Yield medio propio: ${avgYield.toFixed(2)}%
-- €/m²/mes medio: ${avgEurM2.toFixed(2)}€
-- Detalle:`);
-    for (const c of portfolioComps.slice(0, 10)) {
-      parts.push(`  - ${c.edificio} ${c.numero} (${c.tipo}): ${c.superficie}m², ${c.renta}€/mes${c.yieldBruto ? `, yield ${c.yieldBruto}%` : ''}`);
-    }
-  }
+  parts.push(`
+### MÉTODO 2: CAPITALIZACIÓN DE RENTAS (Income Approach)
+Valoración = NOI / Cap Rate objetivo
+- Cap Rate se determina por tipo de activo y zona (NO por portfolio del comprador)
+- Residencial prime: 3.5-4.5% | Residencial zona media: 4.5-6% | Periferia: 5.5-7%
+- Local comercial prime: 4-5.5% | Zona secundaria: 5.5-8%
+- Garaje centro: 4-5.5% | Garaje periferia: 5-7%
+- Oficina prime: 4-5% | Oficina secundaria: 5.5-7.5%
+- Logístico: 5-7% | Trastero: 6-9%
+- Aplicar prima de riesgo +0.5-1% si: edificio antiguo, zona no consolidada, inquilinos débiles
 
-  if (parts.length <= 1) {
-    parts.push('\nNo se encontraron datos de mercado independientes para esta zona.');
-  }
+### MÉTODO 3: COSTE DE REPOSICIÓN (Cost Approach — complementario)
+- Valor suelo + Coste construcción - Depreciación
+- Solo como referencia cruzada, no como método principal para activos en renta
+- Útil para detectar si el precio pedido está muy por encima del valor de reposición
 
-  parts.push('\n\nIMPORTANTE: Compara los precios/yields del broker con estos datos de mercado. Señala discrepancias claras.');
+INSTRUCCIONES CRÍTICAS:
+- CADA activo tiene sus propias circunstancias. NO uses promedios genéricos.
+- Analiza la propuesta del broker contra DATOS DE MERCADO PÚBLICO, no contra otros activos del comprador.
+- Señala si el broker infla rentas, omite gastos o maquilla yields.
+- Calcula precio justo con CADA método y muestra la horquilla resultante.
+- El veredicto debe basarse en la intersección de los 3 métodos.`);
+
   return parts.join('\n');
 }
 
-function buildMarketContextResponse(marketData: any, platformData: any, portfolioComps: any[], parsedAnalysis: any) {
-  // Market context
+function buildMarketContextResponse(marketData: any, platformData: any, parsedAnalysis: any) {
+  // Market context from public sources
   const marketContext = marketData ? {
     precioM2ZonaReal: marketData.precioRealVentaM2,
     precioM2ZonaAsking: marketData.askingPriceVentaM2,
@@ -243,11 +223,11 @@ function buildMarketContextResponse(marketData: any, platformData: any, portfoli
     demandLevel: platformData.raw.demandLevel,
   } : null;
 
-  // Precio vs broker
+  // Precio vs broker — basado en datos de mercado público
   const brokerPrecioM2 = parsedAnalysis?.analisisIndependiente?.precioM2Compra
-    || parsedAnalysis?.datosActivo?.askingPrice && parsedAnalysis?.datosActivo?.superficieTotal
+    || (parsedAnalysis?.datosActivo?.askingPrice && parsedAnalysis?.datosActivo?.superficieTotal
       ? (parsedAnalysis.datosActivo.askingPrice / parsedAnalysis.datosActivo.superficieTotal)
-      : null;
+      : null);
 
   let precioVsBroker = null;
   if (brokerPrecioM2 && marketData?.precioRealVentaM2) {
@@ -261,7 +241,7 @@ function buildMarketContextResponse(marketData: any, platformData: any, portfoli
     };
   }
 
-  return { marketContext, platformSummary, portfolioComps, precioVsBroker };
+  return { marketContext, platformSummary, precioVsBroker };
 }
 
 // ============================================================================
@@ -274,8 +254,6 @@ export async function POST(request: NextRequest) {
     if (!session?.user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
-
-    const companyId = (session.user as any)?.companyId || '';
 
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
@@ -303,7 +281,6 @@ export async function POST(request: NextRequest) {
     // ── Fetch market data IN PARALLEL while preparing Claude call ──
     const marketDataPromise = getMarketDataSafe(addressHint);
     const platformDataPromise = getPlatformDataSafe('Madrid', undefined, addressHint);
-    const portfolioCompsPromise = getPortfolioComparables(companyId);
 
     // ── Handle file-based analysis (PDF/image) ──
     if (file && (file.type.includes('image') || file.type === 'application/pdf')) {
@@ -311,10 +288,10 @@ export async function POST(request: NextRequest) {
       const base64 = Buffer.from(bytes).toString('base64');
 
       // Wait for market data
-      const [marketData, platformData, portfolioComps] = await Promise.all([
-        marketDataPromise, platformDataPromise, portfolioCompsPromise,
+      const [marketData, platformData] = await Promise.all([
+        marketDataPromise, platformDataPromise,
       ]);
-      const marketPrompt = buildMarketContextPrompt(marketData, platformData, portfolioComps);
+      const marketPrompt = buildMarketContextPrompt(marketData, platformData);
 
       const Anthropic = (await import('@anthropic-ai/sdk')).default;
       const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
@@ -346,14 +323,14 @@ export async function POST(request: NextRequest) {
       const textContent = response.content.find((c: any) => c.type === 'text') as any;
       const rawAnalysis = textContent?.text || '';
 
-      return parseAndReturnResult(rawAnalysis, marketData, platformData, portfolioComps);
+      return parseAndReturnResult(rawAnalysis, marketData, platformData);
     }
 
     // ── Handle text-based analysis ──
-    const [marketData, platformData, portfolioComps] = await Promise.all([
-      marketDataPromise, platformDataPromise, portfolioCompsPromise,
+    const [marketData, platformData] = await Promise.all([
+      marketDataPromise, platformDataPromise,
     ]);
-    const marketPrompt = buildMarketContextPrompt(marketData, platformData, portfolioComps);
+    const marketPrompt = buildMarketContextPrompt(marketData, platformData);
 
     const Anthropic = (await import('@anthropic-ai/sdk')).default;
     const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
@@ -371,7 +348,7 @@ export async function POST(request: NextRequest) {
     const textContent = response.content.find((c: any) => c.type === 'text') as any;
     const rawAnalysis = textContent?.text || '';
 
-    return parseAndReturnResult(rawAnalysis, marketData, platformData, portfolioComps);
+    return parseAndReturnResult(rawAnalysis, marketData, platformData);
   } catch (error: any) {
     logger.error('[AI Analyze Proposal]:', error);
     Sentry.captureException(error);
@@ -383,7 +360,6 @@ function parseAndReturnResult(
   rawAnalysis: string,
   marketData?: any,
   platformData?: any,
-  portfolioComps?: any[]
 ) {
   let parsed: any = {};
   try {
@@ -400,7 +376,6 @@ function parseAndReturnResult(
   const contextData = buildMarketContextResponse(
     marketData || null,
     platformData || null,
-    portfolioComps || [],
     parsed
   );
 
@@ -424,10 +399,9 @@ function parseAndReturnResult(
       analisisIndependiente: parsed.analisisIndependiente || null,
       rawAnalysis,
     },
-    // New: market context for frontend comparison UI
+    // Market context for frontend comparison UI (public market data only)
     marketContext: contextData.marketContext,
     platformSummary: contextData.platformSummary,
-    portfolioComps: contextData.portfolioComps,
     precioVsBroker: contextData.precioVsBroker,
   });
 }
