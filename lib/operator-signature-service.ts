@@ -172,7 +172,7 @@ export async function listOperatorSignatureRequests(
     prisma.operatorSignatureRequest.findMany({
       where,
       include: {
-        unit: { select: { numero: true, building: { select: { nombre: true, ciudad: true } } } },
+        unit: { select: { numero: true, building: { select: { nombre: true, direccion: true } } } },
       },
       orderBy: { createdAt: 'desc' },
       skip: (page - 1) * limit,
@@ -200,7 +200,7 @@ export async function getOperatorSignatureRequest(
   return prisma.operatorSignatureRequest.findFirst({
     where: { id, companyId },
     include: {
-      unit: { select: { numero: true, building: { select: { nombre: true, direccion: true, ciudad: true } } } },
+      unit: { select: { numero: true, building: { select: { nombre: true, direccion: true } } } },
       contract: { select: { id: true, estado: true, fechaInicio: true, fechaFin: true } },
     },
   });
