@@ -104,7 +104,19 @@ export async function POST(req: NextRequest) {
     const prisma = await getPrisma();
     const companyId = (session.user as any).companyId;
     const body = await req.json();
-    const { titulo, tipoDocumento, contractId, tenantId, firmantes, diasExpiracion } = body;
+    const {
+      titulo,
+      tipoDocumento,
+      contractId,
+      tenantId,
+      firmantes,
+      diasExpiracion,
+      // Nuevos campos para envío a DocuSign
+      sendToSign,
+      documentUrl,
+      provider,
+      operatorName,
+    } = body;
 
     if (!titulo || !tipoDocumento) {
       return NextResponse.json({ error: 'Título y tipo de documento requeridos' }, { status: 400 });
@@ -122,6 +134,7 @@ export async function POST(req: NextRequest) {
         tenantId: tenantId || null,
         estado: 'PENDING',
         fechaExpiracion,
+        urlDocumento: documentUrl || null,
         creadoPor: session.user.id as string,
         firmantes: {
           create: (firmantes || []).map((f: any, i: number) => ({
@@ -135,7 +148,63 @@ export async function POST(req: NextRequest) {
       include: { firmantes: true },
     });
 
-    return NextResponse.json({ success: true, documento }, { status: 201 });
+    // Si se pide enviar a firma y hay contractId + documentUrl, usar la API de firma
+    let signatureResult = null;
+    if (sendToSign && contractId && documentUrl && firmantes?.length > 0) {
+      try {
+        const { isDocuSignConfigured, isSignaturitConfigured } = await import('@/lib/digital-signature-service');
+        const activeProvider = provider || (isDocuSignConfigured() ? 'DOCUSIGN' : isSignaturitConfigured() ? 'SIGNATURIT' : null);
+
+        if (activeProvider) {
+          const { createSignatureRequest } = await import('@/lib/digital-signature-service');
+          signatureResult = await createSignatureRequest({
+            contractId,
+            companyId,
+            documentUrl,
+            documentName: titulo,
+            signatories: firmantes.map((f: any) => ({
+              name: f.nombre,
+              email: f.email,
+              role: f.rol === 'propietario' ? 'LANDLORD' : f.rol === 'inquilino' ? 'TENANT' : 'OTHER',
+            })),
+            provider: activeProvider,
+            emailSubject: operatorName
+              ? `Firma contrato ${operatorName} - ${titulo}`
+              : `Firma de contrato: ${titulo}`,
+            emailMessage: operatorName
+              ? `Contrato de media estancia con ${operatorName}. Por favor, revisa y firma.`
+              : 'Por favor, revisa y firma el documento adjunto.',
+            expiresInDays: expDays,
+            requestedBy: session.user.id as string,
+          });
+
+          // Update DocumentoFirma with signature info
+          await prisma.documentoFirma.update({
+            where: { id: documento.id },
+            data: {
+              signaturitId: signatureResult.externalId || signatureResult.signatureId,
+              estado: 'PENDING',
+            },
+          });
+        }
+      } catch (signErr: any) {
+        logger.warn('[Digital Signature] Could not send to sign:', signErr.message);
+        // Don't fail the creation, just log the error
+      }
+    }
+
+    return NextResponse.json({
+      success: true,
+      documento,
+      ...(signatureResult && {
+        signature: {
+          id: signatureResult.signatureId,
+          provider: provider || 'DOCUSIGN',
+          signingUrl: signatureResult.signingUrl,
+          status: signatureResult.status,
+        },
+      }),
+    }, { status: 201 });
   } catch (error: any) {
     logger.error('[Digital Signature] Error creating:', error);
     return NextResponse.json({ error: 'Error creando documento' }, { status: 500 });
