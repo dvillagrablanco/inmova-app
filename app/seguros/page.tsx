@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { AiInsightPanel } from '@/components/ai/AiInsightPanel';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import {
   Shield,
@@ -669,6 +670,15 @@ export default function SegurosPage() {
             </CardContent>
           </Card>
         )}
+
+        {/* Panel IA: Asesor de Seguros */}
+        <AiInsightPanel
+          apiUrl="/api/ai/insurance-advisor"
+          mode="chat"
+          title="Asesor IA de Seguros"
+          icon={<Shield className="h-4 w-4 text-blue-600" />}
+          chatContext="Módulo de seguros inmobiliarios. Pólizas de comunidad, hogar, local comercial. Puede preguntar sobre coberturas, franquicias, siniestros, renovaciones o comparar aseguradoras."
+        />
 
         {/* Filters */}
         <Card>

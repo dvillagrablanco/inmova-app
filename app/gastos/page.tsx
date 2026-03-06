@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { useSession } from 'next-auth/react';
+import { AiInsightPanel } from '@/components/ai/AiInsightPanel';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
@@ -838,6 +839,14 @@ export default function GastosPage() {
                 </form>
               </DialogContent>
             </Dialog>
+
+            {/* Panel IA: Copiloto Financiero */}
+            <AiInsightPanel
+              apiUrl="/api/ai/financial-copilot"
+              mode="chat"
+              title="Copiloto Financiero IA"
+              chatContext="Módulo de gastos del grupo inmobiliario. Puede preguntar sobre categorización de gastos, detección de anomalías, previsiones, deducibilidad fiscal o comparativa de proveedores."
+            />
 
             {/* Estadísticas */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

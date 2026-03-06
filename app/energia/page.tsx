@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { useSession } from 'next-auth/react';
+import { AiInsightPanel } from '@/components/ai/AiInsightPanel';
 import { useRouter } from 'next/navigation';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
@@ -334,6 +335,14 @@ export default function EnergiaPage() {
               Monitorea consumos de energía, agua y gas en tiempo real
             </p>
           </div>
+
+          {/* Panel IA: Auditoría Energética */}
+          <AiInsightPanel
+            apiUrl="/api/ai/energy-audit"
+            mode="chat"
+            title="Auditoría Energética IA"
+            chatContext="Módulo de gestión energética de edificios. Puede preguntar sobre CEE, consumos, eficiencia, paneles solares, aerotermia, subvenciones IDAE o mejoras de certificación energética."
+          />
 
           {/* KPIs */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

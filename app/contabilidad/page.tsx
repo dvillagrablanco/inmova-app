@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
+import { AiInsightPanel } from '@/components/ai/AiInsightPanel';
 import Link from 'next/link';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -603,6 +604,14 @@ export default function ContabilidadPage() {
           </Button>
         </div>
       </div>
+
+      {/* Panel IA: Asistente Contable */}
+      <AiInsightPanel
+        apiUrl="/api/ai/accounting-assistant"
+        mode="chat"
+        title="Asistente Contable IA"
+        chatContext="Módulo de contabilidad del grupo inmobiliario. Puede preguntar sobre asientos, balances, impuestos (IVA, IRPF, IS), conciliación, plan general contable, amortizaciones o cualquier duda fiscal/contable."
+      />
 
       {/* Filtros */}
       <Card>
