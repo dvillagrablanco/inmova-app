@@ -23,6 +23,9 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 // Lazy Prisma (auditoria V2)
 async function getPrisma() {
   const { getPrismaClient } = await import('@/lib/db');

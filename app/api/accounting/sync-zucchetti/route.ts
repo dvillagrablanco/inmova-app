@@ -17,6 +17,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { resolveAccountingScope } from '@/lib/accounting-scope';
+
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 import {
   getAltaiAccessToken,
   getAltaiConfig,

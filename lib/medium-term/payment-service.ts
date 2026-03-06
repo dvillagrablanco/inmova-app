@@ -5,7 +5,7 @@
  */
 
 import Stripe from 'stripe';
-import { prisma } from '../db';
+import { getPrismaClient } from '../db';
 import { format, addMonths } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { sendNotification } from './notification-service';
@@ -78,6 +78,7 @@ export interface InvoiceData {
 export async function getOrCreateStripeCustomer(
   tenantId: string
 ): Promise<{ customerId: string; isNew: boolean }> {
+  const prisma = getPrismaClient();
   const tenant = await prisma.tenant.findUnique({
     where: { id: tenantId },
   });
@@ -119,6 +120,7 @@ export async function addPaymentMethod(
   paymentMethodId: string,
   setAsDefault: boolean = true
 ): Promise<PaymentMethod> {
+  const prisma = getPrismaClient();
   const { customerId } = await getOrCreateStripeCustomer(tenantId);
 
   // Adjuntar método de pago al cliente
@@ -165,6 +167,7 @@ export async function addPaymentMethod(
 export async function getPaymentMethods(
   tenantId: string
 ): Promise<PaymentMethod[]> {
+  const prisma = getPrismaClient();
   const tenant = await prisma.tenant.findUnique({
     where: { id: tenantId },
   });
@@ -215,6 +218,7 @@ export async function processOneTimePayment(
   description: string,
   paymentMethodId?: string
 ): Promise<PaymentResult> {
+  const prisma = getPrismaClient();
   const contract = await prisma.contract.findUnique({
     where: { id: contractId },
     include: { tenant: true },
@@ -292,6 +296,7 @@ export async function processOneTimePayment(
 export async function setupRecurringPayments(
   schedule: PaymentSchedule
 ): Promise<{ subscriptionId: string; nextPaymentDate: Date }> {
+  const prisma = getPrismaClient();
   const contract = await prisma.contract.findUnique({
     where: { id: schedule.contractId },
     include: { tenant: true, unit: true },
@@ -368,6 +373,7 @@ export async function setupRecurringPayments(
 export async function cancelRecurringPayments(
   contractId: string
 ): Promise<boolean> {
+  const prisma = getPrismaClient();
   const contract = await prisma.contract.findUnique({
     where: { id: contractId },
   });
@@ -396,6 +402,7 @@ export async function pauseRecurringPayments(
   contractId: string,
   resumeDate?: Date
 ): Promise<boolean> {
+  const prisma = getPrismaClient();
   const contract = await prisma.contract.findUnique({
     where: { id: contractId },
   });
@@ -424,6 +431,7 @@ export async function pauseRecurringPayments(
 export async function generateInvoice(
   data: InvoiceData
 ): Promise<{ invoiceId: string; invoiceUrl: string; invoicePdf: string }> {
+  const prisma = getPrismaClient();
   const contract = await prisma.contract.findUnique({
     where: { id: data.contractId },
     include: { tenant: true },
@@ -504,6 +512,7 @@ export async function processDepositReturn(
   amount: number,
   reason: string
 ): Promise<PaymentResult> {
+  const prisma = getPrismaClient();
   const contract = await prisma.contract.findUnique({
     where: { id: contractId },
     include: { tenant: true },
@@ -626,6 +635,7 @@ export async function handleStripeWebhook(
 }
 
 async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent): Promise<void> {
+  const prisma = getPrismaClient();
   const contractId = paymentIntent.metadata.contractId;
   if (!contractId) return;
 
@@ -655,6 +665,7 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent): Promis
 }
 
 async function handlePaymentFailure(paymentIntent: Stripe.PaymentIntent): Promise<void> {
+  const prisma = getPrismaClient();
   const contractId = paymentIntent.metadata.contractId;
   if (!contractId) return;
 
@@ -685,6 +696,7 @@ async function handlePaymentFailure(paymentIntent: Stripe.PaymentIntent): Promis
 }
 
 async function handleInvoicePaid(invoice: Stripe.Invoice): Promise<void> {
+  const prisma = getPrismaClient();
   await prisma.invoice.updateMany({
     where: { stripeInvoiceId: invoice.id },
     data: { status: 'paid', paidAt: new Date() },
@@ -692,6 +704,7 @@ async function handleInvoicePaid(invoice: Stripe.Invoice): Promise<void> {
 }
 
 async function handleInvoiceFailed(invoice: Stripe.Invoice): Promise<void> {
+  const prisma = getPrismaClient();
   await prisma.invoice.updateMany({
     where: { stripeInvoiceId: invoice.id },
     data: { status: 'overdue' },
@@ -699,6 +712,7 @@ async function handleInvoiceFailed(invoice: Stripe.Invoice): Promise<void> {
 }
 
 async function handleSubscriptionCancelled(subscription: Stripe.Subscription): Promise<void> {
+  const prisma = getPrismaClient();
   const contractId = subscription.metadata.contractId;
   if (!contractId) return;
 
@@ -719,6 +733,7 @@ async function getOrCreateProduct(
   unitId: string,
   unitName: string
 ): Promise<string> {
+  const prisma = getPrismaClient();
   // Buscar producto existente
   const existingProduct = await prisma.unit.findUnique({
     where: { id: unitId },

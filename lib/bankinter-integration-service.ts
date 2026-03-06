@@ -15,7 +15,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import * as fs from 'fs';
 import * as https from 'https';
-import { prisma } from './db';
+import { getPrismaClient } from './db';
 import logger, { logError } from '@/lib/logger';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -315,6 +315,7 @@ export class BankinterIntegrationService {
     psuIpAddress: string,
     validDays: number = 90
   ): Promise<{ consentId: string; scaRedirectUrl: string }> {
+    const prisma = getPrismaClient();
     if (!this.isConfigured) {
       logger.info('🔧 MODO DEMO: Creando consentimiento simulado');
       return {
@@ -637,6 +638,7 @@ export class BankinterIntegrationService {
     connectionId: string,
     diasAtras: number = 90
   ): Promise<{ transacciones: any[]; total: number }> {
+    const prisma = getPrismaClient();
     try {
       // Obtener la conexión
       const connection = await prisma.bankConnection.findUnique({
@@ -735,6 +737,7 @@ export class BankinterIntegrationService {
     tenantId: string,
     mesesAnalisis: number = 3
   ): Promise<any> {
+    const prisma = getPrismaClient();
     try {
       // Obtener la conexión bancaria del inquilino
       const tenant = await prisma.tenant.findUnique({
@@ -829,6 +832,7 @@ export class BankinterIntegrationService {
     companyId: string,
     mesesAtras: number = 1
   ): Promise<{ conciliados: number; total: number }> {
+    const prisma = getPrismaClient();
     try {
       // Obtener conexiones bancarias de la compañía
       const connections = await prisma.bankConnection.findMany({

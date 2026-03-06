@@ -1,5 +1,7 @@
-import { prisma } from './db';
+import { getPrismaClient } from './db';
 import logger, { logError } from '@/lib/logger';
+
+function getPrisma() { return getPrismaClient(); }
 import { getBankinterService, isBankinterConfigured } from './bankinter-integration-service';
 
 /**
@@ -14,6 +16,7 @@ import { getBankinterService, isBankinterConfigured } from './bankinter-integrat
  * Conecta una cuenta bancaria
  */
 export async function conectarCuentaBancaria(params: any) {
+  const prisma = getPrisma();
   const { companyId, userId, nombreBanco, tipoCuenta, psuIpAddress } = params;
 
   // Si Bankinter está configurado y es el banco seleccionado, usar integración real
@@ -70,6 +73,7 @@ export async function conectarCuentaBancaria(params: any) {
  * Sincroniza transacciones de una conexión bancaria
  */
 export async function sincronizarTransacciones(connectionId: string, diasAtras?: number) {
+  const prisma = getPrisma();
   const connection = await prisma.bankConnection.findUnique({
     where: { id: connectionId }
   });
@@ -116,6 +120,7 @@ export async function sincronizarTransacciones(connectionId: string, diasAtras?:
  * Verifica los ingresos de un inquilino
  */
 export async function verificarIngresos(tenantId: string, mesesAnalisis?: number) {
+  const prisma = getPrisma();
   // Buscar si el tenant tiene conexión Bankinter
   const tenant = await prisma.tenant.findUnique({
     where: { id: tenantId },
@@ -177,6 +182,7 @@ export async function verificarIngresos(tenantId: string, mesesAnalisis?: number
  * Concilia pagos automáticamente con transacciones bancarias
  */
 export async function conciliarPagos(companyId: string, mesesAtras?: number) {
+  const prisma = getPrisma();
   // Verificar si hay conexiones Bankinter
   const connections = await prisma.bankConnection.findMany({
     where: {
