@@ -142,7 +142,13 @@ export async function GET(request: NextRequest) {
         },
       };
 
-      // ── Firma Digital ──
+      // ── Firma Digital (Grupo Vidaro) ──
+      const docusignFullyConfigured = !!(
+        isConfigured(process.env.DOCUSIGN_INTEGRATION_KEY) &&
+        isConfigured(process.env.DOCUSIGN_USER_ID) &&
+        isConfigured(process.env.DOCUSIGN_ACCOUNT_ID) &&
+        isConfigured(process.env.DOCUSIGN_PRIVATE_KEY)
+      );
       const firma = {
         signaturit: {
           configured: isConfigured(process.env.SIGNATURIT_API_KEY),
@@ -150,9 +156,13 @@ export async function GET(request: NextRequest) {
           environment: process.env.SIGNATURIT_ENVIRONMENT || 'sandbox',
         },
         docusign: {
-          configured: isConfigured(process.env.DOCUSIGN_INTEGRATION_KEY),
-          status: isConfigured(process.env.DOCUSIGN_INTEGRATION_KEY) ? 'configured' as CheckStatus : 'missing' as CheckStatus,
+          configured: docusignFullyConfigured,
+          status: docusignFullyConfigured ? 'configured' as CheckStatus : 'missing' as CheckStatus,
           environment: process.env.DOCUSIGN_BASE_PATH?.includes('demo') ? 'demo' : 'production',
+          hasIntegrationKey: isConfigured(process.env.DOCUSIGN_INTEGRATION_KEY),
+          hasUserId: isConfigured(process.env.DOCUSIGN_USER_ID),
+          hasAccountId: isConfigured(process.env.DOCUSIGN_ACCOUNT_ID),
+          hasPrivateKey: isConfigured(process.env.DOCUSIGN_PRIVATE_KEY),
         },
       };
 

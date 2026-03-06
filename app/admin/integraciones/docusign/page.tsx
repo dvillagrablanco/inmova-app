@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
@@ -13,50 +13,89 @@ import {
 } from '@/components/ui/breadcrumb';
 import {
   Home, ArrowLeft, FileSignature, CheckCircle, AlertTriangle,
-  ExternalLink, Loader2, Shield,
+  ExternalLink, Loader2, Shield, XCircle, Building2,
 } from 'lucide-react';
 import { toast } from 'sonner';
+
+interface DocuSignStatus {
+  configured: boolean;
+  status: string;
+  environment: string;
+  hasIntegrationKey?: boolean;
+  hasUserId?: boolean;
+  hasAccountId?: boolean;
+  hasPrivateKey?: boolean;
+}
 
 export default function DocuSignConfigPage() {
   const { data: session } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [testing, setTesting] = useState(false);
-  const [testResult, setTestResult] = useState<{ ok: boolean; message: string } | null>(null);
+  const [docusignStatus, setDocusignStatus] = useState<DocuSignStatus | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const docusignStatus = searchParams?.get('docusign');
+  const callbackStatus = searchParams?.get('docusign');
 
-  const INTEGRATION_KEY = '0daca02a-dbe5-45cd-9f78-35108236c0cd';
-  const CONSENT_URL = `https://account-d.docusign.com/oauth/auth?response_type=code&scope=signature%20impersonation&client_id=${INTEGRATION_KEY}&redirect_uri=${encodeURIComponent(typeof window !== 'undefined' ? window.location.origin + '/api/integrations/docusign/callback' : 'https://inmovaapp.com/api/integrations/docusign/callback')}`;
+  // Producción: account.docusign.com (no account-d)
+  const CONSENT_BASE = docusignStatus?.environment === 'demo'
+    ? 'https://account-d.docusign.com'
+    : 'https://account.docusign.com';
+  
+  const REDIRECT_URI = typeof window !== 'undefined'
+    ? `${window.location.origin}/api/integrations/docusign/callback`
+    : 'https://inmovaapp.com/api/integrations/docusign/callback';
+
+  // Cargar estado real desde API
+  useEffect(() => {
+    const loadStatus = async () => {
+      try {
+        const res = await fetch('/api/admin/integraciones/status');
+        if (res.ok) {
+          const data = await res.json();
+          const ds = data.firma?.docusign || data.integrations?.firma?.docusign;
+          if (ds) {
+            setDocusignStatus(ds);
+          }
+        }
+      } catch (err) {
+        console.error('Error loading DocuSign status:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadStatus();
+  }, []);
 
   const testConnection = async () => {
     setTesting(true);
-    setTestResult(null);
     try {
-      const res = await fetch('/api/admin/ai-agents/test', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ agent: 'docusign-test' }),
-      });
-      // Simple health check - verify env vars are loaded
-      const envRes = await fetch('/api/integrations/status');
-      if (envRes.ok) {
-        const data = await envRes.json();
-        const docusign = data.integrations?.docusign || data.docusign;
-        if (docusign?.configured) {
-          setTestResult({ ok: true, message: 'DocuSign configurado correctamente. Integration Key, Account ID, User ID y Private Key detectados.' });
-          toast.success('DocuSign configurado');
+      const res = await fetch('/api/admin/integraciones/status');
+      if (res.ok) {
+        const data = await res.json();
+        const ds = data.firma?.docusign || data.integrations?.firma?.docusign;
+        setDocusignStatus(ds);
+        if (ds?.configured) {
+          toast.success('DocuSign configurado correctamente');
         } else {
-          setTestResult({ ok: false, message: 'Variables de DocuSign no detectadas en el servidor.' });
+          toast.error('DocuSign no está completamente configurado');
         }
-      } else {
-        setTestResult({ ok: true, message: 'Credenciales de DocuSign configuradas en el servidor.' });
       }
-    } catch (error) {
-      setTestResult({ ok: false, message: 'Error al verificar la conexión.' });
+    } catch {
+      toast.error('Error verificando conexión');
     } finally {
       setTesting(false);
     }
+  };
+
+  const openConsent = () => {
+    if (!docusignStatus?.hasIntegrationKey) {
+      toast.error('Integration Key no configurada en el servidor');
+      return;
+    }
+    // We don't expose the integration key in the client. Build consent URL server-side or use a known one.
+    // For now, redirect to a server endpoint that builds the consent URL
+    window.open(`/api/integrations/docusign/consent`, '_blank');
   };
 
   return (
@@ -82,12 +121,18 @@ export default function DocuSignConfigPage() {
             <FileSignature className="h-6 w-6 text-yellow-700" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold">DocuSign - Firma Digital</h1>
-            <p className="text-muted-foreground">Configuración de firma electrónica para Viroda y Rovida</p>
+            <h1 className="text-2xl font-bold">DocuSign — Grupo Vidaro</h1>
+            <p className="text-muted-foreground">Firma digital de contratos para todas las sociedades del grupo</p>
           </div>
+          {!loading && (
+            <Badge variant={docusignStatus?.configured ? 'default' : 'outline'} className="ml-auto">
+              {docusignStatus?.configured ? '✅ Producción' : '⚠️ No configurado'}
+            </Badge>
+          )}
         </div>
 
-        {docusignStatus === 'success' && (
+        {/* Callback status messages */}
+        {callbackStatus === 'success' && (
           <Card className="border-green-200 bg-green-50">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
@@ -101,7 +146,7 @@ export default function DocuSignConfigPage() {
           </Card>
         )}
 
-        {docusignStatus === 'error' && (
+        {callbackStatus === 'error' && (
           <Card className="border-red-200 bg-red-50">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
@@ -115,55 +160,92 @@ export default function DocuSignConfigPage() {
           </Card>
         )}
 
+        {/* Estado de configuración */}
         <Card>
           <CardHeader>
             <CardTitle>Estado de la integración</CardTitle>
             <CardDescription>Credenciales y conexión con DocuSign</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-3 bg-muted/50 rounded-lg">
-                <p className="text-xs text-muted-foreground">Integration Key</p>
-                <p className="text-sm font-mono">0daca02a-...c0cd</p>
+            {loading ? (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Cargando estado...
               </div>
-              <div className="p-3 bg-muted/50 rounded-lg">
-                <p className="text-xs text-muted-foreground">Account ID</p>
-                <p className="text-sm font-mono">dc80ca20-...3569</p>
-              </div>
-              <div className="p-3 bg-muted/50 rounded-lg">
-                <p className="text-xs text-muted-foreground">User ID</p>
-                <p className="text-sm font-mono">6db6e1e7-...3e59</p>
-              </div>
-              <div className="p-3 bg-muted/50 rounded-lg">
-                <p className="text-xs text-muted-foreground">Entorno</p>
-                <Badge variant="outline">Demo</Badge>
-              </div>
-            </div>
-
-            <div className="flex gap-2">
-              <Button onClick={testConnection} disabled={testing} variant="outline">
-                {testing ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Shield className="h-4 w-4 mr-2" />}
-                Verificar conexión
-              </Button>
-            </div>
-
-            {testResult && (
-              <div className={`p-3 rounded-lg ${testResult.ok ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
-                <div className="flex items-center gap-2">
-                  {testResult.ok ? <CheckCircle className="h-4 w-4 text-green-600" /> : <AlertTriangle className="h-4 w-4 text-red-600" />}
-                  <p className={`text-sm ${testResult.ok ? 'text-green-800' : 'text-red-800'}`}>{testResult.message}</p>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-3 bg-muted/50 rounded-lg">
+                    <p className="text-xs text-muted-foreground">Integration Key</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      {docusignStatus?.hasIntegrationKey
+                        ? <CheckCircle className="h-4 w-4 text-green-500" />
+                        : <XCircle className="h-4 w-4 text-red-500" />}
+                      <p className="text-sm font-mono">
+                        {docusignStatus?.hasIntegrationKey ? 'Configurada' : 'No configurada'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="p-3 bg-muted/50 rounded-lg">
+                    <p className="text-xs text-muted-foreground">Account ID</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      {docusignStatus?.hasAccountId
+                        ? <CheckCircle className="h-4 w-4 text-green-500" />
+                        : <XCircle className="h-4 w-4 text-red-500" />}
+                      <p className="text-sm font-mono">
+                        {docusignStatus?.hasAccountId ? 'Configurado' : 'No configurado'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="p-3 bg-muted/50 rounded-lg">
+                    <p className="text-xs text-muted-foreground">User ID</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      {docusignStatus?.hasUserId
+                        ? <CheckCircle className="h-4 w-4 text-green-500" />
+                        : <XCircle className="h-4 w-4 text-red-500" />}
+                      <p className="text-sm font-mono">
+                        {docusignStatus?.hasUserId ? 'Configurado' : 'No configurado'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="p-3 bg-muted/50 rounded-lg">
+                    <p className="text-xs text-muted-foreground">Private Key RSA</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      {docusignStatus?.hasPrivateKey
+                        ? <CheckCircle className="h-4 w-4 text-green-500" />
+                        : <XCircle className="h-4 w-4 text-red-500" />}
+                      <p className="text-sm font-mono">
+                        {docusignStatus?.hasPrivateKey ? 'Configurada' : 'No configurada'}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-              </div>
+
+                <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                  <p className="text-xs text-muted-foreground">Entorno:</p>
+                  <Badge variant={docusignStatus?.environment === 'production' ? 'default' : 'secondary'}>
+                    {docusignStatus?.environment === 'production' ? '🟢 Producción' : '🟡 Demo'}
+                  </Badge>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button onClick={testConnection} disabled={testing} variant="outline">
+                    {testing ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Shield className="h-4 w-4 mr-2" />}
+                    Verificar conexión
+                  </Button>
+                </div>
+              </>
             )}
           </CardContent>
         </Card>
 
+        {/* Consent grant */}
         <Card>
           <CardHeader>
-            <CardTitle>Paso 1: Autorizar DocuSign (una sola vez)</CardTitle>
+            <CardTitle>Autorización JWT (una sola vez)</CardTitle>
             <CardDescription>
-              Concede permiso a Inmova para firmar documentos en nombre de tu cuenta DocuSign.
-              Este paso se hace una sola vez.
+              Concede permiso a Inmova para firmar documentos en nombre de la cuenta DocuSign del Grupo Vidaro.
+              Este paso se hace una sola vez por cuenta.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -171,19 +253,16 @@ export default function DocuSignConfigPage() {
               <p className="text-sm font-medium text-amber-800">Instrucciones:</p>
               <ol className="text-sm text-amber-700 space-y-1 list-decimal ml-4">
                 <li>Haz clic en el botón de abajo</li>
-                <li>Inicia sesión con <strong>info.viroda@gmail.com</strong></li>
+                <li>Inicia sesión con la <strong>cuenta DocuSign de Vidaro</strong></li>
                 <li>Acepta los permisos solicitados</li>
                 <li>Serás redirigido de vuelta a esta página</li>
               </ol>
-              <p className="text-xs text-amber-600 mt-2">
-                Nota: Si DocuSign muestra error de redirect_uri, necesitas registrar la URI en tu panel de DocuSign Apps.
-                Ve a apps.docusign.com → tu App → Settings → Redirect URIs → añadir: <code className="bg-amber-100 px-1">https://inmovaapp.com/api/integrations/docusign/callback</code>
-              </p>
             </div>
 
             <Button
               className="w-full gap-2"
-              onClick={() => window.open(CONSENT_URL, '_blank')}
+              onClick={openConsent}
+              disabled={!docusignStatus?.hasIntegrationKey}
             >
               <FileSignature className="h-4 w-4" />
               Autorizar DocuSign
@@ -192,27 +271,91 @@ export default function DocuSignConfigPage() {
           </CardContent>
         </Card>
 
+        {/* Sociedades del grupo */}
         <Card>
           <CardHeader>
-            <CardTitle>Sociedades configuradas</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Building2 className="h-5 w-5" />
+              Sociedades del Grupo Vidaro
+            </CardTitle>
+            <CardDescription>
+              Todas las sociedades del grupo usan la misma cuenta DocuSign para firma digital
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               <div className="flex items-center justify-between p-3 border rounded-lg">
                 <div>
                   <p className="font-medium">Viroda Inversiones S.L.</p>
-                  <p className="text-xs text-muted-foreground">Firma digital para contratos</p>
+                  <p className="text-xs text-muted-foreground">Firma de contratos de arrendamiento y media estancia</p>
                 </div>
-                <Badge>Activa</Badge>
+                <Badge variant={docusignStatus?.configured ? 'default' : 'outline'}>
+                  {docusignStatus?.configured ? 'Activa' : 'Pendiente'}
+                </Badge>
               </div>
               <div className="flex items-center justify-between p-3 border rounded-lg">
                 <div>
                   <p className="font-medium">Rovida S.L.</p>
-                  <p className="text-xs text-muted-foreground">Firma digital para contratos</p>
+                  <p className="text-xs text-muted-foreground">Firma de contratos de arrendamiento y media estancia</p>
                 </div>
-                <Badge>Activa</Badge>
+                <Badge variant={docusignStatus?.configured ? 'default' : 'outline'}>
+                  {docusignStatus?.configured ? 'Activa' : 'Pendiente'}
+                </Badge>
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Operadores de media estancia */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Operadores de media estancia</CardTitle>
+            <CardDescription>
+              Contratos recibidos de operadores como Álamo se firman a través de la misma cuenta DocuSign del grupo
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800 space-y-2">
+              <p><strong>Flujo de firma con operadores:</strong></p>
+              <ol className="list-decimal ml-4 space-y-1">
+                <li>El operador (ej: Álamo) envía el contrato a firmar</li>
+                <li>Se sube el PDF del contrato al sistema</li>
+                <li>Se envía a DocuSign con los firmantes correspondientes</li>
+                <li>Los firmantes reciben email de DocuSign para firmar</li>
+                <li>El estado se actualiza automáticamente via webhook</li>
+              </ol>
+            </div>
+
+            <div className="mt-4 space-y-2">
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <p className="font-medium">Álamo</p>
+                  <p className="text-xs text-muted-foreground">Operador de media estancia</p>
+                </div>
+                <Badge variant="secondary">Integrado</Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Webhook config */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Webhook de notificaciones</CardTitle>
+            <CardDescription>
+              Configurar en DocuSign Admin → Connect para recibir actualizaciones automáticas
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="p-3 bg-muted/50 rounded-lg">
+              <p className="text-xs text-muted-foreground mb-1">URL del Webhook:</p>
+              <code className="text-sm font-mono break-all">
+                https://inmovaapp.com/api/webhooks/docusign
+              </code>
+            </div>
+            <p className="text-xs text-muted-foreground mt-3">
+              Eventos recomendados: Envelope Completed, Envelope Declined, Envelope Voided
+            </p>
           </CardContent>
         </Card>
       </div>
