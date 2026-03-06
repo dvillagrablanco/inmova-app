@@ -1,11 +1,17 @@
 /**
  * SERVICIO DE FIRMA DIGITAL PARA CONTRATOS DE MEDIA ESTANCIA
  * 
- * Integración con Signaturit para firma electrónica legal
+ * Integración con DocuSign (producción Grupo Vidaro) y Signaturit (fallback)
+ * Soporta contratos propios y de operadores de media estancia (Álamo, etc.)
  */
 
-import { prisma } from '../db';
+// Lazy Prisma loading (compatible con Next.js build)
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 import { generateContractPDF } from './pdf-generator';
+import { getDefaultProvider, isDocuSignConfigured } from '@/lib/digital-signature-service';
 
 import logger from '@/lib/logger';
 // ==========================================
@@ -181,6 +187,7 @@ const signaturitClient = new SignaturitClient();
 export async function initializeSignature(
   request: SignatureRequest
 ): Promise<SignatureStatus> {
+  const prisma = await getPrisma();
   // Generar PDF del contrato
   const pdfResult = await generateContractPDF(request.contractId);
   
@@ -251,6 +258,7 @@ export async function initializeSignature(
 export async function getSignatureStatus(
   contractId: string
 ): Promise<SignatureStatus | null> {
+  const prisma = await getPrisma();
   const signatureRecord = await prisma.contractSignature.findFirst({
     where: { contractId },
     orderBy: { createdAt: 'desc' },
@@ -304,6 +312,7 @@ export async function getSignatureStatus(
  * Cancela una solicitud de firma
  */
 export async function cancelSignature(contractId: string): Promise<boolean> {
+  const prisma = await getPrisma();
   const signatureRecord = await prisma.contractSignature.findFirst({
     where: { contractId },
     orderBy: { createdAt: 'desc' },
@@ -334,6 +343,7 @@ export async function cancelSignature(contractId: string): Promise<boolean> {
 export async function downloadSignedDocument(
   contractId: string
 ): Promise<{ buffer: Buffer; filename: string }> {
+  const prisma = await getPrisma();
   const signatureRecord = await prisma.contractSignature.findFirst({
     where: { contractId, status: 'completed' },
     orderBy: { createdAt: 'desc' },
@@ -355,6 +365,7 @@ export async function downloadSignedDocument(
  * Envía recordatorio de firma
  */
 export async function sendSignatureReminder(contractId: string): Promise<boolean> {
+  const prisma = await getPrisma();
   const signatureRecord = await prisma.contractSignature.findFirst({
     where: { contractId, status: { in: ['pending', 'in_progress'] } },
     orderBy: { createdAt: 'desc' },
@@ -375,6 +386,7 @@ export async function sendSignatureReminder(contractId: string): Promise<boolean
 export async function processSignatureWebhook(
   payload: SignatureWebhookPayload
 ): Promise<void> {
+  const prisma = await getPrisma();
   const signatureRecord = await prisma.contractSignature.findFirst({
     where: { signatureId: payload.signatureId },
   });
