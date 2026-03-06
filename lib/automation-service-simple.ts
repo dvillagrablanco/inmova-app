@@ -31,7 +31,10 @@ export interface PaymentReminderConfig {
 }
 
 export class ContractRenewalService {
-  async processUpcomingExpirations(companyId: string, config?: ContractRenewalConfig): Promise<{
+  async processUpcomingExpirations(
+    companyId: string,
+    config?: ContractRenewalConfig
+  ): Promise<{
     notified: number;
     renewed: number;
     errors: string[];
@@ -83,7 +86,9 @@ export class ContractRenewalService {
         }
       }
 
-      logger.info(`[ContractRenewal] company=${companyId}: notified=${notified}, renewed=${renewed}`);
+      logger.info(
+        `[ContractRenewal] company=${companyId}: notified=${notified}, renewed=${renewed}`
+      );
       return { notified, renewed, errors };
     } catch (error: any) {
       logger.error('[ContractRenewal] Error:', error);
@@ -93,7 +98,10 @@ export class ContractRenewalService {
 }
 
 export class IncidentEscalationService {
-  async processEscalations(companyId: string, config?: IncidentEscalationConfig): Promise<{
+  async processEscalations(
+    companyId: string,
+    config?: IncidentEscalationConfig
+  ): Promise<{
     escalated: number;
     errors: string[];
   }> {
@@ -124,7 +132,9 @@ export class IncidentEscalationService {
             data: {
               companyId,
               tipo: 'alerta_sistema',
-              titulo: isUrgent ? 'Incidencia URGENTE sin resolver' : 'Incidencia pendiente de escalado',
+              titulo: isUrgent
+                ? 'Incidencia URGENTE sin resolver'
+                : 'Incidencia pendiente de escalado',
               mensaje: `Incidencia #${incident.id} lleva ${Math.round((now.getTime() - incident.createdAt.getTime()) / 3600000)}h sin resolver.`,
               entityId: incident.id,
               entityType: 'MAINTENANCE',
@@ -146,14 +156,37 @@ export class IncidentEscalationService {
 }
 
 export class PaymentReminderService {
-  async processReminders(companyId: string, config?: PaymentReminderConfig): Promise<{
+  async processReminders(
+    companyId: string,
+    config?: PaymentReminderConfig
+  ): Promise<{
     sent: number;
     errors: string[];
   }> {
     const prisma = await getPrisma();
-    const daysBefore = config?.daysBefore ?? [3, 1];
 
     try {
+      const company = await prisma.company.findUnique({
+        where: { id: companyId },
+        select: {
+          paymentRemindersEnabled: true,
+          paymentRemindersPreventiveEnabled: true,
+          paymentRemindersPreventiveDays: true,
+        },
+      });
+
+      if (
+        company &&
+        (!company.paymentRemindersEnabled || !company.paymentRemindersPreventiveEnabled)
+      ) {
+        logger.info(`[PaymentReminder] company=${companyId}: deshabilitado`);
+        return { sent: 0, errors: [] };
+      }
+
+      const daysBefore = company?.paymentRemindersPreventiveDays?.length
+        ? company.paymentRemindersPreventiveDays
+        : (config?.daysBefore ?? [3, 1]);
+
       const now = new Date();
       let sent = 0;
       const errors: string[] = [];

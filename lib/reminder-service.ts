@@ -18,15 +18,18 @@ import { prisma } from './db';
 // ============================================
 export const sendPaymentReminders = async (companyId: string) => {
   const today = startOfDay(new Date());
-  const in7Days = addDays(today, 7);
-  const in3Days = addDays(today, 3);
-  const tomorrow = addDays(today, 1);
 
   try {
-    // Obtener datos de la empresa
     const company = await prisma.company.findUnique({
       where: { id: companyId },
-      select: { nombre: true, email: true, telefono: true },
+      select: {
+        nombre: true,
+        email: true,
+        telefono: true,
+        paymentRemindersEnabled: true,
+        paymentRemindersPreventiveEnabled: true,
+        paymentRemindersPreventiveDays: true,
+      },
     });
 
     if (!company) {
@@ -34,13 +37,28 @@ export const sendPaymentReminders = async (companyId: string) => {
       return { success: false, error: 'Empresa no encontrada' };
     }
 
-    // Buscar pagos pendientes que vencen en 7, 3 o 1 días
+    if (!company.paymentRemindersEnabled || !company.paymentRemindersPreventiveEnabled) {
+      logger.info(`Recordatorios preventivos deshabilitados para empresa ${companyId}`);
+      return {
+        success: true,
+        emailsSent: 0,
+        errors: 0,
+        message: 'Recordatorios preventivos deshabilitados',
+      };
+    }
+
+    const preventiveDays = company.paymentRemindersPreventiveDays?.length
+      ? company.paymentRemindersPreventiveDays
+      : [7, 3, 1];
+    const maxDays = Math.max(...preventiveDays);
+    const inMaxDays = addDays(today, maxDays);
+
     const pendingPayments = await prisma.payment.findMany({
       where: {
         estado: 'pendiente',
         fechaVencimiento: {
           gte: today,
-          lte: in7Days,
+          lte: inMaxDays,
         },
         contract: {
           unit: {
@@ -70,8 +88,7 @@ export const sendPaymentReminders = async (companyId: string) => {
     for (const payment of pendingPayments) {
       const daysUntilDue = differenceInDays(payment.fechaVencimiento, today);
 
-      // Solo enviar recordatorios en días específicos (7, 3, 1)
-      if (![7, 3, 1, 0].includes(daysUntilDue)) {
+      if (!preventiveDays.includes(daysUntilDue) && daysUntilDue !== 0) {
         continue;
       }
 
@@ -132,7 +149,10 @@ export const sendPaymentReminders = async (companyId: string) => {
         });
       } else {
         errors++;
-        logger.error(`Error enviando recordatorio a ${payment.contract.tenant.email}:`, result.error);
+        logger.error(
+          `Error enviando recordatorio a ${payment.contract.tenant.email}:`,
+          result.error
+        );
       }
     }
 
@@ -387,7 +407,10 @@ export const sendMaintenanceNotifications = async (companyId: string) => {
         });
       } else {
         errors++;
-        logger.error(`Error enviando notificación a ${maintenance.unit.tenant.email}:`, result.error);
+        logger.error(
+          `Error enviando notificación a ${maintenance.unit.tenant.email}:`,
+          result.error
+        );
       }
     }
 
@@ -408,7 +431,7 @@ export const sendMaintenanceNotifications = async (companyId: string) => {
 // ============================================
 export const runAllReminders = async (companyId: string) => {
   logger.info(`\n🔔 Ejecutando recordatorios automáticos para empresa: ${companyId}`);
-  
+
   const results = {
     paymentReminders: await sendPaymentReminders(companyId),
     contractAlerts: await sendContractExpirationAlerts(companyId),

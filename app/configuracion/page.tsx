@@ -60,6 +60,13 @@ const configSections: ConfigSection[] = [
     href: '/configuracion/notificaciones',
   },
   {
+    id: 'recordatorios-pago',
+    title: 'Recordatorios de Pago',
+    description: 'Configura el envío automático de recordatorios',
+    icon: <CreditCard className="h-5 w-5" />,
+    href: '/configuracion/recordatorios-pago',
+  },
+  {
     id: 'integraciones',
     title: 'Integraciones',
     description: 'Conecta con servicios externos',
@@ -167,9 +174,7 @@ export default function ConfiguracionPage() {
         {/* Header */}
         <div>
           <h1 className="text-2xl md:text-3xl font-bold">Configuración</h1>
-          <p className="text-muted-foreground mt-1">
-            Personaliza tu experiencia en Inmova
-          </p>
+          <p className="text-muted-foreground mt-1">Personaliza tu experiencia en Inmova</p>
         </div>
 
         {/* Secciones */}
@@ -220,7 +225,11 @@ export default function ConfiguracionPage() {
                   <p className="text-xs text-muted-foreground">Reduce la fatiga visual</p>
                 </div>
               </div>
-              <Button variant="outline" size="sm" onClick={() => router.push('/configuracion/ui-mode')}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push('/configuracion/ui-mode')}
+              >
                 Cambiar
               </Button>
             </div>
@@ -246,7 +255,11 @@ export default function ConfiguracionPage() {
                   <p className="text-xs text-muted-foreground">Alertas en tiempo real</p>
                 </div>
               </div>
-              <Button variant="outline" size="sm" onClick={() => router.push('/configuracion/notificaciones')}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push('/configuracion/notificaciones')}
+              >
                 Configurar
               </Button>
             </div>
@@ -259,9 +272,7 @@ export default function ConfiguracionPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-medium text-sm">¿Necesitas ayuda?</p>
-                <p className="text-xs text-muted-foreground">
-                  Visita nuestro centro de soporte
-                </p>
+                <p className="text-xs text-muted-foreground">Visita nuestro centro de soporte</p>
               </div>
               <Button variant="outline" size="sm" onClick={() => router.push('/soporte')}>
                 Ayuda

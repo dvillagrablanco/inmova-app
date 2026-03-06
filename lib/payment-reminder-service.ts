@@ -23,11 +23,11 @@ interface PaymentReminder {
  */
 export async function detectOverduePayments(companyId?: string): Promise<PaymentReminder[]> {
   const now = new Date();
-  
+
   const paymentWhere: any = {
     estado: 'atrasado',
   };
-  
+
   if (companyId) {
     paymentWhere.contract = {
       tenant: {
@@ -56,10 +56,10 @@ export async function detectOverduePayments(companyId?: string): Promise<Payment
 
   for (const payment of payments) {
     const daysOverdue = differenceInDays(now, new Date(payment.fechaVencimiento));
-    
+
     let stage: PaymentReminder['stage'];
     let priority: PaymentReminder['priority'];
-    
+
     if (daysOverdue >= 30) {
       stage = 'legal';
       priority = 'alto';
@@ -89,11 +89,36 @@ export async function detectOverduePayments(companyId?: string): Promise<Payment
 }
 
 /**
+ * Obtiene la configuración de recordatorios de pago de una empresa
+ */
+async function getCompanyReminderConfig(companyId: string) {
+  const company = await prisma.company.findUnique({
+    where: { id: companyId },
+    select: {
+      paymentRemindersEnabled: true,
+      paymentRemindersOverdueEnabled: true,
+      paymentRemindersSendToTenant: true,
+      paymentRemindersSendToAdmin: true,
+      paymentRemindersMinDaysOverdue: true,
+    },
+  });
+  return company;
+}
+
+/**
  * Procesa recordatorios de pago y envía notificaciones
  */
 export async function processPaymentReminders(companyId?: string): Promise<void> {
+  if (companyId) {
+    const config = await getCompanyReminderConfig(companyId);
+    if (config && (!config.paymentRemindersEnabled || !config.paymentRemindersOverdueEnabled)) {
+      logger.info(`Recordatorios de pago deshabilitados para empresa ${companyId}`);
+      return;
+    }
+  }
+
   const reminders = await detectOverduePayments(companyId);
-  
+
   for (const reminder of reminders) {
     await processPaymentReminder(reminder);
   }
@@ -123,6 +148,15 @@ async function processPaymentReminder(reminder: PaymentReminder): Promise<void> 
 
   const companyId = payment.contract.unit.building.companyId;
   if (!companyId) return;
+
+  const config = await getCompanyReminderConfig(companyId);
+  if (config && (!config.paymentRemindersEnabled || !config.paymentRemindersOverdueEnabled)) {
+    return;
+  }
+
+  if (config && reminder.daysOverdue < config.paymentRemindersMinDaysOverdue) {
+    return;
+  }
 
   // Verificar si ya existe una notificación reciente
   const daysSinceLastNotification = await getDaysSinceLastPaymentNotification(
@@ -160,8 +194,10 @@ async function processPaymentReminder(reminder: PaymentReminder): Promise<void> 
     entityType: 'Payment',
   });
 
-  // Enviar email al inquilino y al administrador
-  await sendPaymentReminderEmail(payment, reminder);
+  // Enviar email según configuración de la empresa
+  const sendToTenant = config?.paymentRemindersSendToTenant ?? true;
+  const sendToAdmin = config?.paymentRemindersSendToAdmin ?? true;
+  await sendPaymentReminderEmail(payment, reminder, sendToTenant, sendToAdmin);
 
   logger.info(`Recordatorio de pago procesado: Pago ${payment.id}, Etapa: ${reminder.stage}`);
 }
@@ -194,7 +230,7 @@ async function getDaysSinceLastPaymentNotification(
  */
 function getReminderTitle(reminder: PaymentReminder, payment: any): string {
   const location = `${payment.contract?.unit?.building?.nombre} ${payment.contract?.unit?.numero}`;
-  
+
   switch (reminder.stage) {
     case 'legal':
       return `⚠️ AVISO LEGAL: Pago atrasado ${reminder.daysOverdue} días - ${location}`;
@@ -217,14 +253,14 @@ function getReminderMessage(reminder: PaymentReminder, payment: any): string {
   const amount = `€${reminder.amount.toLocaleString('es-ES')}`;
   const period = payment.periodo;
   const dueDate = format(new Date(payment.fechaVencimiento), 'dd/MM/yyyy', { locale: es });
-  
+
   let message = `Pago atrasado de ${tenantName}.\n\n`;
   message += `📌 Detalles:\n`;
   message += `• Monto: ${amount}\n`;
   message += `• Período: ${period}\n`;
   message += `• Fecha de vencimiento: ${dueDate}\n`;
   message += `• Días de retraso: ${reminder.daysOverdue}\n\n`;
-  
+
   switch (reminder.stage) {
     case 'legal':
       message += `⚠️ AVISO LEGAL:\n`;
@@ -235,7 +271,7 @@ function getReminderMessage(reminder: PaymentReminder, payment: any): string {
       message += `4. 💼 Consultar con asesor legal\n\n`;
       message += `Los recargos por mora aplican según contrato.`;
       break;
-      
+
     case 'urgent':
       message += `🔴 ACCIÓN URGENTE REQUERIDA:\n`;
       message += `El pago lleva ${reminder.daysOverdue} días de retraso.\n\n`;
@@ -246,7 +282,7 @@ function getReminderMessage(reminder: PaymentReminder, payment: any): string {
       message += `4. ⚠️ Advertir sobre posibles acciones legales\n\n`;
       message += `Recargos por mora: ${calculateLateFee(reminder.amount, reminder.daysOverdue)}`;
       break;
-      
+
     case 'firm':
       message += `📢 Recordatorio Formal:\n`;
       message += `Este pago está vencido desde hace ${reminder.daysOverdue} días.\n\n`;
@@ -257,7 +293,7 @@ function getReminderMessage(reminder: PaymentReminder, payment: any): string {
       message += `4. 📋 Documentar la situación\n\n`;
       message += `Los recargos por mora comenzarán a aplicarse.`;
       break;
-      
+
     case 'friendly':
       message += `🔔 Recordatorio Amistoso:\n`;
       message += `El pago de ${period} está pendiente.\n\n`;
@@ -269,7 +305,7 @@ function getReminderMessage(reminder: PaymentReminder, payment: any): string {
       message += `Mantener buena relación con inquilinos puntuales.`;
       break;
   }
-  
+
   return message;
 }
 
@@ -287,24 +323,21 @@ function calculateLateFee(amount: number, daysOverdue: number): string {
 /**
  * Envía email de recordatorio de pago
  */
-async function sendPaymentReminderEmail(payment: any, reminder: PaymentReminder): Promise<void> {
+async function sendPaymentReminderEmail(
+  payment: any,
+  reminder: PaymentReminder,
+  sendToTenant: boolean = true,
+  sendToAdmin: boolean = true
+): Promise<void> {
   if (!payment.contract?.unit?.building?.companyId) return;
 
   const tenant = payment.contract.tenant;
   const companyId = payment.contract.unit.building.companyId;
 
-  // Obtener administradores de la empresa
-  const admins = await prisma.user.findMany({
-    where: {
-      companyId,
-      role: 'administrador',
-    },
-  });
-
   const subject = getReminderTitle(reminder, payment);
-  
-  // Email para inquilino (si tiene email)
-  if (tenant?.email) {
+
+  // Email para inquilino (si tiene email y está habilitado)
+  if (sendToTenant && tenant?.email) {
     const tenantHtml = generateTenantEmailHTML(payment, reminder);
     try {
       await sendEmail({
@@ -318,18 +351,27 @@ async function sendPaymentReminderEmail(payment: any, reminder: PaymentReminder)
     }
   }
 
-  // Email para administradores
-  const adminHtml = generateAdminEmailHTML(payment, reminder);
-  for (const admin of admins) {
-    try {
-      await sendEmail({
-        to: admin.email,
-        subject,
-        html: adminHtml,
-      });
-      logger.info(`Email de alerta enviado a administrador ${admin.email}`);
-    } catch (error) {
-      logger.error(`Error enviando email a administrador:`, error);
+  // Email para administradores (si está habilitado)
+  if (sendToAdmin) {
+    const admins = await prisma.user.findMany({
+      where: {
+        companyId,
+        role: 'administrador',
+      },
+    });
+
+    const adminHtml = generateAdminEmailHTML(payment, reminder);
+    for (const admin of admins) {
+      try {
+        await sendEmail({
+          to: admin.email,
+          subject,
+          html: adminHtml,
+        });
+        logger.info(`Email de alerta enviado a administrador ${admin.email}`);
+      } catch (error) {
+        logger.error(`Error enviando email a administrador:`, error);
+      }
     }
   }
 }
@@ -342,31 +384,35 @@ function generateTenantEmailHTML(payment: any, reminder: PaymentReminder): strin
   const dueDate = format(new Date(payment.fechaVencimiento), 'dd/MM/yyyy', { locale: es });
   const building = payment.contract?.unit?.building?.nombre;
   const unit = payment.contract?.unit?.numero;
-  
+
   let tone = '';
   let urgencyColor = '';
   let actionMessage = '';
-  
+
   switch (reminder.stage) {
     case 'legal':
       tone = 'Aviso Legal';
       urgencyColor = '#dc2626';
-      actionMessage = 'Este es un aviso legal formal. Por favor, contacte con nosotros inmediatamente para evitar acciones legales.';
+      actionMessage =
+        'Este es un aviso legal formal. Por favor, contacte con nosotros inmediatamente para evitar acciones legales.';
       break;
     case 'urgent':
       tone = 'Urgente';
       urgencyColor = '#ea580c';
-      actionMessage = 'Su pago está significativamente atrasado. Le solicitamos que se ponga en contacto con nosotros a la brevedad posible.';
+      actionMessage =
+        'Su pago está significativamente atrasado. Le solicitamos que se ponga en contacto con nosotros a la brevedad posible.';
       break;
     case 'firm':
       tone = 'Importante';
       urgencyColor = '#f59e0b';
-      actionMessage = 'Hemos notado que su pago está pendiente. Por favor, regularice su situación lo antes posible.';
+      actionMessage =
+        'Hemos notado que su pago está pendiente. Por favor, regularice su situación lo antes posible.';
       break;
     case 'friendly':
       tone = 'Recordatorio';
       urgencyColor = '#3b82f6';
-      actionMessage = 'Este es un recordatorio amistoso de su pago pendiente. Si ya realizó el pago, por favor ignore este mensaje.';
+      actionMessage =
+        'Este es un recordatorio amistoso de su pago pendiente. Si ya realizó el pago, por favor ignore este mensaje.';
       break;
   }
 
@@ -637,18 +683,26 @@ function generateTenantEmailHTML(payment: any, reminder: PaymentReminder): strin
                     </div>
                   </div>
                   
-                  ${reminder.stage !== 'friendly' ? `
+                  ${
+                    reminder.stage !== 'friendly'
+                      ? `
                   <div class="late-fee-box">
                     <p><strong>⚠️ Recargo por mora aplicable:</strong> ${calculateLateFee(reminder.amount, reminder.daysOverdue)}</p>
                     <p style="margin-top: 8px; font-size: 13px; color: #92400E;">Este recargo se añadirá al monto adeudado según los términos del contrato.</p>
                   </div>
-                  ` : ''}
+                  `
+                      : ''
+                  }
                   
-                  ${reminder.stage === 'legal' || reminder.stage === 'urgent' ? `
+                  ${
+                    reminder.stage === 'legal' || reminder.stage === 'urgent'
+                      ? `
                   <div class="warning-box">
                     <p><strong>⚠️ Acción Inmediata Requerida:</strong> ${reminder.stage === 'legal' ? 'Este pago está significativamente atrasado. Si no se recibe el pago en los próximos días, nos veremos obligados a iniciar procedimientos legales según lo establecido en el contrato.' : 'Este pago está atrasado y requiere su atención inmediata para evitar recargos adicionales.'}</p>
                   </div>
-                  ` : ''}
+                  `
+                      : ''
+                  }
                   
                   <div class="payment-options">
                     <h3 style="margin-top: 0; color: #374151;">💳 Opciones de Pago</h3>
@@ -701,7 +755,7 @@ function generateTenantEmailHTML(payment: any, reminder: PaymentReminder): strin
 function generateAdminEmailHTML(payment: any, reminder: PaymentReminder): string {
   const amount = `€${reminder.amount.toLocaleString('es-ES')}`;
   const dueDate = format(new Date(payment.fechaVencimiento), 'dd/MM/yyyy', { locale: es });
-  
+
   return `
     <!DOCTYPE html>
     <html>
@@ -760,7 +814,7 @@ function generateAdminEmailHTML(payment: any, reminder: PaymentReminder): string
  */
 export async function generateOverduePaymentsReport(companyId: string): Promise<any> {
   const reminders = await detectOverduePayments(companyId);
-  
+
   const payments = await Promise.all(
     reminders.map(async (reminder) => {
       const payment = await prisma.payment.findUnique({
@@ -782,10 +836,10 @@ export async function generateOverduePaymentsReport(companyId: string): Promise<
     })
   );
 
-  const legal = payments.filter(p => p.reminder.stage === 'legal');
-  const urgent = payments.filter(p => p.reminder.stage === 'urgent');
-  const firm = payments.filter(p => p.reminder.stage === 'firm');
-  const friendly = payments.filter(p => p.reminder.stage === 'friendly');
+  const legal = payments.filter((p) => p.reminder.stage === 'legal');
+  const urgent = payments.filter((p) => p.reminder.stage === 'urgent');
+  const firm = payments.filter((p) => p.reminder.stage === 'firm');
+  const friendly = payments.filter((p) => p.reminder.stage === 'friendly');
 
   const totalOverdue = payments.reduce((sum, p) => sum + p.reminder.amount, 0);
 
@@ -796,7 +850,7 @@ export async function generateOverduePaymentsReport(companyId: string): Promise<
     urgent: urgent.length,
     firm: firm.length,
     friendly: friendly.length,
-    payments: payments.map(p => ({
+    payments: payments.map((p) => ({
       id: p.id,
       tenant: p.contract?.tenant?.nombreCompleto,
       unit: `${p.contract?.unit?.building?.nombre} ${p.contract?.unit?.numero}`,
