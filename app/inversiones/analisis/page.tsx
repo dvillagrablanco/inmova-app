@@ -101,6 +101,12 @@ export default function AnalisisInversionPage() {
   const [brokerAnalysis, setBrokerAnalysis] = useState<any>(null);
   const [brokerLoading, setBrokerLoading] = useState(false);
 
+  // Datos de contraste de mercado (paralelo al análisis de broker)
+  const [marketContext, setMarketContext] = useState<any>(null);
+  const [portfolioComps, setPortfolioComps] = useState<any[]>([]);
+  const [precioVsBroker, setPrecioVsBroker] = useState<any>(null);
+  const [platformSummary, setPlatformSummary] = useState<any>(null);
+
   // Chat de inversiones
   const [chatMessages, setChatMessages] = useState<
     { role: 'user' | 'assistant'; content: string }[]
@@ -415,6 +421,12 @@ export default function AnalisisInversionPage() {
       const data = await res.json();
       const extracted = data.data;
       setBrokerAnalysis(extracted);
+
+      // Store market context data from parallel analysis
+      if (data.marketContext) setMarketContext(data.marketContext);
+      if (data.portfolioComps) setPortfolioComps(data.portfolioComps);
+      if (data.precioVsBroker) setPrecioVsBroker(data.precioVsBroker);
+      if (data.platformSummary) setPlatformSummary(data.platformSummary);
 
       if (extracted.rentRoll?.length > 0) {
         setRentRoll(extracted.rentRoll);
@@ -1392,6 +1404,183 @@ Estado: Reformado 2018"
                             );
                           })}
                         </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* ── CONTRASTE DE MERCADO (datos paralelos) ── */}
+              {(marketContext || precioVsBroker || portfolioComps.length > 0) && (
+                <Card className="border-2 border-blue-200 bg-blue-50/20">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <BarChart3 className="h-5 w-5 text-blue-600" />
+                      Contraste de Mercado Independiente
+                    </CardTitle>
+                    <CardDescription>
+                      Datos reales de mercado obtenidos en paralelo al análisis IA
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Badge de valoración vs mercado */}
+                    {precioVsBroker && (
+                      <div className={`flex items-center gap-3 p-4 rounded-lg border-2 ${
+                        precioVsBroker.estado === 'sobrevalorado' ? 'border-red-300 bg-red-50' :
+                        precioVsBroker.estado === 'ligeramente_alto' ? 'border-amber-300 bg-amber-50' :
+                        precioVsBroker.estado === 'en_linea' ? 'border-green-300 bg-green-50' :
+                        'border-blue-300 bg-blue-50'
+                      }`}>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            {precioVsBroker.estado === 'sobrevalorado' && <AlertTriangle className="h-5 w-5 text-red-600" />}
+                            {precioVsBroker.estado === 'ligeramente_alto' && <AlertTriangle className="h-5 w-5 text-amber-600" />}
+                            {precioVsBroker.estado === 'en_linea' && <CheckCircle2 className="h-5 w-5 text-green-600" />}
+                            {precioVsBroker.estado === 'infravalorado' && <TrendingUp className="h-5 w-5 text-blue-600" />}
+                            <span className="font-bold text-base">
+                              {precioVsBroker.estado === 'sobrevalorado' ? 'Precio Sobrevalorado' :
+                               precioVsBroker.estado === 'ligeramente_alto' ? 'Precio Ligeramente Alto' :
+                               precioVsBroker.estado === 'en_linea' ? 'Precio en Línea con Mercado' :
+                               'Precio Infravalorado (Oportunidad)'}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-600">
+                            Broker: <strong>{precioVsBroker.precioM2Broker?.toLocaleString('es-ES')}€/m²</strong> vs
+                            Mercado real: <strong>{precioVsBroker.precioM2Mercado?.toLocaleString('es-ES')}€/m²</strong>
+                            {' '}({precioVsBroker.diferenciaPercent > 0 ? '+' : ''}{precioVsBroker.diferenciaPercent}%)
+                          </p>
+                        </div>
+                        <Badge className={`text-lg px-4 py-1 ${
+                          precioVsBroker.estado === 'sobrevalorado' ? 'bg-red-500' :
+                          precioVsBroker.estado === 'ligeramente_alto' ? 'bg-amber-500' :
+                          precioVsBroker.estado === 'en_linea' ? 'bg-green-500' :
+                          'bg-blue-500'
+                        }`}>
+                          {precioVsBroker.diferenciaPercent > 0 ? '+' : ''}{precioVsBroker.diferenciaPercent}%
+                        </Badge>
+                      </div>
+                    )}
+
+                    {/* Barras de comparación de precios */}
+                    {marketContext && (
+                      <div className="space-y-3">
+                        <h4 className="font-medium text-sm">Precios €/m² — Comparativa</h4>
+                        {(() => {
+                          const brokerP = precioVsBroker?.precioM2Broker || 0;
+                          const realP = marketContext.precioM2ZonaReal || 0;
+                          const askingP = marketContext.precioM2ZonaAsking || 0;
+                          const maxP = Math.max(brokerP, realP, askingP, 1);
+                          return (
+                            <div className="space-y-2">
+                              {brokerP > 0 && (
+                                <div>
+                                  <div className="flex justify-between text-xs mb-0.5">
+                                    <span>Precio Broker</span>
+                                    <span className="font-bold">{brokerP.toLocaleString('es-ES')}€/m²</span>
+                                  </div>
+                                  <div className="h-5 bg-gray-100 rounded-full overflow-hidden">
+                                    <div className="h-full bg-red-400 rounded-full" style={{ width: `${(brokerP / maxP) * 100}%` }} />
+                                  </div>
+                                </div>
+                              )}
+                              {askingP > 0 && (
+                                <div>
+                                  <div className="flex justify-between text-xs mb-0.5">
+                                    <span>Asking Price Portales <span className="text-gray-400">(Idealista/Fotocasa)</span></span>
+                                    <span className="font-bold">{askingP.toLocaleString('es-ES')}€/m²</span>
+                                  </div>
+                                  <div className="h-5 bg-gray-100 rounded-full overflow-hidden">
+                                    <div className="h-full bg-amber-400 rounded-full" style={{ width: `${(askingP / maxP) * 100}%` }} />
+                                  </div>
+                                </div>
+                              )}
+                              {realP > 0 && (
+                                <div>
+                                  <div className="flex justify-between text-xs mb-0.5">
+                                    <span>Precio Real Escriturado <span className="text-gray-400">(Notariado)</span></span>
+                                    <span className="font-bold">{realP.toLocaleString('es-ES')}€/m²</span>
+                                  </div>
+                                  <div className="h-5 bg-gray-100 rounded-full overflow-hidden">
+                                    <div className="h-full bg-green-500 rounded-full" style={{ width: `${(realP / maxP) * 100}%` }} />
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
+
+                        {/* Market details grid */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
+                          <div className="bg-white rounded-lg p-3 border">
+                            <div className="text-xs text-gray-500">Zona</div>
+                            <div className="text-sm font-bold">{marketContext.zona || '-'}</div>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 border">
+                            <div className="text-xs text-gray-500">Tendencia</div>
+                            <div className="text-sm font-bold capitalize">{marketContext.tendenciaZona || '-'}</div>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 border">
+                            <div className="text-xs text-gray-500">Demanda</div>
+                            <div className="text-sm font-bold capitalize">{marketContext.demandaZona || '-'}</div>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 border">
+                            <div className="text-xs text-gray-500">Alquiler €/m²/mes</div>
+                            <div className="text-sm font-bold">
+                              {marketContext.alquilerM2ZonaReal ? `${marketContext.alquilerM2ZonaReal}€` : '-'}
+                            </div>
+                          </div>
+                        </div>
+                        <p className="text-xs text-gray-400 mt-1">
+                          Fuentes: {marketContext.fuentePrecioReal || 'Notariado'}, {marketContext.fuenteAsking || 'Idealista/Fotocasa'}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Portfolio comparables */}
+                    {portfolioComps.length > 0 && (
+                      <div>
+                        <h4 className="font-medium text-sm mb-2">Comparables del Portfolio Propio ({portfolioComps.length})</h4>
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-sm">
+                            <thead>
+                              <tr className="border-b text-left text-xs text-gray-500">
+                                <th className="pb-1 pr-3">Edificio</th>
+                                <th className="pb-1 pr-3">Tipo</th>
+                                <th className="pb-1 pr-3">m²</th>
+                                <th className="pb-1 pr-3">Renta</th>
+                                <th className="pb-1 pr-3">€/m²</th>
+                                <th className="pb-1">Yield</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {portfolioComps.slice(0, 8).map((c: any, i: number) => (
+                                <tr key={i} className="border-b border-gray-100">
+                                  <td className="py-1 pr-3 font-medium">{c.edificio} {c.numero}</td>
+                                  <td className="py-1 pr-3 capitalize">{c.tipo}</td>
+                                  <td className="py-1 pr-3">{c.superficie}</td>
+                                  <td className="py-1 pr-3">{c.renta?.toLocaleString('es-ES')}€</td>
+                                  <td className="py-1 pr-3">{c.eurM2?.toFixed(1)}€</td>
+                                  <td className="py-1">{c.yieldBruto ? `${c.yieldBruto}%` : '-'}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Platform summary */}
+                    {platformSummary && (
+                      <div className="flex flex-wrap gap-2 text-xs text-gray-500 pt-2 border-t">
+                        <span>Fuentes: {platformSummary.sourcesUsed?.join(', ')}</span>
+                        <span>•</span>
+                        <span>Fiabilidad: {platformSummary.overallReliability}%</span>
+                        {platformSummary.comparablesCount > 0 && (
+                          <>
+                            <span>•</span>
+                            <span>{platformSummary.comparablesCount} comparables</span>
+                          </>
+                        )}
                       </div>
                     )}
                   </CardContent>
