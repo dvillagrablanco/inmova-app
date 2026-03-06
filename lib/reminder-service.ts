@@ -26,6 +26,9 @@ export const sendPaymentReminders = async (companyId: string) => {
         nombre: true,
         email: true,
         telefono: true,
+        logoUrl: true,
+        direccion: true,
+        cif: true,
         paymentRemindersEnabled: true,
         paymentRemindersPreventiveEnabled: true,
         paymentRemindersPreventiveDays: true,
@@ -128,6 +131,9 @@ export const sendPaymentReminders = async (companyId: string) => {
           nombre: company.nombre,
           email: company.email || undefined,
           telefono: company.telefono || undefined,
+          logoUrl: company.logoUrl || undefined,
+          direccion: company.direccion || undefined,
+          cif: company.cif || undefined,
         },
       });
 
@@ -187,7 +193,7 @@ export const sendContractExpirationAlerts = async (companyId: string) => {
   try {
     const company = await prisma.company.findUnique({
       where: { id: companyId },
-      select: { nombre: true, email: true, telefono: true },
+      select: { nombre: true, email: true, telefono: true, logoUrl: true, direccion: true, cif: true },
     });
 
     if (!company) {
@@ -257,6 +263,9 @@ export const sendContractExpirationAlerts = async (companyId: string) => {
           nombre: company.nombre,
           email: company.email || undefined,
           telefono: company.telefono || undefined,
+          logoUrl: company.logoUrl || undefined,
+          direccion: company.direccion || undefined,
+          cif: company.cif || undefined,
         },
       });
 
@@ -311,7 +320,7 @@ export const sendMaintenanceNotifications = async (companyId: string) => {
   try {
     const company = await prisma.company.findUnique({
       where: { id: companyId },
-      select: { nombre: true, email: true, telefono: true },
+      select: { nombre: true, email: true, telefono: true, logoUrl: true, direccion: true, cif: true },
     });
 
     if (!company) {
@@ -387,6 +396,9 @@ export const sendMaintenanceNotifications = async (companyId: string) => {
           nombre: company.nombre,
           email: company.email || undefined,
           telefono: company.telefono || undefined,
+          logoUrl: company.logoUrl || undefined,
+          direccion: company.direccion || undefined,
+          cif: company.cif || undefined,
         },
       });
 
