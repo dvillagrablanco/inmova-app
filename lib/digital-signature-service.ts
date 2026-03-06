@@ -2,9 +2,12 @@
  * Servicio de Firma Digital de Contratos
  * 
  * Abstracción para múltiples proveedores de firma electrónica:
+ * - DocuSign (líder global — Grupo Vidaro producción)
  * - Signaturit (eIDAS compliant, Europa)
- * - DocuSign (líder global)
  * - Self-hosted (firma simple con certificado propio)
+ * 
+ * Configurado para Grupo Vidaro: Viroda Inversiones S.L. + Rovida S.L.
+ * Soporta contratos propios y contratos de operadores de media estancia (ej: Álamo)
  * 
  * @module DigitalSignatureService
  */
@@ -173,42 +176,54 @@ class DocuSignProvider implements ISignatureProvider {
   private userId: string;
   private basePath: string;
   private privateKey: string;
+  private isProduction: boolean;
   
   constructor() {
     this.integrationKey = process.env.DOCUSIGN_INTEGRATION_KEY || '';
     this.accountId = process.env.DOCUSIGN_ACCOUNT_ID || '';
     this.userId = process.env.DOCUSIGN_USER_ID || '';
-    this.basePath = process.env.DOCUSIGN_BASE_PATH || 'https://demo.docusign.net/restapi';
-    this.privateKey = process.env.DOCUSIGN_PRIVATE_KEY || '';
+    this.basePath = process.env.DOCUSIGN_BASE_PATH || 'https://www.docusign.net/restapi';
+    this.privateKey = (process.env.DOCUSIGN_PRIVATE_KEY || '').replace(/\\n/g, '\n');
+    this.isProduction = !this.basePath.includes('demo');
     
     if (!this.integrationKey || !this.accountId) {
       logger.warn('DocuSign not fully configured - set DOCUSIGN_INTEGRATION_KEY and DOCUSIGN_ACCOUNT_ID');
     }
   }
 
+  /** OAuth host differs between demo and production */
+  private get oAuthHost(): string {
+    return this.isProduction ? 'account.docusign.com' : 'account-d.docusign.com';
+  }
+
   private async getAccessToken(): Promise<string> {
     const docusign = require('docusign-esign');
     const apiClient = new docusign.ApiClient();
-    apiClient.setBasePath(this.basePath);
+    apiClient.setOAuthBasePath(this.oAuthHost);
 
-    // JWT Auth
-    if (this.privateKey && this.userId) {
-      try {
-        const results = await apiClient.requestJWTUserToken(
-          this.integrationKey,
-          this.userId,
-          ['signature', 'impersonation'],
-          Buffer.from(this.privateKey, 'utf8'),
-          3600
-        );
-        return results.body.access_token;
-      } catch (jwtError: any) {
-        logger.error('DocuSign JWT auth failed:', jwtError.message);
-        throw new Error('DocuSign authentication failed. Check DOCUSIGN_PRIVATE_KEY and DOCUSIGN_USER_ID.');
-      }
+    if (!this.privateKey || !this.userId) {
+      throw new Error('DocuSign credentials not configured. Need DOCUSIGN_PRIVATE_KEY + DOCUSIGN_USER_ID for JWT auth.');
     }
 
-    throw new Error('DocuSign credentials not configured. Need DOCUSIGN_PRIVATE_KEY + DOCUSIGN_USER_ID for JWT auth.');
+    try {
+      const results = await apiClient.requestJWTUserToken(
+        this.integrationKey,
+        this.userId,
+        ['signature', 'impersonation'],
+        Buffer.from(this.privateKey, 'utf8'),
+        3600
+      );
+      logger.info('DocuSign JWT token obtained', { environment: this.isProduction ? 'production' : 'demo' });
+      return results.body.access_token;
+    } catch (jwtError: any) {
+      const msg = jwtError?.response?.body?.error || jwtError.message || 'Unknown error';
+      logger.error('DocuSign JWT auth failed:', msg);
+      if (msg === 'consent_required') {
+        const consentUrl = `https://${this.oAuthHost}/oauth/auth?response_type=code&scope=signature%20impersonation&client_id=${this.integrationKey}&redirect_uri=${encodeURIComponent(process.env.NEXTAUTH_URL || 'https://inmovaapp.com')}/api/integrations/docusign/callback`;
+        throw new Error(`DocuSign consent required. Visit: ${consentUrl}`);
+      }
+      throw new Error(`DocuSign authentication failed: ${msg}`);
+    }
   }
   
   async createSignatureRequest(request: SignatureRequest) {
@@ -257,9 +272,28 @@ class DocuSignProvider implements ISignatureProvider {
       envelopeDefinition.recipients = recipients;
       envelopeDefinition.status = 'sent';
       
-      // Documento desde URL
+      // Descargar documento y convertir a base64
+      let documentBase64 = '';
+      try {
+        const docResponse = await fetch(request.documentUrl);
+        if (docResponse.ok) {
+          const buffer = await docResponse.arrayBuffer();
+          documentBase64 = Buffer.from(buffer).toString('base64');
+        }
+      } catch (downloadErr: any) {
+        logger.warn('Could not download document from URL, trying S3:', downloadErr.message);
+        try {
+          const { downloadFile } = await import('@/lib/s3');
+          const buffer = await downloadFile(request.documentUrl);
+          documentBase64 = buffer.toString('base64');
+        } catch (s3Err: any) {
+          logger.error('Could not download document from S3 either:', s3Err.message);
+          throw new Error('No se pudo obtener el documento PDF para firma');
+        }
+      }
+
       const document = new docusign.Document();
-      document.documentBase64 = ''; // Se rellenaría con el PDF real
+      document.documentBase64 = documentBase64;
       document.name = request.documentName || 'Contrato';
       document.fileExtension = 'pdf';
       document.documentId = '1';
@@ -281,14 +315,16 @@ class DocuSignProvider implements ISignatureProvider {
       viewRequest.userName = request.signatories[0].name;
       viewRequest.recipientId = '1';
       
-      let signingUrl = `https://demo.docusign.net/Signing/${externalId}`;
+      const signingHost = this.isProduction ? 'https://www.docusign.net' : 'https://demo.docusign.net';
+      let signingUrl = `${signingHost}/Signing/${externalId}`;
       try {
         const viewResults = await envelopesApi.createRecipientView(this.accountId, externalId, {
           recipientViewRequest: viewRequest,
         });
         signingUrl = viewResults.url;
       } catch (viewErr) {
-        logger.warn('Could not get embedded signing URL, using envelope ID');
+        // Para firma remota (email-based), no se necesita embedded view — los firmantes reciben email
+        logger.info('Embedded signing URL not available — firmantes recibirán email de DocuSign');
       }
       
       logger.info(`DocuSign envelope created: ${externalId}`);
@@ -439,6 +475,49 @@ function getProvider(provider: SignatureProvider): ISignatureProvider {
 }
 
 // ============================================================================
+// DETECCIÓN DE PROVEEDOR
+// ============================================================================
+
+/**
+ * Verifica si DocuSign está configurado con todas las credenciales necesarias
+ */
+export function isDocuSignConfigured(): boolean {
+  return !!(
+    process.env.DOCUSIGN_INTEGRATION_KEY &&
+    process.env.DOCUSIGN_USER_ID &&
+    process.env.DOCUSIGN_ACCOUNT_ID &&
+    process.env.DOCUSIGN_PRIVATE_KEY
+  );
+}
+
+/**
+ * Verifica si Signaturit está configurado
+ */
+export function isSignaturitConfigured(): boolean {
+  return !!process.env.SIGNATURIT_API_KEY;
+}
+
+/**
+ * Devuelve el proveedor por defecto según las credenciales disponibles.
+ * Prioridad: DocuSign (Grupo Vidaro producción) > Signaturit > SELF_HOSTED
+ */
+export function getDefaultProvider(): SignatureProvider {
+  if (isDocuSignConfigured()) return 'DOCUSIGN';
+  if (isSignaturitConfigured()) return 'SIGNATURIT';
+  return 'SELF_HOSTED';
+}
+
+/**
+ * Devuelve info del entorno de DocuSign
+ */
+export function getDocuSignEnvironment(): { configured: boolean; production: boolean } {
+  return {
+    configured: isDocuSignConfigured(),
+    production: !(process.env.DOCUSIGN_BASE_PATH || '').includes('demo'),
+  };
+}
+
+// ============================================================================
 // FUNCIONES PRINCIPALES
 // ============================================================================
 
@@ -459,8 +538,9 @@ function calculateDocumentHash(documentUrl: string): string {
 export async function createSignatureRequest(
   request: SignatureRequest
 ): Promise<SignatureResponse> {
+  const prisma = await getPrisma();
   try {
-    const provider = request.provider || (process.env.DOCUSIGN_INTEGRATION_KEY ? 'DOCUSIGN' : 'SIGNATURIT');
+    const provider = request.provider || getDefaultProvider();
     
     logger.info('🚀 Creating digital signature request', {
       contractId: request.contractId,
@@ -596,6 +676,7 @@ export async function cancelSignature(
   signatureId: string,
   companyId: string
 ): Promise<void> {
+  const prisma = await getPrisma();
   try {
     const signature = await prisma.contractSignature.findFirst({
       where: {
@@ -642,6 +723,7 @@ export async function processSignatureWebhook(
   event: string,
   payload: any
 ): Promise<void> {
+  const prisma = await getPrisma();
   try {
     logger.info('📨 Processing signature webhook', { provider, event });
     
@@ -677,6 +759,7 @@ export async function processSignatureWebhook(
 }
 
 async function handleSignatureCompleted(payload: any) {
+  const prisma = await getPrisma();
   const externalId = payload.externalId;
   
   const signature = await prisma.contractSignature.findFirst({
@@ -698,6 +781,7 @@ async function handleSignatureCompleted(payload: any) {
 }
 
 async function handleSignatureDeclined(payload: any) {
+  const prisma = await getPrisma();
   const externalId = payload.externalId;
   
   const signature = await prisma.contractSignature.findFirst({
@@ -717,6 +801,7 @@ async function handleSignatureDeclined(payload: any) {
 }
 
 async function handleSignatureExpired(payload: any) {
+  const prisma = await getPrisma();
   const externalId = payload.externalId;
   
   const signature = await prisma.contractSignature.findFirst({
@@ -742,6 +827,7 @@ export async function getContractSignatures(
   contractId: string,
   companyId: string
 ): Promise<any[]> {
+  const prisma = await getPrisma();
   return await prisma.contractSignature.findMany({
     where: {
       contractId,
