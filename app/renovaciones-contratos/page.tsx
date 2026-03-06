@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
+import { AiInsightPanel } from '@/components/ai/AiInsightPanel';
 import { useRouter } from 'next/navigation';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -325,6 +326,26 @@ export default function RenovacionesContratosPage() {
             Renovar en lote ({selectedIds.size})
           </Button>
         </div>
+
+        {/* Panel IA: Sugerencias de Renovación */}
+        <AiInsightPanel
+          apiUrl="/api/ai/renewal-suggestions"
+          mode="insights"
+          title="Sugerencias IA de Renovación"
+          transformResponse={(data) => {
+            const recs = data.recommendations || [];
+            if (recs.length === 0) return [{ id: 'ok', nivel: 'verde', titulo: 'Sin renovaciones próximas', detalle: 'No hay contratos que venzan en los próximos 6 meses.' }];
+            return recs.slice(0, 12).map((r: any, i: number) => ({
+              id: `ren-${i}`,
+              nivel: r.riskLevel === 'alto' ? 'rojo' : r.riskLevel === 'medio' ? 'amarillo' : 'verde',
+              titulo: `${r.building} ${r.unit} — ${r.tenant} (vence ${r.expiryDate})`,
+              detalle: r.reason,
+              accion: r.recommendation === 'no_renovar' ? '⛔ No renovar'
+                : r.recommendation === 'evaluar_no_renovar' ? '⚠️ Evaluar condiciones'
+                : `Subir a ${r.suggestedRent}€/mes (+${r.incrementPercent}%)`,
+            }));
+          }}
+        />
 
         {/* KPIs */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

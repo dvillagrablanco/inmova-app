@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { AiInsightPanel } from '@/components/ai/AiInsightPanel';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
 import { KPICard } from '@/components/ui/kpi-card';
@@ -249,6 +250,14 @@ function ReportesPageContent() {
                 </div>
               </div>
             </div>
+
+            {/* Panel IA: Copiloto de Reportes */}
+            <AiInsightPanel
+              apiUrl="/api/ai/financial-copilot"
+              mode="chat"
+              title="Generador IA de Informes"
+              chatContext="Módulo de reportes financieros. Puede pedir: resumen mensual de ingresos/gastos, comparativa trimestral, informe para junta, análisis de rentabilidad por edificio o cualquier informe personalizado."
+            />
 
             {/* Reporte Global */}
             {tipoReporte === 'global' && globalData && (

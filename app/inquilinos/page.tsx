@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { AiInsightPanel } from '@/components/ai/AiInsightPanel';
 
 import {
   Users,
@@ -286,6 +287,14 @@ function InquilinosPageContent() {
               {/* Quick Actions */}
               {canCreate && <ContextualQuickActions />}
             </div>
+
+            {/* Panel IA: Screening de Inquilinos */}
+            <AiInsightPanel
+              apiUrl="/api/ai/tenant-screening"
+              mode="chat"
+              title="Screening IA de Inquilinos"
+              chatContext="Módulo de gestión de inquilinos. Puede preguntar sobre verificación de solvencia, scoring crediticio, referencias, historial de pagos o evaluación de candidatos."
+            />
 
             {/* Error Alert */}
             {error && (
