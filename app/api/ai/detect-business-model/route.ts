@@ -17,6 +17,14 @@ const detectBusinessSchema = z.object({
  */
 export async function POST(request: NextRequest) {
   try {
+    // Auth check — prevent abuse of external AI API
+    const { getServerSession } = await import('next-auth');
+    const { authOptions } = await import('@/lib/auth-options');
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+    }
+
     const body = await request.json();
     const parsed = detectBusinessSchema.safeParse(body);
     if (!parsed.success) {

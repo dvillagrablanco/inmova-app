@@ -73,10 +73,19 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET para obtener estadísticas
+// GET para obtener estadísticas (solo admin)
 export async function GET(request: NextRequest) {
   const prisma = await getPrisma();
   try {
+    // Auth: solo usuarios autenticados con rol admin pueden ver stats
+    const { getServerSession } = await import('next-auth');
+    const { authOptions } = await import('@/lib/auth-options');
+    const session = await getServerSession(authOptions);
+    const role = (session?.user as any)?.role;
+    if (!session?.user || !['super_admin', 'administrador'].includes(role)) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const metric = searchParams.get('metric');
     const days = parseInt(searchParams.get('days') || '7');
