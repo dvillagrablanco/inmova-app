@@ -268,7 +268,8 @@ export async function approveOperatorSignatureRequest(
 
     if (provider === 'DOCUSIGN') {
       // Enviar via DocuSign
-      const docusign = require('docusign-esign');
+      const docusignModule = 'docusign-esign';
+      const docusign = await import(/* webpackIgnore: true */ docusignModule);
       const integrationKey = process.env.DOCUSIGN_INTEGRATION_KEY!;
       const userId = process.env.DOCUSIGN_USER_ID!;
       const accountId = process.env.DOCUSIGN_ACCOUNT_ID!;

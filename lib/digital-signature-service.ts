@@ -197,7 +197,8 @@ class DocuSignProvider implements ISignatureProvider {
   }
 
   private async getAccessToken(): Promise<string> {
-    const docusign = require('docusign-esign');
+    const docusignModule = 'docusign-esign';
+    const docusign = await import(/* webpackIgnore: true */ docusignModule);
     const apiClient = new docusign.ApiClient();
     apiClient.setOAuthBasePath(this.oAuthHost);
 
@@ -233,7 +234,8 @@ class DocuSignProvider implements ISignatureProvider {
         signatories: request.signatories.length,
       });
       
-      const docusign = require('docusign-esign');
+      const docusignModule = 'docusign-esign';
+      const docusign = await import(/* webpackIgnore: true */ docusignModule);
       const accessToken = await this.getAccessToken();
       
       const apiClient = new docusign.ApiClient();
@@ -342,7 +344,8 @@ class DocuSignProvider implements ISignatureProvider {
   
   async getSignatureStatus(externalId: string) {
     try {
-      const docusign = require('docusign-esign');
+      const docusignModule = 'docusign-esign';
+      const docusign = await import(/* webpackIgnore: true */ docusignModule);
       const accessToken = await this.getAccessToken();
       
       const apiClient = new docusign.ApiClient();
@@ -372,7 +375,8 @@ class DocuSignProvider implements ISignatureProvider {
   
   async cancelSignature(externalId: string) {
     try {
-      const docusign = require('docusign-esign');
+      const docusignModule = 'docusign-esign';
+      const docusign = await import(/* webpackIgnore: true */ docusignModule);
       const accessToken = await this.getAccessToken();
       
       const apiClient = new docusign.ApiClient();
@@ -394,7 +398,8 @@ class DocuSignProvider implements ISignatureProvider {
   
   async downloadSignedDocument(externalId: string): Promise<Buffer> {
     try {
-      const docusign = require('docusign-esign');
+      const docusignModule = 'docusign-esign';
+      const docusign = await import(/* webpackIgnore: true */ docusignModule);
       const accessToken = await this.getAccessToken();
       
       const apiClient = new docusign.ApiClient();

@@ -80,9 +80,9 @@ const resolvePdfBuffer = async (pdfPath: string): Promise<Buffer> => {
 
 // Detectar proveedor configurado — DocuSign tiene prioridad (Grupo Vidaro producción)
 const getActiveProvider = (): 'signaturit' | 'docusign' | null => {
-  const { isDocuSignConfigured, isSignaturitConfigured } = require('@/lib/digital-signature-service');
-  if (isDocuSignConfigured()) return 'docusign';
-  if (isSignaturitConfigured()) return 'signaturit';
+  if (process.env.DOCUSIGN_INTEGRATION_KEY && process.env.DOCUSIGN_USER_ID && 
+      process.env.DOCUSIGN_ACCOUNT_ID && process.env.DOCUSIGN_PRIVATE_KEY) return 'docusign';
+  if (process.env.SIGNATURIT_API_KEY) return 'signaturit';
   return null;
 };
 
@@ -381,7 +381,9 @@ async function sendToDocuSign({
   emailSubject: string;
   emailMessage: string;
 }> {
-  const docusign = require('docusign-esign');
+  // Dynamic import to avoid webpack analysis of docusign-esign (has broken relative imports)
+  const docusignModule = 'docusign-esign';
+  const docusign = await import(/* webpackIgnore: true */ docusignModule);
 
   // 1. Configuración
   const integrationKey = process.env.DOCUSIGN_INTEGRATION_KEY!;
