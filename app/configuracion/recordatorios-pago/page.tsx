@@ -39,7 +39,7 @@ interface PaymentReminderConfig {
 }
 
 const defaultConfig: PaymentReminderConfig = {
-  paymentRemindersEnabled: true,
+  paymentRemindersEnabled: false,
   paymentRemindersOverdueEnabled: true,
   paymentRemindersPreventiveEnabled: true,
   paymentRemindersSendToTenant: true,
