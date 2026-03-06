@@ -37,6 +37,7 @@ interface TenantInfo {
   contractId: string;
   unitId: string;
   unitNumero: string;
+  unitTipo: string; // 'vivienda' | 'garaje' | 'local' | 'trastero' | 'oficina' etc
   buildingNombre: string;
   rentaMensual: number;
   nameParts: string[];
@@ -61,7 +62,7 @@ async function loadTenants(companyId: string): Promise<TenantInfo[]> {
     include: {
       tenant: { select: { id: true, nombreCompleto: true, email: true, dni: true } },
       unit: {
-        select: { id: true, numero: true, building: { select: { nombre: true } } },
+        select: { id: true, numero: true, tipo: true, building: { select: { nombre: true } } },
       },
     },
   });
@@ -73,12 +74,13 @@ async function loadTenants(companyId: string): Promise<TenantInfo[]> {
     contractId: c.id,
     unitId: c.unit.id,
     unitNumero: c.unit.numero,
+    unitTipo: c.unit.tipo || 'vivienda',
     buildingNombre: c.unit.building.nombre,
     rentaMensual: c.rentaMensual,
     nameParts: c.tenant.nombreCompleto.toUpperCase().split(/\s+/).filter(p => p.length > 2),
   }));
 
-  _tenantsCache[companyId] = { data: tenantList, expiry: Date.now() + 5 * 60 * 1000 };
+  _tenantsCache[companyId] = { data: tenantList, expiry: Date.now() + 15 * 60 * 1000 }; // 15 min TTL
   return tenantList;
 }
 
@@ -185,10 +187,35 @@ function ruleBasedMatch(
 
   // Si hay match por monto exacto y es el UNICO inquilino con esa renta, subir confianza
   if (bestMatch && bestMatch.method === 'fuzzy_name' && bestMatch.score <= 45) {
-    const sameRentCount = tenants.filter(t => amountClose(txAmount, t.rentaMensual)).length;
-    if (sameRentCount === 1) {
+    const sameRentTenants = tenants.filter(t => amountClose(txAmount, t.rentaMensual));
+    if (sameRentTenants.length === 1) {
       bestMatch.score = 70;
       bestMatch.reason += ' (único inquilino con esa renta)';
+    } else if (sameRentTenants.length > 1) {
+      // Múltiples inquilinos con la misma renta (típico en garajes Rovida).
+      // Intentar desambiguar por nombre del deudor en el texto bancario.
+      const isGaraje = sameRentTenants.some(t => t.unitTipo === 'garaje');
+      if (isGaraje && txDebtorName) {
+        const debtorClean = cleanBankText(txDebtorName);
+        let bestGarageMatch: { tenant: TenantInfo; score: number } | null = null;
+        for (const t of sameRentTenants) {
+          const nameHits = t.nameParts.filter(part => debtorClean.includes(part)).length;
+          if (nameHits > 0 && nameHits > (bestGarageMatch?.score || 0)) {
+            bestGarageMatch = { tenant: t, score: nameHits };
+          }
+        }
+        if (bestGarageMatch) {
+          bestMatch = {
+            tenant: bestGarageMatch.tenant,
+            score: 80,
+            reason: `Garaje: nombre deudor coincide con ${bestGarageMatch.tenant.nombre} + monto exacto (${txAmount}€). ${sameRentTenants.length} inquilinos con misma renta.`,
+            method: 'exact_amount_name',
+          };
+        } else {
+          // No se pudo desambiguar por nombre — dejar score bajo
+          bestMatch.reason += ` (${sameRentTenants.length} garajes con misma renta, sin match de nombre)`;
+        }
+      }
     }
   }
 
@@ -199,7 +226,7 @@ function ruleBasedMatch(
       tenantName: t.nombre,
       contractId: t.contractId,
       unitId: t.unitId,
-      unitLabel: `${t.buildingNombre} - ${t.unitNumero}`,
+      unitLabel: `${t.buildingNombre} - ${t.unitNumero}${t.unitTipo !== 'vivienda' ? ` (${t.unitTipo})` : ''}`,
       confidence: bestMatch.score,
       reasoning: bestMatch.reason,
       method: bestMatch.method as any,
@@ -216,7 +243,7 @@ function ruleBasedMatch(
         tenantName: t.nombre,
         contractId: t.contractId,
         unitId: t.unitId,
-        unitLabel: `${t.buildingNombre} - ${t.unitNumero}`,
+        unitLabel: `${t.buildingNombre} - ${t.unitNumero}${t.unitTipo !== 'vivienda' ? ` (${t.unitTipo})` : ''}`,
         confidence: 55,
         reasoning: `Referencia contiene "${t.unitNumero}" de ${t.buildingNombre} + monto cercano.`,
         method: 'reference_code',
@@ -253,7 +280,7 @@ async function aiMatch(
 
   try {
     const tenantList = tenants.slice(0, 50).map(t =>
-      `- ${t.nombre} | ${t.email} | ${t.buildingNombre} ${t.unitNumero} | ${t.rentaMensual}€/mes | ID:${t.id}`
+      `- ${t.nombre} | ${t.email} | ${t.buildingNombre} ${t.unitNumero} (${t.unitTipo}) | ${t.rentaMensual}€/mes | ID:${t.id}`
     ).join('\n');
 
     const prompt = `Eres un experto en conciliación bancaria inmobiliaria. Analiza este movimiento bancario e identifica a qué inquilino y unidad corresponde.
@@ -303,7 +330,7 @@ Si no hay match claro, devuelve tenantId null y confidence 0.`;
           tenantName: tenant.nombre,
           contractId: tenant.contractId,
           unitId: tenant.unitId,
-          unitLabel: `${tenant.buildingNombre} - ${tenant.unitNumero}`,
+          unitLabel: `${tenant.buildingNombre} - ${tenant.unitNumero}${tenant.unitTipo !== 'vivienda' ? ` (${tenant.unitTipo})` : ''}`,
           confidence: result.confidence || 60,
           reasoning: result.reasoning || 'Matched by AI',
           method: 'ai_inference',

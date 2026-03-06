@@ -96,27 +96,44 @@ export async function POST(request: NextRequest) {
 
     for (const tx of unmatchedTxs) {
       const amount = Math.abs(tx.amount);
+      const txDebtorName = ((tx as any).debtorName || '').toUpperCase();
+      const concept = (tx.description || (tx as any).remittanceInfo || '').toLowerCase();
 
-      // Buscar pago por importe exacto (±0.01€ tolerancia)
-      const exactMatch = pendingPayments.find(
+      // Buscar pagos por importe exacto (±0.50€ tolerancia para garajes)
+      const exactMatches = pendingPayments.filter(
         (p) =>
           !matchedPaymentIds.has(p.id) &&
-          Math.abs(p.monto - amount) < 0.02
+          Math.abs(p.monto - amount) < 0.50
       );
+
+      let exactMatch = exactMatches.length === 1 ? exactMatches[0] : null;
+
+      // Si hay múltiples pagos con el mismo importe (típico garajes), desambiguar por nombre
+      if (exactMatches.length > 1 && txDebtorName) {
+        const nameMatch = exactMatches.find((p) => {
+          const tenantName = (p.contract?.tenant?.nombreCompleto || '').toUpperCase();
+          const nameParts = tenantName.split(/\s+/).filter((w: string) => w.length > 2);
+          return nameParts.some((part: string) => txDebtorName.includes(part));
+        });
+        exactMatch = nameMatch || exactMatches[0]; // Fallback al primero si no hay match de nombre
+      } else if (exactMatches.length > 1) {
+        exactMatch = exactMatches[0]; // Sin nombre de deudor, usar el primero
+      }
 
       if (exactMatch) {
         matchedPaymentIds.add(exactMatch.id);
         autoMatched++;
+        const confidence = exactMatches.length === 1 ? 'high' : (txDebtorName ? 'high' : 'medium');
         matches.push({
           bankTxId: tx.id,
           bankTxDate: tx.date,
           bankTxAmount: amount,
-          bankTxConcept: tx.description || tx.remittanceInfo || '',
+          bankTxConcept: tx.description || (tx as any).remittanceInfo || '',
           paymentId: exactMatch.id,
           tenantName: exactMatch.contract?.tenant?.nombreCompleto || null,
           buildingName: exactMatch.contract?.unit?.building?.nombre || null,
           unitNumber: exactMatch.contract?.unit?.numero || null,
-          confidence: 'high',
+          confidence,
           matchType: 'exact_amount',
         });
       } else {

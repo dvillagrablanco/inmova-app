@@ -114,6 +114,13 @@ interface BankTransaction {
   companyId: string;
   companyName?: string;
   bankName?: string;
+  matchSuggestion?: {
+    tenantId: string;
+    tenantName: string;
+    contractId?: string;
+    matchType: string;
+    confidence: number;
+  };
 }
 
 interface CompanyOption {
@@ -751,7 +758,8 @@ export default function ConciliacionBancariaPage() {
                         {selectedCompany === 'all' && companies.length > 1 && (
                           <TableHead>Sociedad</TableHead>
                         )}
-                        <TableHead className="min-w-[280px]">Descripción</TableHead>
+                        <TableHead className="min-w-[220px]">Descripción</TableHead>
+                        <TableHead className="min-w-[150px]">Ordenante</TableHead>
                         <TableHead>Categoría</TableHead>
                         <TableHead className="text-right">Importe</TableHead>
                         <TableHead>Estado</TableHead>
@@ -801,6 +809,30 @@ export default function ConciliacionBancariaPage() {
                                 <p className="text-xs text-muted-foreground/70 line-clamp-1">
                                   {tx.reference}
                                 </p>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="max-w-[180px]">
+                              {tx.type === 'income' && tx.debtorName && (
+                                <p className="text-sm font-medium truncate" title={tx.debtorName}>
+                                  {tx.debtorName}
+                                </p>
+                              )}
+                              {tx.type === 'expense' && tx.creditorName && (
+                                <p className="text-sm font-medium truncate" title={tx.creditorName}>
+                                  {tx.creditorName}
+                                </p>
+                              )}
+                              {tx.matchSuggestion && (
+                                <div className="flex items-center gap-1 mt-0.5">
+                                  <Badge variant="outline" className="text-xs text-green-600 border-green-300 truncate max-w-[170px]">
+                                    {tx.matchSuggestion.tenantName}
+                                  </Badge>
+                                </div>
+                              )}
+                              {!tx.debtorName && !tx.creditorName && !tx.matchSuggestion && (
+                                <span className="text-xs text-muted-foreground">—</span>
                               )}
                             </div>
                           </TableCell>
