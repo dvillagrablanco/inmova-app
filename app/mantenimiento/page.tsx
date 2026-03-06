@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { AiInsightPanel } from '@/components/ai/AiInsightPanel';
 import { SmartBreadcrumbs } from '@/components/navigation/smart-breadcrumbs';
 import { ContextualQuickActions } from '@/components/navigation/contextual-quick-actions';
 
@@ -465,6 +466,31 @@ function MantenimientoPage() {
                 upcomingMaintenanceTasks={statsSchedules.proximos30}
               />
             </div>
+
+            {/* Panel IA: Mantenimiento Predictivo */}
+            <AiInsightPanel
+              apiUrl="/api/ai/predictive-maintenance"
+              mode="insights"
+              title="Mantenimiento Predictivo IA"
+              icon={<Wrench className="h-4 w-4 text-purple-600" />}
+              transformResponse={(data) => {
+                const insights: any[] = [];
+                for (const b of (data.buildings || [])) {
+                  for (const pattern of (b.patterns || [])) {
+                    insights.push({
+                      id: `${b.buildingId}-${pattern.category}`,
+                      nivel: pattern.count >= 3 ? 'rojo' : pattern.count >= 2 ? 'amarillo' : 'info',
+                      titulo: `${b.buildingName}: ${pattern.category}`,
+                      detalle: `${pattern.count} incidencias en 6 meses. Próxima estimada: ${pattern.nextEstimate || 'pendiente'}`,
+                    });
+                  }
+                }
+                if (insights.length === 0) {
+                  insights.push({ id: 'ok', nivel: 'verde', titulo: 'Sin alertas', detalle: 'No se detectan patrones de averías recurrentes.' });
+                }
+                return insights;
+              }}
+            />
 
             {/* Tabs Navigation */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">

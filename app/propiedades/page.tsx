@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { AiInsightPanel } from '@/components/ai/AiInsightPanel';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import {
   Home,
@@ -331,6 +332,38 @@ export default function PropiedadesPage() {
           {/* Quick Actions */}
           <ContextualQuickActions />
         </div>
+
+        {/* Panel IA: Optimización de Rentas */}
+        <AiInsightPanel
+          apiUrl="/api/ai/rent-optimization"
+          mode="insights"
+          title="Optimización de Rentas IA"
+          transformResponse={(data) => {
+            const recs = data.recommendations || data.buildings || data.results || [];
+            if (Array.isArray(recs) && recs.length > 0 && recs[0].units) {
+              // Shape: buildings with units
+              const insights: any[] = [];
+              for (const b of recs) {
+                for (const u of (b.units || []).filter((u: any) => u.gap > 5)) {
+                  insights.push({
+                    id: `${b.buildingId}-${u.unitId}`,
+                    nivel: u.gap >= 20 ? 'rojo' : u.gap >= 10 ? 'amarillo' : 'verde',
+                    titulo: `${b.buildingName} ${u.unitNumber}: +${u.gap.toFixed(0)}% potencial`,
+                    detalle: `Renta actual: ${u.currentRent}€ → Mercado: ${u.marketRent}€/mes (${u.rentPerM2?.toFixed(1)}€/m²)`,
+                    accion: `Incrementar a ${u.suggestedRent || u.marketRent}€ en próxima renovación`,
+                  });
+                }
+              }
+              return insights.length > 0 ? insights : [{ id: 'ok', nivel: 'verde', titulo: 'Rentas en línea', detalle: 'Todas las rentas están alineadas con el mercado.' }];
+            }
+            return recs.slice(0, 10).map((r: any, i: number) => ({
+              id: `rec-${i}`,
+              nivel: (r.gap || r.potencial || 0) >= 15 ? 'amarillo' : 'verde',
+              titulo: r.title || r.unit || `Unidad ${i + 1}`,
+              detalle: r.detail || r.recommendation || JSON.stringify(r),
+            }));
+          }}
+        />
 
         {/* Estadísticas */}
         <div className="grid gap-4 md:grid-cols-4">

@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { ExportCSVButton } from '@/components/ui/export-csv-button';
 import { Home, Loader2, Send, Eye, AlertTriangle } from 'lucide-react';
+import { AiInsightPanel } from '@/components/ai/AiInsightPanel';
 import { toast } from 'sonner';
 import { differenceInDays } from 'date-fns';
 
@@ -192,6 +193,23 @@ export default function MorosidadPage() {
             ]}
           />
         </div>
+
+        {/* Panel IA: Riesgo de Morosidad */}
+        <AiInsightPanel
+          apiUrl="/api/ai/delinquency-risk"
+          mode="insights"
+          title="Predicción de Morosidad IA"
+          icon={<AlertTriangle className="h-4 w-4 text-red-500" />}
+          transformResponse={(data) => {
+            const tenants = data.tenants || data.results || [];
+            return tenants.slice(0, 10).map((t: any, i: number) => ({
+              id: `risk-${i}`,
+              nivel: (t.riskScore || t.score || 0) >= 70 ? 'rojo' : (t.riskScore || t.score || 0) >= 40 ? 'amarillo' : 'verde',
+              titulo: `${t.name || t.nombreCompleto || 'Inquilino'} — Riesgo ${t.riskScore || t.score || 0}/100`,
+              detalle: t.reason || t.factors?.join(', ') || `${t.latePayments || 0} pagos atrasados, ratio deuda ${t.debtRatio || 0}%`,
+            }));
+          }}
+        />
 
         {/* KPIs */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

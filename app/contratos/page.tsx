@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { AiInsightPanel } from '@/components/ai/AiInsightPanel';
 
 import {
   FileText,
@@ -429,6 +430,14 @@ function ContratosPageContent() {
         />
       )}
         </div>
+
+        {/* Panel IA: Asistente de Contratos */}
+        <AiInsightPanel
+          apiUrl="/api/ai/contract-risk-detector"
+          mode="chat"
+          title="Asistente IA de Contratos"
+          chatContext="Módulo de gestión de contratos de arrendamiento. El usuario puede preguntar sobre cláusulas, riesgos legales, vencimientos, renovaciones o cualquier aspecto contractual."
+        />
 
         {/* Error Alert */}
         {error && (
