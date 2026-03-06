@@ -14,7 +14,6 @@ import * as Sentry from '@sentry/nextjs';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
-export const runtime = 'nodejs';
 
 // Lazy Prisma (auditoria V2)
 async function getPrisma() {
