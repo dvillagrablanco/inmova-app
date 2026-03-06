@@ -26,10 +26,14 @@ export async function detectOverduePayments(companyId?: string): Promise<Payment
 
   const paymentWhere: any = {
     estado: 'atrasado',
+    contract: {
+      metodoPago: { notIn: ['domiciliacion', 'domiciliación'] },
+    },
   };
 
   if (companyId) {
     paymentWhere.contract = {
+      ...paymentWhere.contract,
       tenant: {
         companyId,
       },
@@ -44,17 +48,24 @@ export async function detectOverduePayments(companyId?: string): Promise<Payment
           tenant: true,
           unit: {
             include: {
-              building: true,
+              building: {
+                include: {
+                  company: { select: { id: true, nombre: true, email: true, telefono: true } },
+                },
+              },
             },
           },
         },
       },
+      sepaPayments: { take: 1 },
     },
   });
 
+  const filteredPayments = payments.filter(p => !(p as any).sepaPayments?.length);
+
   const reminders: PaymentReminder[] = [];
 
-  for (const payment of payments) {
+  for (const payment of filteredPayments) {
     const daysOverdue = differenceInDays(now, new Date(payment.fechaVencimiento));
 
     let stage: PaymentReminder['stage'];
@@ -136,15 +147,26 @@ async function processPaymentReminder(reminder: PaymentReminder): Promise<void> 
           tenant: true,
           unit: {
             include: {
-              building: true,
+              building: {
+                include: {
+                  company: { select: { id: true, nombre: true, email: true, telefono: true } },
+                },
+              },
             },
           },
         },
       },
+      sepaPayments: { take: 1 },
     },
   });
 
   if (!payment || !payment.contract?.unit?.building) return;
+
+  if ((payment as any).sepaPayments?.length > 0 ||
+      payment.contract.metodoPago === 'domiciliacion' ||
+      payment.contract.metodoPago === 'domiciliación') {
+    return;
+  }
 
   const companyId = payment.contract.unit.building.companyId;
   if (!companyId) return;
@@ -333,6 +355,7 @@ async function sendPaymentReminderEmail(
 
   const tenant = payment.contract.tenant;
   const companyId = payment.contract.unit.building.companyId;
+  const companyName = payment.contract?.unit?.building?.company?.nombre || 'Su administrador';
 
   const subject = getReminderTitle(reminder, payment);
 
@@ -342,7 +365,7 @@ async function sendPaymentReminderEmail(
     try {
       await sendEmail({
         to: tenant.email,
-        subject: `Recordatorio de Pago - ${payment.periodo}`,
+        subject: `${companyName} - Recordatorio de Pago - ${payment.periodo}`,
         html: tenantHtml,
       });
       logger.info(`Email de recordatorio enviado al inquilino ${tenant.email}`);
@@ -384,6 +407,9 @@ function generateTenantEmailHTML(payment: any, reminder: PaymentReminder): strin
   const dueDate = format(new Date(payment.fechaVencimiento), 'dd/MM/yyyy', { locale: es });
   const building = payment.contract?.unit?.building?.nombre;
   const unit = payment.contract?.unit?.numero;
+  const companyName = payment.contract?.unit?.building?.company?.nombre || 'Su administrador';
+  const companyEmail = payment.contract?.unit?.building?.company?.email || payment.contract?.unit?.building?.email;
+  const companyPhone = payment.contract?.unit?.building?.company?.telefono || payment.contract?.unit?.building?.telefono;
 
   let tone = '';
   let urgencyColor = '';
@@ -423,7 +449,7 @@ function generateTenantEmailHTML(payment: any, reminder: PaymentReminder): strin
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <meta http-equiv="X-UA-Compatible" content="IE=edge">
-      <title>${tone} - Pago Pendiente | INMOVA</title>
+      <title>${tone} - Pago Pendiente | ${companyName}</title>
       <style>
         /* Reset y estilos base */
         body {
@@ -642,8 +668,8 @@ function generateTenantEmailHTML(payment: any, reminder: PaymentReminder): strin
               <!-- Header -->
               <tr>
                 <td class="header">
-                  <h2 class="header-logo">🏢 INMOVA</h2>
-                  <p class="header-subtitle">Gestión Inmobiliaria Inteligente</p>
+                  <h2 class="header-logo">🏢 ${companyName}</h2>
+                  <p class="header-subtitle">Gestión de Alquileres</p>
                 </td>
               </tr>
               
@@ -706,14 +732,14 @@ function generateTenantEmailHTML(payment: any, reminder: PaymentReminder): strin
                   
                   <div class="payment-options">
                     <h3 style="margin-top: 0; color: #374151;">💳 Opciones de Pago</h3>
-                    <p>Por favor, realice el pago a través de su método habitual o contacte con nosotros para coordinar alternativas de pago:</p>
-                    <p style="margin-top: 16px;"><strong>📞 Teléfono:</strong> ${payment.contract?.unit?.building?.telefono || 'Consulte su contrato'}</p>
-                    <p><strong>📧 Email:</strong> ${payment.contract?.unit?.building?.email || payment.contract?.unit?.building?.company?.emailContacto || 'administracion@inmova.app'}</p>
+                    <p>Por favor, realice el pago a través de su método habitual o contacte con <strong>${companyName}</strong> para coordinar alternativas de pago:</p>
+                    ${companyPhone ? `<p style="margin-top: 16px;"><strong>📞 Teléfono:</strong> ${companyPhone}</p>` : ''}
+                    ${companyEmail ? `<p><strong>📧 Email:</strong> ${companyEmail}</p>` : ''}
                   </div>
                   
                   <div style="text-align: center;">
                     <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://inmova.app'}/pagos" class="button">
-                      💳 Ver Mis Pagos en INMOVA
+                      💳 Ver Mis Pagos
                     </a>
                   </div>
                   
@@ -726,17 +752,16 @@ function generateTenantEmailHTML(payment: any, reminder: PaymentReminder): strin
               <!-- Footer -->
               <tr>
                 <td class="footer">
-                  <div class="footer-logo">INMOVA</div>
+                  <div class="footer-logo">${companyName}</div>
                   <p class="footer-text">
-                    Gestión Inmobiliaria Inteligente<br>
-                    Automatizamos, optimizamos, innovamos
+                    Gestión de Alquileres
                   </p>
                   <p class="footer-text" style="margin-top: 16px;">
-                    Este es un mensaje automático del sistema INMOVA.<br>
-                    © ${new Date().getFullYear()} INMOVA. Todos los derechos reservados.
+                    Este es un mensaje automático enviado por ${companyName}.<br>
+                    © ${new Date().getFullYear()} ${companyName}. Todos los derechos reservados.
                   </p>
                   <p class="footer-text" style="margin-top: 12px;">
-                    <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://inmova.app'}" class="footer-link">Acceder a INMOVA</a>
+                    <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://inmova.app'}" class="footer-link">Acceder al portal</a>
                   </p>
                 </td>
               </tr>
@@ -800,7 +825,7 @@ function generateAdminEmailHTML(payment: any, reminder: PaymentReminder): string
           </div>
           
           <div style="text-align: center;">
-            <a href="${process.env.NEXTAUTH_URL}/pagos" class="button">Ver Pagos en INMOVA</a>
+            <a href="${process.env.NEXTAUTH_URL}/pagos" class="button">Ver Pagos</a>
           </div>
         </div>
       </div>

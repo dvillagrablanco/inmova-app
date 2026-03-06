@@ -176,11 +176,11 @@ describe('💰 Payment Reminder Service', () => {
       expect(prisma.payment.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
-            contract: {
+            contract: expect.objectContaining({
               tenant: {
                 companyId: 'company-123',
               },
-            },
+            }),
           }),
         })
       );

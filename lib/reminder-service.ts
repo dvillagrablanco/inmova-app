@@ -61,6 +61,7 @@ export const sendPaymentReminders = async (companyId: string) => {
           lte: inMaxDays,
         },
         contract: {
+          metodoPago: { notIn: ['domiciliacion', 'domiciliación'] },
           unit: {
             building: {
               companyId,
@@ -74,18 +75,25 @@ export const sendPaymentReminders = async (companyId: string) => {
             tenant: true,
             unit: {
               include: {
-                building: true,
+                building: {
+                  include: {
+                    company: { select: { nombre: true, email: true, telefono: true } },
+                  },
+                },
               },
             },
           },
         },
+        sepaPayments: { take: 1 },
       },
     });
+
+    const nonSepaPayments = pendingPayments.filter(p => (p as any).sepaPayments?.length === 0);
 
     let emailsSent = 0;
     let errors = 0;
 
-    for (const payment of pendingPayments) {
+    for (const payment of nonSepaPayments) {
       const daysUntilDue = differenceInDays(payment.fechaVencimiento, today);
 
       if (!preventiveDays.includes(daysUntilDue) && daysUntilDue !== 0) {

@@ -199,14 +199,24 @@ export class PaymentReminderService {
 
         const upcomingPayments = await prisma.payment.findMany({
           where: {
-            contract: { unit: { building: { companyId } } },
+            contract: {
+              metodoPago: { notIn: ['domiciliacion', 'domiciliación'] },
+              unit: { building: { companyId } },
+            },
             estado: 'pendiente',
             fechaVencimiento: { gte: startOfDay, lte: endOfDay },
           },
-          include: { contract: { include: { tenant: true } } },
+          include: {
+            contract: { include: { tenant: true } },
+            sepaPayments: { take: 1 },
+          },
         });
 
-        for (const payment of upcomingPayments) {
+        const filteredPayments = upcomingPayments.filter(
+          (p: any) => !p.sepaPayments?.length
+        );
+
+        for (const payment of filteredPayments) {
           try {
             await prisma.notification.create({
               data: {
