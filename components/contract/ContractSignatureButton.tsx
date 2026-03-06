@@ -73,7 +73,7 @@ export function ContractSignatureButton({
       const response = await fetch(`/api/contracts/${contractId}/sign`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ signatories, expirationDays: 30 }),
+        body: JSON.stringify({ signatories, expirationDays: 30, provider: 'docusign' }),
       });
 
       const data = await response.json();
@@ -166,8 +166,10 @@ export function ContractSignatureButton({
                   <SelectContent>
                     <SelectItem value="LANDLORD">Propietario</SelectItem>
                     <SelectItem value="TENANT">Inquilino</SelectItem>
+                    <SelectItem value="OPERATOR">Operador</SelectItem>
                     <SelectItem value="GUARANTOR">Avalista</SelectItem>
                     <SelectItem value="WITNESS">Testigo</SelectItem>
+                    <SelectItem value="OTHER">Otro</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

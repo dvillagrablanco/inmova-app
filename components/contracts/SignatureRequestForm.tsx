@@ -21,25 +21,30 @@ import { PenTool, Plus, Trash2, Loader2, CheckCircle2, AlertTriangle } from 'luc
 interface Signatory {
   email: string;
   name: string;
-  role: 'LANDLORD' | 'TENANT' | 'GUARANTOR' | 'WITNESS';
+  role: 'LANDLORD' | 'TENANT' | 'GUARANTOR' | 'WITNESS' | 'OPERATOR' | 'OTHER';
 }
 
 interface SignatureRequestFormProps {
   contractId: string;
   onSuccess?: (data: any) => void;
   onError?: (error: string) => void;
+  defaultProvider?: 'docusign' | 'signaturit';
+  operatorName?: string;
 }
 
 export function SignatureRequestForm({
   contractId,
   onSuccess,
   onError,
+  defaultProvider,
+  operatorName,
 }: SignatureRequestFormProps) {
   const [signatories, setSignatories] = useState<Signatory[]>([
     { email: '', name: '', role: 'LANDLORD' },
-    { email: '', name: '', role: 'TENANT' },
+    { email: '', name: '', role: operatorName ? 'OPERATOR' : 'TENANT' },
   ]);
   const [expirationDays, setExpirationDays] = useState(30);
+  const [provider, setProvider] = useState<'docusign' | 'signaturit' | ''>(defaultProvider || '');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -80,6 +85,8 @@ export function SignatureRequestForm({
         body: JSON.stringify({
           signatories,
           expirationDays,
+          ...(provider && { provider }),
+          ...(operatorName && { operatorName }),
         }),
       });
 
@@ -227,8 +234,10 @@ export function SignatureRequestForm({
                   <SelectContent>
                     <SelectItem value="LANDLORD">Propietario</SelectItem>
                     <SelectItem value="TENANT">Inquilino</SelectItem>
+                    <SelectItem value="OPERATOR">Operador</SelectItem>
                     <SelectItem value="GUARANTOR">Avalista</SelectItem>
                     <SelectItem value="WITNESS">Testigo</SelectItem>
+                    <SelectItem value="OTHER">Otro</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -237,20 +246,41 @@ export function SignatureRequestForm({
         ))}
       </div>
 
-      {/* Expiración */}
-      <div>
-        <Label htmlFor="expiration">Días hasta expiración</Label>
-        <Input
-          id="expiration"
-          type="number"
-          min={1}
-          max={90}
-          value={expirationDays}
-          onChange={(e) => setExpirationDays(parseInt(e.target.value))}
-        />
-        <p className="text-xs text-gray-500 mt-1">
-          Los firmantes tendrán {expirationDays} días para firmar el documento
-        </p>
+      {/* Provider y Expiración */}
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="provider">Proveedor de Firma</Label>
+          <Select
+            value={provider || ''}
+            onValueChange={(v) => setProvider(v as any)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Automático (DocuSign)" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Automático</SelectItem>
+              <SelectItem value="docusign">DocuSign</SelectItem>
+              <SelectItem value="signaturit">Signaturit</SelectItem>
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-gray-500 mt-1">
+            DocuSign es el proveedor por defecto del Grupo Vidaro
+          </p>
+        </div>
+        <div>
+          <Label htmlFor="expiration">Días hasta expiración</Label>
+          <Input
+            id="expiration"
+            type="number"
+            min={1}
+            max={90}
+            value={expirationDays}
+            onChange={(e) => setExpirationDays(parseInt(e.target.value))}
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            Los firmantes tendrán {expirationDays} días para firmar
+          </p>
+        </div>
       </div>
 
       {/* Error */}
