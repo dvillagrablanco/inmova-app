@@ -128,9 +128,19 @@ export async function GET(request: NextRequest) {
 
       valorFinanciero += valorCuenta;
       pnlFinanciero += pnlCuenta;
-      tesoreriaTotal += acc.saldoActual || 0;
-      tesoreriaPorEntidad[acc.entidad] =
-        (tesoreriaPorEntidad[acc.entidad] || 0) + (acc.saldoActual || 0);
+
+      // Anti-duplicidad: Si saldoActual ≈ sum(posiciones) (±10%), el saldo ES el NAV
+      // de las posiciones, no liquidez adicional. No contar como tesorería.
+      const saldo = acc.saldoActual || 0;
+      const isNavDuplicate = valorCuenta > 1000 && saldo > 1000 &&
+        Math.abs(saldo - valorCuenta) / valorCuenta < 0.10;
+
+      const tesoreriaContable = isNavDuplicate ? 0 : saldo;
+      tesoreriaTotal += tesoreriaContable;
+      if (tesoreriaContable > 0) {
+        tesoreriaPorEntidad[acc.entidad] =
+          (tesoreriaPorEntidad[acc.entidad] || 0) + tesoreriaContable;
+      }
 
       return {
         id: acc.id,
@@ -139,7 +149,9 @@ export async function GET(request: NextRequest) {
         divisa: acc.divisa,
         valor: round2(valorCuenta),
         pnl: round2(pnlCuenta),
-        saldo: acc.saldoActual || 0,
+        saldo: round2(saldo),
+        tesoreriaContable: round2(tesoreriaContable),
+        isNavDuplicate,
         posiciones: acc.positions.length,
       };
     });
