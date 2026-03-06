@@ -880,7 +880,8 @@ model Unit {
 
   // Nuevas funcionalidades IA (Valoración, Matching)
   propertyValuations    PropertyValuation[]   @relation("UnitPropertyValuations")
-  tenantPropertyMatches TenantPropertyMatch[] @relation("UnitTenantMatches")
+  tenantPropertyMatches     TenantPropertyMatch[]      @relation("UnitTenantMatches")
+  operatorSignatureRequests OperatorSignatureRequest[] @relation("UnitOperatorSignatures")
 
   @@unique([buildingId, numero])
   // Índices optimizados para consultas frecuentes
@@ -1479,7 +1480,8 @@ model Contract {
   depositManagement DepositManagement?
 
   // Nuevas funcionalidades IA (Firma Digital)
-  contractSignatures ContractSignature[] @relation("ContractSignatures")
+  contractSignatures        ContractSignature[]        @relation("ContractSignatures")
+  operatorSignatureRequests OperatorSignatureRequest[] @relation("ContractOperatorSignatures")
 
   // Sociedades Inversoras
   fianzaDeposits FianzaDeposit[]
@@ -2117,6 +2119,7 @@ model Company {
   // Nuevas funcionalidades IA (Valoración, Firma Digital, Matching)
   propertyValuations        PropertyValuation[]        @relation("CompanyPropertyValuations")
   contractSignatures        ContractSignature[]        @relation("CompanyContractSignatures")
+  operatorSignatureRequests OperatorSignatureRequest[] @relation("CompanyOperatorSignatures")
   tenantPropertyMatches     TenantPropertyMatch[]      @relation("CompanyTenantMatches")
   providerQuotes            ProviderQuote[]
   providerReviews           ProviderReview[]
@@ -15331,6 +15334,95 @@ model SignatureWebhook {
   @@index([event])
   @@index([processed])
   @@map("signature_webhooks")
+}
+
+// ============================================================================
+// SOLICITUDES DE FIRMA DE OPERADORES (Álamo, etc.)
+// ============================================================================
+
+enum OperatorSignatureStatus {
+  pending_review  // Recibido, pendiente de revisión
+  approved        // Aprobado, listo para enviar a firma
+  sent_to_sign    // Enviado a DocuSign/Signaturit
+  signed          // Firmado por todas las partes
+  rejected        // Rechazado por el gestor
+  expired         // Expirado sin firmar
+  cancelled       // Cancelado
+}
+
+model OperatorSignatureRequest {
+  id        String  @id @default(cuid())
+  companyId String
+  company   Company @relation("CompanyOperatorSignatures", fields: [companyId], references: [id], onDelete: Cascade)
+
+  // Operador de media estancia
+  operatorName  String  // "Álamo", "Spotahome", "HousingAnywhere", etc.
+  operatorEmail String?
+  operatorPhone String?
+  operatorRef   String? // Referencia interna del operador
+
+  // Documento a firmar
+  documentUrl  String  @db.Text // URL del PDF en S3
+  documentName String
+  documentHash String? // SHA-256
+
+  // Asociación con unidad/contrato
+  unitId     String?
+  unit       Unit?     @relation("UnitOperatorSignatures", fields: [unitId], references: [id], onDelete: SetNull)
+  contractId String?
+  contract   Contract? @relation("ContractOperatorSignatures", fields: [contractId], references: [id], onDelete: SetNull)
+  buildingId String?
+
+  // Datos del inquilino (proporcionados por el operador)
+  tenantName  String?
+  tenantEmail String?
+  tenantPhone String?
+  tenantDni   String?
+
+  // Firmantes propuestos
+  signatories Json // [{ name, email, role, phone? }]
+
+  // Detalles del contrato
+  contractType    String? // "media_estancia", "temporada", "corporativo"
+  startDate       DateTime?
+  endDate         DateTime?
+  monthlyRent     Float?
+  currency        String   @default("EUR")
+
+  // Workflow de aprobación
+  status       OperatorSignatureStatus @default(pending_review)
+  reviewedBy   String?
+  reviewedAt   DateTime?
+  reviewNotes  String?                 @db.Text
+  rejectedReason String?               @db.Text
+
+  // Enlace con firma digital (cuando se envía a DocuSign/Signaturit)
+  signatureId         String? // ID del ContractSignature
+  signatureProvider   String? // "DOCUSIGN" | "SIGNATURIT"
+  signatureExternalId String? // Envelope ID / Signaturit ID
+  signatureUrl        String? @db.Text
+
+  // Cómo se recibió
+  receivedVia String @default("manual") // "manual", "email", "api", "webhook"
+
+  // Firma en lote
+  batchId String? // Para agrupar múltiples firmas
+
+  // Timestamps
+  sentToSignAt  DateTime?
+  signedAt      DateTime?
+  expiresAt     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([companyId])
+  @@index([operatorName])
+  @@index([status])
+  @@index([unitId])
+  @@index([contractId])
+  @@index([batchId])
+  @@index([createdAt])
+  @@map("operator_signature_requests")
 }
 
 // ============================================================================
