@@ -26,9 +26,9 @@ DocuSign requiere un proceso de autorización JWT (JSON Web Token) **una sola ve
 
 ✅ **Credenciales configuradas**:
 ```env
-DOCUSIGN_INTEGRATION_KEY=0daca02a-dbe5-45cd-9f78-35108236c0cd
-DOCUSIGN_USER_ID=6db6e1e7-24be-4445-a75c-dce2aa0f3e59
-DOCUSIGN_ACCOUNT_ID=dc80ca20-9dcd-4d88-878a-3cb0e67e3569
+DOCUSIGN_INTEGRATION_KEY=5cb4a15f-658d-4fa0-ae53-6aabb10749d7
+DOCUSIGN_USER_ID=5f587d75-ad98-4daf-812b-3ff11be90d9d
+DOCUSIGN_ACCOUNT_ID=e59b0a7b-966d-42e0-bced-f9169c0c3464
 DOCUSIGN_BASE_PATH=https://demo.docusign.net/restapi
 DOCUSIGN_PRIVATE_KEY=[configurada]
 ```
@@ -79,9 +79,9 @@ grep DOCUSIGN .env.production
 Debe mostrar:
 
 ```env
-DOCUSIGN_INTEGRATION_KEY=0daca02a-dbe5-45cd-9f78-35108236c0cd
-DOCUSIGN_USER_ID=6db6e1e7-24be-4445-a75c-dce2aa0f3e59
-DOCUSIGN_ACCOUNT_ID=dc80ca20-9dcd-4d88-878a-3cb0e67e3569
+DOCUSIGN_INTEGRATION_KEY=5cb4a15f-658d-4fa0-ae53-6aabb10749d7
+DOCUSIGN_USER_ID=5f587d75-ad98-4daf-812b-3ff11be90d9d
+DOCUSIGN_ACCOUNT_ID=e59b0a7b-966d-42e0-bced-f9169c0c3464
 DOCUSIGN_BASE_PATH=https://demo.docusign.net/restapi
 DOCUSIGN_PRIVATE_KEY=-----BEGIN RSA PRIVATE KEY-----...
 ```
@@ -108,7 +108,7 @@ https://account-d.docusign.com/oauth/auth?response_type=code&scope=signature%20i
 **Sustituir valores**:
 
 ```
-https://account-d.docusign.com/oauth/auth?response_type=code&scope=signature%20impersonation&client_id=0daca02a-dbe5-45cd-9f78-35108236c0cd&redirect_uri=https://inmovaapp.com/api/docusign/callback
+https://account-d.docusign.com/oauth/auth?response_type=code&scope=signature%20impersonation&client_id=5cb4a15f-658d-4fa0-ae53-6aabb10749d7&redirect_uri=https://inmovaapp.com/api/docusign/callback
 ```
 
 **2. Abrir URL en navegador**
@@ -295,7 +295,7 @@ pm2 logs inmova-app | grep -i docusign
 grep DOCUSIGN_INTEGRATION_KEY /opt/inmova-app/.env.production
 ```
 
-Debe ser: `0daca02a-dbe5-45cd-9f78-35108236c0cd`
+Debe ser: `5cb4a15f-658d-4fa0-ae53-6aabb10749d7`
 
 ---
 

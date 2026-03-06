@@ -26,7 +26,7 @@ export default function DocuSignConfigPage() {
 
   const docusignStatus = searchParams?.get('docusign');
 
-  const INTEGRATION_KEY = '0daca02a-dbe5-45cd-9f78-35108236c0cd';
+  const INTEGRATION_KEY = '5cb4a15f-658d-4fa0-ae53-6aabb10749d7';
   const CONSENT_URL = `https://account-d.docusign.com/oauth/auth?response_type=code&scope=signature%20impersonation&client_id=${INTEGRATION_KEY}&redirect_uri=${encodeURIComponent(typeof window !== 'undefined' ? window.location.origin + '/api/integrations/docusign/callback' : 'https://inmovaapp.com/api/integrations/docusign/callback')}`;
 
   const testConnection = async () => {
@@ -124,15 +124,15 @@ export default function DocuSignConfigPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="p-3 bg-muted/50 rounded-lg">
                 <p className="text-xs text-muted-foreground">Integration Key</p>
-                <p className="text-sm font-mono">0daca02a-...c0cd</p>
+                <p className="text-sm font-mono">5cb4a15f-...9d7</p>
               </div>
               <div className="p-3 bg-muted/50 rounded-lg">
                 <p className="text-xs text-muted-foreground">Account ID</p>
-                <p className="text-sm font-mono">dc80ca20-...3569</p>
+                <p className="text-sm font-mono">e59b0a7b-...3464</p>
               </div>
               <div className="p-3 bg-muted/50 rounded-lg">
                 <p className="text-xs text-muted-foreground">User ID</p>
-                <p className="text-sm font-mono">6db6e1e7-...3e59</p>
+                <p className="text-sm font-mono">5f587d75-...d9d</p>
               </div>
               <div className="p-3 bg-muted/50 rounded-lg">
                 <p className="text-xs text-muted-foreground">Entorno</p>
