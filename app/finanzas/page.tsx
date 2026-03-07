@@ -214,6 +214,7 @@ export default function FinanzasPage() {
   });
   const [latestPeriod, setLatestPeriod] = useState<LatestPeriodSummary | null>(null);
   const [meta, setMeta] = useState<any>(null);
+  const [kpis, setKpis] = useState<{ dso: number; tasaCobro: number; tasaConciliacion: number }>({ dso: 0, tasaCobro: 0, tasaConciliacion: 0 });
   const [selectedPeriod, setSelectedPeriod] = useState<string>('mes');
 
   const fetchFinancialData = async () => {
@@ -236,6 +237,7 @@ export default function FinanzasPage() {
         setModuleStats(data.moduleStats || moduleStats);
         setLatestPeriod(data.latestPeriod || null);
         setMeta(data.meta || null);
+        if (data.kpisFinancieros) setKpis(data.kpisFinancieros);
       }
     } catch (error) {
       console.error('Error fetching financial data:', error);
@@ -427,6 +429,36 @@ export default function FinanzasPage() {
                 </div>
                 <p className="text-xl font-bold">
                   {financialSummary.reconciliationRate}%
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* KPIs Financieros avanzados */}
+        {!loading && (kpis.dso > 0 || kpis.tasaCobro > 0) && (
+          <div className="grid grid-cols-3 gap-4">
+            <Card className="border-blue-200">
+              <CardContent className="pt-4 text-center">
+                <div className="text-xs text-gray-500 mb-1">DSO (Días para cobrar)</div>
+                <p className={`text-2xl font-bold ${kpis.dso <= 15 ? 'text-green-600' : kpis.dso <= 30 ? 'text-amber-600' : 'text-red-600'}`}>
+                  {kpis.dso} días
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="border-green-200">
+              <CardContent className="pt-4 text-center">
+                <div className="text-xs text-gray-500 mb-1">Tasa de Cobro</div>
+                <p className={`text-2xl font-bold ${kpis.tasaCobro >= 80 ? 'text-green-600' : kpis.tasaCobro >= 60 ? 'text-amber-600' : 'text-red-600'}`}>
+                  {kpis.tasaCobro}%
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="border-purple-200">
+              <CardContent className="pt-4 text-center">
+                <div className="text-xs text-gray-500 mb-1">Tasa Conciliación</div>
+                <p className={`text-2xl font-bold ${kpis.tasaConciliacion >= 80 ? 'text-green-600' : kpis.tasaConciliacion >= 50 ? 'text-amber-600' : 'text-red-600'}`}>
+                  {kpis.tasaConciliacion}%
                 </p>
               </CardContent>
             </Card>
