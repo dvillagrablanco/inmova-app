@@ -20,13 +20,22 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
+    // Resolve scope: include subsidiary companies
+    const { resolveCompanyScope } = await import('@/lib/company-scope');
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: (session.user as any).role as any,
+      primaryCompanyId: session.user.companyId,
+      request,
+    });
+
     const { searchParams } = new URL(request.url);
     const unitId = searchParams.get('unitId');
     const vigente = searchParams.get('vigente');
 
     const certificados = await prisma.energyCertificate.findMany({
       where: {
-        companyId: session.user.companyId,
+        companyId: { in: scope.scopeCompanyIds },
         ...(unitId && { unitId }),
         ...(vigente !== null && { vigente: vigente === 'true' }),
       },
