@@ -103,6 +103,7 @@ export async function GET(request: NextRequest) {
       include: {
         positions: {
           select: {
+            nombre: true,
             valorActual: true,
             costeTotal: true,
             pnlNoRealizado: true,
@@ -113,20 +114,52 @@ export async function GET(request: NextRequest) {
       },
     });
 
+    // --- 3 (pre-load). PRIVATE EQUITY — load early for cross-check ---
+    const allParticipations = await prisma.participation.findMany({
+      where: { companyId: { in: scopeIds }, activa: true },
+    });
+
+    // Build PE name set for deduplication (normalize names for matching)
+    const peNames = new Set(
+      allParticipations
+        .filter((p: any) => (p.valorEstimado || p.valorContable || p.costeAdquisicion || 0) > 0)
+        .map((p: any) => (p.targetCompanyName || '').toUpperCase().substring(0, 12))
+        .filter((n: string) => n.length > 3)
+    );
+
     let valorFinanciero = 0;
+    let valorFinancieroPEDuplicado = 0; // Positions that duplicate PE participations
     let pnlFinanciero = 0;
     let tesoreriaTotal = 0;
     const tesoreriaPorEntidad: Record<string, number> = {};
 
     const cuentas = accounts.map((acc: any) => {
-      const valorCuenta = acc.positions.reduce(
-        (sum: number, p: any) => sum + (p.valorActual || 0), 0
-      );
+      // Separate: positions that are PE (already counted in Participation) vs pure financial
+      let valorCuenta = 0;
+      let valorPEenCuenta = 0;
+
+      for (const pos of acc.positions) {
+        const posVal = pos.valorActual || 0;
+        const posName = (pos.nombre || '').toUpperCase();
+
+        // Check if this position matches a PE participation
+        const isPE = Array.from(peNames).some((peName: string) =>
+          posName.includes(peName) || peName.includes(posName.substring(0, 12))
+        );
+
+        if (isPE) {
+          valorPEenCuenta += posVal;
+        }
+        valorCuenta += posVal;
+      }
+
       const pnlCuenta = acc.positions.reduce(
         (sum: number, p: any) => sum + (p.pnlNoRealizado || 0) + (p.pnlRealizado || 0), 0
       );
 
-      valorFinanciero += valorCuenta;
+      // Only count non-PE positions as financiero
+      valorFinanciero += (valorCuenta - valorPEenCuenta);
+      valorFinancieroPEDuplicado += valorPEenCuenta;
       pnlFinanciero += pnlCuenta;
 
       // Anti-duplicidad: Si saldoActual ≈ sum(posiciones) (±10%), el saldo ES el NAV
@@ -156,10 +189,7 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    // --- 3. PRIVATE EQUITY / PARTICIPACIONES ---
-    const allParticipations = await prisma.participation.findMany({
-      where: { companyId: { in: scopeIds }, activa: true },
-    });
+    // --- 3. PRIVATE EQUITY / PARTICIPACIONES (allParticipations loaded above for cross-check) ---
 
     // En vista consolidada: excluir participaciones intragrupo (donde el CIF del target = CIF de filial)
     const participations = view === 'consolidated'
@@ -219,6 +249,7 @@ export async function GET(request: NextRequest) {
           valor: round2(valorPE),
           participaciones: participacionesData,
           participacionesIntragrupoExcluidas: view === 'consolidated' ? participacionesExcluidas : 0,
+          posicionesFinancierasExcluidas: round2(valorFinancieroPEDuplicado),
         },
         tesoreria: {
           saldo: round2(tesoreriaTotal),
