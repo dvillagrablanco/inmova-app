@@ -110,6 +110,7 @@ enum UnitType {
   oficina // Espacios de oficina
   nave_industrial // Naves y almacenes
   coworking_space // Espacios flexibles de coworking
+  terreno // Terrenos, parcelas, fincas rústicas
 }
 
 enum UnitStatus {
