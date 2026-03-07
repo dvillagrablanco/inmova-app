@@ -1707,6 +1707,103 @@ export const MODULOS_CATALOGO = [
     esCore: false,
     orden: 218
   },
+  // === Módulos añadidos (sync completo Mar 2026) ===
+  {
+    codigo: 'alertas',
+    nombre: 'Alertas',
+    descripcion: 'Sistema de alertas y notificaciones de la plataforma',
+    categoria: 'core',
+    icono: 'Bell',
+    ruta: '/alertas',
+    requiereModulos: [],
+    tiersIncluido: ['basico', 'profesional', 'empresarial'],
+    esCore: true,
+    orden: 220
+  },
+  {
+    codigo: 'ayuda',
+    nombre: 'Centro de Ayuda',
+    descripcion: 'Documentación, tutoriales y soporte',
+    categoria: 'core',
+    icono: 'HelpCircle',
+    ruta: '/ayuda',
+    requiereModulos: [],
+    tiersIncluido: ['basico', 'profesional', 'empresarial'],
+    esCore: true,
+    orden: 221
+  },
+  {
+    codigo: 'comunicaciones',
+    nombre: 'Comunicaciones',
+    descripcion: 'Gestión de comunicaciones con inquilinos y propietarios',
+    categoria: 'comunicacion',
+    icono: 'Mail',
+    ruta: '/comunicaciones',
+    requiereModulos: [],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 222
+  },
+  {
+    codigo: 'comunidad',
+    nombre: 'Comunidad',
+    descripcion: 'Red social y comunidad de usuarios',
+    categoria: 'comunidad',
+    icono: 'Users',
+    ruta: '/comunidad',
+    requiereModulos: [],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 223
+  },
+  {
+    codigo: 'morosidad',
+    nombre: 'Gestión de Morosidad',
+    descripcion: 'Control de impagos, scoring de riesgo y recobro',
+    categoria: 'financiero',
+    icono: 'AlertTriangle',
+    ruta: '/morosidad',
+    requiereModulos: ['pagos'],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 224
+  },
+  {
+    codigo: 'renovaciones_contratos',
+    nombre: 'Renovación de Contratos',
+    descripcion: 'Gestión de renovaciones, incrementos IPC y vencimientos',
+    categoria: 'gestion',
+    icono: 'RefreshCw',
+    ruta: '/renovaciones-contratos',
+    requiereModulos: ['contratos'],
+    tiersIncluido: ['basico', 'profesional', 'empresarial'],
+    esCore: false,
+    orden: 225
+  },
+  {
+    codigo: 'admin',
+    nombre: 'Panel de Administración',
+    descripcion: 'Configuración general y administración del sistema',
+    categoria: 'admin',
+    icono: 'Settings',
+    ruta: '/admin',
+    requiereModulos: [],
+    tiersIncluido: ['basico', 'profesional', 'empresarial'],
+    esCore: true,
+    orden: 226
+  },
+  {
+    codigo: 'community',
+    nombre: 'Community Feed',
+    descripcion: 'Feed social de la comunidad de gestores',
+    categoria: 'comunidad',
+    icono: 'MessageCircle',
+    ruta: '/community',
+    requiereModulos: [],
+    tiersIncluido: ['profesional', 'empresarial'],
+    esCore: false,
+    orden: 227
+  },
 ];
 
 /**
