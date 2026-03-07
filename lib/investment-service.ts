@@ -165,9 +165,15 @@ export async function getCompanyPortfolio(companyId: string, consolidateHolding 
   const totalMortgageDebt = mortgages.reduce((sum, m) => sum + m.capitalPendiente, 0);
   const totalMortgagePayments = mortgages.reduce((sum, m) => sum + m.cuotaMensual, 0);
 
-  // Inversion y valor: desde AssetAcquisition o estimacion
+  // Inversion: desde AssetAcquisition (datos de escritura)
   let totalInvestment = assets.reduce((sum, a) => sum + (a.inversionTotal || a.precioCompra), 0);
-  let totalMarketValue = assets.reduce((sum, a) => sum + (a.valorMercadoEstimado || a.precioCompra), 0);
+
+  // Valor de mercado: preferir valoraciones actualizadas de unidades sobre AssetAcquisition.
+  // AssetAcquisition.valorMercadoEstimado suele ser el precio de compra sin actualizar.
+  // Unit.valorMercado se actualiza con valoraciones periódicas y es más fiable.
+  const assetMarketValue = assets.reduce((sum, a) => sum + (a.valorMercadoEstimado || a.precioCompra), 0);
+  const unitMarketValue = units.reduce((s, u) => s + ((u as any).valorMercado || 0), 0);
+  let totalMarketValue = unitMarketValue > 0 ? Math.max(unitMarketValue, assetMarketValue) : assetMarketValue;
 
   // Renta contratada: suma de rentas de contratos activos
   const contractedRent = contracts.reduce((sum, c) => sum + (c.rentaMensual || 0), 0);
@@ -204,7 +210,7 @@ export async function getCompanyPortfolio(companyId: string, consolidateHolding 
   return {
     totalAssets: buildings.length,
     totalInvestment: Math.round(totalInvestment * 100) / 100,
-    totalMarketValue: Math.round(totalMarketValue > 0 ? totalMarketValue : totalValorMercadoUnidades),
+    totalMarketValue: Math.round(totalMarketValue),
     totalMortgageDebt: Math.round(totalMortgageDebt * 100) / 100,
     totalEquity: Math.round(totalEquity * 100) / 100,
     totalMonthlyIncome: Math.round(totalMonthlyIncome * 100) / 100,
