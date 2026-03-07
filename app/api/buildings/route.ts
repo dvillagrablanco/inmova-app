@@ -38,8 +38,6 @@ export async function GET(req: NextRequest) {
       if (cached) return NextResponse.json(cached);
     } catch {} // Redis not configured
 
-    const _h = await prisma.company.findUnique({ where: { id: user.companyId! }, select: { childCompanies: { select: { id: true } } } });
-    const allCompanyIds = _h ? [user.companyId!, ..._h.childCompanies.map((c: { id: string }) => c.id)] : [user.companyId!];
     const scope = await resolveCompanyScope({
       userId: user.id,
       role: user.role as any,
@@ -56,7 +54,9 @@ export async function GET(req: NextRequest) {
       return NextResponse.json([]);
     }
 
-    const whereClause = { companyId: { in: allCompanyIds } };
+    // Use scope: if user selected a specific company, show only that company's buildings
+    // If viewing from holding, show holding + subsidiaries
+    const whereClause = { companyId: { in: scope.scopeCompanyIds } };
 
     const { searchParams: sp2 } = new URL(req.url);
     const usePagination = sp2.has('page') || sp2.has('limit');

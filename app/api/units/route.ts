@@ -25,8 +25,6 @@ export async function GET(req: NextRequest) {
     if (!session) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
-    const _h = await prisma.company.findUnique({ where: { id: session.user.companyId! }, select: { childCompanies: { select: { id: true } } } });
-    const allCompanyIds = _h ? [session.user.companyId!, ..._h.childCompanies.map((c: { id: string }) => c.id)] : [session.user.companyId!];
     const scope = await resolveCompanyScope({
       userId: session.user.id as string,
       role: session.user.role as any,
@@ -44,7 +42,8 @@ export async function GET(req: NextRequest) {
     const tipo = searchParams.get('tipo');
     const usePagination = searchParams.get('paginate') === 'true';
 
-    const companyFilter = { building: { companyId: { in: allCompanyIds } } };
+    // Use scope: respects company selector (header/cookie/query)
+    const companyFilter = { building: { companyId: { in: scope.scopeCompanyIds } } };
 
     // Si hay filtros o se solicita paginación, no usar caché
     const hasFilters = buildingId || estado || tipo;
@@ -158,7 +157,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Sin filtros, usar caché solo cuando hay una empresa activa
-    if (allCompanyIds.length > 1) {
+    if (scope.scopeCompanyIds.length > 1) {
       const units = await prisma.unit.findMany({
         where: companyFilter,
         select: {
@@ -200,7 +199,7 @@ export async function GET(req: NextRequest) {
     }
 
     const units = await prisma.unit.findMany({
-      where: { building: { companyId: { in: allCompanyIds } } },
+      where: { building: { companyId: { in: scope.scopeCompanyIds } } },
       select: {
         id: true, numero: true, tipo: true, estado: true, planta: true,
         superficie: true, habitaciones: true, banos: true, rentaMensual: true,
