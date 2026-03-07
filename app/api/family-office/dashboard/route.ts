@@ -114,6 +114,7 @@ export async function GET(request: NextRequest) {
         positions: {
           select: {
             nombre: true,
+            isin: true,
             valorActual: true,
             costeTotal: true,
             pnlNoRealizado: true,
@@ -124,23 +125,72 @@ export async function GET(request: NextRequest) {
       },
     });
 
+    // --- 3 (pre-load). PE for cross-check ---
+    const allParticipationsPreload = await prisma.participation.findMany({
+      where: { companyId: { in: scopeIds }, activa: true },
+    });
+    const peNamesForDedup = new Set(
+      allParticipationsPreload
+        .filter((pp: any) => (pp.valorEstimado || pp.valorContable || pp.costeAdquisicion || 0) > 0)
+        .flatMap((pp: any) => {
+          const name = (pp.targetCompanyName || '').toUpperCase();
+          // Extract meaningful keywords for matching
+          return name.split(/[\s,]+/).filter((w: string) => w.length >= 5);
+        })
+    );
+
     // --- DEDUPLICATION: Count each ISIN only once (max value across all accounts) ---
-    // Same fund can appear in multiple custodians (CACEIS, Inversis, Pictet, etc.)
-    // but represents the SAME holding. We take the highest value for each ISIN.
+    // Also: extract ISIN from position name when isin field is null
+    // Also: exclude positions that match PE participations (already counted in PE)
     const isinMaxValue: Record<string, { valor: number; nombre: string }> = {};
     let noIsinTotal = 0;
+    let peDuplicadoExcluido = 0;
+    let isinFromNameExcluido = 0;
+
+    // Collect all ISINs from positions with isin field for cross-ref
+    const knownIsins = new Set<string>();
+    for (const acc of accounts) {
+      for (const pos of acc.positions) {
+        if (pos.isin) knownIsins.add(pos.isin);
+      }
+    }
 
     for (const acc of accounts) {
       for (const pos of acc.positions) {
         const val = pos.valorActual || 0;
+        const posName = (pos.nombre || '').toUpperCase();
+
         if (pos.isin) {
+          // Has ISIN field: standard dedup
           const current = isinMaxValue[pos.isin];
           if (!current || val > current.valor) {
             isinMaxValue[pos.isin] = { valor: val, nombre: pos.nombre || '' };
           }
         } else {
-          // No ISIN = unique position (PE commitments, private positions)
-          noIsinTotal += val;
+          // No ISIN field — check if ISIN is embedded in the name
+          const isinMatch = (pos.nombre || '').match(/\b([A-Z]{2}[A-Z0-9]{9,10})\b/);
+          const embeddedIsin = isinMatch ? isinMatch[1] : null;
+
+          if (embeddedIsin && knownIsins.has(embeddedIsin)) {
+            // This position's ISIN exists in another account → already deduped, skip
+            isinFromNameExcluido += val;
+          } else if (embeddedIsin) {
+            // New ISIN found in name
+            const current = isinMaxValue[embeddedIsin];
+            if (!current || val > current.valor) {
+              isinMaxValue[embeddedIsin] = { valor: val, nombre: pos.nombre || '' };
+            }
+          } else {
+            // No ISIN at all — check if it's a PE duplicate
+            const isPE = Array.from(peNamesForDedup).some((keyword: string) =>
+              posName.includes(keyword)
+            );
+            if (isPE) {
+              peDuplicadoExcluido += val;
+            } else {
+              noIsinTotal += val;
+            }
+          }
         }
       }
     }
@@ -149,7 +199,7 @@ export async function GET(request: NextRequest) {
     const valorFinancieroBruto = accounts.reduce((s: number, a: any) =>
       s + a.positions.reduce((s2: number, p: any) => s2 + (p.valorActual || 0), 0), 0);
     const valorFinanciero = isinDedupTotal + noIsinTotal;
-    const valorFinancieroEliminado = valorFinancieroBruto - valorFinanciero;
+    const valorFinancieroEliminado = valorFinancieroBruto - valorFinanciero - peDuplicadoExcluido - isinFromNameExcluido;
 
     let pnlFinanciero = 0;
     let tesoreriaTotal = 0;
@@ -191,10 +241,8 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    // --- 3. PRIVATE EQUITY / PARTICIPACIONES ---
-    const allParticipations = await prisma.participation.findMany({
-      where: { companyId: { in: scopeIds }, activa: true },
-    });
+    // --- 3. PRIVATE EQUITY / PARTICIPACIONES (pre-loaded above) ---
+    const allParticipations = allParticipationsPreload;
 
     // En vista consolidada: excluir participaciones intragrupo (donde el CIF del target = CIF de filial)
     const participations = view === 'consolidated'
