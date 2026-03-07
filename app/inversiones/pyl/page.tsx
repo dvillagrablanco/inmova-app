@@ -4,17 +4,35 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
-import { ArrowUpRight, ArrowDownRight, Euro, Landmark, Minus, Home } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
+import { Badge } from '@/components/ui/badge';
+import { ArrowUpRight, ArrowDownRight, Euro, Landmark, Minus, Home, Calendar, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
+
+interface PeriodData {
+  label: string;
+  description: string;
+  months: number;
+  ingresos: number;
+  gastos: number;
+  noi: number;
+  amortizaciones: number;
+  hipotecas: number;
+  impuestos: number;
+  beneficioNeto: number;
+  cashFlow: number;
+}
 
 export default function PYLConsolidadoPage() {
   const { status } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<any>(null);
+  const [periods, setPeriods] = useState<Record<string, PeriodData>>({});
+  const [activeTab, setActiveTab] = useState('ytd');
 
   useEffect(() => {
     if (status === 'unauthenticated') { router.push('/login'); return; }
@@ -23,19 +41,19 @@ export default function PYLConsolidadoPage() {
 
   const loadData = async () => {
     try {
-      const [consolidatedRes, fiscalRes] = await Promise.all([
-        fetch('/api/investment/consolidated'),
-        fetch(`/api/investment/fiscal?year=${new Date().getFullYear()}`),
-      ]);
-      const consolidated = consolidatedRes.ok ? (await consolidatedRes.json()).data : null;
-      const fiscal = fiscalRes.ok ? (await fiscalRes.json()).data : null;
-      setData({ consolidated, fiscal });
+      const res = await fetch('/api/investment/pyl');
+      if (res.ok) {
+        const data = await res.json();
+        setPeriods(data.periods || {});
+      }
     } catch { toast.error('Error cargando P&L'); }
     finally { setLoading(false); }
   };
 
   const fmt = (n: number) =>
     new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
+
+  const pctOf = (n: number, total: number) => total > 0 ? Math.round(n / total * 100) : 0;
 
   if (loading) {
     return (
@@ -47,42 +65,105 @@ export default function PYLConsolidadoPage() {
     );
   }
 
-  const p = data?.consolidated?.consolidated;
-  const f = data?.fiscal;
-  if (!p) {
-    return (
-      <AuthenticatedLayout>
-        <div className="p-6">
-          <Breadcrumb className="mb-4">
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/dashboard"><Home className="h-3.5 w-3.5" /></BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/inversiones">Inversiones</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>P&L</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-          <h1 className="text-2xl font-bold mb-4">P&L Consolidado</h1>
-          <Card><CardContent className="p-8 text-center text-gray-500">Sin datos disponibles.</CardContent></Card>
-        </div>
-      </AuthenticatedLayout>
-    );
-  }
+  const renderPYL = (period: PeriodData | undefined) => {
+    if (!period) return <div className="text-center text-gray-500 py-8">Sin datos para este periodo.</div>;
 
-  const annualIncome = p.totalMonthlyIncome * 12;
-  const annualExpenses = p.totalMonthlyExpenses * 12;
-  const annualMortgage = p.totalMortgagePayments * 12;
-  const amortizaciones = f?.amortizaciones || 0;
-  const intereses = f?.interesesHipoteca || 0;
-  const noi = annualIncome - annualExpenses;
-  const ebitda = noi - amortizaciones;
-  const beneficioNeto = noi - annualMortgage - (f?.cuotaIS || 0);
+    const margenNOI = pctOf(period.noi, period.ingresos);
+    const margenNeto = pctOf(period.beneficioNeto, period.ingresos);
+
+    return (
+      <div className="space-y-2 max-w-2xl">
+        {/* Ingresos */}
+        <div className="flex justify-between items-center py-2.5">
+          <span className="flex items-center gap-2 text-gray-700">
+            <ArrowUpRight className="h-4 w-4 text-green-500" />
+            Ingresos por alquiler
+          </span>
+          <span className="font-medium text-green-600">+{fmt(period.ingresos)}</span>
+        </div>
+
+        {/* Gastos operativos */}
+        <div className="flex justify-between items-center py-2.5">
+          <span className="flex items-center gap-2 text-gray-700">
+            <ArrowDownRight className="h-4 w-4 text-red-500" />
+            Gastos operativos (IBI, comunidad, seguros, mantenim.)
+          </span>
+          <span className="font-medium text-red-600">-{fmt(period.gastos)}</span>
+        </div>
+
+        <div className="flex justify-between items-center py-2.5 border-t font-bold">
+          <span>NOI (Net Operating Income)</span>
+          <div className="text-right">
+            <span className={period.noi >= 0 ? 'text-green-600' : 'text-red-600'}>{fmt(period.noi)}</span>
+            <span className="text-xs text-gray-400 ml-2">({margenNOI}%)</span>
+          </div>
+        </div>
+
+        {/* Amortizaciones */}
+        <div className="flex justify-between items-center py-2.5">
+          <span className="flex items-center gap-2 text-gray-500">
+            <Minus className="h-4 w-4" />
+            Amortizaciones (3% construcción)
+          </span>
+          <span className="text-orange-600">-{fmt(period.amortizaciones)}</span>
+        </div>
+
+        {/* EBITDA */}
+        <div className="flex justify-between items-center py-2.5 border-t font-bold">
+          <span>EBITDA</span>
+          <span className={(period.noi - period.amortizaciones) >= 0 ? 'text-green-600' : 'text-red-600'}>
+            {fmt(period.noi - period.amortizaciones)}
+          </span>
+        </div>
+
+        {/* Gastos financieros */}
+        <div className="flex justify-between items-center py-2.5">
+          <span className="flex items-center gap-2 text-gray-500">
+            <Landmark className="h-4 w-4" />
+            Cuotas hipotecarias (capital + intereses)
+          </span>
+          <span className="text-red-600">-{fmt(period.hipotecas)}</span>
+        </div>
+
+        {/* Impuestos */}
+        <div className="flex justify-between items-center py-2.5">
+          <span className="flex items-center gap-2 text-gray-500">
+            <Euro className="h-4 w-4" />
+            Impuesto de Sociedades (25%)
+          </span>
+          <span className="text-red-600">-{fmt(period.impuestos)}</span>
+        </div>
+
+        <div className="flex justify-between items-center py-3 border-t-2 border-gray-900 font-bold text-lg">
+          <span>Beneficio Neto</span>
+          <div className="text-right">
+            <span className={period.beneficioNeto >= 0 ? 'text-green-600' : 'text-red-600'}>{fmt(period.beneficioNeto)}</span>
+            <span className="text-xs text-gray-400 ml-2">({margenNeto}%)</span>
+          </div>
+        </div>
+
+        {/* Métricas */}
+        <div className="grid grid-cols-4 gap-4 pt-4 border-t mt-4">
+          <div className="text-center">
+            <div className="text-xs text-gray-500">Margen NOI</div>
+            <div className="font-bold text-sm">{margenNOI}%</div>
+          </div>
+          <div className="text-center">
+            <div className="text-xs text-gray-500">Margen neto</div>
+            <div className="font-bold text-sm">{margenNeto}%</div>
+          </div>
+          <div className="text-center">
+            <div className="text-xs text-gray-500">Cash-flow</div>
+            <div className="font-bold text-sm">{fmt(period.cashFlow)}</div>
+          </div>
+          <div className="text-center">
+            <div className="text-xs text-gray-500">Meses</div>
+            <div className="font-bold text-sm">{period.months}</div>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <AuthenticatedLayout>
@@ -102,95 +183,67 @@ export default function PYLConsolidadoPage() {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
+
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">P&L Consolidado</h1>
-          <p className="text-gray-500">Cuenta de resultados anualizada del grupo - {new Date().getFullYear()}</p>
+          <h1 className="text-2xl font-bold text-gray-900">Cuenta de Resultados</h1>
+          <p className="text-gray-500">P&L consolidado del grupo</p>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Cuenta de Perdidas y Ganancias</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2 max-w-lg">
-              {/* Ingresos */}
-              <div className="flex justify-between items-center py-2">
-                <span className="flex items-center gap-2 text-gray-700">
-                  <ArrowUpRight className="h-4 w-4 text-green-500" />
-                  Ingresos por alquiler
-                </span>
-                <span className="font-medium text-green-600">+{fmt(annualIncome)}</span>
-              </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-3 max-w-md">
+            <TabsTrigger value="ytd" className="text-xs sm:text-sm">
+              <Calendar className="h-3.5 w-3.5 mr-1.5 hidden sm:inline" />
+              YTD
+            </TabsTrigger>
+            <TabsTrigger value="tam" className="text-xs sm:text-sm">
+              <TrendingUp className="h-3.5 w-3.5 mr-1.5 hidden sm:inline" />
+              TAM (12M)
+            </TabsTrigger>
+            <TabsTrigger value="anual" className="text-xs sm:text-sm">
+              <Euro className="h-3.5 w-3.5 mr-1.5 hidden sm:inline" />
+              Año {new Date().getFullYear() - 1}
+            </TabsTrigger>
+          </TabsList>
 
-              {/* Gastos operativos */}
-              <div className="flex justify-between items-center py-2">
-                <span className="flex items-center gap-2 text-gray-700">
-                  <ArrowDownRight className="h-4 w-4 text-red-500" />
-                  Gastos operativos (IBI, comunidad, seguros, mantenim.)
-                </span>
-                <span className="font-medium text-red-600">-{fmt(annualExpenses)}</span>
-              </div>
+          <TabsContent value="ytd">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  P&L — Year to Date
+                  <Badge variant="outline" className="text-xs">{periods.ytd?.description || ''}</Badge>
+                </CardTitle>
+                <CardDescription>Desde el 1 de enero hasta hoy</CardDescription>
+              </CardHeader>
+              <CardContent>{renderPYL(periods.ytd)}</CardContent>
+            </Card>
+          </TabsContent>
 
-              <div className="flex justify-between items-center py-2 border-t font-bold">
-                <span>NOI (Net Operating Income)</span>
-                <span className={noi >= 0 ? 'text-green-600' : 'text-red-600'}>{fmt(noi)}</span>
-              </div>
+          <TabsContent value="tam">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  P&L — Trailing 12 Months (TAM)
+                  <Badge variant="outline" className="text-xs">{periods.tam?.description || ''}</Badge>
+                </CardTitle>
+                <CardDescription>Últimos 12 meses móviles</CardDescription>
+              </CardHeader>
+              <CardContent>{renderPYL(periods.tam)}</CardContent>
+            </Card>
+          </TabsContent>
 
-              {/* Amortizaciones */}
-              <div className="flex justify-between items-center py-2">
-                <span className="flex items-center gap-2 text-gray-500">
-                  <Minus className="h-4 w-4" />
-                  Amortizaciones (3% construcción)
-                </span>
-                <span className="text-orange-600">-{fmt(amortizaciones)}</span>
-              </div>
-
-              <div className="flex justify-between items-center py-2 border-t font-bold">
-                <span>EBITDA</span>
-                <span className={ebitda >= 0 ? 'text-green-600' : 'text-red-600'}>{fmt(ebitda)}</span>
-              </div>
-
-              {/* Gastos financieros */}
-              <div className="flex justify-between items-center py-2">
-                <span className="flex items-center gap-2 text-gray-500">
-                  <Landmark className="h-4 w-4" />
-                  Cuotas hipotecarias (capital + intereses)
-                </span>
-                <span className="text-red-600">-{fmt(annualMortgage)}</span>
-              </div>
-
-              {/* Impuestos */}
-              <div className="flex justify-between items-center py-2">
-                <span className="flex items-center gap-2 text-gray-500">
-                  <Euro className="h-4 w-4" />
-                  Impuesto de Sociedades (25%)
-                </span>
-                <span className="text-red-600">-{fmt(f?.cuotaIS || 0)}</span>
-              </div>
-
-              <div className="flex justify-between items-center py-3 border-t-2 border-gray-900 font-bold text-lg">
-                <span>Beneficio Neto</span>
-                <span className={beneficioNeto >= 0 ? 'text-green-600' : 'text-red-600'}>{fmt(beneficioNeto)}</span>
-              </div>
-
-              {/* Metricas */}
-              <div className="grid grid-cols-3 gap-4 pt-4 border-t mt-4">
-                <div className="text-center">
-                  <div className="text-sm text-gray-500">Margen NOI</div>
-                  <div className="font-bold">{annualIncome > 0 ? Math.round(noi / annualIncome * 100) : 0}%</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-sm text-gray-500">Margen neto</div>
-                  <div className="font-bold">{annualIncome > 0 ? Math.round(beneficioNeto / annualIncome * 100) : 0}%</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-sm text-gray-500">Cash-flow anual</div>
-                  <div className="font-bold">{fmt(p.monthlyCashFlow * 12)}</div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          <TabsContent value="anual">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  P&L — Año Natural {new Date().getFullYear() - 1}
+                  <Badge variant="outline" className="text-xs">{periods.anual?.description || ''}</Badge>
+                </CardTitle>
+                <CardDescription>Año completo cerrado</CardDescription>
+              </CardHeader>
+              <CardContent>{renderPYL(periods.anual)}</CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </AuthenticatedLayout>
   );
