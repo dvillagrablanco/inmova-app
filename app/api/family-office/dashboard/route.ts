@@ -114,56 +114,48 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // --- 3 (pre-load). PRIVATE EQUITY — load early for cross-check ---
-    const allParticipations = await prisma.participation.findMany({
-      where: { companyId: { in: scopeIds }, activa: true },
-    });
+    // --- DEDUPLICATION: Count each ISIN only once (max value across all accounts) ---
+    // Same fund can appear in multiple custodians (CACEIS, Inversis, Pictet, etc.)
+    // but represents the SAME holding. We take the highest value for each ISIN.
+    const isinMaxValue: Record<string, { valor: number; nombre: string }> = {};
+    let noIsinTotal = 0;
 
-    // Build PE name set for deduplication (normalize names for matching)
-    const peNames = new Set(
-      allParticipations
-        .filter((p: any) => (p.valorEstimado || p.valorContable || p.costeAdquisicion || 0) > 0)
-        .map((p: any) => (p.targetCompanyName || '').toUpperCase().substring(0, 12))
-        .filter((n: string) => n.length > 3)
-    );
+    for (const acc of accounts) {
+      for (const pos of acc.positions) {
+        const val = pos.valorActual || 0;
+        if (pos.isin) {
+          const current = isinMaxValue[pos.isin];
+          if (!current || val > current.valor) {
+            isinMaxValue[pos.isin] = { valor: val, nombre: pos.nombre || '' };
+          }
+        } else {
+          // No ISIN = unique position (PE commitments, private positions)
+          noIsinTotal += val;
+        }
+      }
+    }
 
-    let valorFinanciero = 0;
-    let valorFinancieroPEDuplicado = 0; // Positions that duplicate PE participations
+    const isinDedupTotal = Object.values(isinMaxValue).reduce((s, p) => s + p.valor, 0);
+    const valorFinancieroBruto = accounts.reduce((s: number, a: any) =>
+      s + a.positions.reduce((s2: number, p: any) => s2 + (p.valorActual || 0), 0), 0);
+    const valorFinanciero = isinDedupTotal + noIsinTotal;
+    const valorFinancieroEliminado = valorFinancieroBruto - valorFinanciero;
+
     let pnlFinanciero = 0;
     let tesoreriaTotal = 0;
     const tesoreriaPorEntidad: Record<string, number> = {};
 
     const cuentas = accounts.map((acc: any) => {
-      // Separate: positions that are PE (already counted in Participation) vs pure financial
-      let valorCuenta = 0;
-      let valorPEenCuenta = 0;
-
-      for (const pos of acc.positions) {
-        const posVal = pos.valorActual || 0;
-        const posName = (pos.nombre || '').toUpperCase();
-
-        // Check if this position matches a PE participation
-        const isPE = Array.from(peNames).some((peName: string) =>
-          posName.includes(peName) || peName.includes(posName.substring(0, 12))
-        );
-
-        if (isPE) {
-          valorPEenCuenta += posVal;
-        }
-        valorCuenta += posVal;
-      }
-
+      const valorCuenta = acc.positions.reduce(
+        (sum: number, p: any) => sum + (p.valorActual || 0), 0
+      );
       const pnlCuenta = acc.positions.reduce(
         (sum: number, p: any) => sum + (p.pnlNoRealizado || 0) + (p.pnlRealizado || 0), 0
       );
-
-      // Only count non-PE positions as financiero
-      valorFinanciero += (valorCuenta - valorPEenCuenta);
-      valorFinancieroPEDuplicado += valorPEenCuenta;
       pnlFinanciero += pnlCuenta;
 
-      // Anti-duplicidad: Si saldoActual ≈ sum(posiciones) (±10%), el saldo ES el NAV
-      // de las posiciones, no liquidez adicional. No contar como tesorería.
+      // Anti-duplicidad tesorería: Si saldoActual ≈ sum(posiciones) (±10%),
+      // el saldo ES el NAV de las posiciones, no liquidez adicional.
       const saldo = acc.saldoActual || 0;
       const isNavDuplicate = valorCuenta > 1000 && saldo > 1000 &&
         Math.abs(saldo - valorCuenta) / valorCuenta < 0.10;
@@ -189,7 +181,10 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    // --- 3. PRIVATE EQUITY / PARTICIPACIONES (allParticipations loaded above for cross-check) ---
+    // --- 3. PRIVATE EQUITY / PARTICIPACIONES ---
+    const allParticipations = await prisma.participation.findMany({
+      where: { companyId: { in: scopeIds }, activa: true },
+    });
 
     // En vista consolidada: excluir participaciones intragrupo (donde el CIF del target = CIF de filial)
     const participations = view === 'consolidated'
@@ -249,7 +244,7 @@ export async function GET(request: NextRequest) {
           valor: round2(valorPE),
           participaciones: participacionesData,
           participacionesIntragrupoExcluidas: view === 'consolidated' ? participacionesExcluidas : 0,
-          posicionesFinancierasExcluidas: round2(valorFinancieroPEDuplicado),
+          posicionesFinancierasDuplicadas: round2(valorFinancieroEliminado),
         },
         tesoreria: {
           saldo: round2(tesoreriaTotal),
