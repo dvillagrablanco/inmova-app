@@ -35,58 +35,66 @@ export async function GET(request: NextRequest) {
 
     const companyIds = scope.companyIds;
     const now = new Date();
-    const monthStart = startOfMonth(now);
-    const monthEnd = endOfMonth(now);
+    const { searchParams } = new URL(request.url);
+    const periodParam = searchParams.get('period'); // mes | ytd | tam | anual
 
     // ================================================================
-    // PASO 1: Buscar el último periodo con datos reales
+    // PASO 1: Determinar periodo según parámetro o autodetectar
     // ================================================================
-    
-    // Buscar en AccountingTransaction
-    const latestAccounting = await prisma.accountingTransaction.findFirst({
-      where: { companyId: { in: companyIds } },
-      orderBy: { fecha: 'desc' },
-      select: { fecha: true },
-    });
-
-    // Buscar en BankTransaction
-    const latestBank = await prisma.bankTransaction.findFirst({
-      where: { companyId: { in: companyIds } },
-      orderBy: { fecha: 'desc' },
-      select: { fecha: true },
-    }).catch(() => null);
-
-    // Determinar el periodo a mostrar: intentar mes actual, sino el último con datos
-    let displayStart = monthStart;
-    let displayEnd = monthEnd;
-    let displayPeriodo = format(now, 'yyyy-MM');
+    let displayStart: Date;
+    let displayEnd: Date;
+    let displayPeriodo: string;
     let isCurrentMonth = true;
+    const currentYear = now.getFullYear();
 
-    // Verificar si hay datos en el mes actual
-    const currentMonthAccounting = await prisma.accountingTransaction.count({
-      where: {
-        companyId: { in: companyIds },
-        fecha: { gte: monthStart, lte: monthEnd },
-      },
-    });
-    const currentMonthBank = await prisma.bankTransaction.count({
-      where: {
-        companyId: { in: companyIds },
-        fecha: { gte: monthStart, lte: monthEnd },
-      },
-    }).catch(() => 0);
+    if (periodParam === 'ytd') {
+      displayStart = new Date(currentYear, 0, 1);
+      displayEnd = now;
+      displayPeriodo = `YTD ${currentYear}`;
+      isCurrentMonth = false;
+    } else if (periodParam === 'tam') {
+      displayStart = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+      displayEnd = now;
+      displayPeriodo = 'TAM (12 meses)';
+      isCurrentMonth = false;
+    } else if (periodParam === 'anual') {
+      displayStart = new Date(currentYear - 1, 0, 1);
+      displayEnd = new Date(currentYear - 1, 11, 31, 23, 59, 59);
+      displayPeriodo = `Año ${currentYear - 1}`;
+      isCurrentMonth = false;
+    } else {
+      // Default: mes actual o último con datos
+      const monthStart = startOfMonth(now);
+      const monthEnd = endOfMonth(now);
+      displayStart = monthStart;
+      displayEnd = monthEnd;
+      displayPeriodo = format(now, 'yyyy-MM');
 
-    // Si no hay datos en el mes actual, usar el último periodo con datos
-    if (currentMonthAccounting === 0 && currentMonthBank === 0) {
-      const latestDate = [latestAccounting?.fecha, latestBank?.fecha]
-        .filter(Boolean)
-        .sort((a, b) => (b as Date).getTime() - (a as Date).getTime())[0];
+      // Verificar si hay datos en el mes actual
+      const currentMonthCount = await prisma.accountingTransaction.count({
+        where: { companyId: { in: companyIds }, fecha: { gte: monthStart, lte: monthEnd } },
+      });
+      const currentMonthBank = await prisma.bankTransaction.count({
+        where: { companyId: { in: companyIds }, fecha: { gte: monthStart, lte: monthEnd } },
+      }).catch(() => 0);
 
-      if (latestDate) {
-        displayStart = startOfMonth(latestDate);
-        displayEnd = endOfMonth(latestDate);
-        displayPeriodo = format(latestDate, 'yyyy-MM');
-        isCurrentMonth = false;
+      if (currentMonthCount === 0 && currentMonthBank === 0) {
+        const latestAccounting = await prisma.accountingTransaction.findFirst({
+          where: { companyId: { in: companyIds } }, orderBy: { fecha: 'desc' }, select: { fecha: true },
+        });
+        const latestBank = await prisma.bankTransaction.findFirst({
+          where: { companyId: { in: companyIds } }, orderBy: { fecha: 'desc' }, select: { fecha: true },
+        }).catch(() => null);
+
+        const latestDate = [latestAccounting?.fecha, latestBank?.fecha]
+          .filter(Boolean).sort((a, b) => (b as Date).getTime() - (a as Date).getTime())[0];
+
+        if (latestDate) {
+          displayStart = startOfMonth(latestDate);
+          displayEnd = endOfMonth(latestDate);
+          displayPeriodo = format(latestDate, 'yyyy-MM');
+          isCurrentMonth = false;
+        }
       }
     }
 

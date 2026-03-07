@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -213,13 +214,16 @@ export default function FinanzasPage() {
   });
   const [latestPeriod, setLatestPeriod] = useState<LatestPeriodSummary | null>(null);
   const [meta, setMeta] = useState<any>(null);
+  const [selectedPeriod, setSelectedPeriod] = useState<string>('mes');
 
   const fetchFinancialData = async () => {
     try {
-      // Pasar companyId explícitamente si hay empresa seleccionada
       const params = new URLSearchParams();
       if (selectedCompany?.id) {
         params.set('companyId', selectedCompany.id);
+      }
+      if (selectedPeriod !== 'mes') {
+        params.set('period', selectedPeriod);
       }
       const url = params.toString() 
         ? `/api/finanzas/summary?${params.toString()}` 
@@ -245,7 +249,7 @@ export default function FinanzasPage() {
     if (status === 'authenticated') {
       fetchFinancialData();
     }
-  }, [status, selectedCompany?.id]);
+  }, [status, selectedCompany?.id, selectedPeriod]);
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -305,7 +309,18 @@ export default function FinanzasPage() {
               </p>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
+            <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
+              <SelectTrigger className="w-[150px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="mes">Mes actual</SelectItem>
+                <SelectItem value="ytd">YTD {new Date().getFullYear()}</SelectItem>
+                <SelectItem value="tam">TAM (12M)</SelectItem>
+                <SelectItem value="anual">Año {new Date().getFullYear() - 1}</SelectItem>
+              </SelectContent>
+            </Select>
             <Button variant="outline" onClick={handleRefresh} disabled={refreshing}>
               <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
               Actualizar
