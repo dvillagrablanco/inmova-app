@@ -50,6 +50,53 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
+import dynamic from 'next/dynamic';
+
+// Lazy load recharts (heavy library)
+const RechartsBarChart = dynamic(
+  () => import('recharts').then((mod) => {
+    const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Legend } = mod;
+    return function BrokerBarChart({ data }: { data: { name: string; valor: number; color: string }[] }) {
+      return (
+        <ResponsiveContainer width="100%" height={220}>
+          <BarChart data={data} layout="vertical" margin={{ left: 10, right: 30, top: 5, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+            <XAxis type="number" tickFormatter={(v: number) => `${(v / 1000).toFixed(0)}K`} fontSize={11} />
+            <YAxis type="category" dataKey="name" width={130} fontSize={11} />
+            <Tooltip formatter={(v: number) => [`${v.toLocaleString('es-ES')}€`, 'Valor']} />
+            <Bar dataKey="valor" radius={[0, 6, 6, 0]} barSize={28}>
+              {data.map((entry, idx) => (
+                <Cell key={idx} fill={entry.color} />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      );
+    };
+  }),
+  { ssr: false, loading: () => <div className="h-[220px] flex items-center justify-center text-gray-300">Cargando gráfico...</div> }
+);
+
+const RechartsPieChart = dynamic(
+  () => import('recharts').then((mod) => {
+    const { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } = mod;
+    return function BrokerPieChart({ data }: { data: { name: string; value: number; color: string }[] }) {
+      return (
+        <ResponsiveContainer width="100%" height={200}>
+          <PieChart>
+            <Pie data={data} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" paddingAngle={3} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false} fontSize={11}>
+              {data.map((entry, idx) => (
+                <Cell key={idx} fill={entry.color} />
+              ))}
+            </Pie>
+            <Tooltip formatter={(v: number) => [v, 'Flags']} />
+          </PieChart>
+        </ResponsiveContainer>
+      );
+    };
+  }),
+  { ssr: false, loading: () => <div className="h-[200px]" /> }
+);
 
 interface RentRollEntry {
   tipo: 'vivienda' | 'garaje' | 'local' | 'trastero' | 'oficina' | 'otro';
@@ -1375,6 +1422,86 @@ Estado: Reformado 2018"
                         </div>
                       </div>
                     </div>
+
+                    {/* ── Gráficos visuales del análisis ── */}
+                    <div className="grid md:grid-cols-2 gap-4">
+                      {/* Gráfico de barras: Comparación de precios */}
+                      {(brokerAnalysis.datosActivo?.askingPrice || brokerAnalysis.analisisIndependiente?.precioMaximoRecomendado) && (
+                        <div className="bg-white rounded-xl border p-4">
+                          <h4 className="font-medium text-sm mb-3 flex items-center gap-2">
+                            <BarChart3 className="h-4 w-4 text-blue-500" />
+                            Comparación de Precios
+                          </h4>
+                          <RechartsBarChart data={[
+                            brokerAnalysis.datosActivo?.askingPrice ? { name: 'Precio Broker', valor: brokerAnalysis.datosActivo.askingPrice, color: '#ef4444' } : null,
+                            brokerAnalysis.analisisIndependiente?.precioMaximoRecomendado ? { name: 'Precio Máx Recomendado', valor: brokerAnalysis.analisisIndependiente.precioMaximoRecomendado, color: '#22c55e' } : null,
+                            brokerAnalysis.analisisIndependiente?.escenarios?.conservador?.precio ? { name: 'Escenario Conservador', valor: brokerAnalysis.analisisIndependiente.escenarios.conservador.precio, color: '#3b82f6' } : null,
+                            brokerAnalysis.analisisIndependiente?.escenarios?.base?.precio ? { name: 'Escenario Base', valor: brokerAnalysis.analisisIndependiente.escenarios.base.precio, color: '#8b5cf6' } : null,
+                          ].filter(Boolean) as any} />
+                        </div>
+                      )}
+
+                      {/* Donut: Distribución de flags */}
+                      {brokerAnalysis.analisisCritico?.flags && brokerAnalysis.analisisCritico.flags.length > 0 && (
+                        <div className="bg-white rounded-xl border p-4">
+                          <h4 className="font-medium text-sm mb-3 flex items-center gap-2">
+                            <Shield className="h-4 w-4 text-purple-500" />
+                            Análisis de Riesgos
+                          </h4>
+                          <RechartsPieChart data={(() => {
+                            const flags = brokerAnalysis.analisisCritico.flags;
+                            const green = flags.filter((f: any) => f.nivel === 'verde').length;
+                            const yellow = flags.filter((f: any) => f.nivel === 'amarillo').length;
+                            const red = flags.filter((f: any) => f.nivel === 'rojo').length;
+                            return [
+                              green > 0 ? { name: 'OK', value: green, color: '#22c55e' } : null,
+                              yellow > 0 ? { name: 'Atención', value: yellow, color: '#f59e0b' } : null,
+                              red > 0 ? { name: 'Riesgo', value: red, color: '#ef4444' } : null,
+                            ].filter(Boolean) as any;
+                          })()} />
+                          <div className="flex justify-center gap-4 mt-2 text-xs">
+                            <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-green-500 inline-block" /> OK</span>
+                            <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-amber-500 inline-block" /> Atención</span>
+                            <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-red-500 inline-block" /> Riesgo</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Gauge visual: Score de confianza */}
+                    {brokerAnalysis.analisisIndependiente?.yieldNetoEstimado != null && (
+                      <div className="bg-white rounded-xl border p-4">
+                        <h4 className="font-medium text-sm mb-3">Métricas Clave del Activo</h4>
+                        <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+                          {[
+                            { label: 'Yield Bruto', value: brokerAnalysis.analisisIndependiente.yieldBrutoReal, suffix: '%', target: 6, color: 'blue' },
+                            { label: 'Yield Neto', value: brokerAnalysis.analisisIndependiente.yieldNetoEstimado, suffix: '%', target: 4.5, color: 'green' },
+                            { label: 'TIR 10 años', value: brokerAnalysis.analisisIndependiente.tirEstimada10anos, suffix: '%', target: 8, color: 'purple' },
+                            { label: 'Descuento', value: brokerAnalysis.analisisIndependiente.descuentoSugerido, suffix: '%', target: 0, color: 'amber' },
+                            { label: '€/m² Compra', value: brokerAnalysis.analisisIndependiente.precioM2Compra, suffix: '€', target: null, color: 'gray' },
+                            { label: '€/m² Zona', value: brokerAnalysis.analisisIndependiente.precioM2Zona, suffix: '€', target: null, color: 'gray' },
+                          ].map((metric, i) => {
+                            if (metric.value == null) return null;
+                            const pct = metric.target ? Math.min((metric.value / metric.target) * 100, 150) : 100;
+                            const barColor = metric.color === 'blue' ? 'bg-blue-500' : metric.color === 'green' ? 'bg-green-500' : metric.color === 'purple' ? 'bg-purple-500' : metric.color === 'amber' ? 'bg-amber-500' : 'bg-gray-400';
+                            return (
+                              <div key={i} className="text-center">
+                                <div className="relative w-16 h-16 mx-auto mb-1">
+                                  <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
+                                    <circle cx="18" cy="18" r="14" fill="none" stroke="#e5e7eb" strokeWidth="3" />
+                                    <circle cx="18" cy="18" r="14" fill="none" stroke={metric.color === 'blue' ? '#3b82f6' : metric.color === 'green' ? '#22c55e' : metric.color === 'purple' ? '#8b5cf6' : metric.color === 'amber' ? '#f59e0b' : '#9ca3af'} strokeWidth="3" strokeDasharray={`${Math.min(pct, 100) * 0.88} 88`} strokeLinecap="round" />
+                                  </svg>
+                                  <div className="absolute inset-0 flex items-center justify-center">
+                                    <span className="text-xs font-bold">{typeof metric.value === 'number' ? metric.value.toLocaleString('es-ES') : metric.value}</span>
+                                  </div>
+                                </div>
+                                <div className="text-[10px] text-gray-500">{metric.label}</div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
 
                     {/* Escenarios */}
                     {brokerAnalysis.analisisIndependiente.escenarios && (
