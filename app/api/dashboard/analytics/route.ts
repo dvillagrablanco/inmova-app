@@ -1,6 +1,7 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/permissions';
 import logger from '@/lib/logger';
+import { resolveCompanyScope } from '@/lib/company-scope';
 import { cacheGetOrSet, CacheTTL } from '@/lib/cache';
 import { paymentFilterWithCompanies, expenseFilterWithCompanies } from '@/lib/demo-data-filter';
 
@@ -24,15 +25,19 @@ async function getPrisma() {
  * - Reduce payload de ~100KB a ~5KB
  * - Mejora de 500ms → 50ms con caché, 500ms → 200ms sin caché
  */
-export async function GET() {
+export async function GET(req: NextRequest) {
   const prisma = await getPrisma();
   try {
     const user = await requireAuth();
-    const _h = await prisma.company.findUnique({ where: { id: user.companyId! }, select: { childCompanies: { select: { id: true } } } });
-    const allCompanyIds = _h ? [user.companyId!, ..._h.childCompanies.map((c: { id: string }) => c.id)] : [user.companyId!];
+    const scope = await resolveCompanyScope({
+      userId: user.id,
+      role: user.role as any,
+      primaryCompanyId: user.companyId,
+      request: req,
+    });
 
     // Usar caché de 5 minutos para analytics
-    const cacheKey = `analytics:monthly:${allCompanyIds.join(',')}`;
+    const cacheKey = `analytics:monthly:${scope.scopeCompanyIds.join(',')}`;
     
     const analyticsData = await cacheGetOrSet(
       cacheKey,
@@ -47,7 +52,7 @@ export async function GET() {
         // IMPORTANTE: Excluir datos de demostración de las estadísticas
         const payments = await prisma.payment.findMany({
           where: {
-            ...paymentFilterWithCompanies(allCompanyIds),
+            ...paymentFilterWithCompanies(scope.scopeCompanyIds),
             estado: 'pagado',
             fechaVencimiento: {
               gte: twelveMonthsAgo,
@@ -64,7 +69,7 @@ export async function GET() {
         // IMPORTANTE: Excluir datos de demostración de las estadísticas
         const expenses = await prisma.expense.findMany({
           where: {
-            ...expenseFilterWithCompanies(allCompanyIds),
+            ...expenseFilterWithCompanies(scope.scopeCompanyIds),
             fecha: {
               gte: twelveMonthsAgo,
             },

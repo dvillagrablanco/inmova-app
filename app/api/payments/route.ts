@@ -29,8 +29,6 @@ export async function GET(req: NextRequest) {
       if (!session) {
         return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
       }
-      const _h = await prisma.company.findUnique({ where: { id: session.user.companyId! }, select: { childCompanies: { select: { id: true } } } });
-      const allCompanyIds = _h ? [session.user.companyId!, ..._h.childCompanies.map((c: { id: string }) => c.id)] : [session.user.companyId!];
       const scope = await resolveCompanyScope({
         userId: session.user.id as string,
         role: session.user.role as any,
@@ -58,7 +56,7 @@ export async function GET(req: NextRequest) {
           contract: {
             unit: {
               building: {
-                companyId: { in: allCompanyIds },
+                companyId: { in: scope.scopeCompanyIds },
               },
             },
           },
@@ -138,12 +136,12 @@ export async function GET(req: NextRequest) {
       // Sin filtros ni paginación, usar caché
       let paymentsResult: any[] = [];
 
-      if (allCompanyIds.length > 1) {
+      if (scope.scopeCompanyIds.length > 1) {
         const payments = await prisma.payment.findMany({
           where: {
             contract: {
               unit: {
-                building: { companyId: { in: allCompanyIds } },
+                building: { companyId: { in: scope.scopeCompanyIds } },
               },
             },
           },
@@ -171,7 +169,7 @@ export async function GET(req: NextRequest) {
           where: {
             contract: {
               unit: {
-                building: { companyId: { in: allCompanyIds } },
+                building: { companyId: { in: scope.scopeCompanyIds } },
               },
             },
           },
@@ -195,7 +193,7 @@ export async function GET(req: NextRequest) {
       if (paymentsResult.length === 0 && scope.activeCompanyId) {
         const accountingIncome = await prisma.accountingTransaction.findMany({
           where: {
-            companyId: { in: allCompanyIds },
+            companyId: { in: scope.scopeCompanyIds },
             tipo: 'ingreso',
           },
           orderBy: { fecha: 'desc' },

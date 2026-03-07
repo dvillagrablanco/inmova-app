@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import logger from '@/lib/logger';
 import * as Sentry from '@sentry/nextjs';
 import { getPrismaClient } from '@/lib/db';
+import { resolveCompanyScope } from '@/lib/company-scope';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -19,15 +20,19 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
     const prisma = getPrismaClient();
-    const _h = await prisma.company.findUnique({ where: { id: session.user.companyId }, select: { childCompanies: { select: { id: true } } } });
-    const allCompanyIds = _h ? [session.user.companyId, ..._h.childCompanies.map((c: { id: string }) => c.id)] : [session.user.companyId];
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: session.user.role as any,
+      primaryCompanyId: session.user?.companyId,
+      request,
+    });
     const { searchParams } = new URL(request.url);
     const assetId = searchParams.get('assetId');
 
     if (assetId) {
       // Tabla de un activo especifico
       const asset = await prisma.assetAcquisition.findFirst({
-        where: { id: assetId, companyId: { in: allCompanyIds } },
+        where: { id: assetId, companyId: { in: scope.scopeCompanyIds } },
       });
       if (!asset) {
         return NextResponse.json({ error: 'Activo no encontrado' }, { status: 404 });
@@ -43,7 +48,7 @@ export async function GET(request: NextRequest) {
 
     // Resumen de amortizaciones de todos los activos
     const assets = await prisma.assetAcquisition.findMany({
-      where: { companyId: { in: allCompanyIds } },
+      where: { companyId: { in: scope.scopeCompanyIds } },
       select: {
         id: true,
         assetType: true,

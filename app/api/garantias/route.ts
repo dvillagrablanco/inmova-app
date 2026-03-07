@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { z } from 'zod';
+import { resolveCompanyScope } from '@/lib/company-scope';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -31,15 +32,19 @@ export async function GET(request: NextRequest) {
     if (!session?.user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
-    const _h = await prisma.company.findUnique({ where: { id: session.user.companyId! }, select: { childCompanies: { select: { id: true } } } });
-    const allCompanyIds = _h ? [session.user.companyId!, ..._h.childCompanies.map((c: { id: string }) => c.id)] : [session.user.companyId!];
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: session.user.role as any,
+      primaryCompanyId: session.user?.companyId,
+      request,
+    });
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
     const type = searchParams.get('type');
 
     // Construir filtros
     const whereClause: any = {
-      companyId: { in: allCompanyIds },
+      companyId: { in: scope.scopeCompanyIds },
     };
 
     // Filtrar por estado

@@ -29,8 +29,6 @@ export async function GET(req: NextRequest) {
   const prisma = await getPrisma();
   try {
     const user = await requireAuth();
-    const _h = await prisma.company.findUnique({ where: { id: user.companyId! }, select: { childCompanies: { select: { id: true } } } });
-    const allCompanyIds = _h ? [user.companyId!, ..._h.childCompanies.map((c: { id: string }) => c.id)] : [user.companyId!];
     const scope = await resolveCompanyScope({
       userId: user.id,
       role: user.role as any,
@@ -54,7 +52,7 @@ export async function GET(req: NextRequest) {
 
     const where: any = {
       building: {
-        companyId: { in: allCompanyIds },
+        companyId: { in: scope.scopeCompanyIds },
       },
     };
 
@@ -98,7 +96,7 @@ export async function GET(req: NextRequest) {
     // Si no hay gastos operativos, hacer fallback a AccountingTransaction (gastos contables)
     if (expensesWithNumbers.length === 0 && scope.activeCompanyId) {
       const accountingWhere: any = {
-        companyId: { in: allCompanyIds },
+        companyId: { in: scope.scopeCompanyIds },
         tipo: 'gasto',
       };
 

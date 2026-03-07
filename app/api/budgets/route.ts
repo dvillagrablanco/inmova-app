@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import logger from '@/lib/logger';
+import { resolveCompanyScope } from '@/lib/company-scope';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -18,8 +19,12 @@ export async function GET(request: NextRequest) {
     if (!session?.user?.companyId) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
-    const _h = await prisma.company.findUnique({ where: { id: session.user.companyId }, select: { childCompanies: { select: { id: true } } } });
-    const allCompanyIds = _h ? [session.user.companyId, ..._h.childCompanies.map((c: { id: string }) => c.id)] : [session.user.companyId];
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: session.user.role as any,
+      primaryCompanyId: session.user?.companyId,
+      request,
+    });
     const { searchParams } = new URL(request.url);
     const estado = searchParams.get('estado');
     const providerId = searchParams.get('providerId');
@@ -27,7 +32,7 @@ export async function GET(request: NextRequest) {
     // Obtener presupuestos de proveedores
     const quotes = await prisma.providerQuote.findMany({
       where: {
-        companyId: { in: allCompanyIds },
+        companyId: { in: scope.scopeCompanyIds },
         ...(estado && { estado }),
         ...(providerId && { providerId }),
       },

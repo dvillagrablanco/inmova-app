@@ -5,6 +5,7 @@ import { z } from 'zod';
 import logger from '@/lib/logger';
 import * as Sentry from '@sentry/nextjs';
 import { getPrismaClient } from '@/lib/db';
+import { resolveCompanyScope } from '@/lib/company-scope';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -44,10 +45,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
     const prisma = getPrismaClient();
-    const _h = await prisma.company.findUnique({ where: { id: session.user.companyId }, select: { childCompanies: { select: { id: true } } } });
-    const allCompanyIds = _h ? [session.user.companyId, ..._h.childCompanies.map((c: { id: string }) => c.id)] : [session.user.companyId];
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: session.user.role as any,
+      primaryCompanyId: session.user?.companyId,
+      request,
+    });
     const mortgages = await prisma.mortgage.findMany({
-      where: { companyId: { in: allCompanyIds } },
+      where: { companyId: { in: scope.scopeCompanyIds } },
       include: {
         asset: {
           select: {

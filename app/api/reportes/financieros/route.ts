@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { authOptions } from '@/lib/auth-options';
 import { getPrismaClient } from '@/lib/db';
 import logger from '@/lib/logger';
+import { resolveCompanyScope } from '@/lib/company-scope';
 import type { Prisma } from '@/types/prisma-types';
 
 export const dynamic = 'force-dynamic';
@@ -81,8 +82,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
     const prisma = getPrismaClient();
-    const _h = await prisma.company.findUnique({ where: { id: session.user.companyId }, select: { childCompanies: { select: { id: true } } } });
-    const allCompanyIds = _h ? [session.user.companyId, ..._h.childCompanies.map((c: { id: string }) => c.id)] : [session.user.companyId];
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: session.user.role as any,
+      primaryCompanyId: session.user?.companyId,
+      request,
+    });
     const { searchParams } = new URL(request.url);
     const parsedPeriod = periodSchema.safeParse(searchParams.get('period'));
     const period: Period = parsedPeriod.success ? parsedPeriod.data : 'month';
@@ -94,7 +99,7 @@ export async function GET(request: NextRequest) {
         isDemo: false,
         unit: {
           isDemo: false,
-          building: { companyId: { in: allCompanyIds }, isDemo: false },
+          building: { companyId: { in: scope.scopeCompanyIds }, isDemo: false },
         },
       },
     };
@@ -103,8 +108,8 @@ export async function GET(request: NextRequest) {
       isDemo: false,
       fecha: { gte: start, lte: end },
       OR: [
-        { building: { companyId: { in: allCompanyIds }, isDemo: false } },
-        { unit: { isDemo: false, building: { companyId: { in: allCompanyIds }, isDemo: false } } },
+        { building: { companyId: { in: scope.scopeCompanyIds }, isDemo: false } },
+        { unit: { isDemo: false, building: { companyId: { in: scope.scopeCompanyIds }, isDemo: false } } },
       ],
     };
 
@@ -116,7 +121,7 @@ export async function GET(request: NextRequest) {
     const [buildings, paidPayments, expenses, previousPaidPayments, previousExpenses, duePayments] =
       await Promise.all([
         prisma.building.findMany({
-          where: { companyId: { in: allCompanyIds }, isDemo: false },
+          where: { companyId: { in: scope.scopeCompanyIds }, isDemo: false },
           select: {
             id: true,
             nombre: true,

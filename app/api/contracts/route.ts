@@ -28,8 +28,6 @@ export async function GET(req: NextRequest) {
     if (!session) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
-    const _h = await prisma.company.findUnique({ where: { id: session.user.companyId! }, select: { childCompanies: { select: { id: true } } } });
-    const allCompanyIds = _h ? [session.user.companyId!, ..._h.childCompanies.map((c: { id: string }) => c.id)] : [session.user.companyId!];
     const scope = await resolveCompanyScope({
       userId: session.user.id as string,
       role: session.user.role as any,
@@ -50,7 +48,7 @@ export async function GET(req: NextRequest) {
     const whereClause = {
       unit: {
         building: {
-          companyId: { in: allCompanyIds },
+          companyId: { in: scope.scopeCompanyIds },
         },
       },
     };
