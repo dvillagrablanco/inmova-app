@@ -57,6 +57,7 @@ export async function GET(request: NextRequest) {
             id: true,
             estado: true,
             valorMercado: true,
+            precioCompra: true,
             rentaMensual: true,
             contracts: {
               where: { estado: 'activo' },
@@ -69,20 +70,25 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    let valorInmobiliario = 0;
+    let valorInmobLibros = 0; // Valor en libros (precio escritura)
+    let valorInmobMercado = 0; // Valor de mercado estimado
     let rentaMensualTotal = 0;
     const edificios = buildings.map((b: any) => {
-      const valorEdificio = b.units.reduce((sum: number, u: any) => {
-        // Si no hay valorMercado, estimar como renta anual × 15
-        const valor = u.valorMercado || ((u.contracts?.[0]?.rentaMensual || u.rentaMensual || 0) * 12 * 15);
-        return sum + valor;
-      }, 0);
+      let valorLibrosEdificio = 0;
+      let valorMercadoEdificio = 0;
       const rentaEdificio = b.units.reduce((sum: number, u: any) => {
         const contractRenta = u.contracts?.[0]?.rentaMensual;
         return sum + (contractRenta || u.rentaMensual || 0);
       }, 0);
 
-      valorInmobiliario += valorEdificio;
+      for (const u of b.units) {
+        valorLibrosEdificio += u.precioCompra || 0;
+        // Solo usar valorMercado real — no estimar con renta para evitar inflar
+        valorMercadoEdificio += u.valorMercado || 0;
+      }
+
+      valorInmobLibros += valorLibrosEdificio;
+      valorInmobMercado += valorMercadoEdificio;
       rentaMensualTotal += rentaEdificio;
 
       return {
@@ -92,10 +98,14 @@ export async function GET(request: NextRequest) {
         sociedad: b.company?.nombre || '',
         unidades: b.units.length,
         ocupadas: b.units.filter((u: any) => u.estado === 'ocupada').length,
-        valor: round2(valorEdificio),
+        valorLibros: round2(valorLibrosEdificio),
+        valorMercado: round2(valorMercadoEdificio),
         renta: round2(rentaEdificio),
       };
     });
+
+    // Use market value for patrimonio (or book value if no market data)
+    const valorInmobiliario = valorInmobMercado > 0 ? valorInmobMercado : valorInmobLibros;
 
     // --- 2. FINANCIERO ---
     const accounts = await prisma.financialAccount.findMany({
@@ -231,8 +241,14 @@ export async function GET(request: NextRequest) {
       data: {
         inmobiliario: {
           valor: round2(valorInmobiliario),
+          valorLibros: round2(valorInmobLibros),
+          valorMercado: round2(valorInmobMercado),
+          revalorizacion: round2(valorInmobMercado - valorInmobLibros),
+          revalorizacionPct: valorInmobLibros > 0 ? round2(((valorInmobMercado - valorInmobLibros) / valorInmobLibros) * 100) : 0,
           renta: round2(rentaMensualTotal),
           rentaAnual: round2(rentaMensualTotal * 12),
+          yieldBrutoLibros: valorInmobLibros > 0 ? round2((rentaMensualTotal * 12 / valorInmobLibros) * 100) : 0,
+          yieldBrutoMercado: valorInmobMercado > 0 ? round2((rentaMensualTotal * 12 / valorInmobMercado) * 100) : 0,
           edificios,
         },
         financiero: {

@@ -32,6 +32,10 @@ interface ExecutiveDashboardData {
   patrimonio: {
     total: number;
     inmobiliario: number;
+    inmobLibros: number;
+    inmobMercado: number;
+    inmobRevalorizacion: number;
+    inmobRevalorizacionPct: number;
     financiero: number;
     pe: number;
   };
@@ -90,6 +94,10 @@ export default function DashboardEjecutivoPage() {
         patrimonio: {
           total: fo?.patrimonio?.total || 0,
           inmobiliario: fo?.inmobiliario?.valor || 0,
+          inmobLibros: fo?.inmobiliario?.valorLibros || 0,
+          inmobMercado: fo?.inmobiliario?.valorMercado || 0,
+          inmobRevalorizacion: fo?.inmobiliario?.revalorizacion || 0,
+          inmobRevalorizacionPct: fo?.inmobiliario?.revalorizacionPct || 0,
           financiero: fo?.financiero?.valor || 0,
           pe: fo?.privateEquity?.valor || 0,
         },
@@ -196,8 +204,43 @@ export default function DashboardEjecutivoPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Inmobiliario — con desglose libros vs mercado */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Building2 className="h-4 w-4 text-gray-500" />
+                    <span className="text-sm font-medium">Inmobiliario</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-sm font-bold">{fmt(d?.patrimonio.inmobiliario || 0)}</span>
+                    <span className="text-xs text-gray-400 ml-2">({((d?.patrimonio.inmobiliario || 0) / (d?.patrimonio.total || 1) * 100).toFixed(0)}%)</span>
+                  </div>
+                </div>
+                <div className="h-2 w-full rounded-full bg-gray-100 dark:bg-gray-800">
+                  <div className="h-2 rounded-full bg-blue-500" style={{ width: `${Math.min((d?.patrimonio.inmobiliario || 0) / (d?.patrimonio.total || 1) * 100, 100)}%` }} />
+                </div>
+                {/* Libros vs Mercado sub-detail */}
+                <div className="grid grid-cols-2 gap-2 ml-6">
+                  <div className="text-xs">
+                    <span className="text-gray-400">Libros (escritura): </span>
+                    <span className="font-medium">{fmt(d?.patrimonio.inmobLibros || 0)}</span>
+                  </div>
+                  <div className="text-xs">
+                    <span className="text-gray-400">Mercado (estimado): </span>
+                    <span className="font-medium">{fmt(d?.patrimonio.inmobMercado || 0)}</span>
+                  </div>
+                </div>
+                {(d?.patrimonio.inmobRevalorizacion || 0) !== 0 && (
+                  <div className="ml-6 text-xs">
+                    <span className={d!.patrimonio.inmobRevalorizacion >= 0 ? 'text-green-600' : 'text-red-600'}>
+                      Revalorización: {d!.patrimonio.inmobRevalorizacion >= 0 ? '+' : ''}{fmt(d!.patrimonio.inmobRevalorizacion)} ({d!.patrimonio.inmobRevalorizacionPct >= 0 ? '+' : ''}{d!.patrimonio.inmobRevalorizacionPct.toFixed(1)}%)
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Financiero + PE */}
               {[
-                { label: 'Inmobiliario', value: d?.patrimonio.inmobiliario || 0, color: 'bg-blue-500', icon: Building2 },
                 { label: 'Financiero', value: d?.patrimonio.financiero || 0, color: 'bg-green-500', icon: TrendingUp },
                 { label: 'Private Equity', value: d?.patrimonio.pe || 0, color: 'bg-purple-500', icon: Landmark },
               ].map((item) => {
