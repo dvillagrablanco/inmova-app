@@ -32,29 +32,28 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const [buildings, rooms] = await Promise.all([
-      prisma.building.findMany({
-        where: { companyId: user.companyId },
-        select: {
-          id: true,
-          nombre: true,
-          direccion: true,
-          etiquetas: true,
-        },
-        orderBy: { createdAt: 'desc' },
-      }),
-      prisma.room.findMany({
-        where: { companyId: user.companyId },
-        select: {
-          rentaMensual: true,
-          estado: true,
-          unit: {
-            select: { buildingId: true },
-          },
-        },
-      }),
-    ]);
+    // Resolve company scope (include subsidiaries)
+    const { resolveCompanyScope } = await import('@/lib/company-scope');
+    const scope = await resolveCompanyScope({
+      userId: (session?.user as any)?.id as string,
+      role: ((session?.user as any)?.role || 'admin') as any,
+      primaryCompanyId: user.companyId,
+      request,
+    });
 
+    // Only fetch rooms (coliving-specific data) — then find which buildings have rooms
+    const rooms = await prisma.room.findMany({
+      where: { companyId: { in: scope.scopeCompanyIds } },
+      select: {
+        rentaMensual: true,
+        estado: true,
+        unit: {
+          select: { buildingId: true },
+        },
+      },
+    });
+
+    // Aggregate stats per building
     const statsByBuilding = new Map<string, RoomStats>();
     rooms.forEach((room) => {
       const buildingId = room.unit.buildingId;
@@ -71,12 +70,26 @@ export async function GET(request: NextRequest) {
       statsByBuilding.set(buildingId, current);
     });
 
+    // Only fetch buildings that actually have coliving rooms
+    const buildingIdsWithRooms = Array.from(statsByBuilding.keys());
+
+    if (buildingIdsWithRooms.length === 0) {
+      return NextResponse.json([]);
+    }
+
+    const buildings = await prisma.building.findMany({
+      where: { id: { in: buildingIdsWithRooms } },
+      select: {
+        id: true,
+        nombre: true,
+        direccion: true,
+        etiquetas: true,
+      },
+      orderBy: { nombre: 'asc' },
+    });
+
     const properties = buildings.map((building) => {
-      const stats = statsByBuilding.get(building.id) || {
-        total: 0,
-        ocupadas: 0,
-        rentaTotal: 0,
-      };
+      const stats = statsByBuilding.get(building.id)!;
       const precioMedio =
         stats.total > 0 ? stats.rentaTotal / stats.total : 0;
 
