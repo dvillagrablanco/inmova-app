@@ -381,6 +381,57 @@ export async function GET(request: NextRequest) {
       // Skip if query fails
     }
 
+    // ============================================
+    // ALERTAS DE MOROSIDAD CONSECUTIVA (2+ pagos atrasados)
+    // ============================================
+    try {
+      const tenantsWithOverdue = await prisma.tenant.findMany({
+        where: {
+          companyId,
+          contracts: {
+            some: {
+              estado: 'activo',
+              payments: { some: { estado: 'pendiente', fechaVencimiento: { lt: today } } },
+            },
+          },
+        },
+        select: {
+          id: true,
+          nombreCompleto: true,
+          contracts: {
+            where: { estado: 'activo' },
+            select: {
+              payments: {
+                where: { estado: 'pendiente', fechaVencimiento: { lt: today } },
+                select: { id: true },
+              },
+              unit: { select: { numero: true, building: { select: { nombre: true } } } },
+            },
+            take: 1,
+          },
+        },
+        take: 20,
+      });
+
+      for (const tenant of tenantsWithOverdue) {
+        const overdueCount = tenant.contracts[0]?.payments?.length || 0;
+        if (overdueCount >= 2) {
+          const unit = tenant.contracts[0]?.unit;
+          alerts.push({
+            id: `moroso-${tenant.id}`,
+            type: 'payment',
+            priority: overdueCount >= 3 ? 'alto' : 'medio',
+            title: `Morosidad: ${overdueCount} pagos atrasados`,
+            description: `${tenant.nombreCompleto} | ${unit?.building?.nombre || ''} ${unit?.numero || ''}`,
+            entityId: tenant.id,
+            entityType: 'tenant',
+          });
+        }
+      }
+    } catch {
+      // Skip silently
+    }
+
     // Ordenar alertas por prioridad y fecha
     const priorityOrder = { alto: 0, medio: 1, bajo: 2 };
     alerts.sort((a, b) => {
