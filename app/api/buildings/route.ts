@@ -70,6 +70,8 @@ export async function GET(req: NextRequest) {
               id: true,
               estado: true,
               rentaMensual: true,
+              valorMercado: true,
+              precioCompra: true,
             },
           },
           company: {
@@ -117,6 +119,13 @@ export async function GET(req: NextRequest) {
           occupiedUnits,
           ocupacionPct: Number((Math.round(ocupacionPct * 10) / 10).toFixed(1)),
           ingresosMensuales: Number((Math.round(ingresosMensuales * 100) / 100).toFixed(2)),
+          // Yield por edificio
+          valorMercado: building.units.reduce((s: number, u: any) => s + (u.valorMercado || 0), 0),
+          precioCompra: building.units.reduce((s: number, u: any) => s + (u.precioCompra || 0), 0),
+          yieldBruto: (() => {
+            const vm = building.units.reduce((s: number, u: any) => s + (u.valorMercado || 0), 0);
+            return vm > 0 ? Number(((ingresosMensuales * 12 / vm) * 100).toFixed(1)) : 0;
+          })(),
         },
       };
     });

@@ -33,6 +33,8 @@ export async function GET(request: NextRequest) {
       request,
     });
     const companyIds = scope.scopeCompanyIds;
+    const { searchParams } = new URL(request.url);
+    const breakdown = searchParams.get('breakdown'); // 'sociedad' = per-company breakdown
 
     const now = new Date();
     const currentYear = now.getFullYear();
@@ -128,9 +130,36 @@ export async function GET(request: NextRequest) {
       calcPeriod(anualStart, anualEnd, monthsAnual, 'Año Natural', `Ene-Dic ${prevYear}`),
     ]);
 
+    // If breakdown by sociedad requested, calculate per company
+    let porSociedad: any = null;
+    if (breakdown === 'sociedad') {
+      const companies = await prisma.company.findMany({
+        where: { id: { in: companyIds } },
+        select: { id: true, nombre: true },
+      });
+      porSociedad = {};
+      for (const company of companies) {
+        // Override companyIds temporarily for per-company calc
+        const origIds = companyIds;
+        const singleId = [company.id];
+        // Inline calc for YTD only (most relevant)
+        const ing = await prisma.payment.aggregate({ where: { estado: 'pagado', fechaPago: { gte: ytdStart, lte: now }, contract: { unit: { building: { companyId: { in: singleId } } } } }, _sum: { monto: true } });
+        const gas = await prisma.expense.aggregate({ where: { fecha: { gte: ytdStart, lte: now }, building: { companyId: { in: singleId } } }, _sum: { monto: true } });
+        const ingVal = ing._sum.monto || 0;
+        const gasVal = gas._sum.monto || 0;
+        porSociedad[company.nombre] = {
+          ingresos: Math.round(ingVal),
+          gastos: Math.round(gasVal),
+          noi: Math.round(ingVal - gasVal),
+          margenNoi: ingVal > 0 ? Math.round((ingVal - gasVal) / ingVal * 100) : 0,
+        };
+      }
+    }
+
     return NextResponse.json({
       success: true,
       periods: { ytd, tam, anual },
+      ...(porSociedad && { porSociedad }),
     });
   } catch (error: any) {
     logger.error('[Investment P&L]:', error);

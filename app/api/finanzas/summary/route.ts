@@ -295,10 +295,39 @@ export async function GET(request: NextRequest) {
     else if (accountingTotals.ingresos > 0 || accountingTotals.gastos > 0) dataSource = 'contabilidad';
     else if (bankTxIncome > 0 || bankTxExpense > 0) dataSource = 'banco';
 
-    // Total de registros contables (para mostrar si hay datos)
+    // Total de registros contables
     const totalAccountingRecords = await prisma.accountingTransaction.count({
       where: { companyId: { in: companyIds } },
     });
+
+    // DSO (Days Sales Outstanding) — media de días entre vencimiento y cobro
+    const paidWithDates = await prisma.payment.findMany({
+      where: {
+        estado: 'pagado',
+        fechaPago: { not: null },
+        contract: { unit: { building: { companyId: { in: companyIds } } } },
+      },
+      select: { fechaVencimiento: true, fechaPago: true },
+      take: 500,
+      orderBy: { fechaPago: 'desc' },
+    });
+    let dso = 0;
+    if (paidWithDates.length > 0) {
+      const totalDays = paidWithDates.reduce((s, p) => {
+        const diff = (new Date(p.fechaPago!).getTime() - new Date(p.fechaVencimiento).getTime()) / 86400000;
+        return s + Math.max(0, diff);
+      }, 0);
+      dso = Math.round(totalDays / paidWithDates.length);
+    }
+
+    // Tasa de cobro
+    const totalPaid = await prisma.payment.count({
+      where: { estado: 'pagado', contract: { unit: { building: { companyId: { in: companyIds } } } } },
+    });
+    const totalPayments = await prisma.payment.count({
+      where: { contract: { unit: { building: { companyId: { in: companyIds } } } } },
+    });
+    const tasaCobro = totalPayments > 0 ? Math.round((totalPaid / totalPayments) * 100) : 0;
 
     return NextResponse.json({
       summary: {
@@ -322,6 +351,11 @@ export async function GET(request: NextRequest) {
         pendientes: bankTxPending,
         ingresosMes: bankTxIncome,
         gastosMes: bankTxExpense,
+        tasaConciliacion: reconciliationRate,
+      },
+      kpisFinancieros: {
+        dso,
+        tasaCobro,
         tasaConciliacion: reconciliationRate,
       },
       latestPeriod: {
