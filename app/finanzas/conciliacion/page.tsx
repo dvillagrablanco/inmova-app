@@ -178,6 +178,7 @@ export default function ConciliacionBancariaPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
+  const [periodFilter, setPeriodFilter] = useState<string>('all');
   const [isSyncing, setIsSyncing] = useState(false);
   const [aiProgress, setAiProgress] = useState<{
     active: boolean;
@@ -206,7 +207,7 @@ export default function ConciliacionBancariaPage() {
   // Cargar datos desde API - accepts explicit params to avoid stale closures
   const fetchData = async (
     page = 1,
-    filters?: { company?: string; status?: string; type?: string; search?: string }
+    filters?: { company?: string; status?: string; type?: string; search?: string; period?: string }
   ) => {
     const f = filters || {
       company: selectedCompany,
@@ -223,6 +224,23 @@ export default function ConciliacionBancariaPage() {
       if (f.search) params.set('search', f.search);
       params.set('page', String(page));
       params.set('limit', '50');
+
+      // Period filter → dateFrom/dateTo
+      const prd = f.period || periodFilter;
+      const now = new Date();
+      if (prd === 'mes') {
+        params.set('dateFrom', new Date(now.getFullYear(), now.getMonth(), 1).toISOString());
+        params.set('dateTo', now.toISOString());
+      } else if (prd === 'ytd') {
+        params.set('dateFrom', new Date(now.getFullYear(), 0, 1).toISOString());
+        params.set('dateTo', now.toISOString());
+      } else if (prd === 'tam') {
+        params.set('dateFrom', new Date(now.getTime() - 365 * 86400000).toISOString());
+        params.set('dateTo', now.toISOString());
+      } else if (prd === 'anual') {
+        params.set('dateFrom', new Date(now.getFullYear() - 1, 0, 1).toISOString());
+        params.set('dateTo', new Date(now.getFullYear() - 1, 11, 31, 23, 59, 59).toISOString());
+      }
 
       const response = await fetch(`/api/finanzas/conciliacion?${params.toString()}`);
       if (response.ok) {
@@ -274,7 +292,7 @@ export default function ConciliacionBancariaPage() {
     }, 300);
     return () => clearTimeout(timeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchTerm, selectedCompany, statusFilter, typeFilter]);
+  }, [searchTerm, selectedCompany, statusFilter, typeFilter, periodFilter]);
 
   // Filtrar cuentas por empresa seleccionada
   const filteredAccounts =
@@ -729,6 +747,18 @@ export default function ConciliacionBancariaPage() {
                       <SelectItem value="all">Todos</SelectItem>
                       <SelectItem value="income">Ingresos</SelectItem>
                       <SelectItem value="expense">Gastos</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={periodFilter} onValueChange={setPeriodFilter}>
+                    <SelectTrigger className="w-[150px]">
+                      <SelectValue placeholder="Periodo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todo el historial</SelectItem>
+                      <SelectItem value="mes">Mes actual</SelectItem>
+                      <SelectItem value="ytd">YTD {new Date().getFullYear()}</SelectItem>
+                      <SelectItem value="tam">TAM (12M)</SelectItem>
+                      <SelectItem value="anual">Año {new Date().getFullYear() - 1}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
