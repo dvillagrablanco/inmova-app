@@ -111,11 +111,17 @@ const ACCEPTED_FILES = {
   'application/pdf': ['.pdf'],
   'application/msword': ['.doc'],
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+  'application/vnd.ms-excel': ['.xls'],
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
+  'text/csv': ['.csv'],
   'image/jpeg': ['.jpg', '.jpeg'],
   'image/png': ['.png'],
   'image/tiff': ['.tiff', '.tif'],
   'application/zip': ['.zip'],
   'application/x-zip-compressed': ['.zip'],
+  'application/x-rar-compressed': ['.rar'],
+  'application/vnd.rar': ['.rar'],
+  'application/x-7z-compressed': ['.7z'],
 };
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB

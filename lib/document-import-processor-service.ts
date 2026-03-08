@@ -572,6 +572,20 @@ export function isZipFile(mimeType: string): boolean {
   return mimeType === 'application/zip' || mimeType === 'application/x-zip-compressed';
 }
 
+export function isArchiveFile(mimeType: string, fileName?: string): boolean {
+  const archiveMimes = [
+    'application/zip', 'application/x-zip-compressed',
+    'application/x-rar-compressed', 'application/vnd.rar',
+    'application/x-7z-compressed',
+  ];
+  if (archiveMimes.includes(mimeType)) return true;
+  if (fileName) {
+    const ext = fileName.toLowerCase().split('.').pop();
+    return ['zip', 'rar', '7z'].includes(ext || '');
+  }
+  return false;
+}
+
 /**
  * Verifica si un tipo de archivo está soportado
  */

@@ -19,7 +19,8 @@ import { uploadDocument } from '@/lib/document-service';
 import { 
   processFile, 
   processZipFile, 
-  isZipFile, 
+  isZipFile,
+  isArchiveFile,
   calculateChecksum 
 } from '@/lib/document-import-processor-service';
 import logger from '@/lib/logger';
@@ -178,7 +179,7 @@ export async function POST(request: NextRequest) {
         const buffer = Buffer.from(arrayBuffer);
 
         // Si es ZIP, procesar contenidos
-        if (isZipFile(file.type) || file.name.toLowerCase().endsWith('.zip')) {
+        if (isArchiveFile(file.type, file.name)) {
           const zipContents = await processZipFile(buffer, file.name);
           
           // Crear DocumentImport para cada archivo del ZIP
