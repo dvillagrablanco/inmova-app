@@ -3,132 +3,166 @@
 /**
  * DEMO SHOWCASE TOUR — GRUPO VIDARO
  * 
- * Tour NAVEGABLE: cada paso lleva al usuario a la página real de la funcionalidad.
- * Overlay modal con navegación anterior/siguiente y barra de progreso.
- * 
- * Flujo: Navegar a ruta → Esperar carga → Mostrar overlay con explicación
+ * Tour NAVEGABLE: cada paso lleva al usuario a la página real.
+ * Estado persistido en sessionStorage para sobrevivir a las navegaciones de Next.js.
  */
 
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { DEMO_STEPS, DEMO_USER_EMAIL, type DemoStep } from '@/lib/onboarding-demo-tour';
+import { DEMO_STEPS, DEMO_USER_EMAIL } from '@/lib/onboarding-demo-tour';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, X, Presentation, RotateCcw } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, Presentation } from 'lucide-react';
 
-const STORAGE_KEY = 'inmova-demo-tour-state';
+const STORAGE_KEY = 'inmova-demo-tour';
 
 interface TourState {
+  active: boolean;
   stepIndex: number;
   completed: boolean;
 }
 
+function readState(): TourState {
+  try {
+    const raw = sessionStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch { /* ignore */ }
+  return { active: false, stepIndex: 0, completed: false };
+}
+
+function writeState(state: TourState) {
+  try {
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch { /* ignore */ }
+}
+
 export function DemoShowcaseTour() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const pathname = usePathname();
+
   const [active, setActive] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
-  const [navigating, setNavigating] = useState(false);
   const [showControls, setShowControls] = useState(false);
-  const mountedRef = useRef(false);
+  const [initialized, setInitialized] = useState(false);
 
   const isDemoUser = session?.user?.email === DEMO_USER_EMAIL;
-  const step = DEMO_STEPS[stepIndex] as DemoStep | undefined;
   const totalSteps = DEMO_STEPS.length;
+  const step = DEMO_STEPS[stepIndex];
 
-  // Auto-start on first visit
+  // ── INIT: Read persisted state on mount ──
   useEffect(() => {
-    if (!isDemoUser || mountedRef.current) return;
-    mountedRef.current = true;
+    if (status === 'loading' || !isDemoUser || initialized) return;
+    setInitialized(true);
 
-    try {
-      const stored = sessionStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const state: TourState = JSON.parse(stored);
-        if (state.completed) {
-          setShowControls(true);
-          setStepIndex(state.stepIndex);
-          return;
-        }
-        // Resume from where they left off
-        setStepIndex(state.stepIndex);
+    const state = readState();
+
+    if (state.completed) {
+      // Tour was completed, show restart controls
+      setStepIndex(state.stepIndex);
+      setShowControls(true);
+      return;
+    }
+
+    if (state.active) {
+      // Tour is in progress (we came back from a navigation)
+      setStepIndex(state.stepIndex);
+      // Check if we're on the right page
+      const expectedRoute = DEMO_STEPS[state.stepIndex]?.route;
+      if (!expectedRoute || pathname?.startsWith(expectedRoute)) {
+        // We're on the right page, show the overlay
+        setActive(true);
+      } else {
+        // Wrong page, navigate to the right one
+        router.push(expectedRoute);
+        // The next mount will catch us in the right state
       }
-    } catch { /* ignore */ }
+      return;
+    }
 
-    // Auto-start after a delay
+    // First time — auto-start after delay
     const timer = setTimeout(() => {
+      const s: TourState = { active: true, stepIndex: 0, completed: false };
+      writeState(s);
       setActive(true);
-      navigateToStep(0);
-    }, 1200);
+    }, 1500);
 
     return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isDemoUser]);
+  }, [status, isDemoUser, initialized, pathname, router]);
 
-  // Save state
-  const saveState = useCallback((index: number, completed: boolean) => {
-    try {
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ stepIndex: index, completed }));
-    } catch { /* ignore */ }
-  }, []);
+  // ── When pathname changes while tour is active, show overlay if on correct page ──
+  useEffect(() => {
+    if (!isDemoUser || !initialized) return;
+    const state = readState();
+    if (!state.active) return;
 
-  // Navigate to a step's route
-  const navigateToStep = useCallback((index: number) => {
+    const expectedRoute = DEMO_STEPS[state.stepIndex]?.route;
+    if (expectedRoute && pathname?.startsWith(expectedRoute)) {
+      setStepIndex(state.stepIndex);
+      setActive(true);
+    }
+  }, [pathname, isDemoUser, initialized]);
+
+  // ── NAVIGATE to a step ──
+  const goToStep = useCallback((index: number) => {
     const target = DEMO_STEPS[index];
     if (!target) return;
 
-    if (target.route && target.route !== pathname) {
-      setNavigating(true);
+    // Persist state BEFORE navigating (survives remount)
+    const newState: TourState = { active: true, stepIndex: index, completed: false };
+    writeState(newState);
+    setStepIndex(index);
+
+    if (target.route && !pathname?.startsWith(target.route)) {
+      // Navigate — component will remount, read state from sessionStorage
+      setActive(false); // hide overlay during transition
       router.push(target.route);
-      // Wait for navigation + page load
-      setTimeout(() => {
-        setNavigating(false);
-        setStepIndex(index);
-        saveState(index, false);
-      }, 1200);
     } else {
-      setStepIndex(index);
-      saveState(index, false);
+      // Same page — just show overlay
+      setActive(true);
     }
-  }, [pathname, router, saveState]);
+  }, [pathname, router]);
 
   const handleNext = useCallback(() => {
     if (stepIndex < totalSteps - 1) {
-      navigateToStep(stepIndex + 1);
+      goToStep(stepIndex + 1);
     } else {
-      // Tour completed
+      // Complete
+      writeState({ active: false, stepIndex: stepIndex, completed: true });
       setActive(false);
       setShowControls(true);
-      saveState(stepIndex, true);
     }
-  }, [stepIndex, totalSteps, navigateToStep, saveState]);
+  }, [stepIndex, totalSteps, goToStep]);
 
   const handlePrev = useCallback(() => {
     if (stepIndex > 0) {
-      navigateToStep(stepIndex - 1);
+      goToStep(stepIndex - 1);
     }
-  }, [stepIndex, navigateToStep]);
+  }, [stepIndex, goToStep]);
 
   const handleClose = useCallback(() => {
+    writeState({ active: false, stepIndex, completed: true });
     setActive(false);
     setShowControls(true);
-    saveState(stepIndex, true);
-  }, [stepIndex, saveState]);
+  }, [stepIndex]);
 
   const handlePresent = useCallback(() => {
+    writeState({ active: true, stepIndex: 0, completed: false });
     setShowControls(false);
     setStepIndex(0);
-    setActive(true);
-    navigateToStep(0);
-  }, [navigateToStep]);
+    const firstRoute = DEMO_STEPS[0]?.route;
+    if (firstRoute && !pathname?.startsWith(firstRoute)) {
+      router.push(firstRoute);
+    } else {
+      setActive(true);
+    }
+  }, [pathname, router]);
 
   const handleResume = useCallback(() => {
     setShowControls(false);
-    setActive(true);
-    navigateToStep(stepIndex);
-  }, [stepIndex, navigateToStep]);
+    goToStep(stepIndex);
+  }, [stepIndex, goToStep]);
 
   if (!isDemoUser) return null;
 
@@ -136,42 +170,46 @@ export function DemoShowcaseTour() {
     <>
       {/* TOUR OVERLAY */}
       <AnimatePresence>
-        {active && step && !navigating && (
+        {active && step && (
           <motion.div
+            key={`step-${stepIndex}`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
+            transition={{ duration: 0.2 }}
             className="fixed inset-0 z-[9999] flex items-center justify-center"
           >
             {/* Backdrop */}
-            <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]" onClick={handleClose} />
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]" />
 
             {/* Content Card */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
               transition={{ duration: 0.2, delay: 0.05 }}
               className="relative z-10 w-full max-w-xl mx-4"
             >
               <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
                 {/* Progress Bar */}
-                <div className="h-1 bg-gray-100">
-                  <div
-                    className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-500"
-                    style={{ width: `${((stepIndex + 1) / totalSteps) * 100}%` }}
+                <div className="h-1.5 bg-gray-100">
+                  <motion.div
+                    className="h-full bg-gradient-to-r from-indigo-500 to-purple-500"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${((stepIndex + 1) / totalSteps) * 100}%` }}
+                    transition={{ duration: 0.4 }}
                   />
                 </div>
 
                 {/* Step Counter + Close */}
                 <div className="flex items-center justify-between px-5 pt-3">
-                  <span className="text-[10px] font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
+                  <span className="text-[10px] font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full">
                     PASO {stepIndex + 1} / {totalSteps}
                   </span>
                   <button
                     onClick={handleClose}
-                    className="p-1 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                    className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                    title="Cerrar (puede continuar después)"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -232,23 +270,6 @@ export function DemoShowcaseTour() {
         )}
       </AnimatePresence>
 
-      {/* Loading indicator during navigation */}
-      <AnimatePresence>
-        {navigating && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[9998] flex items-center justify-center bg-black/30"
-          >
-            <div className="bg-white rounded-xl px-6 py-4 shadow-lg flex items-center gap-3">
-              <div className="h-5 w-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-              <span className="text-sm text-gray-600">Navegando...</span>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Controls when tour is paused/completed */}
       {showControls && !active && (
         <div className="fixed bottom-6 left-6 z-50 flex items-center gap-2">
@@ -257,7 +278,7 @@ export function DemoShowcaseTour() {
               onClick={handleResume}
               variant="outline"
               size="sm"
-              className="bg-white/90 backdrop-blur-sm shadow-lg border-gray-200 hover:bg-gray-50 transition-all"
+              className="bg-white/90 backdrop-blur-sm shadow-lg border-gray-200 hover:bg-gray-50"
             >
               <ChevronRight className="h-3.5 w-3.5 mr-1 text-gray-600" />
               <span className="text-gray-700 text-xs">Continuar ({stepIndex + 1}/{totalSteps})</span>
@@ -265,7 +286,6 @@ export function DemoShowcaseTour() {
           )}
           <Button
             onClick={handlePresent}
-            variant="default"
             size="sm"
             className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg"
           >
