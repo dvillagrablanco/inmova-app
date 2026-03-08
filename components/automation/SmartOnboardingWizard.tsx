@@ -15,11 +15,12 @@ import {
   ArrowRight,
   X,
   RefreshCw,
-  Sparkles
+  Sparkles,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import logger, { logError } from '@/lib/logger';
+import { filterOnboardingTasksByModules } from '@/lib/onboarding-module-filter';
 
 interface OnboardingStep {
   id: string;
@@ -73,7 +74,7 @@ export default function SmartOnboardingWizard() {
       setIsVisible(false);
       return;
     }
-    
+
     // Verificar si el wizard fue cerrado previamente (localStorage)
     if (userId) {
       const dismissedKey = `${WIZARD_DISMISSED_KEY}-${userId}`;
@@ -89,7 +90,7 @@ export default function SmartOnboardingWizard() {
         // localStorage no disponible
       }
     }
-    
+
     loadProgress();
   }, [userRole, userId, sessionStatus]);
 
@@ -98,8 +99,26 @@ export default function SmartOnboardingWizard() {
       const res = await fetch('/api/onboarding/progress');
       if (res.ok) {
         const data = await res.json();
+
+        // Filtrar pasos según módulos activos del usuario
+        const userModules = (session?.user as any)?.preferredModules as string[] | undefined;
+        if (userModules && userModules.length > 0 && data.steps) {
+          const tasksWithRoute = data.steps.map((s: OnboardingStep) => ({
+            ...s,
+            route: s.action?.startsWith('navigate:') ? s.action.replace('navigate:', '') : s.action,
+            taskId: s.id,
+          }));
+          const filtered = filterOnboardingTasksByModules(tasksWithRoute, userModules);
+          const filteredIds = new Set(filtered.map((f: any) => f.taskId));
+          data.steps = data.steps.filter((s: OnboardingStep) => filteredIds.has(s.id));
+          data.totalSteps = data.steps.length;
+          data.completedSteps = data.steps.filter((s: OnboardingStep) => s.completed).length;
+          data.percentageComplete =
+            data.totalSteps > 0 ? Math.round((data.completedSteps / data.totalSteps) * 100) : 100;
+        }
+
         setProgress(data);
-        
+
         // Si ya está completado, no mostrar
         if (data.percentageComplete === 100) {
           setIsVisible(false);
@@ -121,7 +140,7 @@ export default function SmartOnboardingWizard() {
     if (step.action.startsWith('navigate:')) {
       const path = step.action.replace('navigate:', '');
       router.push(path);
-      
+
       // Marcar como completado después de un breve delay
       setTimeout(() => {
         completeStep(step.id);
@@ -136,17 +155,17 @@ export default function SmartOnboardingWizard() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'complete_step',
-          stepId
-        })
+          stepId,
+        }),
       });
 
       if (res.ok) {
         const updated = await res.json();
         setProgress(updated);
-        
+
         if (updated.percentageComplete === 100) {
           toast.success('¡Onboarding completado! 🎉', {
-            description: 'Estás listo para usar INMOVA al 100%'
+            description: 'Estás listo para usar INMOVA al 100%',
           });
           setTimeout(() => setIsVisible(false), 3000);
         } else {
@@ -163,7 +182,7 @@ export default function SmartOnboardingWizard() {
       const res = await fetch('/api/onboarding/progress', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'skip' })
+        body: JSON.stringify({ action: 'skip' }),
       });
 
       if (res.ok) {
@@ -195,7 +214,7 @@ export default function SmartOnboardingWizard() {
       const res = await fetch('/api/onboarding/progress', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'restart' })
+        body: JSON.stringify({ action: 'restart' }),
       });
 
       if (res.ok) {
@@ -256,7 +275,8 @@ export default function SmartOnboardingWizard() {
                 <div>
                   <CardTitle className="text-xl">Bienvenido a INMOVA</CardTitle>
                   <CardDescription>
-                    Configuración {progress.vertical} - {progress.completedSteps}/{progress.totalSteps} pasos completados
+                    Configuración {progress.vertical} - {progress.completedSteps}/
+                    {progress.totalSteps} pasos completados
                   </CardDescription>
                 </div>
               </div>
@@ -277,11 +297,7 @@ export default function SmartOnboardingWizard() {
                 >
                   Omitir
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleDismiss}
-                >
+                <Button variant="ghost" size="icon" onClick={handleDismiss}>
                   <X className="h-4 w-4" />
                 </Button>
               </div>
@@ -294,7 +310,8 @@ export default function SmartOnboardingWizard() {
                   {progress.percentageComplete}% completado
                 </span>
                 <span className="text-sm text-muted-foreground">
-                  ~{progress.steps.reduce((acc, s) => acc + (s.estimatedTime || 0), 0)} min restantes
+                  ~{progress.steps.reduce((acc, s) => acc + (s.estimatedTime || 0), 0)} min
+                  restantes
                 </span>
               </div>
               <Progress value={progress.percentageComplete} className="h-2" />
@@ -358,9 +375,7 @@ export default function SmartOnboardingWizard() {
 
             {/* Lista de todos los pasos */}
             <div className="space-y-2">
-              <h4 className="text-sm font-semibold text-muted-foreground mb-3">
-                Todos los pasos:
-              </h4>
+              <h4 className="text-sm font-semibold text-muted-foreground mb-3">Todos los pasos:</h4>
               {progress.steps.map((step, index) => (
                 <motion.button
                   key={step.id}
@@ -371,11 +386,12 @@ export default function SmartOnboardingWizard() {
                   disabled={step.completed}
                   className={`
                     w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all
-                    ${step.completed
-                      ? 'bg-muted/50 border-muted cursor-default opacity-70'
-                      : index === safeCurrentStep
-                      ? 'border-primary bg-primary/5 hover:bg-primary/10'
-                      : 'border-border hover:border-primary/50 hover:bg-accent'
+                    ${
+                      step.completed
+                        ? 'bg-muted/50 border-muted cursor-default opacity-70'
+                        : index === safeCurrentStep
+                          ? 'border-primary bg-primary/5 hover:bg-primary/10'
+                          : 'border-border hover:border-primary/50 hover:bg-accent'
                     }
                   `}
                 >
@@ -383,16 +399,20 @@ export default function SmartOnboardingWizard() {
                     {step.completed ? (
                       <CheckCircle2 className="h-5 w-5 text-green-600" />
                     ) : (
-                      <Circle className={`h-5 w-5 ${
-                        index === safeCurrentStep ? 'text-primary' : 'text-muted-foreground'
-                      }`} />
+                      <Circle
+                        className={`h-5 w-5 ${
+                          index === safeCurrentStep ? 'text-primary' : 'text-muted-foreground'
+                        }`}
+                      />
                     )}
                   </div>
                   <div className="flex-1 text-left">
                     <div className="flex items-center gap-2">
-                      <span className={`text-sm font-medium ${
-                        step.completed ? 'line-through text-muted-foreground' : ''
-                      }`}>
+                      <span
+                        className={`text-sm font-medium ${
+                          step.completed ? 'line-through text-muted-foreground' : ''
+                        }`}
+                      >
                         {step.title}
                       </span>
                       {step.required && !step.completed && (
@@ -401,9 +421,7 @@ export default function SmartOnboardingWizard() {
                         </Badge>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      {step.description}
-                    </p>
+                    <p className="text-xs text-muted-foreground">{step.description}</p>
                   </div>
                   {step.estimatedTime && !step.completed && (
                     <span className="text-xs text-muted-foreground flex items-center gap-1">

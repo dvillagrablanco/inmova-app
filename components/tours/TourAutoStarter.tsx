@@ -14,10 +14,23 @@ import { VirtualTourPlayer } from './VirtualTourPlayer';
 const ROUTE_TO_TOUR_MAP: Record<string, string> = {
   '/dashboard': 'tour-dashboard',
   '/edificios': 'tour-edificios',
+  '/propiedades': 'tour-propiedades',
   '/unidades': 'tour-unidades',
+  '/inquilinos': 'tour-inquilinos',
   '/contratos': 'tour-contratos',
+  '/pagos': 'tour-pagos',
   '/mantenimiento': 'tour-mantenimiento',
-  '/coliving': 'tour-coliving'
+  '/coliving': 'tour-coliving',
+  '/room-rental': 'tour-room-rental',
+  '/str': 'tour-str',
+  '/flipping': 'tour-flipping',
+  '/construccion': 'tour-construccion',
+  '/comunidades': 'tour-comunidades',
+  '/professional': 'tour-professional',
+  '/inversiones': 'tour-inversiones',
+  '/family-office': 'tour-family-office',
+  '/crm': 'tour-crm',
+  '/finanzas': 'tour-finanzas',
 };
 
 // Clave para sessionStorage - evita mostrar tours cerrados en esta sesión
@@ -28,7 +41,7 @@ export function TourAutoStarter() {
   const { availableTours, completeTour, isTourCompleted, loading } = useVirtualTour();
   const [activeTour, setActiveTour] = useState<any>(null);
   const [autoplayEnabled, setAutoplayEnabled] = useState(true);
-  
+
   // Ref para evitar múltiples inicios del mismo tour
   const closedToursRef = useRef<Set<string>>(new Set());
   const isProcessingRef = useRef(false);
@@ -52,10 +65,7 @@ export function TourAutoStarter() {
   const markTourAsClosed = useCallback((tourId: string) => {
     closedToursRef.current.add(tourId);
     try {
-      sessionStorage.setItem(
-        SESSION_CLOSED_TOURS_KEY, 
-        JSON.stringify([...closedToursRef.current])
-      );
+      sessionStorage.setItem(SESSION_CLOSED_TOURS_KEY, JSON.stringify([...closedToursRef.current]));
     } catch (e) {
       // Ignorar errores de sessionStorage
     }
@@ -93,7 +103,7 @@ export function TourAutoStarter() {
     if (isTourCompleted(tourId)) return;
 
     // Buscar el tour en la lista de disponibles
-    const tour = availableTours.find(t => t.id === tourId);
+    const tour = availableTours.find((t) => t.id === tourId);
     if (!tour) return;
 
     // Verificar si tiene autoStart habilitado
@@ -140,10 +150,6 @@ export function TourAutoStarter() {
   if (!activeTour) return null;
 
   return (
-    <VirtualTourPlayer
-      tour={activeTour}
-      onComplete={handleTourComplete}
-      onSkip={handleTourSkip}
-    />
+    <VirtualTourPlayer tour={activeTour} onComplete={handleTourComplete} onSkip={handleTourSkip} />
   );
 }
