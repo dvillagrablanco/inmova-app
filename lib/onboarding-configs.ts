@@ -43,7 +43,7 @@ export const ONBOARDING_ALQUILER_TRADICIONAL: OnboardingStep[] = [
     description: 'Una propiedad puede ser un edificio completo, una casa o cualquier inmueble. Después podrás añadir unidades (apartamentos, locales, etc.) dentro de ella.',
     action: { label: 'Crear propiedad con asistente', route: '/edificios/nuevo?wizard=true' },
     icon: '🏢',
-    videoUrl: '/videos/crear-primera-propiedad.mp4'
+    // videoUrl: pendiente de crear video
   },
   {
     id: 'units',
@@ -102,7 +102,7 @@ export const ONBOARDING_ROOM_RENTAL: OnboardingStep[] = [
     description: 'Define cómo se reparten los gastos comunes (luz, agua, internet). Puedes hacerlo por igual, por porcentaje o personalizado.',
     action: { label: 'Configurar prorrateo', route: '/room-rental?wizard=expenses' },
     icon: '🧠',
-    videoUrl: '/videos/prorrateo-gastos.mp4'
+    // videoUrl: pendiente de crear video
   },
   {
     id: 'house_rules',
@@ -140,7 +140,7 @@ export const ONBOARDING_STR: OnboardingStep[] = [
     description: 'Sincroniza tus cuentas de Airbnb, Booking, Expedia y VRBO. La sincronización es bidireccional y en tiempo real.',
     action: { label: 'Conectar canales', route: '/str/channels?wizard=true' },
     icon: '🌐',
-    videoUrl: '/videos/conectar-channel-manager.mp4'
+    // videoUrl: pendiente de crear video
   },
   {
     id: 'import_listings',
@@ -186,7 +186,7 @@ export const ONBOARDING_FLIPPING: OnboardingStep[] = [
     description: 'Calcula el coste de la reforma por categorías (estructura, instalaciones, acabados). Te mostraremos benchmarks de €/m² típicos.',
     action: { label: 'Calcular presupuesto', route: '/flipping?wizard=budget' },
     icon: '🛠️',
-    videoUrl: '/videos/calcular-presupuesto-reforma.mp4'
+    // videoUrl: pendiente de crear video
   },
   {
     id: 'sale_projection',
@@ -276,7 +276,7 @@ export const ONBOARDING_PROFESIONAL: OnboardingStep[] = [
     description: 'Activa el timer integrado para registrar horas trabajadas en cada proyecto. También puedes usar la app móvil.',
     action: { label: 'Configurar timer', route: '/professional?wizard=timer' },
     icon: '⏱️',
-    videoUrl: '/videos/time-tracking.mp4'
+    // videoUrl: pendiente de crear video
   },
   {
     id: 'recurring_billing',
@@ -328,7 +328,7 @@ export const ONBOARDING_COMUNIDADES: OnboardingStep[] = [
     description: 'Usa el asistente para convocar juntas (ordinarias o extraordinarias) con plantillas legales predefinidas. Envío automático certificado.',
     action: { label: 'Convocar junta', route: '/reuniones?wizard=true' },
     icon: '📅',
-    videoUrl: '/videos/convocar-junta.mp4'
+    // videoUrl: pendiente de crear video
   },
   {
     id: 'voting',

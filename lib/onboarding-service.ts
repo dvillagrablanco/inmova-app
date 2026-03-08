@@ -52,7 +52,7 @@ const ONBOARDING_ALQUILER_TRADICIONAL: OnboardingTaskDefinition[] = [
     order: 0,
     isMandatory: false,
     estimatedTime: 90,
-    videoUrl: '/videos/onboarding/intro-90s.mp4',
+    // videoUrl: pendiente de crear videos de onboarding
     unlocks: []
   },
   {
@@ -76,7 +76,7 @@ const ONBOARDING_ALQUILER_TRADICIONAL: OnboardingTaskDefinition[] = [
     isMandatory: true,
     estimatedTime: 120,
     route: '/edificios/nuevo?wizard=true',
-    videoUrl: '/videos/crear-edificio.mp4',
+    // videoUrl: pendiente de crear video
     helpArticle: '/docs/edificios',
     unlocks: ['unidades_module', 'dashboard_building_card']
   },
@@ -136,7 +136,7 @@ const ONBOARDING_ROOM_RENTAL: OnboardingTaskDefinition[] = [
     order: 0,
     isMandatory: false,
     estimatedTime: 90,
-    videoUrl: '/videos/onboarding/room-rental-intro.mp4',
+    // videoUrl: pendiente de crear video
     unlocks: []
   },
   {
@@ -171,7 +171,7 @@ const ONBOARDING_ROOM_RENTAL: OnboardingTaskDefinition[] = [
     isMandatory: true,
     estimatedTime: 180,
     route: '/room-rental/[unitId]/proration',
-    videoUrl: '/videos/prorrateo-gastos.mp4',
+    // videoUrl: pendiente de crear video
     helpArticle: '/docs/prorrateo',
     unlocks: ['automatic_proration']
   },
@@ -219,7 +219,7 @@ const ONBOARDING_STR: OnboardingTaskDefinition[] = [
     order: 0,
     isMandatory: false,
     estimatedTime: 90,
-    videoUrl: '/videos/onboarding/str-intro.mp4',
+    // videoUrl: pendiente de crear video
     unlocks: []
   },
   {
@@ -231,7 +231,7 @@ const ONBOARDING_STR: OnboardingTaskDefinition[] = [
     isMandatory: true,
     estimatedTime: 240,
     route: '/str/channels?wizard=true',
-    videoUrl: '/videos/conectar-channel-manager.mp4',
+    // videoUrl: pendiente de crear video
     helpArticle: '/docs/str-channels',
     unlocks: ['str_channel_manager']
   },
@@ -291,7 +291,7 @@ const ONBOARDING_FLIPPING: OnboardingTaskDefinition[] = [
     order: 0,
     isMandatory: false,
     estimatedTime: 90,
-    videoUrl: '/videos/onboarding/flipping-intro.mp4',
+    // videoUrl: pendiente de crear video
     unlocks: []
   },
   {
@@ -315,7 +315,7 @@ const ONBOARDING_FLIPPING: OnboardingTaskDefinition[] = [
     isMandatory: true,
     estimatedTime: 180,
     route: '/flipping/[id]/presupuesto',
-    videoUrl: '/videos/calcular-presupuesto-reforma.mp4',
+    // videoUrl: pendiente de crear video
     unlocks: ['budget_calculator']
   },
   {
@@ -373,7 +373,7 @@ const ONBOARDING_GENERAL: OnboardingTaskDefinition[] = [
     order: 0,
     isMandatory: false,
     estimatedTime: 90,
-    videoUrl: '/videos/onboarding/intro-90s.mp4',
+    // videoUrl: pendiente de crear videos de onboarding
     unlocks: []
   },
   {
@@ -445,7 +445,7 @@ const ONBOARDING_CONSTRUCCION: OnboardingTaskDefinition[] = [
     order: 0,
     isMandatory: false,
     estimatedTime: 90,
-    videoUrl: '/videos/onboarding/construccion-intro.mp4',
+    // videoUrl: pendiente de crear video
     unlocks: []
   },
   {
@@ -529,7 +529,7 @@ const ONBOARDING_PROFESIONAL: OnboardingTaskDefinition[] = [
     order: 0,
     isMandatory: false,
     estimatedTime: 90,
-    videoUrl: '/videos/onboarding/profesional-intro.mp4',
+    // videoUrl: pendiente de crear video
     unlocks: []
   },
   {
@@ -602,7 +602,7 @@ const ONBOARDING_COMUNIDADES: OnboardingTaskDefinition[] = [
     order: 0,
     isMandatory: false,
     estimatedTime: 90,
-    videoUrl: '/videos/onboarding/comunidades-intro.mp4',
+    // videoUrl: pendiente de crear video
     unlocks: []
   },
   {
@@ -648,7 +648,7 @@ const ONBOARDING_COMUNIDADES: OnboardingTaskDefinition[] = [
     isMandatory: false,
     estimatedTime: 90,
     route: '/comunidades/reuniones',
-    videoUrl: '/videos/convocar-junta.mp4',
+    // videoUrl: pendiente de crear video
     unlocks: ['juntas_module']
   },
   {
