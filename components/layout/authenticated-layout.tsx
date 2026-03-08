@@ -42,6 +42,9 @@ const DemoShowcaseTour = dynamic(
   { ssr: false }
 );
 
+// Email del usuario demo — se excluye de onboarding estándar
+const DEMO_USER_EMAIL = 'demo@vidaroinversiones.com';
+
 /**
  * Layout autenticado con navegación optimizada para mobile-first
  * Incluye:
@@ -263,13 +266,13 @@ export function AuthenticatedLayout({
         <BottomNavigation />
       </div>
 
-      {/* AI Onboarding Chat - Primera vez (NO para superadmin) */}
-      {showSetupWizard && session?.user?.role !== 'super_admin' && (
+      {/* AI Onboarding Chat - Primera vez (NO para superadmin ni demo user) */}
+      {showSetupWizard && session?.user?.role !== 'super_admin' && session?.user?.email !== DEMO_USER_EMAIL && (
         <AIOnboardingChat onComplete={handleCompleteSetup} onSkip={handleSkipSetup} />
       )}
 
-      {/* Onboarding Checklist - Hasta completar (NO para superadmin) */}
-      {showChecklist && session?.user?.id && session?.user?.role !== 'super_admin' && (
+      {/* Onboarding Checklist - Hasta completar (NO para superadmin ni demo user) */}
+      {showChecklist && session?.user?.id && session?.user?.role !== 'super_admin' && session?.user?.email !== DEMO_USER_EMAIL && (
         <OnboardingChecklist
           userId={session.user.id}
           isNewUser={isNewUser}
@@ -286,17 +289,17 @@ export function AuthenticatedLayout({
       {/* Shortcuts Help Dialog - Ayuda de atajos con ? */}
       <ShortcutsHelpDialog />
 
-      {/* Navigation Tutorial - Tutorial interactivo (NO para superadmin) */}
-      {session?.user?.role !== 'super_admin' && <NavigationTutorial />}
+      {/* Navigation Tutorial - Tutorial interactivo (NO para superadmin ni demo) */}
+      {session?.user?.role !== 'super_admin' && session?.user?.email !== DEMO_USER_EMAIL && <NavigationTutorial />}
 
-      {/* Tour Auto-Starter - Detecta la página y lanza tours contextuales */}
-      {session?.user?.role !== 'super_admin' && <TourAutoStarter />}
+      {/* Tour Auto-Starter - Detecta la página y lanza tours contextuales (NO para demo) */}
+      {session?.user?.role !== 'super_admin' && session?.user?.email !== DEMO_USER_EMAIL && <TourAutoStarter />}
 
       {/* Demo Showcase Tour - Tour de presentación para demo@vidaroinversiones.com */}
       <DemoShowcaseTour />
 
-      {/* Chatbot de Onboarding - Widget flotante durante onboarding activo */}
-      {showChecklist && !showSetupWizard && session?.user?.role !== 'super_admin' && (
+      {/* Chatbot de Onboarding - Widget flotante durante onboarding activo (NO para demo) */}
+      {showChecklist && !showSetupWizard && session?.user?.role !== 'super_admin' && session?.user?.email !== DEMO_USER_EMAIL && (
         <OnboardingChatbotWidget />
       )}
 

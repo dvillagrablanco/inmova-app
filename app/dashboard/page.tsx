@@ -312,8 +312,8 @@ function DashboardPageContent() {
           </div>
         </div>
 
-        {/* Smart Onboarding Wizard - Sistema automatizado de configuración inicial */}
-        <SmartOnboardingWizard />
+        {/* Smart Onboarding Wizard - Sistema automatizado de configuración inicial (NO para demo user) */}
+        {session?.user?.email !== 'demo@vidaroinversiones.com' && <SmartOnboardingWizard />}
         {/* Demo Data Generator - Solo visible para empresas de prueba/demo sin datos */}
         {data?.esEmpresaPrueba && data?.kpis?.numeroPropiedades === 0 && <DemoDataGenerator />}
 
@@ -690,8 +690,8 @@ function DashboardPageContent() {
       {/* Chatbot inteligente de soporte 24/7 - Sistema automatizado sin intervención humana */}
       {/* Chatbot se renderiza desde AuthenticatedLayout para evitar duplicación */}
 
-      {/* Onboarding Tour Guiado */}
-      <OnboardingTour role={session?.user?.role} />
+      {/* Onboarding Tour Guiado (NO para demo user — usa DemoShowcaseTour) */}
+      {session?.user?.email !== 'demo@vidaroinversiones.com' && <OnboardingTour role={session?.user?.role} />}
     </AuthenticatedLayout>
   );
 }
