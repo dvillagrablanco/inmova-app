@@ -919,6 +919,28 @@ export function getUserVerticalTour(vertical?: BusinessVertical | null): Vertica
   return VERTICAL_TOURS[vertical] || null;
 }
 
+// Función para obtener el tour filtrado por módulos activos
+export function getFilteredVerticalTour(
+  vertical?: BusinessVertical | null,
+  activeModules?: string[] | null
+): VerticalTour | null {
+  const tour = getUserVerticalTour(vertical);
+  if (!tour) return null;
+  
+  // Si no hay filtro de módulos, devolver el tour completo
+  if (!activeModules || activeModules.length === 0) return tour;
+  
+  // Filtrar steps y setupActions según módulos activos
+  // Se importa dinámicamente para evitar circular dependencies
+  const { filterJoyrideStepsByModules, filterSetupActionsByModules } = require('@/lib/onboarding-module-filter');
+  
+  return {
+    ...tour,
+    steps: filterJoyrideStepsByModules(tour.steps, activeModules),
+    setupActions: filterSetupActionsByModules(tour.setupActions, activeModules),
+  };
+}
+
 // Función para calcular el progreso del setup
 export function calculateSetupProgress(actions: SetupAction[]): number {
   if (actions.length === 0) return 0;

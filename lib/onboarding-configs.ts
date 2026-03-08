@@ -428,9 +428,11 @@ function mapBusinessVerticalToModelo(vertical: string): ModeloNegocio {
     'alquiler_tradicional': 'alquiler_tradicional',
     'str_vacacional': 'str',
     'coliving': 'room_rental',
+    'room_rental': 'room_rental',
     'construccion': 'construccion',
     'flipping': 'flipping',
     'servicios_profesionales': 'profesional',
+    'comunidades': 'comunidades',
     'mixto': 'general',
   };
   
