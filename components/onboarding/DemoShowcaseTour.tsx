@@ -37,7 +37,7 @@ function writeState(state: TourState) {
   } catch { /* ignore */ }
 }
 
-export function DemoShowcaseTour() {
+export default function DemoShowcaseTour() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const pathname = usePathname();

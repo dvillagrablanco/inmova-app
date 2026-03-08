@@ -1,5 +1,5 @@
 /**
- * Test del Demo Tour navegable — verifica que fluye correctamente
+ * Test del Demo Tour navegable — debug version
  */
 import { chromium } from 'playwright';
 
@@ -8,7 +8,7 @@ const EMAIL = 'demo@vidaroinversiones.com';
 const PASSWORD = 'VidaroDemo2026!';
 
 async function main() {
-  console.log('🎭 Iniciando test del Demo Tour...\n');
+  console.log('🎭 Test Demo Tour — Debug\n');
 
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({
@@ -17,148 +17,150 @@ async function main() {
   });
   const page = await context.newPage();
 
+  // Collect console logs from the page
+  page.on('console', msg => {
+    if (msg.text().includes('demo') || msg.text().includes('Demo') || msg.text().includes('tour') || msg.text().includes('Tour') || msg.text().includes('DEMO')) {
+      console.log(`   [BROWSER] ${msg.text()}`);
+    }
+  });
+
   try {
     // 1. Login
     console.log('1. Login...');
     await page.goto(`${BASE_URL}/login`, { waitUntil: 'networkidle', timeout: 30000 });
+    
+    // Accept cookies if banner appears
+    const cookieBtn = page.locator('button:has-text("Aceptar todas")');
+    if (await cookieBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await cookieBtn.click();
+      console.log('   Cookies accepted');
+    }
+    
     await page.fill('input[name="email"], input[type="email"]', EMAIL);
     await page.fill('input[name="password"], input[type="password"]', PASSWORD);
     await page.click('button[type="submit"]');
     
-    // Wait for redirect to dashboard
-    await page.waitForURL('**/dashboard**', { timeout: 30000 }).catch(() => {
-      console.log('   ⚠️ No redirigió a /dashboard, URL actual:', page.url());
+    await page.waitForURL('**/dashboard**', { timeout: 30000 }).catch(() => {});
+    console.log('   ✅ URL:', page.url());
+
+    // Accept cookies on dashboard too
+    const cookieBtn2 = page.locator('button:has-text("Aceptar todas")');
+    if (await cookieBtn2.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await cookieBtn2.click();
+      console.log('   Cookies accepted on dashboard');
+    }
+
+    // 2. Wait longer for tour to appear
+    console.log('\n2. Esperando tour (8 seg)...');
+    await page.waitForTimeout(8000);
+
+    // Check sessionStorage
+    const storageState = await page.evaluate(() => {
+      return sessionStorage.getItem('inmova-demo-tour');
     });
-    console.log('   ✅ Login OK → URL:', page.url());
+    console.log(`   sessionStorage['inmova-demo-tour']: ${storageState}`);
 
-    // 2. Wait for the demo tour to appear
-    console.log('\n2. Esperando que aparezca el tour...');
-    await page.waitForTimeout(3000);
+    // Check if user email is correct in session
+    const sessionInfo = await page.evaluate(() => {
+      // Look for next-auth session data
+      const cookies = document.cookie;
+      return cookies.substring(0, 100);
+    });
+    console.log(`   Cookies (first 100): ${sessionInfo}`);
 
-    // Check for tour overlay
-    const overlay = await page.locator('[class*="fixed"][class*="inset-0"][class*="z-"]').first();
-    const overlayVisible = await overlay.isVisible().catch(() => false);
-    console.log(`   Tour overlay visible: ${overlayVisible}`);
-
-    // Look for the step counter "PASO 1 / 12"
-    const stepCounter = await page.locator('text=/PASO \\d+ \\/ \\d+/').first();
-    const counterVisible = await stepCounter.isVisible().catch(() => false);
-    console.log(`   Step counter visible: ${counterVisible}`);
-    if (counterVisible) {
-      const counterText = await stepCounter.textContent();
-      console.log(`   Step counter text: "${counterText}"`);
-    }
-
-    // Look for "Grupo Vidaro" text
-    const vidaro = await page.locator('text=Grupo Vidaro').first();
-    const vidaroVisible = await vidaro.isVisible().catch(() => false);
-    console.log(`   "Grupo Vidaro" visible: ${vidaroVisible}`);
-
-    // Look for "Siguiente" button
-    const nextBtn = await page.locator('button:has-text("Siguiente")').first();
-    const nextVisible = await nextBtn.isVisible().catch(() => false);
-    console.log(`   Botón "Siguiente" visible: ${nextVisible}`);
-
-    if (!nextVisible) {
-      console.log('\n   ❌ Tour no apareció. Buscando elementos de onboarding...');
-      // Check what onboarding elements ARE showing
-      const aiChat = await page.locator('text=Configuración con IA').isVisible().catch(() => false);
-      console.log(`   AIOnboardingChat visible: ${aiChat}`);
-      const wizard = await page.locator('text=Continuar configuración').isVisible().catch(() => false);
-      console.log(`   SmartOnboardingWizard visible: ${wizard}`);
-      
-      // Take screenshot to see what's there
-      await page.screenshot({ path: '/opt/cursor/artifacts/demo-tour-state.png', fullPage: false });
-      console.log('   📸 Screenshot guardado en /opt/cursor/artifacts/demo-tour-state.png');
-      
-      // Check page content
-      const bodyText = await page.locator('body').textContent();
-      const hasPortal = bodyText?.includes('Portal') || false;
-      const hasBienvenido = bodyText?.includes('Bienvenido') || false;
-      const hasInmova = bodyText?.includes('INMOVA') || false;
-      console.log(`   Body contains: Portal=${hasPortal}, Bienvenido=${hasBienvenido}, INMOVA=${hasInmova}`);
-      
-      await browser.close();
-      return;
-    }
-
-    // 3. Click through all 12 steps
-    console.log('\n3. Recorriendo los 12 pasos del tour...');
+    // Check the page for DemoShowcaseTour component
+    const hasOverlay = await page.locator('.fixed.inset-0').count();
+    console.log(`   Fixed inset-0 elements: ${hasOverlay}`);
     
-    const expectedRoutes = [
-      '/dashboard',       // 1. Welcome
-      '/dashboard',       // 2. Dashboard
-      '/propiedades',     // 3. Properties
-      '/portal-inquilino',// 4. Tenant Portal
-      '/contratos',       // 5. Contracts
-      '/family-office',   // 6. Family Office
-      '/valoracion-ia',   // 7. AI
-      '/mantenimiento',   // 8. Maintenance
-      '/configuracion',   // 9. Automation
-      '/dashboard',       // 10. Before/After
-      '/dashboard',       // 11. Closing
-    ];
+    // Check for ANY modal or overlay
+    const overlays = await page.locator('[class*="z-[9999]"], [class*="z-[999"]').count();
+    console.log(`   High z-index elements: ${overlays}`);
 
-    for (let i = 0; i < 12; i++) {
-      const stepNum = i + 1;
-      
-      // Wait for step to be visible
-      await page.waitForTimeout(1500);
-      
-      // Check current URL
-      const currentUrl = page.url();
-      const currentPath = new URL(currentUrl).pathname;
-      
-      // Check step counter
-      const counter = await page.locator('text=/PASO \\d+ \\/ \\d+/').first().textContent().catch(() => '?');
-      
-      // Check if overlay is visible
-      const isOverlayUp = await page.locator('button:has-text("Siguiente"), button:has-text("Explorar")').first().isVisible().catch(() => false);
-      
-      const expectedRoute = expectedRoutes[i] || '?';
-      const routeMatch = currentPath.startsWith(expectedRoute) ? '✅' : `⚠️ (expected ${expectedRoute})`;
-      
-      console.log(`   Paso ${stepNum}: ${counter} | URL: ${currentPath} ${routeMatch} | Overlay: ${isOverlayUp ? '✅' : '❌'}`);
+    // Check for "PASO" text anywhere
+    const pasoText = await page.locator('text=/PASO/').count();
+    console.log(`   "PASO" text elements: ${pasoText}`);
 
-      if (!isOverlayUp) {
-        console.log(`   ❌ Overlay no visible en paso ${stepNum}. Deteniendo.`);
-        await page.screenshot({ path: `/opt/cursor/artifacts/demo-tour-step${stepNum}.png`, fullPage: false });
-        console.log(`   📸 Screenshot: demo-tour-step${stepNum}.png`);
-        break;
-      }
+    // Check for "Grupo Vidaro" text
+    const vidaro = await page.locator('text=Grupo Vidaro').count();
+    console.log(`   "Grupo Vidaro" elements: ${vidaro}`);
+    
+    // Check for "Presentar Demo" button
+    const presentBtn = await page.locator('button:has-text("Presentar Demo")').count();
+    console.log(`   "Presentar Demo" buttons: ${presentBtn}`);
 
-      // Click "Siguiente" (or "Explorar" on last step)
-      if (stepNum < 12) {
-        await page.locator('button:has-text("Siguiente")').first().click();
-      } else {
-        // Last step — click "Explorar ✨"
-        const exploreBtn = await page.locator('button:has-text("Explorar")').first();
-        if (await exploreBtn.isVisible()) {
-          await exploreBtn.click();
-          console.log('   ✅ Tour completado — click en "Explorar"');
-        }
-      }
+    // Check for "Siguiente" button
+    const nextBtn = await page.locator('button:has-text("Siguiente")').count();
+    console.log(`   "Siguiente" buttons: ${nextBtn}`);
+
+    // Screenshot
+    await page.screenshot({ path: '/opt/cursor/artifacts/demo-debug.png', fullPage: false });
+    console.log('   📸 Screenshot: demo-debug.png');
+
+    // 3. If tour not visible, try setting sessionStorage and reloading
+    if (nextBtn === 0 && presentBtn === 0) {
+      console.log('\n3. Tour no visible. Forzando estado via sessionStorage...');
       
-      // Wait for navigation
-      await page.waitForTimeout(1500);
+      await page.evaluate(() => {
+        sessionStorage.removeItem('inmova-demo-tour');
+        sessionStorage.removeItem('inmova-demo-tour-completed');
+        sessionStorage.removeItem('inmova-demo-tour-state');
+      });
+      
+      await page.reload({ waitUntil: 'networkidle' });
+      await page.waitForTimeout(5000);
+      
+      const nextBtn2 = await page.locator('button:has-text("Siguiente")').count();
+      const pasoText2 = await page.locator('text=/PASO/').count();
+      console.log(`   After reload — "Siguiente": ${nextBtn2}, "PASO": ${pasoText2}`);
+      
+      await page.screenshot({ path: '/opt/cursor/artifacts/demo-debug2.png', fullPage: false });
+      console.log('   📸 Screenshot: demo-debug2.png');
     }
 
-    // 4. Check controls after tour
-    console.log('\n4. Verificando controles post-tour...');
-    await page.waitForTimeout(1000);
-    const presentBtn = await page.locator('button:has-text("Presentar Demo")').first();
-    const presentVisible = await presentBtn.isVisible().catch(() => false);
-    console.log(`   Botón "Presentar Demo" visible: ${presentVisible}`);
+    // 4. If still not visible, try clicking "Presentar Demo" if it appears
+    const presentBtnAfter = await page.locator('button:has-text("Presentar Demo")');
+    if (await presentBtnAfter.isVisible().catch(() => false)) {
+      console.log('\n4. Clickando "Presentar Demo"...');
+      await presentBtnAfter.click();
+      await page.waitForTimeout(2000);
+      
+      const nextBtnFinal = await page.locator('button:has-text("Siguiente")').count();
+      console.log(`   "Siguiente" visible: ${nextBtnFinal > 0}`);
+    }
 
-    // 5. Take final screenshot
-    await page.screenshot({ path: '/opt/cursor/artifacts/demo-tour-final.png', fullPage: false });
-    console.log('   📸 Screenshot final guardado');
+    // 5. If tour IS visible now, click through steps
+    const finalNext = page.locator('button:has-text("Siguiente")');
+    if (await finalNext.isVisible().catch(() => false)) {
+      console.log('\n5. Tour visible! Recorriendo pasos...');
+      
+      for (let i = 0; i < 11; i++) {
+        const stepNum = i + 1;
+        const counter = await page.locator('text=/PASO \\d+ \\/ \\d+/').first().textContent().catch(() => '?');
+        const url = new URL(page.url()).pathname;
+        
+        const isLast = stepNum === 11;
+        const btn = isLast
+          ? page.locator('button:has-text("Explorar")')
+          : page.locator('button:has-text("Siguiente")');
+        const btnVisible = await btn.isVisible().catch(() => false);
+        
+        console.log(`   ${counter} | URL: ${url} | Btn: ${btnVisible ? '✅' : '❌'}`);
+        
+        if (!btnVisible) {
+          await page.screenshot({ path: `/opt/cursor/artifacts/demo-step${stepNum}.png` });
+          break;
+        }
+        
+        await btn.click();
+        await page.waitForTimeout(2000);
+      }
+    }
 
     console.log('\n✅ Test completado');
 
   } catch (error: any) {
     console.error('\n❌ Error:', error.message);
-    await page.screenshot({ path: '/opt/cursor/artifacts/demo-tour-error.png', fullPage: false }).catch(() => {});
+    await page.screenshot({ path: '/opt/cursor/artifacts/demo-error.png' }).catch(() => {});
   } finally {
     await browser.close();
   }

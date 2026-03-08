@@ -38,7 +38,7 @@ const OnboardingChatbotWidget = dynamic(
 
 // Demo Showcase Tour - tour de presentación para usuario demo Vidaro
 const DemoShowcaseTour = dynamic(
-  () => import('@/components/onboarding/DemoShowcaseTour').then(m => ({ default: m.DemoShowcaseTour })),
+  () => import('@/components/onboarding/DemoShowcaseTour'),
   { ssr: false }
 );
 
