@@ -28,7 +28,6 @@ import {
   FileText,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import logger, { logError } from '@/lib/logger';
 
 interface TenantData {
   id: string;
@@ -77,7 +76,7 @@ export default function PerfilInquilinoPage() {
       setTenantData(data);
       setFormData(data);
     } catch (error) {
-      logger.error('Error:', error);
+      console.error('Error:', error);
       toast.error('Error al cargar el perfil');
     } finally {
       setIsLoading(false);
@@ -98,7 +97,7 @@ export default function PerfilInquilinoPage() {
       toast.success('Perfil actualizado correctamente');
       fetchTenantData();
     } catch (error) {
-      logger.error('Error:', error);
+      console.error('Error:', error);
       toast.error('Error al actualizar el perfil');
     } finally {
       setIsSaving(false);
@@ -140,7 +139,7 @@ export default function PerfilInquilinoPage() {
       toast.success('Contraseña actualizada correctamente');
       setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (error: any) {
-      logger.error('Error:', error);
+      console.error('Error:', error);
       toast.error(error.message || 'Error al cambiar la contraseña');
     } finally {
       setIsSaving(false);

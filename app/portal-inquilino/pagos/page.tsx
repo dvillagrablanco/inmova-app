@@ -21,7 +21,6 @@ import {
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import StripePaymentForm from './components/StripePaymentForm';
-import logger, { logError } from '@/lib/logger';
 
 // Solo inicializar Stripe si la key está configurada
 const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
@@ -75,7 +74,7 @@ export default function TenantPaymentsPage() {
       const data = await response.json();
       setPayments(data.payments || []);
     } catch (error) {
-      logger.error('Error fetching payments:', error);
+      console.error('Error fetching payments:', error);
       toast.error('Error al cargar los pagos');
     } finally {
       setLoading(false);
@@ -105,7 +104,7 @@ export default function TenantPaymentsPage() {
       setClientSecret(data.clientSecret);
       setSelectedPayment(payment);
     } catch (error: any) {
-      logger.error('Error creating payment intent:', error);
+      console.error('Error creating payment intent:', error);
       toast.error(error.message || 'Error al procesar el pago');
     } finally {
       setProcessingPayment(false);
@@ -150,7 +149,7 @@ export default function TenantPaymentsPage() {
 
       toast.success('Recibo descargado exitosamente');
     } catch (error: any) {
-      logger.error('Error downloading receipt:', error);
+      console.error('Error downloading receipt:', error);
       toast.error(error.message || 'Error al descargar el recibo');
     }
   };
@@ -173,7 +172,7 @@ export default function TenantPaymentsPage() {
 
       // El URL se limpiará automáticamente cuando se cierre la pestaña
     } catch (error: any) {
-      logger.error('Error viewing receipt:', error);
+      console.error('Error viewing receipt:', error);
       toast.error(error.message || 'Error al visualizar el recibo');
     }
   };

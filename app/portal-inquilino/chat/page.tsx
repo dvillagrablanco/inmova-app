@@ -22,7 +22,6 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
 import { MessageSquare, Plus, Send, Clock, CheckCircle2 } from 'lucide-react';
-import logger, { logError } from '@/lib/logger';
 
 interface Conversation {
   id: string;
@@ -86,7 +85,7 @@ export default function TenantChatPage() {
       const data = await response.json();
       setConversations(Array.isArray(data.conversations) ? data.conversations : []);
     } catch (error) {
-      logger.error('Error loading conversations:', error);
+      console.error('Error loading conversations:', error);
       toast.error('Error al cargar conversaciones');
       setConversations([]);
     } finally {
@@ -103,7 +102,7 @@ export default function TenantChatPage() {
       const data = await response.json();
       setMessages(Array.isArray(data.messages) ? data.messages : []);
     } catch (error) {
-      logger.error('Error loading messages:', error);
+      console.error('Error loading messages:', error);
       setMessages([]);
     }
   };
@@ -128,7 +127,7 @@ export default function TenantChatPage() {
       loadMessages(selectedConversation.id);
       loadConversations();
     } catch (error) {
-      logger.error('Error sending message:', error);
+      console.error('Error sending message:', error);
       toast.error('Error al enviar mensaje');
     } finally {
       setSending(false);
@@ -158,7 +157,7 @@ export default function TenantChatPage() {
       setSelectedConversation(data.conversation);
       toast.success('Conversación creada exitosamente');
     } catch (error) {
-      logger.error('Error creating conversation:', error);
+      console.error('Error creating conversation:', error);
       toast.error('Error al crear conversación');
     } finally {
       setSending(false);

@@ -37,7 +37,6 @@ import {
   BreadcrumbPage,
 } from '@/components/ui/breadcrumb';
 import { toast } from 'sonner';
-import logger, { logError } from '@/lib/logger';
 
 interface Document {
   id: string;
@@ -122,7 +121,7 @@ export default function DocumentosPortalPage() {
         setSharedDocuments(sharedData.shares || []);
       }
     } catch (error) {
-      logger.error('Error fetching data:', error);
+      console.error('Error fetching data:', error);
       toast.error('Error al cargar documentos');
     } finally {
       setIsLoading(false);
@@ -150,7 +149,7 @@ export default function DocumentosPortalPage() {
         toast.error('Error al descargar documento');
       }
     } catch (error) {
-      logger.error('Error downloading document:', error);
+      console.error('Error downloading document:', error);
       toast.error('Error al descargar documento');
     }
   };
@@ -174,7 +173,7 @@ export default function DocumentosPortalPage() {
         toast.error('El recibo aún no está disponible');
       }
     } catch (error) {
-      logger.error('Error downloading receipt:', error);
+      console.error('Error downloading receipt:', error);
       toast.error('Error al descargar recibo');
     }
   };

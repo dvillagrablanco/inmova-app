@@ -5,7 +5,6 @@ import { PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js'
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
-import logger, { logError } from '@/lib/logger';
 
 interface StripePaymentFormProps {
   onSuccess: () => void;
@@ -44,7 +43,7 @@ export default function StripePaymentForm({ onSuccess, onCancel }: StripePayment
         onSuccess();
       }
     } catch (error: any) {
-      logger.error('Payment error:', error);
+      console.error('Payment error:', error);
       toast.error('Error al procesar el pago');
     } finally {
       setIsProcessing(false);
