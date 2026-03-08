@@ -69,10 +69,10 @@ export const VERTICAL_TOURS: Record<BusinessVertical, VerticalTour> = {
         placement: 'right',
       },
       {
-        target: '[data-tour="unidades-menu"]',
+        target: '[data-tour="propiedades-menu"]',
         content: (
           <div className="space-y-2">
-            <h4 className="font-semibold">Paso 2: Añadir unidades</h4>
+            <h4 className="font-semibold">Paso 2: Gestionar propiedades</h4>
             <p className="text-sm">Define las unidades o apartamentos dentro de tus edificios.</p>
           </div>
         ),
@@ -339,10 +339,10 @@ export const VERTICAL_TOURS: Record<BusinessVertical, VerticalTour> = {
         placement: 'right',
       },
       {
-        target: '[data-tour="str-pricing-menu"]',
+        target: '[data-tour="str-channels-menu"]',
         content: (
           <div className="space-y-2">
-            <h4 className="font-semibold">Paso 3: Precios dinámicos</h4>
+            <h4 className="font-semibold">Paso 3: Revenue y precios dinámicos</h4>
             <p className="text-sm">Optimiza tus tarifas con IA.</p>
           </div>
         ),
@@ -689,6 +689,36 @@ export const VERTICAL_TOURS: Record<BusinessVertical, VerticalTour> = {
         placement: 'center',
         disableBeacon: true,
       },
+      {
+        target: '[data-tour="room-rental-menu"]',
+        content: (
+          <div className="space-y-2">
+            <h4 className="font-semibold">Paso 1: Configurar habitaciones</h4>
+            <p className="text-sm">Define las habitaciones disponibles con precio, características y fotos.</p>
+          </div>
+        ),
+        placement: 'right',
+      },
+      {
+        target: '[data-tour="contratos-menu"]',
+        content: (
+          <div className="space-y-2">
+            <h4 className="font-semibold">Paso 2: Crear contratos por habitación</h4>
+            <p className="text-sm">Genera contratos individuales para cada habitación con prorrateo de gastos.</p>
+          </div>
+        ),
+        placement: 'right',
+      },
+      {
+        target: '[data-tour="pagos-menu"]',
+        content: (
+          <div className="space-y-2">
+            <h4 className="font-semibold">Paso 3: Gestionar cobros</h4>
+            <p className="text-sm">Configura pagos mensuales y prorrateo automático de gastos comunes.</p>
+          </div>
+        ),
+        placement: 'right',
+      },
     ],
     setupActions: [
       {
@@ -728,6 +758,46 @@ export const VERTICAL_TOURS: Record<BusinessVertical, VerticalTour> = {
         ),
         placement: 'center',
         disableBeacon: true,
+      },
+      {
+        target: '[data-tour="comunidades-lista-menu"]',
+        content: (
+          <div className="space-y-2">
+            <h4 className="font-semibold">Paso 1: Crear comunidad</h4>
+            <p className="text-sm">Registra la comunidad de propietarios con dirección, CIF y espacios comunes.</p>
+          </div>
+        ),
+        placement: 'right',
+      },
+      {
+        target: '[data-tour="comunidades-propietarios-menu"]',
+        content: (
+          <div className="space-y-2">
+            <h4 className="font-semibold">Paso 2: Añadir propietarios</h4>
+            <p className="text-sm">Registra copropietarios con sus coeficientes de propiedad.</p>
+          </div>
+        ),
+        placement: 'right',
+      },
+      {
+        target: '[data-tour="comunidades-cuotas-menu"]',
+        content: (
+          <div className="space-y-2">
+            <h4 className="font-semibold">Paso 3: Configurar cuotas</h4>
+            <p className="text-sm">Define cuotas ordinarias y extraordinarias con cálculo automático.</p>
+          </div>
+        ),
+        placement: 'right',
+      },
+      {
+        target: '[data-tour="comunidades-reuniones-menu"]',
+        content: (
+          <div className="space-y-2">
+            <h4 className="font-semibold">Paso 4: Convocar juntas</h4>
+            <p className="text-sm">Organiza juntas de propietarios con convocatoria automática y actas digitales.</p>
+          </div>
+        ),
+        placement: 'right',
       },
     ],
     setupActions: [
@@ -779,6 +849,36 @@ export const VERTICAL_TOURS: Record<BusinessVertical, VerticalTour> = {
         ),
         placement: 'center',
         disableBeacon: true,
+      },
+      {
+        target: '[data-tour="propiedades-menu"]',
+        content: (
+          <div className="space-y-2">
+            <h4 className="font-semibold">Paso 1: Añadir propiedades</h4>
+            <p className="text-sm">Registra tus propiedades, edificios y unidades para comenzar.</p>
+          </div>
+        ),
+        placement: 'right',
+      },
+      {
+        target: '[data-tour="cuadro-mandos-menu"]',
+        content: (
+          <div className="space-y-2">
+            <h4 className="font-semibold">Paso 2: Panel financiero</h4>
+            <p className="text-sm">Visualiza el P&L consolidado y KPIs de todas tus verticales.</p>
+          </div>
+        ),
+        placement: 'right',
+      },
+      {
+        target: '[data-tour="dashboard-link"]',
+        content: (
+          <div className="space-y-2">
+            <h4 className="font-semibold">¡Todo listo!</h4>
+            <p className="text-sm">Explora los módulos según tu modelo de negocio. Puedes activar y desactivar módulos desde Configuración.</p>
+          </div>
+        ),
+        placement: 'bottom',
       },
     ],
     setupActions: [
