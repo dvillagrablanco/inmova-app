@@ -94,6 +94,13 @@ interface BuildingOption {
   direccion: string;
 }
 
+interface UnitOption {
+  id: string;
+  numero: string;
+  tipo: string;
+  superficie: number;
+}
+
 interface Provider {
   id: string;
   nombre: string;
@@ -126,11 +133,13 @@ export default function NuevaSolicitudCotizacionPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [buildings, setBuildings] = useState<BuildingOption[]>([]);
+  const [units, setUnits] = useState<UnitOption[]>([]);
   const [providers, setProviders] = useState<Provider[]>([]);
   const [loadingBuildings, setLoadingBuildings] = useState(false);
+  const [loadingUnits, setLoadingUnits] = useState(false);
   const [loadingProviders, setLoadingProviders] = useState(false);
 
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<FormData & { unitId: string }>({
     tipoSeguro: '',
     direccionInmueble: '',
     superficieM2: '',
@@ -138,6 +147,7 @@ export default function NuevaSolicitudCotizacionPage() {
     usoPrincipal: '',
     sumaAsegurada: '',
     buildingId: '',
+    unitId: '',
     descripcion: '',
     coberturasSolicitadas: [],
     fechaLimiteRespuesta: '',
@@ -220,12 +230,36 @@ export default function NuevaSolicitudCotizacionPage() {
     }));
   };
 
-  const handleBuildingSelect = (buildingId: string) => {
-    updateField('buildingId', buildingId === '_none' ? '' : buildingId);
-    if (buildingId && buildingId !== '_none') {
-      const building = buildings.find((b) => b.id === buildingId);
+  const handleBuildingSelect = async (buildingId: string) => {
+    const id = buildingId === '_none' ? '' : buildingId;
+    updateField('buildingId', id);
+    setFormData(prev => ({ ...prev, buildingId: id, unitId: '' }));
+    setUnits([]);
+
+    if (id) {
+      const building = buildings.find((b) => b.id === id);
       if (building?.direccion && !formData.direccionInmueble) {
         updateField('direccionInmueble', building.direccion);
+      }
+      // Load units for this building
+      setLoadingUnits(true);
+      try {
+        const res = await fetch(`/api/units?buildingId=${id}`);
+        if (res.ok) {
+          const data = await res.json();
+          const list = Array.isArray(data) ? data : (data.data ?? []);
+          setUnits(list.map((u: any) => ({ id: u.id, numero: u.numero, tipo: u.tipo, superficie: u.superficie || 0 })));
+        }
+      } catch {} finally { setLoadingUnits(false); }
+    }
+  };
+
+  const handleUnitSelect = (unitId: string) => {
+    setFormData(prev => ({ ...prev, unitId: unitId === '_none' ? '' : unitId }));
+    if (unitId && unitId !== '_none') {
+      const unit = units.find(u => u.id === unitId);
+      if (unit?.superficie && !formData.superficieM2) {
+        updateField('superficieM2', String(unit.superficie));
       }
     }
   };
@@ -486,14 +520,14 @@ export default function NuevaSolicitudCotizacionPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="buildingId">Inmueble existente (opcional)</Label>
+                    <Label htmlFor="buildingId">Edificio</Label>
                     <Select
                       value={formData.buildingId || '_none'}
                       onValueChange={handleBuildingSelect}
                     >
                       <SelectTrigger id="buildingId">
                         <SelectValue
-                          placeholder={loadingBuildings ? 'Cargando...' : 'Seleccionar inmueble'}
+                          placeholder={loadingBuildings ? 'Cargando...' : 'Seleccionar edificio'}
                         />
                       </SelectTrigger>
                       <SelectContent>
@@ -507,6 +541,31 @@ export default function NuevaSolicitudCotizacionPage() {
                     </Select>
                   </div>
                 </div>
+
+                {/* Selector de unidad (aparece al seleccionar edificio) */}
+                {formData.buildingId && (
+                  <div className="space-y-2">
+                    <Label htmlFor="unitId">Unidad del edificio (opcional)</Label>
+                    <Select
+                      value={formData.unitId || '_none'}
+                      onValueChange={handleUnitSelect}
+                    >
+                      <SelectTrigger id="unitId">
+                        <SelectValue
+                          placeholder={loadingUnits ? 'Cargando unidades...' : 'Seleccionar unidad (todo el edificio si no se selecciona)'}
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="_none">Todo el edificio</SelectItem>
+                        {units.map((u) => (
+                          <SelectItem key={u.id} value={u.id}>
+                            {u.numero} — {u.tipo} {u.superficie > 0 ? `(${u.superficie}m²)` : ''}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <Label htmlFor="direccionInmueble">
