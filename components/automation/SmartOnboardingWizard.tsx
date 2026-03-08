@@ -46,7 +46,7 @@ interface OnboardingProgress {
 const WIZARD_DISMISSED_KEY = 'inmova-onboarding-wizard-dismissed';
 
 // Roles que NO deben ver el wizard (administradores ya conocen la plataforma)
-const EXCLUDED_ROLES = ['super_admin', 'administrador', 'admin', 'gestor'];
+const EXCLUDED_ROLES = ['super_admin'];
 
 export default function SmartOnboardingWizard() {
   const router = useRouter();

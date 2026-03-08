@@ -30,7 +30,7 @@ const ownerSteps: Step[] = [
     disableBeacon: true,
   },
   {
-    target: '[data-tour="create-property"]',
+    target: '[data-tour="propiedades-menu"]',
     content: (
       <div className="space-y-2">
         <h4 className="font-semibold text-gray-900">Crea tu primera propiedad</h4>
@@ -43,7 +43,7 @@ const ownerSteps: Step[] = [
     spotlightClicks: true,
   },
   {
-    target: '[data-tour="properties-list"]',
+    target: '[data-tour="edificios-menu"]',
     content: (
       <div className="space-y-2">
         <h4 className="font-semibold text-gray-900">Gestiona tus propiedades</h4>
@@ -60,14 +60,14 @@ const ownerSteps: Step[] = [
       <div className="space-y-2">
         <h4 className="font-semibold text-gray-900">Inquilinos y contratos</h4>
         <p className="text-gray-600">
-          Gestiona tus inquilinos, crea contratos legales y haz seguimiento de pagos desde aquí.
+          Gestiona tus inquilinos desde Inquilinos o Contratos, crea contratos legales y haz seguimiento de pagos desde aquí.
         </p>
       </div>
     ),
     placement: 'right',
   },
   {
-    target: '[data-tour="dashboard-stats"]',
+    target: '[data-tour="kpi-cards"]',
     content: (
       <div className="space-y-2">
         <h4 className="font-semibold text-gray-900">Dashboard en tiempo real</h4>
@@ -79,7 +79,7 @@ const ownerSteps: Step[] = [
     placement: 'bottom',
   },
   {
-    target: '[data-tour="help-button"]',
+    target: '[data-tour="configuracion-link"]',
     content: (
       <div className="space-y-2">
         <h4 className="font-semibold text-gray-900">¿Necesitas ayuda?</h4>
@@ -126,7 +126,7 @@ const tenantSteps: Step[] = [
     disableBeacon: true,
   },
   {
-    target: '[data-tour="contract-info"]',
+    target: '[data-tour="contratos-menu"]',
     content: (
       <div className="space-y-2">
         <h4 className="font-semibold text-gray-900">Tu contrato</h4>
@@ -138,7 +138,7 @@ const tenantSteps: Step[] = [
     placement: 'bottom',
   },
   {
-    target: '[data-tour="payments"]',
+    target: '[data-tour="pagos-menu"]',
     content: (
       <div className="space-y-2">
         <h4 className="font-semibold text-gray-900">Pagos</h4>
@@ -150,7 +150,7 @@ const tenantSteps: Step[] = [
     placement: 'right',
   },
   {
-    target: '[data-tour="requests"]',
+    target: '[data-tour="mantenimiento-menu"]',
     content: (
       <div className="space-y-2">
         <h4 className="font-semibold text-gray-900">Incidencias</h4>
@@ -164,7 +164,7 @@ const tenantSteps: Step[] = [
 ];
 
 // Roles que NO deben ver el tour (administradores ya conocen la plataforma)
-const EXCLUDED_ROLES = ['super_admin', 'administrador', 'admin', 'gestor'];
+const EXCLUDED_ROLES = ['super_admin'];
 
 // Clave para sessionStorage (persiste solo durante la sesión del navegador)
 const SESSION_TOUR_KEY = 'inmova-tour-shown';
