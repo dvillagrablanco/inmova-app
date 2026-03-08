@@ -251,6 +251,22 @@ export default function LoginPage() {
                   </Link>
                 </p>
               </div>
+
+              {/* Acceso a otros portales */}
+              <div className="mt-4 pt-4 border-t border-white/5">
+                <p className="text-center text-xs text-indigo-200/40 mb-3">Otros accesos</p>
+                <div className="flex flex-wrap gap-2 justify-center">
+                  <Link href="/auth-propietario/register" className="text-xs text-indigo-300/60 hover:text-white transition-colors px-3 py-1 rounded-full border border-white/10 hover:border-white/30">
+                    Portal Propietario
+                  </Link>
+                  <Link href="/portal-proveedor/login" className="text-xs text-indigo-300/60 hover:text-white transition-colors px-3 py-1 rounded-full border border-white/10 hover:border-white/30">
+                    Portal Proveedor
+                  </Link>
+                  <Link href="/partners/login" className="text-xs text-indigo-300/60 hover:text-white transition-colors px-3 py-1 rounded-full border border-white/10 hover:border-white/30">
+                    Partners
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
 
