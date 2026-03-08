@@ -46,6 +46,7 @@ import DemoDataGenerator from '@/components/automation/DemoDataGenerator';
 import logger, { logError } from '@/lib/logger';
 import { ContextualQuickActions } from '@/components/navigation/contextual-quick-actions';
 import { OnboardingTour } from '@/components/onboarding/OnboardingTour';
+import DemoShowcaseTour from '@/components/onboarding/DemoShowcaseTour';
 import { OccupancyByTypeCard, OccupancyTypeData } from '@/components/dashboard/OccupancyByTypeCard';
 
 interface DashboardData {
@@ -692,6 +693,9 @@ function DashboardPageContent() {
 
       {/* Onboarding Tour Guiado (NO para demo user — usa DemoShowcaseTour) */}
       {session?.user?.email !== 'demo@vidaroinversiones.com' && <OnboardingTour role={session?.user?.role} />}
+
+      {/* Demo Showcase Tour — solo para demo@vidaroinversiones.com */}
+      <DemoShowcaseTour />
     </AuthenticatedLayout>
   );
 }
