@@ -176,13 +176,17 @@ function parseStatementLine(
 
   const afterDc = value.slice(11);
 
-  const amountMatch = afterDc.match(/^([A-Z]?)([\d,]+)([A-Z]{3})?(.*)$/);
+  // MT940 :61: format after D/C: [FundsCode]Amount[TransactionType][Reference]
+  // FundsCode is optional single letter, Amount is digits+comma, then type code (N/F + 3 chars)
+  // Note: NO currency code in :61: lines (currency comes from :60F: balance)
+  const amountMatch = afterDc.match(/^([A-Z]?)([\d,]+)(.*)$/);
   if (amountMatch) {
     const amountStr = amountMatch[2];
     tx.amount = parseAmount(amountStr);
-    const txTypeAndRest = amountMatch[4] || '';
+    const txTypeAndRest = amountMatch[3] || '';
 
-    const txTypeMatch = txTypeAndRest.match(/^([NF][A-Z0-9]{3})(.*)$/);
+    // Transaction type: standard is N/F/S + 3 chars, but banks may use other prefixes (D, C, etc.)
+    const txTypeMatch = txTypeAndRest.match(/^([A-Z][A-Z0-9]{2,3})(.*)$/);
     if (txTypeMatch) {
       tx.transactionType = txTypeMatch[1];
       const refPart = txTypeMatch[2].trim();
@@ -291,17 +295,21 @@ function getTransactionPairs(block: string): Array<{ line61: string; line86: str
       i++;
       while (i < lines.length) {
         const nextLine = lines[i];
-        if (nextLine.match(/^:\d{2}[A-Z]?:/)) break;
-        if (nextLine.match(/^:86:(.*)$/)) {
-          const m = nextLine.match(/^:86:(.*)$/);
-          line86 = (m?.[1] ?? '').trim();
+        // Check :86: FIRST (before general tag check, since :86: also matches the tag pattern)
+        const m86 = nextLine.match(/^:86:(.*)$/);
+        if (m86) {
+          line86 = (m86[1] ?? '').trim();
           i++;
+          // Collect continuation lines for :86:
           while (i < lines.length && !lines[i].match(/^:\d{2}[A-Z]?:/)) {
             line86 += ' ' + lines[i].trim();
             i++;
           }
           break;
         }
+        // Any other tag means end of this :61: block
+        if (nextLine.match(/^:\d{2}[A-Z]?:/)) break;
+        // Non-tag continuation of :61:
         line61 += nextLine.trim();
         i++;
       }
