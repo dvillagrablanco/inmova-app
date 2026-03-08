@@ -127,6 +127,8 @@ function DashboardPageContent() {
   if (status === 'loading' || isLoading) {
     return (
       <AuthenticatedLayout>
+        {/* Demo Tour - debe estar en TODOS los returns para no perder estado */}
+        <DemoShowcaseTour />
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-8 space-y-2">
@@ -169,6 +171,7 @@ function DashboardPageContent() {
   if (!session) {
     return (
       <AuthenticatedLayout>
+        <DemoShowcaseTour />
         <div className="flex items-center justify-center h-full">
           <div className="text-center">
             <p className="text-gray-600">Cargando sesión...</p>

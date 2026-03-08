@@ -53,9 +53,7 @@ export default function DemoShowcaseTour() {
 
   // ── INIT: Read persisted state on mount ──
   useEffect(() => {
-    console.log('[DemoTour] Init check:', { status, email: session?.user?.email, isDemoUser, initialized });
     if (status === 'loading' || !isDemoUser || initialized) return;
-    console.log('[DemoTour] Initializing tour...');
     setInitialized(true);
 
     const state = readState();
