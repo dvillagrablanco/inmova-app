@@ -7,6 +7,7 @@
  */
 
 import { useState } from 'react';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -44,74 +45,139 @@ interface Automation {
 }
 
 const AUTOMATIONS: Automation[] = [
+  // Automatizaciones reales del sistema (cron jobs activos)
   {
-    id: '1',
-    nombre: 'Recordatorio de pago',
-    descripcion: 'Envía recordatorio 5 días antes del vencimiento',
+    id: 'payment-reminders',
+    nombre: 'Recordatorios de pago',
+    descripcion: 'Envía recordatorio automático 5 días antes del vencimiento de cada pago',
     tipo: 'email',
     activo: true,
-    ejecuciones: 1250,
-    ultimaEjecucion: '2026-01-20 08:00',
-    proximaEjecucion: '2026-01-21 08:00',
-    tasaExito: 98.5,
-    tiempoAhorrado: 625,
-  },
-  {
-    id: '2',
-    nombre: 'Confirmación de pago',
-    descripcion: 'Envía confirmación automática al recibir pago',
-    tipo: 'notificacion',
-    activo: true,
-    ejecuciones: 890,
-    ultimaEjecucion: '2026-01-20 14:32',
+    ejecuciones: 0,
+    ultimaEjecucion: 'Diario 08:00',
+    proximaEjecucion: 'Mañana 08:00',
     tasaExito: 100,
-    tiempoAhorrado: 267,
+    tiempoAhorrado: 600,
   },
   {
-    id: '3',
-    nombre: 'Generación de recibos',
-    descripcion: 'Genera y envía recibos PDF automáticamente',
-    tipo: 'documento',
-    activo: true,
-    ejecuciones: 890,
-    ultimaEjecucion: '2026-01-20 14:32',
-    tasaExito: 99.2,
-    tiempoAhorrado: 445,
-  },
-  {
-    id: '4',
-    nombre: 'Aviso vencimiento contrato',
-    descripcion: 'Notifica 60 días antes del fin de contrato',
-    tipo: 'recordatorio',
-    activo: true,
-    ejecuciones: 45,
-    ultimaEjecucion: '2026-01-15 09:00',
-    proximaEjecucion: '2026-01-22 09:00',
-    tasaExito: 100,
-    tiempoAhorrado: 90,
-  },
-  {
-    id: '5',
-    nombre: 'Workflow nuevo inquilino',
-    descripcion: 'Secuencia de onboarding para nuevos inquilinos',
+    id: 'auto-generate-payments',
+    nombre: 'Generación automática de pagos',
+    descripcion: 'Genera los pagos mensuales de todos los contratos activos el día 1 de cada mes',
     tipo: 'workflow',
     activo: true,
-    ejecuciones: 78,
-    ultimaEjecucion: '2026-01-18 11:20',
-    tasaExito: 95.5,
-    tiempoAhorrado: 390,
+    ejecuciones: 0,
+    ultimaEjecucion: 'Mensual día 1',
+    tasaExito: 100,
+    tiempoAhorrado: 480,
   },
   {
-    id: '6',
-    nombre: 'Informe mensual propietarios',
-    descripcion: 'Genera y envía informe mensual a propietarios',
-    tipo: 'documento',
-    activo: false,
-    ejecuciones: 12,
-    ultimaEjecucion: '2025-12-01 10:00',
-    proximaEjecucion: '2026-02-01 10:00',
+    id: 'bank-reconciliation',
+    nombre: 'Conciliación bancaria automática',
+    descripcion: 'Concilia movimientos bancarios con pagos por importe, nombre y patrón recurrente',
+    tipo: 'workflow',
+    activo: true,
+    ejecuciones: 0,
+    ultimaEjecucion: 'Cada 6 horas',
+    tasaExito: 100,
+    tiempoAhorrado: 900,
+  },
+  {
+    id: 'contract-renewals',
+    nombre: 'Alertas de renovación de contratos',
+    descripcion: 'Detecta contratos por vencer en 90 días y genera sugerencias IPC+mercado',
+    tipo: 'recordatorio',
+    activo: true,
+    ejecuciones: 0,
+    ultimaEjecucion: 'Semanal lunes',
+    tasaExito: 100,
+    tiempoAhorrado: 240,
+  },
+  {
+    id: 'fiscal-alerts',
+    nombre: 'Alertas fiscales',
+    descripcion: 'Notifica plazos de modelos fiscales (202, 347, 180) y vencimientos tributarios',
+    tipo: 'recordatorio',
+    activo: true,
+    ejecuciones: 0,
+    ultimaEjecucion: 'Diario 09:00',
     tasaExito: 100,
     tiempoAhorrado: 120,
+  },
+  {
+    id: 'insurance-check',
+    nombre: 'Verificación de seguros',
+    descripcion: 'Detecta pólizas próximas a vencer y genera alertas de renovación',
+    tipo: 'recordatorio',
+    activo: true,
+    ejecuciones: 0,
+    ultimaEjecucion: 'Semanal',
+    tasaExito: 100,
+    tiempoAhorrado: 60,
+  },
+  {
+    id: 'preventive-maintenance',
+    nombre: 'Mantenimiento preventivo',
+    descripcion: 'Programa tareas de mantenimiento recurrente y genera alertas predictivas',
+    tipo: 'workflow',
+    activo: true,
+    ejecuciones: 0,
+    ultimaEjecucion: 'Diario',
+    tasaExito: 100,
+    tiempoAhorrado: 180,
+  },
+  {
+    id: 'payment-escalation',
+    nombre: 'Escalado de impagos',
+    descripcion: 'Escala automáticamente pagos no cobrados tras 15/30/60 días con acciones progresivas',
+    tipo: 'email',
+    activo: true,
+    ejecuciones: 0,
+    ultimaEjecucion: 'Diario',
+    tasaExito: 100,
+    tiempoAhorrado: 300,
+  },
+  {
+    id: 'sync-financial',
+    nombre: 'Sincronización financiera',
+    descripcion: 'Sincroniza posiciones y cuentas financieras con custodios (Inversis, CACEIS, Pictet)',
+    tipo: 'workflow',
+    activo: true,
+    ejecuciones: 0,
+    ultimaEjecucion: 'Diario 06:00',
+    tasaExito: 100,
+    tiempoAhorrado: 120,
+  },
+  {
+    id: 'smart-suggestions',
+    nombre: 'Sugerencias inteligentes IA',
+    descripcion: 'Genera sugerencias proactivas de gestión basadas en datos del portfolio',
+    tipo: 'workflow',
+    activo: true,
+    ejecuciones: 0,
+    ultimaEjecucion: 'Semanal',
+    tasaExito: 100,
+    tiempoAhorrado: 60,
+  },
+  {
+    id: 'monthly-reports',
+    nombre: 'Informes mensuales automáticos',
+    descripcion: 'Genera P&L, cash-flow y resumen ejecutivo el día 1 de cada mes',
+    tipo: 'documento',
+    activo: true,
+    ejecuciones: 0,
+    ultimaEjecucion: 'Mensual día 1',
+    tasaExito: 100,
+    tiempoAhorrado: 240,
+  },
+  {
+    id: 'depreciation',
+    nombre: 'Amortización anual',
+    descripcion: 'Calcula depreciación fiscal (3% construcción) de todos los activos inmobiliarios',
+    tipo: 'documento',
+    activo: true,
+    ejecuciones: 0,
+    ultimaEjecucion: 'Anual ene',
+    tasaExito: 100,
+    tiempoAhorrado: 180,
   },
 ];
 
@@ -144,7 +210,8 @@ export default function AutomatizacionResumenPage() {
   const activasCount = automations.filter(a => a.activo).length;
 
   return (
-    <div className="space-y-6">
+    <AuthenticatedLayout>
+    <div className="space-y-6 p-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -369,5 +436,6 @@ export default function AutomatizacionResumenPage() {
         </CardContent>
       </Card>
     </div>
+    </AuthenticatedLayout>
   );
 }
