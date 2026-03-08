@@ -147,24 +147,24 @@ FASE 4 - CONFIGURE (sabes todo, configura):
 \`\`\`
 
 Módulos recomendados según negocio:
-- Alquiler residencial: contratos, pagos, inquilinos, mantenimiento, contabilidad
-- STR/Vacacional: listings, bookings, channels, pricing, reviews
-- Coliving: habitaciones, residentes, actividades, pagos
-- Holding/Family Office: inversiones, family-office, comparativa, fiscal
-- Mixto: todos los anteriores
+- Alquiler residencial: propiedades, edificios, unidades, contratos, pagos, inquilinos, mantenimiento, contabilidad, seguros, inspecciones, valoración IA, matching
+- STR/Vacacional: str_listings, str_bookings, str_channels, str_pricing, housekeeping, reviews, calendario
+- Coliving/Habitaciones: room_rental, comunidad_social, eventos, matching, reservas_espacios, prorrateo_gastos
+- Holding/Family Office: inversiones, family_office, private_equity, tesoreria, modelo_720, estructura_grupo, comparativa_sociedades, oportunidades_inversion
+- Construcción: proyectos_construccion, gantt, licitaciones, obras, ordenes_trabajo, quality_control
+- Servicios Profesionales: proyectos_professional, clientes, facturacion, time_tracking
+- Comunidades/Admin Fincas: comunidades, propietarios, cuotas, votaciones, juntas, actas, fondos_reserva, portal_presidente
+- Flipping: proyectos_flipping, calculator_roi, timeline, analisis_mercado
+- Media Estancia: contratos_flexibles, scoring, calendario_disponibilidad, analytics_revenue
+- Hospitality: checkin_checkout, housekeeping, servicios_huesped
+- Student Housing: residentes, habitaciones, aplicaciones, actividades, pagos_semestre
+- eWoorker: trabajadores, asignaciones, obras, contratos_laborales, compliance
+- Mixto: todos los anteriores según preferencia del usuario
 
 UIMode según experiencia:
-- Principiante → simple
-- Intermedio → standard  
-- Avanzado → advanced
-
-FASE 5 - READY (configuración aplicada):
-- Celebra brevemente: "¡Todo listo! 🎉"
-- Dale 3 acciones concretas para empezar (links):
-  1. Su primer paso según negocio (ej: crear primer edificio)
-  2. Explorar el dashboard
-  3. Recordarle que puede hablar contigo cuando quiera
-- Despídete cálidamente
+- Principiante → simple (solo módulos esenciales, tooltips activos, videos tutoriales)
+- Intermedio → standard (módulos principales, asistencia bajo demanda)
+- Avanzado → advanced (todos los módulos, sin tutoriales, acceso directo)
 
 IMPORTANTE: 
 - Rol del usuario: ${userRole}
@@ -219,13 +219,13 @@ function parseAIResponse(text: string): { text: string; actions: any[]; detected
 function getLocalOnboardingResponse(phase: string, message: string, userName: string): string {
   switch (phase) {
     case 'welcome':
-      return `¡Hola ${userName}! 👋 Bienvenido a INMOVA.\n\nSoy tu asistente y te voy a ayudar a configurar la plataforma para que se adapte perfectamente a tu negocio.\n\n¿A qué te dedicas en el sector inmobiliario?`;
+      return `¡Hola ${userName}! 👋 Bienvenido a INMOVA.\n\nSoy tu asistente y te voy a ayudar a configurar la plataforma para que se adapte perfectamente a tu negocio.\n\n¿A qué te dedicas en el sector inmobiliario? Por ejemplo: alquiler residencial, vacacional (STR), coliving, construcción, flipping, administración de fincas, holding/family office, servicios profesionales...`;
     case 'business':
       return `Perfecto, entendido. Para personalizar mejor tu experiencia, ¿cuántas propiedades gestionas aproximadamente?`;
     case 'experience':
       return `¡Bien! Una última pregunta: ¿has usado antes algún software de gestión inmobiliaria?`;
     case 'configure':
-      return `Excelente, ${userName}. Ya tengo todo lo que necesito. He personalizado INMOVA para ti.\n\nTe recomiendo empezar por:\n1. Crear tu primer edificio en /edificios/nuevo\n2. Explorar tu dashboard en /dashboard\n3. Y recuerda que estoy aquí siempre que me necesites.\n\n¡Mucho éxito! 🚀`;
+      return `Excelente, ${userName}. Ya tengo todo lo que necesito. He personalizado INMOVA para ti.\n\nTe recomiendo empezar por:\n1. Crear tu primera propiedad en /edificios/nuevo\n2. Explorar tu dashboard en /dashboard\n3. Configurar tus preferencias en /configuracion\n\n¡Mucho éxito! 🚀`;
     default:
       return `¿En qué puedo ayudarte, ${userName}?`;
   }
