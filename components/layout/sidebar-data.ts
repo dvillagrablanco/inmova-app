@@ -577,6 +577,7 @@ const alquilerResidencialItems = [
     href: '/edificios',
     icon: Building2,
     roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'edificios-menu',
   },
   {
     name: 'Inquilinos',
@@ -621,12 +622,14 @@ const alquilerResidencialItems = [
     icon: Brain,
     roles: ['super_admin', 'administrador', 'gestor'],
     badge: 'IA',
+    dataTour: 'valoraciones-menu',
   },
   {
     name: 'Seguros',
     href: '/seguros',
     icon: Shield,
     roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'seguros-menu',
     subItems: [
       { name: 'Pólizas', href: '/seguros', icon: Shield },
       { name: 'Cotizaciones', href: '/seguros/cotizaciones', icon: FileText },
@@ -639,6 +642,7 @@ const alquilerResidencialItems = [
     href: '/inspecciones',
     icon: ClipboardList,
     roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'inspecciones-menu',
   },
   {
     name: 'Certificaciones',
@@ -655,36 +659,42 @@ const strNavItems = [
     href: '/str',
     icon: Hotel,
     roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'str-dashboard-menu',
   },
   {
     name: 'Anuncios',
     href: '/str/listings',
     icon: Home,
     roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'str-listings-menu',
   },
   {
     name: 'Reservas',
     href: '/str/bookings',
     icon: Calendar,
     roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'str-bookings-menu',
   },
   {
     name: 'Revenue',
     href: '/str/channels',
     icon: TrendingUp,
     roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'str-channels-menu',
   },
   {
     name: 'Housekeeping',
     href: '/str-housekeeping',
     icon: ClipboardList,
     roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'str-housekeeping-menu',
   },
   {
     name: 'Reviews',
     href: '/str/reviews',
     icon: Star,
     roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'str-reviews-menu',
   },
 ];
 
@@ -725,36 +735,42 @@ const coLivingNavItems = [
     href: '/room-rental',
     icon: Home,
     roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'room-rental-menu',
   },
   {
     name: 'Propiedades',
     href: '/coliving/propiedades',
     icon: Building2,
     roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'coliving-propiedades-menu',
   },
   {
     name: 'Comunidad',
     href: '/coliving/comunidad',
     icon: Users2,
     roles: ['super_admin', 'administrador', 'gestor', 'community_manager'],
+    dataTour: 'comunidad-social-menu',
   },
   {
     name: 'Matching',
     href: '/coliving/emparejamiento',
     icon: UserCheck,
     roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'coliving-matching-menu',
   },
   {
     name: 'Eventos',
     href: '/coliving/eventos',
     icon: Calendar,
     roles: ['super_admin', 'administrador', 'gestor', 'community_manager'],
+    dataTour: 'coliving-eventos-menu',
   },
   {
     name: 'Reservas',
     href: '/coliving/reservas',
     icon: CalendarCheck,
     roles: ['super_admin', 'administrador', 'gestor', 'operador'],
+    dataTour: 'espacios-comunes-menu',
   },
 ];
 
@@ -795,12 +811,14 @@ const flippingNavItems = [
     href: '/flipping/dashboard',
     icon: TrendingUp,
     roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'flipping-dashboard-menu',
   },
   {
     name: 'Proyectos',
     href: '/flipping/projects',
     icon: Folder,
     roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'flipping-projects-menu',
   },
   {
     name: 'Timeline',
@@ -831,12 +849,14 @@ const construccionNavItems = [
     href: '/construccion',
     icon: LayoutDashboard,
     roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'construction-dashboard-menu',
   },
   {
     name: 'Proyectos',
     href: '/construccion/proyectos',
     icon: HardHat,
     roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'construction-projects-menu',
   },
   {
     name: 'Diagrama Gantt',
@@ -1048,18 +1068,21 @@ const comercialNavItems = [
     href: '/professional/projects',
     icon: Briefcase,
     roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'professional-projects-menu',
   },
   {
     name: 'Clientes',
     href: '/professional/clients',
     icon: Users,
     roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'crm-menu',
   },
   {
     name: 'Facturación',
     href: '/professional/invoicing',
     icon: FileText,
     roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'facturacion-menu',
   },
 ];
 
@@ -1074,24 +1097,28 @@ const adminFincasItems = [
     href: '/comunidades',
     icon: LayoutDashboard,
     roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'comunidades-dashboard-menu',
   },
   {
     name: 'Mis Comunidades',
     href: '/comunidades/lista',
     icon: Building2,
     roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'comunidades-lista-menu',
   },
   {
     name: 'Propietarios',
     href: '/comunidades/propietarios',
     icon: Users,
     roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'comunidades-propietarios-menu',
   },
   {
     name: 'Cuotas',
     href: '/comunidades/cuotas',
     icon: Euro,
     roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'comunidades-cuotas-menu',
   },
   {
     name: 'Fondos Reserva',
@@ -1110,18 +1137,21 @@ const adminFincasItems = [
     href: '/comunidades/votaciones',
     icon: Vote,
     roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'comunidades-votaciones-menu',
   },
   {
     name: 'Incidencias',
     href: '/comunidades/incidencias',
     icon: AlertTriangle,
     roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'comunidades-incidencias-menu',
   },
   {
     name: 'Reuniones',
     href: '/comunidades/reuniones',
     icon: Calendar,
     roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'comunidades-reuniones-menu',
   },
   {
     name: 'Cumplimiento',
@@ -1432,6 +1462,7 @@ const finanzasNavItems = [
     href: '/gastos',
     icon: Euro,
     roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'gastos-menu',
   },
   {
     name: 'Intragrupo',
@@ -1526,6 +1557,7 @@ const operacionesNavItems = [
     href: '/mantenimiento',
     icon: Wrench,
     roles: ['super_admin', 'administrador', 'gestor', 'operador'],
+    dataTour: 'mantenimiento-menu',
     subItems: [
       { name: 'Solicitudes', href: '/mantenimiento', icon: Wrench },
       { name: 'Vista Kanban', href: '/mantenimiento/kanban', icon: ClipboardList },
@@ -1537,6 +1569,7 @@ const operacionesNavItems = [
     href: '/proveedores',
     icon: Users,
     roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'proveedores-menu',
   },
   {
     name: 'Incidencias',
@@ -1584,6 +1617,7 @@ const holdingGrupoNavItems = [
     href: '/inversiones',
     icon: Crown,
     roles: ['super_admin', 'administrador'],
+    dataTour: 'inversiones-menu',
   },
   {
     name: 'Family Office 360°',
@@ -1591,6 +1625,7 @@ const holdingGrupoNavItems = [
     icon: Landmark,
     roles: ['super_admin', 'administrador'],
     badge: 'Add-on',
+    dataTour: 'family-office-menu',
     subItems: [
       { name: 'Patrimonio 360°', href: '/family-office/dashboard', icon: Crown },
       { name: 'Cuentas y Bancos', href: '/family-office/cuentas', icon: CreditCard },
@@ -1847,6 +1882,7 @@ const documentosLegalNavItems = [
     href: '/documentos',
     icon: Folder,
     roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'documentos-menu',
   },
   {
     name: 'Plantillas',
@@ -1888,6 +1924,7 @@ const crmMarketingNavItems = [
     href: '/crm',
     icon: Users,
     roles: ['super_admin', 'administrador', 'gestor'],
+    dataTour: 'crm-general-menu',
   },
   {
     name: 'Portal Comercial',
