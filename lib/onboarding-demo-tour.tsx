@@ -50,7 +50,7 @@ export const DEMO_SHOWCASE_STEPS: Step[] = [
           </div>
         </div>
         <p className="text-xs text-gray-400 text-center italic">
-          Duración del tour: ~4 minutos · Incluye 2 demos en vivo
+          Duración del tour: ~5 minutos · Incluye demos en vivo
         </p>
       </div>
     ),
@@ -209,7 +209,75 @@ export const DEMO_SHOWCASE_STEPS: Step[] = [
   },
 
   // ═══════════════════════════════════════════════════════════════
-  // PASO 7: CONTRATOS DIGITALES
+  // PASO 7: PORTAL DEL INQUILINO — EXPERIENCIA COMPLETA
+  // ═══════════════════════════════════════════════════════════════
+  {
+    target: '[data-tour="inquilinos-menu"]',
+    content: (
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <span className="text-xl">📱</span>
+          <h3 className="font-bold text-gray-900">Portal del Inquilino — Self-Service 24/7</h3>
+        </div>
+        <p className="text-sm text-gray-600">
+          Cada inquilino tiene su <strong>propio portal web y móvil</strong> con acceso completo 
+          a toda su relación con el grupo. Funciona como una app bancaria, pero para su alquiler.
+        </p>
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-3 border border-blue-200">
+          <h4 className="text-xs font-bold text-blue-900 mb-2">Lo que el inquilino puede hacer solo:</h4>
+          <div className="grid grid-cols-2 gap-x-3 gap-y-1">
+            <div className="flex items-center gap-1.5 text-[11px] text-blue-800">
+              <span className="text-blue-500">💳</span> Pagar alquiler online (Stripe)
+            </div>
+            <div className="flex items-center gap-1.5 text-[11px] text-blue-800">
+              <span className="text-blue-500">📄</span> Descargar recibos y facturas
+            </div>
+            <div className="flex items-center gap-1.5 text-[11px] text-blue-800">
+              <span className="text-blue-500">🔧</span> Reportar incidencias + fotos
+            </div>
+            <div className="flex items-center gap-1.5 text-[11px] text-blue-800">
+              <span className="text-blue-500">💬</span> Chat directo con gestor
+            </div>
+            <div className="flex items-center gap-1.5 text-[11px] text-blue-800">
+              <span className="text-blue-500">📝</span> Ver contrato y condiciones
+            </div>
+            <div className="flex items-center gap-1.5 text-[11px] text-blue-800">
+              <span className="text-blue-500">🔄</span> Solicitar renovación
+            </div>
+            <div className="flex items-center gap-1.5 text-[11px] text-blue-800">
+              <span className="text-blue-500">📂</span> Subir/descargar documentos
+            </div>
+            <div className="flex items-center gap-1.5 text-[11px] text-blue-800">
+              <span className="text-blue-500">🤖</span> Chatbot IA de soporte
+            </div>
+            <div className="flex items-center gap-1.5 text-[11px] text-blue-800">
+              <span className="text-blue-500">⭐</span> Valorar experiencia
+            </div>
+            <div className="flex items-center gap-1.5 text-[11px] text-blue-800">
+              <span className="text-blue-500">🎁</span> Programa de referidos
+            </div>
+            <div className="flex items-center gap-1.5 text-[11px] text-blue-800">
+              <span className="text-blue-500">🏆</span> Sistema de logros
+            </div>
+            <div className="flex items-center gap-1.5 text-[11px] text-blue-800">
+              <span className="text-blue-500">👤</span> Gestionar perfil y datos
+            </div>
+          </div>
+        </div>
+        <div className="bg-green-50 border border-green-200 rounded-lg p-2">
+          <p className="text-xs text-green-800">
+            💡 <strong>Impacto:</strong> El 85% de las gestiones del inquilino se resuelven 
+            <strong>sin intervención humana</strong>. Cada inquilino es autónomo. 
+            Accesible en <strong>inmovaapp.com/portal-inquilino</strong>
+          </p>
+        </div>
+      </div>
+    ),
+    placement: 'right',
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // PASO 8: CONTRATOS DIGITALES
   // ═══════════════════════════════════════════════════════════════
   {
     target: '[data-tour="contratos-menu"]',
@@ -237,7 +305,7 @@ export const DEMO_SHOWCASE_STEPS: Step[] = [
   },
 
   // ═══════════════════════════════════════════════════════════════
-  // PASO 8: FAMILY OFFICE 360°
+  // PASO 9: FAMILY OFFICE 360°
   // ═══════════════════════════════════════════════════════════════
   {
     target: '[data-tour="family-office-menu"]',
@@ -274,7 +342,7 @@ export const DEMO_SHOWCASE_STEPS: Step[] = [
   },
 
   // ═══════════════════════════════════════════════════════════════
-  // PASO 9: INTELIGENCIA ARTIFICIAL
+  // PASO 10: INTELIGENCIA ARTIFICIAL
   // ═══════════════════════════════════════════════════════════════
   {
     target: '[data-tour="valoraciones-menu"]',
@@ -307,7 +375,7 @@ export const DEMO_SHOWCASE_STEPS: Step[] = [
   },
 
   // ═══════════════════════════════════════════════════════════════
-  // PASO 10: VALORACIÓN EN VIVO — DEMO INTERACTIVA
+  // PASO 11: VALORACIÓN EN VIVO — DEMO INTERACTIVA
   // ═══════════════════════════════════════════════════════════════
   {
     target: '[data-tour="valoraciones-menu"]',
@@ -344,7 +412,7 @@ export const DEMO_SHOWCASE_STEPS: Step[] = [
   },
 
   // ═══════════════════════════════════════════════════════════════
-  // PASO 11: ANÁLISIS DE PROPUESTAS DEL BROKER
+  // PASO 12: ANÁLISIS DE PROPUESTAS DEL BROKER
   // ═══════════════════════════════════════════════════════════════
   {
     target: '[data-tour="oportunidades-ia-menu"]',
@@ -396,7 +464,7 @@ export const DEMO_SHOWCASE_STEPS: Step[] = [
   },
 
   // ═══════════════════════════════════════════════════════════════
-  // PASO 12: CUADRO DE MANDOS FINANCIERO
+  // PASO 13: CUADRO DE MANDOS FINANCIERO
   // ═══════════════════════════════════════════════════════════════
   {
     target: '[data-tour="cuadro-mandos-menu"]',
@@ -423,7 +491,7 @@ export const DEMO_SHOWCASE_STEPS: Step[] = [
   },
 
   // ═══════════════════════════════════════════════════════════════
-  // PASO 13: PAGOS & COBROS AUTOMÁTICOS
+  // PASO 14: PAGOS & COBROS AUTOMÁTICOS
   // ═══════════════════════════════════════════════════════════════
   {
     target: '[data-tour="pagos-menu"]',
@@ -450,7 +518,7 @@ export const DEMO_SHOWCASE_STEPS: Step[] = [
   },
 
   // ═══════════════════════════════════════════════════════════════
-  // PASO 14: OPERACIONES & MANTENIMIENTO
+  // PASO 15: OPERACIONES & MANTENIMIENTO
   // ═══════════════════════════════════════════════════════════════
   {
     target: '[data-tour="mantenimiento-menu"]',
@@ -477,7 +545,7 @@ export const DEMO_SHOWCASE_STEPS: Step[] = [
   },
 
   // ═══════════════════════════════════════════════════════════════
-  // PASO 15: SEGUROS & DOCUMENTACIÓN
+  // PASO 16: SEGUROS & DOCUMENTACIÓN
   // ═══════════════════════════════════════════════════════════════
   {
     target: '[data-tour="seguros-menu"]',
@@ -505,7 +573,7 @@ export const DEMO_SHOWCASE_STEPS: Step[] = [
   },
 
   // ═══════════════════════════════════════════════════════════════
-  // PASO 16: AUTOMATIZACIÓN TOTAL
+  // PASO 17: AUTOMATIZACIÓN TOTAL
   // ═══════════════════════════════════════════════════════════════
   {
     target: '[data-tour="configuracion-link"]',
@@ -538,7 +606,7 @@ export const DEMO_SHOWCASE_STEPS: Step[] = [
   },
 
   // ═══════════════════════════════════════════════════════════════
-  // PASO 17: CIERRE WOW — CALL TO ACTION
+  // PASO 18: CIERRE WOW — CALL TO ACTION
   // ═══════════════════════════════════════════════════════════════
   {
     target: 'body',
@@ -574,11 +642,11 @@ export const DEMO_SHOWCASE_STEPS: Step[] = [
             </div>
             <div className="flex items-start gap-1.5">
               <span className="text-green-500 mt-0.5">✓</span>
-              <span className="text-gray-700">Contratos inteligentes</span>
+              <span className="text-gray-700">Portal inquilino 24/7</span>
             </div>
             <div className="flex items-start gap-1.5">
               <span className="text-green-500 mt-0.5">✓</span>
-              <span className="text-gray-700">Cuadro mandos financiero</span>
+              <span className="text-gray-700">Contratos inteligentes</span>
             </div>
             <div className="flex items-start gap-1.5">
               <span className="text-green-500 mt-0.5">✓</span>
