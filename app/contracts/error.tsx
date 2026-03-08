@@ -11,7 +11,6 @@
 
 import { useEffect } from 'react';
 import { ErrorDisplay } from '@/components/ui/error-display';
-import logger from '@/lib/logger';
 
 export default function Error({
   error,
@@ -22,7 +21,7 @@ export default function Error({
 }) {
   useEffect(() => {
     // Log del error para monitoreo
-    logger.error('Error en página de contratos:', {
+    console.error('Error en página de contratos:', {
       message: error.message,
       digest: error.digest,
       stack: error.stack,

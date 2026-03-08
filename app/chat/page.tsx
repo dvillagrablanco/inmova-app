@@ -8,7 +8,6 @@ import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { toast } from 'sonner';
 import { LoadingState } from '@/components/ui/loading-state';
 import { Home, MessageCircle, ExternalLink, Settings } from 'lucide-react';
-import logger from '@/lib/logger';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -95,7 +94,7 @@ function AdminChatPage() {
       const data = await response.json();
       setMessages(data.messages || []);
     } catch (error) {
-      logger.error('Failed to fetch messages', { error });
+      console.error('Failed to fetch messages', { error });
     }
   };
 

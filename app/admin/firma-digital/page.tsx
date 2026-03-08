@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import logger from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -154,7 +153,7 @@ export default function FirmaDigitalPage() {
       const errorMessage =
         error instanceof Error ? error.message : 'Error al cargar los documentos';
       toast.error(errorMessage);
-      logger.error(errorMessage);
+      console.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -311,7 +310,7 @@ export default function FirmaDigitalPage() {
       fetchDocumentos();
     } catch (error: any) {
       toast.error(error.message || 'Error al guardar el documento');
-      logger.error(error instanceof Error ? error.message : String(error));
+      console.error(error instanceof Error ? error.message : String(error));
     }
   };
 
@@ -331,7 +330,7 @@ export default function FirmaDigitalPage() {
       fetchDocumentos();
     } catch (error) {
       toast.error('Error al eliminar el documento');
-      logger.error(error instanceof Error ? error.message : String(error));
+      console.error(error instanceof Error ? error.message : String(error));
     }
   };
 

@@ -6,7 +6,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import logger from '@/lib/logger';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
@@ -102,7 +101,7 @@ export default function STRAdvancedDashboard() {
         legalCompliance: 0,
       });
     } catch (error) {
-      logger.error('Error cargando dashboard:', error);
+      console.error('Error cargando dashboard:', error);
     } finally {
       setLoading(false);
     }

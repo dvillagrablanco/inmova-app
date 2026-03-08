@@ -34,7 +34,6 @@ import {
   Info,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import logger from '@/lib/logger';
 
 interface Portal {
   id: string;
@@ -353,7 +352,7 @@ export default function PortalesInmobiliariosPage() {
         setAutoSync(syncState);
       }
     } catch (error) {
-      logger.error('Error fetching portal status:', error);
+      console.error('Error fetching portal status:', error);
     } finally {
       setLoading(false);
     }
@@ -375,7 +374,7 @@ export default function PortalesInmobiliariosPage() {
         toast.error(data.message || 'Error al sincronizar');
       }
     } catch (error) {
-      logger.error('Error syncing:', error);
+      console.error('Error syncing:', error);
       toast.error('Error al sincronizar');
     } finally {
       setSyncing(null);
@@ -400,7 +399,7 @@ export default function PortalesInmobiliariosPage() {
         toast.error(data.message || 'Error al guardar configuración');
       }
     } catch (error) {
-      logger.error('Error saving config:', error);
+      console.error('Error saving config:', error);
       toast.error('Error al guardar configuración');
     }
   };
@@ -422,7 +421,7 @@ export default function PortalesInmobiliariosPage() {
         toast.error('Error al desconectar');
       }
     } catch (error) {
-      logger.error('Error disconnecting:', error);
+      console.error('Error disconnecting:', error);
       toast.error('Error al desconectar');
     }
   };
@@ -440,7 +439,7 @@ export default function PortalesInmobiliariosPage() {
         toast.success(enabled ? 'Auto-sincronización activada' : 'Auto-sincronización desactivada');
       }
     } catch (error) {
-      logger.error('Error toggling auto-sync:', error);
+      console.error('Error toggling auto-sync:', error);
     }
   };
 

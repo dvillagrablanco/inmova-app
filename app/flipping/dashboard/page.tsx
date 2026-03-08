@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import logger from '@/lib/logger';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
@@ -110,7 +109,7 @@ export default function FlippingDashboardPage() {
         setRoiData(roiDataRes);
       }
     } catch (error) {
-      logger.error('Error loading flipping dashboard:', error);
+      console.error('Error loading flipping dashboard:', error);
       toast.error('Error al cargar el dashboard de House Flipping');
     } finally {
       setLoading(false);

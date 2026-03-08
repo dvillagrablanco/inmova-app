@@ -71,7 +71,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import logger from '@/lib/logger';
 import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
 
 // Tipos para la valoración
@@ -271,7 +270,7 @@ export default function ValoracionIAPage() {
         setBuildings(normalizedBuildings);
       }
     } catch (error) {
-      logger.error('Error fetching assets:', error);
+      console.error('Error fetching assets:', error);
       toast.error('Error al cargar los activos');
     } finally {
       setLoading(false);
@@ -413,7 +412,7 @@ export default function ValoracionIAPage() {
 
       toast.success('Datos del Catastro cargados correctamente');
     } catch (error: any) {
-      logger.error('Error consultando catastro:', error);
+      console.error('Error consultando catastro:', error);
       toast.error(error.message || 'No se encontraron datos catastrales');
     } finally {
       setBuscandoCatastro(false);
@@ -535,7 +534,7 @@ export default function ValoracionIAPage() {
       setResultado(data);
       toast.success('Valoración completada');
     } catch (error: any) {
-      logger.error('Error en valoración:', error);
+      console.error('Error en valoración:', error);
       toast.error(error.message || 'Error al realizar la valoración con IA');
     } finally {
       setValorando(false);
@@ -615,7 +614,7 @@ export default function ValoracionIAPage() {
         toast.error(err.message || 'Error al guardar la valoración');
       }
     } catch (error) {
-      logger.error('Error guardando valoración:', error);
+      console.error('Error guardando valoración:', error);
       toast.error('Error al guardar la valoración');
     }
   };

@@ -8,7 +8,6 @@
 
 import { useEffect } from 'react';
 import { ErrorDisplay } from '@/components/ui/error-display';
-import logger from '@/lib/logger';
 
 export default function Error({
   error,
@@ -18,7 +17,7 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    logger.error('Error en página de pagos:', {
+    console.error('Error en página de pagos:', {
       message: error.message,
       digest: error.digest,
       stack: error.stack,

@@ -31,7 +31,6 @@ import { ViewModeToggle, ViewMode } from '@/components/ui/view-mode-toggle';
 import { SearchInput } from '@/components/ui/search-input';
 import { DeleteConfirmationDialog } from '@/components/ui/delete-confirmation-dialog';
 import { toast } from 'sonner';
-import logger from '@/lib/logger';
 
 interface Tenant {
   id: string;
@@ -150,7 +149,7 @@ export default function InquilinosClientPage({
         setTimeout(() => router.refresh(), 300);
       })
       .catch((error) => {
-        logger.error('Error deleting tenant:', error);
+        console.error('Error deleting tenant:', error);
         toast.error('Error al eliminar el inquilino');
       })
       .finally(() => {

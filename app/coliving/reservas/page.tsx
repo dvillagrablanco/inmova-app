@@ -47,7 +47,6 @@ import {
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { toast } from 'sonner';
-import logger from '@/lib/logger';
 
 interface Reservation {
   id: string;
@@ -88,7 +87,7 @@ export default function ColivingReservationsPage() {
         setReservations(Array.isArray(data) ? data : data.reservations || []);
       }
     } catch (error) {
-      logger.error('Error fetching reservations:', error);
+      console.error('Error fetching reservations:', error);
       setReservations([]);
     } finally {
       setLoading(false);

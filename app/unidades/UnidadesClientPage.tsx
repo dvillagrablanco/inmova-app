@@ -50,7 +50,6 @@ import { FilterChips } from '@/components/ui/filter-chips';
 import { ViewModeToggle, ViewMode } from '@/components/ui/view-mode-toggle';
 import { DeleteConfirmationDialog } from '@/components/ui/delete-confirmation-dialog';
 import { toast } from 'sonner';
-import logger from '@/lib/logger';
 
 interface Unit {
   id: string;
@@ -245,7 +244,7 @@ export default function UnidadesClientPage({ initialUnits, session }: UnidadesCl
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Error desconocido al eliminar';
       toast.error(errorMsg);
-      logger.error(errorMsg);
+      console.error(errorMsg);
     } finally {
       setIsDeleting(false);
     }

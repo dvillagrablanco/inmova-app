@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import logger from '@/lib/logger';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -59,7 +58,7 @@ export default function NuevaFacturaPage() {
         setWorkOrders(data.workOrders || data);
       }
     } catch (error) {
-      logger.error('Error fetching work orders:', error);
+      console.error('Error fetching work orders:', error);
     }
   };
 
@@ -125,7 +124,7 @@ export default function NuevaFacturaPage() {
       toast.success('Factura creada correctamente');
       router.push(`/portal-proveedor/facturas/${invoice.id}`);
     } catch (error) {
-      logger.error('Error creating invoice:', error);
+      console.error('Error creating invoice:', error);
       toast.error(error instanceof Error ? error.message : 'Error al crear la factura');
     } finally {
       setLoading(false);

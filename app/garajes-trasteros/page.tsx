@@ -43,7 +43,6 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { AdvancedFilters, FilterOption, FilterValues } from '@/components/ui/advanced-filters';
 import { ExportButton } from '@/components/ui/export-button';
 import { formatters } from '@/lib/export-utils';
-import logger from '@/lib/logger';
 
 interface Unit {
   id: string;
@@ -183,7 +182,7 @@ export default function GarajesTrasterosPage() {
         toast.error('Error al cargar garajes y trasteros');
       }
     } catch (error) {
-      logger.error('Error fetching units:', error);
+      console.error('Error fetching units:', error);
       toast.error('Error al cargar los datos');
     } finally {
       setLoading(false);
@@ -245,7 +244,7 @@ export default function GarajesTrasterosPage() {
         toast.error('Error al eliminar el espacio');
       }
     } catch (error) {
-      logger.error('Error deleting unit:', error);
+      console.error('Error deleting unit:', error);
       toast.error('Error al eliminar');
     }
   };

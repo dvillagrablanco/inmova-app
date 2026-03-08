@@ -26,7 +26,6 @@ import {
   Filter,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import logger from '@/lib/logger';
 
 interface Service {
   id: string;
@@ -98,7 +97,7 @@ export default function MarketplacePage() {
         setStats(data);
       }
     } catch (error) {
-      logger.error('Error loading marketplace data:', error);
+      console.error('Error loading marketplace data:', error);
       toast.error('Error al cargar marketplace');
     } finally {
       setLoading(false);
@@ -127,7 +126,7 @@ export default function MarketplacePage() {
         toast.error('Error al solicitar servicio');
       }
     } catch (error) {
-      logger.error('Error booking service:', error);
+      console.error('Error booking service:', error);
       toast.error('Error al solicitar servicio');
     }
   };

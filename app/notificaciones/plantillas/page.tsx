@@ -39,7 +39,6 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
-import logger from '@/lib/logger';
 
 interface NotificationTemplate {
   id: string;
@@ -102,7 +101,7 @@ export default function NotificationTemplatesPage() {
         setTemplates(data);
       }
     } catch (error) {
-      logger.error('Error fetching templates:', error);
+      console.error('Error fetching templates:', error);
       toast.error('Error al cargar plantillas');
     } finally {
       setLoading(false);
@@ -142,7 +141,7 @@ export default function NotificationTemplatesPage() {
         toast.error('Error al guardar la plantilla');
       }
     } catch (error) {
-      logger.error('Error saving template:', error);
+      console.error('Error saving template:', error);
       toast.error('Error al guardar la plantilla');
     }
   };
@@ -163,7 +162,7 @@ export default function NotificationTemplatesPage() {
         toast.error(data.error || 'Error al eliminar la plantilla');
       }
     } catch (error) {
-      logger.error('Error deleting template:', error);
+      console.error('Error deleting template:', error);
       toast.error('Error al eliminar la plantilla');
     }
   };

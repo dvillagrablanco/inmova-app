@@ -60,7 +60,6 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { useBranding } from '@/lib/hooks/useBranding';
-import logger from '@/lib/logger';
 
 interface BrandingFormData {
   appName: string;
@@ -291,7 +290,7 @@ export default function PersonalizacionPage() {
       await refresh();
       setTimeout(() => window.location.reload(), 1000);
     } catch (error) {
-      logger.error('Error saving branding:', error);
+      console.error('Error saving branding:', error);
       toast.error('Error al guardar');
     } finally {
       setSaving(false);

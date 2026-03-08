@@ -52,7 +52,6 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import logger from '@/lib/logger';
 import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
 
 type ImportStep = 'select' | 'validate' | 'preview' | 'import' | 'results';
@@ -147,7 +146,7 @@ export default function ImportarContratosPage() {
         toast.error(data.error || 'Error al validar el archivo');
       }
     } catch (error) {
-      logger.error('Error validating:', error);
+      console.error('Error validating:', error);
       toast.error('Error al validar el archivo');
     } finally {
       setValidating(false);
@@ -188,7 +187,7 @@ export default function ImportarContratosPage() {
         setCurrentStep('preview');
       }
     } catch (error) {
-      logger.error('Error importing:', error);
+      console.error('Error importing:', error);
       toast.error('Error al importar datos');
       setCurrentStep('preview');
     } finally {

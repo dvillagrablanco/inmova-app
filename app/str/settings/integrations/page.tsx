@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import logger from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -90,7 +89,7 @@ export default function IntegrationsSettingsPage() {
           : 'https://inmova.app';
       setWebhookUrl(`${baseUrl}/api/webhooks/str`);
     } catch (error) {
-      logger.error('Error cargando configuración:', error);
+      console.error('Error cargando configuración:', error);
       toast.error('Error al cargar configuración');
     } finally {
       setLoading(false);
@@ -107,7 +106,7 @@ export default function IntegrationsSettingsPage() {
       // En producción, guardar en API
       toast.success('Configuración guardada exitosamente');
     } catch (error) {
-      logger.error('Error guardando configuración:', error);
+      console.error('Error guardando configuración:', error);
       toast.error('Error al guardar configuración');
     }
   };

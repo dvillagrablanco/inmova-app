@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import logger from '@/lib/logger';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -34,7 +33,7 @@ export default function MatchingPanel() {
         setMatches(data);
       }
     } catch (error) {
-      logger.error('Error cargando matches:', error);
+      console.error('Error cargando matches:', error);
       toast.error('Error al cargar matches');
     } finally {
       setLoading(false);
@@ -58,7 +57,7 @@ export default function MatchingPanel() {
         cargarMatches();
       }
     } catch (error) {
-      logger.error('Error creando match:', error);
+      console.error('Error creando match:', error);
       toast.error('Error al crear match');
     }
   };

@@ -43,7 +43,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { DeleteConfirmationDialog } from '@/components/ui/delete-confirmation-dialog';
-import logger from '@/lib/logger';
 import { toast } from 'sonner';
 
 interface Payment {
@@ -155,7 +154,7 @@ export default function PagosClientPage({ initialPayments, session }: PagosClien
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Error desconocido al eliminar';
       toast.error(errorMsg);
-      logger.error(errorMsg);
+      console.error(errorMsg);
     } finally {
       setIsDeleting(false);
     }

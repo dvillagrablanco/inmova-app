@@ -28,7 +28,6 @@ import {
 } from '@/components/ui/breadcrumb';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
-import logger from '@/lib/logger';
 import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
 
 interface BuildingData {
@@ -157,7 +156,7 @@ export default function EditarEdificioPage() {
         toast.error(error.error || 'Error al actualizar el edificio');
       }
     } catch (error) {
-      logger.error('Error:', error);
+      console.error('Error:', error);
       toast.error('Error al actualizar el edificio');
     } finally {
       setIsSaving(false);

@@ -26,7 +26,6 @@ import {
   CheckCircle,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import logger from '@/lib/logger';
 import {
   LineChart,
   Line,
@@ -104,7 +103,7 @@ export default function STRPricingPage() {
         setAutoPricingEnabled(data.autoPricingEnabled || false);
       }
     } catch (error) {
-      logger.error('Error loading pricing data:', error);
+      console.error('Error loading pricing data:', error);
       toast.error('Error al cargar datos de pricing');
     } finally {
       setLoading(false);
@@ -126,7 +125,7 @@ export default function STRPricingPage() {
         toast.error('Error al actualizar precio');
       }
     } catch (error) {
-      logger.error('Error applying pricing:', error);
+      console.error('Error applying pricing:', error);
       toast.error('Error al actualizar precio');
     }
   };
@@ -146,7 +145,7 @@ export default function STRPricingPage() {
         toast.error('Error al cambiar configuración');
       }
     } catch (error) {
-      logger.error('Error toggling auto pricing:', error);
+      console.error('Error toggling auto pricing:', error);
       toast.error('Error al cambiar configuración');
     }
   };

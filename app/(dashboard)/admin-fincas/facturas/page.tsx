@@ -1,7 +1,6 @@
 'use client';
 
 import { useSession } from 'next-auth/react';
-import logger from '@/lib/logger';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
@@ -60,7 +59,7 @@ export default function FacturasPage() {
         setInvoices(data);
       }
     } catch (error) {
-      logger.error('Error fetching invoices:', error);
+      console.error('Error fetching invoices:', error);
     } finally {
       setLoading(false);
     }

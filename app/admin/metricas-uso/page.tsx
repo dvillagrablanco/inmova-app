@@ -28,7 +28,6 @@ import {
   Cell,
 } from '@/components/ui/lazy-charts-extended';
 import { RefreshCw, TrendingUp, AlertTriangle, Activity } from 'lucide-react';
-import logger from '@/lib/logger';
 
 interface UsageMetrics {
   period: number;
@@ -77,7 +76,7 @@ export default function UsageMetricsPage() {
       const data = await response.json();
       setMetricsData(data);
     } catch (error) {
-      logger.error('Error al cargar métricas:', error);
+      console.error('Error al cargar métricas:', error);
     } finally {
       setLoading(false);
       setRefreshing(false);

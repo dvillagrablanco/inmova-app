@@ -1,7 +1,6 @@
 'use client';
 
 import { useSession } from 'next-auth/react';
-import logger from '@/lib/logger';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
@@ -67,7 +66,7 @@ export default function LibroCajaPage() {
         }
       }
     } catch (error) {
-      logger.error('Error fetching communities:', error);
+      console.error('Error fetching communities:', error);
     } finally {
       setLoading(false);
     }
@@ -83,7 +82,7 @@ export default function LibroCajaPage() {
         setSaldoActual(data.saldoActual);
       }
     } catch (error) {
-      logger.error('Error fetching cash book entries:', error);
+      console.error('Error fetching cash book entries:', error);
     }
   };
 

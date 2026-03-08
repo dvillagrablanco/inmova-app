@@ -19,7 +19,6 @@ import {
   Users,
   Building,
 } from 'lucide-react';
-import logger from '@/lib/logger';
 
 interface SystemHealth {
   status: string;
@@ -73,7 +72,7 @@ export default function SystemHealthPage() {
       const data = await response.json();
       setHealthData(data);
     } catch (error) {
-      logger.error('Error al cargar datos de salud:', error);
+      console.error('Error al cargar datos de salud:', error);
     } finally {
       setLoading(false);
       setRefreshing(false);

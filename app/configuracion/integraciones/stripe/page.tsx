@@ -33,7 +33,6 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { BackButton } from '@/components/ui/back-button';
-import logger from '@/lib/logger';
 
 export default function StripeConfigurationPage() {
   const { data: session, status } = useSession() || {};
@@ -106,7 +105,7 @@ export default function StripeConfigurationPage() {
       toast.info('Para aplicar los cambios, debes actualizar el archivo .env del servidor');
       toast.success('Configuración validada correctamente');
     } catch (error) {
-      logger.error('Error saving Stripe configuration:', error);
+      console.error('Error saving Stripe configuration:', error);
       toast.error('Error al guardar la configuración');
     } finally {
       setLoading(false);
@@ -144,7 +143,7 @@ export default function StripeConfigurationPage() {
         toast.error('Error al verificar la conexión');
       }
     } catch (error) {
-      logger.error('Error testing Stripe connection:', error);
+      console.error('Error testing Stripe connection:', error);
       setTestResult({
         success: false,
         message: 'Error de red al conectar con Stripe',

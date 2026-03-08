@@ -17,7 +17,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Database, Download, Upload, AlertTriangle, CheckCircle, RefreshCw } from 'lucide-react';
-import logger from '@/lib/logger';
 import { toast } from 'sonner';
 
 interface Backup {
@@ -55,7 +54,7 @@ export default function BackupRestorePage() {
       const data = await response.json();
       setBackups(data.backups || []);
     } catch (error) {
-      logger.error('Error al cargar backups:', error);
+      console.error('Error al cargar backups:', error);
       toast.error('Error al cargar la lista de backups');
     } finally {
       setLoading(false);
@@ -85,7 +84,7 @@ export default function BackupRestorePage() {
       toast.success('Backup creado exitosamente');
       await fetchBackups();
     } catch (error) {
-      logger.error('Error al crear backup:', error);
+      console.error('Error al crear backup:', error);
       toast.error('Error al crear el backup');
     } finally {
       setCreating(false);
@@ -111,7 +110,7 @@ export default function BackupRestorePage() {
       setShowRestoreDialog(false);
       setSelectedBackup(null);
     } catch (error) {
-      logger.error('Error al restaurar backup:', error);
+      console.error('Error al restaurar backup:', error);
       toast.error('Error al restaurar el backup');
     } finally {
       setRestoring(false);

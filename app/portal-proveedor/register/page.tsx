@@ -16,7 +16,6 @@ import {
 import { toast } from 'sonner';
 import { Briefcase, Loader2, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import logger from '@/lib/logger';
 
 export default function ProveedorRegisterPage() {
   const router = useRouter();
@@ -67,7 +66,7 @@ export default function ProveedorRegisterPage() {
         toast.error(data.error || 'Error al registrar');
       }
     } catch (error) {
-      logger.error('Error:', error);
+      console.error('Error:', error);
       toast.error('Error al registrar');
     } finally {
       setLoading(false);

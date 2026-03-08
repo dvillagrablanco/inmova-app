@@ -25,7 +25,6 @@ import {
   Zap,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import logger from '@/lib/logger';
 
 interface Module {
   codigo: string;
@@ -70,7 +69,7 @@ export default function InactiveModules() {
         setModules(data.modules || []);
       }
     } catch (error) {
-      logger.error('Error loading inactive modules:', error);
+      console.error('Error loading inactive modules:', error);
     } finally {
       setIsLoading(false);
     }
@@ -97,7 +96,7 @@ export default function InactiveModules() {
         });
       }
     } catch (error) {
-      logger.error('Error activating module:', error);
+      console.error('Error activating module:', error);
       toast.error('Error al activar módulo');
     }
   };

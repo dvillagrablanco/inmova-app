@@ -16,7 +16,6 @@ import {
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { RefreshCw, Shield, AlertTriangle, AlertCircle, Info } from 'lucide-react';
-import logger from '@/lib/logger';
 
 interface SecurityAlert {
   type: string;
@@ -69,7 +68,7 @@ export default function SecurityAlertsPage() {
       const data = await response.json();
       setSecurityData(data);
     } catch (error) {
-      logger.error('Error al cargar alertas de seguridad:', error);
+      console.error('Error al cargar alertas de seguridad:', error);
     } finally {
       setLoading(false);
       setRefreshing(false);

@@ -42,7 +42,6 @@ import {
   Send,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import logger from '@/lib/logger';
 
 interface EmailTemplate {
   id: string;
@@ -157,7 +156,7 @@ export default function PlantillasEmailPage() {
         setPlantillas(data.templates || []);
       }
     } catch (error) {
-      logger.error('Error fetching email templates:', error);
+      console.error('Error fetching email templates:', error);
       toast.error('Error al cargar plantillas');
     } finally {
       setLoading(false);

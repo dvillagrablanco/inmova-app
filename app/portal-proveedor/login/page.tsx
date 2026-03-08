@@ -11,7 +11,6 @@ import { toast } from 'sonner';
 import { Briefcase, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import logger from '@/lib/logger';
 
 export default function ProveedorLoginPage() {
   const router = useRouter();
@@ -45,7 +44,7 @@ export default function ProveedorLoginPage() {
         toast.error(data.error || 'Error al iniciar sesión');
       }
     } catch (error) {
-      logger.error('Error:', error);
+      console.error('Error:', error);
       toast.error('Error al iniciar sesión');
     } finally {
       setLoading(false);

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import logger from '@/lib/logger';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
@@ -93,7 +92,7 @@ export default function SMSPage() {
       setTenants(Array.isArray(tenantsData) ? tenantsData : []);
       setLoading(false);
     } catch (error) {
-      logger.error('Error al cargar datos de SMS:', error);
+      console.error('Error al cargar datos de SMS:', error);
       toast.error('Error al cargar datos. Por favor, intenta de nuevo.');
       setLoading(false);
     }

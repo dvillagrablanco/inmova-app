@@ -27,7 +27,6 @@ import {
   Euro,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import logger from '@/lib/logger';
 
 interface ColivingProperty {
   id: string;
@@ -65,7 +64,7 @@ export default function ColivingPropertiesPage() {
         setProperties(Array.isArray(data) ? data : data.properties || []);
       }
     } catch (error) {
-      logger.error('Error fetching coliving properties:', error);
+      console.error('Error fetching coliving properties:', error);
       setProperties([]);
     } finally {
       setLoading(false);

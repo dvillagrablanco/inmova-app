@@ -29,7 +29,6 @@ import { Home, Car, Package, Save } from 'lucide-react';
 import { toast } from 'sonner';
 import { LoadingState } from '@/components/ui/loading-state';
 import { BackButton } from '@/components/ui/back-button';
-import logger from '@/lib/logger';
 import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
 
 interface Building {
@@ -75,7 +74,7 @@ export default function NuevoGarajeTrasteroPage() {
         setBuildings(data);
       }
     } catch (error) {
-      logger.error('Error fetching buildings:', error);
+      console.error('Error fetching buildings:', error);
       toast.error('Error al cargar edificios');
     }
   };
@@ -129,7 +128,7 @@ export default function NuevoGarajeTrasteroPage() {
         toast.error(error.error || `Error al crear ${formData.tipo}`);
       }
     } catch (error) {
-      logger.error('Error creating unit:', error);
+      console.error('Error creating unit:', error);
       toast.error('Error al crear el espacio');
     } finally {
       setLoading(false);

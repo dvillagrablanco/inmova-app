@@ -30,7 +30,6 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
-import logger from '@/lib/logger';
 
 interface NotificationLog {
   id: string;
@@ -134,7 +133,7 @@ export default function NotificationHistoryPage() {
         setPagination(data.pagination);
       }
     } catch (error) {
-      logger.error('Error fetching logs:', error);
+      console.error('Error fetching logs:', error);
       toast.error('Error al cargar el historial');
     } finally {
       setLoading(false);
@@ -151,7 +150,7 @@ export default function NotificationHistoryPage() {
         setStats(data.stats);
       }
     } catch (error) {
-      logger.error('Error fetching stats:', error);
+      console.error('Error fetching stats:', error);
     }
   };
 

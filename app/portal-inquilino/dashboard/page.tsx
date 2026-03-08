@@ -23,7 +23,6 @@ import {
   MessageSquare,
 } from 'lucide-react';
 import Link from 'next/link';
-import logger from '@/lib/logger';
 import { TenantOnboarding } from '@/components/portal-inquilino/TenantOnboarding';
 
 interface DashboardData {
@@ -76,7 +75,7 @@ export default function PortalInquilinoDashboardPage() {
         toast.error('Error al cargar el dashboard');
       }
     } catch (error) {
-      logger.error('Error al cargar dashboard:', error);
+      console.error('Error al cargar dashboard:', error);
       toast.error('Error al cargar datos');
     } finally {
       setLoading(false);

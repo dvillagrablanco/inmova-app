@@ -42,7 +42,6 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
-import logger from '@/lib/logger';
 
 interface NotificationRule {
   id: string;
@@ -141,7 +140,7 @@ export default function NotificationRulesPage() {
         setRules(data);
       }
     } catch (error) {
-      logger.error('Error fetching rules:', error);
+      console.error('Error fetching rules:', error);
       toast.error('Error al cargar reglas');
     } finally {
       setLoading(false);
@@ -156,7 +155,7 @@ export default function NotificationRulesPage() {
         setTemplates(data);
       }
     } catch (error) {
-      logger.error('Error fetching templates:', error);
+      console.error('Error fetching templates:', error);
     }
   };
 
@@ -188,7 +187,7 @@ export default function NotificationRulesPage() {
         toast.error('Error al guardar la regla');
       }
     } catch (error) {
-      logger.error('Error saving rule:', error);
+      console.error('Error saving rule:', error);
       toast.error('Error al guardar la regla');
     }
   };
@@ -208,7 +207,7 @@ export default function NotificationRulesPage() {
         toast.error('Error al eliminar la regla');
       }
     } catch (error) {
-      logger.error('Error deleting rule:', error);
+      console.error('Error deleting rule:', error);
       toast.error('Error al eliminar la regla');
     }
   };
@@ -228,7 +227,7 @@ export default function NotificationRulesPage() {
         toast.error('Error al cambiar el estado');
       }
     } catch (error) {
-      logger.error('Error toggling rule:', error);
+      console.error('Error toggling rule:', error);
       toast.error('Error al cambiar el estado');
     }
   };

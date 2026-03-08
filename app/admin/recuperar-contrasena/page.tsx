@@ -10,7 +10,6 @@ import { PasswordInput } from '@/components/ui/password-input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Shield, CheckCircle, AlertTriangle, Key, Mail } from 'lucide-react';
-import logger from '@/lib/logger';
 import { toast } from 'sonner';
 
 function RecuperarContrasenaContent() {
@@ -45,7 +44,7 @@ function RecuperarContrasenaContent() {
 
         // En desarrollo, mostrar el token
         if (data.token && process.env.NODE_ENV === 'development') {
-          logger.info(`Token de desarrollo: ${data.token}`);
+          console.info(`Token de desarrollo: ${data.token}`);
           // Redirigir automáticamente en desarrollo
           setTimeout(() => {
             router.push(`/admin/recuperar-contrasena?token=${data.token}`);
@@ -55,7 +54,7 @@ function RecuperarContrasenaContent() {
         setError(data.error || 'Error al solicitar recuperación');
       }
     } catch (error) {
-      logger.error('Error al solicitar recuperación:', error);
+      console.error('Error al solicitar recuperación:', error);
       setError('Error al procesar la solicitud');
     } finally {
       setLoading(false);
@@ -98,7 +97,7 @@ function RecuperarContrasenaContent() {
         setError(data.error || 'Error al restablecer contraseña');
       }
     } catch (error) {
-      logger.error('Error al restablecer contraseña:', error);
+      console.error('Error al restablecer contraseña:', error);
       setError('Error al procesar la solicitud');
     } finally {
       setLoading(false);

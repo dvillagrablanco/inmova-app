@@ -66,7 +66,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
-import logger from '@/lib/logger';
 
 // Estadísticas del marketplace
 interface MarketplaceStats {
@@ -200,7 +199,7 @@ export default function MarketplaceAdminPage() {
 
       setProviders([]);
     } catch (error) {
-      logger.error('Error loading marketplace data:', error);
+      console.error('Error loading marketplace data:', error);
       toast.error('Error al cargar datos del marketplace');
     } finally {
       setLoading(false);

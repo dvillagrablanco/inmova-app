@@ -42,7 +42,6 @@ import { FilterChips } from '@/components/ui/filter-chips';
 import { SearchInput } from '@/components/ui/search-input';
 import { DeleteConfirmationDialog } from '@/components/ui/delete-confirmation-dialog';
 import { toast } from 'sonner';
-import logger from '@/lib/logger';
 
 interface Contract {
   id: string;
@@ -146,7 +145,7 @@ export default function ContratosClientPage({
         setTimeout(() => router.refresh(), 300);
       })
       .catch((error) => {
-        logger.error('Error deleting contract:', error);
+        console.error('Error deleting contract:', error);
         toast.error('Error al eliminar el contrato');
       })
       .finally(() => {
