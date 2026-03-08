@@ -433,16 +433,269 @@ const ONBOARDING_GENERAL: OnboardingTaskDefinition[] = [
   }
 ];
 
+// ===================================
+// CONSTRUCCIÓN — Tareas específicas
+// ===================================
+const ONBOARDING_CONSTRUCCION: OnboardingTaskDefinition[] = [
+  {
+    taskId: 'welcome',
+    title: '🏗️ ¡Bienvenido al módulo de Construcción!',
+    description: 'Gestiona proyectos de obra nueva o rehabilitación integral',
+    type: 'video',
+    order: 0,
+    isMandatory: false,
+    estimatedTime: 90,
+    videoUrl: '/videos/onboarding/construccion-intro.mp4',
+    unlocks: []
+  },
+  {
+    taskId: 'create_construction_project',
+    title: '📋 Define tu proyecto de construcción',
+    description: 'Tipo de obra, fases, plazos y presupuesto inicial',
+    type: 'wizard',
+    order: 1,
+    isMandatory: true,
+    estimatedTime: 180,
+    route: '/construccion/proyectos',
+    helpArticle: '/docs/construccion',
+    unlocks: ['construccion_module']
+  },
+  {
+    taskId: 'manage_permits',
+    title: '📄 Gestión de permisos y licencias',
+    description: 'Checklist automático de licencias según tipo de obra',
+    type: 'wizard',
+    order: 2,
+    isMandatory: true,
+    estimatedTime: 120,
+    route: '/construccion/proyectos',
+    unlocks: ['permisos_module']
+  },
+  {
+    taskId: 'add_contractors',
+    title: '👥 Añadir proveedores y contratistas',
+    description: 'Registra arquitecto, aparejador, constructor y más',
+    type: 'wizard',
+    order: 3,
+    isMandatory: false,
+    estimatedTime: 120,
+    route: '/proveedores',
+    unlocks: ['proveedores_module']
+  },
+  {
+    taskId: 'plan_phases',
+    title: '📆 Planificar fases de obra',
+    description: 'Define cimentación, estructura, cerramientos, acabados...',
+    type: 'wizard',
+    order: 4,
+    isMandatory: false,
+    estimatedTime: 180,
+    route: '/construction/gantt',
+    unlocks: ['gantt_module']
+  },
+  {
+    taskId: 'explore_dashboard',
+    title: '📊 Ver dashboard Construcción',
+    description: 'Controla avance, costes y hitos desde un solo panel',
+    type: 'action',
+    order: 5,
+    isMandatory: false,
+    estimatedTime: 60,
+    route: '/construccion',
+    unlocks: []
+  },
+  {
+    taskId: 'complete_celebration',
+    title: '✅ ¡Proyecto de construcción configurado!',
+    description: 'Gestiona tu obra con diagrama Gantt y control de calidad',
+    type: 'action',
+    order: 6,
+    isMandatory: true,
+    estimatedTime: 30,
+    route: '/onboarding/complete',
+    unlocks: ['todos_los_modulos']
+  }
+];
+
+// ===================================
+// SERVICIOS PROFESIONALES — Tareas específicas
+// ===================================
+const ONBOARDING_PROFESIONAL: OnboardingTaskDefinition[] = [
+  {
+    taskId: 'welcome',
+    title: '💼 ¡Bienvenido al módulo Profesional!',
+    description: 'Gestiona proyectos, clientes y facturación de tus servicios',
+    type: 'video',
+    order: 0,
+    isMandatory: false,
+    estimatedTime: 90,
+    videoUrl: '/videos/onboarding/profesional-intro.mp4',
+    unlocks: []
+  },
+  {
+    taskId: 'define_services',
+    title: '📋 Define tus servicios y tarifas',
+    description: 'Crea tu catálogo de servicios con tarifas por hora o proyecto',
+    type: 'wizard',
+    order: 1,
+    isMandatory: true,
+    estimatedTime: 120,
+    route: '/professional/projects',
+    helpArticle: '/docs/servicios-profesionales',
+    unlocks: ['professional_module']
+  },
+  {
+    taskId: 'setup_clients',
+    title: '👥 Añade tus primeros clientes',
+    description: 'Importa o crea clientes en el CRM',
+    type: 'wizard',
+    order: 2,
+    isMandatory: true,
+    estimatedTime: 90,
+    route: '/professional/clients',
+    unlocks: ['crm_module']
+  },
+  {
+    taskId: 'configure_invoicing',
+    title: '💳 Configura facturación',
+    description: 'Establece honorarios, plantillas de factura y método de cobro',
+    type: 'wizard',
+    order: 3,
+    isMandatory: false,
+    estimatedTime: 120,
+    route: '/professional/invoicing',
+    unlocks: ['facturacion_module']
+  },
+  {
+    taskId: 'explore_dashboard',
+    title: '📊 Ver dashboard Profesional',
+    description: 'Gestiona proyectos, facturación y rentabilidad',
+    type: 'action',
+    order: 4,
+    isMandatory: false,
+    estimatedTime: 60,
+    route: '/professional/projects',
+    unlocks: []
+  },
+  {
+    taskId: 'complete_celebration',
+    title: '✅ ¡Tu negocio profesional está listo!',
+    description: 'Gestiona proyectos y factura a tus clientes',
+    type: 'action',
+    order: 5,
+    isMandatory: true,
+    estimatedTime: 30,
+    route: '/onboarding/complete',
+    unlocks: ['todos_los_modulos']
+  }
+];
+
+// ===================================
+// COMUNIDADES / ADMIN FINCAS — Tareas específicas
+// ===================================
+const ONBOARDING_COMUNIDADES: OnboardingTaskDefinition[] = [
+  {
+    taskId: 'welcome',
+    title: '🏛️ ¡Bienvenido a Gestión de Comunidades!',
+    description: 'Administra comunidades de propietarios de forma digital',
+    type: 'video',
+    order: 0,
+    isMandatory: false,
+    estimatedTime: 90,
+    videoUrl: '/videos/onboarding/comunidades-intro.mp4',
+    unlocks: []
+  },
+  {
+    taskId: 'create_community',
+    title: '🏛️ Crea tu primera comunidad',
+    description: 'Registra la finca (dirección, nº propietarios, CIF)',
+    type: 'wizard',
+    order: 1,
+    isMandatory: true,
+    estimatedTime: 120,
+    route: '/comunidades/lista',
+    helpArticle: '/docs/comunidades',
+    unlocks: ['comunidades_module']
+  },
+  {
+    taskId: 'add_owners',
+    title: '👥 Añade copropietarios',
+    description: 'Registra propietarios con coeficientes de propiedad',
+    type: 'wizard',
+    order: 2,
+    isMandatory: true,
+    estimatedTime: 120,
+    route: '/comunidades/propietarios',
+    unlocks: ['propietarios_module']
+  },
+  {
+    taskId: 'configure_fees',
+    title: '💶 Configura cuotas',
+    description: 'Define cuotas ordinarias y coeficientes de pago',
+    type: 'wizard',
+    order: 3,
+    isMandatory: false,
+    estimatedTime: 90,
+    route: '/comunidades/cuotas',
+    unlocks: ['cuotas_module']
+  },
+  {
+    taskId: 'schedule_meeting',
+    title: '📅 Convoca una junta',
+    description: 'Usa el asistente para convocar junta ordinaria o extraordinaria',
+    type: 'wizard',
+    order: 4,
+    isMandatory: false,
+    estimatedTime: 90,
+    route: '/comunidades/reuniones',
+    videoUrl: '/videos/convocar-junta.mp4',
+    unlocks: ['juntas_module']
+  },
+  {
+    taskId: 'setup_voting',
+    title: '☑️ Configura votaciones electrónicas',
+    description: 'Activa votación desde el móvil con cálculo automático de mayorías',
+    type: 'wizard',
+    order: 5,
+    isMandatory: false,
+    estimatedTime: 60,
+    route: '/comunidades/votaciones',
+    unlocks: ['votaciones_module']
+  },
+  {
+    taskId: 'explore_dashboard',
+    title: '📊 Ver dashboard Comunidades',
+    description: 'Gestiona juntas, derramas, espacios comunes y comunicaciones',
+    type: 'action',
+    order: 6,
+    isMandatory: false,
+    estimatedTime: 60,
+    route: '/comunidades',
+    unlocks: []
+  },
+  {
+    taskId: 'complete_celebration',
+    title: '✅ ¡Comunidad configurada!',
+    description: 'Administra tu comunidad de propietarios completamente digital',
+    type: 'action',
+    order: 7,
+    isMandatory: true,
+    estimatedTime: 30,
+    route: '/onboarding/complete',
+    unlocks: ['todos_los_modulos']
+  }
+];
+
 // Mapeo de verticales a tareas
 const ONBOARDING_TASKS_BY_VERTICAL: Record<string, OnboardingTaskDefinition[]> = {
   'alquiler_tradicional': ONBOARDING_ALQUILER_TRADICIONAL,
   'room_rental': ONBOARDING_ROOM_RENTAL,
-  'coliving': ONBOARDING_ROOM_RENTAL, // Usa el mismo que room_rental
+  'coliving': ONBOARDING_ROOM_RENTAL,
   'str_vacacional': ONBOARDING_STR,
   'flipping': ONBOARDING_FLIPPING,
-  'construccion': ONBOARDING_GENERAL, // TODO: Crear específico
-  'servicios_profesionales': ONBOARDING_GENERAL, // TODO: Crear específico
-  'comunidades': ONBOARDING_GENERAL, // TODO: Crear específico
+  'construccion': ONBOARDING_CONSTRUCCION,
+  'servicios_profesionales': ONBOARDING_PROFESIONAL,
+  'comunidades': ONBOARDING_COMUNIDADES,
   'mixto': ONBOARDING_GENERAL,
   'general': ONBOARDING_GENERAL
 };
