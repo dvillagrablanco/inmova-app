@@ -26,7 +26,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Progress } from '@/components/ui/progress';
-import logger from '@/lib/logger';
+// logger removed — winston doesn't work in client components
 
 interface ESGMetrics {
   carbonFootprint: number; // kg CO2
@@ -92,7 +92,7 @@ export default function ESGPage() {
         setPlans(data);
       }
     } catch (error) {
-      logger.error('Error loading ESG data:', error);
+      console.error('Error loading ESG data:', error);
       toast.error('Error al cargar datos ESG');
     } finally {
       setLoading(false);
@@ -141,7 +141,7 @@ export default function ESGPage() {
         toast.error('Error al generar reporte');
       }
     } catch (error) {
-      logger.error('Error generating report:', error);
+      console.error('Error generating report:', error);
       toast.error('Error al generar reporte');
     }
   };
