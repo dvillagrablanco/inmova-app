@@ -14,18 +14,21 @@
  */
 
 import { useEffect, useState, useCallback, useRef } from 'react';
-import Joyride, { CallBackProps, STATUS } from 'react-joyride';
+import Joyride, { CallBackProps, STATUS, ACTIONS } from 'react-joyride';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { DEMO_SHOWCASE_STEPS, DEMO_USER_EMAIL } from '@/lib/onboarding-demo-tour';
 import { Button } from '@/components/ui/button';
-import { RotateCcw, Presentation } from 'lucide-react';
+import { RotateCcw, Presentation, Play } from 'lucide-react';
 
 const DEMO_TOUR_STORAGE_KEY = 'inmova-demo-tour-completed';
 
 export function DemoShowcaseTour() {
   const { data: session } = useSession();
+  const router = useRouter();
   const [run, setRun] = useState(false);
-  const [showRestartButton, setShowRestartButton] = useState(false);
+  const [stepIndex, setStepIndex] = useState(0);
+  const [showControls, setShowControls] = useState(false);
   const isProcessingRef = useRef(false);
 
   const userEmail = session?.user?.email;
@@ -35,14 +38,13 @@ export function DemoShowcaseTour() {
   useEffect(() => {
     if (!isDemoUser) return;
 
-    // Check if tour was already shown in this browser session
     const completed = sessionStorage.getItem(DEMO_TOUR_STORAGE_KEY);
     if (completed === 'true') {
-      setShowRestartButton(true);
+      setShowControls(true);
       return;
     }
 
-    // Delay to let the page render fully
+    // Ensure we're on dashboard before starting
     const timer = setTimeout(() => {
       setRun(true);
     }, 1500);
@@ -51,15 +53,19 @@ export function DemoShowcaseTour() {
   }, [isDemoUser]);
 
   const handleCallback = useCallback((data: CallBackProps) => {
-    const { status } = data;
+    const { status, index, action } = data;
     const finished = [STATUS.FINISHED, STATUS.SKIPPED];
+
+    if (action === ACTIONS.UPDATE) {
+      setStepIndex(index);
+    }
 
     if (finished.includes(status as any)) {
       if (isProcessingRef.current) return;
       isProcessingRef.current = true;
 
       setRun(false);
-      setShowRestartButton(true);
+      setShowControls(true);
       sessionStorage.setItem(DEMO_TOUR_STORAGE_KEY, 'true');
 
       setTimeout(() => {
@@ -68,10 +74,21 @@ export function DemoShowcaseTour() {
     }
   }, []);
 
-  const handleRestart = useCallback(() => {
+  // Reiniciar desde el dashboard (paso 1)
+  const handlePresent = useCallback(() => {
     sessionStorage.removeItem(DEMO_TOUR_STORAGE_KEY);
-    setShowRestartButton(false);
-    // Small delay before restarting
+    setShowControls(false);
+    setStepIndex(0);
+    // Navigate to dashboard first
+    router.push('/dashboard');
+    setTimeout(() => {
+      setRun(true);
+    }, 500);
+  }, [router]);
+
+  // Continuar desde donde se dejó
+  const handleResume = useCallback(() => {
+    setShowControls(false);
     setTimeout(() => {
       setRun(true);
     }, 300);
@@ -147,26 +164,30 @@ export function DemoShowcaseTour() {
         }}
       />
 
-      {/* Restart Demo Button - Fixed position */}
-      {showRestartButton && (
-        <div className="fixed bottom-6 left-6 z-50 flex gap-2">
+      {/* Demo Controls - Fixed position */}
+      {showControls && (
+        <div className="fixed bottom-6 left-6 z-50 flex items-center gap-2">
+          {/* Resume from current step */}
+          {stepIndex > 0 && stepIndex < DEMO_SHOWCASE_STEPS.length - 1 && (
+            <Button
+              onClick={handleResume}
+              variant="outline"
+              size="sm"
+              className="bg-white/90 backdrop-blur-sm shadow-lg border-gray-200 hover:bg-gray-50 transition-all"
+            >
+              <Play className="h-3.5 w-3.5 mr-1.5 text-gray-600" />
+              <span className="text-gray-700 text-xs">Continuar ({stepIndex + 1}/12)</span>
+            </Button>
+          )}
+          {/* Restart from beginning */}
           <Button
-            onClick={handleRestart}
-            variant="outline"
-            size="sm"
-            className="bg-white/90 backdrop-blur-sm shadow-lg border-indigo-200 hover:bg-indigo-50 hover:border-indigo-400 transition-all"
-          >
-            <RotateCcw className="h-4 w-4 mr-2 text-indigo-600" />
-            <span className="text-indigo-700 font-medium">Reiniciar Demo</span>
-          </Button>
-          <Button
-            onClick={handleRestart}
+            onClick={handlePresent}
             variant="default"
             size="sm"
             className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg"
           >
-            <Presentation className="h-4 w-4 mr-2" />
-            <span>Presentar</span>
+            <Presentation className="h-4 w-4 mr-1.5" />
+            <span className="text-xs font-medium">Presentar Demo</span>
           </Button>
         </div>
       )}

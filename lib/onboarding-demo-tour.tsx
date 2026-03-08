@@ -4,53 +4,70 @@ import { Step } from 'react-joyride';
 /**
  * TOUR DEMO SHOWCASE — GRUPO VIDARO
  * 
- * Tour de presentación diseñado para impresionar al equipo con
- * la potencialidad completa de INMOVA. Cada paso resalta beneficios
- * tangibles con datos reales del grupo.
+ * 12 pasos con arco dramático: PROBLEMA → SOLUCIÓN → BENEFICIO → PRUEBA
+ * Diseñado para presentar la plataforma al equipo y dejar impacto.
  * 
- * 15 pasos estratégicos que cubren toda la plataforma.
+ * Estructura:
+ * ACTO 1 — El Reto (2 pasos center)
+ * ACTO 2 — La Plataforma (6 pasos alternancia center/right)
+ * ACTO 3 — Sin Esfuerzo (2 pasos right)
+ * ACTO 4 — El Impacto (2 pasos center)
  */
 
 export const DEMO_USER_EMAIL = 'demo@vidaroinversiones.com';
 
 export const DEMO_SHOWCASE_STEPS: Step[] = [
-  // ═══════════════════════════════════════════════════════════════
-  // PASO 1: BIENVENIDA ÉPICA
-  // ═══════════════════════════════════════════════════════════════
+
+  // ╔═══════════════════════════════════════════════════════════════╗
+  // ║  ACTO 1 — "EL RETO"                                         ║
+  // ╚═══════════════════════════════════════════════════════════════╝
+
+  // ─── PASO 1: BIENVENIDA + EL PROBLEMA ──────────────────────────
   {
     target: 'body',
     content: (
-      <div className="space-y-4 max-w-md">
+      <div className="space-y-4 max-w-lg">
         <div className="text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 mb-3">
             <span className="text-3xl">🏛️</span>
           </div>
           <h2 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-            Bienvenido, Grupo Vidaro
+            Grupo Vidaro · INMOVA
           </h2>
+          <p className="text-xs text-gray-400 mt-1">La plataforma inmobiliaria más completa de España</p>
         </div>
-        <p className="text-gray-600 text-center text-sm leading-relaxed">
-          INMOVA es la <strong>plataforma de gestión inmobiliaria más completa de España</strong>.
-          Hoy le mostraremos cómo puede transformar la operación de sus 
-          <strong> 3 sociedades, 22+ inmuebles y €337M en activos</strong> en una 
-          experiencia 100% digital, automatizada e inteligente.
+
+        <div className="grid grid-cols-3 gap-2">
+          <div className="text-center p-2.5 bg-indigo-50 rounded-xl">
+            <div className="text-xl font-bold text-indigo-700">3</div>
+            <div className="text-[10px] text-indigo-600 font-medium">Sociedades</div>
+          </div>
+          <div className="text-center p-2.5 bg-purple-50 rounded-xl">
+            <div className="text-xl font-bold text-purple-700">340+</div>
+            <div className="text-[10px] text-purple-600 font-medium">Inquilinos</div>
+          </div>
+          <div className="text-center p-2.5 bg-blue-50 rounded-xl">
+            <div className="text-xl font-bold text-blue-700">€337M</div>
+            <div className="text-[10px] text-blue-600 font-medium">Activos</div>
+          </div>
+        </div>
+
+        <div className="bg-red-50 border border-red-200 rounded-xl p-3">
+          <h4 className="text-xs font-bold text-red-900 mb-1.5">🔴 El reto actual del equipo:</h4>
+          <div className="space-y-1 text-xs text-red-800">
+            <p>• Hojas de Excel separadas por cada sociedad y edificio</p>
+            <p>• Reporting manual que consume semanas cada trimestre</p>
+            <p>• Cobros, contratos y vencimientos seguidos a mano</p>
+            <p>• Sin visión consolidada del patrimonio completo</p>
+          </div>
+        </div>
+
+        <p className="text-center text-sm text-gray-600 font-medium">
+          ¿Y si todo esto desapareciera en <strong>un solo click</strong>?
         </p>
-        <div className="grid grid-cols-3 gap-2 pt-2">
-          <div className="text-center p-2 bg-indigo-50 rounded-lg">
-            <div className="text-lg font-bold text-indigo-700">3</div>
-            <div className="text-[10px] text-indigo-600">Sociedades</div>
-          </div>
-          <div className="text-center p-2 bg-purple-50 rounded-lg">
-            <div className="text-lg font-bold text-purple-700">340+</div>
-            <div className="text-[10px] text-purple-600">Inquilinos</div>
-          </div>
-          <div className="text-center p-2 bg-blue-50 rounded-lg">
-            <div className="text-lg font-bold text-blue-700">€337M</div>
-            <div className="text-[10px] text-blue-600">Activos</div>
-          </div>
-        </div>
-        <p className="text-xs text-gray-400 text-center italic">
-          Duración del tour: ~5 minutos · Incluye demos en vivo
+
+        <p className="text-[10px] text-gray-400 text-center">
+          12 pasos · ~5 min · Incluye demos en vivo
         </p>
       </div>
     ),
@@ -58,245 +75,227 @@ export const DEMO_SHOWCASE_STEPS: Step[] = [
     disableBeacon: true,
   },
 
-  // ═══════════════════════════════════════════════════════════════
-  // PASO 2: DASHBOARD — VISIÓN 360° EN TIEMPO REAL
-  // ═══════════════════════════════════════════════════════════════
+  // ─── PASO 2: LA RESPUESTA — DASHBOARD 360° ────────────────────
   {
     target: '[data-tour="kpi-cards"]',
     content: (
       <div className="space-y-3">
         <div className="flex items-center gap-2">
-          <span className="text-xl">📊</span>
-          <h3 className="font-bold text-gray-900">Dashboard en Tiempo Real</h3>
+          <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-green-100 text-lg">📊</span>
+          <div>
+            <h3 className="font-bold text-gray-900">Todo el Grupo. Una Pantalla. Tiempo Real.</h3>
+            <p className="text-[10px] text-green-600 font-semibold">PASO 2/12</p>
+          </div>
         </div>
         <p className="text-sm text-gray-600">
-          <strong>Todo el grupo en una sola pantalla.</strong> KPIs de ingresos, ocupación, 
-          morosidad y alertas actualizados al segundo. Sin esperar informes mensuales: 
-          las decisiones se toman con datos de hoy.
+          Ingresos, ocupación, morosidad, alertas y gráficos predictivos — 
+          actualizados <strong>al segundo</strong>, no al trimestre.
+          Proyecciones a 12 meses con IA que aprende del histórico del grupo.
         </p>
-        <div className="bg-green-50 border border-green-200 rounded-lg p-2">
-          <p className="text-xs text-green-800">
-            💡 <strong>Beneficio:</strong> Reducción del 80% en tiempo de reporting. 
-            Lo que antes llevaba días ahora se ve en un click.
-          </p>
+        <div className="flex gap-2">
+          <div className="flex-1 text-center p-2 bg-red-50 rounded-lg border border-red-100">
+            <div className="text-[10px] font-bold text-red-700">❌ Antes</div>
+            <div className="text-[9px] text-red-600 mt-0.5">Semanas para un informe</div>
+          </div>
+          <div className="flex-1 text-center p-2 bg-green-50 rounded-lg border border-green-100">
+            <div className="text-[10px] font-bold text-green-700">✅ Con INMOVA</div>
+            <div className="text-[9px] text-green-600 mt-0.5">1 click, datos al segundo</div>
+          </div>
         </div>
       </div>
     ),
     placement: 'bottom',
   },
 
-  // ═══════════════════════════════════════════════════════════════
-  // PASO 3: GRÁFICOS PREDICTIVOS
-  // ═══════════════════════════════════════════════════════════════
-  {
-    target: '[data-tour="charts"]',
-    content: (
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <span className="text-xl">📈</span>
-          <h3 className="font-bold text-gray-900">Análisis Predictivo & Tendencias</h3>
-        </div>
-        <p className="text-sm text-gray-600">
-          Gráficos interactivos que muestran la <strong>evolución de ingresos, ocupación y gastos</strong>.
-          Detecte tendencias antes de que se conviertan en problemas. Proyecciones a 12 meses 
-          con IA que aprende del histórico del grupo.
-        </p>
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-2">
-          <p className="text-xs text-blue-800">
-            💡 <strong>Beneficio:</strong> Anticipe caídas de ocupación 3 meses antes. 
-            Prevea flujo de caja con 95% de precisión.
-          </p>
-        </div>
-      </div>
-    ),
-    placement: 'top',
-  },
+  // ╔═══════════════════════════════════════════════════════════════╗
+  // ║  ACTO 2 — "LA PLATAFORMA"                                   ║
+  // ╚═══════════════════════════════════════════════════════════════╝
 
-  // ═══════════════════════════════════════════════════════════════
-  // PASO 4: GESTIÓN MULTI-SOCIEDAD
-  // ═══════════════════════════════════════════════════════════════
+  // ─── PASO 3: MULTI-SOCIEDAD ────────────────────────────────────
   {
     target: '[data-tour="dashboard-link"]',
     content: (
       <div className="space-y-3">
         <div className="flex items-center gap-2">
-          <span className="text-xl">🏢</span>
-          <h3 className="font-bold text-gray-900">Grupo Multi-Sociedad</h3>
+          <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-blue-100 text-lg">🏢</span>
+          <div>
+            <h3 className="font-bold text-gray-900">3 Sociedades, 1 Solo Login</h3>
+            <p className="text-[10px] text-blue-600 font-semibold">PASO 3/12</p>
+          </div>
         </div>
         <p className="text-sm text-gray-600">
-          Gestione <strong>Vidaro, Rovida y Viroda</strong> desde un único login. 
-          Cambie entre sociedades con un click. Visión consolidada del holding 
-          O detalle por filial. Cada empleado ve solo lo que le corresponde.
+          Cambie entre <strong>Vidaro, Rovida y Viroda</strong> instantáneamente. 
+          Visión consolidada del holding O detalle por filial. 
+          Cada empleado ve <strong>solo lo que le corresponde</strong>.
         </p>
-        <div className="grid grid-cols-3 gap-1.5 pt-1">
-          <div className="text-center p-1.5 bg-blue-50 rounded border border-blue-100">
-            <div className="text-[10px] font-bold text-blue-700">Vidaro</div>
-            <div className="text-[9px] text-blue-600">Holding</div>
+        <div className="grid grid-cols-3 gap-1.5">
+          <div className="text-center p-2 bg-blue-50 rounded-lg border border-blue-100">
+            <div className="text-xs font-bold text-blue-700">Vidaro</div>
+            <div className="text-[9px] text-blue-600">Holding · €253M</div>
           </div>
-          <div className="text-center p-1.5 bg-green-50 rounded border border-green-100">
-            <div className="text-[10px] font-bold text-green-700">Rovida</div>
-            <div className="text-[9px] text-green-600">17 inmuebles</div>
+          <div className="text-center p-2 bg-green-50 rounded-lg border border-green-100">
+            <div className="text-xs font-bold text-green-700">Rovida</div>
+            <div className="text-[9px] text-green-600">17 inmuebles · €46M</div>
           </div>
-          <div className="text-center p-1.5 bg-red-50 rounded border border-red-100">
-            <div className="text-[10px] font-bold text-red-700">Viroda</div>
-            <div className="text-[9px] text-red-600">5 edificios</div>
+          <div className="text-center p-2 bg-red-50 rounded-lg border border-red-100">
+            <div className="text-xs font-bold text-red-700">Viroda</div>
+            <div className="text-[9px] text-red-600">5 edificios · €38M</div>
           </div>
-        </div>
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-2">
-          <p className="text-xs text-amber-800">
-            💡 <strong>Beneficio:</strong> Elimine las hojas de Excel separadas por sociedad. 
-            Un solo sistema, múltiples vistas, control total.
-          </p>
         </div>
       </div>
     ),
     placement: 'right',
   },
 
-  // ═══════════════════════════════════════════════════════════════
-  // PASO 5: PROPIEDADES & EDIFICIOS
-  // ═══════════════════════════════════════════════════════════════
+  // ─── PASO 4: INMUEBLES + INQUILINOS ───────────────────────────
   {
     target: '[data-tour="propiedades-menu"]',
     content: (
       <div className="space-y-3">
         <div className="flex items-center gap-2">
-          <span className="text-xl">🏠</span>
-          <h3 className="font-bold text-gray-900">Gestión Inmobiliaria Total</h3>
+          <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-100 text-lg">🏠</span>
+          <div>
+            <h3 className="font-bold text-gray-900">22 Inmuebles · 340 Inquilinos · Todo Digital</h3>
+            <p className="text-[10px] text-indigo-600 font-semibold">PASO 4/12</p>
+          </div>
         </div>
         <p className="text-sm text-gray-600">
-          <strong>22 inmuebles, cientos de unidades, todo digitalizado.</strong> Ficha completa 
-          de cada propiedad: fotos, planos, CEE, metros, catastro. 
-          Desde el Prado de Rovida (€644K/año) hasta cada garaje de H.Tejada.
+          Ficha completa de cada propiedad y cada inquilino: fotos, planos, CEE, catastro, 
+          historial de pagos, incidencias, scoring IA y documentación.
+          Desde Piamonte (€644K/año) hasta cada garaje de H.Tejada.
         </p>
-        <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-2">
-          <p className="text-xs text-indigo-800">
-            💡 <strong>Beneficio:</strong> Localice cualquier dato de cualquier propiedad 
-            en menos de 5 segundos. Fin de las carpetas y documentos dispersos.
-          </p>
+        <div className="flex gap-2">
+          <div className="flex-1 text-center p-2 bg-red-50 rounded-lg border border-red-100">
+            <div className="text-[10px] font-bold text-red-700">❌ Antes</div>
+            <div className="text-[9px] text-red-600 mt-0.5">Buscar en carpetas 15 min</div>
+          </div>
+          <div className="flex-1 text-center p-2 bg-green-50 rounded-lg border border-green-100">
+            <div className="text-[10px] font-bold text-green-700">✅ Con INMOVA</div>
+            <div className="text-[9px] text-green-600 mt-0.5">Cualquier dato en 5 seg</div>
+          </div>
         </div>
       </div>
     ),
     placement: 'right',
   },
 
-  // ═══════════════════════════════════════════════════════════════
-  // PASO 6: INQUILINOS & CONTRATOS
-  // ═══════════════════════════════════════════════════════════════
+  // ─── PASO 5: PORTAL DEL INQUILINO — EL GRAN WOW ──────────────
   {
-    target: '[data-tour="inquilinos-menu"]',
+    target: 'body',
     content: (
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <span className="text-xl">👥</span>
-          <h3 className="font-bold text-gray-900">340+ Inquilinos Gestionados con IA</h3>
+      <div className="space-y-4 max-w-lg">
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 mb-2">
+            <span className="text-2xl">📱</span>
+          </div>
+          <h2 className="text-xl font-bold text-gray-900">Portal del Inquilino — Self-Service 24/7</h2>
+          <p className="text-[10px] text-blue-600 font-semibold">PASO 5/12 · LA ESTRELLA DE LA PLATAFORMA</p>
         </div>
-        <p className="text-sm text-gray-600">
-          Ficha completa de cada inquilino, historial de pagos, 
-          incidencias, documentación y <strong>scoring automático</strong>. 
-          Portal del inquilino donde pagan, reportan incidencias y descargan recibos 
-          <strong>sin intervención humana</strong>.
-        </p>
-        <div className="bg-purple-50 border border-purple-200 rounded-lg p-2">
-          <p className="text-xs text-purple-800">
-            💡 <strong>Beneficio:</strong> Ahorre 20+ horas/semana en gestión administrativa. 
-            Los inquilinos se autogestionan desde su portal.
-          </p>
-        </div>
-      </div>
-    ),
-    placement: 'right',
-  },
 
-  // ═══════════════════════════════════════════════════════════════
-  // PASO 7: PORTAL DEL INQUILINO — EXPERIENCIA COMPLETA
-  // ═══════════════════════════════════════════════════════════════
-  {
-    target: '[data-tour="inquilinos-menu"]',
-    content: (
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <span className="text-xl">📱</span>
-          <h3 className="font-bold text-gray-900">Portal del Inquilino — Self-Service 24/7</h3>
-        </div>
-        <p className="text-sm text-gray-600">
-          Cada inquilino tiene su <strong>propio portal web y móvil</strong> con acceso completo 
-          a toda su relación con el grupo. Funciona como una app bancaria, pero para su alquiler.
+        <p className="text-sm text-gray-600 text-center">
+          Cada uno de sus <strong>340 inquilinos</strong> tiene un portal web y móvil (PWA) 
+          donde gestiona <strong>todo sin llamar ni escribir emails</strong>.
         </p>
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-3 border border-blue-200">
-          <h4 className="text-xs font-bold text-blue-900 mb-2">Lo que el inquilino puede hacer solo:</h4>
-          <div className="grid grid-cols-2 gap-x-3 gap-y-1">
-            <div className="flex items-center gap-1.5 text-[11px] text-blue-800">
-              <span className="text-blue-500">💳</span> Pagar alquiler online (Stripe)
+
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-3 border border-blue-200">
+          <div className="grid grid-cols-3 gap-x-2 gap-y-1.5">
+            <div className="flex items-center gap-1 text-[11px] text-blue-800">
+              <span>💳</span> Pagar online
             </div>
-            <div className="flex items-center gap-1.5 text-[11px] text-blue-800">
-              <span className="text-blue-500">📄</span> Descargar recibos y facturas
+            <div className="flex items-center gap-1 text-[11px] text-blue-800">
+              <span>📄</span> Recibos PDF
             </div>
-            <div className="flex items-center gap-1.5 text-[11px] text-blue-800">
-              <span className="text-blue-500">🔧</span> Reportar incidencias + fotos
+            <div className="flex items-center gap-1 text-[11px] text-blue-800">
+              <span>🔧</span> Incidencias
             </div>
-            <div className="flex items-center gap-1.5 text-[11px] text-blue-800">
-              <span className="text-blue-500">💬</span> Chat directo con gestor
+            <div className="flex items-center gap-1 text-[11px] text-blue-800">
+              <span>💬</span> Chat gestor
             </div>
-            <div className="flex items-center gap-1.5 text-[11px] text-blue-800">
-              <span className="text-blue-500">📝</span> Ver contrato y condiciones
+            <div className="flex items-center gap-1 text-[11px] text-blue-800">
+              <span>📝</span> Ver contrato
             </div>
-            <div className="flex items-center gap-1.5 text-[11px] text-blue-800">
-              <span className="text-blue-500">🔄</span> Solicitar renovación
+            <div className="flex items-center gap-1 text-[11px] text-blue-800">
+              <span>🔄</span> Renovar
             </div>
-            <div className="flex items-center gap-1.5 text-[11px] text-blue-800">
-              <span className="text-blue-500">📂</span> Subir/descargar documentos
+            <div className="flex items-center gap-1 text-[11px] text-blue-800">
+              <span>📂</span> Documentos
             </div>
-            <div className="flex items-center gap-1.5 text-[11px] text-blue-800">
-              <span className="text-blue-500">🤖</span> Chatbot IA de soporte
+            <div className="flex items-center gap-1 text-[11px] text-blue-800">
+              <span>🤖</span> Chatbot IA
             </div>
-            <div className="flex items-center gap-1.5 text-[11px] text-blue-800">
-              <span className="text-blue-500">⭐</span> Valorar experiencia
+            <div className="flex items-center gap-1 text-[11px] text-blue-800">
+              <span>⭐</span> Valoraciones
             </div>
-            <div className="flex items-center gap-1.5 text-[11px] text-blue-800">
-              <span className="text-blue-500">🎁</span> Programa de referidos
+            <div className="flex items-center gap-1 text-[11px] text-blue-800">
+              <span>🎁</span> Referidos
             </div>
-            <div className="flex items-center gap-1.5 text-[11px] text-blue-800">
-              <span className="text-blue-500">🏆</span> Sistema de logros
+            <div className="flex items-center gap-1 text-[11px] text-blue-800">
+              <span>🏆</span> Logros
             </div>
-            <div className="flex items-center gap-1.5 text-[11px] text-blue-800">
-              <span className="text-blue-500">👤</span> Gestionar perfil y datos
+            <div className="flex items-center gap-1 text-[11px] text-blue-800">
+              <span>👤</span> Perfil
             </div>
           </div>
         </div>
-        <div className="bg-green-50 border border-green-200 rounded-lg p-2">
-          <p className="text-xs text-green-800">
-            💡 <strong>Impacto:</strong> El 85% de las gestiones del inquilino se resuelven 
-            <strong>sin intervención humana</strong>. Cada inquilino es autónomo. 
-            Accesible en <strong>inmovaapp.com/portal-inquilino</strong>
-          </p>
+
+        <div className="flex gap-2">
+          <div className="flex-1 text-center p-2 bg-red-50 rounded-lg border border-red-100">
+            <div className="text-[10px] font-bold text-red-700">❌ Antes</div>
+            <div className="text-[9px] text-red-600 mt-0.5">Llamadas, emails, WhatsApp</div>
+            <div className="text-[9px] text-red-600">Equipo saturado</div>
+          </div>
+          <div className="flex-1 text-center p-2 bg-green-50 rounded-lg border border-green-100">
+            <div className="text-[10px] font-bold text-green-700">✅ Con INMOVA</div>
+            <div className="text-[9px] text-green-600 mt-0.5">85% sin intervención humana</div>
+            <div className="text-[9px] text-green-600">Equipo enfocado en valor</div>
+          </div>
         </div>
+
+        <p className="text-center text-[10px] text-gray-500">
+          📱 Accesible en <strong>inmovaapp.com/portal-inquilino</strong> · Instalable como app móvil (PWA)
+        </p>
       </div>
     ),
-    placement: 'right',
+    placement: 'center',
   },
 
-  // ═══════════════════════════════════════════════════════════════
-  // PASO 8: CONTRATOS DIGITALES
-  // ═══════════════════════════════════════════════════════════════
+  // ─── PASO 6: CONTRATOS + COBROS ───────────────────────────────
   {
     target: '[data-tour="contratos-menu"]',
     content: (
       <div className="space-y-3">
         <div className="flex items-center gap-2">
-          <span className="text-xl">📝</span>
-          <h3 className="font-bold text-gray-900">Contratos Inteligentes</h3>
+          <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-green-100 text-lg">📝</span>
+          <div>
+            <h3 className="font-bold text-gray-900">Contratos Inteligentes + Cobros SEPA</h3>
+            <p className="text-[10px] text-green-600 font-semibold">PASO 6/12</p>
+          </div>
         </div>
-        <p className="text-sm text-gray-600">
-          Generación automática de contratos con plantillas legales. 
-          <strong>Actualización IPC automática</strong>, alertas de vencimiento 
-          90 días antes, renovación en lote y firma digital integrada. 
-          Garantías, fianzas y depósitos centralizados.
-        </p>
+        <div className="grid grid-cols-2 gap-2 text-xs">
+          <div className="bg-blue-50 rounded-lg p-2 border border-blue-100">
+            <div className="font-bold text-blue-900 mb-1">Contratos</div>
+            <ul className="text-blue-700 space-y-0.5 text-[10px]">
+              <li>✦ Plantillas legales auto</li>
+              <li>✦ IPC automático anual</li>
+              <li>✦ Firma digital integrada</li>
+              <li>✦ Alertas vencimiento 90d</li>
+              <li>✦ Renovación en lote</li>
+            </ul>
+          </div>
+          <div className="bg-emerald-50 rounded-lg p-2 border border-emerald-100">
+            <div className="font-bold text-emerald-900 mb-1">Cobros</div>
+            <ul className="text-emerald-700 space-y-0.5 text-[10px]">
+              <li>✦ SEPA domiciliación</li>
+              <li>✦ 340 cobros/mes auto</li>
+              <li>✦ Recibos por email</li>
+              <li>✦ Morosidad tiempo real</li>
+              <li>✦ Recordatorios auto</li>
+            </ul>
+          </div>
+        </div>
         <div className="bg-green-50 border border-green-200 rounded-lg p-2">
           <p className="text-xs text-green-800">
-            💡 <strong>Beneficio:</strong> Cero contratos olvidados. Cero subidas de IPC 
-            perdidas. Renovaciones automáticas que maximizan ingresos.
+            💡 Cero contratos olvidados · Cero IPC perdidos · <strong>-60% morosidad</strong>
           </p>
         </div>
       </div>
@@ -304,239 +303,151 @@ export const DEMO_SHOWCASE_STEPS: Step[] = [
     placement: 'right',
   },
 
-  // ═══════════════════════════════════════════════════════════════
-  // PASO 9: FAMILY OFFICE 360°
-  // ═══════════════════════════════════════════════════════════════
+  // ─── PASO 7: FAMILY OFFICE + FINANZAS ─────────────────────────
   {
     target: '[data-tour="family-office-menu"]',
     content: (
       <div className="space-y-3">
         <div className="flex items-center gap-2">
-          <span className="text-xl">👑</span>
-          <h3 className="font-bold text-gray-900">Family Office 360°</h3>
+          <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-amber-100 text-lg">👑</span>
+          <div>
+            <h3 className="font-bold text-gray-900">Family Office 360° + Control Financiero</h3>
+            <p className="text-[10px] text-amber-600 font-semibold">PASO 7/12</p>
+          </div>
         </div>
         <p className="text-sm text-gray-600">
-          <strong>Patrimonio consolidado: inmobiliario + financiero + Private Equity.</strong> 
-          460+ instrumentos financieros de Vidaro (CACEIS, Inversis, Pictet, Banca March, Bankinter) 
-          junto con los activos inmobiliarios en una sola vista.
+          <strong>Patrimonio completo en una vista:</strong> inmobiliario + financiero + Private Equity.
+          P&L por centro de coste. Previsión a 12 meses. 7.239 asientos contables importados.
         </p>
-        <div className="grid grid-cols-2 gap-1.5 pt-1">
+        <div className="grid grid-cols-4 gap-1 pt-1">
           <div className="text-center p-1.5 bg-amber-50 rounded border border-amber-100">
-            <div className="text-xs font-bold text-amber-700">€253M</div>
-            <div className="text-[9px] text-amber-600">Contabilidad Vidaro</div>
+            <div className="text-[10px] font-bold text-amber-700">€253M</div>
+            <div className="text-[8px] text-amber-600">Vidaro</div>
           </div>
           <div className="text-center p-1.5 bg-amber-50 rounded border border-amber-100">
-            <div className="text-xs font-bold text-amber-700">460+</div>
-            <div className="text-[9px] text-amber-600">Instrumentos</div>
+            <div className="text-[10px] font-bold text-amber-700">460+</div>
+            <div className="text-[8px] text-amber-600">Instrum.</div>
+          </div>
+          <div className="text-center p-1.5 bg-amber-50 rounded border border-amber-100">
+            <div className="text-[10px] font-bold text-amber-700">5</div>
+            <div className="text-[8px] text-amber-600">Carteras</div>
+          </div>
+          <div className="text-center p-1.5 bg-amber-50 rounded border border-amber-100">
+            <div className="text-[10px] font-bold text-amber-700">7</div>
+            <div className="text-[8px] text-amber-600">Particip.</div>
           </div>
         </div>
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-2">
-          <p className="text-xs text-amber-800">
-            💡 <strong>Beneficio:</strong> Visión patrimonial completa en un dashboard. 
-            Modelo 720, estructura grupo, P&L consolidado por sociedad.
-          </p>
+        <div className="text-[10px] text-gray-500 pl-1">
+          CACEIS · Inversis · Pictet · Banca March · Bankinter · Modelo 720 · Estructura grupo
         </div>
       </div>
     ),
     placement: 'right',
   },
 
-  // ═══════════════════════════════════════════════════════════════
-  // PASO 10: INTELIGENCIA ARTIFICIAL
-  // ═══════════════════════════════════════════════════════════════
+  // ─── PASO 8: IA EN ACCIÓN — DEMO LIVE ────────────────────────
   {
-    target: '[data-tour="valoraciones-menu"]',
+    target: 'body',
     content: (
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <span className="text-xl">🧠</span>
-          <h3 className="font-bold text-gray-900">IA Integrada en Toda la Plataforma</h3>
+      <div className="space-y-4 max-w-lg">
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 mb-2">
+            <span className="text-2xl">🧠</span>
+          </div>
+          <h2 className="text-xl font-bold text-gray-900">Inteligencia Artificial en Acción</h2>
+          <p className="text-[10px] text-violet-600 font-semibold">PASO 8/12 · DEMOS EN VIVO</p>
         </div>
-        <p className="text-sm text-gray-600">
-          <strong>Claude AI trabajando para el grupo 24/7.</strong> Valoración automática 
-          de inmuebles, clasificación inteligente de incidencias, matching inquilino-propiedad, 
-          análisis de oportunidades de inversión con scoring y pipeline Kanban.
+
+        <p className="text-sm text-gray-600 text-center">
+          Claude AI trabaja para el grupo <strong>24 horas, 7 días</strong>. 
+          Pruebe estas 3 funciones en directo:
         </p>
-        <ul className="text-xs text-gray-500 space-y-0.5 pl-3">
-          <li>✦ Valoración IA con comparables de mercado</li>
-          <li>✦ 51 features en oportunidades de inversión</li>
-          <li>✦ Copiloto financiero que responde preguntas sobre la contabilidad</li>
-          <li>✦ Análisis de propuestas de brokers con veredicto automático</li>
-        </ul>
+
+        <div className="space-y-2">
+          {/* Demo 1 */}
+          <div className="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-xl p-3 border border-indigo-200">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-sm">🏷️</span>
+              <span className="text-xs font-bold text-indigo-900">1. Valoración IA</span>
+              <span className="text-[9px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded-full">Menú → Valoración IA</span>
+            </div>
+            <p className="text-[10px] text-indigo-800">
+              Escriba una dirección de Madrid → valor estimado + comparables + precio/m² en 10 seg
+            </p>
+          </div>
+
+          {/* Demo 2 */}
+          <div className="bg-gradient-to-r from-purple-50 to-fuchsia-50 rounded-xl p-3 border border-purple-200">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-sm">📋</span>
+              <span className="text-xs font-bold text-purple-900">2. Análisis de Broker</span>
+              <span className="text-[9px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full">Menú → Oportunidades IA</span>
+            </div>
+            <p className="text-[10px] text-purple-800">
+              Pegue un PDF de propuesta → la IA extrae datos, analiza riesgos y emite: COMPRAR / NEGOCIAR / DESCARTAR
+            </p>
+          </div>
+
+          {/* Demo 3 */}
+          <div className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl p-3 border border-emerald-200">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-sm">💬</span>
+              <span className="text-xs font-bold text-emerald-900">3. Copiloto Financiero</span>
+              <span className="text-[9px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full">Botón IA ↘ abajo derecha</span>
+            </div>
+            <p className="text-[10px] text-emerald-800">
+              Pregunte: &quot;¿Cuánto genera Piamonte al año?&quot; o &quot;¿Qué sociedad tiene mejor yield?&quot; — responde al instante
+            </p>
+          </div>
+        </div>
+
         <div className="bg-violet-50 border border-violet-200 rounded-lg p-2">
-          <p className="text-xs text-violet-800">
-            💡 <strong>Beneficio:</strong> Decisiones de inversión 10x más rápidas. 
-            La IA analiza lo que un equipo tardaría semanas.
+          <p className="text-xs text-violet-800 text-center">
+            💡 La IA analiza en segundos lo que un equipo tardaría semanas. <strong>50 propuestas analizadas en el tiempo de 1.</strong>
           </p>
         </div>
       </div>
     ),
-    placement: 'right',
+    placement: 'center',
   },
 
-  // ═══════════════════════════════════════════════════════════════
-  // PASO 11: VALORACIÓN EN VIVO — DEMO INTERACTIVA
-  // ═══════════════════════════════════════════════════════════════
-  {
-    target: '[data-tour="valoraciones-menu"]',
-    content: (
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <span className="text-xl">🏷️</span>
-          <h3 className="font-bold text-gray-900">Demo en Vivo: Valoración IA</h3>
-        </div>
-        <div className="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-lg p-3 border border-indigo-200">
-          <p className="text-sm text-gray-700 font-medium mb-2">
-            👉 Haga click en <strong>&quot;Valoración IA&quot;</strong> en el menú para probarlo en directo.
-          </p>
-          <p className="text-xs text-gray-600">
-            Introduzca cualquier dirección de Madrid y la IA calculará al instante:
-          </p>
-          <ul className="text-xs text-gray-600 mt-1.5 space-y-0.5 pl-3">
-            <li>✦ <strong>Valor estimado</strong> con rango min-max y confianza</li>
-            <li>✦ <strong>Comparables</strong> del mercado en la misma zona</li>
-            <li>✦ <strong>Precio/m²</strong> vs media del barrio</li>
-            <li>✦ <strong>Tendencia</strong> del mercado local (subiendo/bajando/estable)</li>
-          </ul>
-        </div>
-        <div className="bg-green-50 border border-green-200 rounded-lg p-2">
-          <p className="text-xs text-green-800">
-            💡 <strong>Ejemplo:</strong> Piso en Barrio Salamanca, 120m², 3 hab → la IA 
-            estima €580K-€650K en menos de 10 segundos, con 6 comparables reales.
-          </p>
-        </div>
-      </div>
-    ),
-    placement: 'right',
-    spotlightClicks: true,
-  },
+  // ╔═══════════════════════════════════════════════════════════════╗
+  // ║  ACTO 3 — "SIN ESFUERZO"                                    ║
+  // ╚═══════════════════════════════════════════════════════════════╝
 
-  // ═══════════════════════════════════════════════════════════════
-  // PASO 12: ANÁLISIS DE PROPUESTAS DEL BROKER
-  // ═══════════════════════════════════════════════════════════════
-  {
-    target: '[data-tour="oportunidades-ia-menu"]',
-    content: (
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <span className="text-xl">📋</span>
-          <h3 className="font-bold text-gray-900">Demo en Vivo: Analizar Propuesta de Broker</h3>
-        </div>
-        <div className="bg-gradient-to-r from-purple-50 to-fuchsia-50 rounded-lg p-3 border border-purple-200">
-          <p className="text-sm text-gray-700 font-medium mb-2">
-            👉 Entre en <strong>&quot;Oportunidades IA&quot;</strong> para ver el analizador de propuestas.
-          </p>
-          <p className="text-xs text-gray-600">
-            Pegue el texto o suba el PDF de cualquier propuesta de un broker y la IA:
-          </p>
-          <ul className="text-xs text-gray-600 mt-1.5 space-y-0.5 pl-3">
-            <li>✦ <strong>Extrae automáticamente</strong> precio, yield, superficie, ubicación</li>
-            <li>✦ <strong>Analiza riesgos</strong>: inquilino, zona, estado del inmueble, mercado</li>
-            <li>✦ <strong>Compara con el portfolio</strong> actual del grupo Vidaro</li>
-            <li>✦ <strong>Emite veredicto:</strong> COMPRAR / NEGOCIAR / DESCARTAR con justificación</li>
-          </ul>
-        </div>
-        <div className="grid grid-cols-3 gap-1.5 pt-1">
-          <div className="text-center p-1.5 bg-green-50 rounded border border-green-100">
-            <div className="text-[10px] font-bold text-green-700">✓ COMPRAR</div>
-            <div className="text-[8px] text-green-600">Yield &gt; 6%</div>
-          </div>
-          <div className="text-center p-1.5 bg-amber-50 rounded border border-amber-100">
-            <div className="text-[10px] font-bold text-amber-700">⚡ NEGOCIAR</div>
-            <div className="text-[8px] text-amber-600">Precio alto</div>
-          </div>
-          <div className="text-center p-1.5 bg-red-50 rounded border border-red-100">
-            <div className="text-[10px] font-bold text-red-700">✗ DESCARTAR</div>
-            <div className="text-[8px] text-red-600">Riesgo alto</div>
-          </div>
-        </div>
-        <div className="bg-violet-50 border border-violet-200 rounded-lg p-2">
-          <p className="text-xs text-violet-800">
-            💡 <strong>Beneficio:</strong> Analice 50 propuestas en el tiempo que antes 
-            tardaba en estudiar 1. Due diligence automatizada con IA. Pipeline Kanban 
-            para seguimiento de cada oportunidad hasta el cierre.
-          </p>
-        </div>
-      </div>
-    ),
-    placement: 'right',
-    spotlightClicks: true,
-  },
-
-  // ═══════════════════════════════════════════════════════════════
-  // PASO 13: CUADRO DE MANDOS FINANCIERO
-  // ═══════════════════════════════════════════════════════════════
-  {
-    target: '[data-tour="cuadro-mandos-menu"]',
-    content: (
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <span className="text-xl">💰</span>
-          <h3 className="font-bold text-gray-900">Cuadro de Mandos Financiero</h3>
-        </div>
-        <p className="text-sm text-gray-600">
-          <strong>P&L por centro de coste en tiempo real.</strong> Cada edificio, cada sociedad, 
-          el grupo consolidado. Importación directa de contabilidad (7.239 asientos del grupo en 2025), 
-          conciliación bancaria, previsión fiscal trimestral.
-        </p>
-        <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-2">
-          <p className="text-xs text-emerald-800">
-            💡 <strong>Beneficio:</strong> Sepa exactamente cuánto genera cada inmueble. 
-            Detecte centros de coste deficitarios al instante. Previsión a 12 meses.
-          </p>
-        </div>
-      </div>
-    ),
-    placement: 'right',
-  },
-
-  // ═══════════════════════════════════════════════════════════════
-  // PASO 14: PAGOS & COBROS AUTOMÁTICOS
-  // ═══════════════════════════════════════════════════════════════
-  {
-    target: '[data-tour="pagos-menu"]',
-    content: (
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <span className="text-xl">💳</span>
-          <h3 className="font-bold text-gray-900">Cobros Automáticos & SEPA</h3>
-        </div>
-        <p className="text-sm text-gray-600">
-          <strong>Cobro automático de 340+ alquileres cada mes.</strong> Domiciliación SEPA, 
-          recordatorios automáticos, detección de morosidad en tiempo real, 
-          generación de recibos y envío por email sin intervención.
-        </p>
-        <div className="bg-teal-50 border border-teal-200 rounded-lg p-2">
-          <p className="text-xs text-teal-800">
-            💡 <strong>Beneficio:</strong> Morosidad reducida un 60%. Cobros que antes 
-            requerían días de gestión manual ahora se procesan solos.
-          </p>
-        </div>
-      </div>
-    ),
-    placement: 'right',
-  },
-
-  // ═══════════════════════════════════════════════════════════════
-  // PASO 15: OPERACIONES & MANTENIMIENTO
-  // ═══════════════════════════════════════════════════════════════
+  // ─── PASO 9: MANTENIMIENTO + SEGUROS + DOCS ───────────────────
   {
     target: '[data-tour="mantenimiento-menu"]',
     content: (
       <div className="space-y-3">
         <div className="flex items-center gap-2">
-          <span className="text-xl">🔧</span>
-          <h3 className="font-bold text-gray-900">Mantenimiento Inteligente</h3>
+          <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-orange-100 text-lg">🔧</span>
+          <div>
+            <h3 className="font-bold text-gray-900">Operaciones Sin Fricción</h3>
+            <p className="text-[10px] text-orange-600 font-semibold">PASO 9/12</p>
+          </div>
         </div>
-        <p className="text-sm text-gray-600">
-          Los inquilinos reportan incidencias desde su portal. <strong>La IA clasifica automáticamente</strong> 
-          la urgencia, categoría y proveedor recomendado. Órdenes de trabajo, seguimiento 
-          de costes y tiempo de resolución medido.
-        </p>
+        <div className="grid grid-cols-3 gap-1.5 text-[10px]">
+          <div className="bg-orange-50 rounded-lg p-2 border border-orange-100 text-center">
+            <div className="text-sm mb-0.5">🔧</div>
+            <div className="font-bold text-orange-800">Mantenimiento</div>
+            <div className="text-orange-600 mt-0.5">IA clasifica urgencia y asigna proveedor auto</div>
+          </div>
+          <div className="bg-sky-50 rounded-lg p-2 border border-sky-100 text-center">
+            <div className="text-sm mb-0.5">🛡️</div>
+            <div className="font-bold text-sky-800">Seguros</div>
+            <div className="text-sky-600 mt-0.5">Pólizas con alertas, cobertura edificio→unidad</div>
+          </div>
+          <div className="bg-gray-50 rounded-lg p-2 border border-gray-200 text-center">
+            <div className="text-sm mb-0.5">📂</div>
+            <div className="font-bold text-gray-800">Documentos</div>
+            <div className="text-gray-600 mt-0.5">Escrituras, CEE, ITE en nube. IA organiza todo</div>
+          </div>
+        </div>
         <div className="bg-orange-50 border border-orange-200 rounded-lg p-2">
           <p className="text-xs text-orange-800">
-            💡 <strong>Beneficio:</strong> Tiempo de respuesta reducido un 70%. 
-            Priorización automática de urgencias. Histórico de costes por inmueble.
+            💡 <strong>-70% tiempo de respuesta</strong> en incidencias. 
+            Cero pólizas vencidas. Cualquier documento en 3 seg.
           </p>
         </div>
       </div>
@@ -544,60 +455,36 @@ export const DEMO_SHOWCASE_STEPS: Step[] = [
     placement: 'right',
   },
 
-  // ═══════════════════════════════════════════════════════════════
-  // PASO 16: SEGUROS & DOCUMENTACIÓN
-  // ═══════════════════════════════════════════════════════════════
-  {
-    target: '[data-tour="seguros-menu"]',
-    content: (
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <span className="text-xl">🛡️</span>
-          <h3 className="font-bold text-gray-900">Seguros & Gestión Documental</h3>
-        </div>
-        <p className="text-sm text-gray-600">
-          <strong>Todas las pólizas parametrizadas con alertas de vencimiento.</strong> 
-          Documentos almacenados en la nube (AWS S3), accesibles al instante. 
-          Cobertura propagada automáticamente de edificio a cada unidad. 
-          Escrituras, contratos, CEE, ITE, licencias — todo organizado con IA.
-        </p>
-        <div className="bg-sky-50 border border-sky-200 rounded-lg p-2">
-          <p className="text-xs text-sky-800">
-            💡 <strong>Beneficio:</strong> Nunca más una póliza vencida sin renovar. 
-            Cualquier documento localizado en 3 segundos.
-          </p>
-        </div>
-      </div>
-    ),
-    placement: 'right',
-  },
-
-  // ═══════════════════════════════════════════════════════════════
-  // PASO 17: AUTOMATIZACIÓN TOTAL
-  // ═══════════════════════════════════════════════════════════════
+  // ─── PASO 10: AUTOMATIZACIÓN + PWA ────────────────────────────
   {
     target: '[data-tour="configuracion-link"]',
     content: (
       <div className="space-y-3">
         <div className="flex items-center gap-2">
-          <span className="text-xl">⚡</span>
-          <h3 className="font-bold text-gray-900">Automatización sin Límites</h3>
+          <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-fuchsia-100 text-lg">⚡</span>
+          <div>
+            <h3 className="font-bold text-gray-900">La Plataforma Trabaja Sola</h3>
+            <p className="text-[10px] text-fuchsia-600 font-semibold">PASO 10/12</p>
+          </div>
         </div>
         <p className="text-sm text-gray-600">
-          <strong>La plataforma trabaja mientras usted duerme.</strong> Emails automáticos, 
-          webhooks, alertas inteligentes, cobros SEPA programados, renovaciones de contrato, 
-          actualización de IPC, informes mensuales generados y enviados sin intervención.
+          <strong>INMOVA funciona mientras el equipo duerme.</strong> 
+          Todo configurable, todo automatizable:
         </p>
-        <ul className="text-xs text-gray-500 space-y-0.5 pl-3">
-          <li>✦ Portal inquilino 24/7 (pago, incidencias, documentos)</li>
-          <li>✦ Chatbot IA de soporte que resuelve consultas al instante</li>
-          <li>✦ Notificaciones push, email y SMS configurables</li>
-          <li>✦ API abierta para integraciones con cualquier sistema</li>
-        </ul>
+        <div className="grid grid-cols-2 gap-1.5 text-[10px]">
+          <div className="flex items-center gap-1.5 text-gray-700">✦ Cobros SEPA mensuales</div>
+          <div className="flex items-center gap-1.5 text-gray-700">✦ Recordatorios de pago</div>
+          <div className="flex items-center gap-1.5 text-gray-700">✦ Renovación contratos</div>
+          <div className="flex items-center gap-1.5 text-gray-700">✦ Actualización IPC</div>
+          <div className="flex items-center gap-1.5 text-gray-700">✦ Informes mensuales</div>
+          <div className="flex items-center gap-1.5 text-gray-700">✦ Alertas inteligentes</div>
+          <div className="flex items-center gap-1.5 text-gray-700">✦ Chatbot IA 24/7</div>
+          <div className="flex items-center gap-1.5 text-gray-700">✦ API + Webhooks</div>
+        </div>
         <div className="bg-fuchsia-50 border border-fuchsia-200 rounded-lg p-2">
           <p className="text-xs text-fuchsia-800">
-            💡 <strong>Beneficio:</strong> Un equipo de 3 personas gestiona 
-            lo que antes requería 10. Automatización = escalabilidad.
+            📱 <strong>App móvil (PWA)</strong> instalable en iPhone/Android. 
+            Gestione desde cualquier lugar. Push notifications en tiempo real.
           </p>
         </div>
       </div>
@@ -605,73 +492,102 @@ export const DEMO_SHOWCASE_STEPS: Step[] = [
     placement: 'left',
   },
 
-  // ═══════════════════════════════════════════════════════════════
-  // PASO 18: CIERRE WOW — CALL TO ACTION
-  // ═══════════════════════════════════════════════════════════════
+  // ╔═══════════════════════════════════════════════════════════════╗
+  // ║  ACTO 4 — "EL IMPACTO"                                      ║
+  // ╚═══════════════════════════════════════════════════════════════╝
+
+  // ─── PASO 11: ANTES VS DESPUÉS ────────────────────────────────
   {
     target: 'body',
     content: (
-      <div className="space-y-4 max-w-md">
+      <div className="space-y-4 max-w-lg">
+        <div className="text-center mb-1">
+          <h2 className="text-xl font-bold text-gray-900">La Transformación del Grupo Vidaro</h2>
+          <p className="text-[10px] text-gray-500 font-semibold">PASO 11/12</p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          {/* ANTES */}
+          <div className="bg-red-50 rounded-xl p-3 border border-red-200">
+            <div className="text-center text-sm font-bold text-red-800 mb-2">❌ Sin INMOVA</div>
+            <div className="space-y-1.5 text-[10px] text-red-700">
+              <p>📋 Excel por cada sociedad</p>
+              <p>📞 Inquilinos llaman para todo</p>
+              <p>📊 Informes manuales, semanas</p>
+              <p>💸 Cobros seguidos a mano</p>
+              <p>📁 Documentos en carpetas</p>
+              <p>🔧 Incidencias por WhatsApp</p>
+              <p>📈 Sin visión consolidada</p>
+              <p>⏰ Equipo de 10 personas</p>
+            </div>
+          </div>
+          {/* DESPUÉS */}
+          <div className="bg-green-50 rounded-xl p-3 border border-green-200">
+            <div className="text-center text-sm font-bold text-green-800 mb-2">✅ Con INMOVA</div>
+            <div className="space-y-1.5 text-[10px] text-green-700">
+              <p>🖥️ Una plataforma, 3 sociedades</p>
+              <p>📱 Portal self-service 24/7</p>
+              <p>📊 Dashboard tiempo real, 1 click</p>
+              <p>💳 SEPA automático 340 cobros</p>
+              <p>☁️ Nube + IA organiza todo</p>
+              <p>🤖 IA clasifica y asigna sola</p>
+              <p>👑 Family Office 360° + PE</p>
+              <p>⚡ Equipo de 3 personas</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    ),
+    placement: 'center',
+  },
+
+  // ─── PASO 12: CIERRE + CTA ────────────────────────────────────
+  {
+    target: 'body',
+    content: (
+      <div className="space-y-4 max-w-lg">
         <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 mb-3">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 mb-2">
             <span className="text-3xl">🚀</span>
           </div>
           <h2 className="text-xl font-bold text-gray-900">
-            INMOVA para Grupo Vidaro
+            Impacto Real para Grupo Vidaro
           </h2>
+          <p className="text-[10px] text-emerald-600 font-semibold">PASO 12/12 · RESULTADO</p>
         </div>
 
-        <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-4 border border-indigo-100">
-          <h4 className="font-semibold text-indigo-900 text-sm mb-2">Lo que acabamos de ver:</h4>
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <div className="flex items-start gap-1.5">
-              <span className="text-green-500 mt-0.5">✓</span>
-              <span className="text-gray-700">Dashboard multi-sociedad</span>
+        <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="text-center">
+              <div className="text-2xl font-black text-green-700">-80%</div>
+              <div className="text-[10px] text-green-600">Tiempo administrativo</div>
             </div>
-            <div className="flex items-start gap-1.5">
-              <span className="text-green-500 mt-0.5">✓</span>
-              <span className="text-gray-700">Family Office 360°</span>
+            <div className="text-center">
+              <div className="text-2xl font-black text-green-700">+15%</div>
+              <div className="text-[10px] text-green-600">Ingresos por rentas</div>
             </div>
-            <div className="flex items-start gap-1.5">
-              <span className="text-green-500 mt-0.5">✓</span>
-              <span className="text-gray-700">Valoración IA en vivo</span>
+            <div className="text-center">
+              <div className="text-2xl font-black text-green-700">-60%</div>
+              <div className="text-[10px] text-green-600">Morosidad</div>
             </div>
-            <div className="flex items-start gap-1.5">
-              <span className="text-green-500 mt-0.5">✓</span>
-              <span className="text-gray-700">Análisis propuestas broker</span>
-            </div>
-            <div className="flex items-start gap-1.5">
-              <span className="text-green-500 mt-0.5">✓</span>
-              <span className="text-gray-700">Portal inquilino 24/7</span>
-            </div>
-            <div className="flex items-start gap-1.5">
-              <span className="text-green-500 mt-0.5">✓</span>
-              <span className="text-gray-700">Contratos inteligentes</span>
-            </div>
-            <div className="flex items-start gap-1.5">
-              <span className="text-green-500 mt-0.5">✓</span>
-              <span className="text-gray-700">Seguros & documentación</span>
-            </div>
-            <div className="flex items-start gap-1.5">
-              <span className="text-green-500 mt-0.5">✓</span>
-              <span className="text-gray-700">Automatización total</span>
+            <div className="text-center">
+              <div className="text-2xl font-black text-green-700">-70%</div>
+              <div className="text-[10px] text-green-600">Tiempo respuesta</div>
             </div>
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-3 border border-green-200">
-          <h4 className="font-semibold text-green-900 text-sm mb-1.5">Impacto estimado para el grupo:</h4>
-          <div className="space-y-1 text-xs text-green-800">
-            <p>📉 <strong>-80%</strong> tiempo de reporting y administración</p>
-            <p>📈 <strong>+15%</strong> ingresos por rentas (IPC automático + ocupación)</p>
-            <p>💰 <strong>-60%</strong> morosidad con cobros automatizados</p>
-            <p>⚡ <strong>-70%</strong> tiempo de respuesta en mantenimiento</p>
-          </div>
+        <div className="bg-indigo-50 rounded-xl p-3 border border-indigo-200 text-center">
+          <p className="text-sm text-indigo-900 font-semibold">
+            Todo lo que ha visto está <strong>operativo y listo</strong> para el grupo.
+          </p>
+          <p className="text-xs text-indigo-700 mt-1">
+            100+ módulos · 15 verticales · IA integrada · App móvil · API abierta
+          </p>
         </div>
 
-        <p className="text-center text-sm text-gray-600 font-medium">
-          Explore libremente la plataforma. Todo lo que ve está 
-          <strong> operativo y listo</strong> para su grupo.
+        <p className="text-center text-sm text-gray-500">
+          Explore libremente. Use los botones de abajo para repetir la presentación.
         </p>
       </div>
     ),
