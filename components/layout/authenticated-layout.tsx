@@ -36,6 +36,12 @@ const OnboardingChatbotWidget = dynamic(
   { ssr: false }
 );
 
+// Demo Showcase Tour - tour de presentación para usuario demo Vidaro
+const DemoShowcaseTour = dynamic(
+  () => import('@/components/onboarding/DemoShowcaseTour').then(m => ({ default: m.DemoShowcaseTour })),
+  { ssr: false }
+);
+
 /**
  * Layout autenticado con navegación optimizada para mobile-first
  * Incluye:
@@ -285,6 +291,9 @@ export function AuthenticatedLayout({
 
       {/* Tour Auto-Starter - Detecta la página y lanza tours contextuales */}
       {session?.user?.role !== 'super_admin' && <TourAutoStarter />}
+
+      {/* Demo Showcase Tour - Tour de presentación para demo@vidaroinversiones.com */}
+      <DemoShowcaseTour />
 
       {/* Chatbot de Onboarding - Widget flotante durante onboarding activo */}
       {showChecklist && !showSetupWizard && session?.user?.role !== 'super_admin' && (
