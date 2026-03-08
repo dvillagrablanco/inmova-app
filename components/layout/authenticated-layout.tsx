@@ -36,11 +36,8 @@ const OnboardingChatbotWidget = dynamic(
   { ssr: false }
 );
 
-// Demo Showcase Tour - tour de presentación para usuario demo Vidaro
-const DemoShowcaseTour = dynamic(
-  () => import('@/components/onboarding/DemoShowcaseTour'),
-  { ssr: false }
-);
+// Demo Showcase Tour - importación directa (no lazy) para garantizar carga
+import DemoShowcaseTour from '@/components/onboarding/DemoShowcaseTour';
 
 // Email del usuario demo — se excluye de onboarding estándar
 const DEMO_USER_EMAIL = 'demo@vidaroinversiones.com';
