@@ -24,6 +24,18 @@ const IntelligentSupportChatbot = dynamic(
   { ssr: false }
 );
 
+// Tour auto-starter - detecta la página actual y lanza tours correspondientes
+const TourAutoStarter = dynamic(
+  () => import('@/components/tours/TourAutoStarter').then(m => ({ default: m.TourAutoStarter })),
+  { ssr: false }
+);
+
+// Chatbot de onboarding - widget flotante durante el onboarding
+const OnboardingChatbotWidget = dynamic(
+  () => import('@/components/onboarding/OnboardingChatbot'),
+  { ssr: false }
+);
+
 /**
  * Layout autenticado con navegación optimizada para mobile-first
  * Incluye:
@@ -270,6 +282,14 @@ export function AuthenticatedLayout({
 
       {/* Navigation Tutorial - Tutorial interactivo (NO para superadmin) */}
       {session?.user?.role !== 'super_admin' && <NavigationTutorial />}
+
+      {/* Tour Auto-Starter - Detecta la página y lanza tours contextuales */}
+      {session?.user?.role !== 'super_admin' && <TourAutoStarter />}
+
+      {/* Chatbot de Onboarding - Widget flotante durante onboarding activo */}
+      {showChecklist && !showSetupWizard && session?.user?.role !== 'super_admin' && (
+        <OnboardingChatbotWidget />
+      )}
 
       {/* Chatbot de Soporte Inteligente - Disponible en todas las páginas */}
       <IntelligentSupportChatbot />
