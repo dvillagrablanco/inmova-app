@@ -3,183 +3,266 @@
 /**
  * DEMO SHOWCASE TOUR — GRUPO VIDARO
  * 
- * Tour de presentación comercial con pasos visualmente impactantes.
- * Se activa SOLO para el usuario demo (demo@vidaroinversiones.com).
+ * Tour NAVEGABLE: cada paso lleva al usuario a la página real de la funcionalidad.
+ * Overlay modal con navegación anterior/siguiente y barra de progreso.
  * 
- * Features:
- * - Tour react-joyride con estilos premium
- * - Botón "Reiniciar Demo" siempre visible
- * - Pasos con métricas reales del grupo
- * - Diseñado para impresionar al equipo
+ * Flujo: Navegar a ruta → Esperar carga → Mostrar overlay con explicación
  */
 
 import { useEffect, useState, useCallback, useRef } from 'react';
-import Joyride, { CallBackProps, STATUS, ACTIONS } from 'react-joyride';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import { DEMO_SHOWCASE_STEPS, DEMO_USER_EMAIL } from '@/lib/onboarding-demo-tour';
+import { useRouter, usePathname } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+import { DEMO_STEPS, DEMO_USER_EMAIL, type DemoStep } from '@/lib/onboarding-demo-tour';
 import { Button } from '@/components/ui/button';
-import { RotateCcw, Presentation, Play } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, Presentation, RotateCcw } from 'lucide-react';
 
-const DEMO_TOUR_STORAGE_KEY = 'inmova-demo-tour-completed';
+const STORAGE_KEY = 'inmova-demo-tour-state';
+
+interface TourState {
+  stepIndex: number;
+  completed: boolean;
+}
 
 export function DemoShowcaseTour() {
   const { data: session } = useSession();
   const router = useRouter();
-  const [run, setRun] = useState(false);
+  const pathname = usePathname();
+  const [active, setActive] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
+  const [navigating, setNavigating] = useState(false);
   const [showControls, setShowControls] = useState(false);
-  const isProcessingRef = useRef(false);
+  const mountedRef = useRef(false);
 
-  const userEmail = session?.user?.email;
-  const isDemoUser = userEmail === DEMO_USER_EMAIL;
+  const isDemoUser = session?.user?.email === DEMO_USER_EMAIL;
+  const step = DEMO_STEPS[stepIndex] as DemoStep | undefined;
+  const totalSteps = DEMO_STEPS.length;
 
-  // Auto-start tour for demo user
+  // Auto-start on first visit
   useEffect(() => {
-    if (!isDemoUser) return;
+    if (!isDemoUser || mountedRef.current) return;
+    mountedRef.current = true;
 
-    const completed = sessionStorage.getItem(DEMO_TOUR_STORAGE_KEY);
-    if (completed === 'true') {
-      setShowControls(true);
-      return;
-    }
+    try {
+      const stored = sessionStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const state: TourState = JSON.parse(stored);
+        if (state.completed) {
+          setShowControls(true);
+          setStepIndex(state.stepIndex);
+          return;
+        }
+        // Resume from where they left off
+        setStepIndex(state.stepIndex);
+      }
+    } catch { /* ignore */ }
 
-    // Ensure we're on dashboard before starting
+    // Auto-start after a delay
     const timer = setTimeout(() => {
-      setRun(true);
-    }, 1500);
+      setActive(true);
+      navigateToStep(0);
+    }, 1200);
 
     return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDemoUser]);
 
-  const handleCallback = useCallback((data: CallBackProps) => {
-    const { status, index, action } = data;
-    const finished = [STATUS.FINISHED, STATUS.SKIPPED];
-
-    if (action === ACTIONS.UPDATE) {
-      setStepIndex(index);
-    }
-
-    if (finished.includes(status as any)) {
-      if (isProcessingRef.current) return;
-      isProcessingRef.current = true;
-
-      setRun(false);
-      setShowControls(true);
-      sessionStorage.setItem(DEMO_TOUR_STORAGE_KEY, 'true');
-
-      setTimeout(() => {
-        isProcessingRef.current = false;
-      }, 200);
-    }
+  // Save state
+  const saveState = useCallback((index: number, completed: boolean) => {
+    try {
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ stepIndex: index, completed }));
+    } catch { /* ignore */ }
   }, []);
 
-  // Reiniciar desde el dashboard (paso 1)
+  // Navigate to a step's route
+  const navigateToStep = useCallback((index: number) => {
+    const target = DEMO_STEPS[index];
+    if (!target) return;
+
+    if (target.route && target.route !== pathname) {
+      setNavigating(true);
+      router.push(target.route);
+      // Wait for navigation + page load
+      setTimeout(() => {
+        setNavigating(false);
+        setStepIndex(index);
+        saveState(index, false);
+      }, 1200);
+    } else {
+      setStepIndex(index);
+      saveState(index, false);
+    }
+  }, [pathname, router, saveState]);
+
+  const handleNext = useCallback(() => {
+    if (stepIndex < totalSteps - 1) {
+      navigateToStep(stepIndex + 1);
+    } else {
+      // Tour completed
+      setActive(false);
+      setShowControls(true);
+      saveState(stepIndex, true);
+    }
+  }, [stepIndex, totalSteps, navigateToStep, saveState]);
+
+  const handlePrev = useCallback(() => {
+    if (stepIndex > 0) {
+      navigateToStep(stepIndex - 1);
+    }
+  }, [stepIndex, navigateToStep]);
+
+  const handleClose = useCallback(() => {
+    setActive(false);
+    setShowControls(true);
+    saveState(stepIndex, true);
+  }, [stepIndex, saveState]);
+
   const handlePresent = useCallback(() => {
-    sessionStorage.removeItem(DEMO_TOUR_STORAGE_KEY);
     setShowControls(false);
     setStepIndex(0);
-    // Navigate to dashboard first
-    router.push('/dashboard');
-    setTimeout(() => {
-      setRun(true);
-    }, 500);
-  }, [router]);
+    setActive(true);
+    navigateToStep(0);
+  }, [navigateToStep]);
 
-  // Continuar desde donde se dejó
   const handleResume = useCallback(() => {
     setShowControls(false);
-    setTimeout(() => {
-      setRun(true);
-    }, 300);
-  }, []);
+    setActive(true);
+    navigateToStep(stepIndex);
+  }, [stepIndex, navigateToStep]);
 
   if (!isDemoUser) return null;
 
   return (
     <>
-      <Joyride
-        steps={DEMO_SHOWCASE_STEPS}
-        run={run}
-        continuous
-        showProgress
-        showSkipButton
-        scrollToFirstStep
-        disableScrolling={false}
-        callback={handleCallback}
-        floaterProps={{
-          styles: {
-            floater: {
-              filter: 'drop-shadow(0 10px 25px rgba(0,0,0,0.15))',
-            },
-          },
-        }}
-        styles={{
-          options: {
-            primaryColor: '#4f46e5', // indigo-600
-            textColor: '#1f2937',
-            backgroundColor: '#ffffff',
-            overlayColor: 'rgba(0, 0, 0, 0.6)',
-            arrowColor: '#ffffff',
-            zIndex: 10000,
-            width: 440,
-          },
-          tooltip: {
-            borderRadius: 16,
-            padding: 24,
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-          },
-          tooltipContainer: {
-            textAlign: 'left' as const,
-          },
-          buttonNext: {
-            backgroundColor: '#4f46e5',
-            borderRadius: 10,
-            padding: '10px 20px',
-            fontSize: 14,
-            fontWeight: 600,
-          },
-          buttonBack: {
-            color: '#6b7280',
-            marginRight: 12,
-            fontSize: 14,
-          },
-          buttonSkip: {
-            color: '#9ca3af',
-            fontSize: 13,
-          },
-          spotlight: {
-            borderRadius: 12,
-          },
-          overlay: {
-            backgroundColor: 'rgba(15, 23, 42, 0.65)',
-          },
-        }}
-        locale={{
-          back: '← Anterior',
-          close: 'Cerrar',
-          last: '✨ Explorar',
-          next: 'Siguiente →',
-          skip: 'Saltar demo',
-        }}
-      />
+      {/* TOUR OVERLAY */}
+      <AnimatePresence>
+        {active && step && !navigating && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="fixed inset-0 z-[9999] flex items-center justify-center"
+          >
+            {/* Backdrop */}
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]" onClick={handleClose} />
 
-      {/* Demo Controls - Fixed position */}
-      {showControls && (
+            {/* Content Card */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ duration: 0.2, delay: 0.05 }}
+              className="relative z-10 w-full max-w-xl mx-4"
+            >
+              <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
+                {/* Progress Bar */}
+                <div className="h-1 bg-gray-100">
+                  <div
+                    className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-500"
+                    style={{ width: `${((stepIndex + 1) / totalSteps) * 100}%` }}
+                  />
+                </div>
+
+                {/* Step Counter + Close */}
+                <div className="flex items-center justify-between px-5 pt-3">
+                  <span className="text-[10px] font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
+                    PASO {stepIndex + 1} / {totalSteps}
+                  </span>
+                  <button
+                    onClick={handleClose}
+                    className="p-1 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+
+                {/* Step Content */}
+                <div className="px-5 py-4">
+                  {step.content}
+                </div>
+
+                {/* Navigation */}
+                <div className="flex items-center justify-between px-5 pb-4 pt-2 border-t border-gray-100">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handlePrev}
+                    disabled={stepIndex === 0}
+                    className="text-gray-500"
+                  >
+                    <ChevronLeft className="h-4 w-4 mr-1" />
+                    Anterior
+                  </Button>
+
+                  {/* Step dots */}
+                  <div className="flex gap-1">
+                    {DEMO_STEPS.map((_, i) => (
+                      <div
+                        key={i}
+                        className={`h-1.5 rounded-full transition-all duration-300 ${
+                          i === stepIndex
+                            ? 'w-4 bg-indigo-500'
+                            : i < stepIndex
+                            ? 'w-1.5 bg-indigo-300'
+                            : 'w-1.5 bg-gray-200'
+                        }`}
+                      />
+                    ))}
+                  </div>
+
+                  <Button
+                    size="sm"
+                    onClick={handleNext}
+                    className="bg-indigo-600 hover:bg-indigo-700"
+                  >
+                    {stepIndex === totalSteps - 1 ? (
+                      <>Explorar ✨</>
+                    ) : (
+                      <>
+                        Siguiente
+                        <ChevronRight className="h-4 w-4 ml-1" />
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Loading indicator during navigation */}
+      <AnimatePresence>
+        {navigating && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[9998] flex items-center justify-center bg-black/30"
+          >
+            <div className="bg-white rounded-xl px-6 py-4 shadow-lg flex items-center gap-3">
+              <div className="h-5 w-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+              <span className="text-sm text-gray-600">Navegando...</span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Controls when tour is paused/completed */}
+      {showControls && !active && (
         <div className="fixed bottom-6 left-6 z-50 flex items-center gap-2">
-          {/* Resume from current step */}
-          {stepIndex > 0 && stepIndex < DEMO_SHOWCASE_STEPS.length - 1 && (
+          {stepIndex > 0 && stepIndex < totalSteps - 1 && (
             <Button
               onClick={handleResume}
               variant="outline"
               size="sm"
               className="bg-white/90 backdrop-blur-sm shadow-lg border-gray-200 hover:bg-gray-50 transition-all"
             >
-              <Play className="h-3.5 w-3.5 mr-1.5 text-gray-600" />
-              <span className="text-gray-700 text-xs">Continuar ({stepIndex + 1}/12)</span>
+              <ChevronRight className="h-3.5 w-3.5 mr-1 text-gray-600" />
+              <span className="text-gray-700 text-xs">Continuar ({stepIndex + 1}/{totalSteps})</span>
             </Button>
           )}
-          {/* Restart from beginning */}
           <Button
             onClick={handlePresent}
             variant="default"
