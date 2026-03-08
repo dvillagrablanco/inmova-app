@@ -396,36 +396,58 @@ export function DocumentOnboardingWizard({ onComplete, onSkip }: DocumentOnboard
                       <div className="flex flex-wrap gap-2 justify-center">
                         <Badge variant="outline">PDF</Badge>
                         <Badge variant="outline">Word</Badge>
+                        <Badge variant="outline">Excel</Badge>
                         <Badge variant="outline">Imágenes</Badge>
-                        <Badge variant="outline" className="bg-indigo-50">
-                          ZIP
-                        </Badge>
+                        <Badge variant="outline" className="bg-indigo-50">ZIP / RAR / 7z</Badge>
                       </div>
                     </div>
                   </div>
 
-                  {/* Document types info */}
-                  <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <DocumentTypeCard
-                      icon={<FileSignature className="w-5 h-5" />}
-                      title="Contratos"
-                      description="Alquiler, compraventa"
-                    />
-                    <DocumentTypeCard
-                      icon={<Building2 className="w-5 h-5" />}
-                      title="Escrituras"
-                      description="Propiedades, notas simples"
-                    />
-                    <DocumentTypeCard
-                      icon={<Users className="w-5 h-5" />}
-                      title="DNIs"
-                      description="Inquilinos, propietarios"
-                    />
-                    <DocumentTypeCard
-                      icon={<FileText className="w-5 h-5" />}
-                      title="Facturas"
-                      description="Proveedores, seguros"
-                    />
+                  {/* Document types templates */}
+                  <div className="mt-6">
+                    <h4 className="text-sm font-medium text-gray-700 mb-3">Tipos de documento que la IA procesa automáticamente:</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      <DocumentTypeCard
+                        icon={<Building2 className="w-5 h-5" />}
+                        title="Escrituras"
+                        description="Compraventa, ampliación capital, constitución"
+                      />
+                      <DocumentTypeCard
+                        icon={<FileSignature className="w-5 h-5" />}
+                        title="Contratos"
+                        description="Arrendamiento, temporada, garaje, local"
+                      />
+                      <DocumentTypeCard
+                        icon={<Shield className="w-5 h-5" />}
+                        title="Seguros / CEE"
+                        description="Pólizas, certificados energéticos"
+                      />
+                      <DocumentTypeCard
+                        icon={<Users className="w-5 h-5" />}
+                        title="DNIs / Identidad"
+                        description="DNI, NIE, pasaporte, CIF"
+                      />
+                      <DocumentTypeCard
+                        icon={<FileText className="w-5 h-5" />}
+                        title="Contabilidad"
+                        description="Excel contable, extractos CAMT.053"
+                      />
+                      <DocumentTypeCard
+                        icon={<FolderArchive className="w-5 h-5" />}
+                        title="Lotes comprimidos"
+                        description="ZIP, RAR, 7z con múltiples documentos"
+                      />
+                      <DocumentTypeCard
+                        icon={<FileText className="w-5 h-5" />}
+                        title="Facturas / Gastos"
+                        description="Facturas de proveedores, recibos"
+                      />
+                      <DocumentTypeCard
+                        icon={<Sparkles className="w-5 h-5" />}
+                        title="Otros"
+                        description="La IA detecta el tipo automáticamente"
+                      />
+                    </div>
                   </div>
 
                   {/* File list */}
