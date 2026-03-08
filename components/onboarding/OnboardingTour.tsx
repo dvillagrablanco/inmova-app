@@ -5,6 +5,7 @@ import Joyride, { Step, CallBackProps, STATUS, EVENTS } from 'react-joyride';
 import { useSession } from 'next-auth/react';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { UserRole } from '@/types/prisma-types';
+import { filterJoyrideStepsByModules } from '@/lib/onboarding-module-filter';
 
 interface OnboardingTourProps {
   role?: UserRole;
@@ -184,6 +185,20 @@ export function OnboardingTour({ role }: OnboardingTourProps) {
   // Determinar qué pasos mostrar según el rol
   const steps = role === 'TENANT' ? tenantSteps : ownerSteps;
 
+  const [activeModuleIds, setActiveModuleIds] = useState<string[]>([]);
+
+  // Fetch user's active modules for filtering
+  useEffect(() => {
+    if (!session?.user) return;
+    const userModules = (session.user as any).preferredModules;
+    if (Array.isArray(userModules) && userModules.length > 0) {
+      setActiveModuleIds(userModules);
+    }
+  }, [session]);
+
+  // Filter steps based on active modules
+  const filteredSteps = filterJoyrideStepsByModules(steps, activeModuleIds.length > 0 ? activeModuleIds : null);
+
   // Obtener el rol del usuario de la sesión
   const userRole = (session?.user as any)?.role;
   const userId = (session?.user as any)?.id;
@@ -285,7 +300,7 @@ export function OnboardingTour({ role }: OnboardingTourProps) {
 
   return (
     <Joyride
-      steps={steps}
+      steps={filteredSteps}
       run={run}
       continuous
       showProgress

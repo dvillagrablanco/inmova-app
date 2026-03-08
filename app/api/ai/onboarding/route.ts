@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import { getActiveModulesContext } from '@/lib/onboarding-module-filter';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -27,9 +28,13 @@ export async function POST(request: NextRequest) {
     const { message, conversationHistory = [], phase = 'welcome' } = await request.json();
     const userName = session.user.name || 'Usuario';
     const userRole = (session.user as any).role || 'gestor';
+    const userModules = (session.user as any).preferredModules as string[] | undefined;
+    const modulesContext = userModules && userModules.length > 0
+      ? getActiveModulesContext(userModules)
+      : '';
 
     // Build system prompt for onboarding
-    const systemPrompt = buildOnboardingPrompt(userName, userRole, phase);
+    const systemPrompt = buildOnboardingPrompt(userName, userRole, phase, modulesContext);
 
     // Call Claude
     const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -100,7 +105,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function buildOnboardingPrompt(userName: string, userRole: string, phase: string): string {
+function buildOnboardingPrompt(userName: string, userRole: string, phase: string, modulesContext?: string): string {
   return `Eres el asistente de onboarding de INMOVA, la plataforma de gestión inmobiliaria más completa de España. Tu objetivo es dar la MEJOR primera impresión posible y configurar la plataforma perfectamente para el usuario.
 
 REGLAS DE COMUNICACIÓN:
@@ -171,7 +176,7 @@ IMPORTANTE:
 - Si es admin/super_admin, asume nivel avanzado y ofrece más opciones
 - Si es gestor/operador, sé más guiado y didáctico
 - NUNCA uses jerga técnica con principiantes
-- SIEMPRE responde en español`;
+- SIEMPRE responde en español${modulesContext ? `\n\nMÓDULOS DEL USUARIO:\n${modulesContext}\nSolo sugiere acciones de módulos que el usuario tiene activos. No menciones funcionalidades de módulos desactivados.` : ''}`;
 }
 
 function getNextPhase(current: string): string {

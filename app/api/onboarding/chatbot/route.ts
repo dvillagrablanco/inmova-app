@@ -17,6 +17,7 @@ import {
   getQuickQuestions,
   ChatMessage,
 } from '@/lib/onboarding-chatbot-service';
+import { getActiveModulesContext } from '@/lib/onboarding-module-filter';
 import logger from '@/lib/logger';
 
 // Lazy Prisma (auditoria V2)
@@ -58,6 +59,7 @@ export async function POST(request: NextRequest) {
         name: true,
         experienceLevel: true,
         onboardingCompleted: true,
+        preferredModules: true,
         company: {
           select: {
             businessVertical: true,
@@ -88,12 +90,19 @@ export async function POST(request: NextRequest) {
           )
         : 0;
 
+    // Build active modules context
+    const userModules = (user?.preferredModules as string[] | null) || [];
+    const modulesContext = userModules.length > 0
+      ? getActiveModulesContext(userModules)
+      : undefined;
+
     // Contexto del usuario
     const userContext = {
       userName: user?.name || undefined,
       vertical: user?.company?.businessVertical || undefined,
       onboardingProgress,
       completedTasks,
+      currentPage: modulesContext, // Reuse currentPage field for module context
     };
 
     // Enviar mensaje al chatbot
