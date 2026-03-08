@@ -50,7 +50,7 @@ export const DEMO_SHOWCASE_STEPS: Step[] = [
           </div>
         </div>
         <p className="text-xs text-gray-400 text-center italic">
-          Duración del tour: ~3 minutos
+          Duración del tour: ~4 minutos · Incluye 2 demos en vivo
         </p>
       </div>
     ),
@@ -307,7 +307,96 @@ export const DEMO_SHOWCASE_STEPS: Step[] = [
   },
 
   // ═══════════════════════════════════════════════════════════════
-  // PASO 10: CUADRO DE MANDOS FINANCIERO
+  // PASO 10: VALORACIÓN EN VIVO — DEMO INTERACTIVA
+  // ═══════════════════════════════════════════════════════════════
+  {
+    target: '[data-tour="valoraciones-menu"]',
+    content: (
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <span className="text-xl">🏷️</span>
+          <h3 className="font-bold text-gray-900">Demo en Vivo: Valoración IA</h3>
+        </div>
+        <div className="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-lg p-3 border border-indigo-200">
+          <p className="text-sm text-gray-700 font-medium mb-2">
+            👉 Haga click en <strong>&quot;Valoración IA&quot;</strong> en el menú para probarlo en directo.
+          </p>
+          <p className="text-xs text-gray-600">
+            Introduzca cualquier dirección de Madrid y la IA calculará al instante:
+          </p>
+          <ul className="text-xs text-gray-600 mt-1.5 space-y-0.5 pl-3">
+            <li>✦ <strong>Valor estimado</strong> con rango min-max y confianza</li>
+            <li>✦ <strong>Comparables</strong> del mercado en la misma zona</li>
+            <li>✦ <strong>Precio/m²</strong> vs media del barrio</li>
+            <li>✦ <strong>Tendencia</strong> del mercado local (subiendo/bajando/estable)</li>
+          </ul>
+        </div>
+        <div className="bg-green-50 border border-green-200 rounded-lg p-2">
+          <p className="text-xs text-green-800">
+            💡 <strong>Ejemplo:</strong> Piso en Barrio Salamanca, 120m², 3 hab → la IA 
+            estima €580K-€650K en menos de 10 segundos, con 6 comparables reales.
+          </p>
+        </div>
+      </div>
+    ),
+    placement: 'right',
+    spotlightClicks: true,
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // PASO 11: ANÁLISIS DE PROPUESTAS DEL BROKER
+  // ═══════════════════════════════════════════════════════════════
+  {
+    target: '[data-tour="oportunidades-ia-menu"]',
+    content: (
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <span className="text-xl">📋</span>
+          <h3 className="font-bold text-gray-900">Demo en Vivo: Analizar Propuesta de Broker</h3>
+        </div>
+        <div className="bg-gradient-to-r from-purple-50 to-fuchsia-50 rounded-lg p-3 border border-purple-200">
+          <p className="text-sm text-gray-700 font-medium mb-2">
+            👉 Entre en <strong>&quot;Oportunidades IA&quot;</strong> para ver el analizador de propuestas.
+          </p>
+          <p className="text-xs text-gray-600">
+            Pegue el texto o suba el PDF de cualquier propuesta de un broker y la IA:
+          </p>
+          <ul className="text-xs text-gray-600 mt-1.5 space-y-0.5 pl-3">
+            <li>✦ <strong>Extrae automáticamente</strong> precio, yield, superficie, ubicación</li>
+            <li>✦ <strong>Analiza riesgos</strong>: inquilino, zona, estado del inmueble, mercado</li>
+            <li>✦ <strong>Compara con el portfolio</strong> actual del grupo Vidaro</li>
+            <li>✦ <strong>Emite veredicto:</strong> COMPRAR / NEGOCIAR / DESCARTAR con justificación</li>
+          </ul>
+        </div>
+        <div className="grid grid-cols-3 gap-1.5 pt-1">
+          <div className="text-center p-1.5 bg-green-50 rounded border border-green-100">
+            <div className="text-[10px] font-bold text-green-700">✓ COMPRAR</div>
+            <div className="text-[8px] text-green-600">Yield &gt; 6%</div>
+          </div>
+          <div className="text-center p-1.5 bg-amber-50 rounded border border-amber-100">
+            <div className="text-[10px] font-bold text-amber-700">⚡ NEGOCIAR</div>
+            <div className="text-[8px] text-amber-600">Precio alto</div>
+          </div>
+          <div className="text-center p-1.5 bg-red-50 rounded border border-red-100">
+            <div className="text-[10px] font-bold text-red-700">✗ DESCARTAR</div>
+            <div className="text-[8px] text-red-600">Riesgo alto</div>
+          </div>
+        </div>
+        <div className="bg-violet-50 border border-violet-200 rounded-lg p-2">
+          <p className="text-xs text-violet-800">
+            💡 <strong>Beneficio:</strong> Analice 50 propuestas en el tiempo que antes 
+            tardaba en estudiar 1. Due diligence automatizada con IA. Pipeline Kanban 
+            para seguimiento de cada oportunidad hasta el cierre.
+          </p>
+        </div>
+      </div>
+    ),
+    placement: 'right',
+    spotlightClicks: true,
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // PASO 12: CUADRO DE MANDOS FINANCIERO
   // ═══════════════════════════════════════════════════════════════
   {
     target: '[data-tour="cuadro-mandos-menu"]',
@@ -334,7 +423,7 @@ export const DEMO_SHOWCASE_STEPS: Step[] = [
   },
 
   // ═══════════════════════════════════════════════════════════════
-  // PASO 11: PAGOS & COBROS AUTOMÁTICOS
+  // PASO 13: PAGOS & COBROS AUTOMÁTICOS
   // ═══════════════════════════════════════════════════════════════
   {
     target: '[data-tour="pagos-menu"]',
@@ -361,7 +450,7 @@ export const DEMO_SHOWCASE_STEPS: Step[] = [
   },
 
   // ═══════════════════════════════════════════════════════════════
-  // PASO 12: OPERACIONES & MANTENIMIENTO
+  // PASO 14: OPERACIONES & MANTENIMIENTO
   // ═══════════════════════════════════════════════════════════════
   {
     target: '[data-tour="mantenimiento-menu"]',
@@ -388,7 +477,7 @@ export const DEMO_SHOWCASE_STEPS: Step[] = [
   },
 
   // ═══════════════════════════════════════════════════════════════
-  // PASO 13: SEGUROS & DOCUMENTACIÓN
+  // PASO 15: SEGUROS & DOCUMENTACIÓN
   // ═══════════════════════════════════════════════════════════════
   {
     target: '[data-tour="seguros-menu"]',
@@ -416,7 +505,7 @@ export const DEMO_SHOWCASE_STEPS: Step[] = [
   },
 
   // ═══════════════════════════════════════════════════════════════
-  // PASO 14: AUTOMATIZACIÓN TOTAL
+  // PASO 16: AUTOMATIZACIÓN TOTAL
   // ═══════════════════════════════════════════════════════════════
   {
     target: '[data-tour="configuracion-link"]',
@@ -449,7 +538,7 @@ export const DEMO_SHOWCASE_STEPS: Step[] = [
   },
 
   // ═══════════════════════════════════════════════════════════════
-  // PASO 15: CIERRE WOW — CALL TO ACTION
+  // PASO 17: CIERRE WOW — CALL TO ACTION
   // ═══════════════════════════════════════════════════════════════
   {
     target: 'body',
@@ -477,11 +566,11 @@ export const DEMO_SHOWCASE_STEPS: Step[] = [
             </div>
             <div className="flex items-start gap-1.5">
               <span className="text-green-500 mt-0.5">✓</span>
-              <span className="text-gray-700">IA integrada (Claude)</span>
+              <span className="text-gray-700">Valoración IA en vivo</span>
             </div>
             <div className="flex items-start gap-1.5">
               <span className="text-green-500 mt-0.5">✓</span>
-              <span className="text-gray-700">Cobros automáticos SEPA</span>
+              <span className="text-gray-700">Análisis propuestas broker</span>
             </div>
             <div className="flex items-start gap-1.5">
               <span className="text-green-500 mt-0.5">✓</span>

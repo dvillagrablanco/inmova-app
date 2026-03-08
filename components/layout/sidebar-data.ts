@@ -1702,6 +1702,7 @@ const holdingGrupoNavItems = [
     name: 'Oportunidades IA',
     href: '/inversiones/oportunidades',
     icon: Search,
+    dataTour: 'oportunidades-ia-menu',
   },
   {
     name: 'Mapa Patrimonio',
