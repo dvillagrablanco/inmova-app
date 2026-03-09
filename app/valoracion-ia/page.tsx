@@ -208,6 +208,7 @@ export default function ValoracionIAPage() {
   const [refCatastral, setRefCatastral] = useState('');
   const [catastroData, setCatastroData] = useState<any>(null);
   const [buscandoCatastro, setBuscandoCatastro] = useState(false);
+  const [searchDireccionLibre, setSearchDireccionLibre] = useState('');
   const [searchProvincia, setSearchProvincia] = useState('');
   const [searchMunicipio, setSearchMunicipio] = useState('');
   const [searchTipoVia, setSearchTipoVia] = useState('CL');
@@ -371,12 +372,13 @@ export default function ValoracionIAPage() {
   // Búsqueda Catastro (Valoración de Mercado)
   const handleBuscarCatastro = async () => {
     const hasRC = refCatastral.trim().length >= 14 && refCatastral.trim().length <= 20;
+    const hasFreeAddress = searchDireccionLibre.trim().length >= 5;
     const hasAddress =
       searchProvincia.trim() && searchMunicipio.trim() && searchVia.trim() && searchNumero.trim();
 
-    if (!hasRC && !hasAddress) {
+    if (!hasRC && !hasFreeAddress && !hasAddress) {
       toast.error(
-        'Introduce referencia catastral (14-20 chars) o completa todos los campos de dirección'
+        'Introduce una dirección (ej: "Calle Alcalá 1, Madrid") o una referencia catastral'
       );
       return;
     }
@@ -388,6 +390,8 @@ export default function ValoracionIAPage() {
       let url = '/api/catastro/consulta?';
       if (hasRC) {
         url += `rc=${encodeURIComponent(refCatastral.trim())}`;
+      } else if (hasFreeAddress) {
+        url += `q=${encodeURIComponent(searchDireccionLibre.trim())}`;
       } else {
         url += `provincia=${encodeURIComponent(searchProvincia)}&municipio=${encodeURIComponent(searchMunicipio)}&tipoVia=${encodeURIComponent(searchTipoVia)}&via=${encodeURIComponent(searchVia)}&numero=${encodeURIComponent(searchNumero)}`;
       }
@@ -1138,53 +1142,31 @@ ${resultado.recomendaciones?.length ? `<div class="section">
 
                     <Separator />
 
-                    {/* Búsqueda por Dirección */}
+                    {/* Búsqueda por Dirección (simple) */}
                     <div className="space-y-2">
                       <Label>O busca por dirección</Label>
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="flex gap-2">
                         <Input
-                          placeholder="Provincia"
-                          value={searchProvincia}
-                          onChange={(e) => setSearchProvincia(e.target.value)}
+                          placeholder='Ej: "Calle Alcalá 1, Madrid" o "Avda Diagonal 520, Barcelona"'
+                          value={searchDireccionLibre}
+                          onChange={(e) => setSearchDireccionLibre(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && handleBuscarCatastro()}
                         />
-                        <Input
-                          placeholder="Municipio"
-                          value={searchMunicipio}
-                          onChange={(e) => setSearchMunicipio(e.target.value)}
-                        />
-                        <Select value={searchTipoVia} onValueChange={setSearchTipoVia}>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="CL">Calle (CL)</SelectItem>
-                            <SelectItem value="AV">Avenida (AV)</SelectItem>
-                            <SelectItem value="PZ">Plaza (PZ)</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <Input
-                          placeholder="Nombre vía"
-                          value={searchVia}
-                          onChange={(e) => setSearchVia(e.target.value)}
-                        />
-                        <Input
-                          placeholder="Número"
-                          value={searchNumero}
-                          onChange={(e) => setSearchNumero(e.target.value)}
-                          className="col-span-2"
-                        />
+                        <Button
+                          variant="outline"
+                          onClick={handleBuscarCatastro}
+                          disabled={buscandoCatastro}
+                        >
+                          {buscandoCatastro ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            'Buscar'
+                          )}
+                        </Button>
                       </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleBuscarCatastro}
-                        disabled={buscandoCatastro}
-                      >
-                        {buscandoCatastro ? (
-                          <Loader2 className="h-4 w-4 animate-spin mr-1" />
-                        ) : null}
-                        Buscar
-                      </Button>
+                      <p className="text-[10px] text-muted-foreground">
+                        Formato: tipo vía + nombre + número + ciudad. Se consulta la API pública del Catastro.
+                      </p>
                     </div>
                   </CardContent>
                 </Card>

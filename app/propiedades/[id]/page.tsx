@@ -41,6 +41,7 @@ import { PropertyMap } from '@/components/property/PropertyMap';
 import { ValuationCard } from '@/components/property/ValuationCard';
 import { DeletePropertyDialog } from '@/components/property/DeletePropertyDialog';
 import { InsuranceCoverageCard } from '@/components/property/InsuranceCoverageCard';
+import { CatastroPlanoViewer } from '@/components/property/CatastroPlanoViewer';
 import { PhotoGallery } from '@/components/ui/photo-gallery';
 import { EntityDocuments } from '@/components/ui/entity-documents';
 
@@ -75,6 +76,8 @@ interface PropertyDetails {
     ciudad: string;
     codigoPostal?: string;
     referenciaCatastral?: string;
+    latitud?: number;
+    longitud?: number;
   };
   tenant?: {
     id: string;
@@ -520,6 +523,13 @@ export default function PropiedadDetallesPage() {
 
             {/* Cobertura de Seguro */}
             <InsuranceCoverageCard unitId={property.id} />
+
+            {/* Plano Catastral */}
+            <CatastroPlanoViewer
+              referenciaCatastral={property.referenciaCatastral || property.building.referenciaCatastral}
+              latitud={property.building.latitud}
+              longitud={property.building.longitud}
+            />
 
             {/* Inquilino Actual */}
             {property.tenant && (

@@ -61,6 +61,7 @@ import Link from 'next/link';
 import { PhotoGallery } from '@/components/ui/photo-gallery';
 import { EntityDocuments } from '@/components/ui/entity-documents';
 import { PropertyMap } from '@/components/property/PropertyMap';
+import { CatastroPlanoViewer } from '@/components/property/CatastroPlanoViewer';
 import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
 
 interface Unit {
@@ -88,6 +89,7 @@ interface BuildingDetails {
   nombre: string;
   direccion: string;
   tipo: string;
+  referenciaCatastral?: string;
   anoConstructor: number;
   numeroUnidades: number;
   estadoConservacion?: string;
@@ -639,6 +641,13 @@ export default function EdificioDetallesPage() {
               address={building.direccion}
               latitude={building.latitud ?? undefined}
               longitude={building.longitud ?? undefined}
+            />
+
+            {/* Plano Catastral */}
+            <CatastroPlanoViewer
+              referenciaCatastral={building.referenciaCatastral}
+              latitud={building.latitud}
+              longitud={building.longitud}
             />
 
             {/* Información Económica */}
