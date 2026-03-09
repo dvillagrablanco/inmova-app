@@ -36,11 +36,8 @@ const OnboardingChatbotWidget = dynamic(
   { ssr: false }
 );
 
-// Demo Showcase Tour - se importa lazy y se carga en cada página via AuthenticatedLayout
-const DemoShowcaseTour = dynamic(
-  () => import('@/components/onboarding/DemoShowcaseTour'),
-  { ssr: false, loading: () => null }
-);
+// Demo Showcase Tour - importación directa para garantizar carga en todas las páginas
+import DemoShowcaseTour from '@/components/onboarding/DemoShowcaseTour';
 
 // Email del usuario demo — se excluye de onboarding estándar
 const DEMO_USER_EMAIL = 'demo@vidaroinversiones.com';
@@ -295,7 +292,8 @@ export function AuthenticatedLayout({
       {/* Tour Auto-Starter - Detecta la página y lanza tours contextuales (NO para demo) */}
       {session?.user?.role !== 'super_admin' && session?.user?.email !== DEMO_USER_EMAIL && <TourAutoStarter />}
 
-      {/* Demo Showcase Tour - se renderiza desde app/dashboard/page.tsx */}
+      {/* Demo Showcase Tour - se renderiza en todas las páginas para soportar navegación */}
+      <DemoShowcaseTour />
 
       {/* Chatbot de Onboarding - Widget flotante durante onboarding activo (NO para demo) */}
       {showChecklist && !showSetupWizard && session?.user?.role !== 'super_admin' && session?.user?.email !== DEMO_USER_EMAIL && (
