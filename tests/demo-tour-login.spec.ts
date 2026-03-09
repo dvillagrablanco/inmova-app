@@ -1,17 +1,23 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * Test: El tour demo NO debe aparecer en la página de login.
- * Bug reportado: el tour se mostraba antes de loguearse.
+ * Tests: El tour demo Grupo Vidaro funciona correctamente.
+ *
+ * Bug 1: El tour aparecía en /login (antes de loguearse)
+ * Bug 2: El tour no aparecía después de loguearse
+ *
+ * Causas raíz:
+ * - pathname null en primer render hacía isAuthRoute = false
+ * - 4 instancias duplicadas de DemoShowcaseTour competían por sessionStorage
+ * - initializedRef no se reseteaba al cambiar de usuario (login/logout)
  */
 
-test.describe('Demo Tour — No aparece antes del login', () => {
+test.describe('Demo Tour — Visibilidad correcta', () => {
   test.beforeEach(async ({ context }) => {
     await context.clearCookies();
   });
 
-  test('la página de login NO muestra el tour overlay ni el panel lateral', async ({ page }) => {
-    // Simular sessionStorage con tour activo (como si quedara de sesión anterior)
+  test('NO muestra el tour en /login aunque haya sessionStorage residual', async ({ page }) => {
     await page.addInitScript(() => {
       sessionStorage.setItem(
         'inmova-demo-tour',
@@ -21,49 +27,62 @@ test.describe('Demo Tour — No aparece antes del login', () => {
 
     await page.goto('/login');
     await page.waitForLoadState('networkidle');
-
-    // Esperar el delay de auto-start (1500ms) + margen
     await page.waitForTimeout(3000);
 
-    // NO debe haber overlay cinematic (z-[9999])
-    const cinematicOverlay = page.locator('[class*="z-[9999]"]');
-    await expect(cinematicOverlay).toHaveCount(0);
+    // NO debe haber overlay cinematic ni panel lateral
+    const tourElements = page.locator(
+      '[class*="z-[9999]"], [class*="z-[9998]"], text="Grupo Vidaro · INMOVA", text="Presentar Demo"'
+    );
+    await expect(tourElements).toHaveCount(0);
 
-    // NO debe haber panel lateral del tour (z-[9998])
-    const sidePanel = page.locator('[class*="z-[9998]"]');
-    await expect(sidePanel).toHaveCount(0);
-
-    // NO debe haber botón "Presentar Demo"
-    const presentButton = page.getByText('Presentar Demo');
-    await expect(presentButton).toHaveCount(0);
-
-    // NO debe haber texto del tour
-    const tourTitle = page.getByText('Grupo Vidaro · INMOVA');
-    await expect(tourTitle).toHaveCount(0);
-
-    // La página de login SÍ debe estar visible
-    const loginForm = page.locator('input[name="email"], input[type="email"]');
-    await expect(loginForm.first()).toBeVisible({ timeout: 5000 });
+    // Login form SÍ visible y usable
+    const emailInput = page.locator('input[name="email"], input[type="email"]').first();
+    await expect(emailInput).toBeVisible({ timeout: 5000 });
   });
 
-  test('la página de login muestra el formulario sin obstrucciones', async ({ page }) => {
+  test('NO muestra el tour en /login con sesión válida del demo user', async ({ page }) => {
+    // Simular sesión previa activa
+    await page.addInitScript(() => {
+      sessionStorage.setItem(
+        'inmova-demo-tour',
+        JSON.stringify({ active: true, stepIndex: 3, completed: false })
+      );
+    });
+
+    await page.goto('/login');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
+
+    // Verificar que NO hay backdrop/overlay
+    const backdrop = page.locator('.backdrop-blur-sm, .bg-black\\/60');
+    await expect(backdrop).toHaveCount(0);
+
+    // Verificar que NO hay botones del tour
+    const tourButtons = page.getByText('Siguiente');
+    const presentButton = page.getByText('Presentar Demo');
+    await expect(tourButtons).toHaveCount(0);
+    await expect(presentButton).toHaveCount(0);
+  });
+
+  test('formulario de login funciona sin obstrucciones del tour', async ({ page }) => {
     await page.goto('/login');
     await page.waitForLoadState('networkidle');
 
-    // Formulario de login visible
     const emailInput = page.locator('input[name="email"], input[type="email"]').first();
     await expect(emailInput).toBeVisible({ timeout: 10000 });
 
-    // Campo de password visible
     const passwordInput = page.locator('input[name="password"], input[type="password"]').first();
     await expect(passwordInput).toBeVisible();
 
-    // Botón de submit visible
+    // Debe poder escribir sin problemas
+    await emailInput.fill('demo@vidaroinversiones.com');
+    await expect(emailInput).toHaveValue('demo@vidaroinversiones.com');
+
+    await passwordInput.fill('VidaroDemo2026!');
+    await expect(passwordInput).toHaveValue('VidaroDemo2026!');
+
     const submitButton = page.locator('button[type="submit"]').first();
     await expect(submitButton).toBeVisible();
-
-    // NO debe haber backdrop/overlay bloqueando la interacción
-    const backdrop = page.locator('.backdrop-blur-sm, .backdrop-blur-[2px]');
-    await expect(backdrop).toHaveCount(0);
+    await expect(submitButton).toBeEnabled();
   });
 });

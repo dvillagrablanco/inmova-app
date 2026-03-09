@@ -120,7 +120,7 @@ export default function DemoShowcaseTour() {
   const taskTimerRef = useRef<NodeJS.Timeout | null>(null);
   const spotlightCleanupRef = useRef<(() => void) | null>(null);
 
-  const isAuthRoute = AUTH_ROUTES.some((route) => pathname?.startsWith(route));
+  const isAuthRoute = !pathname || AUTH_ROUTES.some((route) => pathname.startsWith(route));
   const isDemoUser = status === 'authenticated' && session?.user?.email === DEMO_USER_EMAIL;
   const totalSteps = DEMO_STEPS.length;
   const step = DEMO_STEPS[stepIndex];
@@ -210,6 +210,13 @@ export default function DemoShowcaseTour() {
       }
     }
   }, []);
+
+  // ── Reset initialization when user context changes (login/logout) ──
+  useEffect(() => {
+    if (!isDemoUser) {
+      initializedRef.current = false;
+    }
+  }, [isDemoUser]);
 
   // ── INIT ──
   useEffect(() => {
