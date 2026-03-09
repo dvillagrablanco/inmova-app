@@ -103,7 +103,8 @@ export default function DemoShowcaseTour() {
       setStepIndex(state.stepIndex);
       setActive(true);
     }
-  }, [pathname, isDemoUser, initialized]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname, isDemoUser]);
 
   // ── NAVIGATE to a step ──
   const goToStep = useCallback((index: number) => {
