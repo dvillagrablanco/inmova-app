@@ -104,7 +104,23 @@ const STAT_COLORS: Record<string, string> = {
   red: 'bg-red-50 text-red-700 border-red-200',
 };
 
-const AUTH_ROUTES = ['/login', '/register', '/forgot-password', '/reset-password', '/verify'];
+const ALLOWED_ROUTES = [
+  '/dashboard',
+  '/propiedades',
+  '/portal-inquilino',
+  '/contratos',
+  '/family-office',
+  '/valoracion-ia',
+  '/mantenimiento',
+  '/configuracion',
+  '/inversiones',
+  '/edificios',
+  '/inquilinos',
+  '/pagos',
+  '/comunidades',
+  '/crm',
+  '/admin',
+];
 
 export default function DemoShowcaseTour() {
   const { data: session, status } = useSession();
@@ -120,7 +136,7 @@ export default function DemoShowcaseTour() {
   const taskTimerRef = useRef<NodeJS.Timeout | null>(null);
   const spotlightCleanupRef = useRef<(() => void) | null>(null);
 
-  const isAuthRoute = !pathname || AUTH_ROUTES.some((route) => pathname.startsWith(route));
+  const isAllowedRoute = !!pathname && ALLOWED_ROUTES.some((route) => pathname.startsWith(route));
   const isDemoUser = status === 'authenticated' && session?.user?.email === DEMO_USER_EMAIL;
   const totalSteps = DEMO_STEPS.length;
   const step = DEMO_STEPS[stepIndex];
@@ -220,7 +236,7 @@ export default function DemoShowcaseTour() {
 
   // ── INIT ──
   useEffect(() => {
-    if (status === 'loading' || !isDemoUser || isAuthRoute || initializedRef.current) return;
+    if (status === 'loading' || !isDemoUser || !isAllowedRoute || initializedRef.current) return;
     initializedRef.current = true;
 
     const state = readState();
@@ -249,21 +265,21 @@ export default function DemoShowcaseTour() {
 
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status, isDemoUser, isAuthRoute]);
+  }, [status, isDemoUser, isAllowedRoute]);
 
-  // ── Force-hide on auth routes (cleanup after logout) ──
+  // ── Force-hide when leaving allowed routes (e.g. logout → login) ──
   useEffect(() => {
-    if (isAuthRoute && active) {
+    if (!isAllowedRoute && active) {
       clearSpotlight();
       setActive(false);
       setShowControls(false);
       setMinimized(false);
     }
-  }, [isAuthRoute, active, clearSpotlight]);
+  }, [isAllowedRoute, active, clearSpotlight]);
 
   // ── Pathname change → re-show if on correct page ──
   useEffect(() => {
-    if (!isDemoUser || isAuthRoute || !initializedRef.current) return;
+    if (!isDemoUser || !isAllowedRoute || !initializedRef.current) return;
     const state = readState();
     if (!state.active) return;
 
@@ -272,7 +288,7 @@ export default function DemoShowcaseTour() {
       setStepIndex(state.stepIndex);
       setActive(true);
     }
-  }, [pathname, isDemoUser, isAuthRoute]);
+  }, [pathname, isDemoUser, isAllowedRoute]);
 
   // ── Apply spotlight when step changes ──
   useEffect(() => {
@@ -357,7 +373,7 @@ export default function DemoShowcaseTour() {
     goToStep(stepIndex);
   }, [stepIndex, goToStep]);
 
-  if (!isDemoUser || isAuthRoute) return null;
+  if (!isDemoUser || !isAllowedRoute) return null;
 
   const isCinematic = step?.mode === 'cinematic';
   const actColor = step ? ACT_COLORS[step.act] : ACT_COLORS[1];
