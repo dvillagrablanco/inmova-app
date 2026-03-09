@@ -1,10 +1,14 @@
 /**
  * API: Consulta Catastro Público
- * 
- * GET /api/catastro/consulta?rc=XXXXXXXXXXXX - Consulta por referencia catastral
- * GET /api/catastro/consulta?provincia=X&municipio=X&via=X&numero=X - Por dirección
- * 
- * Usa la API pública del Catastro (OVCCallejero)
+ *
+ * GET /api/catastro/consulta?rc=XXXXXXXXXXXX - Por referencia catastral
+ * GET /api/catastro/consulta?q=Calle+Nombre+123+Madrid - Por dirección libre (IA asistida)
+ * GET /api/catastro/consulta?provincia=X&municipio=X&via=X&numero=X - Por campos
+ *
+ * Flujo de búsqueda por dirección libre (q):
+ * 1. Parser local intenta extraer provincia/municipio/via/numero
+ * 2. Si falla o el Catastro no encuentra, Claude normaliza la dirección
+ * 3. Se reintenta con la dirección normalizada por IA
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -197,6 +201,72 @@ function parseDireccionLibre(q: string): { provincia: string; municipio: string;
   return { provincia, municipio, tipoVia, via: via.toUpperCase(), numero };
 }
 
+async function normalizarDireccionConIA(
+  direccionOriginal: string
+): Promise<{ provincia: string; municipio: string; tipoVia: string; via: string; numero: string } | null> {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return null;
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-3-5-haiku-20241022',
+        max_tokens: 200,
+        messages: [{
+          role: 'user',
+          content: `Eres un experto en el Catastro español. Necesito normalizar esta dirección para buscar en la API del Catastro (OVCCallejero ConsultaNumero).
+
+Dirección del usuario: "${direccionOriginal}"
+
+Devuelve SOLO un JSON con estos campos exactos (nombres oficiales del Catastro, todo en MAYÚSCULAS sin acentos):
+{
+  "provincia": "NOMBRE_PROVINCIA",
+  "municipio": "NOMBRE_MUNICIPIO",
+  "tipoVia": "CL|AV|PZ|PS|RD|TR|CM",
+  "via": "NOMBRE_OFICIAL_VIA_SIN_TIPO",
+  "numero": "NUMERO"
+}
+
+Reglas:
+- via debe ser el NOMBRE OFICIAL COMPLETO (ej: "Silvela" → "MANUEL SILVELA", "Castellana" → "PASEO DE LA CASTELLANA" pero tipoVia sería PS)
+- Si hay varios números (3, 5, 7) usa el primero
+- Si no hay número, pon "1"
+- Sin acentos (MALAGA no MÁLAGA)
+- Solo el JSON, sin explicaciones`
+        }],
+      }),
+      signal: AbortSignal.timeout(8000),
+    });
+
+    if (!resp.ok) return null;
+
+    const data = await resp.json();
+    const text = data.content?.[0]?.text || '';
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) return null;
+
+    const parsed = JSON.parse(jsonMatch[0]);
+    if (!parsed.provincia || !parsed.municipio || !parsed.via) return null;
+
+    return {
+      provincia: String(parsed.provincia).toUpperCase(),
+      municipio: String(parsed.municipio).toUpperCase(),
+      tipoVia: String(parsed.tipoVia || 'CL').toUpperCase(),
+      via: String(parsed.via).toUpperCase(),
+      numero: String(parsed.numero || '1'),
+    };
+  } catch (error: any) {
+    logger.warn('[Catastro] IA normalization failed:', error.message);
+    return null;
+  }
+}
+
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -218,17 +288,26 @@ export async function GET(req: NextRequest) {
     if (rc && rc.length >= 14) {
       result = await consultaPorRC(rc);
     } else if (q && q.trim().length >= 5) {
+      // Paso 1: Parser local
       const parsed = parseDireccionLibre(q);
-      if (!parsed) {
-        return NextResponse.json(
-          { error: 'No se pudo interpretar la dirección. Prueba: "Calle Nombre 123, Madrid"' },
-          { status: 400 }
-        );
+      if (parsed) {
+        result = await consultaPorDireccion(parsed.provincia, parsed.municipio, parsed.tipoVia, parsed.via, parsed.numero);
       }
-      result = await consultaPorDireccion(parsed.provincia, parsed.municipio, parsed.tipoVia, parsed.via, parsed.numero);
+
+      // Paso 2: Si parser local falla o Catastro no encuentra → IA normaliza
       if (!result) {
+        logger.info('[Catastro] Parser local no encontró resultado, intentando con IA...');
+        const iaParsed = await normalizarDireccionConIA(q);
+        if (iaParsed) {
+          logger.info(`[Catastro] IA normalizó: ${iaParsed.tipoVia} ${iaParsed.via} ${iaParsed.numero}, ${iaParsed.municipio}`);
+          result = await consultaPorDireccion(iaParsed.provincia, iaParsed.municipio, iaParsed.tipoVia, iaParsed.via, iaParsed.numero);
+        }
+      }
+
+      if (!result) {
+        const hint = parsed ? `"${parsed.via} ${parsed.numero}" en ${parsed.municipio}` : q;
         return NextResponse.json(
-          { error: `No se encontró "${parsed.via} ${parsed.numero}" en ${parsed.municipio}. Prueba el nombre oficial completo de la vía.` },
+          { error: `No se encontró ${hint} en el Catastro. Prueba con el nombre oficial completo de la vía o la referencia catastral.` },
           { status: 404 }
         );
       }
