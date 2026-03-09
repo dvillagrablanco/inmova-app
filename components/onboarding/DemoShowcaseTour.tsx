@@ -7,7 +7,7 @@
  * Estado persistido en sessionStorage para sobrevivir a las navegaciones de Next.js.
  */
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -45,7 +45,7 @@ export default function DemoShowcaseTour() {
   const [active, setActive] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
   const [showControls, setShowControls] = useState(false);
-  const [initialized, setInitialized] = useState(false);
+  const initializedRef = useRef(false);
 
   const isDemoUser = session?.user?.email === DEMO_USER_EMAIL;
   const totalSteps = DEMO_STEPS.length;
@@ -53,12 +53,8 @@ export default function DemoShowcaseTour() {
 
   // ── INIT: Read persisted state on mount ──
   useEffect(() => {
-    // Debug: trace tour initialization
-    if (typeof window !== 'undefined') {
-      (window as any).__demoTourDebug = { status, email: session?.user?.email, isDemoUser, initialized };
-    }
-    if (status === 'loading' || !isDemoUser || initialized) return;
-    setInitialized(true);
+    if (status === 'loading' || !isDemoUser || initializedRef.current) return;
+    initializedRef.current = true;
 
     const state = readState();
 
@@ -93,11 +89,12 @@ export default function DemoShowcaseTour() {
     }, 1500);
 
     return () => clearTimeout(timer);
-  }, [status, isDemoUser, initialized, pathname, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status, isDemoUser]);
 
   // ── When pathname changes while tour is active, show overlay if on correct page ──
   useEffect(() => {
-    if (!isDemoUser || !initialized) return;
+    if (!isDemoUser || !initializedRef.current) return;
     const state = readState();
     if (!state.active) return;
 
