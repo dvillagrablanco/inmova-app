@@ -17,7 +17,12 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { DEMO_STEPS, DEMO_USER_EMAIL, type DemoStep, type StepMode } from '@/lib/onboarding-demo-tour';
+import {
+  DEMO_STEPS,
+  DEMO_USER_EMAIL,
+  type DemoStep,
+  type StepMode,
+} from '@/lib/onboarding-demo-tour';
 import { Button } from '@/components/ui/button';
 import {
   ChevronLeft,
@@ -45,21 +50,45 @@ function readState(): TourState {
   try {
     const raw = sessionStorage.getItem(STORAGE_KEY);
     if (raw) return JSON.parse(raw);
-  } catch { /* SSR-safe */ }
+  } catch {
+    /* SSR-safe */
+  }
   return { active: false, stepIndex: 0, completed: false };
 }
 
 function writeState(state: TourState) {
   try {
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch { /* SSR-safe */ }
+  } catch {
+    /* SSR-safe */
+  }
 }
 
 const ACT_COLORS: Record<number, { bg: string; text: string; border: string; gradient: string }> = {
-  1: { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200', gradient: 'from-red-500 to-orange-500' },
-  2: { bg: 'bg-indigo-50', text: 'text-indigo-700', border: 'border-indigo-200', gradient: 'from-indigo-500 to-purple-500' },
-  3: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200', gradient: 'from-amber-500 to-orange-500' },
-  4: { bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-200', gradient: 'from-green-500 to-emerald-500' },
+  1: {
+    bg: 'bg-red-50',
+    text: 'text-red-700',
+    border: 'border-red-200',
+    gradient: 'from-red-500 to-orange-500',
+  },
+  2: {
+    bg: 'bg-indigo-50',
+    text: 'text-indigo-700',
+    border: 'border-indigo-200',
+    gradient: 'from-indigo-500 to-purple-500',
+  },
+  3: {
+    bg: 'bg-amber-50',
+    text: 'text-amber-700',
+    border: 'border-amber-200',
+    gradient: 'from-amber-500 to-orange-500',
+  },
+  4: {
+    bg: 'bg-green-50',
+    text: 'text-green-700',
+    border: 'border-green-200',
+    gradient: 'from-green-500 to-emerald-500',
+  },
 };
 
 const STAT_COLORS: Record<string, string> = {
@@ -75,6 +104,8 @@ const STAT_COLORS: Record<string, string> = {
   red: 'bg-red-50 text-red-700 border-red-200',
 };
 
+const AUTH_ROUTES = ['/login', '/register', '/forgot-password', '/reset-password', '/verify'];
+
 export default function DemoShowcaseTour() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -89,7 +120,8 @@ export default function DemoShowcaseTour() {
   const taskTimerRef = useRef<NodeJS.Timeout | null>(null);
   const spotlightCleanupRef = useRef<(() => void) | null>(null);
 
-  const isDemoUser = session?.user?.email === DEMO_USER_EMAIL;
+  const isAuthRoute = AUTH_ROUTES.some((route) => pathname?.startsWith(route));
+  const isDemoUser = status === 'authenticated' && session?.user?.email === DEMO_USER_EMAIL;
   const totalSteps = DEMO_STEPS.length;
   const step = DEMO_STEPS[stepIndex];
 
@@ -129,7 +161,7 @@ export default function DemoShowcaseTour() {
     `;
 
     requestAnimationFrame(() => {
-      targets.forEach(selector => {
+      targets.forEach((selector) => {
         const el = document.querySelector<HTMLElement>(selector);
         if (el) {
           el.classList.add('demo-tour-spotlight');
@@ -140,7 +172,7 @@ export default function DemoShowcaseTour() {
     });
 
     spotlightCleanupRef.current = () => {
-      elements.forEach(el => el.classList.remove('demo-tour-spotlight'));
+      elements.forEach((el) => el.classList.remove('demo-tour-spotlight'));
     };
   }, []);
 
@@ -181,7 +213,7 @@ export default function DemoShowcaseTour() {
 
   // ── INIT ──
   useEffect(() => {
-    if (status === 'loading' || !isDemoUser || initializedRef.current) return;
+    if (status === 'loading' || !isDemoUser || isAuthRoute || initializedRef.current) return;
     initializedRef.current = true;
 
     const state = readState();
@@ -210,11 +242,21 @@ export default function DemoShowcaseTour() {
 
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status, isDemoUser]);
+  }, [status, isDemoUser, isAuthRoute]);
+
+  // ── Force-hide on auth routes (cleanup after logout) ──
+  useEffect(() => {
+    if (isAuthRoute && active) {
+      clearSpotlight();
+      setActive(false);
+      setShowControls(false);
+      setMinimized(false);
+    }
+  }, [isAuthRoute, active, clearSpotlight]);
 
   // ── Pathname change → re-show if on correct page ──
   useEffect(() => {
-    if (!isDemoUser || !initializedRef.current) return;
+    if (!isDemoUser || isAuthRoute || !initializedRef.current) return;
     const state = readState();
     if (!state.active) return;
 
@@ -223,8 +265,7 @@ export default function DemoShowcaseTour() {
       setStepIndex(state.stepIndex);
       setActive(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname, isDemoUser]);
+  }, [pathname, isDemoUser, isAuthRoute]);
 
   // ── Apply spotlight when step changes ──
   useEffect(() => {
@@ -244,26 +285,29 @@ export default function DemoShowcaseTour() {
   }, [active, stepIndex]);
 
   // ── NAVIGATION ──
-  const goToStep = useCallback((index: number) => {
-    const target = DEMO_STEPS[index];
-    if (!target) return;
+  const goToStep = useCallback(
+    (index: number) => {
+      const target = DEMO_STEPS[index];
+      if (!target) return;
 
-    clearSpotlight();
-    setTaskCompleted(false);
-    if (taskTimerRef.current) clearTimeout(taskTimerRef.current);
+      clearSpotlight();
+      setTaskCompleted(false);
+      if (taskTimerRef.current) clearTimeout(taskTimerRef.current);
 
-    const newState: TourState = { active: true, stepIndex: index, completed: false };
-    writeState(newState);
-    setStepIndex(index);
-    setMinimized(false);
+      const newState: TourState = { active: true, stepIndex: index, completed: false };
+      writeState(newState);
+      setStepIndex(index);
+      setMinimized(false);
 
-    if (target.route && !pathname?.startsWith(target.route)) {
-      setActive(false);
-      router.push(target.route);
-    } else {
-      setActive(true);
-    }
-  }, [pathname, router, clearSpotlight]);
+      if (target.route && !pathname?.startsWith(target.route)) {
+        setActive(false);
+        router.push(target.route);
+      } else {
+        setActive(true);
+      }
+    },
+    [pathname, router, clearSpotlight]
+  );
 
   const handleNext = useCallback(() => {
     if (stepIndex < totalSteps - 1) {
@@ -306,7 +350,7 @@ export default function DemoShowcaseTour() {
     goToStep(stepIndex);
   }, [stepIndex, goToStep]);
 
-  if (!isDemoUser) return null;
+  if (!isDemoUser || isAuthRoute) return null;
 
   const isCinematic = step?.mode === 'cinematic';
   const actColor = step ? ACT_COLORS[step.act] : ACT_COLORS[1];
@@ -351,7 +395,9 @@ export default function DemoShowcaseTour() {
                 <div className="p-6">
                   {/* Act Badge */}
                   <div className="flex items-center justify-between mb-4">
-                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${actColor.bg} ${actColor.text}`}>
+                    <span
+                      className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${actColor.bg} ${actColor.text}`}
+                    >
                       ACTO {step.act} — {step.actTitle}
                     </span>
                     <button
@@ -370,9 +416,14 @@ export default function DemoShowcaseTour() {
 
                   {/* Stats */}
                   {step.stats && (
-                    <div className={`grid gap-2 mb-4 ${step.stats.length <= 4 ? `grid-cols-${step.stats.length}` : 'grid-cols-3'}`}>
+                    <div
+                      className={`grid gap-2 mb-4 ${step.stats.length <= 4 ? `grid-cols-${step.stats.length}` : 'grid-cols-3'}`}
+                    >
                       {step.stats.map((stat, i) => (
-                        <div key={i} className={`text-center p-2 rounded-xl border ${STAT_COLORS[stat.color] || STAT_COLORS.gray}`}>
+                        <div
+                          key={i}
+                          className={`text-center p-2 rounded-xl border ${STAT_COLORS[stat.color] || STAT_COLORS.gray}`}
+                        >
                           <div className="text-lg font-bold">{stat.value}</div>
                           <div className="text-[10px] font-medium">{stat.label}</div>
                         </div>
@@ -439,7 +490,9 @@ export default function DemoShowcaseTour() {
               {/* Header */}
               <div className="flex items-center justify-between px-4 pt-3 pb-2 flex-shrink-0">
                 <div className="flex items-center gap-2">
-                  <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${actColor.bg} ${actColor.text}`}>
+                  <span
+                    className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${actColor.bg} ${actColor.text}`}
+                  >
                     ACTO {step.act}
                   </span>
                   <span className="text-[10px] text-gray-400 font-medium">
@@ -470,19 +523,27 @@ export default function DemoShowcaseTour() {
                 <div className="flex items-center gap-1.5 mb-2">
                   <ModeIcon mode={step.mode} />
                   <span className="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">
-                    {step.mode === 'task' ? 'Interactivo' : step.mode === 'spotlight' ? 'Observar' : 'Narración'}
+                    {step.mode === 'task'
+                      ? 'Interactivo'
+                      : step.mode === 'spotlight'
+                        ? 'Observar'
+                        : 'Narración'}
                   </span>
                 </div>
 
                 {/* Title */}
-                <h3 className="text-base font-bold text-gray-900 mb-2 leading-tight">{step.title}</h3>
+                <h3 className="text-base font-bold text-gray-900 mb-2 leading-tight">
+                  {step.title}
+                </h3>
 
                 {/* Narration */}
                 <div className="mb-3">{step.narration}</div>
 
                 {/* Stats grid */}
                 {step.stats && (
-                  <div className={`grid gap-1.5 mb-3 ${step.stats.length > 4 ? 'grid-cols-3' : `grid-cols-${Math.min(step.stats.length, 4)}`}`}>
+                  <div
+                    className={`grid gap-1.5 mb-3 ${step.stats.length > 4 ? 'grid-cols-3' : `grid-cols-${Math.min(step.stats.length, 4)}`}`}
+                  >
                     {step.stats.map((stat, i) => (
                       <div
                         key={i}
@@ -504,7 +565,9 @@ export default function DemoShowcaseTour() {
                     </div>
                     <div className="flex-1 text-center p-1.5 bg-green-50 rounded-lg border border-green-100">
                       <div className="text-[9px] font-bold text-green-700">✅ Con INMOVA</div>
-                      <div className="text-[9px] text-green-600 mt-0.5">{step.comparison.after}</div>
+                      <div className="text-[9px] text-green-600 mt-0.5">
+                        {step.comparison.after}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -541,7 +604,10 @@ export default function DemoShowcaseTour() {
                                 className="h-full bg-indigo-500 rounded-full"
                                 initial={{ width: '0%' }}
                                 animate={{ width: '100%' }}
-                                transition={{ duration: (step.task.autoCompleteMs || 10000) / 1000, ease: 'linear' }}
+                                transition={{
+                                  duration: (step.task.autoCompleteMs || 10000) / 1000,
+                                  ease: 'linear',
+                                }}
                               />
                             </div>
                             <span className="text-[8px] text-indigo-400">auto</span>
@@ -624,7 +690,9 @@ export default function DemoShowcaseTour() {
               className="bg-white/90 backdrop-blur-sm shadow-lg border-gray-200 hover:bg-gray-50"
             >
               <Play className="h-3.5 w-3.5 mr-1 text-gray-600" />
-              <span className="text-gray-700 text-xs">Continuar ({stepIndex + 1}/{totalSteps})</span>
+              <span className="text-gray-700 text-xs">
+                Continuar ({stepIndex + 1}/{totalSteps})
+              </span>
             </Button>
           )}
           <Button
@@ -653,8 +721,8 @@ function StepDots({ current, total }: { current: number; total: number }) {
             i === current
               ? 'w-3 h-1.5 bg-indigo-500'
               : i < current
-              ? 'w-1.5 h-1.5 bg-indigo-300'
-              : 'w-1.5 h-1.5 bg-gray-200'
+                ? 'w-1.5 h-1.5 bg-indigo-300'
+                : 'w-1.5 h-1.5 bg-gray-200'
           }`}
         />
       ))}
