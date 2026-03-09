@@ -219,13 +219,17 @@ export async function GET(req: NextRequest) {
       result = await consultaPorRC(rc);
     } else if (q && q.trim().length >= 5) {
       const parsed = parseDireccionLibre(q);
-      if (parsed) {
-        result = await consultaPorDireccion(parsed.provincia, parsed.municipio, parsed.tipoVia, parsed.via, parsed.numero);
+      if (!parsed) {
+        return NextResponse.json(
+          { error: 'No se pudo interpretar la dirección. Prueba: "Calle Nombre 123, Madrid"' },
+          { status: 400 }
+        );
       }
+      result = await consultaPorDireccion(parsed.provincia, parsed.municipio, parsed.tipoVia, parsed.via, parsed.numero);
       if (!result) {
         return NextResponse.json(
-          { error: 'No se pudo interpretar la dirección. Prueba con formato: "Calle Nombre 123, Madrid"' },
-          { status: 400 }
+          { error: `No se encontró "${parsed.via} ${parsed.numero}" en ${parsed.municipio}. Prueba el nombre oficial completo de la vía.` },
+          { status: 404 }
         );
       }
     } else if (provincia && municipio && via && numero) {
