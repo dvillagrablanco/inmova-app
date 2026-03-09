@@ -11,6 +11,7 @@ import { BrandingProvider } from '@/components/BrandingProvider';
 import { DesignSystemProvider } from '@/components/DesignSystemProvider';
 import { QueryProvider } from '@/components/QueryProvider';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
+import DemoShowcaseTour from '@/components/onboarding/DemoShowcaseTour';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -28,6 +29,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
                 >
                   <ServiceWorkerRegister />
                   {children}
+                  <DemoShowcaseTour />
                   <InstallPrompt />
                   <ConnectivityIndicator />
                   <Toaster />
