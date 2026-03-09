@@ -46,7 +46,6 @@ import DemoDataGenerator from '@/components/automation/DemoDataGenerator';
 import logger, { logError } from '@/lib/logger';
 import { ContextualQuickActions } from '@/components/navigation/contextual-quick-actions';
 import { OnboardingTour } from '@/components/onboarding/OnboardingTour';
-import DemoShowcaseTour from '@/components/onboarding/DemoShowcaseTour';
 import { OccupancyByTypeCard, OccupancyTypeData } from '@/components/dashboard/OccupancyByTypeCard';
 
 interface DashboardData {
@@ -127,8 +126,6 @@ function DashboardPageContent() {
   if (status === 'loading' || isLoading) {
     return (
       <AuthenticatedLayout>
-        {/* Demo Tour - debe estar en TODOS los returns para no perder estado */}
-        <DemoShowcaseTour />
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-8 space-y-2">
@@ -171,7 +168,6 @@ function DashboardPageContent() {
   if (!session) {
     return (
       <AuthenticatedLayout>
-        <DemoShowcaseTour />
         <div className="flex items-center justify-center h-full">
           <div className="text-center">
             <p className="text-gray-600">Cargando sesión...</p>
@@ -694,11 +690,8 @@ function DashboardPageContent() {
       {/* Chatbot inteligente de soporte 24/7 - Sistema automatizado sin intervención humana */}
       {/* Chatbot se renderiza desde AuthenticatedLayout para evitar duplicación */}
 
-      {/* Onboarding Tour Guiado (NO para demo user — usa DemoShowcaseTour) */}
+      {/* Onboarding Tour Guiado (NO para demo user — DemoShowcaseTour se renderiza desde Providers) */}
       {session?.user?.email !== 'demo@vidaroinversiones.com' && <OnboardingTour role={session?.user?.role} />}
-
-      {/* Demo Showcase Tour — solo para demo@vidaroinversiones.com */}
-      <DemoShowcaseTour />
     </AuthenticatedLayout>
   );
 }

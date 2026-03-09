@@ -2,10 +2,11 @@ import React from 'react';
 
 /**
  * TOUR DEMO SHOWCASE — GRUPO VIDARO
- * 
- * 12 pasos NAVEGABLES con arco dramático.
- * Cada paso puede llevar al usuario a la página real de la funcionalidad.
- * 
+ *
+ * 11 pasos NAVEGABLES con arco dramático.
+ * Contenido COMPACTO para panel flotante (380px).
+ * La app es 100% visible e interactiva — el panel solo narra.
+ *
  * ACTO 1 — El Reto (dashboard)
  * ACTO 2 — La Plataforma (navega a cada sección)
  * ACTO 3 — Sin Esfuerzo (navega a operaciones)
@@ -16,64 +17,67 @@ export const DEMO_USER_EMAIL = 'demo@vidaroinversiones.com';
 
 export interface DemoStep {
   id: string;
-  /** Ruta a la que navegar ANTES de mostrar el paso. Si no tiene, se queda en la página actual */
   route?: string;
-  /** 'overlay' = modal centrado fullscreen, 'spotlight' = tooltip apuntando a un target */
   type: 'overlay' | 'spotlight';
-  /** CSS selector del elemento a destacar (solo para type='spotlight') */
   target?: string;
-  /** Contenido JSX del paso */
   content: React.ReactNode;
 }
 
 export const DEMO_STEPS: DemoStep[] = [
-
-  // ╔═══════════════════════════════════════════════════════════╗
-  // ║  ACTO 1 — "EL RETO"                                      ║
-  // ╚═══════════════════════════════════════════════════════════╝
+  // ═══ ACTO 1 — "EL RETO" ═══
 
   {
     id: 'welcome',
     route: '/dashboard',
     type: 'overlay',
     content: (
-      <div className="space-y-4 max-w-lg mx-auto">
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 mb-3">
-            <span className="text-3xl">🏛️</span>
+      <div className="space-y-3">
+        <div className="flex items-center gap-3">
+          <div className="flex-shrink-0 w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+            <span className="text-xl">🏛️</span>
           </div>
-          <h2 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-            Grupo Vidaro · INMOVA
-          </h2>
-          <p className="text-xs text-gray-400 mt-1">La plataforma inmobiliaria más completa de España</p>
-        </div>
-        <div className="grid grid-cols-3 gap-2">
-          <div className="text-center p-2.5 bg-indigo-50 rounded-xl">
-            <div className="text-xl font-bold text-indigo-700">3</div>
-            <div className="text-[10px] text-indigo-600 font-medium">Sociedades</div>
-          </div>
-          <div className="text-center p-2.5 bg-purple-50 rounded-xl">
-            <div className="text-xl font-bold text-purple-700">340+</div>
-            <div className="text-[10px] text-purple-600 font-medium">Inquilinos</div>
-          </div>
-          <div className="text-center p-2.5 bg-blue-50 rounded-xl">
-            <div className="text-xl font-bold text-blue-700">€337M</div>
-            <div className="text-[10px] text-blue-600 font-medium">Activos</div>
+          <div>
+            <h2 className="text-base font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent leading-tight">
+              Grupo Vidaro · INMOVA
+            </h2>
+            <p className="text-[10px] text-gray-400">
+              Plataforma inmobiliaria integral
+            </p>
           </div>
         </div>
-        <div className="bg-red-50 border border-red-200 rounded-xl p-3">
-          <h4 className="text-xs font-bold text-red-900 mb-1.5">🔴 El reto actual del equipo:</h4>
-          <div className="space-y-1 text-xs text-red-800">
-            <p>• Hojas de Excel separadas por cada sociedad y edificio</p>
-            <p>• Reporting manual que consume semanas cada trimestre</p>
-            <p>• Cobros, contratos y vencimientos seguidos a mano</p>
-            <p>• Sin visión consolidada del patrimonio completo</p>
+
+        <div className="flex gap-1.5">
+          <div className="flex-1 text-center py-1.5 bg-indigo-50 rounded-lg">
+            <div className="text-sm font-bold text-indigo-700">3</div>
+            <div className="text-[9px] text-indigo-600">Sociedades</div>
+          </div>
+          <div className="flex-1 text-center py-1.5 bg-purple-50 rounded-lg">
+            <div className="text-sm font-bold text-purple-700">340+</div>
+            <div className="text-[9px] text-purple-600">Inquilinos</div>
+          </div>
+          <div className="flex-1 text-center py-1.5 bg-blue-50 rounded-lg">
+            <div className="text-sm font-bold text-blue-700">€337M</div>
+            <div className="text-[9px] text-blue-600">Activos</div>
           </div>
         </div>
-        <p className="text-center text-sm text-gray-600 font-medium">
+
+        <div className="bg-red-50 border border-red-200 rounded-lg p-2.5">
+          <h4 className="text-[10px] font-bold text-red-900 mb-1">
+            🔴 El reto actual:
+          </h4>
+          <div className="space-y-0.5 text-[10px] text-red-800">
+            <p>• Excel separado por sociedad y edificio</p>
+            <p>• Reporting manual, semanas cada trimestre</p>
+            <p>• Cobros y contratos seguidos a mano</p>
+          </div>
+        </div>
+
+        <p className="text-xs text-gray-600 text-center font-medium">
           ¿Y si todo esto desapareciera en <strong>un solo click</strong>?
         </p>
-        <p className="text-[10px] text-gray-400 text-center">12 pasos · ~5 min · Le llevaremos a cada sección en vivo</p>
+        <p className="text-[9px] text-gray-400 text-center">
+          11 pasos · ~4 min · La app es interactiva durante el tour
+        </p>
       </div>
     ),
   },
@@ -83,59 +87,65 @@ export const DEMO_STEPS: DemoStep[] = [
     route: '/dashboard',
     type: 'overlay',
     content: (
-      <div className="space-y-3 max-w-md mx-auto">
-        <div className="text-center">
-          <span className="text-2xl">📊</span>
-          <h3 className="text-lg font-bold text-gray-900 mt-1">Todo el Grupo. Una Pantalla. Tiempo Real.</h3>
+      <div className="space-y-2.5">
+        <div className="flex items-center gap-2">
+          <span className="text-lg">📊</span>
+          <h3 className="text-sm font-bold text-gray-900">
+            Dashboard — Todo en Tiempo Real
+          </h3>
         </div>
-        <p className="text-sm text-gray-600 text-center">
-          Este es su <strong>Dashboard</strong>. Ingresos, ocupación, morosidad y alertas — 
-          actualizados <strong>al segundo</strong>. Proyecciones a 12 meses con IA.
+        <p className="text-xs text-gray-600">
+          Está viendo el <strong>panel de control real</strong> del grupo.
+          Ingresos, ocupación, morosidad y alertas actualizados al segundo.
         </p>
-        <div className="flex gap-2">
-          <div className="flex-1 text-center p-2 bg-red-50 rounded-lg border border-red-100">
-            <div className="text-[10px] font-bold text-red-700">❌ Antes</div>
-            <div className="text-[9px] text-red-600 mt-0.5">Semanas para un informe</div>
+        <div className="flex gap-1.5">
+          <div className="flex-1 text-center p-1.5 bg-red-50 rounded border border-red-100">
+            <div className="text-[9px] font-bold text-red-700">❌ Antes</div>
+            <div className="text-[8px] text-red-600">Semanas para un informe</div>
           </div>
-          <div className="flex-1 text-center p-2 bg-green-50 rounded-lg border border-green-100">
-            <div className="text-[10px] font-bold text-green-700">✅ Con INMOVA</div>
-            <div className="text-[9px] text-green-600 mt-0.5">1 click, datos al segundo</div>
+          <div className="flex-1 text-center p-1.5 bg-green-50 rounded border border-green-100">
+            <div className="text-[9px] font-bold text-green-700">✅ INMOVA</div>
+            <div className="text-[8px] text-green-600">1 click, datos al segundo</div>
           </div>
         </div>
-        <p className="text-xs text-gray-400 text-center">👆 Observe los KPIs y gráficos detrás de este panel</p>
+        <p className="text-[10px] text-indigo-600 font-medium text-center">
+          ↖ Explore los KPIs y gráficos a la izquierda
+        </p>
       </div>
     ),
   },
 
-  // ╔═══════════════════════════════════════════════════════════╗
-  // ║  ACTO 2 — "LA PLATAFORMA" (navega a cada sección)        ║
-  // ╚═══════════════════════════════════════════════════════════╝
+  // ═══ ACTO 2 — "LA PLATAFORMA" ═══
 
   {
     id: 'properties',
     route: '/propiedades',
     type: 'overlay',
     content: (
-      <div className="space-y-3 max-w-md mx-auto">
-        <div className="text-center">
-          <span className="text-2xl">🏠</span>
-          <h3 className="text-lg font-bold text-gray-900 mt-1">22 Inmuebles · 340 Inquilinos · Todo Digital</h3>
+      <div className="space-y-2.5">
+        <div className="flex items-center gap-2">
+          <span className="text-lg">🏠</span>
+          <h3 className="text-sm font-bold text-gray-900">
+            22 Inmuebles · 340 Inquilinos
+          </h3>
         </div>
-        <p className="text-sm text-gray-600 text-center">
-          Estamos en la sección de <strong>Propiedades</strong>. Ficha completa de cada inmueble: 
-          fotos, planos, CEE, catastro, contratos vinculados, historial de incidencias y rentabilidad.
+        <p className="text-xs text-gray-600">
+          Ficha completa de cada inmueble: fotos, planos, CEE, catastro,
+          contratos vinculados, incidencias y rentabilidad.
         </p>
-        <div className="flex gap-2">
-          <div className="flex-1 text-center p-2 bg-red-50 rounded-lg border border-red-100">
-            <div className="text-[10px] font-bold text-red-700">❌ Antes</div>
-            <div className="text-[9px] text-red-600 mt-0.5">Buscar en carpetas 15 min</div>
+        <div className="flex gap-1.5">
+          <div className="flex-1 text-center p-1.5 bg-red-50 rounded border border-red-100">
+            <div className="text-[9px] font-bold text-red-700">❌ Antes</div>
+            <div className="text-[8px] text-red-600">Buscar en carpetas 15 min</div>
           </div>
-          <div className="flex-1 text-center p-2 bg-green-50 rounded-lg border border-green-100">
-            <div className="text-[10px] font-bold text-green-700">✅ Con INMOVA</div>
-            <div className="text-[9px] text-green-600 mt-0.5">Cualquier dato en 5 seg</div>
+          <div className="flex-1 text-center p-1.5 bg-green-50 rounded border border-green-100">
+            <div className="text-[9px] font-bold text-green-700">✅ INMOVA</div>
+            <div className="text-[8px] text-green-600">Cualquier dato en 5 seg</div>
           </div>
         </div>
-        <p className="text-xs text-gray-400 text-center">👆 Explore las propiedades del grupo detrás de este panel</p>
+        <p className="text-[10px] text-indigo-600 font-medium text-center">
+          ↖ Haga click en cualquier propiedad para ver su ficha
+        </p>
       </div>
     ),
   },
@@ -145,45 +155,41 @@ export const DEMO_STEPS: DemoStep[] = [
     route: '/portal-inquilino',
     type: 'overlay',
     content: (
-      <div className="space-y-4 max-w-lg mx-auto">
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 mb-2">
-            <span className="text-2xl">📱</span>
+      <div className="space-y-2.5">
+        <div className="flex items-center gap-2">
+          <div className="flex-shrink-0 w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+            <span className="text-base">📱</span>
           </div>
-          <h2 className="text-xl font-bold text-gray-900">Portal del Inquilino — Self-Service 24/7</h2>
-          <p className="text-[10px] text-blue-600 font-semibold">⭐ LA ESTRELLA DE LA PLATAFORMA</p>
+          <div>
+            <h3 className="text-sm font-bold text-gray-900">
+              Portal del Inquilino 24/7
+            </h3>
+            <p className="text-[9px] text-blue-600 font-semibold">
+              ⭐ LA ESTRELLA DE LA PLATAFORMA
+            </p>
+          </div>
         </div>
-        <p className="text-sm text-gray-600 text-center">
-          Está viendo el <strong>portal real</strong> que cada uno de sus 340 inquilinos usa. 
-          Web y móvil (PWA). Todo <strong>sin llamar ni escribir emails</strong>.
+        <p className="text-[11px] text-gray-600">
+          Lo que ve es el portal real que usan los 340 inquilinos. Web y
+          móvil (PWA), todo sin llamar ni escribir emails.
         </p>
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-3 border border-blue-200">
-          <div className="grid grid-cols-3 gap-x-2 gap-y-1.5">
-            <div className="flex items-center gap-1 text-[11px] text-blue-800"><span>💳</span> Pagar online</div>
-            <div className="flex items-center gap-1 text-[11px] text-blue-800"><span>📄</span> Recibos PDF</div>
-            <div className="flex items-center gap-1 text-[11px] text-blue-800"><span>🔧</span> Incidencias</div>
-            <div className="flex items-center gap-1 text-[11px] text-blue-800"><span>💬</span> Chat gestor</div>
-            <div className="flex items-center gap-1 text-[11px] text-blue-800"><span>📝</span> Ver contrato</div>
-            <div className="flex items-center gap-1 text-[11px] text-blue-800"><span>🔄</span> Renovar</div>
-            <div className="flex items-center gap-1 text-[11px] text-blue-800"><span>📂</span> Documentos</div>
-            <div className="flex items-center gap-1 text-[11px] text-blue-800"><span>🤖</span> Chatbot IA</div>
-            <div className="flex items-center gap-1 text-[11px] text-blue-800"><span>⭐</span> Valoraciones</div>
-            <div className="flex items-center gap-1 text-[11px] text-blue-800"><span>🎁</span> Referidos</div>
-            <div className="flex items-center gap-1 text-[11px] text-blue-800"><span>🏆</span> Logros</div>
-            <div className="flex items-center gap-1 text-[11px] text-blue-800"><span>👤</span> Perfil</div>
-          </div>
+        <div className="grid grid-cols-4 gap-x-1 gap-y-1 text-[9px] text-blue-800 bg-blue-50/50 rounded-lg p-2 border border-blue-100">
+          <span>💳 Pagar</span>
+          <span>📄 Recibos</span>
+          <span>🔧 Incidencias</span>
+          <span>💬 Chat</span>
+          <span>📝 Contrato</span>
+          <span>🔄 Renovar</span>
+          <span>📂 Docs</span>
+          <span>🤖 IA Bot</span>
         </div>
-        <div className="flex gap-2">
-          <div className="flex-1 text-center p-2 bg-red-50 rounded-lg border border-red-100">
-            <div className="text-[10px] font-bold text-red-700">❌ Antes</div>
-            <div className="text-[9px] text-red-600">Llamadas, emails, WhatsApp</div>
-          </div>
-          <div className="flex-1 text-center p-2 bg-green-50 rounded-lg border border-green-100">
-            <div className="text-[10px] font-bold text-green-700">✅ Con INMOVA</div>
-            <div className="text-[9px] text-green-600">85% sin intervención humana</div>
-          </div>
+        <div className="text-center text-[10px]">
+          <span className="text-red-600">❌ Antes: llamadas, emails, WhatsApp</span>
+          {' → '}
+          <span className="text-green-600 font-semibold">
+            ✅ 85% sin intervención
+          </span>
         </div>
-        <p className="text-xs text-gray-400 text-center">👆 Este es el portal real. Explore las secciones detrás de este panel.</p>
       </div>
     ),
   },
@@ -193,39 +199,40 @@ export const DEMO_STEPS: DemoStep[] = [
     route: '/contratos',
     type: 'overlay',
     content: (
-      <div className="space-y-3 max-w-md mx-auto">
-        <div className="text-center">
-          <span className="text-2xl">📝</span>
-          <h3 className="text-lg font-bold text-gray-900 mt-1">Contratos Inteligentes + Cobros SEPA</h3>
+      <div className="space-y-2.5">
+        <div className="flex items-center gap-2">
+          <span className="text-lg">📝</span>
+          <h3 className="text-sm font-bold text-gray-900">
+            Contratos + Cobros SEPA
+          </h3>
         </div>
-        <div className="grid grid-cols-2 gap-2 text-xs">
+        <div className="grid grid-cols-2 gap-1.5">
           <div className="bg-blue-50 rounded-lg p-2 border border-blue-100">
-            <div className="font-bold text-blue-900 mb-1">Contratos</div>
-            <ul className="text-blue-700 space-y-0.5 text-[10px]">
-              <li>✦ Plantillas legales auto</li>
-              <li>✦ IPC automático anual</li>
-              <li>✦ Firma digital integrada</li>
-              <li>✦ Alertas vencimiento 90d</li>
-              <li>✦ Renovación en lote</li>
-            </ul>
+            <div className="text-[10px] font-bold text-blue-900 mb-0.5">
+              Contratos
+            </div>
+            <div className="space-y-0.5 text-[9px] text-blue-700">
+              <p>✦ Plantillas legales auto</p>
+              <p>✦ IPC automático anual</p>
+              <p>✦ Firma digital integrada</p>
+              <p>✦ Alertas vencimiento 90d</p>
+            </div>
           </div>
           <div className="bg-emerald-50 rounded-lg p-2 border border-emerald-100">
-            <div className="font-bold text-emerald-900 mb-1">Cobros</div>
-            <ul className="text-emerald-700 space-y-0.5 text-[10px]">
-              <li>✦ SEPA domiciliación</li>
-              <li>✦ 340 cobros/mes auto</li>
-              <li>✦ Recibos por email</li>
-              <li>✦ Morosidad tiempo real</li>
-              <li>✦ Recordatorios auto</li>
-            </ul>
+            <div className="text-[10px] font-bold text-emerald-900 mb-0.5">
+              Cobros
+            </div>
+            <div className="space-y-0.5 text-[9px] text-emerald-700">
+              <p>✦ SEPA domiciliación</p>
+              <p>✦ 340 cobros/mes auto</p>
+              <p>✦ Morosidad tiempo real</p>
+              <p>✦ Recordatorios auto</p>
+            </div>
           </div>
         </div>
-        <div className="bg-green-50 border border-green-200 rounded-lg p-2">
-          <p className="text-xs text-green-800">
-            💡 Cero contratos olvidados · Cero IPC perdidos · <strong>-60% morosidad</strong>
-          </p>
-        </div>
-        <p className="text-xs text-gray-400 text-center">👆 Vea los contratos reales del grupo detrás de este panel</p>
+        <p className="text-[10px] text-green-700 bg-green-50 rounded p-1.5 text-center border border-green-100">
+          💡 Cero contratos olvidados · <strong>-60% morosidad</strong>
+        </p>
       </div>
     ),
   },
@@ -235,37 +242,38 @@ export const DEMO_STEPS: DemoStep[] = [
     route: '/family-office/dashboard',
     type: 'overlay',
     content: (
-      <div className="space-y-3 max-w-md mx-auto">
-        <div className="text-center">
-          <span className="text-2xl">👑</span>
-          <h3 className="text-lg font-bold text-gray-900 mt-1">Family Office 360° + Control Financiero</h3>
+      <div className="space-y-2.5">
+        <div className="flex items-center gap-2">
+          <span className="text-lg">👑</span>
+          <h3 className="text-sm font-bold text-gray-900">
+            Family Office 360°
+          </h3>
         </div>
-        <p className="text-sm text-gray-600 text-center">
-          <strong>Patrimonio completo en una vista:</strong> inmobiliario + financiero + Private Equity.
-          P&L por centro de coste. Previsión a 12 meses.
+        <p className="text-xs text-gray-600">
+          Patrimonio completo en una vista: inmobiliario + financiero + Private
+          Equity. P&L por centro de coste y previsión a 12 meses.
         </p>
         <div className="grid grid-cols-4 gap-1">
-          <div className="text-center p-1.5 bg-amber-50 rounded border border-amber-100">
+          <div className="text-center p-1 bg-amber-50 rounded border border-amber-100">
             <div className="text-[10px] font-bold text-amber-700">€253M</div>
-            <div className="text-[8px] text-amber-600">Vidaro</div>
+            <div className="text-[7px] text-amber-600">Vidaro</div>
           </div>
-          <div className="text-center p-1.5 bg-amber-50 rounded border border-amber-100">
+          <div className="text-center p-1 bg-amber-50 rounded border border-amber-100">
             <div className="text-[10px] font-bold text-amber-700">460+</div>
-            <div className="text-[8px] text-amber-600">Instrum.</div>
+            <div className="text-[7px] text-amber-600">Instrum.</div>
           </div>
-          <div className="text-center p-1.5 bg-amber-50 rounded border border-amber-100">
+          <div className="text-center p-1 bg-amber-50 rounded border border-amber-100">
             <div className="text-[10px] font-bold text-amber-700">5</div>
-            <div className="text-[8px] text-amber-600">Carteras</div>
+            <div className="text-[7px] text-amber-600">Carteras</div>
           </div>
-          <div className="text-center p-1.5 bg-amber-50 rounded border border-amber-100">
+          <div className="text-center p-1 bg-amber-50 rounded border border-amber-100">
             <div className="text-[10px] font-bold text-amber-700">7</div>
-            <div className="text-[8px] text-amber-600">Particip.</div>
+            <div className="text-[7px] text-amber-600">Particip.</div>
           </div>
         </div>
-        <div className="text-[10px] text-gray-500 text-center">
-          CACEIS · Inversis · Pictet · Banca March · Bankinter · Modelo 720
-        </div>
-        <p className="text-xs text-gray-400 text-center">👆 Explore el Family Office real del grupo Vidaro</p>
+        <p className="text-[10px] text-indigo-600 font-medium text-center">
+          ↖ Explore las posiciones financieras en la pantalla
+        </p>
       </div>
     ),
   },
@@ -275,89 +283,79 @@ export const DEMO_STEPS: DemoStep[] = [
     route: '/valoracion-ia',
     type: 'overlay',
     content: (
-      <div className="space-y-3 max-w-lg mx-auto">
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 mb-2">
-            <span className="text-2xl">🧠</span>
+      <div className="space-y-2.5">
+        <div className="flex items-center gap-2">
+          <div className="flex-shrink-0 w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+            <span className="text-base">🧠</span>
           </div>
-          <h2 className="text-xl font-bold text-gray-900">Inteligencia Artificial en Acción</h2>
-          <p className="text-[10px] text-violet-600 font-semibold">DEMO EN VIVO — Cierre este panel y pruebe</p>
-        </div>
-        <div className="space-y-2">
-          <div className="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-xl p-3 border border-indigo-200">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-sm">🏷️</span>
-              <span className="text-xs font-bold text-indigo-900">1. Valoración IA — Está aquí ahora</span>
-            </div>
-            <p className="text-[10px] text-indigo-800">
-              Introduzca una dirección de Madrid → valor estimado + comparables en 10 seg
-            </p>
-          </div>
-          <div className="bg-gradient-to-r from-purple-50 to-fuchsia-50 rounded-xl p-3 border border-purple-200">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-sm">📋</span>
-              <span className="text-xs font-bold text-purple-900">2. Analizar Propuesta Broker</span>
-            </div>
-            <p className="text-[10px] text-purple-800">
-              Vaya a Oportunidades IA → Pegue PDF → Veredicto: COMPRAR / NEGOCIAR / DESCARTAR
-            </p>
-          </div>
-          <div className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl p-3 border border-emerald-200">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-sm">💬</span>
-              <span className="text-xs font-bold text-emerald-900">3. Copiloto Financiero</span>
-            </div>
-            <p className="text-[10px] text-emerald-800">
-              Botón IA abajo derecha → Pregunte: &quot;¿Cuánto genera Piamonte al año?&quot;
+          <div>
+            <h3 className="text-sm font-bold text-gray-900">IA en Acción</h3>
+            <p className="text-[9px] text-violet-600 font-semibold">
+              DEMO EN VIVO — Pruebe ahora mismo
             </p>
           </div>
         </div>
-        <div className="bg-violet-50 border border-violet-200 rounded-lg p-2">
-          <p className="text-xs text-violet-800 text-center">
-            💡 50 propuestas analizadas en el tiempo de 1. <strong>Decisiones 10x más rápidas.</strong>
-          </p>
+        <div className="space-y-1.5">
+          <div className="bg-indigo-50 rounded-lg p-2 border border-indigo-200">
+            <p className="text-[10px] text-indigo-900">
+              <strong>🏷️ Valoración IA</strong> — Introduzca una dirección →
+              valor estimado + comparables en 10 seg
+            </p>
+          </div>
+          <div className="bg-purple-50 rounded-lg p-2 border border-purple-200">
+            <p className="text-[10px] text-purple-900">
+              <strong>📋 Analizar Propuesta</strong> — Pegue un PDF de broker →
+              Veredicto: COMPRAR / NEGOCIAR / DESCARTAR
+            </p>
+          </div>
+          <div className="bg-emerald-50 rounded-lg p-2 border border-emerald-200">
+            <p className="text-[10px] text-emerald-900">
+              <strong>💬 Copiloto</strong> — Pregunte: &quot;¿Cuánto genera
+              Piamonte al año?&quot;
+            </p>
+          </div>
         </div>
+        <p className="text-[10px] text-violet-700 text-center font-medium">
+          ↖ Minimice este panel y pruebe la valoración en vivo
+        </p>
       </div>
     ),
   },
 
-  // ╔═══════════════════════════════════════════════════════════╗
-  // ║  ACTO 3 — "SIN ESFUERZO"                                 ║
-  // ╚═══════════════════════════════════════════════════════════╝
+  // ═══ ACTO 3 — "SIN ESFUERZO" ═══
 
   {
     id: 'maintenance',
     route: '/mantenimiento',
     type: 'overlay',
     content: (
-      <div className="space-y-3 max-w-md mx-auto">
-        <div className="text-center">
-          <span className="text-2xl">🔧</span>
-          <h3 className="text-lg font-bold text-gray-900 mt-1">Operaciones Sin Fricción</h3>
+      <div className="space-y-2.5">
+        <div className="flex items-center gap-2">
+          <span className="text-lg">🔧</span>
+          <h3 className="text-sm font-bold text-gray-900">
+            Operaciones Sin Fricción
+          </h3>
         </div>
-        <div className="grid grid-cols-3 gap-1.5 text-[10px]">
-          <div className="bg-orange-50 rounded-lg p-2 border border-orange-100 text-center">
+        <div className="grid grid-cols-3 gap-1 text-[9px]">
+          <div className="bg-orange-50 rounded p-1.5 border border-orange-100 text-center">
             <div className="text-sm mb-0.5">🔧</div>
             <div className="font-bold text-orange-800">Mantenimiento</div>
-            <div className="text-orange-600 mt-0.5">IA clasifica urgencia auto</div>
+            <div className="text-orange-600">IA clasifica auto</div>
           </div>
-          <div className="bg-sky-50 rounded-lg p-2 border border-sky-100 text-center">
+          <div className="bg-sky-50 rounded p-1.5 border border-sky-100 text-center">
             <div className="text-sm mb-0.5">🛡️</div>
             <div className="font-bold text-sky-800">Seguros</div>
-            <div className="text-sky-600 mt-0.5">Alertas vencimiento auto</div>
+            <div className="text-sky-600">Alertas vencim.</div>
           </div>
-          <div className="bg-gray-50 rounded-lg p-2 border border-gray-200 text-center">
+          <div className="bg-gray-50 rounded p-1.5 border border-gray-200 text-center">
             <div className="text-sm mb-0.5">📂</div>
             <div className="font-bold text-gray-800">Documentos</div>
-            <div className="text-gray-600 mt-0.5">IA organiza todo</div>
+            <div className="text-gray-600">IA organiza</div>
           </div>
         </div>
-        <div className="bg-orange-50 border border-orange-200 rounded-lg p-2">
-          <p className="text-xs text-orange-800">
-            💡 <strong>-70% tiempo de respuesta</strong> en incidencias. Cero pólizas vencidas.
-          </p>
-        </div>
-        <p className="text-xs text-gray-400 text-center">👆 Vea las incidencias reales del grupo</p>
+        <p className="text-[10px] text-orange-700 bg-orange-50 rounded p-1.5 text-center border border-orange-100">
+          💡 <strong>-70% tiempo respuesta</strong> · Cero pólizas vencidas
+        </p>
       </div>
     ),
   },
@@ -367,70 +365,68 @@ export const DEMO_STEPS: DemoStep[] = [
     route: '/configuracion',
     type: 'overlay',
     content: (
-      <div className="space-y-3 max-w-md mx-auto">
-        <div className="text-center">
-          <span className="text-2xl">⚡</span>
-          <h3 className="text-lg font-bold text-gray-900 mt-1">La Plataforma Trabaja Sola</h3>
+      <div className="space-y-2.5">
+        <div className="flex items-center gap-2">
+          <span className="text-lg">⚡</span>
+          <h3 className="text-sm font-bold text-gray-900">
+            La Plataforma Trabaja Sola
+          </h3>
         </div>
-        <p className="text-sm text-gray-600 text-center">
-          Desde <strong>Configuración</strong> puede activar y personalizar todos los automatismos:
+        <p className="text-xs text-gray-600">
+          Desde <strong>Configuración</strong> se activan y personalizan todos
+          los automatismos:
         </p>
-        <div className="grid grid-cols-2 gap-1.5 text-[10px]">
-          <div className="flex items-center gap-1.5 text-gray-700">✦ Cobros SEPA mensuales</div>
-          <div className="flex items-center gap-1.5 text-gray-700">✦ Recordatorios de pago</div>
-          <div className="flex items-center gap-1.5 text-gray-700">✦ Renovación contratos</div>
-          <div className="flex items-center gap-1.5 text-gray-700">✦ Actualización IPC</div>
-          <div className="flex items-center gap-1.5 text-gray-700">✦ Informes mensuales</div>
-          <div className="flex items-center gap-1.5 text-gray-700">✦ Alertas inteligentes</div>
-          <div className="flex items-center gap-1.5 text-gray-700">✦ Chatbot IA 24/7</div>
-          <div className="flex items-center gap-1.5 text-gray-700">✦ API + Webhooks</div>
+        <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[10px] text-gray-700">
+          <span>✦ Cobros SEPA mensuales</span>
+          <span>✦ Recordatorios de pago</span>
+          <span>✦ Renovación contratos</span>
+          <span>✦ Actualización IPC</span>
+          <span>✦ Informes mensuales</span>
+          <span>✦ Alertas inteligentes</span>
+          <span>✦ Chatbot IA 24/7</span>
+          <span>✦ API + Webhooks</span>
         </div>
-        <div className="bg-fuchsia-50 border border-fuchsia-200 rounded-lg p-2">
-          <p className="text-xs text-fuchsia-800">
-            📱 <strong>App móvil (PWA)</strong> instalable en iPhone/Android. 
-            Push notifications en tiempo real.
-          </p>
-        </div>
+        <p className="text-[10px] text-fuchsia-700 bg-fuchsia-50 rounded p-1.5 text-center border border-fuchsia-100">
+          📱 <strong>App móvil (PWA)</strong> instalable. Push notifications.
+        </p>
       </div>
     ),
   },
 
-  // ╔═══════════════════════════════════════════════════════════╗
-  // ║  ACTO 4 — "EL IMPACTO"                                   ║
-  // ╚═══════════════════════════════════════════════════════════╝
+  // ═══ ACTO 4 — "EL IMPACTO" ═══
 
   {
     id: 'before-after',
     route: '/dashboard',
     type: 'overlay',
     content: (
-      <div className="space-y-4 max-w-lg mx-auto">
-        <h2 className="text-xl font-bold text-gray-900 text-center">La Transformación del Grupo Vidaro</h2>
-        <div className="grid grid-cols-2 gap-3">
-          <div className="bg-red-50 rounded-xl p-3 border border-red-200">
-            <div className="text-center text-sm font-bold text-red-800 mb-2">❌ Sin INMOVA</div>
-            <div className="space-y-1.5 text-[10px] text-red-700">
-              <p>📋 Excel por cada sociedad</p>
-              <p>📞 Inquilinos llaman para todo</p>
-              <p>📊 Informes manuales, semanas</p>
-              <p>💸 Cobros seguidos a mano</p>
-              <p>📁 Documentos en carpetas</p>
-              <p>🔧 Incidencias por WhatsApp</p>
-              <p>📈 Sin visión consolidada</p>
-              <p>⏰ Equipo de 10 personas</p>
+      <div className="space-y-2.5">
+        <h3 className="text-sm font-bold text-gray-900 text-center">
+          La Transformación
+        </h3>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="bg-red-50 rounded-lg p-2 border border-red-200">
+            <div className="text-center text-[10px] font-bold text-red-800 mb-1">
+              ❌ Sin INMOVA
+            </div>
+            <div className="space-y-0.5 text-[8px] text-red-700">
+              <p>📋 Excel por sociedad</p>
+              <p>📞 Inquilinos llaman</p>
+              <p>📊 Informes manuales</p>
+              <p>💸 Cobros a mano</p>
+              <p>⏰ Equipo de 10</p>
             </div>
           </div>
-          <div className="bg-green-50 rounded-xl p-3 border border-green-200">
-            <div className="text-center text-sm font-bold text-green-800 mb-2">✅ Con INMOVA</div>
-            <div className="space-y-1.5 text-[10px] text-green-700">
-              <p>🖥️ Una plataforma, 3 sociedades</p>
-              <p>📱 Portal self-service 24/7</p>
-              <p>📊 Dashboard tiempo real, 1 click</p>
-              <p>💳 SEPA automático 340 cobros</p>
-              <p>☁️ Nube + IA organiza todo</p>
-              <p>🤖 IA clasifica y asigna sola</p>
-              <p>👑 Family Office 360° + PE</p>
-              <p>⚡ Equipo de 3 personas</p>
+          <div className="bg-green-50 rounded-lg p-2 border border-green-200">
+            <div className="text-center text-[10px] font-bold text-green-800 mb-1">
+              ✅ Con INMOVA
+            </div>
+            <div className="space-y-0.5 text-[8px] text-green-700">
+              <p>🖥️ 1 plataforma, 3 soc.</p>
+              <p>📱 Self-service 24/7</p>
+              <p>📊 Dashboard 1 click</p>
+              <p>💳 SEPA auto 340 cobros</p>
+              <p>⚡ Equipo de 3</p>
             </div>
           </div>
         </div>
@@ -443,43 +439,44 @@ export const DEMO_STEPS: DemoStep[] = [
     route: '/dashboard',
     type: 'overlay',
     content: (
-      <div className="space-y-4 max-w-lg mx-auto">
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 mb-2">
-            <span className="text-3xl">🚀</span>
+      <div className="space-y-3">
+        <div className="flex items-center gap-2 justify-center">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
+            <span className="text-xl">🚀</span>
           </div>
-          <h2 className="text-xl font-bold text-gray-900">Impacto Real para Grupo Vidaro</h2>
+          <h3 className="text-sm font-bold text-gray-900">
+            Impacto Real
+          </h3>
         </div>
-        <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="text-center">
-              <div className="text-2xl font-black text-green-700">-80%</div>
-              <div className="text-[10px] text-green-600">Tiempo administrativo</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-black text-green-700">+15%</div>
-              <div className="text-[10px] text-green-600">Ingresos por rentas</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-black text-green-700">-60%</div>
-              <div className="text-[10px] text-green-600">Morosidad</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-black text-green-700">-70%</div>
-              <div className="text-[10px] text-green-600">Tiempo respuesta</div>
-            </div>
+        <div className="grid grid-cols-2 gap-2 bg-green-50 rounded-lg p-2.5 border border-green-200">
+          <div className="text-center">
+            <div className="text-lg font-black text-green-700">-80%</div>
+            <div className="text-[8px] text-green-600">Tiempo admin</div>
+          </div>
+          <div className="text-center">
+            <div className="text-lg font-black text-green-700">+15%</div>
+            <div className="text-[8px] text-green-600">Ingresos rentas</div>
+          </div>
+          <div className="text-center">
+            <div className="text-lg font-black text-green-700">-60%</div>
+            <div className="text-[8px] text-green-600">Morosidad</div>
+          </div>
+          <div className="text-center">
+            <div className="text-lg font-black text-green-700">-70%</div>
+            <div className="text-[8px] text-green-600">T. respuesta</div>
           </div>
         </div>
-        <div className="bg-indigo-50 rounded-xl p-3 border border-indigo-200 text-center">
-          <p className="text-sm text-indigo-900 font-semibold">
-            Todo lo que ha visto está <strong>operativo y listo</strong> para el grupo.
+        <div className="bg-indigo-50 rounded-lg p-2 border border-indigo-200 text-center">
+          <p className="text-[10px] text-indigo-900 font-semibold">
+            Todo operativo y listo para el grupo.
           </p>
-          <p className="text-xs text-indigo-700 mt-1">
-            100+ módulos · 15 verticales · IA integrada · App móvil · API abierta
+          <p className="text-[9px] text-indigo-700 mt-0.5">
+            100+ módulos · 15 verticales · IA · App móvil · API
           </p>
         </div>
-        <p className="text-center text-sm text-gray-500">
-          Explore libremente la plataforma. Botón <strong>Presentar Demo</strong> para repetir.
+        <p className="text-[10px] text-gray-500 text-center">
+          Explore libremente. Botón <strong>Presentar Demo</strong> para
+          repetir.
         </p>
       </div>
     ),
