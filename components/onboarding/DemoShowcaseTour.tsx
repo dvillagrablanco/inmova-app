@@ -53,6 +53,10 @@ export default function DemoShowcaseTour() {
 
   // ── INIT: Read persisted state on mount ──
   useEffect(() => {
+    // Debug: trace tour initialization
+    if (typeof window !== 'undefined') {
+      (window as any).__demoTourDebug = { status, email: session?.user?.email, isDemoUser, initialized };
+    }
     if (status === 'loading' || !isDemoUser || initialized) return;
     setInitialized(true);
 
