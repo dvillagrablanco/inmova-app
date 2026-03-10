@@ -10,6 +10,7 @@ import { ArticleContent } from '@/components/help-center/ArticleContent';
 import { ArticleSidebar } from '@/components/help-center/ArticleSidebar';
 import { ArticleFeedback } from '@/components/help-center/ArticleFeedback';
 import { ArticleCard } from '@/components/help-center/ArticleCard';
+import { VideoPlaceholder } from '@/components/help-center/VideoPlaceholder';
 
 interface ArticlePageProps {
   params: { collection: string; slug: string };
@@ -71,15 +72,19 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       {article.videoUrl && (
         <div className="mt-10">
           <h2 className="text-xl font-semibold mb-4">Vídeo relacionado</h2>
-          <div className="aspect-video rounded-lg overflow-hidden bg-muted">
-            <iframe
-              src={article.videoUrl}
-              title={article.title}
-              className="w-full h-full"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
-          </div>
+          {article.videoUrl.includes('dQw4w9WgXcQ') ? (
+            <VideoPlaceholder title={article.title} className="aspect-video" />
+          ) : (
+            <div className="aspect-video rounded-lg overflow-hidden bg-muted">
+              <iframe
+                src={article.videoUrl}
+                title={article.title}
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+          )}
         </div>
       )}
 
