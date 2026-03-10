@@ -116,7 +116,7 @@ export default function IntelligentSupportChatbot() {
     {
       id: '1',
       sender: 'bot',
-      text: '¡Hola! Soy el **Asistente INMOVA** 🧠, tu centro de mando IA. Coordino **8 agentes especializados** y **48+ herramientas**:\n\n🏠 **Gestión**: Buscar inmuebles, crear inquilinos, generar contratos\n💰 **Finanzas**: Liquidaciones, facturas, conciliación, IPC\n📊 **Análisis**: Valorar propiedades, scoring inquilinos, reportes\n🔍 **Inversiones**: Due diligence, ROI, negociación\n🔧 **Operaciones**: Clasificar incidencias, mantenimiento predictivo\n📋 **Legal**: Detectar riesgos en contratos, generar plantillas\n👨‍👩‍👧 **Family Office**: Patrimonio, fiscal, PE\n📎 **Documentos**: Analizar PDF, OCR, clasificar\n\n💡 Prueba: "Valora el piso de C/ Reina 15" o mira las sugerencias de abajo 👇',
+      text: '¡Hola! Soy el **Asistente INMOVA** ✨, tu centro de mando IA. Coordino **8 agentes especializados** y **48+ herramientas**:\n\n🏠 **Gestión**: Buscar inmuebles, crear inquilinos, generar contratos\n💰 **Finanzas**: Liquidaciones, facturas, conciliación, IPC\n📊 **Análisis**: Valorar propiedades, scoring inquilinos, reportes\n🔍 **Inversiones**: Due diligence, ROI, negociación\n🔧 **Operaciones**: Clasificar incidencias, mantenimiento predictivo\n📋 **Legal**: Detectar riesgos en contratos, generar plantillas\n👨‍👩‍👧 **Family Office**: Patrimonio, fiscal, PE\n📎 **Documentos**: Analizar PDF, OCR, clasificar\n\n💡 Prueba: "Valora el piso de C/ Reina 15" o mira las sugerencias de abajo 👇',
       timestamp: new Date()
     }
   ]);
@@ -289,10 +289,8 @@ export default function IntelligentSupportChatbot() {
               {/* Efecto de brillo en hover */}
               <div className="absolute inset-0 bg-white/20 group-hover:bg-white/30 transition-colors" />
               
-              {/* Emoticono del asistente */}
-              <span className="text-3xl relative z-10 group-hover:scale-110 transition-transform" role="img" aria-label="Asistente INMOVA">
-                🧠
-              </span>
+              {/* Icono del asistente */}
+              <Sparkles className="h-7 w-7 relative z-10 group-hover:scale-110 transition-transform" />
             </Button>
             
             {/* Indicador de disponibilidad pulsante */}
