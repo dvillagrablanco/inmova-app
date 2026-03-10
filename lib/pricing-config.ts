@@ -733,6 +733,97 @@ export const ADD_ONS: Record<string, AddOn> = {
     includedIn: ['business', 'enterprise'],
     highlighted: true,
   },
+
+  // ═══════════════════════════════════════════════════════════════
+  // PACKS VERTICALES — Sincronizados con Landing PricingSection
+  // ═══════════════════════════════════════════════════════════════
+
+  ia_inmobiliaria: {
+    id: 'ia_inmobiliaria',
+    name: 'IA Inmobiliaria',
+    description: 'Valoración IA, predicción morosidad, renta óptima, detección anomalías, clasificación documentos, asistente IA avanzado',
+    category: 'premium',
+    monthlyPrice: 149,
+    annualPrice: 1490,
+    costPerUnit: 25,          // Anthropic Claude + ML compute
+    marginPercentage: 83,     // (149-25)/149 = 83%
+    costSource: 'Anthropic Claude + AWS ML',
+    availableFor: ['professional', 'business'],
+    includedIn: ['enterprise'],
+    highlighted: true,
+  },
+
+  family_office: {
+    id: 'family_office',
+    name: 'Family Office 360°',
+    description: 'Dashboard patrimonial, P&L por sociedad, Private Equity (TVPI/DPI), informes PDF trimestrales',
+    category: 'premium',
+    monthlyPrice: 249,
+    annualPrice: 2490,
+    costPerUnit: 10,          // Compute + PDF generation
+    marginPercentage: 96,     // (249-10)/249 = 96%
+    costSource: 'Desarrollo interno + PDF gen',
+    availableFor: ['business'],
+    includedIn: ['enterprise'],
+    highlighted: true,
+  },
+
+  automatizacion_pro: {
+    id: 'automatizacion_pro',
+    name: 'Automatización Pro',
+    description: 'Facturación automática, SEPA, escalado impagos (4 niveles), sync Zucchetti, conciliación bancaria IA',
+    category: 'premium',
+    monthlyPrice: 99,
+    annualPrice: 990,
+    costPerUnit: 15,          // APIs bancarias + SEPA
+    marginPercentage: 85,     // (99-15)/99 = 85%
+    costSource: 'APIs PSD2/SEPA + desarrollo',
+    availableFor: ['professional', 'business'],
+    includedIn: ['enterprise'],
+  },
+
+  analytics_avanzado: {
+    id: 'analytics_avanzado',
+    name: 'Analytics Avanzado',
+    description: 'Morosidad detallada, yield tracker, benchmark mercado, previsión 12 meses, fiscal trimestral',
+    category: 'premium',
+    monthlyPrice: 79,
+    annualPrice: 790,
+    costPerUnit: 5,           // APIs mercado + compute
+    marginPercentage: 94,     // (79-5)/79 = 94%
+    costSource: 'APIs mercado + BI compute',
+    availableFor: ['professional', 'business'],
+    includedIn: ['enterprise'],
+  },
+
+  operaciones_pro: {
+    id: 'operaciones_pro',
+    name: 'Operaciones Pro',
+    description: 'Kanban mantenimiento, checklist inspección, evaluación proveedores, workflows completos, SLAs',
+    category: 'premium',
+    monthlyPrice: 69,
+    annualPrice: 690,
+    costPerUnit: 0,           // Desarrollo interno
+    marginPercentage: 100,
+    costSource: 'Desarrollo interno',
+    availableFor: ['professional', 'business'],
+    includedIn: ['enterprise'],
+  },
+
+  pack_completo: {
+    id: 'pack_completo',
+    name: 'Pack Completo',
+    description: 'Los 5 addons verticales incluidos: IA Inmobiliaria + Family Office + Automatización + Analytics + Operaciones. Ahorra 23%.',
+    category: 'premium',
+    monthlyPrice: 499,
+    annualPrice: 4990,
+    costPerUnit: 55,          // Suma de costos de los 5 addons
+    marginPercentage: 89,     // (499-55)/499 = 89%
+    costSource: 'Bundle de addons premium',
+    availableFor: ['professional', 'business'],
+    includedIn: ['enterprise'],
+    highlighted: true,
+  },
 };
 
 /**

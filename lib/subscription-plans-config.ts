@@ -702,7 +702,7 @@ export const MODULES_BY_PLAN: Record<SubscriptionPlanId, string[]> = {
     'plantillas_comunicacion',
   ],
   business: [
-    // Professional +
+    // Core (todo de Professional)
     'dashboard',
     'propiedades',
     'edificios',
@@ -735,7 +735,7 @@ export const MODULES_BY_PLAN: Record<SubscriptionPlanId, string[]> = {
     'api_completa',
     'audit_log',
     'multi_empresa',
-    // Nuevos módulos Homming (todos incluidos)
+    // Módulos Homming (todos incluidos)
     'liquidaciones',
     'liquidaciones_programadas',
     'facturacion_avanzada',

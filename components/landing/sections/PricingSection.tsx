@@ -27,6 +27,15 @@ const ADDONS = [
   { id: 'pack_completo', name: '🚀 Pack Completo', price: 499, yearlyPrice: 4990, desc: 'Los 5 addons incluidos — Ahorra 23% vs compra individual (€645/mes)', highlight: true },
 ];
 
+// Add-ons Funcionales (accesibles para planes menores)
+const FUNCTIONAL_ADDONS = [
+  { id: 'liquidaciones', name: '💰 Liquidaciones', price: 19, yearlyPrice: 190, desc: 'Liquidaciones a propietarios con cálculo automático y export PDF. Incluido desde Profesional.' },
+  { id: 'facturacion_avanzada', name: '🧾 Facturación Avanzada', price: 25, yearlyPrice: 250, desc: 'Series de facturación, IVA/IRPF, proformas, rectificativas, Verifactu. Incluido desde Profesional.' },
+  { id: 'reportes_avanzados', name: '📊 21 Reportes', price: 15, yearlyPrice: 150, desc: 'Inquilinos, contratos, incidencias, rentabilidad, impagos, declaración renta. Incluido desde Business.' },
+  { id: 'checkin_checkout', name: '📋 Check-in/out Digital', price: 12, yearlyPrice: 120, desc: 'Formularios digitales con token, inventario, contadores y firma. Incluido desde Profesional.' },
+  { id: 'ia_modular', name: '✨ IA por Módulo', price: 29, yearlyPrice: 290, desc: 'Asistente IA contextual en cada módulo: scoring, clasificación, previsión. Incluido desde Business.' },
+];
+
 interface PlanData {
   name: string;
   price: string;
@@ -109,12 +118,14 @@ const plans: PlanData[] = [
       'Todo de Starter +',
       'Combina hasta 3 verticales (Alquiler + STR + Coliving)',
       'Cobro en 1-click y cobro masivo batch',
-      'Facturación automática con nº secuencial',
-      'Renovación de contratos con IPC',
-      'Wizard alta inquilino en 4 pasos',
-      'Informe de morosidad detallado',
+      'Facturación avanzada con series y retenciones',
+      'Liquidaciones a propietarios',
+      'Pipeline prealquiler Kanban',
+      'Incidencias Kanban con IA',
+      'Check-in/out digital con token',
+      'Contratos de gestión con propietarios',
+      'Renovación automática con IPC',
       'Valoraciones de inmuebles con IA',
-      'Export CSV de cualquier tabla',
       'Asistente IA conversacional',
     ],
     highlight: 'El más elegido por gestores',
@@ -142,13 +153,15 @@ const plans: PlanData[] = [
     features: [
       'Todo de Profesional +',
       'Los 7 verticales completos',
-      '88+ módulos incluidos',
-      'Dashboard ejecutivo consolidado',
-      'API REST + integración Zucchetti/Altai',
-      'CRM inmobiliario con pipeline',
-      'Gestor de cuenta dedicado',
-      'Personalización de marca (colores, logo)',
-      'Addons disponibles como complemento',
+      '100+ módulos incluidos',
+      '21 reportes avanzados con export CSV/PDF',
+      'Acciones masivas (cobros, gastos, transferencias)',
+      'Conciliación bancaria visual con IA',
+      'Chat vinculado a entidades',
+      'Campos personalizados por entidad',
+      'Asistente IA contextual en cada módulo',
+      'API REST + CRM inmobiliario',
+      'Gestor dedicado + personalización marca',
     ],
     highlight: 'Para gestoras profesionales',
   },
@@ -405,6 +418,30 @@ export function PricingSection() {
           <p className="text-center text-sm text-gray-500 mt-4">
             Los add-ons se pueden añadir a cualquier plan en cualquier momento
           </p>
+
+          {/* Addons Funcionales */}
+          <div className="mt-10 text-center">
+            <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 px-4 py-2">
+              Módulos a la carta
+            </Badge>
+            <h4 className="text-xl font-bold text-gray-800 mt-3">
+              Amplía tu plan Starter o Básico
+            </h4>
+            <p className="text-gray-500 text-sm mt-1">
+              Incluidos en planes superiores. Disponibles como add-on para planes Starter y Básico.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mt-4">
+            {FUNCTIONAL_ADDONS.map((addon: any) => (
+              <div key={addon.id} className="p-4 rounded-lg border bg-white hover:border-emerald-300 transition-all">
+                <span className="font-semibold text-sm text-gray-800">{addon.name}</span>
+                <Badge variant="secondary" className="ml-2 bg-emerald-100 text-emerald-700 text-xs">
+                  €{addon.price}/mes
+                </Badge>
+                <p className="text-xs text-gray-500 mt-2 line-clamp-2">{addon.desc}</p>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Tabla Comparativa Genérica */}
