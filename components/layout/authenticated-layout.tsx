@@ -31,10 +31,7 @@ const TourAutoStarter = dynamic(
 );
 
 // Chatbot de onboarding - widget flotante durante el onboarding
-const OnboardingChatbotWidget = dynamic(
-  () => import('@/components/onboarding/OnboardingChatbot'),
-  { ssr: false }
-);
+// OnboardingChatbotWidget eliminado — funcionalidad integrada en IntelligentSupportChatbot (Asistente INMOVA unificado)
 
 // Demo Showcase Tour - se renderiza desde components/providers.tsx para estar en TODAS las páginas
 
@@ -293,12 +290,8 @@ export function AuthenticatedLayout({
 
       {/* Demo Showcase Tour - se renderiza desde Providers (global) */}
 
-      {/* Chatbot de Onboarding - Widget flotante durante onboarding activo (NO para demo) */}
-      {showChecklist && !showSetupWizard && session?.user?.role !== 'super_admin' && session?.user?.email !== DEMO_USER_EMAIL && (
-        <OnboardingChatbotWidget />
-      )}
-
-      {/* Chatbot de Soporte Inteligente - Disponible en todas las páginas */}
+      {/* Asistente INMOVA Unificado - Único widget flotante en todas las páginas
+          Integra: soporte, onboarding, IA contextual, coordinador de agentes */}
       <IntelligentSupportChatbot />
     </div>
   );
