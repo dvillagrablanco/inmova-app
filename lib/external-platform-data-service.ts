@@ -422,9 +422,10 @@ async function fetchFromInternalDB(options: FetchOptions): Promise<PlatformMarke
 // ============================================================================
 
 /**
- * Obtiene datos profesionales de Idealista Data Platform.
- * Requiere IDEALISTA_DATA_EMAIL + IDEALISTA_DATA_PASSWORD.
- * Fiabilidad: 88% — datos agregados profesionales, más fiables que asking prices individuales.
+ * Obtiene datos completos de Idealista (públicos + autenticados).
+ * Combina: índice de precios público, rentabilidad, evolución histórica,
+ * y datos profesionales si hay credenciales configuradas.
+ * Fiabilidad: 88% — datos agregados, más fiables que asking prices individuales.
  */
 async function fetchFromIdealistaData(
   options: FetchOptions
@@ -440,8 +441,9 @@ async function fetchFromIdealistaData(
 
     const hasSaleData = report.salePricePerM2 && report.salePricePerM2 > 0;
     const hasRentData = report.rentPricePerM2 && report.rentPricePerM2 > 0;
+    const hasYield = report.grossYield && report.grossYield > 0;
 
-    if (!hasSaleData && !hasRentData) return null;
+    if (!hasSaleData && !hasRentData && !hasYield) return null;
 
     let trend: 'UP' | 'STABLE' | 'DOWN' = 'STABLE';
     if (report.salePricePerM2Evolution) {
@@ -453,12 +455,23 @@ async function fetchFromIdealistaData(
             : 'STABLE';
     }
 
+    // Construir label con info de lo que contiene
+    const parts: string[] = [];
+    if (hasSaleData) parts.push(`venta ${report.salePricePerM2}€/m²`);
+    if (hasRentData) parts.push(`alquiler ${report.rentPricePerM2}€/m²`);
+    if (hasYield) parts.push(`rentab. ${report.grossYield}%`);
+    if (report.subZones.length > 0) parts.push(`${report.subZones.length} subzonas`);
+    if (report.priceEvolution?.dataPoints.length) parts.push(`evolución ${report.priceEvolution.dataPoints.length} periodos`);
+
+    const isAuth = report.dataSource.includes('auth');
+    const reliability = isAuth ? 88 : 85;
+
     return {
       source: 'idealista_data',
-      sourceLabel: `Idealista Data Platform — Informe profesional de mercado (${report.sampleSize > 0 ? `${report.sampleSize} anuncios` : 'datos agregados'})`,
+      sourceLabel: `Idealista Data${isAuth ? ' Platform (autenticado)' : ' (informes públicos)'} — ${parts.join(', ')}`,
       sourceUrl: 'https://www.idealista.com/data',
       fetchedAt: report.reportDate,
-      reliability: 88,
+      reliability,
       dataType: 'asking_price',
       pricePerM2Sale: report.salePricePerM2 || undefined,
       pricePerM2Rent: report.rentPricePerM2 || undefined,
@@ -477,9 +490,16 @@ async function fetchFromIdealistaData(
         : undefined,
       demandLevel: report.demandLevel,
       avgDaysOnMarket: report.avgDaysOnMarket || undefined,
+      rawData: {
+        grossYield: report.grossYield,
+        subZonesCount: report.subZones.length,
+        subZones: report.subZones.slice(0, 10),
+        priceEvolutionPoints: report.priceEvolution?.dataPoints.length || 0,
+        priceEvolution: report.priceEvolution?.dataPoints.slice(-6) || [],
+      },
     };
   } catch (error) {
-    logger.warn('[IdealistaData] Error obteniendo datos profesionales:', error);
+    logger.warn('[IdealistaData] Error obteniendo datos:', error);
     return null;
   }
 }
@@ -796,6 +816,35 @@ export function formatPlatformDataForPrompt(data: AggregatedMarketData): string 
     }
     if (pd.sampleSize) {
       sections.push(`  Muestra: ${pd.sampleSize} propiedades`);
+    }
+    if (pd.avgDaysOnMarket) {
+      sections.push(`  Tiempo medio en mercado: ${pd.avgDaysOnMarket} días`);
+    }
+
+    // Datos enriquecidos de Idealista Data (rentabilidad, subzonas, evolución)
+    if (pd.source === 'idealista_data' && pd.rawData) {
+      const raw = pd.rawData as Record<string, unknown>;
+      if (raw.grossYield && typeof raw.grossYield === 'number') {
+        sections.push(`  ** Rentabilidad bruta alquiler: ${raw.grossYield}% anual **`);
+      }
+      if (raw.subZones && Array.isArray(raw.subZones) && raw.subZones.length > 0) {
+        sections.push(`  Precios por subzona/distrito:`);
+        for (const zone of raw.subZones.slice(0, 6)) {
+          const z = zone as { location?: string; pricePerM2?: number; annualVariation?: number };
+          if (z.location && z.pricePerM2) {
+            sections.push(`    - ${z.location}: ${z.pricePerM2}€/m²${z.annualVariation ? ` (${z.annualVariation > 0 ? '+' : ''}${z.annualVariation}% anual)` : ''}`);
+          }
+        }
+      }
+      if (raw.priceEvolution && Array.isArray(raw.priceEvolution) && raw.priceEvolution.length > 0) {
+        sections.push(`  Evolución reciente de precios:`);
+        for (const point of raw.priceEvolution) {
+          const p = point as { period?: string; pricePerM2?: number; variation?: number };
+          if (p.period && p.pricePerM2) {
+            sections.push(`    - ${p.period}: ${p.pricePerM2}€/m²${p.variation ? ` (${p.variation > 0 ? '+' : ''}${p.variation}%)` : ''}`);
+          }
+        }
+      }
     }
     sections.push('');
   }

@@ -2197,6 +2197,40 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                               </div>
                             )}
 
+                            {/* Datos enriquecidos de Idealista Data */}
+                            {resultado.platformSources.platformDetails
+                              ?.filter((pd: PlatformDetail) => pd.source === 'idealista_data')
+                              .map((pd: PlatformDetail, idx: number) => {
+                                const raw = (pd as any).rawData;
+                                if (!raw) return null;
+                                return (
+                                  <div key={`idealist-enriched-${idx}`} className="mt-3 p-3 bg-blue-50/50 rounded-lg border border-blue-100 space-y-2">
+                                    <p className="text-xs font-medium text-blue-700 uppercase tracking-wide flex items-center gap-1">
+                                      <TrendingUp className="h-3 w-3" />
+                                      Datos enriquecidos Idealista
+                                    </p>
+                                    {raw.grossYield > 0 && (
+                                      <div className="flex items-center gap-2">
+                                        <Badge variant="outline" className="border-emerald-300 text-emerald-700 bg-emerald-50 text-xs">
+                                          Rentabilidad bruta: {raw.grossYield}%
+                                        </Badge>
+                                      </div>
+                                    )}
+                                    {raw.subZones && raw.subZones.length > 0 && (
+                                      <div className="text-xs text-muted-foreground">
+                                        <span className="font-medium">Subzonas: </span>
+                                        {raw.subZones.slice(0, 4).map((z: any, i: number) => (
+                                          <span key={i}>
+                                            {z.location} ({z.pricePerM2}€/m²)
+                                            {i < Math.min(raw.subZones.length, 4) - 1 ? ' · ' : ''}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+
                             <p className="text-xs text-muted-foreground mt-2 italic">
                               Los asking prices de Idealista/Fotocasa se ajustan -12% para aproximar
                               el precio real de cierre. Los datos del Notariado son precios
