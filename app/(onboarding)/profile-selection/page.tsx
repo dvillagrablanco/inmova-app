@@ -84,7 +84,7 @@ export default function ProfileSelectionPage() {
       await update({ clientProfile: selectedProfile });
       
       // Redirigir al siguiente paso del onboarding
-      router.push('/onboarding/experience');
+      router.push('/onboarding/rental-type');
     } catch (error) {
       console.error('Error saving profile:', error);
     } finally {
@@ -102,10 +102,10 @@ export default function ProfileSelectionPage() {
         {/* Progress */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium">Paso 1 de 3</span>
+            <span className="text-sm font-medium">Paso 1 de 5</span>
             <span className="text-sm text-muted-foreground">Configuración inicial</span>
           </div>
-          <Progress value={33} className="h-2" />
+          <Progress value={20} className="h-2" />
         </div>
         
         {/* Header */}

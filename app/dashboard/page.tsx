@@ -46,6 +46,7 @@ import DemoDataGenerator from '@/components/automation/DemoDataGenerator';
 import logger, { logError } from '@/lib/logger';
 import { ContextualQuickActions } from '@/components/navigation/contextual-quick-actions';
 import { OnboardingTour } from '@/components/onboarding/OnboardingTour';
+import { GuidedSetupCards } from '@/components/onboarding/GuidedSetupCards';
 import { OccupancyByTypeCard, OccupancyTypeData } from '@/components/dashboard/OccupancyByTypeCard';
 
 interface DashboardData {
@@ -314,6 +315,12 @@ function DashboardPageContent() {
 
         {/* Smart Onboarding Wizard - Sistema automatizado de configuración inicial (NO para demo user) */}
         {session?.user?.email !== 'demo@vidaroinversiones.com' && <SmartOnboardingWizard />}
+        {/* Guided Setup Cards - Pasos contextuales según perfil (gestor/propietario) */}
+        {session?.user?.email !== 'demo@vidaroinversiones.com' && (
+          <div className="mb-6">
+            <GuidedSetupCards />
+          </div>
+        )}
         {/* Demo Data Generator - Solo visible para empresas de prueba/demo sin datos */}
         {data?.esEmpresaPrueba && data?.kpis?.numeroPropiedades === 0 && <DemoDataGenerator />}
 

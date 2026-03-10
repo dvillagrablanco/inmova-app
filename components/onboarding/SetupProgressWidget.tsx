@@ -130,14 +130,21 @@ export function SetupProgressWidget({ className }: SetupProgressWidgetProps) {
     localStorage.removeItem('setup_progress_dismissed');
   };
 
-  // Si está al 100%, mostrar un mensaje de éxito
+  // Si está al 100%, mostrar celebración
   if (progress === 100 && !isDismissed) {
     return (
-      <Card className={cn('border-green-200 bg-green-50', className)}>
+      <Card className={cn('border-green-300 bg-gradient-to-br from-green-50 to-emerald-50 shadow-lg', className)}>
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="h-5 w-5 text-green-600" />
-            <CardTitle className="text-lg text-green-800">¡Setup Completado!</CardTitle>
+          <div className="flex items-center gap-3">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-green-500/20 text-2xl">
+              🎉
+            </div>
+            <div>
+              <CardTitle className="text-xl text-green-800">¡Configuración completa!</CardTitle>
+              <p className="text-sm text-green-700 mt-0.5">
+                Has completado todas las acciones. ¡Listo para sacar el máximo partido a INMOVA!
+              </p>
+            </div>
           </div>
           <Button
             variant="ghost"
@@ -149,9 +156,10 @@ export function SetupProgressWidget({ className }: SetupProgressWidgetProps) {
           </Button>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-green-700">
-            Has completado todas las acciones de configuración inicial. ¡Ahora estás listo para sacar el máximo partido a INMOVA!
-          </p>
+          <div className="flex items-center gap-2">
+            <Badge className="bg-green-500 text-white text-sm px-3 py-1">100%</Badge>
+            <span className="text-sm text-green-700">Todos los pasos completados</span>
+          </div>
         </CardContent>
       </Card>
     );
@@ -167,41 +175,39 @@ export function SetupProgressWidget({ className }: SetupProgressWidgetProps) {
   return (
     <Card className={cn('gradient-bg border-indigo-200 shadow-lg', className)}>
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-indigo-600" />
-            <CardTitle className="text-lg">Progreso de Configuración</CardTitle>
-          </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="text-sm font-semibold">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start gap-4">
+            {/* Badge de porcentaje prominente */}
+            <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-indigo-100 text-2xl font-bold text-indigo-700 ring-4 ring-indigo-200/50">
               {progress}%
-            </Badge>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleDismiss}
-              className="h-8 w-8 p-0 hover:bg-white/50"
-            >
-              <X className="h-4 w-4" />
-            </Button>
+            </div>
+            <div>
+              <CardTitle className="text-lg">Progreso de Configuración</CardTitle>
+              <CardDescription className="mt-1">
+                Tu configuración está al {progress}%
+              </CardDescription>
+              <p className="text-sm text-gray-600 mt-1">
+                {setupActions.filter(a => a.completed).length} de {setupActions.length} pasos completados
+              </p>
+            </div>
           </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleDismiss}
+            className="h-8 w-8 p-0 hover:bg-white/50 flex-shrink-0"
+          >
+            <X className="h-4 w-4" />
+          </Button>
         </div>
-        <CardDescription className="mt-1">
-          {progress < 100
-            ? `Completa estas acciones para optimizar tu experiencia`
-            : '¡Felicidades! Setup completado'}
-        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Barra de progreso */}
         <div className="space-y-2">
-          <Progress value={progress} className="h-2" />
-          <div className="flex justify-between text-xs text-gray-600">
-            <span>{setupActions.filter(a => a.completed).length} de {setupActions.length} completadas</span>
-            {progress < 100 && (
-              <span className="text-indigo-600 font-medium">Casi listo...</span>
-            )}
-          </div>
+          <Progress value={progress} className="h-3" />
+          {progress < 100 && (
+            <span className="text-xs text-indigo-600 font-medium">Casi listo...</span>
+          )}
         </div>
 
         {/* Próxima acción recomendada */}
@@ -234,25 +240,29 @@ export function SetupProgressWidget({ className }: SetupProgressWidgetProps) {
           onClick={() => setIsExpanded(!isExpanded)}
           className="w-full"
         >
-          {isExpanded ? 'Ver menos' : `Ver todas las acciones (${setupActions.length})`}
+          {isExpanded ? 'Ocultar pasos' : `Ver todos los pasos (${setupActions.length})`}
         </Button>
 
         {/* Lista completa de acciones (expandible) */}
         {isExpanded && (
           <div className="space-y-2 pt-2">
+            <p className="text-xs font-medium text-gray-500 mb-2">
+              Completados: {setupActions.filter(a => a.completed).length} · Pendientes: {setupActions.filter(a => !a.completed).length}
+            </p>
             {setupActions.map((action) => (
               <div
                 key={action.id}
                 className={cn(
                   'flex items-center gap-3 p-3 rounded-lg border transition-all',
                   action.completed
-                    ? 'bg-green-50 border-green-200'
-                    : 'bg-white border-gray-200 hover:border-indigo-300'
+                    ? 'bg-green-50/80 border-green-200 shadow-sm'
+                    : 'bg-white border-gray-200 hover:border-indigo-300 hover:shadow-sm'
                 )}
               >
                 <button
                   onClick={() => handleToggleComplete(action.id)}
                   className="flex-shrink-0"
+                  aria-label={action.completed ? 'Marcar como pendiente' : 'Marcar como completado'}
                 >
                   {action.completed ? (
                     <CheckCircle2 className="h-5 w-5 text-green-600" />
@@ -267,14 +277,19 @@ export function SetupProgressWidget({ className }: SetupProgressWidgetProps) {
                   )}>
                     {action.title}
                   </h5>
-                  <p className="text-xs text-gray-500 mt-0.5">{action.description}</p>
+                  <p className={cn(
+                    'text-xs mt-0.5',
+                    action.completed ? 'text-green-600' : 'text-gray-500'
+                  )}>
+                    {action.description}
+                  </p>
                 </div>
                 {!action.completed && (
                   <Button
                     size="sm"
                     variant="ghost"
                     onClick={() => handleActionClick(action)}
-                    className="text-indigo-600 hover:text-indigo-700"
+                    className="text-indigo-600 hover:text-indigo-700 flex-shrink-0"
                   >
                     Ir
                     <ChevronRight className="ml-1 h-3 w-3" />

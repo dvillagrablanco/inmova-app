@@ -127,10 +127,10 @@ export default function ExperiencePage() {
         {/* Progress */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium">Paso 2 de 3</span>
+            <span className="text-sm font-medium">Paso 4 de 5</span>
             <span className="text-sm text-muted-foreground">Tu experiencia</span>
           </div>
-          <Progress value={66} className="h-2" />
+          <Progress value={80} className="h-2" />
         </div>
         
         {/* Header */}
@@ -216,7 +216,7 @@ export default function ExperiencePage() {
         <div className="flex items-center justify-between">
           <Button 
             variant="ghost"
-            onClick={() => router.push('/profile-selection')}
+            onClick={() => router.push('/onboarding/needs')}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Volver

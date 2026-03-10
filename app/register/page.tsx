@@ -23,6 +23,8 @@ import {
   Loader2,
   Tag,
   Gift,
+  Home,
+  Wrench,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -60,13 +62,40 @@ const COUPON_INFO: Record<string, { nombre: string; descuento: string; plan: str
   },
 };
 
+type ProfileRole = 'gestor' | 'propietario' | 'inquilino' | 'proveedor' | null;
+
 export default function RegisterPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [selectedRole, setSelectedRole] = useState<ProfileRole>(null);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
   const [couponInfo, setCouponInfo] = useState<typeof COUPON_INFO[string] | null>(null);
+
+  // Redirigir si se selecciona inquilino o proveedor
+  useEffect(() => {
+    if (selectedRole === 'inquilino') {
+      router.push('/portal-inquilino/register');
+      return;
+    }
+    if (selectedRole === 'proveedor') {
+      router.push('/portal-proveedor/register');
+      return;
+    }
+  }, [selectedRole, router]);
+
+  // Mostrar loading mientras redirigimos a portal específico
+  if (selectedRole === 'inquilino' || selectedRole === 'proveedor') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center">
+        <div className="text-white text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p>Redirigiendo...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Detectar cupón de la URL
   useEffect(() => {
@@ -114,7 +143,7 @@ export default function RegisterPage() {
           email: data.email,
           recoveryEmail: data.recoveryEmail || undefined,
           password: data.password,
-          role: 'gestor',
+          role: selectedRole === 'propietario' ? 'gestor' : 'gestor',
           businessVertical: data.businessVertical,
         }),
       });
@@ -138,6 +167,9 @@ export default function RegisterPage() {
           'Cuenta creada pero error al iniciar sesión. Por favor, intenta iniciar sesión manualmente.'
         );
       } else {
+        if (typeof window !== 'undefined' && selectedRole) {
+          localStorage.setItem('onboarding_profile', selectedRole);
+        }
         router.push('/dashboard');
       }
     } catch (err) {
@@ -281,26 +313,141 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            {/* Right Side - Register Form */}
+            {/* Right Side - Profile Selector or Register Form */}
             <div className="w-full max-w-md mx-auto">
-              {/* Mobile Logo */}
-              <div className="lg:hidden text-center mb-8 animate-fade-in">
-                <div className="flex items-center justify-center gap-3 mb-4">
-                  <div className="p-2 bg-indigo-100 rounded-xl">
-                    <Building2 className="h-8 w-8 text-indigo-600" />
+              {/* Profile Selector - Mostrar cuando no hay rol seleccionado */}
+              {!selectedRole && (
+                <div className="space-y-6 animate-fade-in">
+                  <div className="lg:hidden text-center mb-6">
+                    <div className="flex items-center justify-center gap-3 mb-4">
+                      <div className="p-2 bg-indigo-100 rounded-xl">
+                        <Building2 className="h-8 w-8 text-indigo-600" />
+                      </div>
+                      <span className="text-3xl font-black bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
+                        INMOVA
+                      </span>
+                    </div>
+                    <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 px-4 py-2">
+                      <Star className="h-4 w-4 mr-2" />
+                      PRUEBA GRATIS 30 DÍAS
+                    </Badge>
                   </div>
-                  <span className="text-3xl font-black bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
-                    INMOVA
-                  </span>
-                </div>
-                <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 px-4 py-2">
-                  <Star className="h-4 w-4 mr-2" />
-                  PRUEBA GRATIS 30 DÍAS
-                </Badge>
-              </div>
 
-              {/* Register Form */}
-              <div className="bg-white rounded-2xl shadow-2xl p-8 animate-fade-in">
+                  <div className="bg-white rounded-2xl shadow-2xl p-8">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                      ¿Cómo vas a usar Inmova?
+                    </h2>
+                    <p className="text-gray-600 mb-6">
+                      Selecciona tu perfil para comenzar con la configuración adecuada
+                    </p>
+
+                    <div className="grid gap-4">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedRole('gestor')}
+                        className="flex items-start gap-4 p-4 rounded-xl border-2 border-gray-200 hover:border-indigo-500 hover:bg-indigo-50/50 transition-all text-left group"
+                      >
+                        <div className="p-2 rounded-lg bg-indigo-100 group-hover:bg-indigo-200 transition-colors">
+                          <Building2 className="h-6 w-6 text-indigo-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900">Gestor / Empresa</h3>
+                          <p className="text-sm text-gray-600 mt-0.5">
+                            Gestiono propiedades propias o de terceros
+                          </p>
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setSelectedRole('propietario')}
+                        className="flex items-start gap-4 p-4 rounded-xl border-2 border-gray-200 hover:border-indigo-500 hover:bg-indigo-50/50 transition-all text-left group"
+                      >
+                        <div className="p-2 rounded-lg bg-indigo-100 group-hover:bg-indigo-200 transition-colors">
+                          <Home className="h-6 w-6 text-indigo-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900">Propietario / Inversor</h3>
+                          <p className="text-sm text-gray-600 mt-0.5">
+                            Tengo propiedades en alquiler
+                          </p>
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setSelectedRole('inquilino')}
+                        className="flex items-start gap-4 p-4 rounded-xl border-2 border-gray-200 hover:border-indigo-500 hover:bg-indigo-50/50 transition-all text-left group"
+                      >
+                        <div className="p-2 rounded-lg bg-indigo-100 group-hover:bg-indigo-200 transition-colors">
+                          <User className="h-6 w-6 text-indigo-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900">Inquilino</h3>
+                          <p className="text-sm text-gray-600 mt-0.5">
+                            Soy inquilino de una propiedad
+                          </p>
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setSelectedRole('proveedor')}
+                        className="flex items-start gap-4 p-4 rounded-xl border-2 border-gray-200 hover:border-indigo-500 hover:bg-indigo-50/50 transition-all text-left group"
+                      >
+                        <div className="p-2 rounded-lg bg-indigo-100 group-hover:bg-indigo-200 transition-colors">
+                          <Wrench className="h-6 w-6 text-indigo-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900">Proveedor</h3>
+                          <p className="text-sm text-gray-600 mt-0.5">
+                            Ofrezco servicios de mantenimiento
+                          </p>
+                        </div>
+                      </button>
+                    </div>
+
+                    <div className="mt-6 text-center">
+                      <p className="text-sm text-gray-600">
+                        ¿Ya tienes cuenta?{' '}
+                        <Link href="/login" className="text-black font-medium hover:underline">
+                          Inicia sesión aquí
+                        </Link>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Register Form - Mostrar cuando gestor o propietario seleccionado */}
+              {(selectedRole === 'gestor' || selectedRole === 'propietario') && (
+                <>
+                  {/* Mobile Logo */}
+                  <div className="lg:hidden text-center mb-8 animate-fade-in">
+                    <div className="flex items-center justify-center gap-3 mb-4">
+                      <div className="p-2 bg-indigo-100 rounded-xl">
+                        <Building2 className="h-8 w-8 text-indigo-600" />
+                      </div>
+                      <span className="text-3xl font-black bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
+                        INMOVA
+                      </span>
+                    </div>
+                    <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 px-4 py-2">
+                      <Star className="h-4 w-4 mr-2" />
+                      PRUEBA GRATIS 30 DÍAS
+                    </Badge>
+                  </div>
+
+                  {/* Register Form */}
+                  <div className="bg-white rounded-2xl shadow-2xl p-8 animate-fade-in">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedRole(null)}
+                      className="mb-4 flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700"
+                    >
+                      <ArrowLeft className="h-4 w-4" />
+                      Cambiar perfil
+                    </button>
                 <div className="mb-6">
                   <h2 className="text-3xl font-bold text-gray-900 mb-2">Crea tu cuenta</h2>
                   <p className="text-gray-600">Comienza tu prueba gratuita de 30 días hoy mismo</p>
@@ -342,6 +489,7 @@ export default function RegisterPage() {
                 )}
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
+                  <input type="hidden" name="profileRole" value={selectedRole || ''} />
                   <AccessibleInputField
                     id="name-field"
                     name="name"
@@ -468,6 +616,8 @@ export default function RegisterPage() {
                   </p>
                 </div>
               </div>
+                </>
+              )}
             </div>
           </div>
         </div>
