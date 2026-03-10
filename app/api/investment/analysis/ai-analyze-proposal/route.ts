@@ -134,6 +134,28 @@ async function getPlatformDataSafe(city: string, postalCode?: string, address?: 
   } catch { return null; }
 }
 
+async function getIdealistaDataSafe(city: string): Promise<any> {
+  try {
+    const { getIdealistaDataReport } = await import('@/lib/idealista-data-service');
+    return await getIdealistaDataReport(city);
+  } catch { return null; }
+}
+
+function extractCityFromText(text: string): string {
+  const cities = [
+    'Madrid', 'Barcelona', 'Valencia', 'Sevilla', 'Málaga', 'Malaga', 'Bilbao',
+    'Zaragoza', 'Palencia', 'Valladolid', 'Alicante', 'Marbella', 'Benidorm',
+    'Palma', 'Córdoba', 'Cordoba', 'Granada', 'Murcia', 'Vigo', 'Gijón', 'Gijon',
+    'Santander', 'San Sebastián', 'San Sebastian', 'Toledo', 'Burgos', 'Salamanca',
+    'León', 'Leon', 'Cádiz', 'Cadiz', 'Huelva', 'Tarragona', 'Girona', 'Lleida',
+  ];
+  const textLower = text.toLowerCase();
+  for (const city of cities) {
+    if (textLower.includes(city.toLowerCase())) return city;
+  }
+  return 'Madrid';
+}
+
 /**
  * Construye el contexto de mercado para inyectar en el prompt de Claude.
  * Usa EXCLUSIVAMENTE datos de mercado público (Notariado, portales, INE).
@@ -166,7 +188,37 @@ DATOS DE ZONA — ${marketData.zona}:
   }
 
   if (platformData?.promptText) {
-    parts.push(`\nDATOS MULTI-FUENTE (scraped):\n${platformData.promptText}`);
+    parts.push(`\nDATOS MULTI-FUENTE (scraping + Idealista Data):\n${platformData.promptText}`);
+  }
+
+  // Datos enriquecidos de Idealista Data si están en platformData
+  if (platformData?.raw?.platformData) {
+    const idealistaData = platformData.raw.platformData.find(
+      (pd: any) => pd.source === 'idealista_data',
+    );
+    if (idealistaData?.rawData) {
+      const raw = idealistaData.rawData;
+      if (raw.grossYield > 0) {
+        parts.push(`\nRENTABILIDAD REAL DE MERCADO (Idealista Data):
+- Yield bruto residencial en esta ciudad: ${raw.grossYield}%
+- USAR ESTE DATO para validar el yield que presenta el broker.
+- Si el broker presenta yield superior al del mercado, CUESTIONAR si las rentas son reales.`);
+      }
+      if (raw.subZones?.length > 0) {
+        parts.push(`\nPRECIOS POR SUBZONA/DISTRITO (Idealista Data):`);
+        for (const zone of raw.subZones.slice(0, 8)) {
+          parts.push(`- ${zone.location}: ${zone.pricePerM2}€/m²${zone.annualVariation ? ` (${zone.annualVariation > 0 ? '+' : ''}${zone.annualVariation}% anual)` : ''}`);
+        }
+        parts.push(`USA la subzona más cercana al activo para comparar €/m² del broker vs mercado.`);
+      }
+      if (raw.priceEvolution?.length > 0) {
+        parts.push(`\nEVOLUCIÓN PRECIOS (Idealista Data, últimos periodos):`);
+        for (const p of raw.priceEvolution) {
+          parts.push(`- ${p.period}: ${p.pricePerM2}€/m²${p.variation ? ` (${p.variation > 0 ? '+' : ''}${p.variation}%)` : ''}`);
+        }
+        parts.push(`USA esta evolución para validar si la tendencia declarada por el broker es coherente.`);
+      }
+    }
   }
 
   parts.push(`
@@ -211,6 +263,27 @@ function buildMarketContextResponse(marketData: any, platformData: any, parsedAn
     fuenteAsking: marketData.fuente || 'Idealista/Fotocasa',
   } : null;
 
+  // Idealista Data enrichment
+  let idealistaDataEnrichment = null;
+  if (platformData?.raw?.platformData) {
+    const idealistaSource = platformData.raw.platformData.find(
+      (pd: any) => pd.source === 'idealista_data',
+    );
+    if (idealistaSource?.rawData) {
+      idealistaDataEnrichment = {
+        grossYield: idealistaSource.rawData.grossYield || null,
+        subZones: (idealistaSource.rawData.subZones || []).slice(0, 10),
+        priceEvolution: (idealistaSource.rawData.priceEvolution || []).slice(-12),
+        avgDaysOnMarket: idealistaSource.avgDaysOnMarket || null,
+        salePricePerM2: idealistaSource.pricePerM2Sale || null,
+        rentPricePerM2: idealistaSource.pricePerM2Rent || null,
+        reliability: idealistaSource.reliability || null,
+        trend: idealistaSource.trend || null,
+        trendPercentage: idealistaSource.trendPercentage || null,
+      };
+    }
+  }
+
   // Platform data summary
   const platformSummary = platformData?.raw ? {
     weightedSalePricePerM2: platformData.raw.weightedSalePricePerM2,
@@ -221,6 +294,7 @@ function buildMarketContextResponse(marketData: any, platformData: any, parsedAn
     trend: platformData.raw.marketTrend,
     trendPercentage: platformData.raw.trendPercentage,
     demandLevel: platformData.raw.demandLevel,
+    idealistaData: idealistaDataEnrichment,
   } : null;
 
   // Precio vs broker — basado en datos de mercado público
@@ -277,10 +351,11 @@ export async function POST(request: NextRequest) {
     // ── Extract address/city from text for market data lookup ──
     const fullText = documentContent || additionalContext || '';
     const addressHint = fullText.substring(0, 2000);
+    const detectedCity = extractCityFromText(fullText);
 
-    // ── Fetch market data IN PARALLEL while preparing Claude call ──
+    // ── Fetch market data IN PARALLEL (Idealista Data + portales + Notariado) ──
     const marketDataPromise = getMarketDataSafe(addressHint);
-    const platformDataPromise = getPlatformDataSafe('Madrid', undefined, addressHint);
+    const platformDataPromise = getPlatformDataSafe(detectedCity, undefined, addressHint);
 
     // ── Handle file-based analysis (PDF/image) ──
     if (file && (file.type.includes('image') || file.type === 'application/pdf')) {

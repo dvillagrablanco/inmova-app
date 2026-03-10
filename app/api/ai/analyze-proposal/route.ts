@@ -85,14 +85,77 @@ export async function POST(request: NextRequest) {
         (contracts.reduce((s, c) => s + ((c.unit?.superficie || 60) * 4500), 0)) * 100
       : 0;
 
-    // Get market data
+    // Get market data — multi-source (Idealista Data + portales + Notariado + IPV)
     let marketInfo = '';
+    let detectedCity = 'Madrid';
+
+    // Detectar ciudad de la propuesta
+    const cityList = [
+      'Madrid', 'Barcelona', 'Valencia', 'Sevilla', 'Málaga', 'Malaga', 'Bilbao',
+      'Zaragoza', 'Palencia', 'Valladolid', 'Alicante', 'Marbella', 'Benidorm',
+      'Palma', 'Córdoba', 'Granada', 'Murcia', 'Vigo', 'Santander', 'Toledo',
+      'Burgos', 'Salamanca', 'Cádiz', 'Tarragona', 'Girona',
+    ];
+    const textForCity = (proposalText + ' ' + (brokerName || '')).toLowerCase();
+    for (const city of cityList) {
+      if (textForCity.includes(city.toLowerCase())) { detectedCity = city; break; }
+    }
+
+    // Obtener datos de todas las fuentes en paralelo
     try {
-      const { IPV_STATIC } = await import('@/lib/public-market-apis');
-      marketInfo = Object.entries(IPV_STATIC).map(([ccaa, d]) =>
-        `${ccaa}: ${d.precioMedioM2}€/m², ${d.variacionAnual}% anual, ${d.tendencia}`
-      ).join('\n');
-    } catch {}
+      const [idealistaReport, platformResult, ipvData] = await Promise.allSettled([
+        import('@/lib/idealista-data-service').then(m => m.getIdealistaDataReport(detectedCity)),
+        import('@/lib/external-platform-data-service').then(m =>
+          m.getAggregatedMarketData({ city: detectedCity, address: proposalText.substring(0, 500) })
+            .then(data => ({ data, text: m.formatPlatformDataForPrompt(data) }))
+        ),
+        import('@/lib/public-market-apis').then(m => m.IPV_STATIC),
+      ]);
+
+      const parts: string[] = [];
+
+      // Datos Idealista Data (rentabilidad, subzonas, evolución)
+      if (idealistaReport.status === 'fulfilled' && idealistaReport.value) {
+        const r = idealistaReport.value;
+        parts.push(`DATOS IDEALISTA DATA — ${detectedCity}:`);
+        if (r.salePricePerM2) parts.push(`- Precio venta: ${r.salePricePerM2}€/m²${r.salePricePerM2Evolution ? ` (${r.salePricePerM2Evolution > 0 ? '+' : ''}${r.salePricePerM2Evolution}% anual)` : ''}`);
+        if (r.rentPricePerM2) parts.push(`- Alquiler: ${r.rentPricePerM2}€/m²/mes`);
+        if (r.grossYield) parts.push(`- Rentabilidad bruta alquiler: ${r.grossYield}%`);
+        if (r.avgDaysOnMarket) parts.push(`- Tiempo medio en mercado: ${r.avgDaysOnMarket} días`);
+        if (r.demandLevel) parts.push(`- Demanda: ${r.demandLevel}`);
+        if (r.subZones?.length > 0) {
+          parts.push(`- Subzonas:`);
+          r.subZones.slice(0, 6).forEach(z => {
+            parts.push(`  · ${z.location}: ${z.pricePerM2}€/m²${z.annualVariation ? ` (${z.annualVariation > 0 ? '+' : ''}${z.annualVariation}%)` : ''}`);
+          });
+        }
+        parts.push('');
+      }
+
+      // Datos multi-plataforma (Notariado, portales, BD interna)
+      if (platformResult.status === 'fulfilled' && platformResult.value) {
+        parts.push(platformResult.value.text);
+        parts.push('');
+      }
+
+      // IPV estático como fallback
+      if (parts.length === 0 && ipvData.status === 'fulfilled') {
+        parts.push('DATOS IPV ESTÁTICOS (referencia nacional):');
+        Object.entries(ipvData.value).forEach(([ccaa, d]: [string, any]) => {
+          parts.push(`${ccaa}: ${d.precioMedioM2}€/m², ${d.variacionAnual}% anual, ${d.tendencia}`);
+        });
+      }
+
+      marketInfo = parts.join('\n');
+    } catch {
+      // Fallback mínimo
+      try {
+        const { IPV_STATIC } = await import('@/lib/public-market-apis');
+        marketInfo = Object.entries(IPV_STATIC).map(([ccaa, d]: [string, any]) =>
+          `${ccaa}: ${d.precioMedioM2}€/m², ${d.variacionAnual}% anual, ${d.tendencia}`
+        ).join('\n');
+      } catch {}
+    }
 
     // Call Claude
     const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -127,7 +190,7 @@ export async function POST(request: NextRequest) {
 
     messageContent.push({
       type: 'text',
-      text: `Eres un analista de inversiones inmobiliarias senior. Un broker/inmobiliaria ha enviado esta propuesta de inversión. Analízala EN PROFUNDIDAD.
+      text: `Eres un analista de inversiones inmobiliarias senior con mentalidad ESCÉPTICA y CONSERVADORA. Un broker ha enviado esta propuesta. Analízala contrastando con DATOS REALES DE MERCADO.
 
 PROPUESTA DEL BROKER: ${brokerName}
 ${fileName ? `Archivo: ${fileName}` : ''}
@@ -138,10 +201,32 @@ CONTEXTO DEL INVERSOR:
 - Contratos activos: ${contracts.length}
 - Perfil: Holding inmobiliario con cartera diversificada
 
-DATOS DE MERCADO ESPAÑA:
-${marketInfo.substring(0, 2000)}
+═══════════════════════════════════════════════════════
+DATOS DE MERCADO INDEPENDIENTES (VERIFICADOS)
+═══════════════════════════════════════════════════════
+${marketInfo.substring(0, 4000)}
 
-Analiza la propuesta y responde en JSON:
+═══════════════════════════════════════════════════════
+INSTRUCCIONES DE ANÁLISIS
+═══════════════════════════════════════════════════════
+
+1. EXTRAE todos los datos de la propuesta del broker
+2. CONTRASTA cada dato con los datos de mercado reales:
+   - €/m² del broker vs €/m² real de la zona (Notariado/Idealista Data)
+   - Yield declarado vs yield real del mercado (datos Idealista)
+   - Rentas declaradas vs rentas reales de la zona
+   - Si el broker presenta un yield MUY superior al del mercado → ALERTA ROJA
+3. CALCULA el precio justo usando datos reales, NO los del broker
+4. IDENTIFICA qué datos faltan y qué preguntas hacer al broker
+5. DA UN VEREDICTO basado en hechos, no en las proyecciones del broker
+
+REGLAS:
+- Asking prices de portales: -10-15% para precio real de cierre
+- Si hay rentabilidad de mercado de Idealista: usarla como referencia de yield zona
+- Si hay precios por subzona: usar la subzona más cercana como referencia
+- Los gastos omitidos (IBI, comunidad, seguro, mantenimiento, gestión) SIEMPRE penalizan
+
+Responde en JSON:
 {
   "datosExtraidos": {
     "tipoInmueble": "string",
@@ -149,33 +234,36 @@ Analiza la propuesta y responde en JSON:
     "precioVenta": número_o_null,
     "superficie": número_o_null,
     "precioM2": número_o_null,
+    "precioM2Mercado": número_o_null,
+    "diferenciaVsMercado": número_porcentaje_o_null,
     "rentaActual": número_o_null,
+    "rentaMercado": número_o_null,
     "rentaPotencial": número_o_null,
     "ocupacion": número_o_null,
     "estadoConservacion": "string",
-    "anoConstuccion": número_o_null,
+    "anoConstruccion": número_o_null,
     "numUnidades": número_o_null,
     "otrosDatos": ["dato1", "dato2"]
   },
   
   "datosQueFaltan": [
-    { "dato": "nombre del dato", "importancia": "critica|importante|deseable", "porQue": "razón" }
+    { "dato": "nombre", "importancia": "critica|importante|deseable", "porQue": "razón" }
   ],
   
-  "preguntasParaBroker": [
-    "pregunta1 que deberías hacer al broker",
-    "pregunta2",
-    "pregunta3"
-  ],
+  "preguntasParaBroker": ["pregunta1", "pregunta2", "pregunta3"],
   
   "analisisFinanciero": {
-    "yieldBrutoEstimado": número,
+    "yieldBrutoDeclarado": número_o_null,
+    "yieldBrutoReal": número,
     "yieldNetoEstimado": número,
+    "yieldMercadoZona": número_o_null,
     "cashFlowAnual": número,
     "roi5anos": número,
     "paybackAnos": número,
     "precioJusto": número,
-    "sobrevalorizacion": número_porcentaje
+    "precioMaxRecomendado": número,
+    "sobrevalorizacion": número_porcentaje,
+    "gastosEstimadosAnuales": número
   },
   
   "analisisRiesgo": {
@@ -187,24 +275,26 @@ Analiza la propuesta y responde en JSON:
   "comparativaCartera": {
     "encajaConEstrategia": true_o_false,
     "yieldVsCartera": "mejor|peor|similar",
+    "yieldVsMercado": "mejor|peor|similar",
     "razon": "texto"
   },
   
   "veredicto": {
     "decision": "INTERESANTE|NEGOCIAR|PEDIR_MAS_INFO|DESCARTAR",
     "confianza": número_0_100,
-    "resumen": "2-3 frases con el veredicto",
+    "resumen": "2-3 frases con el veredicto basado en datos reales",
     "precioMaxRecomendado": número,
+    "contraofertaSugerida": número_o_null,
     "condicionesCompra": ["condición1", "condición2"],
     "proximosPasos": ["paso1", "paso2", "paso3"]
   },
   
   "puntosFuertes": ["punto1", "punto2"],
   "puntosDebiles": ["punto1", "punto2"],
-  "alertasRojas": ["alerta si hay algo sospechoso o peligroso"]
+  "alertasRojas": ["alerta si el broker infla rentas, omite gastos o yield irreal"]
 }
 
-Sé MUY CRÍTICO y DETALLADO. Identifica todo lo que falta. Si hay datos ambiguos o sospechosos, márcalos.`,
+Sé MUY CRÍTICO. Contrasta SIEMPRE con datos de mercado reales. Si hay datos sospechosos, márcalos como alerta roja.`,
     });
 
     const response = await anthropic.messages.create({
@@ -228,12 +318,25 @@ Sé MUY CRÍTICO y DETALLADO. Identifica todo lo que falta. Si hay datos ambiguo
       veredicto: analysis.veredicto?.decision,
     });
 
+    // Obtener datos de Idealista para la respuesta
+    let idealistaYieldData = null;
+    try {
+      const { getRentalYield } = await import('@/lib/idealista-data-service');
+      idealistaYieldData = getRentalYield(detectedCity);
+    } catch {}
+
     return NextResponse.json({
       success: true,
       analysis,
       broker: brokerName,
       fileName,
+      detectedCity,
       portfolioContext: { yield: portfolioYield.toFixed(2), contracts: contracts.length },
+      marketReference: idealistaYieldData ? {
+        grossYield: idealistaYieldData.grossYield,
+        city: detectedCity,
+        source: 'Idealista Data',
+      } : null,
       analyzedAt: new Date().toISOString(),
     });
   } catch (error: any) {
