@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { HelpSearch } from '@/components/help-center/HelpSearch';
+import { HelpChatWidget } from '@/components/help-center/HelpChatWidget';
 
 export const metadata: Metadata = {
   title: {
@@ -37,6 +38,8 @@ export default function AyudaLayout({
       </header>
 
       <main className="flex-1">{children}</main>
+
+      <HelpChatWidget />
 
       <footer className="border-t py-8 mt-auto">
         <div className="container px-4">
