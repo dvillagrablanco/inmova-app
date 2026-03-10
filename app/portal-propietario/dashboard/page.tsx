@@ -1,17 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import {
   Building2,
   TrendingUp,
@@ -19,7 +10,6 @@ import {
   Wallet,
   BarChart3,
   Loader2,
-  Home,
   Euro,
   Percent,
 } from 'lucide-react';
@@ -109,11 +99,9 @@ export default function PortalPropietarioDashboardPage() {
 
   if (loading) {
     return (
-      <AuthenticatedLayout>
-        <div className="flex min-h-[400px] items-center justify-center">
-          <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
-        </div>
-      </AuthenticatedLayout>
+      <div className="flex min-h-[400px] items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
+      </div>
     );
   }
 
@@ -121,23 +109,8 @@ export default function PortalPropietarioDashboardPage() {
   const kpis = dashboard?.kpis;
 
   return (
-    <AuthenticatedLayout>
+    <>
       <div className="max-w-6xl mx-auto space-y-6 p-4 md:p-6">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/dashboard">
-                <Home className="mr-1.5 h-4 w-4" />
-                Inicio
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Portal Propietario</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Portal del Propietario</h1>
           <p className="mt-1 text-lg text-muted-foreground">
@@ -303,6 +276,6 @@ export default function PortalPropietarioDashboardPage() {
           </Card>
         )}
       </div>
-    </AuthenticatedLayout>
+    </>
   );
 }
