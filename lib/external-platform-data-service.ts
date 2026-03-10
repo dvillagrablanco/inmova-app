@@ -28,6 +28,7 @@ import { scrapeAllPortals, type AggregatedScrapingResult } from './scraping/inde
 
 export type PlatformSource =
   | 'idealista'
+  | 'idealista_data'
   | 'fotocasa'
   | 'habitaclia'
   | 'pisos_com'
@@ -131,24 +132,16 @@ interface FetchOptions {
  * Lanza scrapers en paralelo contra Idealista, Fotocasa, Habitaclia y Pisos.com.
  * Resultados cacheados 24h en Redis.
  */
-async function fetchFromScrapedPortals(
-  options: FetchOptions,
-): Promise<PlatformMarketDataPoint[]> {
+async function fetchFromScrapedPortals(options: FetchOptions): Promise<PlatformMarketDataPoint[]> {
   const results: PlatformMarketDataPoint[] = [];
 
   try {
-    const scrapingResult = await scrapeAllPortals(
-      options.city,
-      'sale',
-      options.postalCode,
-    );
+    const scrapingResult = await scrapeAllPortals(options.city, 'sale', options.postalCode);
 
     for (const portal of scrapingResult.portals) {
       if (!portal.success) continue;
 
-      const rawResult = scrapingResult.rawResults.find(
-        (r) => r && r.source === portal.name,
-      );
+      const rawResult = scrapingResult.rawResults.find((r) => r && r.source === portal.name);
 
       results.push({
         source: portal.name as PlatformSource,
@@ -212,7 +205,12 @@ function getStaticFallbackData(options: FetchOptions): PlatformMarketDataPoint[]
         dataType: 'asking_price',
         pricePerM2Sale: zoneData.askingPriceVentaM2,
         pricePerM2Rent: zoneData.askingPriceAlquilerM2,
-        trend: zoneData.tendencia === 'subiendo' ? 'UP' : zoneData.tendencia === 'bajando' ? 'DOWN' : 'STABLE',
+        trend:
+          zoneData.tendencia === 'subiendo'
+            ? 'UP'
+            : zoneData.tendencia === 'bajando'
+              ? 'DOWN'
+              : 'STABLE',
         demandLevel: zoneData.demanda,
         sampleSize: 0,
       });
@@ -225,7 +223,12 @@ function getStaticFallbackData(options: FetchOptions): PlatformMarketDataPoint[]
         dataType: 'asking_price',
         pricePerM2Sale: Math.round(zoneData.askingPriceVentaM2 * 0.97),
         pricePerM2Rent: Math.round(zoneData.askingPriceAlquilerM2 * 0.97 * 100) / 100,
-        trend: zoneData.tendencia === 'subiendo' ? 'UP' : zoneData.tendencia === 'bajando' ? 'DOWN' : 'STABLE',
+        trend:
+          zoneData.tendencia === 'subiendo'
+            ? 'UP'
+            : zoneData.tendencia === 'bajando'
+              ? 'DOWN'
+              : 'STABLE',
         demandLevel: zoneData.demanda,
         sampleSize: 0,
       });
@@ -414,7 +417,72 @@ async function fetchFromInternalDB(options: FetchOptions): Promise<PlatformMarke
   }
 }
 
-// (Adaptador de API de Habitaclia eliminado — reemplazado por web scraping)
+// ============================================================================
+// ADAPTADOR: IDEALISTA DATA PLATFORM (datos profesionales autenticados)
+// ============================================================================
+
+/**
+ * Obtiene datos profesionales de Idealista Data Platform.
+ * Requiere IDEALISTA_DATA_EMAIL + IDEALISTA_DATA_PASSWORD.
+ * Fiabilidad: 88% — datos agregados profesionales, más fiables que asking prices individuales.
+ */
+async function fetchFromIdealistaData(
+  options: FetchOptions
+): Promise<PlatformMarketDataPoint | null> {
+  try {
+    const { getIdealistaDataReport, isIdealistaDataConfigured } =
+      await import('@/lib/idealista-data-service');
+
+    if (!isIdealistaDataConfigured()) return null;
+
+    const report = await getIdealistaDataReport(options.city, options.postalCode);
+    if (!report) return null;
+
+    const hasSaleData = report.salePricePerM2 && report.salePricePerM2 > 0;
+    const hasRentData = report.rentPricePerM2 && report.rentPricePerM2 > 0;
+
+    if (!hasSaleData && !hasRentData) return null;
+
+    let trend: 'UP' | 'STABLE' | 'DOWN' = 'STABLE';
+    if (report.salePricePerM2Evolution) {
+      trend =
+        report.salePricePerM2Evolution > 1
+          ? 'UP'
+          : report.salePricePerM2Evolution < -1
+            ? 'DOWN'
+            : 'STABLE';
+    }
+
+    return {
+      source: 'idealista_data',
+      sourceLabel: `Idealista Data Platform — Informe profesional de mercado (${report.sampleSize > 0 ? `${report.sampleSize} anuncios` : 'datos agregados'})`,
+      sourceUrl: 'https://www.idealista.com/data',
+      fetchedAt: report.reportDate,
+      reliability: 88,
+      dataType: 'asking_price',
+      pricePerM2Sale: report.salePricePerM2 || undefined,
+      pricePerM2Rent: report.rentPricePerM2 || undefined,
+      avgPrice: report.salePriceMedian || undefined,
+      medianPrice: report.salePriceMedian || undefined,
+      priceRange:
+        report.salePriceMin && report.salePriceMax
+          ? { min: report.salePriceMin, max: report.salePriceMax }
+          : report.pricePercentile25 && report.pricePercentile75
+            ? { min: report.pricePercentile25, max: report.pricePercentile75 }
+            : undefined,
+      sampleSize: report.sampleSize || report.totalListings || undefined,
+      trend,
+      trendPercentage: report.salePricePerM2Evolution
+        ? Math.abs(report.salePricePerM2Evolution)
+        : undefined,
+      demandLevel: report.demandLevel,
+      avgDaysOnMarket: report.avgDaysOnMarket || undefined,
+    };
+  } catch (error) {
+    logger.warn('[IdealistaData] Error obteniendo datos profesionales:', error);
+    return null;
+  }
+}
 
 /**
  * Adaptador para datos de valoraciones anteriores en BD (PropertyValuation)
@@ -563,9 +631,11 @@ export async function getAggregatedMarketData(
   });
 
   // 1. Obtener datos de portales vía web scraping (Idealista, Fotocasa, Habitaclia, Pisos.com)
-  // 2. Obtener datos oficiales (Notariado, INE) y base interna en paralelo
-  const [scrapedPortalData, ...officialResults] = await Promise.all([
+  // 2. Obtener datos profesionales de Idealista Data Platform (autenticado)
+  // 3. Obtener datos oficiales (Notariado, INE) y base interna en paralelo
+  const [scrapedPortalData, idealistaDataResult, ...officialResults] = await Promise.all([
     fetchFromScrapedPortals(options),
+    fetchFromIdealistaData(options).catch(() => null),
     fetchFromNotariado(options).catch(() => null),
     fetchFromINE(options).catch(() => null),
     fetchFromInternalDB(options).catch(() => null),
@@ -575,6 +645,12 @@ export async function getAggregatedMarketData(
   const platformData: PlatformMarketDataPoint[] = [];
   const sourcesUsed: PlatformSource[] = [];
   const sourcesFailed: PlatformSource[] = [];
+
+  // Agregar datos profesionales de Idealista Data (alta prioridad, fiabilidad 88%)
+  if (idealistaDataResult && idealistaDataResult.reliability > 0) {
+    platformData.push(idealistaDataResult);
+    sourcesUsed.push('idealista_data');
+  }
 
   // Agregar datos de portales scrapeados
   for (const pd of scrapedPortalData) {
@@ -641,7 +717,16 @@ export async function getAggregatedMarketData(
     },
     fetchedAt: new Date().toISOString(),
     sourcesUsed,
-    sourcesAvailable: platformNames.filter((v, i, a) => a.indexOf(v) === i),
+    sourcesAvailable: [
+      'idealista',
+      'idealista_data',
+      'fotocasa',
+      'habitaclia',
+      'pisos_com',
+      'notariado',
+      'ine',
+      'internal_db',
+    ] as PlatformSource[],
     sourcesFailed,
     weightedSalePricePerM2,
     weightedRentPricePerM2,
@@ -738,7 +823,10 @@ export function formatPlatformDataForPrompt(data: AggregatedMarketData): string 
     '\nIMPORTANTE: Basa tu valoración principalmente en precios REALES escriturados (Notariado, fiabilidad 95%).'
   );
   sections.push(
-    'Los asking prices de Idealista/Fotocasa son orientativos y están inflados ~12% respecto al precio real de cierre.'
+    'Los datos de Idealista Data Platform (fiabilidad 88%) son datos profesionales agregados — más fiables que asking prices individuales.'
+  );
+  sections.push(
+    'Los asking prices de Idealista/Fotocasa (scraping) son orientativos y están inflados ~12% respecto al precio real de cierre.'
   );
 
   return sections.join('\n');

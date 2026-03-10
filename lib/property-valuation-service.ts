@@ -257,12 +257,13 @@ ${internalMarketText}
 
 INSTRUCCIONES:
 1. Analiza todas las características de la propiedad
-2. CRUZA los datos de las diferentes plataformas (Idealista, Fotocasa, Notariado, INE, etc.)
+2. CRUZA los datos de las diferentes plataformas (Idealista Data, Idealista, Fotocasa, Notariado, INE, etc.)
 3. Prioriza los PRECIOS REALES del Notariado (escriturados) sobre los asking prices de portales
-4. Los asking prices de Idealista/Fotocasa están inflados ~12% respecto al cierre real
-5. Compara con propiedades similares de todas las fuentes
-6. Calcula un precio estimado realista basado en la ponderación de fuentes
-7. Indica en el reasoning qué fuentes pesaron más en tu valoración
+4. Los datos de Idealista Data Platform (fiabilidad 88%) son datos profesionales agregados — más fiables que asking prices individuales de portales
+5. Los asking prices de Idealista/Fotocasa (scraping) están inflados ~12% respecto al cierre real
+6. Compara con propiedades similares de todas las fuentes
+7. Calcula un precio estimado realista basado en la ponderación de fuentes
+8. Indica en el reasoning qué fuentes pesaron más en tu valoración
 
 Proporciona tu valoración en formato JSON con la siguiente estructura exacta:
 

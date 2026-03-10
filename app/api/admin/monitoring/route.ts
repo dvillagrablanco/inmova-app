@@ -66,6 +66,9 @@ export async function GET(req: NextRequest) {
         anthropicConfigured: !!process.env.ANTHROPIC_API_KEY,
         smtpConfigured: !!process.env.SMTP_HOST,
         s3Configured: !!process.env.AWS_ACCESS_KEY_ID,
+        idealistaDataConfigured: !!(
+          process.env.IDEALISTA_DATA_EMAIL && process.env.IDEALISTA_DATA_PASSWORD
+        ),
         turnstileConfigured: !!process.env.TURNSTILE_SECRET_KEY,
         sentryConfigured: !!process.env.SENTRY_DSN,
       },
