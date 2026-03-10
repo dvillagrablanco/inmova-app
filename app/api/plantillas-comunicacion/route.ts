@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const PLANTILLAS_INICIALES = [
   { id: '1', nombre: 'Visita comercial', asunto: 'Visita a su propiedad - {{inmueble_direccion}}', cuerpo: 'Estimado/a {{inquilino_nombre}},\n\nLe informamos que hemos programado una visita comercial a la propiedad {{inmueble_direccion}} para el día {{fecha}}.\n\nPor favor, confirme su disponibilidad.', tipo: 'email', evento_trigger: 'manual', activa: true },

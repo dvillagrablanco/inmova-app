@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // Mock messages per entity
 const MOCK_MESSAGES: Record<string, Record<string, Array<{ id: string; autorId: string; autorNombre: string; contenido: string; createdAt: string }>>> = {};
