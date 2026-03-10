@@ -390,6 +390,7 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/instalaciones-deportivas': 'instalaciones_deportivas',
 
   // Soporte
+  '/ayuda': 'centro_ayuda',
   '/soporte': 'soporte',
   '/knowledge-base': 'knowledge_base',
   '/sugerencias': 'sugerencias',
@@ -465,7 +466,7 @@ const SECTION_TO_MODULES: Record<string, string[]> = {
     'esg', 'energia', 'iot', 'blockchain', 'economia_circular',
     'puntos_carga', 'instalaciones_deportivas',
   ],
-  soporte: ['soporte', 'knowledge_base', 'sugerencias'],
+  soporte: ['centro_ayuda', 'soporte', 'knowledge_base', 'sugerencias'],
 };
 
 // Módulos core que siempre deben mostrarse (esCore: true)
@@ -2080,15 +2081,15 @@ const innovacionNavItems = [
 // 3.9 SOPORTE Y AYUDA
 const soporteNavItems = [
   {
-    name: 'Soporte',
-    href: '/soporte',
-    icon: HeadphonesIcon,
+    name: 'Centro de Ayuda',
+    href: '/ayuda',
+    icon: BookOpen,
     roles: ['super_admin', 'administrador', 'gestor', 'operador'],
   },
   {
-    name: 'Base de Conocimientos',
-    href: '/knowledge-base',
-    icon: BookOpen,
+    name: 'Soporte',
+    href: '/soporte',
+    icon: HeadphonesIcon,
     roles: ['super_admin', 'administrador', 'gestor', 'operador'],
   },
   {
