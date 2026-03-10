@@ -24,7 +24,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Send } from 'lucide-react';
-import { ModuleAIAssistant } from '@/components/ai/ModuleAIAssistant';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -308,7 +307,6 @@ export default function ActualizacionesRentaPage() {
           </CardContent>
         </Card>
       </div>
-      <ModuleAIAssistant module="actualizaciones-renta" />
     </AuthenticatedLayout>
   );
 }

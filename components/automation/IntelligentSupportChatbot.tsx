@@ -28,8 +28,25 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import logger, { logError } from '@/lib/logger';
+
+// Quick actions contextuales por módulo (antes en ModuleAIAssistant)
+const MODULE_QUICK_ACTIONS: Record<string, { label: string; actions: string[] }> = {
+  '/liquidaciones': { label: 'Liquidaciones', actions: ['¿Cómo calcular honorarios de gestión?', '¿Qué gastos son repercutibles?', 'Optimizar liquidación del periodo'] },
+  '/facturacion': { label: 'Facturación', actions: ['¿Qué IVA aplico a esta factura?', '¿Necesito retención IRPF?', '¿Cómo generar una rectificativa?'] },
+  '/candidatos': { label: 'Candidatos', actions: ['Analizar solvencia de este candidato', '¿Qué documentación debo pedir?', 'Scoring recomendado para el perfil'] },
+  '/incidencias': { label: 'Incidencias', actions: ['Clasificar esta incidencia', 'Estimar coste de reparación', '¿Qué prioridad le asigno?'] },
+  '/contratos-gestion': { label: 'Contratos Gestión', actions: ['Modelo de contrato recomendado', '¿Qué % de honorarios es mercado?', 'Cláusulas esenciales a incluir'] },
+  '/check-in-out': { label: 'Check-in/out', actions: ['Checklist recomendado para check-in', '¿Qué lecturas de contadores tomar?', 'Documentación necesaria'] },
+  '/reportes': { label: 'Reportes', actions: ['Interpretar estos KPIs', 'Detectar anomalías en los datos', 'Recomendaciones de mejora'] },
+  '/actualizaciones-renta': { label: 'IPC', actions: ['¿Cuándo debo aplicar el IPC?', 'Redactar comunicación al inquilino', 'Calcular incremento óptimo'] },
+  '/suministros': { label: 'Suministros', actions: ['Balance de suministros del periodo', '¿Cómo repercutir al inquilino?', 'Optimizar consumo'] },
+  '/visitas': { label: 'Visitas', actions: ['Horario óptimo para visitas', 'Preparar inmueble para visita', 'Tips para mejorar conversión'] },
+  '/avalistas': { label: 'Avalistas', actions: ['Tipos de garantía recomendados', '¿Cuánto avalar?', 'Documentación del avalista'] },
+  '/garajes-trasteros': { label: 'Garajes', actions: ['Precio de mercado para garajes', 'Vincular garaje a vivienda', 'Normativa de garajes'] },
+  '/acciones-masivas': { label: 'Masivas', actions: ['¿Cómo ejecutar cobro masivo?', 'Optimizar lote de gastos', 'Verificar antes de ejecutar'] },
+};
 
 interface SentimentInfo {
   sentiment: 'positive' | 'neutral' | 'negative';
@@ -66,12 +83,18 @@ interface KnowledgeArticle {
 
 export default function IntelligentSupportChatbot() {
   const router = useRouter();
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+
+  // Detectar módulo actual para quick actions contextuales
+  const currentModuleActions = Object.entries(MODULE_QUICK_ACTIONS).find(
+    ([path]) => pathname?.startsWith(path)
+  )?.[1] || null;
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
       sender: 'bot',
-      text: '¡Hola! Soy **INMOVA Cowork**, tu asistente ejecutivo con IA. Puedo ejecutar acciones directamente:\n\n• "Muéstrame los contratos que vencen"\n• "Crea un inquilino llamado..."\n• "¿Cuál es el patrimonio del grupo?"\n• "Busca unidades vacías en Espronceda"\n• "Valora el piso de C/ Reina 15"\n\n¿Qué necesitas? 🚀',
+      text: '¡Hola! Soy el **Asistente INMOVA**, tu asistente ejecutivo con IA. Puedo ayudarte con:\n\n• Ejecutar acciones: "Crea un inquilino", "Busca unidades vacías"\n• Consultas: "Contratos que vencen", "Patrimonio del grupo"\n• Análisis: "Valora el piso de C/ Reina 15"\n• Ayuda contextual según el módulo que estés usando\n\n¿Qué necesitas? 🚀',
       timestamp: new Date()
     }
   ]);
@@ -245,7 +268,7 @@ export default function IntelligentSupportChatbot() {
               <div className="absolute inset-0 bg-white/20 group-hover:bg-white/30 transition-colors" />
               
               {/* Emoticono del asistente */}
-              <span className="text-3xl relative z-10 group-hover:scale-110 transition-transform" role="img" aria-label="INMOVA Cowork">
+              <span className="text-3xl relative z-10 group-hover:scale-110 transition-transform" role="img" aria-label="Asistente INMOVA">
                 🧠
               </span>
             </Button>
@@ -298,9 +321,11 @@ export default function IntelligentSupportChatbot() {
                       <Sparkles className="h-5 w-5" />
                     </div>
                     <div>
-                      <CardTitle className="text-lg">INMOVA Cowork</CardTitle>
+                      <CardTitle className="text-lg">Asistente INMOVA</CardTitle>
                       <CardDescription className="text-primary-foreground/80 text-xs">
-                        Asistente ejecutivo con IA · 47 acciones
+                        {currentModuleActions 
+                          ? `IA contextual · ${currentModuleActions.label}` 
+                          : 'Asistente ejecutivo con IA'}
                       </CardDescription>
                     </div>
                   </div>
@@ -556,8 +581,28 @@ export default function IntelligentSupportChatbot() {
                     )}
                   </Button>
                 </div>
+                {/* Quick actions contextuales del módulo actual */}
+                {currentModuleActions && messages.length <= 2 && (
+                  <div className="mt-2 space-y-1.5">
+                    <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                      <Sparkles className="h-3 w-3" />
+                      Acciones rápidas — {currentModuleActions.label}
+                    </p>
+                    <div className="flex flex-wrap gap-1">
+                      {currentModuleActions.actions.map((action, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setInputValue(action)}
+                          className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                        >
+                          {action}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <p className="text-xs text-muted-foreground mt-2 text-center">
-                  Respuestas automáticas con IA - Soporte 24/7
+                  Asistente IA unificado · Contextual por módulo · 24/7
                 </p>
               </CardContent>
             </Card>

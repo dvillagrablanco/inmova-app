@@ -19,7 +19,6 @@ import {
 } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { ArrowLeft, Save, FileSignature, Home } from 'lucide-react';
-import { ModuleAIAssistant } from '@/components/ai/ModuleAIAssistant';
 
 export default function NuevoContratoGestionPage() {
   const router = useRouter();
@@ -216,7 +215,6 @@ export default function NuevoContratoGestionPage() {
           </Card>
         </form>
       </div>
-      <ModuleAIAssistant module="contratos-gestion" />
     </AuthenticatedLayout>
   );
 }

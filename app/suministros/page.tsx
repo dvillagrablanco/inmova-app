@@ -17,7 +17,6 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Zap, Droplets, Flame, Wifi, Plus, FileText } from 'lucide-react';
-import { ModuleAIAssistant } from '@/components/ai/ModuleAIAssistant';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -214,7 +213,6 @@ export default function SuministrosPage() {
           </CardContent>
         </Card>
       </div>
-      <ModuleAIAssistant module="suministros" />
     </AuthenticatedLayout>
   );
 }

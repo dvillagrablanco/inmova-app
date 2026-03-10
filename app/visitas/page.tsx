@@ -50,7 +50,6 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { ModuleAIAssistant } from '@/components/ai/ModuleAIAssistant';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -656,7 +655,6 @@ export default function VisitasPage() {
           </DialogContent>
         </Dialog>
       </div>
-      <ModuleAIAssistant module="visitas" />
     </AuthenticatedLayout>
   );
 }

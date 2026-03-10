@@ -57,7 +57,6 @@ import {
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import logger, { logError } from '@/lib/logger';
 import { EntityChat } from '@/components/shared/EntityChat';
-import { ModuleAIAssistant } from '@/components/ai/ModuleAIAssistant';
 
 interface Incidencia {
   id: string;
@@ -972,7 +971,6 @@ export default function IncidenciasPage() {
               </TabsContent>
             </Tabs>
           </div>
-      <ModuleAIAssistant module="incidencias" />
         </AuthenticatedLayout>
   );
 }

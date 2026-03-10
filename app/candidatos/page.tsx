@@ -60,7 +60,6 @@ import {
 } from 'lucide-react';
 import { LoadingState } from '@/components/ui/loading-state';
 import { EmptyState } from '@/components/ui/empty-state';
-import { ModuleAIAssistant } from '@/components/ai/ModuleAIAssistant';
 import { FilterChips } from '@/components/ui/filter-chips';
 import logger, { logError } from '@/lib/logger';
 
@@ -841,7 +840,6 @@ export default function CandidatosPage() {
               </TabsContent>
             </Tabs>
           </div>
-      <ModuleAIAssistant module="candidatos" />
         </AuthenticatedLayout>
   );
 }

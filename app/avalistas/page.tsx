@@ -17,7 +17,6 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Plus, ExternalLink } from 'lucide-react';
-import { ModuleAIAssistant } from '@/components/ai/ModuleAIAssistant';
 import { toast } from 'sonner';
 import Link from 'next/link';
 
@@ -170,7 +169,6 @@ export default function AvalistasPage() {
           </CardContent>
         </Card>
       </div>
-      <ModuleAIAssistant module="avalistas" />
     </AuthenticatedLayout>
   );
 }
