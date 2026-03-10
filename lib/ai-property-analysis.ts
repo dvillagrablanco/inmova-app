@@ -359,99 +359,134 @@ ${phase1.zoneAnalysis.outliersPricePerM2.length > 0 ? `- Outliers descartados: $
   if (property.hasGarage) features.push('Garaje');
   if (property.caracteristicas) features.push(...property.caracteristicas);
 
-  const prompt = `Eres un tasador inmobiliario certificado con 20 años de experiencia en España.
-Realizas una valoración profesional combinando tu conocimiento experto con datos reales del mercado.
+  const prompt = `Eres un tasador inmobiliario certificado (RICS/ATASA) con 20+ años de experiencia en el mercado español. Realizas una valoración profesional rigurosa siguiendo las normas ECO 805/2003 y estándares internacionales de valoración (IVS).
+
+Tu valoración DEBE ser REALISTA — ni optimista ni pesimista — basada en datos verificables.
 
 ═══════════════════════════════════════════════════════
 PROPIEDAD A VALORAR
 ═══════════════════════════════════════════════════════
 - Dirección: ${property.address}, ${property.city} (CP: ${property.postalCode})
-${property.neighborhood ? `- Barrio: ${property.neighborhood}` : ''}
-- Superficie: ${property.squareMeters}m²
-- Habitaciones: ${property.rooms} | Baños: ${property.bathrooms}
-${property.floor ? `- Planta: ${property.floor}` : ''}
-- Estado: ${property.condition}
-${property.yearBuilt ? `- Año construcción: ${property.yearBuilt}` : ''}
-${property.orientacion ? `- Orientación: ${property.orientacion}` : ''}
-${features.length > 0 ? `- Equipamiento: ${features.join(', ')}` : ''}
-${property.descripcionAdicional ? `- Info adicional: ${property.descripcionAdicional}` : ''}
-- Finalidad: ${property.finalidad || 'venta'}
+${property.neighborhood ? `- Barrio/Zona: ${property.neighborhood}` : ''}
+- Superficie útil: ${property.squareMeters}m²
+- Distribución: ${property.rooms} habitaciones, ${property.bathrooms} baños
+${property.floor !== undefined ? `- Planta: ${property.floor}${property.floor === 0 ? ' (bajo)' : property.floor >= 4 ? ' (planta alta — prima +3-5%)' : ''}` : ''}
+- Estado conservación: ${property.condition === 'NEW' ? 'Obra nueva / A estrenar' : property.condition === 'NEEDS_RENOVATION' ? 'Necesita reforma (descuento -15% a -25%)' : 'Buen estado general'}
+${property.yearBuilt ? `- Antigüedad: ${new Date().getFullYear() - property.yearBuilt} años (construido ${property.yearBuilt})` : ''}
+${property.orientacion ? `- Orientación: ${property.orientacion}${property.orientacion === 'sur' ? ' (mejor orientación, prima +2-3%)' : property.orientacion === 'norte' ? ' (menos luminosidad, descuento -2%)' : ''}` : ''}
+${features.length > 0 ? `- Equipamiento: ${features.join(', ')}` : '- Equipamiento: Sin extras destacables'}
+${property.descripcionAdicional ? `- Observaciones: ${property.descripcionAdicional}` : ''}
+- Finalidad valoración: ${property.finalidad === 'venta' ? 'Determinación valor de mercado (venta)' : property.finalidad === 'alquiler' ? 'Determinación renta de mercado (alquiler)' : 'Valor de mercado + Renta de mercado'}
 
 ═══════════════════════════════════════════════════════
-DATOS DE MERCADO DE PLATAFORMAS (scraping en vivo)
+DATOS DE MERCADO — MÚLTIPLES FUENTES VERIFICADAS
 ═══════════════════════════════════════════════════════
 ${platformDataText}
 
 ═══════════════════════════════════════════════════════
-COMPARABLES ANALIZADOS POR IA (Fase 1 — filtrados por similitud)
+COMPARABLES PRE-ANALIZADOS POR IA (Fase 1 — filtrados por similitud)
 ═══════════════════════════════════════════════════════
 ${analyzedCompsText}
 
 ${zoneText}
 
-${internalComparables ? `═══════════════════════════════════════════════════════\nCOMPARABLES DEL PORTFOLIO INTERNO\n═══════════════════════════════════════════════════════\n${internalComparables}` : ''}
+${internalComparables ? `═══════════════════════════════════════════════════════\nCOMPARABLES DEL PORTFOLIO PROPIO (propiedades gestionadas)\n═══════════════════════════════════════════════════════\n${internalComparables}` : ''}
 
 ═══════════════════════════════════════════════════════
-INSTRUCCIONES DE VALORACIÓN
+METODOLOGÍA DE VALORACIÓN (5 PASOS OBLIGATORIOS)
 ═══════════════════════════════════════════════════════
 
-Realiza una valoración profesional en 4 pasos:
+PASO 1 — MÉTODO DE COMPARACIÓN (peso: 50-60%):
+- Usa SOLO comparables con similitud >60% de la Fase 1
+- Para cada comparable, ajusta el precio por:
+  · Diferencia de superficie (±1.5% por cada 5m² de diferencia)
+  · Estado/calidad (reforma: -15-25%, obra nueva: +10-15%)
+  · Planta (bajo: -5-8%, planta alta con ascensor: +3-5%, ático: +8-12%)
+  · Equipamiento (garaje: +8-12%, terraza: +5-8%, piscina: +3-5%, ascensor: +3-5%)
+  · Orientación (sur: +2-3%, norte: -2%)
+- CRÍTICO: Los asking prices de portales (Idealista, Fotocasa) están INFLADOS un 10-15% respecto al precio real de cierre. APLICA SIEMPRE este descuento.
+- Los precios del Notariado son precios REALES escriturados — máxima fiabilidad.
+- Si hay datos de Idealista Data Platform, son datos profesionales agregados — fiabilidad alta, pero siguen siendo asking prices (aplicar descuento ~8-10%).
 
-PASO 1 — MÉTODO DE COMPARABLES:
-- Usa los comparables con mayor similitud (>70%) como base
-- Ajusta por diferencias (superficie, estado, equipamiento, planta)
-- Pondera: Notariado (precio real) > Portales (asking price -12%)
+PASO 2 — MÉTODO DE CAPITALIZACIÓN DE RENTAS (peso: 20-30%):
+- Estima la renta mensual de LARGA ESTANCIA (contrato ≥12 meses) basándote en:
+  · Precios de alquiler de la zona (datos de plataformas arriba)
+  · Rentabilidad bruta de la zona si disponible (datos Idealista)
+  · Comparables de alquiler similares
+- Calcula: Valor = (Renta mensual × 12) / Cap Rate zona
+  · Cap Rate típico España: 3.5-5.5% según ciudad y zona
+  · Madrid centro: 3.5-4.2%, Barcelona centro: 3.8-4.5%
+  · Ciudades medias: 4.5-5.5%, zonas periféricas: 5.5-7%
+- El resultado sirve como validación cruzada del método de comparables
 
-PASO 2 — MÉTODO DE CAPITALIZACIÓN:
-- Estima renta mensual de LARGA ESTANCIA (contrato 12+ meses) basándote en alquileres de la zona
-- Calcula valor por capitalización (renta anual / cap rate zona)
-- Compara con el valor por comparables
+PASO 3 — ANÁLISIS DE INVERSIÓN (MEDIA ESTANCIA 1-11 meses):
+- Estima renta media estancia (contratos temporales) con premium sobre larga estancia:
+  · Madrid/Barcelona premium: +40-60%
+  · Ciudades turísticas (Málaga, Palma, Benidorm): +50-80%
+  · Ciudades medias: +25-40%
+- Estima ocupación REALISTA anual (no 100%): típico 75-90% según zona
+- Calcula rentabilidad bruta = (renta × meses ocupados) / valor inmueble
+- Perfil de inquilino típico: profesional/ejecutivo en movilidad, estudiante posgrado, nómada digital, etc.
 
-PASO 3 — ANÁLISIS DE MEDIA ESTANCIA (1-11 meses):
-Si la propiedad es vivienda, calcula también el alquiler de MEDIA ESTANCIA:
-- Estima renta mensual para contratos temporales (1-11 meses)
-- La media estancia suele tener un PREMIUM del 25-60% sobre larga estancia
-  (varía por ciudad: Madrid/Barcelona ~40-60%, ciudades medianas ~25-35%)
-- Considera: zona turística/empresarial, amueblado, servicios incluidos
-- Estima la ocupación anual realista (no 100%; típico 75-90%)
-- Calcula rentabilidad neta considerando la ocupación
-- Indica el perfil típico de inquilino (profesional, estudiante, nómada digital, etc.)
+PASO 4 — VALIDACIÓN CRUZADA Y COHERENCIA:
+- Compara el valor obtenido por comparables vs capitalización
+  · Si difieren >15%, analiza por qué y ajusta
+  · Prioriza comparables si hay suficientes (≥3 con similitud >70%)
+  · Prioriza capitalización si los comparables son escasos o poco similares
+- Verifica coherencia: el precio/m² resultante debe estar dentro del rango de la zona
+- Si hay evolución histórica de precios, verifica que la tendencia es coherente
+- Si hay datos de subzonas/distritos, usa la subzona más cercana como referencia primaria
 
-PASO 4 — VALORACIÓN FINAL:
-- Pondera ambos métodos (70% comparables + 30% capitalización)
-- Aplica tu criterio experto para ajustes finales
-- Justifica cada decisión en el reasoning
+PASO 5 — DETERMINACIÓN FINAL Y CONFIANZA:
+- Pondera: comparables (55%) + capitalización (25%) + criterio experto (20%)
+- Ajuste final por factores macro: tendencia del mercado, tipos de interés, estacionalidad
+- Confianza (50-98):
+  · >85 = datos Notariado + comparables reales escriturados + ≥5 comparables similares
+  · 75-85 = datos de portales + Idealista Data + ≥3 comparables buenos
+  · 65-75 = asking prices + pocos comparables o baja similitud
+  · 50-65 = datos estáticos o insuficientes, valoración estimativa
+- El rango min-max debe reflejar incertidumbre REAL (típico ±8-12% del valor central)
 
-Responde SOLO con JSON exacto:
+REGLAS DE REALISMO:
+- NO inflar el valor para complacer. Un inmueble medio vale lo que indica el mercado.
+- La reforma necesaria SIEMPRE penaliza: -15% reforma parcial, -25% reforma integral.
+- Sin ascensor en planta >2: penalización -5% a -10%.
+- Antigüedad >40 años sin reforma: penalización adicional -5%.
+- Zona sin parking + inmueble sin garaje: -3-5% en ciudades con problema de aparcamiento.
+
+Responde SOLO con JSON exacto (sin texto adicional antes o después):
 {
-  "estimatedValue": <entero, euros>,
-  "minValue": <entero, euros>,
-  "maxValue": <entero, euros>,
+  "estimatedValue": <entero, euros — valor de mercado más probable>,
+  "minValue": <entero, euros — límite inferior razonable>,
+  "maxValue": <entero, euros — límite superior razonable>,
   "precioM2": <entero, €/m²>,
-  "confidenceScore": <50-98>,
-  "reasoning": "<3-5 párrafos explicando: 1) qué datos usaste, 2) cómo ponderaste las fuentes, 3) ajustes aplicados, 4) conclusión>",
-  "analisisMercado": "<2-3 frases sobre la zona y su mercado actual>",
-  "metodologiaUsada": "<explicación breve de los métodos combinados>",
-  "tendenciaMercado": "<alcista|bajista|estable>",
-  "porcentajeTendencia": <número 0.5-10>,
-  "tiempoEstimadoVenta": "<ej: 2-4 meses>",
+  "confidenceScore": <50-98, basado en calidad de datos>,
 
-  "alquilerLargaEstancia": <entero, €/mes, contrato 12+ meses>,
+  "reasoning": "<4-6 párrafos DETALLADOS explicando: 1) Fuentes de datos utilizadas y su fiabilidad, 2) Comparables seleccionados y ajustes aplicados a cada uno, 3) Método de capitalización: renta estimada, cap rate usado y validación cruzada, 4) Factores de ajuste positivos y negativos con su impacto en €, 5) Conclusión y nivel de confianza>",
+
+  "analisisMercado": "<3-4 frases sobre: situación actual del mercado en la zona, tendencia de precios, nivel de oferta/demanda, perspectiva a 6-12 meses>",
+  "metodologiaUsada": "<Descripción de los métodos: comparación directa (X comparables), capitalización de rentas (cap rate X%), ajustes por características, validación cruzada>",
+
+  "tendenciaMercado": "<alcista|bajista|estable>",
+  "porcentajeTendencia": <número 0.5-12, variación interanual %>,
+  "tiempoEstimadoVenta": "<ej: 2-4 meses, basado en demanda de la zona y días medios en mercado>",
+
+  "alquilerLargaEstancia": <entero, €/mes, contrato ≥12 meses>,
   "rentabilidadLargaEstancia": <número, % bruto anual>,
-  "capRate": <número, %>,
+  "capRate": <número, % neto estimado>,
 
   "alquilerMediaEstancia": <entero, €/mes, contrato 1-11 meses>,
   "alquilerMediaEstanciaMin": <entero, €/mes, temporada baja>,
   "alquilerMediaEstanciaMax": <entero, €/mes, temporada alta>,
-  "rentabilidadMediaEstancia": <número, % bruto anual considerando ocupación>,
-  "ocupacionEstimadaMediaEstancia": <número, % anual, ej: 80>,
-  "perfilInquilinoMediaEstancia": "<ej: Profesionales en movilidad, estudiantes Erasmus, nómadas digitales>",
+  "rentabilidadMediaEstancia": <número, % bruto anual ajustado por ocupación>,
+  "ocupacionEstimadaMediaEstancia": <número, % anual realista>,
+  "perfilInquilinoMediaEstancia": "<perfiles concretos para esta zona>",
 
-  "factoresPositivos": ["<factor1>", "<factor2>", "<factor3>"],
-  "factoresNegativos": ["<factor1>", "<factor2>"],
-  "recomendaciones": ["<recomendación1>", "<recomendación2>", "<recomendación3>"],
+  "factoresPositivos": ["<factor1 con impacto estimado>", "<factor2>", "<factor3>"],
+  "factoresNegativos": ["<factor1 con impacto estimado>", "<factor2>"],
+  "recomendaciones": ["<recomendación1 con impacto en valor>", "<recomendación2>", "<recomendación3>"],
   "comparablesUsados": [
-    {"direccion": "<del comparable real usado>", "precio": <número>, "superficie": <número>, "precioM2": <número>, "similitud": <0.0-1.0>, "fuente": "<portal>"}
+    {"direccion": "<dirección real del comparable>", "precio": <número>, "superficie": <número>, "precioM2": <número>, "similitud": <0.0-1.0>, "fuente": "<portal>"}
   ]
 }`;
 
@@ -499,10 +534,19 @@ Responde SOLO con JSON exacto:
   if (phase1.analyzedComparables.some((c) => c.source === 'fotocasa')) sourcesUsed.push('fotocasa');
   if (phase1.analyzedComparables.some((c) => c.source === 'habitaclia')) sourcesUsed.push('habitaclia');
   if (phase1.analyzedComparables.some((c) => c.source === 'pisos_com')) sourcesUsed.push('pisos_com');
+  if (platformDataText.includes('Idealista Data')) sourcesUsed.push('idealista_data');
   sourcesUsed.push('notariado', 'ine', 'claude_ai');
 
   const estimatedValue = raw.estimatedValue || raw.valorEstimado || 0;
-  const rental = computeRentalEstimates(raw, estimatedValue);
+
+  // Extraer yield real de Idealista del texto de plataformas
+  let idealistaYield: number | null = null;
+  const yieldMatch = platformDataText.match(/Rentabilidad bruta alquiler:\s*([\d.,]+)%/);
+  if (yieldMatch) {
+    idealistaYield = parseFloat(yieldMatch[1].replace(',', '.'));
+  }
+
+  const rental = computeRentalEstimates(raw, estimatedValue, idealistaYield);
 
   return {
     estimatedValue,
@@ -538,29 +582,39 @@ Responde SOLO con JSON exacto:
 // CÁLCULO DE ALQUILERES CON FALLBACK GARANTIZADO
 // ============================================================================
 
-function computeRentalEstimates(raw: any, estimatedValue: number) {
-  // Rentabilidades típicas en España para calcular fallback
-  const YIELD_LARGA = 0.045; // 4.5% bruto anual
-  const YIELD_MEDIA_PREMIUM = 1.40; // media estancia = larga * 1.40
-  const OCUPACION_MEDIA = 82; // % ocupación media estancia
+function computeRentalEstimates(
+  raw: any,
+  estimatedValue: number,
+  idealistaYield?: number | null,
+) {
+  const YIELD_MEDIA_PREMIUM = 1.40;
+  const OCUPACION_MEDIA = 82;
 
-  // Larga estancia: usar valor de la IA si existe, si no calcular
+  // Rentabilidad base: usar Idealista si disponible, si no IA, si no fallback
+  const yieldBase = idealistaYield && idealistaYield > 0
+    ? idealistaYield / 100
+    : 0.045;
+
+  // Larga estancia: priorizar IA, luego calcular con yield real
   let alquilerEstimado = Number(raw.alquilerLargaEstancia || raw.alquilerEstimado || 0);
   if (alquilerEstimado <= 0 && estimatedValue > 0) {
-    alquilerEstimado = Math.round((estimatedValue * YIELD_LARGA) / 12);
+    alquilerEstimado = Math.round((estimatedValue * yieldBase) / 12);
   }
 
   let rentabilidadAlquiler = Number(raw.rentabilidadLargaEstancia || raw.rentabilidadAlquiler || 0);
   if (rentabilidadAlquiler <= 0 && estimatedValue > 0 && alquilerEstimado > 0) {
     rentabilidadAlquiler = Math.round(((alquilerEstimado * 12) / estimatedValue) * 1000) / 10;
   }
+  // Si Idealista tiene yield real y es diferente al calculado, ajustar
+  if (idealistaYield && idealistaYield > 0 && Math.abs(rentabilidadAlquiler - idealistaYield) > 1) {
+    rentabilidadAlquiler = Math.round(((rentabilidadAlquiler + idealistaYield) / 2) * 10) / 10;
+  }
 
   let capRate = Number(raw.capRate || 0);
   if (capRate <= 0 && rentabilidadAlquiler > 0) {
-    capRate = Math.round(rentabilidadAlquiler * 0.75 * 10) / 10; // ~75% del bruto
+    capRate = Math.round(rentabilidadAlquiler * 0.75 * 10) / 10;
   }
 
-  // Media estancia: usar valor de la IA si existe, si no calcular con premium
   let alquilerMediaEstancia = Number(raw.alquilerMediaEstancia || 0);
   if (alquilerMediaEstancia <= 0 && alquilerEstimado > 0) {
     alquilerMediaEstancia = Math.round(alquilerEstimado * YIELD_MEDIA_PREMIUM);
