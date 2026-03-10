@@ -108,8 +108,8 @@ export default function ExperiencePage() {
       // Actualizar sesión
       await update({ experienceLevel: selectedLevel });
       
-      // Redirigir al onboarding personalizado
-      router.push('/onboarding/start');
+      // Redirigir al dashboard (onboarding completo)
+      router.push('/dashboard');
     } catch (error) {
       console.error('Error saving experience level:', error);
     } finally {
