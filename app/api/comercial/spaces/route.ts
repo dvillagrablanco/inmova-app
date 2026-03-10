@@ -118,11 +118,66 @@ export async function GET(request: NextRequest) {
       };
     });
 
+    // Si no hay CommercialSpaces, cargar también Units de tipo comercial como fallback
+    if (formattedSpaces.length === 0) {
+      const UNIT_TIPO_MAPPING: Record<string, string[]> = {
+        oficinas: ['oficina'],
+        locales: ['local'],
+        naves: ['nave_industrial'],
+        coworking: ['coworking_space'],
+      };
+      const unitTipos = categoria && UNIT_TIPO_MAPPING[categoria]
+        ? UNIT_TIPO_MAPPING[categoria]
+        : ['local', 'oficina', 'nave_industrial', 'coworking_space'];
+
+      const units = await prisma.unit.findMany({
+        where: {
+          building: { companyId: typeof companyFilter === 'string' ? companyFilter : undefined },
+          tipo: { in: unitTipos as any },
+          ...(estadoFilter === 'disponible' ? { estado: 'disponible' } : {}),
+          ...(estadoFilter === 'ocupada' ? { estado: 'ocupado' } : {}),
+        },
+        include: {
+          building: { select: { id: true, nombre: true, direccion: true, ciudad: true } },
+          tenant: { select: { id: true, nombreCompleto: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      for (const unit of units) {
+        formattedSpaces.push({
+          id: unit.id,
+          nombre: `${unit.tipo === 'local' ? 'Local' : unit.tipo === 'oficina' ? 'Oficina' : unit.tipo === 'nave_industrial' ? 'Nave' : 'Coworking'} ${unit.numero}`,
+          referencia: unit.referenciaCatastral || null,
+          tipo: unit.tipo,
+          direccion: unit.building?.direccion || '',
+          ciudad: unit.building?.ciudad || '',
+          planta: unit.planta,
+          superficie: unit.superficie,
+          superficieUtil: unit.superficieUtil || unit.superficie * 0.9,
+          estado: unit.tenant ? 'ocupada' : (unit.estado === 'disponible' ? 'disponible' : unit.estado),
+          rentaMensual: unit.rentaMensual,
+          arrendatario: unit.tenant?.nombreCompleto || null,
+          arrendatarioId: unit.tenant?.id || null,
+          buildingId: unit.buildingId,
+          buildingName: unit.building?.nombre,
+          caracteristicas: [
+            unit.aireAcondicionado && 'climatizacion',
+            unit.amueblado && 'amueblado',
+          ].filter(Boolean),
+          imagen: unit.imagenes?.[0] || '/api/placeholder/400/200',
+          descripcion: null,
+          createdAt: unit.createdAt,
+          _source: 'unit', // Marca que viene de la tabla units
+        });
+      }
+    }
+
     // Estadísticas
     const stats = {
       total: formattedSpaces.length,
       ocupadas: formattedSpaces.filter((s) => s.estado === 'ocupada').length,
-      disponibles: formattedSpaces.filter((s) => s.estado === 'disponible').length,
+      disponibles: formattedSpaces.filter((s) => s.estado === 'disponible' || s.estado === 'disponible').length,
       reservadas: 0,
       superficieTotal: formattedSpaces.reduce((sum, s) => sum + (s.superficie || 0), 0),
       rentaMensualTotal: formattedSpaces
