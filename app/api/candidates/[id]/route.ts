@@ -43,6 +43,41 @@ export async function GET(request: Request, { params }: { params: { id: string }
   }
 }
 
+export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+  const prisma = await getPrisma();
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { estado, notas, scoring } = body;
+
+    const candidate = await prisma.candidate.update({
+      where: { id: params.id },
+      data: {
+        ...(estado && { estado }),
+        ...(notas !== undefined && { notas }),
+        ...(scoring !== undefined && { scoring: parseInt(String(scoring)) }),
+      },
+      include: {
+        unit: {
+          include: {
+            building: true,
+          },
+        },
+        visits: true,
+      },
+    });
+
+    return NextResponse.json(candidate);
+  } catch (error) {
+    logger.error('Error updating candidate:', error);
+    return NextResponse.json({ error: 'Error al actualizar candidato' }, { status: 500 });
+  }
+}
+
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   const prisma = await getPrisma();
   try {

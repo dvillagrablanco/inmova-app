@@ -369,6 +369,11 @@ enum EstadoCivil {
 
 enum CandidateStatus {
   nuevo
+  contactado
+  visita_programada
+  visita_realizada
+  reservado
+  descartado
   en_revision
   preseleccionado
   aprobado
@@ -5177,6 +5182,7 @@ enum IncidentType {
 
 enum IncidentStatus {
   abierta
+  asignada
   en_proceso
   resuelta
   cerrada

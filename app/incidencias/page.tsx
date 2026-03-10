@@ -7,6 +7,7 @@ import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { SmartBreadcrumbs } from '@/components/navigation/smart-breadcrumbs';
 import { ContextualQuickActions } from '@/components/navigation/contextual-quick-actions';
 
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -49,6 +50,9 @@ import {
   MessageSquare,
   Edit,
   Trash2,
+  ChevronRight,
+  LayoutGrid,
+  List,
 } from 'lucide-react';
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import logger, { logError } from '@/lib/logger';
@@ -64,9 +68,30 @@ interface Incidencia {
   fotos: string[];
   building: { nombre: string };
   unit?: { numero: string };
+  asignadoA?: string | null;
   createdAt: string;
   fechaResolucion?: string;
   costoFinal?: number;
+}
+
+const KANBAN_COLUMNS = [
+  { id: 'abierta', label: 'Abierta', estados: ['abierta'], headerColor: 'border-l-4 border-l-red-500' },
+  { id: 'asignada', label: 'Asignada', estados: ['asignada'], headerColor: 'border-l-4 border-l-orange-500' },
+  { id: 'en_proceso', label: 'En Progreso', estados: ['en_proceso'], headerColor: 'border-l-4 border-l-amber-500' },
+  { id: 'resuelta', label: 'Resuelta', estados: ['resuelta'], headerColor: 'border-l-4 border-l-green-500' },
+  { id: 'cerrada', label: 'Cerrada', estados: ['cerrada'], headerColor: 'border-l-4 border-l-slate-500' },
+] as const;
+
+function getNextIncidentEstado(current: string): string | null {
+  const order: Record<string, string> = {
+    abierta: 'asignada',
+    asignada: 'en_proceso',
+    en_proceso: 'resuelta',
+    resuelta: 'cerrada',
+    cerrada: null,
+    rechazada: null,
+  };
+  return order[current] ?? null;
 }
 
 interface Building {
@@ -88,6 +113,7 @@ export default function IncidenciasPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterEstado, setFilterEstado] = useState('todas');
   const [filterPrioridad, setFilterPrioridad] = useState('todas');
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     buildingId: '',
@@ -175,6 +201,15 @@ export default function IncidenciasPage() {
     }
   };
 
+  const handleAdvanceIncidencia = async (id: string, nextEstado: string) => {
+    setUpdatingId(id);
+    try {
+      await handleUpdateEstado(id, nextEstado);
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
   const handleEdit = (incidencia: Incidencia) => {
     setEditingIncidencia(incidencia);
     setFormData({
@@ -249,11 +284,58 @@ export default function IncidenciasPage() {
 
   // KPIs
   const totalIncidencias = incidencias.length;
-  const abiertas = incidencias.filter((i) => i.estado === 'abierta').length;
+  const abiertas = incidencias.filter((i) => i.estado === 'abierta' || i.estado === 'asignada').length;
   const enProceso = incidencias.filter((i) => i.estado === 'en_proceso').length;
   const resueltas = incidencias.filter(
     (i) => i.estado === 'resuelta' || i.estado === 'cerrada'
   ).length;
+
+  const kanbanStats = (() => {
+    const totalAbiertas = incidencias.filter(
+      (i) => !['resuelta', 'cerrada', 'rechazada'].includes(i.estado)
+    ).length;
+    const urgentes = incidencias.filter((i) => i.prioridad === 'urgente').length;
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const resueltasEsteMes = incidencias.filter(
+      (i) =>
+        (i.estado === 'resuelta' || i.estado === 'cerrada') &&
+        i.fechaResolucion &&
+        new Date(i.fechaResolucion) >= startOfMonth
+    ).length;
+    const resueltasConFecha = incidencias.filter(
+      (i) => (i.estado === 'resuelta' || i.estado === 'cerrada') && i.fechaResolucion
+    );
+    const tiempoMedio =
+      resueltasConFecha.length > 0
+        ? Math.round(
+            resueltasConFecha.reduce((acc, inc) => {
+              const created = new Date(inc.createdAt).getTime();
+              const resolved = new Date(inc.fechaResolucion!).getTime();
+              return acc + (resolved - created) / (1000 * 60 * 60 * 24);
+            }, 0) / resueltasConFecha.length
+          )
+        : 0;
+    return {
+      totalAbiertas,
+      urgentes,
+      resueltasEsteMes,
+      tiempoMedio,
+    };
+  })();
+
+  const getIncidenciasForColumn = (estados: readonly string[]) =>
+    filteredIncidencias.filter((inc) => estados.includes(inc.estado));
+
+  const getPrioridadBadgeClass = (prioridad: string) => {
+    const config: Record<string, string> = {
+      urgente: 'bg-red-500/15 text-red-600 border-red-200',
+      alta: 'bg-orange-500/15 text-orange-600 border-orange-200',
+      media: 'bg-amber-500/15 text-amber-600 border-amber-200',
+      baja: 'bg-green-500/15 text-green-600 border-green-200',
+    };
+    return config[prioridad] ?? 'bg-gray-500/15 text-gray-600 border-gray-200';
+  };
 
   if (loading) {
     return (
@@ -559,6 +641,147 @@ export default function IncidenciasPage() {
                 </DialogContent>
               </Dialog>
 
+            <Tabs defaultValue="lista" className="space-y-4">
+              <TabsList className="grid w-full max-w-[240px] grid-cols-2">
+                <TabsTrigger value="kanban" className="flex items-center gap-2">
+                  <LayoutGrid className="h-4 w-4" />
+                  Kanban
+                </TabsTrigger>
+                <TabsTrigger value="lista" className="flex items-center gap-2">
+                  <List className="h-4 w-4" />
+                  Lista
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="kanban" className="space-y-4">
+                {/* Kanban KPIs */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Total Abiertas</CardTitle>
+                      <AlertCircle className="h-4 w-4 text-red-500" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{kanbanStats.totalAbiertas}</div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Urgentes</CardTitle>
+                      <AlertTriangle className="h-4 w-4 text-red-500" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{kanbanStats.urgentes}</div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Resueltas Este Mes</CardTitle>
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{kanbanStats.resueltasEsteMes}</div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Tiempo Medio Resolución</CardTitle>
+                      <Clock className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{kanbanStats.tiempoMedio}d</div>
+                      <p className="text-xs text-muted-foreground">días</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Kanban Columns */}
+                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 overflow-x-auto pb-4">
+                  {KANBAN_COLUMNS.map((col) => {
+                    const colIncidencias = getIncidenciasForColumn(col.estados);
+                    return (
+                      <div
+                        key={col.id}
+                        className={`rounded-lg border bg-muted/30 p-4 min-h-[400px] min-w-[200px] flex-shrink-0 ${col.headerColor}`}
+                      >
+                        <h3 className="font-medium mb-3 flex items-center gap-2">
+                          <span>{col.label}</span>
+                          <Badge variant="secondary" className="text-xs">
+                            {colIncidencias.length}
+                          </Badge>
+                        </h3>
+                        <div className="space-y-3">
+                          {colIncidencias.map((inc) => {
+                            const nextEstado = getNextIncidentEstado(inc.estado);
+                            const isUpdating = updatingId === inc.id;
+                            const ubicacion = inc.unit
+                              ? `${inc.building.nombre} - Unidad ${inc.unit.numero}`
+                              : inc.building.nombre;
+                            return (
+                              <Card
+                                key={inc.id}
+                                className="cursor-pointer hover:shadow-md transition-shadow"
+                              >
+                                <CardContent className="p-3">
+                                  <div className="flex flex-col gap-2">
+                                    <p className="font-medium text-sm truncate">{inc.titulo}</p>
+                                    <Badge
+                                      variant="outline"
+                                      className={`text-xs w-fit capitalize ${getPrioridadBadgeClass(inc.prioridad)}`}
+                                    >
+                                      {inc.prioridad}
+                                    </Badge>
+                                    <p className="text-xs text-muted-foreground truncate">
+                                      {ubicacion}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">
+                                      {new Date(inc.createdAt).toLocaleDateString('es-ES', {
+                                        day: '2-digit',
+                                        month: 'short',
+                                      })}
+                                    </p>
+                                    {inc.asignadoA && (
+                                      <p className="text-xs text-muted-foreground">
+                                        Asignado
+                                      </p>
+                                    )}
+                                    {nextEstado && (
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="text-xs h-7 mt-1"
+                                        disabled={!!isUpdating}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleAdvanceIncidencia(inc.id, nextEstado);
+                                        }}
+                                      >
+                                        {isUpdating ? '...' : (
+                                          <>
+                                            Avanzar
+                                            <ChevronRight className="h-3 w-3 ml-1" />
+                                          </>
+                                        )}
+                                      </Button>
+                                    )}
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            );
+                          })}
+                          {colIncidencias.length === 0 && (
+                            <p className="text-sm text-muted-foreground text-center py-8">
+                              Sin incidencias
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="lista" className="space-y-6">
             {/* KPIs */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
               <Card>
@@ -619,6 +842,7 @@ export default function IncidenciasPage() {
                     <SelectContent>
                       <SelectItem value="todas">Todos los estados</SelectItem>
                       <SelectItem value="abierta">Abierta</SelectItem>
+                      <SelectItem value="asignada">Asignada</SelectItem>
                       <SelectItem value="en_proceso">En Proceso</SelectItem>
                       <SelectItem value="resuelta">Resuelta</SelectItem>
                       <SelectItem value="cerrada">Cerrada</SelectItem>
@@ -673,7 +897,7 @@ export default function IncidenciasPage() {
                             <Badge
                               className="capitalize"
                               variant={
-                                inc.estado === 'abierta'
+                                inc.estado === 'abierta' || inc.estado === 'asignada'
                                   ? 'destructive'
                                   : inc.estado === 'en_proceso'
                                     ? 'default'
@@ -695,13 +919,18 @@ export default function IncidenciasPage() {
                           </div>
                         </div>
                         <div className="flex flex-wrap gap-2">
-                          {inc.estado === 'abierta' && (
+                          {(inc.estado === 'abierta' || inc.estado === 'asignada') && (
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => handleUpdateEstado(inc.id, 'en_proceso')}
+                              onClick={() =>
+                                handleUpdateEstado(
+                                  inc.id,
+                                  inc.estado === 'abierta' ? 'asignada' : 'en_proceso'
+                                )
+                              }
                             >
-                              Iniciar
+                              {inc.estado === 'abierta' ? 'Asignar' : 'Iniciar'}
                             </Button>
                           )}
                           {inc.estado === 'en_proceso' && (
@@ -731,6 +960,8 @@ export default function IncidenciasPage() {
                 ))
               )}
             </div>
+              </TabsContent>
+            </Tabs>
           </div>
         </AuthenticatedLayout>
   );

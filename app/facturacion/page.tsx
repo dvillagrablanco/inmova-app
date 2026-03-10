@@ -1,6 +1,6 @@
 /**
  * Página de Facturación para Empresas Clientes
- * Permite a las empresas ver sus facturas y suscripción
+ * Tabs: Facturas (inmobiliarias), Series, Suscripción (B2B)
  */
 
 'use client';
@@ -8,10 +8,12 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import {
   Table,
   TableBody,
@@ -20,6 +22,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
@@ -27,7 +36,6 @@ import {
   FileText,
   Download,
   CreditCard,
-  Calendar,
   CheckCircle,
   AlertCircle,
   Clock,
@@ -36,10 +44,28 @@ import {
   Package,
   Users,
   Building,
+  Plus,
+  Euro,
+  Settings,
+  Eye,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import logger, { logError } from '@/lib/logger';
+import logger from '@/lib/logger';
+
+interface FacturaInmobiliaria {
+  id: string;
+  numeroFactura: string;
+  serie: string;
+  fecha: string;
+  concepto: string;
+  baseImponible: number;
+  total: number;
+  estado: string;
+  tipo: string;
+  destinatario: { nombre: string; nif?: string };
+  inmueble?: string;
+}
 
 interface Invoice {
   id: string;
@@ -81,31 +107,46 @@ export default function FacturacionPage() {
     propiedades: 0,
   });
 
+  // Facturas inmobiliarias (Homming-style)
+  const [facturas, setFacturas] = useState<FacturaInmobiliaria[]>([]);
+  const [kpis, setKpis] = useState({
+    totalFacturado: 0,
+    pendientesCobro: 0,
+    facturasEsteMes: 0,
+  });
+  const [filtrosFacturas, setFiltrosFacturas] = useState({
+    serie: '',
+    estado: '',
+    tipo: '',
+    fechaDesde: '',
+    fechaHasta: '',
+    destinatario: '',
+  });
+
   useEffect(() => {
-    if (session?.user) {
-      loadData();
-    }
+    if (session?.user) loadData();
   }, [session]);
+
+  useEffect(() => {
+    if (session?.user) loadFacturasInmobiliarias();
+  }, [session, filtrosFacturas.serie, filtrosFacturas.estado, filtrosFacturas.tipo, filtrosFacturas.fechaDesde, filtrosFacturas.fechaHasta, filtrosFacturas.destinatario]);
 
   const loadData = async () => {
     try {
       setLoading(true);
 
-      // Cargar facturas de la empresa
       const invoicesRes = await fetch('/api/b2b-billing/invoices');
       if (invoicesRes.ok) {
         const data = await invoicesRes.json();
-        setInvoices(data.invoices);
+        setInvoices(data.invoices || []);
       }
 
-      // Cargar información de la empresa
       const companyRes = await fetch('/api/company');
       if (companyRes.ok) {
         const companyData = await companyRes.json();
         setCompany(companyData);
       }
 
-      // Cargar estadísticas de uso
       const statsRes = await fetch('/api/dashboard?stats=usage');
       if (statsRes.ok) {
         const stats = await statsRes.json();
@@ -122,6 +163,28 @@ export default function FacturacionPage() {
     }
   };
 
+  const loadFacturasInmobiliarias = async () => {
+    try {
+      const params = new URLSearchParams();
+      if (filtrosFacturas.serie) params.set('serie', filtrosFacturas.serie);
+      if (filtrosFacturas.estado) params.set('estado', filtrosFacturas.estado);
+      if (filtrosFacturas.tipo) params.set('tipo', filtrosFacturas.tipo);
+      if (filtrosFacturas.fechaDesde) params.set('fechaDesde', filtrosFacturas.fechaDesde);
+      if (filtrosFacturas.fechaHasta) params.set('fechaHasta', filtrosFacturas.fechaHasta);
+      if (filtrosFacturas.destinatario) params.set('destinatario', filtrosFacturas.destinatario);
+
+      const res = await fetch(`/api/facturacion?${params}`);
+      if (res.ok) {
+        const json = await res.json();
+        setFacturas(json.data || []);
+        setKpis(json.kpis || { totalFacturado: 0, pendientesCobro: 0, facturasEsteMes: 0 });
+      }
+    } catch {
+      toast.error('Error al cargar facturas');
+    }
+  };
+
+
   const getEstadoBadge = (estado: string) => {
     const badges: Record<string, { color: string; icon: any }> = {
       PENDIENTE: { color: 'bg-yellow-100 text-yellow-800 border-yellow-300', icon: Clock },
@@ -129,6 +192,11 @@ export default function FacturacionPage() {
       VENCIDA: { color: 'bg-red-100 text-red-800 border-red-300', icon: AlertCircle },
       CANCELADA: { color: 'bg-gray-100 text-gray-800 border-gray-300', icon: XCircle },
       PARCIALMENTE_PAGADA: { color: 'bg-blue-100 text-blue-800 border-blue-300', icon: Clock },
+      borrador: { color: 'bg-gray-100 text-gray-800 border-gray-300', icon: FileText },
+      emitida: { color: 'bg-blue-100 text-blue-800 border-blue-300', icon: Clock },
+      pagada: { color: 'bg-green-100 text-green-800 border-green-300', icon: CheckCircle },
+      anulada: { color: 'bg-red-100 text-red-800 border-red-300', icon: XCircle },
+      rectificada: { color: 'bg-purple-100 text-purple-800 border-purple-300', icon: FileText },
     };
 
     const badge = badges[estado] || { color: 'bg-gray-100 text-gray-800', icon: FileText };
@@ -172,12 +240,195 @@ export default function FacturacionPage() {
   return (
     <AuthenticatedLayout>
       <div className="max-w-7xl mx-auto space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold">Facturación y Suscripción</h1>
-        <p className="text-muted-foreground">Gestiona tus facturas, pagos y plan de suscripción</p>
-      </div>
+        <div>
+          <h1 className="text-3xl font-bold">Facturación y Suscripción</h1>
+          <p className="text-muted-foreground">Gestiona tus facturas inmobiliarias, series y plan de suscripción</p>
+        </div>
 
+        <Tabs defaultValue="facturas" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 lg:w-auto lg:inline-grid">
+            <TabsTrigger value="facturas" className="gap-2">
+              <FileText className="w-4 h-4" />
+              Facturas ({facturas.length})
+            </TabsTrigger>
+            <TabsTrigger value="series" className="gap-2">
+              <Settings className="w-4 h-4" />
+              Series
+            </TabsTrigger>
+            <TabsTrigger value="suscripcion" className="gap-2">
+              <Package className="w-4 h-4" />
+              Suscripción
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Tab Facturas */}
+          <TabsContent value="facturas" className="space-y-6 mt-6">
+            <div className="flex items-center justify-between">
+              <div className="grid gap-4 md:grid-cols-3">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total facturado</CardTitle>
+                    <Euro className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">€{kpis.totalFacturado.toFixed(2)}</div>
+                    <p className="text-xs text-muted-foreground">Facturas emitidas y pagadas</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Pendientes de cobro</CardTitle>
+                    <AlertCircle className="h-4 w-4 text-yellow-600" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">€{kpis.pendientesCobro.toFixed(2)}</div>
+                    <p className="text-xs text-muted-foreground">Facturas emitidas sin cobrar</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Este mes</CardTitle>
+                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{kpis.facturasEsteMes}</div>
+                    <p className="text-xs text-muted-foreground">Facturas emitidas este mes</p>
+                  </CardContent>
+                </Card>
+              </div>
+              <Button asChild>
+                <Link href="/facturacion/nueva">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nueva factura
+                </Link>
+              </Button>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Facturas inmobiliarias</CardTitle>
+                <CardDescription>Facturas, proformas y rectificativas de propiedades</CardDescription>
+                <div className="flex flex-wrap gap-2 pt-4">
+                  <Input
+                    placeholder="Buscar destinatario..."
+                    className="max-w-[200px]"
+                    value={filtrosFacturas.destinatario}
+                    onChange={(e) => setFiltrosFacturas({ ...filtrosFacturas, destinatario: e.target.value })}
+                  />
+                  <Select value={filtrosFacturas.estado} onValueChange={(v) => setFiltrosFacturas({ ...filtrosFacturas, estado: v })}>
+                    <SelectTrigger className="w-[140px]">
+                      <SelectValue placeholder="Estado" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Todos</SelectItem>
+                      <SelectItem value="borrador">Borrador</SelectItem>
+                      <SelectItem value="emitida">Emitida</SelectItem>
+                      <SelectItem value="pagada">Pagada</SelectItem>
+                      <SelectItem value="anulada">Anulada</SelectItem>
+                      <SelectItem value="rectificada">Rectificada</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={filtrosFacturas.tipo} onValueChange={(v) => setFiltrosFacturas({ ...filtrosFacturas, tipo: v })}>
+                    <SelectTrigger className="w-[140px]">
+                      <SelectValue placeholder="Tipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Todos</SelectItem>
+                      <SelectItem value="factura">Factura</SelectItem>
+                      <SelectItem value="proforma">Proforma</SelectItem>
+                      <SelectItem value="rectificativa">Rectificativa</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    type="date"
+                    placeholder="Desde"
+                    className="w-[140px]"
+                    value={filtrosFacturas.fechaDesde}
+                    onChange={(e) => setFiltrosFacturas({ ...filtrosFacturas, fechaDesde: e.target.value })}
+                  />
+                  <Input
+                    type="date"
+                    placeholder="Hasta"
+                    className="w-[140px]"
+                    value={filtrosFacturas.fechaHasta}
+                    onChange={(e) => setFiltrosFacturas({ ...filtrosFacturas, fechaHasta: e.target.value })}
+                  />
+                </div>
+              </CardHeader>
+              <CardContent>
+                {facturas.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>No hay facturas. Crea la primera.</p>
+                    <Button asChild className="mt-4">
+                      <Link href="/facturacion/nueva">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Nueva factura
+                      </Link>
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Nº</TableHead>
+                          <TableHead>Fecha</TableHead>
+                          <TableHead>Concepto</TableHead>
+                          <TableHead>Destinatario</TableHead>
+                          <TableHead>Inmueble</TableHead>
+                          <TableHead className="text-right">Total</TableHead>
+                          <TableHead>Estado</TableHead>
+                          <TableHead className="text-right">Acciones</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {facturas.map((f) => (
+                          <TableRow key={f.id}>
+                            <TableCell className="font-medium">{f.numeroFactura}</TableCell>
+                            <TableCell>{format(new Date(f.fecha), 'dd/MM/yyyy', { locale: es })}</TableCell>
+                            <TableCell>{f.concepto}</TableCell>
+                            <TableCell>{f.destinatario.nombre}</TableCell>
+                            <TableCell>{f.inmueble || '-'}</TableCell>
+                            <TableCell className="text-right font-medium">€{f.total.toFixed(2)}</TableCell>
+                            <TableCell>{getEstadoBadge(f.estado)}</TableCell>
+                            <TableCell className="text-right">
+                              <Button variant="ghost" size="sm" onClick={() => router.push(`/facturacion/${f.id}`)}>
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Tab Series */}
+          <TabsContent value="series" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Series de facturación</CardTitle>
+                <CardDescription>
+                  Gestiona los prefijos y numeración para facturas, proformas y rectificativas
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button asChild>
+                  <Link href="/facturacion/series">
+                    <Settings className="w-4 h-4 mr-2" />
+                    Ir a Series
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Tab Suscripción */}
+          <TabsContent value="suscripcion" className="space-y-6 mt-6">
       {/* Resumen de Suscripción */}
       {company?.subscriptionPlan && (
         <Card>
@@ -409,6 +660,8 @@ export default function FacturacionPage() {
           </div>
         </CardContent>
       </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </AuthenticatedLayout>
   );

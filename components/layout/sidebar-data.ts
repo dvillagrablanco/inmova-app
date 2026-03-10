@@ -95,6 +95,7 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/inquilinos': 'inquilinos',
   '/matching': 'matching',
   '/contratos': 'contratos',
+  '/contratos-gestion': 'documentos',
   '/pagos': 'pagos',
   '/pagos/sepa': 'pagos',
   '/finanzas/conciliacion': 'pagos',
@@ -1902,6 +1903,12 @@ const documentosLegalNavItems = [
     name: 'Compliance',
     href: '/legal',
     icon: Shield,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Contratos de Gestión',
+    href: '/contratos-gestion',
+    icon: FileText,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {

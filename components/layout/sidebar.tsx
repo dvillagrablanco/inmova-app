@@ -33,6 +33,14 @@ import {
 } from './sidebar-config';
 import { HIDDEN_ROUTES } from '@/lib/active-modules-config';
 import { CompanySelector } from './CompanySelector';
+import { useSidebarCounts } from '@/lib/hooks/useSidebarCounts';
+
+const ROUTE_TO_COUNT_KEY: Record<string, string> = {
+  '/pagos': 'pagos_pendientes',
+  '/incidencias': 'incidencias_abiertas',
+  '/contratos': 'contratos_por_vencer',
+  '/candidatos': 'candidatos_nuevos',
+};
 import { useSelectedCompany } from '@/lib/hooks/admin/useSelectedCompany';
 import {
   ROUTE_TO_MODULE,
@@ -85,6 +93,7 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
   const { data: session, status: sessionStatus } = useSession();
   const { role } = usePermissions();
   const { appName, logo } = useBranding();
+  const { counts } = useSidebarCounts();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeModules, setActiveModules] = useState<string[]>([]);
   const [modulesLoaded, setModulesLoaded] = useState(false);
@@ -658,6 +667,15 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
         >
           <item.icon size={18} />
           <span className="flex-1">{item.name}</span>
+          {(() => {
+            const countKey = ROUTE_TO_COUNT_KEY[item.href];
+            const count = countKey ? (counts[countKey] ?? 0) : 0;
+            return count > 0 ? (
+              <span className="ml-auto bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[20px] text-center">
+                {count}
+              </span>
+            ) : null;
+          })()}
         </Link>
         {showFavoriteButton && !editModulesMode && (
           <button
@@ -722,6 +740,15 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
         >
           <item.icon size={18} />
           <span className="flex-1 text-left">{item.name}</span>
+          {(() => {
+            const countKey = ROUTE_TO_COUNT_KEY[item.href];
+            const count = countKey ? (counts[countKey] ?? 0) : 0;
+            return count > 0 ? (
+              <span className="ml-auto bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[20px] text-center">
+                {count}
+              </span>
+            ) : null;
+          })()}
           {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
         </button>
         {isExpanded && (

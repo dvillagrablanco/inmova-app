@@ -54,6 +54,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
+import { EmptyState } from '@/components/ui/empty-state';
 import { toast } from 'sonner';
 import Image from 'next/image';
 import { SmartBreadcrumbs } from '@/components/navigation/smart-breadcrumbs';
@@ -535,27 +536,23 @@ export default function PropiedadesPage() {
         {/* Resultados */}
         {filteredProperties.length === 0 ? (
           <Card className="p-12">
-            <div className="text-center space-y-4">
-              <Building2 className="h-12 w-12 mx-auto text-muted-foreground" />
-              <div>
-                <h3 className="text-lg font-semibold">No hay propiedades</h3>
-                <p className="text-muted-foreground">
-                  {hasActiveFilters
-                    ? 'No se encontraron propiedades con estos filtros'
-                    : 'Comienza creando tu primera propiedad'}
-                </p>
-              </div>
-              {hasActiveFilters ? (
-                <Button variant="outline" onClick={clearFilters}>
-                  Limpiar filtros
-                </Button>
-              ) : (
-                <Button onClick={() => router.push('/propiedades/crear')}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Crear Primera Propiedad
-                </Button>
-              )}
-            </div>
+            <EmptyState
+              icon={Building2}
+              title={hasActiveFilters ? 'No se encontraron propiedades' : 'Añade tu primer inmueble'}
+              description={
+                hasActiveFilters
+                  ? 'No hay propiedades que coincidan con estos filtros. Prueba a ajustar los criterios.'
+                  : 'Empieza registrando tu primera propiedad para gestionar contratos, inquilinos y cobros.'
+              }
+              action={
+                hasActiveFilters
+                  ? { label: 'Limpiar filtros', onClick: clearFilters }
+                  : {
+                      label: 'Añadir inmueble',
+                      onClick: () => router.push('/propiedades/nuevo'),
+                    }
+              }
+            />
           </Card>
         ) : (
           <>

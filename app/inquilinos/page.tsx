@@ -580,20 +580,30 @@ function InquilinosPageContent() {
 
             {filteredTenants.length === 0 && (
               <Card>
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <Users className="h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No se encontraron inquilinos</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    {searchTerm
-                      ? 'Intenta con otros términos de búsqueda'
-                      : 'Comienza agregando tu primer inquilino'}
-                  </p>
-                  {canCreate && !searchTerm && (
-                    <Button onClick={() => router.push('/inquilinos/nuevo')}>
-                      <Plus className="mr-2 h-4 w-4" />
-                      Nuevo Inquilino
-                    </Button>
-                  )}
+                <CardContent className="py-12">
+                  <EmptyState
+                    icon={Users}
+                    title={
+                      searchTerm
+                        ? 'No se encontraron inquilinos'
+                        : 'Registra tu primer inquilino'
+                    }
+                    description={
+                      searchTerm
+                        ? 'Intenta con otros términos de búsqueda'
+                        : 'Añade inquilinos para vincularlos a contratos y gestionar pagos automáticamente.'
+                    }
+                    action={
+                      searchTerm
+                        ? { label: 'Limpiar búsqueda', onClick: () => setSearchTerm('') }
+                        : canCreate
+                          ? {
+                              label: 'Añadir inquilino',
+                              onClick: () => router.push('/inquilinos/nuevo'),
+                            }
+                          : undefined
+                    }
+                  />
                 </CardContent>
               </Card>
             )}

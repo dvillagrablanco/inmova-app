@@ -744,28 +744,27 @@ function ContratosPageContent() {
         {filteredContracts.length === 0 &&
         (searchTerm ? (
         <EmptyState
-        icon={<FileText className="h-16 w-16 text-gray-400" />}
-        title="No se encontraron resultados"
-        description={`No hay contratos que coincidan con "${searchTerm}"`}
-        action={{
-        label: 'Limpiar búsqueda',
-        onClick: () => setSearchTerm(''),
-        }}
+          icon={FileText}
+          title="No se encontraron resultados"
+          description={`No hay contratos que coincidan con "${searchTerm}"`}
+          action={{
+            label: 'Limpiar búsqueda',
+            onClick: () => setSearchTerm(''),
+          }}
         />
         ) : (
         <EmptyState
-        icon={<FileText className="h-16 w-16 text-gray-400" />}
-        title="No hay contratos registrados"
-        description="Comienza creando tu primer contrato de arrendamiento"
-        action={
-        canCreate
-        ? {
-        label: 'Crear Primer Contrato',
-        onClick: () => router.push('/contratos/nuevo'),
-        icon: <Plus className="h-4 w-4" />,
-        }
-        : undefined
-        }
+          icon={FileText}
+          title="Crea tu primer contrato"
+          description="Genera contratos de alquiler con plantillas, firma digital y actualización automática de IPC."
+          action={
+            canCreate
+              ? {
+                  label: 'Nuevo contrato',
+                  onClick: () => router.push('/contratos/nuevo'),
+                }
+              : undefined
+          }
         />
         ))}
       </div>
