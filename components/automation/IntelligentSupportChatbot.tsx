@@ -31,21 +31,43 @@ import { toast } from 'sonner';
 import { useRouter, usePathname } from 'next/navigation';
 import logger, { logError } from '@/lib/logger';
 
-// Quick actions contextuales por módulo (antes en ModuleAIAssistant)
+// Quick actions contextuales por módulo — cubre TODA la app
 const MODULE_QUICK_ACTIONS: Record<string, { label: string; actions: string[] }> = {
-  '/liquidaciones': { label: 'Liquidaciones', actions: ['¿Cómo calcular honorarios de gestión?', '¿Qué gastos son repercutibles?', 'Optimizar liquidación del periodo'] },
-  '/facturacion': { label: 'Facturación', actions: ['¿Qué IVA aplico a esta factura?', '¿Necesito retención IRPF?', '¿Cómo generar una rectificativa?'] },
-  '/candidatos': { label: 'Candidatos', actions: ['Analizar solvencia de este candidato', '¿Qué documentación debo pedir?', 'Scoring recomendado para el perfil'] },
-  '/incidencias': { label: 'Incidencias', actions: ['Clasificar esta incidencia', 'Estimar coste de reparación', '¿Qué prioridad le asigno?'] },
-  '/contratos-gestion': { label: 'Contratos Gestión', actions: ['Modelo de contrato recomendado', '¿Qué % de honorarios es mercado?', 'Cláusulas esenciales a incluir'] },
-  '/check-in-out': { label: 'Check-in/out', actions: ['Checklist recomendado para check-in', '¿Qué lecturas de contadores tomar?', 'Documentación necesaria'] },
-  '/reportes': { label: 'Reportes', actions: ['Interpretar estos KPIs', 'Detectar anomalías en los datos', 'Recomendaciones de mejora'] },
-  '/actualizaciones-renta': { label: 'IPC', actions: ['¿Cuándo debo aplicar el IPC?', 'Redactar comunicación al inquilino', 'Calcular incremento óptimo'] },
-  '/suministros': { label: 'Suministros', actions: ['Balance de suministros del periodo', '¿Cómo repercutir al inquilino?', 'Optimizar consumo'] },
-  '/visitas': { label: 'Visitas', actions: ['Horario óptimo para visitas', 'Preparar inmueble para visita', 'Tips para mejorar conversión'] },
-  '/avalistas': { label: 'Avalistas', actions: ['Tipos de garantía recomendados', '¿Cuánto avalar?', 'Documentación del avalista'] },
-  '/garajes-trasteros': { label: 'Garajes', actions: ['Precio de mercado para garajes', 'Vincular garaje a vivienda', 'Normativa de garajes'] },
-  '/acciones-masivas': { label: 'Masivas', actions: ['¿Cómo ejecutar cobro masivo?', 'Optimizar lote de gastos', 'Verificar antes de ejecutar'] },
+  // ─── Core ───
+  '/dashboard': { label: 'Dashboard', actions: ['Resumen financiero del mes', 'Contratos que vencen pronto', 'Unidades vacías disponibles'] },
+  '/propiedades': { label: 'Propiedades', actions: ['Valorar esta propiedad con IA', 'Buscar propiedades por zona', 'Calcular rentabilidad'] },
+  '/inquilinos': { label: 'Inquilinos', actions: ['Verificar solvencia del inquilino', 'Predecir riesgo de morosidad', 'Buscar inquilino por nombre'] },
+  '/contratos': { label: 'Contratos', actions: ['Contratos que vencen este mes', 'Generar contrato con IA', 'Detectar riesgos en contrato'] },
+  '/pagos': { label: 'Pagos', actions: ['Pagos pendientes de cobro', 'Resumen de morosidad', 'Conciliar pagos bancarios'] },
+  '/calendario': { label: 'Calendario', actions: ['Eventos de esta semana', 'Vencimientos próximos', 'Programar recordatorio'] },
+  '/mantenimiento': { label: 'Mantenimiento', actions: ['Incidencias abiertas urgentes', 'Predecir averías', 'Buscar proveedor'] },
+  // ─── Financiero ───
+  '/liquidaciones': { label: 'Liquidaciones', actions: ['Calcular liquidación del periodo', '¿Qué gastos son repercutibles?', 'Liquidaciones pendientes de pago'] },
+  '/facturacion': { label: 'Facturación', actions: ['¿Qué IVA aplico?', '¿Necesito retención IRPF?', 'Generar factura rectificativa'] },
+  '/finanzas': { label: 'Finanzas', actions: ['Resumen contable del periodo', 'Detectar anomalías financieras', 'Previsión de cashflow'] },
+  // ─── Prealquiler ───
+  '/candidatos': { label: 'Candidatos', actions: ['Analizar solvencia candidato', 'Scoring recomendado', '¿Qué documentación pedir?'] },
+  '/visitas': { label: 'Visitas', actions: ['Horario óptimo para visitas', 'Tips para conversión', 'Preparar inmueble'] },
+  '/anuncios': { label: 'Anuncios', actions: ['Optimizar descripción del anuncio', 'Sugerir precio competitivo', 'Mejor horario de publicación'] },
+  // ─── Gestión ───
+  '/incidencias': { label: 'Incidencias', actions: ['Clasificar incidencia con IA', 'Estimar coste reparación', 'Prioridad recomendada'] },
+  '/contratos-gestion': { label: 'Contratos Gestión', actions: ['% honorarios de mercado', 'Modelo contrato recomendado', 'Cláusulas esenciales'] },
+  '/check-in-out': { label: 'Check-in/out', actions: ['Checklist recomendado', 'Lecturas de contadores', 'Documentación necesaria'] },
+  '/suministros': { label: 'Suministros', actions: ['Balance de suministros', 'Repercutir al inquilino', 'Optimizar consumo'] },
+  '/actualizaciones-renta': { label: 'IPC', actions: ['¿Cuándo aplicar IPC?', 'Comunicación al inquilino', 'Calcular incremento'] },
+  '/avalistas': { label: 'Avalistas', actions: ['Tipos de garantía', '¿Cuánto avalar?', 'Documentación necesaria'] },
+  '/garajes-trasteros': { label: 'Garajes', actions: ['Precio de mercado', 'Vincular a vivienda', 'Normativa'] },
+  // ─── Avanzado ───
+  '/reportes': { label: 'Reportes', actions: ['Interpretar KPIs', 'Detectar anomalías', 'Generar informe ejecutivo'] },
+  '/acciones-masivas': { label: 'Masivas', actions: ['Ejecutar cobro masivo', 'Verificar antes de ejecutar', 'Optimizar lote'] },
+  '/analytics': { label: 'Analytics', actions: ['Tendencias de ocupación', 'Benchmark vs mercado', 'Previsión 12 meses'] },
+  // ─── Verticales ───
+  '/coliving': { label: 'Coliving', actions: ['Matching de inquilinos IA', 'Prorrateo de suministros', 'Eventos recomendados'] },
+  '/comunidades': { label: 'Comunidades', actions: ['Preparar convocatoria junta', 'Calcular derrama', 'Cuotas pendientes'] },
+  '/inversiones': { label: 'Inversiones', actions: ['Analizar oportunidad de inversión', 'Calcular ROI/TIR', 'Due diligence IA'] },
+  '/family-office': { label: 'Family Office', actions: ['Resumen patrimonial', 'Optimización fiscal', 'Informe trimestral'] },
+  // ─── Admin ───
+  '/admin': { label: 'Administración', actions: ['Estado del sistema', 'Usuarios activos', 'Integraciones conectadas'] },
 };
 
 interface SentimentInfo {
@@ -94,7 +116,7 @@ export default function IntelligentSupportChatbot() {
     {
       id: '1',
       sender: 'bot',
-      text: '¡Hola! Soy el **Asistente INMOVA**, tu asistente ejecutivo con IA. Puedo ayudarte con:\n\n• Ejecutar acciones: "Crea un inquilino", "Busca unidades vacías"\n• Consultas: "Contratos que vencen", "Patrimonio del grupo"\n• Análisis: "Valora el piso de C/ Reina 15"\n• Ayuda contextual según el módulo que estés usando\n\n¿Qué necesitas? 🚀',
+      text: '¡Hola! Soy el **Asistente INMOVA** 🧠, tu centro de mando IA. Coordino **8 agentes especializados** y **48+ herramientas**:\n\n🏠 **Gestión**: Buscar inmuebles, crear inquilinos, generar contratos\n💰 **Finanzas**: Liquidaciones, facturas, conciliación, IPC\n📊 **Análisis**: Valorar propiedades, scoring inquilinos, reportes\n🔍 **Inversiones**: Due diligence, ROI, negociación\n🔧 **Operaciones**: Clasificar incidencias, mantenimiento predictivo\n📋 **Legal**: Detectar riesgos en contratos, generar plantillas\n👨‍👩‍👧 **Family Office**: Patrimonio, fiscal, PE\n📎 **Documentos**: Analizar PDF, OCR, clasificar\n\n💡 Prueba: "Valora el piso de C/ Reina 15" o mira las sugerencias de abajo 👇',
       timestamp: new Date()
     }
   ]);
@@ -324,8 +346,8 @@ export default function IntelligentSupportChatbot() {
                       <CardTitle className="text-lg">Asistente INMOVA</CardTitle>
                       <CardDescription className="text-primary-foreground/80 text-xs">
                         {currentModuleActions 
-                          ? `IA contextual · ${currentModuleActions.label}` 
-                          : 'Asistente ejecutivo con IA'}
+                          ? `IA contextual · ${currentModuleActions.label} · 8 agentes` 
+                          : 'Coordinador IA · 8 agentes · 48+ herramientas'}
                       </CardDescription>
                     </div>
                   </div>
