@@ -72,6 +72,7 @@ import {
 import { es } from 'date-fns/locale';
 import { LoadingState } from '@/components/ui/loading-state';
 import logger, { logError } from '@/lib/logger';
+import { AutoEventsBanner } from '@/components/calendar/AutoEventsBanner';
 
 // Configurar date-fns localizer para react-big-calendar
 const locales = {
@@ -128,6 +129,8 @@ export default function CalendarioPage() {
 
   // Estados principales
   const [eventos, setEventos] = useState<CalendarEvent[]>([]);
+  const [autoEventsEnabled, setAutoEventsEnabled] = useState(true);
+  const [autoEvents, setAutoEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [sincronizando, setSincronizando] = useState(false);
   const [currentView, setCurrentView] = useState<View>(Views.MONTH);
@@ -346,9 +349,14 @@ export default function CalendarioPage() {
     });
   };
 
-  // Convertir eventos al formato de react-big-calendar
+  // Convertir eventos al formato de react-big-calendar (manual + automáticos)
+  const eventosParaCalendario = useMemo(
+    () => [...eventos, ...(autoEventsEnabled ? autoEvents : [])],
+    [eventos, autoEventsEnabled, autoEvents]
+  );
+
   const eventosCalendario = useMemo(() => {
-    return eventos.map((evento) => ({
+    return eventosParaCalendario.map((evento) => ({
       id: evento.id,
       title: evento.titulo,
       start: new Date(evento.fechaInicio),
@@ -356,7 +364,7 @@ export default function CalendarioPage() {
       allDay: evento.todoElDia,
       resource: evento,
     }));
-  }, [eventos]);
+  }, [eventosParaCalendario]);
 
   // Personalizar el estilo de los eventos
   const eventStyleGetter = useCallback((event: any) => {
@@ -586,6 +594,12 @@ export default function CalendarioPage() {
                 </CardContent>
               </Card>
             )}
+
+            <AutoEventsBanner
+              enabled={autoEventsEnabled}
+              onToggle={setAutoEventsEnabled}
+              onEventsLoaded={setAutoEvents}
+            />
 
             {/* Calendario */}
             <Card>

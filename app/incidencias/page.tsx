@@ -56,6 +56,7 @@ import {
 } from 'lucide-react';
 import { usePermissions } from '@/lib/hooks/usePermissions';
 import logger, { logError } from '@/lib/logger';
+import { EntityChat } from '@/components/shared/EntityChat';
 
 interface Incidencia {
   id: string;
@@ -625,6 +626,13 @@ export default function IncidenciasPage() {
                         placeholder="Ej: Planta 3, Parking B"
                       />
                     </div>
+                    {editingIncidencia && (
+                      <EntityChat
+                        entityType="incidencia"
+                        entityId={editingIncidencia.id}
+                        entityLabel={`Incidencia: ${editingIncidencia.titulo}`}
+                      />
+                    )}
                   </div>
                   <div className="flex justify-end gap-2">
                     <Button variant="outline" onClick={() => setOpenEditDialog(false)}>
