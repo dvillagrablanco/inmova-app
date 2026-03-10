@@ -132,7 +132,7 @@ export async function GET(request: NextRequest) {
 
       const units = await prisma.unit.findMany({
         where: {
-          building: { companyId: typeof companyFilter === 'string' ? companyFilter : undefined },
+          building: { companyId: companyFilter },
           tipo: { in: unitTipos as any },
           ...(estadoFilter === 'disponible' ? { estado: 'disponible' } : {}),
           ...(estadoFilter === 'ocupada' ? { estado: 'ocupado' } : {}),
