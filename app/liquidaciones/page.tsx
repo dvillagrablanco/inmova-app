@@ -47,6 +47,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { EmptyState } from '@/components/ui/empty-state';
+import { ModuleAIAssistant } from '@/components/ai/ModuleAIAssistant';
 import { toast } from 'sonner';
 
 interface LiquidacionItem {
@@ -482,6 +483,7 @@ export default function LiquidacionesPage() {
           </CardContent>
         </Card>
       </div>
+      <ModuleAIAssistant module="liquidaciones" />
     </AuthenticatedLayout>
   );
 }

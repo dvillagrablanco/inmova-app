@@ -29,6 +29,7 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui/empty-state';
+import { ModuleAIAssistant } from '@/components/ai/ModuleAIAssistant';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -354,6 +355,7 @@ export default function ContratosGestionPage() {
           </Card>
         )}
       </div>
+      <ModuleAIAssistant module="contratos-gestion" />
     </AuthenticatedLayout>
   );
 }

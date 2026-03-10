@@ -24,6 +24,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Plus, MoreVertical, Send, Eye, ClipboardCheck, LogOut } from 'lucide-react';
+import { ModuleAIAssistant } from '@/components/ai/ModuleAIAssistant';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -187,6 +188,7 @@ export default function CheckInOutPage() {
           </CardContent>
         </Card>
       </div>
+      <ModuleAIAssistant module="check-in-out" />
     </AuthenticatedLayout>
   );
 }

@@ -18,6 +18,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Car, Package, Plus } from 'lucide-react';
+import { ModuleAIAssistant } from '@/components/ai/ModuleAIAssistant';
 import { toast } from 'sonner';
 
 interface GarajeTrastero {
@@ -172,6 +173,7 @@ export default function GarajesTrasterosPage() {
           </CardContent>
         </Card>
       </div>
+      <ModuleAIAssistant module="garajes-trasteros" />
     </AuthenticatedLayout>
   );
 }

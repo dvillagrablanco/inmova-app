@@ -27,6 +27,7 @@ import {
 } from '@/components/ui/table';
 import { toast } from 'sonner';
 import { Play, Package, Clock, Euro } from 'lucide-react';
+import { ModuleAIAssistant } from '@/components/ai/ModuleAIAssistant';
 
 interface BatchOp {
   id: string;
@@ -370,6 +371,7 @@ export default function AccionesMasivasPage() {
           </CardContent>
         </Card>
       </div>
+      <ModuleAIAssistant module="acciones-masivas" />
     </AuthenticatedLayout>
   );
 }

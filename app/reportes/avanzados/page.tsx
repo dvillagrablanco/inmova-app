@@ -42,6 +42,7 @@ import {
   Layers,
   LayoutDashboard,
 } from 'lucide-react';
+import { ModuleAIAssistant } from '@/components/ai/ModuleAIAssistant';
 import { toast } from 'sonner';
 
 const TABS = [
@@ -319,6 +320,7 @@ export default function ReportesAvanzadosPage() {
           ))}
         </Tabs>
       </div>
+      <ModuleAIAssistant module="reportes" />
     </AuthenticatedLayout>
   );
 }

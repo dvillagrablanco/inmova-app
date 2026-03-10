@@ -2,9 +2,20 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, CreditCard, Globe, Hotel, MessageSquare, FileText, Shield, LinkIcon } from 'lucide-react';
+import { CheckCircle, CreditCard, Globe, Hotel, MessageSquare, FileText, Shield, LinkIcon, Bot } from 'lucide-react';
 
 const integrations = [
+  {
+    icon: Bot,
+    title: 'Centro de Ayuda con IA',
+    desc: 'Soporte inteligente 24/7 con respuestas contextuales',
+    gradient: 'from-teal-500 to-cyan-500',
+    items: [
+      { name: 'Centro de Ayuda con IA', desc: 'Base de conocimiento con búsqueda semántica' },
+      { name: 'Chatbot contextual', desc: 'Asistente que entiende el contexto de tu consulta' },
+      { name: 'Respuestas instantáneas', desc: 'Soporte 24/7 sin esperas' },
+    ]
+  },
   {
     icon: CreditCard,
     title: 'Cobros y Pagos',
