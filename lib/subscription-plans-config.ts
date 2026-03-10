@@ -662,6 +662,8 @@ export const MODULES_BY_PLAN: Record<SubscriptionPlanId, string[]> = {
     'gastos',
     'reportes_basicos',
     'herramientas',
+    'actualizaciones_renta',
+    'garajes_trasteros',
   ],
   professional: [
     'dashboard',
@@ -686,6 +688,18 @@ export const MODULES_BY_PLAN: Record<SubscriptionPlanId, string[]> = {
     'str_basico',
     'coliving_basico',
     'comunidades_basico',
+    // Nuevos módulos Homming
+    'liquidaciones',
+    'facturacion_avanzada',
+    'prealquiler_pipeline',
+    'incidencias_avanzadas',
+    'contratos_gestion',
+    'check_in_out',
+    'suministros',
+    'actualizaciones_renta',
+    'garajes_trasteros',
+    'avalistas',
+    'plantillas_comunicacion',
   ],
   business: [
     // Professional +
@@ -721,6 +735,26 @@ export const MODULES_BY_PLAN: Record<SubscriptionPlanId, string[]> = {
     'api_completa',
     'audit_log',
     'multi_empresa',
+    // Nuevos módulos Homming (todos incluidos)
+    'liquidaciones',
+    'liquidaciones_programadas',
+    'facturacion_avanzada',
+    'prealquiler_pipeline',
+    'incidencias_avanzadas',
+    'contratos_gestion',
+    'check_in_out',
+    'reportes_avanzados',
+    'suministros',
+    'actualizaciones_renta',
+    'garajes_trasteros',
+    'avalistas',
+    'acciones_masivas',
+    'campos_personalizados',
+    'plantillas_comunicacion',
+    'conciliacion_visual',
+    'chat_entidades',
+    'notas_entidades',
+    'ia_modular',
   ],
   enterprise: [
     '*', // Todos los módulos
@@ -791,6 +825,27 @@ export const ROUTES_BY_MODULE: Record<string, string[]> = {
   
   // Portal propietario
   portal_propietario: ['/propietario', '/propietario/*'],
+
+  // ─── Nuevos módulos (Homming gap analysis) ───
+  liquidaciones: ['/liquidaciones', '/liquidaciones/*'],
+  liquidaciones_programadas: ['/liquidaciones', '/liquidaciones/*'],
+  facturacion_avanzada: ['/facturacion', '/facturacion/*'],
+  prealquiler_pipeline: ['/candidatos', '/candidatos/*'],
+  incidencias_avanzadas: ['/incidencias', '/incidencias/*'],
+  contratos_gestion: ['/contratos-gestion', '/contratos-gestion/*'],
+  check_in_out: ['/check-in-out', '/check-in-out/*'],
+  reportes_avanzados: ['/reportes/avanzados'],
+  suministros: ['/suministros', '/suministros/*'],
+  actualizaciones_renta: ['/actualizaciones-renta', '/actualizaciones-renta/*'],
+  garajes_trasteros: ['/garajes-trasteros', '/garajes-trasteros/*'],
+  avalistas: ['/avalistas', '/avalistas/*'],
+  acciones_masivas: ['/acciones-masivas', '/acciones-masivas/*'],
+  campos_personalizados: ['/admin/campos-personalizados'],
+  plantillas_comunicacion: ['/admin/plantillas-comunicacion'],
+  conciliacion_visual: ['/finanzas/conciliacion/visual'],
+  chat_entidades: ['/chat', '/chat/*'],
+  notas_entidades: [],
+  ia_modular: [],
 };
 
 // ============================================================================

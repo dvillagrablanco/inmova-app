@@ -656,6 +656,83 @@ export const ADD_ONS: Record<string, AddOn> = {
     availableFor: ['professional', 'business'],
     includedIn: ['enterprise'],
   },
+
+  // ═══════════════════════════════════════════════════════════════
+  // NUEVOS ADD-ONS — Módulos Homming Gap (Mar 2026)
+  // ═══════════════════════════════════════════════════════════════
+
+  liquidaciones_module: {
+    id: 'liquidaciones_module',
+    name: 'Módulo Liquidaciones',
+    description: 'Liquidaciones a propietarios: cálculo automático de honorarios, programación recurrente y export PDF',
+    category: 'feature',
+    monthlyPrice: 19,
+    annualPrice: 190,
+    costPerUnit: 0,
+    marginPercentage: 100,
+    costSource: 'Desarrollo interno',
+    availableFor: ['starter', 'basic'],
+    includedIn: ['professional', 'business', 'enterprise'],
+    highlighted: true,
+  },
+
+  facturacion_avanzada: {
+    id: 'facturacion_avanzada',
+    name: 'Facturación Avanzada',
+    description: 'Series de facturación, IVA/IRPF configurables, proformas, rectificativas y preparado para Verifactu',
+    category: 'feature',
+    monthlyPrice: 25,
+    annualPrice: 250,
+    costPerUnit: 0,
+    marginPercentage: 100,
+    costSource: 'Desarrollo interno',
+    availableFor: ['starter', 'basic'],
+    includedIn: ['professional', 'business', 'enterprise'],
+    highlighted: true,
+  },
+
+  reportes_avanzados_addon: {
+    id: 'reportes_avanzados_addon',
+    name: '21 Reportes Avanzados',
+    description: 'Inquilinos, contratos, incidencias, liquidaciones, rentabilidad, impagos, declaración renta, cashflow. Export CSV/PDF',
+    category: 'feature',
+    monthlyPrice: 15,
+    annualPrice: 150,
+    costPerUnit: 0,
+    marginPercentage: 100,
+    costSource: 'Desarrollo interno',
+    availableFor: ['starter', 'basic', 'professional'],
+    includedIn: ['business', 'enterprise'],
+  },
+
+  checkin_checkout_digital: {
+    id: 'checkin_checkout_digital',
+    name: 'Check-in/Check-out Digital',
+    description: 'Formularios digitales con token: inventario, contadores, fotos y firma del inquilino',
+    category: 'feature',
+    monthlyPrice: 12,
+    annualPrice: 120,
+    costPerUnit: 0,
+    marginPercentage: 100,
+    costSource: 'Desarrollo interno',
+    availableFor: ['starter', 'basic'],
+    includedIn: ['professional', 'business', 'enterprise'],
+  },
+
+  ia_modular_assistant: {
+    id: 'ia_modular_assistant',
+    name: 'Asistente IA por Módulo',
+    description: 'IA contextual en cada módulo: scoring candidatos, clasificación incidencias, previsión liquidaciones, detección anomalías facturas',
+    category: 'premium',
+    monthlyPrice: 29,
+    annualPrice: 290,
+    costPerUnit: 3,           // Anthropic Claude API
+    marginPercentage: 90,     // (29-3)/29 = 90%
+    costSource: 'Anthropic Claude API',
+    availableFor: ['starter', 'basic', 'professional'],
+    includedIn: ['business', 'enterprise'],
+    highlighted: true,
+  },
 };
 
 /**
