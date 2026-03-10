@@ -1893,7 +1893,155 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                   </CardContent>
                 </Card>
 
-                {/* Análisis Detallado */}
+                {/* Metodología y Análisis de Mercado — siempre visible */}
+                {(resultado.metodologiaUsada || resultado.analisisMercado || resultado.reasoning) && (
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <Brain className="h-4 w-4 text-violet-500" />
+                        Metodología y Análisis
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {resultado.metodologiaUsada && (
+                        <div className="p-3 bg-violet-50 rounded-lg border border-violet-100">
+                          <p className="text-xs font-medium text-violet-700 uppercase tracking-wide mb-1">
+                            Metodología aplicada
+                          </p>
+                          <p className="text-sm text-violet-900">
+                            {resultado.metodologiaUsada}
+                          </p>
+                        </div>
+                      )}
+
+                      {resultado.analisisMercado && (
+                        <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
+                          <p className="text-xs font-medium text-blue-700 uppercase tracking-wide mb-1">
+                            Situaci&oacute;n del mercado
+                          </p>
+                          <p className="text-sm text-blue-900 whitespace-pre-line">
+                            {resultado.analisisMercado}
+                          </p>
+                          {resultado.platformSources && (
+                            <div className="flex flex-wrap gap-2 mt-2">
+                              {resultado.platformSources.marketTrend && (
+                                <Badge variant="outline" className={`text-xs ${
+                                  resultado.platformSources.marketTrend === 'UP' ? 'border-green-300 text-green-700 bg-green-50' :
+                                  resultado.platformSources.marketTrend === 'DOWN' ? 'border-red-300 text-red-700 bg-red-50' :
+                                  'border-gray-300 text-gray-700 bg-gray-50'
+                                }`}>
+                                  {resultado.platformSources.marketTrend === 'UP' ? 'Alcista' :
+                                   resultado.platformSources.marketTrend === 'DOWN' ? 'Bajista' : 'Estable'}
+                                  {resultado.platformSources.trendPercentage > 0 && ` (${resultado.platformSources.trendPercentage}%)`}
+                                </Badge>
+                              )}
+                              {resultado.platformSources.demandLevel && (
+                                <Badge variant="outline" className="text-xs">
+                                  Demanda: {resultado.platformSources.demandLevel}
+                                </Badge>
+                              )}
+                              {resultado.platformSources.avgDaysOnMarket && (
+                                <Badge variant="outline" className="text-xs">
+                                  <Clock className="h-3 w-3 mr-1" />
+                                  {resultado.platformSources.avgDaysOnMarket} d&iacute;as en mercado
+                                </Badge>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {resultado.reasoning && (
+                        <div>
+                          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                            Razonamiento del tasador IA
+                          </p>
+                          <p className="text-sm text-muted-foreground whitespace-pre-line leading-relaxed">
+                            {resultado.reasoning}
+                          </p>
+                        </div>
+                      )}
+
+                      {resultado.phase1Summary && (
+                        <div className="p-3 bg-muted/50 rounded-lg">
+                          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                            Pre-an&aacute;lisis de comparables (Fase 1)
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {resultado.phase1Summary}
+                          </p>
+                        </div>
+                      )}
+
+                      {resultado.aiSourcesUsed && resultado.aiSourcesUsed.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          <span className="text-xs text-muted-foreground mr-1">Fuentes utilizadas:</span>
+                          {resultado.aiSourcesUsed.map((source, i) => (
+                            <Badge key={i} variant="secondary" className="text-xs">
+                              {source === 'claude_ai' ? 'Claude AI' :
+                               source === 'idealista_data' ? 'Idealista Data' :
+                               source === 'idealista' ? 'Idealista' :
+                               source === 'fotocasa' ? 'Fotocasa' :
+                               source === 'notariado' ? 'Notariado' :
+                               source === 'ine' ? 'INE' :
+                               source}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Factores positivos y negativos — siempre visible */}
+                {(resultado.factoresPositivos?.length > 0 || resultado.factoresNegativos?.length > 0) && (
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <Target className="h-4 w-4" />
+                        Factores de Valoraci&oacute;n
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {resultado.factoresPositivos?.length > 0 && (
+                          <div>
+                            <p className="text-sm font-medium text-green-700 mb-2 flex items-center gap-1">
+                              <CheckCircle2 className="h-4 w-4" />
+                              Factores Positivos
+                            </p>
+                            <ul className="space-y-1">
+                              {resultado.factoresPositivos.map((f, i) => (
+                                <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
+                                  <span className="text-green-500 mt-1 shrink-0">+</span>
+                                  {f}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {resultado.factoresNegativos?.length > 0 && (
+                          <div>
+                            <p className="text-sm font-medium text-red-700 mb-2 flex items-center gap-1">
+                              <AlertTriangle className="h-4 w-4" />
+                              Factores Negativos
+                            </p>
+                            <ul className="space-y-1">
+                              {resultado.factoresNegativos.map((f, i) => (
+                                <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
+                                  <span className="text-red-500 mt-1 shrink-0">-</span>
+                                  {f}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Detalles expandibles */}
                 <Accordion type="single" collapsible className="w-full">
                   {/* Comparables */}
                   {resultado.comparables && resultado.comparables.length > 0 && (
@@ -1921,7 +2069,7 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                                   )}
                                 </div>
                                 <p className="text-xs text-muted-foreground">
-                                  {comp.superficie}m² • {formatCurrency(comp.precioM2)}/m²
+                                  {comp.superficie}m² &bull; {formatCurrency(comp.precioM2)}/m²
                                 </p>
                               </div>
                               <div className="text-right">
@@ -1936,54 +2084,6 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                       </AccordionContent>
                     </AccordionItem>
                   )}
-
-                  {/* Factores */}
-                  <AccordionItem value="factores">
-                    <AccordionTrigger>
-                      <span className="flex items-center gap-2">
-                        <PieChart className="h-4 w-4" />
-                        Factores de Valoración
-                      </span>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <p className="text-sm font-medium text-green-700 mb-2 flex items-center gap-1">
-                            <CheckCircle2 className="h-4 w-4" />
-                            Factores Positivos
-                          </p>
-                          <ul className="space-y-1">
-                            {resultado.factoresPositivos.map((f, i) => (
-                              <li
-                                key={i}
-                                className="text-sm text-muted-foreground flex items-start gap-2"
-                              >
-                                <span className="text-green-500 mt-1">+</span>
-                                {f}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-red-700 mb-2 flex items-center gap-1">
-                            <AlertTriangle className="h-4 w-4" />
-                            Factores Negativos
-                          </p>
-                          <ul className="space-y-1">
-                            {resultado.factoresNegativos.map((f, i) => (
-                              <li
-                                key={i}
-                                className="text-sm text-muted-foreground flex items-start gap-2"
-                              >
-                                <span className="text-red-500 mt-1">-</span>
-                                {f}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
 
                   {/* Recomendaciones */}
                   <AccordionItem value="recomendaciones">
@@ -2004,78 +2104,6 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                           </li>
                         ))}
                       </ul>
-                    </AccordionContent>
-                  </AccordionItem>
-
-                  {/* Análisis IA Detallado */}
-                  {resultado.reasoning && (
-                    <AccordionItem value="ai-analysis">
-                      <AccordionTrigger>
-                        <span className="flex items-center gap-2">
-                          <Brain className="h-4 w-4 text-violet-500" />
-                          Análisis IA Detallado
-                        </span>
-                      </AccordionTrigger>
-                      <AccordionContent>
-                        <div className="space-y-4">
-                          {resultado.metodologiaUsada && (
-                            <div className="p-3 bg-violet-50 rounded-lg border border-violet-100">
-                              <p className="text-xs font-medium text-violet-700 uppercase tracking-wide mb-1">
-                                Metodología
-                              </p>
-                              <p className="text-sm text-violet-900">
-                                {resultado.metodologiaUsada}
-                              </p>
-                            </div>
-                          )}
-
-                          <div>
-                            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
-                              Razonamiento del Tasador IA
-                            </p>
-                            <p className="text-sm text-muted-foreground whitespace-pre-line leading-relaxed">
-                              {resultado.reasoning}
-                            </p>
-                          </div>
-
-                          {resultado.phase1Summary && (
-                            <div className="p-3 bg-muted/50 rounded-lg">
-                              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
-                                Pre-análisis de comparables (Fase 1)
-                              </p>
-                              <p className="text-sm text-muted-foreground">
-                                {resultado.phase1Summary}
-                              </p>
-                            </div>
-                          )}
-
-                          {resultado.aiSourcesUsed && resultado.aiSourcesUsed.length > 0 && (
-                            <div className="flex flex-wrap gap-1">
-                              <span className="text-xs text-muted-foreground mr-1">Fuentes IA:</span>
-                              {resultado.aiSourcesUsed.map((source, i) => (
-                                <Badge key={i} variant="secondary" className="text-xs">
-                                  {source === 'claude_ai' ? 'Claude AI' : source}
-                                </Badge>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>
-                  )}
-
-                  {/* Análisis de Mercado */}
-                  <AccordionItem value="mercado">
-                    <AccordionTrigger>
-                      <span className="flex items-center gap-2">
-                        <TrendingUp className="h-4 w-4" />
-                        Análisis de Mercado
-                      </span>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <p className="text-sm text-muted-foreground whitespace-pre-line">
-                        {resultado.analisisMercado}
-                      </p>
                     </AccordionContent>
                   </AccordionItem>
 

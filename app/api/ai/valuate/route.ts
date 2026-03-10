@@ -674,6 +674,10 @@ export async function POST(request: NextRequest) {
               pricePerM2Rent: pd.pricePerM2Rent,
               sampleSize: pd.sampleSize,
               trend: pd.trend,
+              trendPercentage: pd.trendPercentage,
+              demandLevel: pd.demandLevel,
+              avgDaysOnMarket: pd.avgDaysOnMarket,
+              rawData: pd.rawData || null,
             })),
             comparablesCount: aggregatedPlatformData.allComparables.length,
           }

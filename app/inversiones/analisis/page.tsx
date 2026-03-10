@@ -1661,15 +1661,69 @@ Estado: Reformado 2018"
                       </div>
                     )}
 
+                    {/* Datos Idealista Data */}
+                    {platformSummary?.idealistaData && (
+                      <div className="p-3 bg-blue-50 rounded-lg border border-blue-200 space-y-2">
+                        <p className="text-xs font-medium text-blue-700 uppercase tracking-wide flex items-center gap-1">
+                          <BarChart3 className="h-3 w-3" />
+                          Datos Idealista Data Platform
+                        </p>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                          {platformSummary.idealistaData.grossYield > 0 && (
+                            <div className="bg-white rounded p-2 border">
+                              <div className="text-[10px] text-gray-500 uppercase">Yield mercado</div>
+                              <div className="text-sm font-bold text-emerald-700">{platformSummary.idealistaData.grossYield}%</div>
+                            </div>
+                          )}
+                          {platformSummary.idealistaData.salePricePerM2 && (
+                            <div className="bg-white rounded p-2 border">
+                              <div className="text-[10px] text-gray-500 uppercase">Precio venta</div>
+                              <div className="text-sm font-bold">{platformSummary.idealistaData.salePricePerM2?.toLocaleString('es-ES')}€/m²</div>
+                            </div>
+                          )}
+                          {platformSummary.idealistaData.rentPricePerM2 && (
+                            <div className="bg-white rounded p-2 border">
+                              <div className="text-[10px] text-gray-500 uppercase">Alquiler</div>
+                              <div className="text-sm font-bold">{platformSummary.idealistaData.rentPricePerM2}€/m²</div>
+                            </div>
+                          )}
+                          {platformSummary.idealistaData.avgDaysOnMarket && (
+                            <div className="bg-white rounded p-2 border">
+                              <div className="text-[10px] text-gray-500 uppercase">D&iacute;as en mercado</div>
+                              <div className="text-sm font-bold">{platformSummary.idealistaData.avgDaysOnMarket}</div>
+                            </div>
+                          )}
+                        </div>
+                        {platformSummary.idealistaData.subZones?.length > 0 && (
+                          <div className="text-xs text-gray-600 space-y-0.5">
+                            <span className="font-medium">Precios por distrito:</span>
+                            {platformSummary.idealistaData.subZones.slice(0, 5).map((z: any, i: number) => (
+                              <span key={i} className="block ml-2">
+                                {z.location}: {z.pricePerM2?.toLocaleString('es-ES')}€/m²
+                                {z.annualVariation ? ` (${z.annualVariation > 0 ? '+' : ''}${z.annualVariation}%)` : ''}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     {/* Platform summary */}
                     {platformSummary && (
                       <div className="flex flex-wrap gap-2 text-xs text-gray-500 pt-2 border-t">
-                        <span>Fuentes: {platformSummary.sourcesUsed?.join(', ')}</span>
-                        <span>•</span>
+                        <span>Fuentes: {platformSummary.sourcesUsed?.map((s: string) =>
+                          s === 'idealista_data' ? 'Idealista Data' :
+                          s === 'idealista' ? 'Idealista' :
+                          s === 'fotocasa' ? 'Fotocasa' :
+                          s === 'notariado' ? 'Notariado' :
+                          s === 'ine' ? 'INE' :
+                          s === 'internal_db' ? 'BD Interna' : s
+                        ).join(', ')}</span>
+                        <span>&bull;</span>
                         <span>Fiabilidad: {platformSummary.overallReliability}%</span>
                         {platformSummary.comparablesCount > 0 && (
                           <>
-                            <span>•</span>
+                            <span>&bull;</span>
                             <span>{platformSummary.comparablesCount} comparables</span>
                           </>
                         )}
