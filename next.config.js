@@ -275,6 +275,17 @@ const nextConfig = {
 
     return config;
   },
+
+  // Redirects
+  async redirects() {
+    return [
+      {
+        source: '/knowledge-base',
+        destination: '/ayuda',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;
