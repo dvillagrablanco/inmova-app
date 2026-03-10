@@ -67,6 +67,7 @@ import {
   Banknote,
   Receipt,
   ArrowRightLeft,
+  FileSpreadsheet,
 } from 'lucide-react';
 
 export interface SubItem {
@@ -96,6 +97,19 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/matching': 'matching',
   '/contratos': 'contratos',
   '/contratos-gestion': 'documentos',
+  '/liquidaciones': 'finanzas',
+  '/facturacion': 'facturacion',
+  '/garajes-trasteros': 'unidades',
+  '/suministros': 'operaciones',
+  '/avalistas': 'contratos',
+  '/actualizaciones-renta': 'contratos',
+  '/check-in-out': 'mantenimiento',
+  '/reportes/avanzados': 'reportes',
+  '/admin/campos-personalizados': 'configuracion',
+  '/admin/plantillas-comunicacion': 'comunicaciones',
+  '/admin/webhook-logs': 'configuracion',
+  '/acciones-masivas': 'operaciones',
+  '/no-disponibilidad': 'operaciones',
   '/pagos': 'pagos',
   '/pagos/sepa': 'pagos',
   '/finanzas/conciliacion': 'pagos',
@@ -607,6 +621,24 @@ const alquilerResidencialItems = [
     dataTour: 'contratos-menu',
   },
   {
+    name: 'Contratos Gestión',
+    href: '/contratos-gestion',
+    icon: FileSignature,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Avalistas',
+    href: '/avalistas',
+    icon: Shield,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Actualización Renta',
+    href: '/actualizaciones-renta',
+    icon: TrendingUp,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
     name: 'Candidatos',
     href: '/candidatos',
     icon: UserPlus,
@@ -650,6 +682,18 @@ const alquilerResidencialItems = [
     name: 'Certificaciones',
     href: '/certificaciones',
     icon: Award,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Garajes y Trasteros',
+    href: '/garajes-trasteros',
+    icon: Car,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Suministros',
+    href: '/suministros',
+    icon: Zap,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
 ];
@@ -1431,6 +1475,12 @@ const finanzasNavItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
+    name: 'Liquidaciones',
+    href: '/liquidaciones',
+    icon: Receipt,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
     name: 'Fianzas',
     href: '/fianzas',
     icon: Shield,
@@ -1499,8 +1549,8 @@ const finanzasNavItems = [
   {
     name: 'Facturación',
     href: '/facturacion',
-    icon: FileText,
-    roles: ['super_admin', 'administrador'],
+    icon: FileSpreadsheet,
+    roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
     name: 'Open Banking',
@@ -1523,6 +1573,12 @@ const analyticsNavItems = [
     name: 'Reportes',
     href: '/reportes',
     icon: FileBarChart,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
+    name: 'Reportes Avanzados',
+    href: '/reportes/avanzados',
+    icon: BarChart3,
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
@@ -1598,6 +1654,12 @@ const operacionesNavItems = [
     roles: ['super_admin', 'administrador', 'gestor'],
   },
   {
+    name: 'Check-in/Check-out',
+    href: '/check-in-out',
+    icon: ClipboardList,
+    roles: ['super_admin', 'administrador', 'gestor'],
+  },
+  {
     name: 'Limpieza',
     href: '/servicios-limpieza',
     icon: ClipboardList,
@@ -1608,6 +1670,18 @@ const operacionesNavItems = [
     href: '/dashboard/servicios',
     icon: ShoppingBag,
     roles: ['super_admin', 'administrador', 'gestor', 'inquilino', 'propietario'],
+  },
+  {
+    name: 'Acciones Masivas',
+    href: '/acciones-masivas',
+    icon: Zap,
+    roles: ['super_admin', 'administrador'],
+  },
+  {
+    name: 'No Disponibilidad',
+    href: '/no-disponibilidad',
+    icon: CalendarCheck,
+    roles: ['super_admin', 'administrador', 'gestor'],
   },
 ];
 
@@ -2206,6 +2280,24 @@ const administradorEmpresaItems = [
     roles: ['administrador', 'super_admin'],
   },
   // === GESTIÓN FISCAL ===
+  {
+    name: 'Campos Personalizados',
+    href: '/admin/campos-personalizados',
+    icon: Settings,
+    roles: ['super_admin'],
+  },
+  {
+    name: 'Plantillas Comunicación',
+    href: '/admin/plantillas-comunicacion',
+    icon: MessageSquare,
+    roles: ['super_admin', 'administrador'],
+  },
+  {
+    name: 'Webhook Logs',
+    href: '/admin/webhook-logs',
+    icon: Activity,
+    roles: ['super_admin'],
+  },
   {
     name: 'Impuestos',
     href: '/admin/impuestos',
