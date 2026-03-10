@@ -281,6 +281,12 @@ const valuateSchema = z.object({
   // Campos requeridos (coerce para tolerar strings del formulario)
   superficie: z.coerce.number().positive(),
 
+  // Tipo de activo — determina metodología de valoración, yields, gastos y riesgos
+  tipoActivo: z.enum([
+    'vivienda', 'local_comercial', 'oficina', 'nave_industrial',
+    'garaje', 'trastero', 'terreno', 'edificio', 'coworking',
+  ]).optional().default('vivienda'),
+
   // Campos opcionales básicos
   habitaciones: z.coerce.number().int().nonnegative().optional().default(0),
   banos: z.coerce.number().int().nonnegative().optional().default(0),
@@ -479,6 +485,7 @@ export async function POST(request: NextRequest) {
 
     // 7. Preparar datos para IA multi-paso
     const propertyForAnalysis: PropertyForAnalysis = {
+      propertyType: validated.tipoActivo || 'vivienda',
       address: direccion,
       city: ciudad,
       postalCode: validated.codigoPostal || validated.postalCode || '',

@@ -32,7 +32,19 @@ const anthropic = new Anthropic({
 // TIPOS
 // ============================================================================
 
+export type PropertyType =
+  | 'vivienda'
+  | 'local_comercial'
+  | 'oficina'
+  | 'nave_industrial'
+  | 'garaje'
+  | 'trastero'
+  | 'terreno'
+  | 'edificio'
+  | 'coworking';
+
 export interface PropertyForAnalysis {
+  propertyType?: PropertyType;
   address: string;
   city: string;
   postalCode: string;
@@ -54,6 +66,99 @@ export interface PropertyForAnalysis {
   caracteristicas?: string[];
   descripcionAdicional?: string;
   finalidad?: string;
+}
+
+const PROPERTY_TYPE_LABELS: Record<string, string> = {
+  vivienda: 'Vivienda residencial',
+  local_comercial: 'Local comercial',
+  oficina: 'Oficina',
+  nave_industrial: 'Nave industrial / Logística',
+  garaje: 'Garaje / Plaza de parking',
+  trastero: 'Trastero',
+  terreno: 'Terreno / Solar',
+  edificio: 'Edificio completo',
+  coworking: 'Espacio coworking',
+};
+
+function getPropertyTypeContext(type: PropertyType): string {
+  const contexts: Record<PropertyType, string> = {
+    vivienda: `TIPO: VIVIENDA RESIDENCIAL
+- Yields objetivo: 3.5-6% bruto según zona (prime 3.5-4.5%, media 4.5-5.5%, periferia 5.5-7%)
+- Gastos típicos: IBI ~0.5-1%, comunidad variable, seguro ~0.15%, mantenimiento 2-4% renta, gestión 5-8%
+- Vacío estimado: 5-8% anual
+- Métricas clave: €/m², habitaciones, baños, planta, ascensor, orientación
+- Riesgos: zona tensionada LAU, rotación inquilinos, morosidad
+- Cap rates: Madrid centro 3.5-4.2%, BCN centro 3.8-4.5%, ciudades medias 4.5-6%`,
+
+    local_comercial: `TIPO: LOCAL COMERCIAL
+- Yields objetivo: 5-9% bruto (prime 5-6%, zona secundaria 6-9%)
+- Gastos típicos: IBI más alto ~1-2%, seguro ~0.3%, mantenimiento 3-5%, gestión 8-10%
+- Vacío estimado: 8-15% anual (mucho mayor que residencial)
+- Métricas clave: €/m², metros de fachada, escaparate, acceso, actividad permitida, licencia
+- Riesgos: ubicación crítica, cambio de hábitos de consumo, periodos vacíos largos (6-12 meses), acondicionamiento
+- Cap rates: prime 4-5.5%, secundario 5.5-8%, periferia 7-10%
+- IMPORTANTE: NO comparar con precios de vivienda. Usar precios de locales de la zona.`,
+
+    oficina: `TIPO: OFICINA
+- Yields objetivo: 4-7.5% bruto (prime 4-5%, zona secundaria 5.5-7.5%)
+- Gastos típicos: IBI ~1%, comunidad/CAM alta, seguro ~0.2%, mantenimiento 3-5%, gestión 8-10%
+- Vacío estimado: 10-20% anual (impacto teletrabajo post-COVID)
+- Métricas clave: €/m², planta diáfana/compartimentada, climatización, eficiencia energética, fibra
+- Riesgos: teletrabajo, obsolescencia técnica, eficiencia energética, tenant quality, break options
+- Cap rates: CBD 4-5%, zona business 5-6.5%, periferia 6-8%
+- IMPORTANTE: El mercado de oficinas ha cambiado radicalmente post-COVID. Aplicar descuento de tendencia.`,
+
+    nave_industrial: `TIPO: NAVE INDUSTRIAL / LOGÍSTICA
+- Yields objetivo: 5.5-9% bruto (logística prime 5.5-6.5%, secundario 6.5-9%)
+- Gastos típicos: IBI ~0.5-1.5%, seguro ~0.3%, mantenimiento 2-4%, gestión 5-8%
+- Vacío estimado: 5-10% anual
+- Métricas clave: €/m², altura libre, muelles de carga, resistencia suelo, acceso autopista/circunvalación
+- Riesgos: contaminación suelo, licencias actividad, obsolescencia, ubicación logística
+- Cap rates: logística prime 5-6%, secundario 6-8%, rural 7.5-10%
+- IMPORTANTE: La logística prime (última milla, e-commerce) tiene primas significativas.`,
+
+    garaje: `TIPO: GARAJE / PLAZA DE PARKING
+- Yields objetivo: 4-6.5% bruto
+- Gastos típicos: comunidad baja, IBI ~0.3-0.5%, seguro mínimo, mantenimiento bajo
+- Vacío estimado: 3-5% anual (muy estable)
+- Métricas clave: €/plaza, tipo plaza (normal/doble/moto), accesibilidad, altura, ubicación
+- Riesgos: ZBE (Zonas Bajas Emisiones), movilidad urbana, vehículo eléctrico (punto de carga)
+- Cap rates: centro 4-5.5%, periferia 5-7%
+- IMPORTANTE: Valorar por €/plaza, NO por €/m². Precio medio plaza Madrid: 25.000-45.000€, BCN: 30.000-50.000€.`,
+
+    trastero: `TIPO: TRASTERO
+- Yields objetivo: 7-11% bruto (uno de los activos más rentables)
+- Gastos típicos: comunidad muy baja, IBI ~0.2%, seguro mínimo
+- Vacío estimado: 5-8% anual
+- Métricas clave: €/m², acceso, seguridad, humedad, ubicación
+- Riesgos: baja liquidez, mercado muy local, competencia self-storage
+- Cap rates: 6-9%
+- IMPORTANTE: Mercado nicho. Comparar con self-storage de la zona.`,
+
+    terreno: `TIPO: TERRENO / SOLAR
+- Sin yield de alquiler (salvo uso temporal: parking, almacén)
+- Metodología: valor residual = valor inmueble terminado - costes construcción - beneficio promotor
+- Métricas clave: €/m² suelo, edificabilidad (m²t/m²s), uso permitido (PGOU), cargas urbanísticas
+- Riesgos: urbanístico (no edificable, protección), plazos licencia, costes urbanización
+- IMPORTANTE: NO aplicar método de comparables de vivienda. Usar valor residual.`,
+
+    edificio: `TIPO: EDIFICIO COMPLETO
+- Yields objetivo: según composición (residencial + comercial + garajes)
+- Gastos típicos: IBI total edificio, comunidad propia, seguro edificio, mantenimiento global
+- Métricas clave: yield ponderado por uso, NOI total, estado fachada/estructura, ITE
+- Riesgos: derramas, ITE desfavorable, rehabilitación energética obligatoria, inquilinos de renta antigua
+- IMPORTANTE: Desglosar por uso (vivienda, local, garaje) y aplicar yield por tipo. Yield ponderado.`,
+
+    coworking: `TIPO: ESPACIO COWORKING
+- Yields objetivo: 6-10% bruto (si se opera), 4-6% como oficina alquilada a operador
+- Gastos típicos: como oficina + mobiliario + servicios + personal
+- Vacío estimado: 15-25% (variable según marca y ubicación)
+- Métricas clave: €/puesto, ocupación media, mix (hot desk/dedicated/privado), servicios
+- Riesgos: competencia, WeWork effect, obsolescencia rápida de diseño
+- Cap rates: como oficina + prima de riesgo operacional`,
+  };
+
+  return contexts[type] || contexts.vivienda;
 }
 
 export interface AnalyzedComparable {
@@ -171,12 +276,16 @@ async function runPhase1Analysis(
     )
     .join('\n');
 
-  const prompt = `Eres un analista inmobiliario experto. Tu tarea es analizar comparables de mercado.
+  const pType = property.propertyType || 'vivienda';
+  const pTypeLabel = PROPERTY_TYPE_LABELS[pType] || pType;
 
-PROPIEDAD OBJETIVO:
+  const prompt = `Eres un analista inmobiliario experto. Tu tarea es analizar comparables de mercado para un activo de tipo **${pTypeLabel}**.
+
+PROPIEDAD OBJETIVO (${pTypeLabel}):
+- Tipo de activo: ${pTypeLabel}
 - Ubicación: ${property.address}, ${property.city} (${property.postalCode})
 - Superficie: ${property.squareMeters}m²
-- Habitaciones: ${property.rooms} | Baños: ${property.bathrooms}
+${pType === 'vivienda' || pType === 'edificio' ? `- Habitaciones: ${property.rooms} | Baños: ${property.bathrooms}` : ''}
 - Estado: ${property.condition}
 ${property.floor ? `- Planta: ${property.floor}` : ''}
 ${property.yearBuilt ? `- Año: ${property.yearBuilt}` : ''}
@@ -187,11 +296,14 @@ ${comparablesText}
 
 TAREA:
 1. Analiza cada comparable y puntúa su SIMILITUD REAL (0-100) con la propiedad objetivo
-   - Considera: ubicación, superficie (±20% = buena similitud), habitaciones, estado
+   - CRÍTICO: Solo considerar comparables del MISMO TIPO DE ACTIVO (${pTypeLabel})
+   - Una vivienda NO es comparable con un local comercial ni con una oficina
+   - Considera: tipo de activo, ubicación, superficie (±20% = buena similitud)${pType === 'vivienda' ? ', habitaciones, estado' : pType === 'garaje' ? ', tipo de plaza, accesibilidad' : pType === 'local_comercial' ? ', fachada, actividad, zona comercial' : pType === 'oficina' ? ', planta diáfana, climatización' : ', características técnicas'}
    - Penaliza diferencias grandes de superficie o ubicación distinta
-2. Identifica OUTLIERS de precio (precios que se desvían >30% de la mediana)
-3. Selecciona los 5-8 comparables MÁS RELEVANTES
-4. Analiza el PERFIL DE LA ZONA (tipo de comprador, rango de precios, tendencia)
+   - Penalizar FUERTEMENTE si el comparable es de un tipo de activo diferente
+2. Identifica OUTLIERS de precio (precios que se desvían >30% de la mediana del tipo)
+3. Selecciona los 5-8 comparables MÁS RELEVANTES (mismo tipo de activo)
+4. Analiza el PERFIL DE LA ZONA para este tipo de activo específico
 
 Responde SOLO con JSON:
 {
@@ -359,22 +471,32 @@ ${phase1.zoneAnalysis.outliersPricePerM2.length > 0 ? `- Outliers descartados: $
   if (property.hasGarage) features.push('Garaje');
   if (property.caracteristicas) features.push(...property.caracteristicas);
 
+  const pType = property.propertyType || 'vivienda';
+  const pTypeLabel = PROPERTY_TYPE_LABELS[pType] || pType;
+  const typeContext = getPropertyTypeContext(pType);
+
   const prompt = `Eres un tasador inmobiliario certificado (RICS/ATASA) con 20+ años de experiencia en el mercado español. Realizas una valoración profesional rigurosa siguiendo las normas ECO 805/2003 y estándares internacionales de valoración (IVS).
 
 Tu valoración DEBE ser REALISTA — ni optimista ni pesimista — basada en datos verificables.
 
 ═══════════════════════════════════════════════════════
-PROPIEDAD A VALORAR
+TIPO DE ACTIVO: ${pTypeLabel.toUpperCase()}
 ═══════════════════════════════════════════════════════
+${typeContext}
+
+═══════════════════════════════════════════════════════
+PROPIEDAD A VALORAR (${pTypeLabel})
+═══════════════════════════════════════════════════════
+- Tipo: ${pTypeLabel}
 - Dirección: ${property.address}, ${property.city} (CP: ${property.postalCode})
 ${property.neighborhood ? `- Barrio/Zona: ${property.neighborhood}` : ''}
-- Superficie útil: ${property.squareMeters}m²
-- Distribución: ${property.rooms} habitaciones, ${property.bathrooms} baños
-${property.floor !== undefined ? `- Planta: ${property.floor}${property.floor === 0 ? ' (bajo)' : property.floor >= 4 ? ' (planta alta — prima +3-5%)' : ''}` : ''}
-- Estado conservación: ${property.condition === 'NEW' ? 'Obra nueva / A estrenar' : property.condition === 'NEEDS_RENOVATION' ? 'Necesita reforma (descuento -15% a -25%)' : 'Buen estado general'}
+- Superficie: ${property.squareMeters}m²
+${pType === 'vivienda' || pType === 'edificio' ? `- Distribución: ${property.rooms} habitaciones, ${property.bathrooms} baños` : pType === 'garaje' ? `- Plazas: ${property.rooms || 1}` : ''}
+${property.floor !== undefined ? `- Planta: ${property.floor}${property.floor === 0 ? ' (bajo' + (pType === 'local_comercial' ? ' — ideal para local a pie de calle)' : ')') : property.floor >= 4 ? (pType === 'vivienda' ? ' (planta alta — prima +3-5%)' : '') : ''}` : ''}
+- Estado conservación: ${property.condition === 'NEW' ? 'Obra nueva / A estrenar' : property.condition === 'NEEDS_RENOVATION' ? 'Necesita reforma' : 'Buen estado general'}
 ${property.yearBuilt ? `- Antigüedad: ${new Date().getFullYear() - property.yearBuilt} años (construido ${property.yearBuilt})` : ''}
-${property.orientacion ? `- Orientación: ${property.orientacion}${property.orientacion === 'sur' ? ' (mejor orientación, prima +2-3%)' : property.orientacion === 'norte' ? ' (menos luminosidad, descuento -2%)' : ''}` : ''}
-${features.length > 0 ? `- Equipamiento: ${features.join(', ')}` : '- Equipamiento: Sin extras destacables'}
+${pType === 'vivienda' && property.orientacion ? `- Orientación: ${property.orientacion}` : ''}
+${features.length > 0 ? `- Equipamiento: ${features.join(', ')}` : ''}
 ${property.descripcionAdicional ? `- Observaciones: ${property.descripcionAdicional}` : ''}
 - Finalidad valoración: ${property.finalidad === 'venta' ? 'Determinación valor de mercado (venta)' : property.finalidad === 'alquiler' ? 'Determinación renta de mercado (alquiler)' : 'Valor de mercado + Renta de mercado'}
 
@@ -397,36 +519,79 @@ METODOLOGÍA DE VALORACIÓN (5 PASOS OBLIGATORIOS)
 ═══════════════════════════════════════════════════════
 
 PASO 1 — MÉTODO DE COMPARACIÓN (peso: 50-60%):
+- CRÍTICO: Usa SOLO comparables DEL MISMO TIPO DE ACTIVO (${pTypeLabel})
+- NO mezclar tipos: un local NO es comparable con una vivienda, una oficina NO es comparable con una nave
 - Usa SOLO comparables con similitud >60% de la Fase 1
-- Para cada comparable, ajusta el precio por:
-  · Diferencia de superficie (±1.5% por cada 5m² de diferencia)
+- Ajusta el precio por diferencias:
+${pType === 'vivienda' ? `  · Superficie (±1.5% por cada 5m² de diferencia)
   · Estado/calidad (reforma: -15-25%, obra nueva: +10-15%)
   · Planta (bajo: -5-8%, planta alta con ascensor: +3-5%, ático: +8-12%)
   · Equipamiento (garaje: +8-12%, terraza: +5-8%, piscina: +3-5%, ascensor: +3-5%)
-  · Orientación (sur: +2-3%, norte: -2%)
-- CRÍTICO: Los asking prices de portales (Idealista, Fotocasa) están INFLADOS un 10-15% respecto al precio real de cierre. APLICA SIEMPRE este descuento.
+  · Orientación (sur: +2-3%, norte: -2%)` :
+pType === 'local_comercial' ? `  · Superficie (±1% por cada 10m² de diferencia)
+  · Fachada y escaparate (con fachada: +10-20%, esquina: +15-25%)
+  · Planta (a pie de calle: referencia, sótano: -30-50%, primera planta: -15-25%)
+  · Altura libre (>3.5m: +5%, <2.5m: -10%)
+  · Estado (a reformar: -20-30% según nivel)
+  · Licencia de actividad vigente (+5-10%)` :
+pType === 'oficina' ? `  · Superficie (±1% por cada 15m² de diferencia)
+  · Planta (baja: -10%, plantas altas con vistas: +5-10%)
+  · Diáfana vs compartimentada (diáfana: +5%)
+  · Climatización central (+5-8%)
+  · Eficiencia energética (A/B: +5-10%, F/G: -5-10%)
+  · Fibra óptica y cableado (+3-5%)` :
+pType === 'nave_industrial' ? `  · Superficie (±1% por cada 100m² de diferencia)
+  · Altura libre (>8m: +10%, <5m: -10%)
+  · Muelles de carga (+10-15%)
+  · Resistencia suelo (>3T/m²: +5%)
+  · Acceso autopista/circunvalación (+5-10%)` :
+pType === 'garaje' ? `  · Tipo de plaza (normal: referencia, doble: +60-80%, moto: -50-60%)
+  · Accesibilidad (rampa ancha: +5%, difícil maniobra: -10-15%)
+  · Punto carga eléctrica (+5-10%)
+  · Planta (más superficial: +5%, sótanos profundos: -5-10%)` :
+`  · Superficie (ajustar según tipo)
+  · Estado/calidad
+  · Ubicación y accesibilidad`}
+- CRÍTICO: Los asking prices de portales están INFLADOS un 10-15%. APLICA SIEMPRE descuento.
 - Los precios del Notariado son precios REALES escriturados — máxima fiabilidad.
-- Si hay datos de Idealista Data Platform, son datos profesionales agregados — fiabilidad alta, pero siguen siendo asking prices (aplicar descuento ~8-10%).
+- Idealista Data Platform: datos profesionales agregados — descuento ~8-10%.
 
 PASO 2 — MÉTODO DE CAPITALIZACIÓN DE RENTAS (peso: 20-30%):
-- Estima la renta mensual de LARGA ESTANCIA (contrato ≥12 meses) basándote en:
-  · Precios de alquiler de la zona (datos de plataformas arriba)
+- Estima la renta mensual para ${pTypeLabel} basándote en:
+  · Precios de alquiler de la zona PARA ESTE TIPO DE ACTIVO (datos de plataformas)
   · Rentabilidad bruta de la zona si disponible (datos Idealista)
-  · Comparables de alquiler similares
-- Calcula: Valor = (Renta mensual × 12) / Cap Rate zona
-  · Cap Rate típico España: 3.5-5.5% según ciudad y zona
-  · Madrid centro: 3.5-4.2%, Barcelona centro: 3.8-4.5%
-  · Ciudades medias: 4.5-5.5%, zonas periféricas: 5.5-7%
+  · Comparables de alquiler similares DEL MISMO TIPO
+- Calcula: Valor = (Renta mensual × 12) / Cap Rate para ${pTypeLabel}
+  · Usar Cap Rate del tipo de activo indicado arriba, NO cap rate genérico
+  · ${pType === 'vivienda' ? 'Residencial: Madrid centro 3.5-4.2%, BCN 3.8-4.5%, medias 4.5-5.5%' :
+     pType === 'local_comercial' ? 'Local: prime 4-5.5%, secundario 5.5-8%, periferia 7-10%' :
+     pType === 'oficina' ? 'Oficina: CBD 4-5%, business 5-6.5%, periferia 6-8%' :
+     pType === 'nave_industrial' ? 'Nave: logística prime 5-6%, secundario 6-8%, rural 7.5-10%' :
+     pType === 'garaje' ? 'Garaje: centro 4-5.5%, periferia 5-7%' :
+     'Usar cap rate específico del tipo de activo'}
 - El resultado sirve como validación cruzada del método de comparables
 
-PASO 3 — ANÁLISIS DE INVERSIÓN (MEDIA ESTANCIA 1-11 meses):
+${pType === 'vivienda' || pType === 'edificio' ? `PASO 3 — ANÁLISIS DE INVERSIÓN (MEDIA ESTANCIA 1-11 meses):
+- Aplica SOLO a vivienda y edificio residencial
 - Estima renta media estancia (contratos temporales) con premium sobre larga estancia:
   · Madrid/Barcelona premium: +40-60%
   · Ciudades turísticas (Málaga, Palma, Benidorm): +50-80%
   · Ciudades medias: +25-40%
 - Estima ocupación REALISTA anual (no 100%): típico 75-90% según zona
 - Calcula rentabilidad bruta = (renta × meses ocupados) / valor inmueble
-- Perfil de inquilino típico: profesional/ejecutivo en movilidad, estudiante posgrado, nómada digital, etc.
+- Perfil de inquilino típico` :
+pType === 'oficina' || pType === 'coworking' ? `PASO 3 — ANÁLISIS DE FLEXIBILIDAD (contratos cortos):
+- Para oficinas/coworking, analiza el potencial de contratos flexibles
+- Premium por flexibilidad: +20-40% sobre contrato largo fijo
+- Ocupación media coworking: 70-85%. Oficina flexible: 80-90%
+- Riesgo de obsolescencia por teletrabajo` :
+`PASO 3 — ANÁLISIS ESPECÍFICO DEL TIPO DE ACTIVO (${pTypeLabel}):
+- Analiza riesgos y oportunidades específicos de ${pTypeLabel}
+- Para locales: analizar zona comercial, tránsito peatonal, competencia
+- Para naves: analizar acceso logístico, demanda de la zona, crecimiento e-commerce
+- Para garajes: analizar impacto ZBE, demanda parking en la zona, vehículo eléctrico
+- Para trasteros: analizar demanda local, competencia self-storage
+- NO calcular media estancia si no aplica a este tipo de activo`}
 
 PASO 4 — VALIDACIÓN CRUZADA Y COHERENCIA:
 - Compara el valor obtenido por comparables vs capitalización
@@ -447,40 +612,64 @@ PASO 5 — DETERMINACIÓN FINAL Y CONFIANZA:
   · 50-65 = datos estáticos o insuficientes, valoración estimativa
 - El rango min-max debe reflejar incertidumbre REAL (típico ±8-12% del valor central)
 
-REGLAS DE REALISMO:
-- NO inflar el valor para complacer. Un inmueble medio vale lo que indica el mercado.
-- La reforma necesaria SIEMPRE penaliza: -15% reforma parcial, -25% reforma integral.
-- Sin ascensor en planta >2: penalización -5% a -10%.
-- Antigüedad >40 años sin reforma: penalización adicional -5%.
-- Zona sin parking + inmueble sin garaje: -3-5% en ciudades con problema de aparcamiento.
+REGLAS DE REALISMO PARA ${pTypeLabel.toUpperCase()}:
+- NO inflar el valor. El activo vale lo que indica el mercado para su tipo.
+- Usar yields, cap rates y gastos ESPECÍFICOS del tipo ${pTypeLabel} (ver sección TIPO DE ACTIVO arriba).
+${pType === 'vivienda' ? `- Reforma necesaria: -15% parcial, -25% integral.
+- Sin ascensor planta >2: -5% a -10%.
+- Antigüedad >40 años sin reforma: -5%.
+- Sin garaje en zona con problema parking: -3-5%.` :
+pType === 'local_comercial' ? `- Local sin fachada/escaparate: descuento -20-30%.
+- Sótano o primera planta (no pie de calle): -25-50%.
+- Sin licencia de actividad: -5-10%.
+- Vacío actual: considerar 6-12 meses para encontrar inquilino.` :
+pType === 'oficina' ? `- Oficina sin climatización central: -10-15%.
+- Sin eficiencia energética (F/G): -5-10%.
+- Compartimentada rígida (no adaptable): -5%.
+- Impacto teletrabajo: aplicar prima de riesgo +0.5-1% en cap rate.` :
+pType === 'nave_industrial' ? `- Sin muelles de carga: -10-15% para logística.
+- Altura libre <5m: -10%.
+- Sin acceso rodado pesado: -15-20%.
+- Posible contaminación suelo: requiere estudio ambiental.` :
+pType === 'garaje' ? `- Valorar POR PLAZA, no por m².
+- Difícil maniobra: -10-15%.
+- Sótanos profundos (>2): -5-10%.
+- Sin punto carga eléctrica: penalización creciente.` :
+`- Aplicar criterios específicos del tipo de activo.`}
 
 Responde SOLO con JSON exacto (sin texto adicional antes o después):
 {
   "estimatedValue": <entero, euros — valor de mercado más probable>,
   "minValue": <entero, euros — límite inferior razonable>,
   "maxValue": <entero, euros — límite superior razonable>,
-  "precioM2": <entero, €/m²>,
+  "precioM2": <entero, €/m²${pType === 'garaje' ? ' o €/plaza' : ''}>,
   "confidenceScore": <50-98, basado en calidad de datos>,
 
-  "reasoning": "<4-6 párrafos DETALLADOS explicando: 1) Fuentes de datos utilizadas y su fiabilidad, 2) Comparables seleccionados y ajustes aplicados a cada uno, 3) Método de capitalización: renta estimada, cap rate usado y validación cruzada, 4) Factores de ajuste positivos y negativos con su impacto en €, 5) Conclusión y nivel de confianza>",
+  "reasoning": "<4-6 párrafos DETALLADOS: 1) Tipo de activo y metodología aplicada, 2) Fuentes de datos y fiabilidad, 3) Comparables del MISMO TIPO seleccionados y ajustes, 4) Capitalización: renta estimada para ${pTypeLabel} y cap rate usado, 5) Factores de ajuste específicos del tipo, 6) Conclusión>",
 
-  "analisisMercado": "<3-4 frases sobre: situación actual del mercado en la zona, tendencia de precios, nivel de oferta/demanda, perspectiva a 6-12 meses>",
-  "metodologiaUsada": "<Descripción de los métodos: comparación directa (X comparables), capitalización de rentas (cap rate X%), ajustes por características, validación cruzada>",
+  "analisisMercado": "<3-4 frases sobre el mercado de ${pTypeLabel} en la zona: oferta/demanda, tendencia, perspectiva>",
+  "metodologiaUsada": "<Métodos aplicados específicos para ${pTypeLabel}: comparación directa, capitalización con cap rate de ${pType === 'vivienda' ? '3.5-6%' : pType === 'local_comercial' ? '4-10%' : pType === 'oficina' ? '4-8%' : pType === 'nave_industrial' ? '5-10%' : pType === 'garaje' ? '4-7%' : '5-8%'}, ajustes por características>",
 
   "tendenciaMercado": "<alcista|bajista|estable>",
   "porcentajeTendencia": <número 0.5-12, variación interanual %>,
-  "tiempoEstimadoVenta": "<ej: 2-4 meses, basado en demanda de la zona y días medios en mercado>",
+  "tiempoEstimadoVenta": "<estimación realista para ${pTypeLabel}>",
 
-  "alquilerLargaEstancia": <entero, €/mes, contrato ≥12 meses>,
-  "rentabilidadLargaEstancia": <número, % bruto anual>,
-  "capRate": <número, % neto estimado>,
+  "alquilerLargaEstancia": <entero, €/mes>,
+  "rentabilidadLargaEstancia": <número, % bruto anual para ${pTypeLabel}>,
+  "capRate": <número, % — ESPECÍFICO para ${pTypeLabel}>,
 
-  "alquilerMediaEstancia": <entero, €/mes, contrato 1-11 meses>,
+${pType === 'vivienda' || pType === 'edificio' ? `  "alquilerMediaEstancia": <entero, €/mes, contrato 1-11 meses>,
   "alquilerMediaEstanciaMin": <entero, €/mes, temporada baja>,
   "alquilerMediaEstanciaMax": <entero, €/mes, temporada alta>,
   "rentabilidadMediaEstancia": <número, % bruto anual ajustado por ocupación>,
   "ocupacionEstimadaMediaEstancia": <número, % anual realista>,
-  "perfilInquilinoMediaEstancia": "<perfiles concretos para esta zona>",
+  "perfilInquilinoMediaEstancia": "<perfiles concretos>",` :
+`  "alquilerMediaEstancia": null,
+  "alquilerMediaEstanciaMin": null,
+  "alquilerMediaEstanciaMax": null,
+  "rentabilidadMediaEstancia": null,
+  "ocupacionEstimadaMediaEstancia": null,
+  "perfilInquilinoMediaEstancia": null,`}
 
   "factoresPositivos": ["<factor1 con impacto estimado>", "<factor2>", "<factor3>"],
   "factoresNegativos": ["<factor1 con impacto estimado>", "<factor2>"],
@@ -546,7 +735,7 @@ Responde SOLO con JSON exacto (sin texto adicional antes o después):
     idealistaYield = parseFloat(yieldMatch[1].replace(',', '.'));
   }
 
-  const rental = computeRentalEstimates(raw, estimatedValue, idealistaYield);
+  const rental = computeRentalEstimates(raw, estimatedValue, idealistaYield, property.propertyType);
 
   return {
     estimatedValue,
@@ -586,14 +775,46 @@ function computeRentalEstimates(
   raw: any,
   estimatedValue: number,
   idealistaYield?: number | null,
+  propertyType?: PropertyType,
 ) {
-  const YIELD_MEDIA_PREMIUM = 1.40;
-  const OCUPACION_MEDIA = 82;
+  const pType = propertyType || 'vivienda';
 
-  // Rentabilidad base: usar Idealista si disponible, si no IA, si no fallback
+  // Yields por defecto por tipo de activo
+  const DEFAULT_YIELDS: Record<string, number> = {
+    vivienda: 0.045,
+    local_comercial: 0.065,
+    oficina: 0.055,
+    nave_industrial: 0.07,
+    garaje: 0.05,
+    trastero: 0.085,
+    terreno: 0.02,
+    edificio: 0.05,
+    coworking: 0.06,
+  };
+
+  const MEDIA_ESTANCIA_PREMIUM: Record<string, number> = {
+    vivienda: 1.40,
+    oficina: 1.25,
+    coworking: 1.10,
+  };
+
+  const OCUPACION_POR_TIPO: Record<string, number> = {
+    vivienda: 82,
+    local_comercial: 87,
+    oficina: 80,
+    nave_industrial: 90,
+    garaje: 95,
+    trastero: 90,
+    edificio: 85,
+    coworking: 75,
+  };
+
+  const YIELD_MEDIA_PREMIUM = MEDIA_ESTANCIA_PREMIUM[pType] || 1.0;
+  const OCUPACION_MEDIA = OCUPACION_POR_TIPO[pType] || 85;
+
   const yieldBase = idealistaYield && idealistaYield > 0
     ? idealistaYield / 100
-    : 0.045;
+    : DEFAULT_YIELDS[pType] || 0.045;
 
   // Larga estancia: priorizar IA, luego calcular con yield real
   let alquilerEstimado = Number(raw.alquilerLargaEstancia || raw.alquilerEstimado || 0);
@@ -615,8 +836,11 @@ function computeRentalEstimates(
     capRate = Math.round(rentabilidadAlquiler * 0.75 * 10) / 10;
   }
 
+  // Media estancia: solo para tipos que lo soporten
+  const supportsMediaEstancia = ['vivienda', 'edificio', 'oficina', 'coworking'].includes(pType);
+
   let alquilerMediaEstancia = Number(raw.alquilerMediaEstancia || 0);
-  if (alquilerMediaEstancia <= 0 && alquilerEstimado > 0) {
+  if (alquilerMediaEstancia <= 0 && alquilerEstimado > 0 && supportsMediaEstancia && YIELD_MEDIA_PREMIUM > 1) {
     alquilerMediaEstancia = Math.round(alquilerEstimado * YIELD_MEDIA_PREMIUM);
   }
 
