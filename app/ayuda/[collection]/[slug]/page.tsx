@@ -11,6 +11,7 @@ import { ArticleSidebar } from '@/components/help-center/ArticleSidebar';
 import { ArticleFeedback } from '@/components/help-center/ArticleFeedback';
 import { ArticleCard } from '@/components/help-center/ArticleCard';
 import { VideoPlaceholder } from '@/components/help-center/VideoPlaceholder';
+import { ArticleViewTracker } from '@/components/help-center/ArticleViewTracker';
 
 interface ArticlePageProps {
   params: { collection: string; slug: string };
@@ -47,6 +48,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   return (
     <div className="container px-4 py-8">
+      <ArticleViewTracker articleId={article.id} />
       <BreadcrumbNav
         items={[
           { label: 'Centro de Ayuda', href: '/ayuda' },
@@ -89,7 +91,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       )}
 
       <div className="mt-10">
-        <ArticleFeedback />
+        <ArticleFeedback articleId={article.id} />
       </div>
 
       {relatedArticles.length > 0 && (

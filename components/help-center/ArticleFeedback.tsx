@@ -3,13 +3,25 @@
 import { useState } from 'react';
 import { ThumbsUp, ThumbsDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 
-export function ArticleFeedback() {
+interface ArticleFeedbackProps {
+  articleId: string;
+}
+
+export function ArticleFeedback({ articleId }: ArticleFeedbackProps) {
   const [submitted, setSubmitted] = useState(false);
 
-  const handleFeedback = () => {
+  const handleFeedback = async (helpful: boolean) => {
     setSubmitted(true);
+    try {
+      await fetch('/api/help/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ articleId, helpful }),
+      });
+    } catch {
+      // Fire-and-forget — no bloquear UX por error de tracking
+    }
   };
 
   if (submitted) {
@@ -29,7 +41,7 @@ export function ArticleFeedback() {
         <Button
           variant="outline"
           size="sm"
-          onClick={handleFeedback}
+          onClick={() => handleFeedback(true)}
           className="gap-2"
         >
           <ThumbsUp className="h-4 w-4" />
@@ -38,7 +50,7 @@ export function ArticleFeedback() {
         <Button
           variant="outline"
           size="sm"
-          onClick={handleFeedback}
+          onClick={() => handleFeedback(false)}
           className="gap-2"
         >
           <ThumbsDown className="h-4 w-4" />
