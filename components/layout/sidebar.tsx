@@ -35,11 +35,11 @@ import { HIDDEN_ROUTES } from '@/lib/active-modules-config';
 import { CompanySelector } from './CompanySelector';
 import { useSidebarCounts } from '@/lib/hooks/useSidebarCounts';
 
-const ROUTE_TO_COUNT_KEY: Record<string, string> = {
-  '/pagos': 'pagos_pendientes',
-  '/incidencias': 'incidencias_abiertas',
-  '/contratos': 'contratos_por_vencer',
-  '/candidatos': 'candidatos_nuevos',
+const ROUTE_TO_COUNT_KEY: Record<string, { key: string; label: string }> = {
+  '/pagos': { key: 'pagos_pendientes', label: 'pagos pendientes de cobro' },
+  '/incidencias': { key: 'incidencias_abiertas', label: 'incidencias abiertas' },
+  '/contratos': { key: 'contratos_por_vencer', label: 'contratos vencen en 30 días' },
+  '/candidatos': { key: 'candidatos_nuevos', label: 'candidatos nuevos' },
 };
 import { useSelectedCompany } from '@/lib/hooks/admin/useSelectedCompany';
 import {
@@ -668,10 +668,13 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
           <item.icon size={18} />
           <span className="flex-1">{item.name}</span>
           {(() => {
-            const countKey = ROUTE_TO_COUNT_KEY[item.href];
-            const count = countKey ? (counts[countKey] ?? 0) : 0;
+            const countInfo = ROUTE_TO_COUNT_KEY[item.href];
+            const count = countInfo ? (counts[countInfo.key] ?? 0) : 0;
             return count > 0 ? (
-              <span className="ml-auto bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[20px] text-center">
+              <span
+                className="ml-auto bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[20px] text-center"
+                title={`${count} ${countInfo!.label}`}
+              >
                 {count}
               </span>
             ) : null;
@@ -741,10 +744,13 @@ export function Sidebar({ onNavigate }: SidebarProps = {}) {
           <item.icon size={18} />
           <span className="flex-1 text-left">{item.name}</span>
           {(() => {
-            const countKey = ROUTE_TO_COUNT_KEY[item.href];
-            const count = countKey ? (counts[countKey] ?? 0) : 0;
+            const countInfo = ROUTE_TO_COUNT_KEY[item.href];
+            const count = countInfo ? (counts[countInfo.key] ?? 0) : 0;
             return count > 0 ? (
-              <span className="ml-auto bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[20px] text-center">
+              <span
+                className="ml-auto bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[20px] text-center"
+                title={`${count} ${countInfo!.label}`}
+              >
                 {count}
               </span>
             ) : null;
