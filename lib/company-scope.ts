@@ -25,6 +25,27 @@ async function getChildCompanyIds(companyId: string): Promise<string[]> {
   return children.map((child) => child.id);
 }
 
+/**
+ * Si la empresa actual es filial (tiene parent), devuelve el grupo completo:
+ * parent + todas las hermanas (otras filiales del mismo parent).
+ * Permite que un usuario de Viroda vea datos de Rovida (ambas filiales de Vidaro).
+ */
+async function getGroupCompanyIds(companyId: string): Promise<string[]> {
+  const company = await prisma.company.findUnique({
+    where: { id: companyId },
+    select: { parentCompanyId: true },
+  });
+
+  if (!company?.parentCompanyId) return [];
+
+  const siblings = await prisma.company.findMany({
+    where: { parentCompanyId: company.parentCompanyId },
+    select: { id: true },
+  });
+
+  return [company.parentCompanyId, ...siblings.map(s => s.id)];
+}
+
 async function getAccessibleCompanyIds(
   userId: string,
   role: UserRole,
@@ -53,12 +74,14 @@ async function getAccessibleCompanyIds(
     ids.add(primaryCompanyId);
   }
 
-  // Para administrador y gestor: incluir también las empresas hijas
+  // Para administrador y gestor: incluir empresas hijas y grupo (hermanas)
   if (role === 'administrador' || role === 'gestor') {
-    const parentIds = Array.from(ids);
-    for (const parentId of parentIds) {
-      const childIds = await getChildCompanyIds(parentId);
+    const currentIds = Array.from(ids);
+    for (const compId of currentIds) {
+      const childIds = await getChildCompanyIds(compId);
       childIds.forEach((id) => ids.add(id));
+      const groupIds = await getGroupCompanyIds(compId);
+      groupIds.forEach((id) => ids.add(id));
     }
   }
 
@@ -91,9 +114,19 @@ export async function resolveCompanyScope(params: {
     };
   }
 
+  // Si la empresa activa es holding (tiene hijas), scope = ella + hijas
+  // Si la empresa activa es filial (tiene parent), scope = grupo completo (parent + hermanas)
   const childCompanyIds = await getChildCompanyIds(activeCompanyId);
-  const scopeCompanyIds =
-    childCompanyIds.length > 0 ? [activeCompanyId, ...childCompanyIds] : [activeCompanyId];
+  let scopeCompanyIds: string[];
+
+  if (childCompanyIds.length > 0) {
+    scopeCompanyIds = [activeCompanyId, ...childCompanyIds];
+  } else {
+    const groupIds = await getGroupCompanyIds(activeCompanyId);
+    scopeCompanyIds = groupIds.length > 0
+      ? [...new Set([activeCompanyId, ...groupIds])]
+      : [activeCompanyId];
+  }
 
   return {
     activeCompanyId,
