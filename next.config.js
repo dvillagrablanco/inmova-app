@@ -276,14 +276,32 @@ const nextConfig = {
     return config;
   },
 
-  // Redirects
+  // Redirects — singular → plural, backward compatibility
   async redirects() {
     return [
-      {
-        source: '/knowledge-base',
-        destination: '/ayuda',
-        permanent: true,
-      },
+      { source: '/knowledge-base', destination: '/ayuda', permanent: true },
+      // Comercial: singular → plural
+      { source: '/comercial/local', destination: '/comercial/locales', permanent: true },
+      { source: '/comercial/oficina', destination: '/comercial/oficinas', permanent: true },
+      { source: '/comercial/nave', destination: '/comercial/naves', permanent: true },
+      { source: '/comercial/contrato', destination: '/comercial/contratos', permanent: true },
+      { source: '/comercial/pago', destination: '/comercial/pagos', permanent: true },
+      { source: '/comercial/lead', destination: '/comercial/leads', permanent: true },
+      { source: '/comercial/visita', destination: '/comercial/visitas', permanent: true },
+      { source: '/comercial/informe', destination: '/comercial/informes', permanent: true },
+      { source: '/comercial/espacio', destination: '/comercial/espacios', permanent: true },
+      // Core: singular → plural
+      { source: '/liquidacion', destination: '/liquidaciones', permanent: true },
+      { source: '/incidencia', destination: '/incidencias', permanent: true },
+      { source: '/candidato', destination: '/candidatos', permanent: true },
+      { source: '/contrato', destination: '/contratos', permanent: true },
+      { source: '/pago', destination: '/pagos', permanent: true },
+      { source: '/inquilino', destination: '/inquilinos', permanent: true },
+      { source: '/propiedad', destination: '/propiedades', permanent: true },
+      { source: '/avalista', destination: '/avalistas', permanent: true },
+      { source: '/suministro', destination: '/suministros', permanent: true },
+      { source: '/visita', destination: '/visitas', permanent: true },
+      { source: '/reporte', destination: '/reportes', permanent: true },
     ];
   },
 };
