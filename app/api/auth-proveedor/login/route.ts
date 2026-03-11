@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import logger from '@/lib/logger';
 import { generateProviderToken, setProviderAuthCookie } from '@/lib/provider-auth';
+import { isAccountLocked, recordFailedAttempt, clearLockout } from '@/lib/account-lockout';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -12,7 +13,6 @@ async function getPrisma() {
   const { getPrismaClient } = await import('@/lib/db');
   return getPrismaClient();
 }
-
 
 // POST /api/auth-proveedor/login - Login para proveedores
 export async function POST(req: NextRequest) {
@@ -24,6 +24,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: 'Email y contraseña son requeridos' },
         { status: 400 }
+      );
+    }
+
+    // Check account lockout before any DB query
+    const lockStatus = isAccountLocked(email);
+    if (lockStatus.locked) {
+      const minutesLeft = Math.ceil(lockStatus.remainingSeconds / 60);
+      return NextResponse.json(
+        { error: `Cuenta bloqueada temporalmente. Intenta de nuevo en ${minutesLeft} minutos.` },
+        { status: 429 }
       );
     }
 
@@ -42,6 +52,8 @@ export async function POST(req: NextRequest) {
     });
 
     if (!proveedor) {
+      // Record failed attempt even for non-existent accounts (prevents enumeration timing)
+      recordFailedAttempt(email);
       return NextResponse.json(
         { error: 'Credenciales inválidas' },
         { status: 401 }
@@ -67,11 +79,21 @@ export async function POST(req: NextRequest) {
     const isPasswordValid = await bcrypt.compare(password, proveedor.password);
 
     if (!isPasswordValid) {
+      const lockResult = recordFailedAttempt(email);
+      if (lockResult.locked) {
+        return NextResponse.json(
+          { error: 'Demasiados intentos fallidos. Cuenta bloqueada por 15 minutos.' },
+          { status: 429 }
+        );
+      }
       return NextResponse.json(
         { error: 'Credenciales inválidas' },
         { status: 401 }
       );
     }
+
+    // Login exitoso: clear lockout
+    clearLockout(email);
 
     // Actualizar último acceso
     await prisma.provider.update({

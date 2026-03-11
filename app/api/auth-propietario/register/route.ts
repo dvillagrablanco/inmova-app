@@ -34,24 +34,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Ya existe una cuenta con este email' }, { status: 409 });
     }
 
-    // Find company by code (CIF or name fragment)
-    let company = null;
-    if (companyCode) {
-      company = await prisma.company.findFirst({
-        where: { OR: [{ cif: companyCode }, { nombre: { contains: companyCode, mode: 'insensitive' } }] },
-        select: { id: true, nombre: true },
-      });
+    // Find company by code (CIF or name fragment) — companyCode is required
+    if (!companyCode) {
+      return NextResponse.json({ error: 'Código de empresa requerido. Contacta con tu gestor para obtener el código.' }, { status: 400 });
     }
+
+    const company = await prisma.company.findFirst({
+      where: {
+        OR: [{ cif: companyCode }, { nombre: { contains: companyCode, mode: 'insensitive' } }],
+        esEmpresaPrueba: false,
+      },
+      select: { id: true, nombre: true },
+    });
+
     if (!company) {
-      // Fallback: find any non-demo company
-      company = await prisma.company.findFirst({
-        where: { isDemo: false },
-        select: { id: true, nombre: true },
-        orderBy: { createdAt: 'asc' },
-      });
-    }
-    if (!company) {
-      return NextResponse.json({ error: 'Empresa no encontrada' }, { status: 404 });
+      return NextResponse.json({ error: 'Código de empresa no válido. Contacta con tu gestor para obtener el código correcto.' }, { status: 404 });
     }
 
     // Hash password
@@ -68,7 +65,7 @@ export async function POST(req: NextRequest) {
         email,
         telefono: telefono || null,
         password: hashedPassword,
-        activo: true,
+        activo: false, // Se activa al verificar email
         emailVerificado: false,
         resetToken: verifyToken,
         resetTokenExpiry: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days

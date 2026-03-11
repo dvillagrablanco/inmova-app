@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
-
 import logger from '@/lib/logger';
 import { sendEmail } from '@/lib/email-config';
 import { buildResetLink, generateResetToken, hashResetToken } from '@/lib/password-reset';
+import { checkRateLimit } from '@/lib/rate-limiting';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -15,12 +15,18 @@ async function getPrisma() {
   return getPrismaClient();
 }
 
-
 const forgotPasswordSchema = z.object({
   email: z.string().email(),
 });
 
 export async function POST(request: NextRequest) {
+  // Rate limit: max 5 requests per IP per 15 minutes
+  const ip = request.headers.get('x-forwarded-for') || request.headers.get('cf-connecting-ip') || 'unknown';
+  const rl = await checkRateLimit(`forgot-password:${ip}`, { maxRequests: 5, windowMs: 15 * 60 * 1000 });
+  if (!rl.success) {
+    return NextResponse.json({ error: 'Demasiadas solicitudes. Intenta en unos minutos.' }, { status: 429 });
+  }
+
   const prisma = await getPrisma();
   try {
     const body: unknown = await request.json();

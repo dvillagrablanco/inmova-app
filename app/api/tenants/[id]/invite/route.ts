@@ -34,6 +34,11 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       return NextResponse.json({ error: 'Inquilino no encontrado' }, { status: 404 });
     }
 
+    // Security: verify tenant belongs to same company as the user
+    if (tenant.companyId !== session.user.companyId) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
+    }
+
     if (!tenant.email || tenant.email.includes('@placeholder')) {
       return NextResponse.json({ error: 'El inquilino no tiene email válido' }, { status: 400 });
     }
@@ -41,10 +46,17 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     // Generate invitation token
     const inviteToken = crypto.randomBytes(32).toString('hex');
 
-    // Store token temporarily in password field (will be replaced when tenant sets password)
-    await prisma.tenant.update({
-      where: { id: tenant.id },
-      data: { password: inviteToken },
+    // Store invitation in dedicated TenantInvitation model (not in tenant.password)
+    await prisma.tenantInvitation.create({
+      data: {
+        companyId: session.user.companyId,
+        tenantId: tenant.id,
+        email: tenant.email,
+        invitationCode: inviteToken,
+        status: 'pendiente',
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+        createdBy: session.user.id,
+      },
     });
 
     // Send invitation email
@@ -71,12 +83,12 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       });
       logger.info('[Tenant Invite] Sent to:', tenant.email);
     } catch (emailErr) {
-      logger.warn('[Tenant Invite] Email failed:', emailErr);
+      logger.warn('[Tenant Invite] Email failed, invitation created but not sent', { tenantId: tenant.id });
+      // Security: do NOT return activateUrl to client — it contains the invitation token
       return NextResponse.json({ 
-        success: true, 
-        message: 'Invitación creada pero no se pudo enviar el email',
-        activateUrl, // Return URL so admin can share manually
-      });
+        success: false, 
+        message: 'No se pudo enviar el email de invitación. Verifica el email del inquilino e inténtalo de nuevo.',
+      }, { status: 500 });
     }
 
     return NextResponse.json({
