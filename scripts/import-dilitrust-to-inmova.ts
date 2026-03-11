@@ -213,6 +213,10 @@ async function processReportingPdf(filePath: string, companyId: string) {
         pnlPct: pos.pnlPct || 0,
         peso: pos.weight,
         ultimaActualizacion: new Date(report.reportDate),
+        return12m: pos.return12m || null,
+        returnYtd: pos.returnYtd || null,
+        portfolioCode: report.portfolioCode || null,
+        custodian: pos.custodian || custodianName,
       };
 
       if (existing) {
