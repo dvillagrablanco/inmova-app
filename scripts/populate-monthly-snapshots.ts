@@ -59,6 +59,15 @@ async function processReport(filePath: string, companyId: string): Promise<boole
     const { parseMdfReporting } = await import('../lib/parsers/mdf-reporting-parser');
     const report = await parseMdfReporting(buffer);
 
+    // Fallback date from filename: "2023_12_31 Reporting..." or "2023 12 31 Reporting..."
+    if (!report.reportDate) {
+      const fn = path.basename(filePath);
+      const dateMatch = fn.match(/(\d{4})[_\s](\d{2})[_\s](\d{2})/);
+      if (dateMatch) {
+        report.reportDate = `${dateMatch[1]}-${dateMatch[2]}-${dateMatch[3]}`;
+      }
+    }
+
     if (!report.reportDate || !report.summary.totalValue) {
       return false;
     }

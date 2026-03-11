@@ -148,10 +148,15 @@ function extractDate(text: string): string {
 }
 
 function detectReportType(text: string): 'AF' | 'AR' | 'AMPER' | 'MIFID' {
-  if (/MiFID\s*II/i.test(text)) return 'MIFID';
-  if (/1149\.01.*BALDOMERO AF/i.test(text) || /BALDOMERO AF GRUPO/i.test(text)) return 'AF';
-  if (/1149\.03.*BALDOMERO AR/i.test(text) || /BALDOMERO AR GRUPO/i.test(text)) return 'AR';
-  if (/1142\.09.*BALDOMERO AMPER/i.test(text) || /BALDOMERO AMPER/i.test(text)) return 'AMPER';
+  // MiFID must check subtype to assign correct portfolio code
+  if (/MiFID\s*II/i.test(text)) {
+    if (/AMPER/i.test(text)) return 'AMPER';
+    if (/\bAR\b/i.test(text) && /1149\.03/i.test(text)) return 'AR';
+    return 'MIFID';
+  }
+  if (/BALDOMERO AF\b/i.test(text) || /1149\.01/i.test(text)) return 'AF';
+  if (/BALDOMERO AR\b/i.test(text) || /1149\.03/i.test(text)) return 'AR';
+  if (/BALDOMERO AMPER/i.test(text) || /1142\.09/i.test(text)) return 'AMPER';
   return 'AF';
 }
 
@@ -181,24 +186,49 @@ function parseSummary(text: string, reportDate: string, reportType: string): Mdf
   let netPnl = 0;
   let fees = 0;
 
-  // "Patrimonio a cierre de mes 31/01/2026 44.743.029"
-  const patrimonioMatch = text.match(/Patrimonio a cierre de mes\s+\d{2}\/\d{2}\/\d{4}\s+([\d.,]+)/);
+  // Format A (2024+): "Patrimonio a cierre de mes 31/01/2026 44.743.029"
+  // Format B (2023):  "Patrimonio a cierre de mes 55.046.434"
+  const patrimonioMatch =
+    text.match(/Patrimonio a cierre de mes\s+\d{2}\/\d{2}\/\d{4}\s+([\d.,]+)/) ||
+    text.match(/Patrimonio a cierre de mes\s+([\d.,]{5,})/);
   if (patrimonioMatch) totalValue = parseEuropeanNumber(patrimonioMatch[1]);
 
-  // "PATRIMONIO A 31/12/2025 43.802.502"
-  const prevMatch = text.match(/PATRIMONIO A \d{2}\/\d{2}\/\d{4}\s+([0-9.,]+)/);
+  // Fallback: "PATRIMONIO PATRIMONIO 55.046.434 100"  (2023 format — doubled word)
+  if (totalValue === 0) {
+    const doubledMatch = text.match(/PATRIMONIO\s+PATRIMONIO\s+([\d.,]+)\s+100/);
+    if (doubledMatch) totalValue = parseEuropeanNumber(doubledMatch[1]);
+  }
+
+  // Fallback: extract from evolution page "Patrimonio ... 55.046.434 0 0"
+  if (totalValue === 0) {
+    const evoMatch = text.match(/Patrimonio\s+[-\d.,\s]+?([\d]{2,3}(?:\.[\d]{3}){1,3}(?:,\d+)?)\s+(?:0|[\d.,]+)\s+(?:0|[\d.,]+)/);
+    if (evoMatch) totalValue = parseEuropeanNumber(evoMatch[1]);
+  }
+
+  // MiFID II: extract total from "Rentabilidad neta" section or "TOTAL COSTES" line
+  if (totalValue === 0 && reportType === 'MIFID') {
+    const mifidMatch = text.match(/TOTAL COSTES Y GASTOS\s+([\d.,]+)/);
+    if (mifidMatch) totalValue = parseEuropeanNumber(mifidMatch[1]);
+  }
+
+  // "PATRIMONIO A 31/12/2025 43.802.502" or "Patrimonio a 31/12/2022"
+  const prevMatch =
+    text.match(/PATRIMONIO A \d{2}\/\d{2}\/\d{4}\s+([0-9.,]+)/) ||
+    text.match(/Patrimonio a \d{2}\/\d{2}\/\d{4}\s+([\d.,]+)/);
   if (prevMatch) previousValue = parseEuropeanNumber(prevMatch[1]);
 
-  // "Aportaciones / Retiradas / Traspasos 7.521"
-  const depMatch = text.match(/Aportaciones\s*\/\s*Retiradas\s*\/\s*Traspasos\s+(-?[0-9.,]+)/);
+  // "Aportaciones / Retiradas / Traspasos 7.521" or "Aportación/Retirada"
+  const depMatch =
+    text.match(/Aportaciones?\s*\/\s*Retiradas?\s*\/?\s*Traspasos?\s+(-?[\d.,]+)/) ||
+    text.match(/Aportación\/Retirada\s+(-?[\d.,]+)/);
   if (depMatch) deposits = parseEuropeanNumber(depMatch[1]);
 
   // "Evolución de la cartera 964.071"
-  const pnlMatch = text.match(/Evolución de la cartera\s+(-?[0-9.,]+)/);
+  const pnlMatch = text.match(/Evolución de la cartera\s+(-?[\d.,]+)/);
   if (pnlMatch) netPnl = parseEuropeanNumber(pnlMatch[1]);
 
-  // "Comisiones -18.736"
-  const feeMatch = text.match(/Comisiones\s+(-?[0-9.,]+)/);
+  // "Comisiones -18.736" or "Comisiones -165.350"
+  const feeMatch = text.match(/\bComisiones\s+(-?[\d.,]+)/);
   if (feeMatch) fees = parseEuropeanNumber(feeMatch[1]);
 
   return {
