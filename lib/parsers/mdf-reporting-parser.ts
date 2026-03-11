@@ -479,7 +479,19 @@ async function parsePdfBuffer(buffer: Buffer): Promise<{ text: string }> {
   if (mod.PDFParse && typeof mod.PDFParse === 'function') {
     const uint8 = new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength);
     const parser = new mod.PDFParse(uint8);
-    const text = await parser.getText();
+    const rawText = await parser.getText();
+    // getText() may return array of pages or a string — normalize
+    let text: string;
+    if (typeof rawText === 'string') {
+      text = rawText;
+    } else if (Array.isArray(rawText)) {
+      text = rawText.join('\n');
+    } else if (rawText && typeof rawText === 'object') {
+      // Could be {text: string} or pages array
+      text = (rawText as any).text || JSON.stringify(rawText);
+    } else {
+      text = String(rawText || '');
+    }
     return { text };
   }
 
