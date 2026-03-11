@@ -31,48 +31,8 @@ type ContratoGestion = {
   createdAt: string;
 };
 
-// Mock data inicial
-const MOCK_CONTRATOS: ContratoGestion[] = [
-  {
-    id: 'cg-1',
-    propietario: 'Juan García López',
-    inmuebles: ['Edificio Centro - Piso 3A'],
-    tipo: 'integral',
-    honorarios: 150,
-    honorariosPorcentaje: undefined,
-    fechaInicio: '2024-01-01',
-    fechaFin: '2025-12-31',
-    estado: 'activo',
-    condiciones: 'Gestión completa incluida',
-    createdAt: '2024-01-01T00:00:00Z',
-  },
-  {
-    id: 'cg-2',
-    propietario: 'María Fernández Ruiz',
-    inmuebles: ['Residencial Norte - Piso 1B', 'Residencial Norte - Piso 2B'],
-    tipo: 'parcial',
-    honorarios: undefined,
-    honorariosPorcentaje: 8,
-    fechaInicio: '2024-03-15',
-    fechaFin: '2025-03-14',
-    estado: 'activo',
-    createdAt: '2024-03-15T00:00:00Z',
-  },
-  {
-    id: 'cg-3',
-    propietario: 'Carlos Martínez Sánchez',
-    inmuebles: ['Local Comercial Calle Mayor'],
-    tipo: 'subarriendo',
-    honorarios: 200,
-    honorariosPorcentaje: undefined,
-    fechaInicio: '2023-06-01',
-    fechaFin: '2024-05-31',
-    estado: 'expirado',
-    createdAt: '2023-06-01T00:00:00Z',
-  },
-];
-
-let mockContracts = [...MOCK_CONTRATOS];
+// In-memory storage (no Prisma model yet — to be migrated to DB)
+let mockContracts: ContratoGestion[] = [];
 
 export async function GET() {
   try {
