@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { SmartBreadcrumbs } from '@/components/navigation/smart-breadcrumbs';
 import { ContextualQuickActions } from '@/components/navigation/contextual-quick-actions';
@@ -103,6 +103,7 @@ interface Building {
 export default function IncidenciasPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { canCreate } = usePermissions();
 
   const [incidencias, setIncidencias] = useState<Incidencia[]>([]);
@@ -132,6 +133,18 @@ export default function IncidenciasPage() {
       fetchData();
     }
   }, [status, router]);
+
+  useEffect(() => {
+    const handleOpenDialog = () => setOpenDialog(true);
+    window.addEventListener('open-new-incidencia-dialog', handleOpenDialog);
+    return () => window.removeEventListener('open-new-incidencia-dialog', handleOpenDialog);
+  }, []);
+
+  useEffect(() => {
+    if (searchParams.get('openNew') === '1' && canCreate) {
+      setOpenDialog(true);
+    }
+  }, [searchParams, canCreate]);
 
   const fetchData = async () => {
     try {

@@ -94,7 +94,7 @@ export function SuggestionsWidget({ limit = 5, showHeader = true, compact = fals
               Sugerencias de Gestión
               <Badge variant="secondary" className="text-[10px]">{suggestions.length}</Badge>
             </span>
-            <Link href="/dashboard/sugerencias">
+            <Link href="/admin/sugerencias">
               <Button variant="ghost" size="sm" className="text-xs h-7">
                 Ver todas <ChevronRight className="h-3 w-3 ml-1" />
               </Button>

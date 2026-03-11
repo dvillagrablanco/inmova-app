@@ -332,16 +332,16 @@ export const QUICK_ACTIONS_BY_ROLE: Record<UserRole, QuickAction[]> = {
     },
   ],
   gestor: [
-    { label: 'Nueva Tarea', href: '/tareas/nueva', icon: 'Plus', tooltip: 'Crear tarea' },
+    { label: 'Nueva Tarea', href: '/tareas?openNew=1', icon: 'Plus', tooltip: 'Crear tarea' },
     {
       label: 'Reportar Incidencia',
-      href: '/incidencias/nueva',
+      href: '/incidencias?openNew=1',
       icon: 'AlertCircle',
       tooltip: 'Reportar problema',
     },
     {
       label: 'Agendar Visita',
-      href: '/visitas/nueva',
+      href: '/visitas?openNew=1',
       icon: 'Calendar',
       tooltip: 'Programar visita',
     },
@@ -351,7 +351,7 @@ export const QUICK_ACTIONS_BY_ROLE: Record<UserRole, QuickAction[]> = {
     { label: 'Subir Foto', href: '/operador/upload', icon: 'Camera', tooltip: 'Subir evidencia' },
     {
       label: 'Reportar Problema',
-      href: '/incidencias/nueva',
+      href: '/incidencias?openNew=1',
       icon: 'AlertCircle',
       tooltip: 'Reportar incidencia',
     },

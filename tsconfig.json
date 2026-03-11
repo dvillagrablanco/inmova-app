@@ -50,6 +50,7 @@
     "public",
     "prisma/migrations",
     "vitest.config.ts",
+    "vitest.config.100.ts",
     "vitest.setup.tsx",
     "__tests__/**/*",
     "**/*.test.ts",

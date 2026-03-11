@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+import { useSearchParams } from 'next/navigation';
 import {
   Calendar,
   Clock,
@@ -84,6 +85,7 @@ interface CandidateOption {
 }
 
 export default function VisitasPage() {
+  const searchParams = useSearchParams();
   const [visits, setVisits] = useState<Visit[]>([]);
   const [loading, setLoading] = useState(true);
   const [candidates, setCandidates] = useState<CandidateOption[]>([]);
@@ -110,6 +112,12 @@ export default function VisitasPage() {
     loadVisits();
     loadCandidates();
   }, []);
+
+  useEffect(() => {
+    if (searchParams.get('openNew') === '1') {
+      setCreateDialogOpen(true);
+    }
+  }, [searchParams]);
 
   const loadVisits = async () => {
     try {

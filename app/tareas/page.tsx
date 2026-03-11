@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import {
@@ -92,6 +92,7 @@ const statuses = [
 
 export default function TareasPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session } = useSession();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
@@ -122,6 +123,12 @@ export default function TareasPage() {
       fetchTasks();
     }
   }, [session]);
+
+  useEffect(() => {
+    if (searchParams.get('openNew') === '1') {
+      setCreateDialogOpen(true);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     applyFilters();

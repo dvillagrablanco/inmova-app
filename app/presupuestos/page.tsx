@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -824,10 +825,10 @@ export default function PresupuestosPage() {
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" asChild>
-                  <a href="/facturacion">Ver Facturación</a>
+                  <Link href="/facturacion">Ver Facturación</Link>
                 </Button>
                 <Button variant="outline" asChild>
-                  <a href="/mantenimiento">Ver Mantenimiento</a>
+                  <Link href="/mantenimiento">Ver Mantenimiento</Link>
                 </Button>
               </div>
             </div>

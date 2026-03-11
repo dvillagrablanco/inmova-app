@@ -497,7 +497,6 @@ function parsePerformance(text: string): MdfPerformance[] {
 
 async function parsePdfBuffer(buffer: Buffer): Promise<{ text: string }> {
   // pdf-parse exports vary across versions/environments
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const mod = require('pdf-parse');
 
   // v1.x: module.exports = function(buffer) { ... }

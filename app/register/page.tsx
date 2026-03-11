@@ -85,18 +85,6 @@ export default function RegisterPage() {
     }
   }, [selectedRole, router]);
 
-  // Mostrar loading mientras redirigimos a portal específico
-  if (selectedRole === 'inquilino' || selectedRole === 'proveedor') {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center">
-        <div className="text-white text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p>Redirigiendo...</p>
-        </div>
-      </div>
-    );
-  }
-
   // Detectar cupón de la URL
   useEffect(() => {
     const couponCode = searchParams.get('coupon')?.toUpperCase();
@@ -143,7 +131,8 @@ export default function RegisterPage() {
           email: data.email,
           recoveryEmail: data.recoveryEmail || undefined,
           password: data.password,
-          role: selectedRole === 'propietario' ? 'gestor' : 'gestor',
+          // El perfil ajusta el onboarding; el rol de plataforma sigue siendo gestor.
+          role: 'gestor',
           businessVertical: data.businessVertical,
         }),
       });
@@ -178,6 +167,18 @@ export default function RegisterPage() {
       setIsLoading(false);
     }
   };
+
+  // Mostrar loading mientras redirigimos a portal específico
+  if (selectedRole === 'inquilino' || selectedRole === 'proveedor') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center">
+        <div className="text-white text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p>Redirigiendo...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">

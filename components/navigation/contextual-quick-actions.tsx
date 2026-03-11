@@ -229,7 +229,7 @@ function generateActions(
           label: 'Reportar Incidencia',
           icon: AlertCircle,
           onClick: () =>
-            router.push(`/incidencias/nueva?propertyId=${props.propertyId}`),
+            router.push(`/incidencias?openNew=1&propertyId=${props.propertyId}`),
           variant: 'ghost',
           badge: props.hasActiveIncidents ? '!' : undefined,
         },
@@ -278,7 +278,7 @@ function generateActions(
           label: 'Programar Visita',
           icon: Calendar,
           onClick: () =>
-            router.push(`/visitas/nueva?propertyId=${props.propertyId}`),
+            router.push(`/visitas?openNew=1&propertyId=${props.propertyId}`),
           variant: 'ghost',
         },
         {
@@ -685,7 +685,7 @@ function generateActions(
       {
         label: 'Nueva Solicitud',
         icon: Plus,
-        onClick: () => router.push('/mantenimiento/nueva'),
+        onClick: () => router.push('/mantenimiento?openNew=1'),
         variant: 'default',
       },
       {
