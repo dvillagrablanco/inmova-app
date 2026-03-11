@@ -100,8 +100,14 @@ export async function requireJWT(request: NextRequest) {
 export function requireCronSecret(request: NextRequest) {
   const cronSecret = process.env.CRON_SECRET;
   if (!cronSecret) {
-    logger.warn('[Auth Guard] CRON_SECRET no configurado - cron jobs desprotegidos');
-    return { authenticated: true as const };
+    logger.error('[Auth Guard] CRON_SECRET not configured — blocking cron request');
+    return {
+      authenticated: false as const,
+      response: NextResponse.json(
+        { error: 'Cron not configured' },
+        { status: 500 }
+      ),
+    };
   }
 
   const authHeader = request.headers.get('authorization');
