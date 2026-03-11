@@ -33,6 +33,15 @@ interface CompanyNode {
   };
 }
 
+const CARD_COLOR_MAP: Record<
+  string,
+  { bg: string; text: string }
+> = {
+  purple: { bg: 'bg-purple-100', text: 'text-purple-600' },
+  blue: { bg: 'bg-blue-100', text: 'text-blue-600' },
+  gray: { bg: 'bg-gray-100', text: 'text-gray-600' },
+};
+
 export default function GrupoPage() {
   const { status } = useSession();
   const router = useRouter();
@@ -153,6 +162,7 @@ export default function GrupoPage() {
             const isPE = filial.nombre.includes('SCR') || filial.nombre.includes('PE');
             const color = isPE ? 'purple' : isInmobiliaria ? 'blue' : 'gray';
             const Icon = isPE ? Briefcase : isInmobiliaria ? Building2 : TrendingUp;
+            const colorClasses = CARD_COLOR_MAP[color];
 
             return (
               <Card key={filial.id} className={cn('hover:shadow-lg transition-shadow',
@@ -161,10 +171,8 @@ export default function GrupoPage() {
               )}>
                 <CardHeader className="pb-2">
                   <div className="flex items-center gap-3">
-                    <div className={cn('w-10 h-10 rounded-lg flex items-center justify-center',
-                      `bg-${color}-100`
-                    )}>
-                      <Icon className={cn('h-5 w-5', `text-${color}-600`)} />
+                    <div className={cn('w-10 h-10 rounded-lg flex items-center justify-center', colorClasses.bg)}>
+                      <Icon className={cn('h-5 w-5', colorClasses.text)} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <CardTitle className="text-sm truncate">{filial.nombre}</CardTitle>

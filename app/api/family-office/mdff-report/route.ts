@@ -5,6 +5,11 @@ import logger from '@/lib/logger';
 import * as Sentry from '@sentry/nextjs';
 import { format, subMonths, startOfYear } from 'date-fns';
 import { es } from 'date-fns/locale';
+import {
+  getAccountLiquidBalance,
+  normalizeInvestmentVehicleName,
+  resolveFamilyOfficeScope,
+} from '@/lib/family-office-scope';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -40,7 +45,15 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const companyId = session?.user?.companyId || request.headers.get('x-company-id') || '';
+    const scope = session?.user?.companyId
+      ? await resolveFamilyOfficeScope(request, {
+          id: session.user.id,
+          role: session.user.role,
+          companyId: session.user.companyId,
+        })
+      : null;
+    const companyId = scope?.rootCompanyId || request.headers.get('x-company-id') || '';
+    const groupIds = scope?.groupCompanyIds || [companyId];
     const today = new Date();
     const reportDate = format(today, "dd MMMM yyyy", { locale: es });
     const reportMonth = format(today, "MMMM yyyy", { locale: es });
@@ -55,7 +68,7 @@ export async function GET(request: NextRequest) {
     });
 
     const accounts = await prisma.financialAccount.findMany({
-      where: { companyId, activa: true },
+      where: { companyId: { in: groupIds }, activa: true },
       include: {
         positions: { orderBy: { valorActual: 'desc' } },
         transactions: { orderBy: { fecha: 'desc' }, take: 50 },
@@ -63,13 +76,11 @@ export async function GET(request: NextRequest) {
     });
 
     const participations = await prisma.participation.findMany({
-      where: { companyId, activa: true },
+      where: { companyId: { in: groupIds }, activa: true },
     });
 
     // Grupo inmobiliario
-    const groupIds = [companyId];
     const children = await prisma.company.findMany({ where: { parentCompanyId: companyId }, select: { id: true, nombre: true } });
-    children.forEach((c) => groupIds.push(c.id));
 
     const units = await prisma.unit.findMany({
       where: { building: { companyId: { in: groupIds }, isDemo: false } },
@@ -107,8 +118,11 @@ export async function GET(request: NextRequest) {
     // ═══════════════════════════════════════════════════
 
     const valorAF = accounts.reduce((s, a) => s + a.positions.reduce((ps, p) => ps + p.valorActual, 0), 0);
-    const saldoCuentas = accounts.reduce((s, a) => s + a.saldoActual, 0);
-    const valorPE = participations.reduce((s, p) => s + (p.valorEstimado || p.valorContable), 0);
+    const saldoCuentas = accounts.reduce((s, a) => s + getAccountLiquidBalance(a), 0);
+    const valorPE = participations.reduce(
+      (s, p) => s + (p.valoracionActual || p.valorEstimado || p.valorContable || 0),
+      0
+    );
     const desembolsosPendientesPE = participations.reduce((s, p) => s + ((p.compromisoTotal || 0) - (p.capitalLlamado || p.costeAdquisicion)), 0);
     const valorInmob = units.reduce((s, u) => s + (u.valorMercado || u.precioCompra || 0), 0);
     const rentaAnual = units.filter((u) => u.estado === 'ocupada').reduce((s, u) => s + u.rentaMensual, 0) * 12;
@@ -279,11 +293,11 @@ export async function GET(request: NextRequest) {
       desembolsosPendientes: Math.round(Math.max(0, desembolsosPendientesPE)),
       participaciones: participations.map((p) => ({
         sociedad: p.targetCompanyName,
-        tipo: p.tipo,
+        tipo: normalizeInvestmentVehicleName(p.vehiculoInversor || p.tipo),
         porcentaje: p.porcentaje,
         coste: Math.round(p.costeAdquisicion),
-        valorActual: Math.round(p.valorEstimado || p.valorContable),
-        pnl: Math.round((p.valorEstimado || p.valorContable) - p.costeAdquisicion),
+        valorActual: Math.round(p.valoracionActual || p.valorEstimado || p.valorContable || 0),
+        pnl: Math.round((p.valoracionActual || p.valorEstimado || p.valorContable || 0) - p.costeAdquisicion),
       })),
     };
 

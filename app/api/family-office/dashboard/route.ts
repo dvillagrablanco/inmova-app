@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import logger from '@/lib/logger';
 import * as Sentry from '@sentry/nextjs';
+import { getAccountLiquidBalance, resolveFamilyOfficeScope } from '@/lib/family-office-scope';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -26,28 +27,30 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const queryCompanyId = searchParams.get('companyId');
     const view = (searchParams.get('view') || 'holding') as 'holding' | 'consolidated';
-    const companyId = (session.user.role === 'super_admin' && queryCompanyId)
-      ? queryCompanyId
-      : session.user.companyId;
     const prisma = await getPrisma();
+    const scope = await resolveFamilyOfficeScope(request, {
+      id: session.user.id,
+      role: session.user.role,
+      companyId: session.user.companyId,
+    });
 
-    // Obtener empresa + filiales
+    // Obtener holding + filiales del grupo activo
     const company = await prisma.company.findUnique({
-      where: { id: companyId },
+      where: { id: scope.rootCompanyId },
       include: { childCompanies: { select: { id: true, nombre: true, cif: true } } },
     });
 
     const childIds = company?.childCompanies?.map((c: any) => c.id) || [];
     const childCIFs = company?.childCompanies?.map((c: any) => c.cif).filter(Boolean) || [];
-    const allCompanyIds = company ? [company.id, ...childIds] : [companyId];
+    const allCompanyIds = company
+      ? Array.from(new Set([company.id, ...childIds, ...scope.groupCompanyIds]))
+      : scope.groupCompanyIds;
 
     // Scope: holding = solo empresa raíz, consolidated = empresa + filiales
-    const scopeIds = view === 'holding' ? [companyId] : allCompanyIds;
+    const scopeIds = view === 'holding' ? [scope.rootCompanyId] : allCompanyIds;
 
-    // Inmobiliario siempre incluye filiales — los edificios en SPVs (Rovida, Viroda)
-    // son activos del holding gestionados a través de sociedades vehículo
+    // El inmobiliario del grupo se mantiene consolidado por SPVs para reflejar el patrimonio real.
     const inmobScopeIds = allCompanyIds;
 
     const round2 = (n: number) => Math.round(n * 100) / 100;
@@ -221,10 +224,8 @@ export async function GET(request: NextRequest) {
       // Anti-duplicidad tesorería: Si saldoActual ≈ sum(posiciones) (±10%),
       // el saldo ES el NAV de las posiciones, no liquidez adicional.
       const saldo = acc.saldoActual || 0;
-      const isNavDuplicate = valorCuenta > 1000 && saldo > 1000 &&
-        Math.abs(saldo - valorCuenta) / valorCuenta < 0.10;
-
-      const tesoreriaContable = isNavDuplicate ? 0 : saldo;
+      const tesoreriaContable = getAccountLiquidBalance(acc);
+      const isNavDuplicate = tesoreriaContable === 0 && saldo > 0 && valorCuenta > 0;
       tesoreriaTotal += tesoreriaContable;
       if (tesoreriaContable > 0) {
         tesoreriaPorEntidad[acc.entidad] =
@@ -263,7 +264,7 @@ export async function GET(request: NextRequest) {
 
     let valorPE = 0;
     const participacionesData = participations.map((p: any) => {
-      const valor = p.valorEstimado ?? p.valorContable ?? p.costeAdquisicion ?? 0;
+      const valor = p.valoracionActual ?? p.valorEstimado ?? p.valorContable ?? p.costeAdquisicion ?? 0;
       valorPE += valor;
       return {
         id: p.id,
@@ -285,10 +286,10 @@ export async function GET(request: NextRequest) {
       success: true,
       view,
       viewLabel: view === 'holding'
-        ? `Vista Holding — ${company?.nombre || 'Empresa'}`
-        : `Vista Grupo Consolidado — ${company?.nombre || 'Grupo'}`,
+        ? `Vista Holding — ${scope.rootCompanyName}`
+        : `Vista Grupo Consolidado — ${scope.rootCompanyName}`,
       viewDescription: view === 'holding'
-        ? 'Solo activos directos del holding. Las filiales se reflejan como participaciones en Private Equity.'
+        ? 'Activos directos del holding en financiero, PE y tesorería. El inmobiliario se consolida con las SPVs del grupo para mantener la foto patrimonial real.'
         : `Activos consolidados del grupo (${allCompanyIds.length} sociedades). Se eliminan ${participacionesExcluidas} participaciones intragrupo para evitar doble conteo.`,
       data: {
         inmobiliario: {
@@ -333,7 +334,7 @@ export async function GET(request: NextRequest) {
         sociedades: view === 'consolidated' ? allCompanyIds.length : 1,
 
         // --- G1-G9: Monthly snapshot data (if available) ---
-        ...(await getSnapshotData(prisma, companyId)),
+        ...(await getSnapshotData(prisma, scope.rootCompanyId)),
       },
     });
   } catch (error: any) {

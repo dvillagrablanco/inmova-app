@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import logger from '@/lib/logger';
 import { addMonths, format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { getAccountLiquidBalance, resolveFamilyOfficeScope } from '@/lib/family-office-scope';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -26,29 +27,23 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const { searchParams } = new URL(request.url);
-    const queryCompanyId = searchParams.get('companyId');
-    const companyId = (session.user.role === 'super_admin' && queryCompanyId)
-      ? queryCompanyId
-      : session.user.companyId;
-
     const today = new Date();
-
-    // Group scope: holding + filiales
-    const company = await prisma.company.findUnique({
-      where: { id: companyId },
-      include: { childCompanies: { select: { id: true, nombre: true } } },
+    const scope = await resolveFamilyOfficeScope(request, {
+      id: session.user.id,
+      role: session.user.role,
+      companyId: session.user.companyId,
     });
-    const groupIds = company
-      ? [company.id, ...company.childCompanies.map((c: any) => c.id)]
-      : [companyId];
+    const groupIds = scope.groupCompanyIds;
 
     // Saldo actual en cuentas (TODO el grupo)
     const accounts = await prisma.financialAccount.findMany({
       where: { companyId: { in: groupIds }, activa: true },
       select: { saldoActual: true, entidad: true, alias: true },
     });
-    const saldoActual = accounts.reduce((s, a) => s + (a.saldoActual || 0), 0);
+    const saldoActual = accounts.reduce(
+      (sum, account) => sum + getAccountLiquidBalance(account),
+      0
+    );
 
     const contracts = await prisma.contract.findMany({
       where: { unit: { building: { companyId: { in: groupIds } } }, estado: 'activo' },
@@ -70,13 +65,11 @@ export async function GET(request: NextRequest) {
 
     // Hipotecas mensuales
     let hipotecaMensual = 0;
-    try {
-      const mortgages = await (prisma as any).assetMortgage.findMany({
-        where: { asset: { companyId: { in: groupIds } }, estado: 'activa' },
-        select: { cuotaMensual: true },
-      });
-      hipotecaMensual = mortgages.reduce((s: number, m: any) => s + (m.cuotaMensual || 0), 0);
-    } catch { /* model may not exist */ }
+    const mortgages = await prisma.mortgage.findMany({
+      where: { companyId: { in: groupIds }, estado: 'activa' },
+      select: { cuotaMensual: true },
+    });
+    hipotecaMensual = mortgages.reduce((sum, mortgage) => sum + (mortgage.cuotaMensual || 0), 0);
 
     // Proyectar 6 meses
     let saldoProyectado = saldoActual;
@@ -123,7 +116,7 @@ export async function GET(request: NextRequest) {
     const porEntidad: Record<string, number> = {};
     for (const acc of accounts) {
       const key = acc.entidad || 'Sin entidad';
-      porEntidad[key] = (porEntidad[key] || 0) + (acc.saldoActual || 0);
+      porEntidad[key] = (porEntidad[key] || 0) + getAccountLiquidBalance(acc);
     }
     const desglose = Object.entries(porEntidad)
       .filter(([_, saldo]) => saldo > 0)

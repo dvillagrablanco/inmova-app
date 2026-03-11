@@ -5,6 +5,10 @@ import logger from '@/lib/logger';
 import * as Sentry from '@sentry/nextjs';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import {
+  getAccountLiquidBalance,
+  resolveFamilyOfficeScope,
+} from '@/lib/family-office-scope';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -31,16 +35,20 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const includeModelo720 = searchParams.get('modelo720') === 'true';
-    const companyId = session.user.companyId;
     const today = new Date();
+    const scope = await resolveFamilyOfficeScope(request, {
+      id: session.user.id,
+      role: session.user.role,
+      companyId: session.user.companyId,
+    });
+    const companyId = scope.rootCompanyId;
+    const groupIds = scope.groupCompanyIds;
 
     // ── DATOS INMOBILIARIOS ──
-    const groupIds = [companyId];
     const children = await prisma.company.findMany({
-      where: { parentCompanyId: companyId },
+      where: { parentCompanyId: scope.rootCompanyId },
       select: { id: true, nombre: true },
     });
-    children.forEach((c) => groupIds.push(c.id));
 
     const buildings = await prisma.building.count({ where: { companyId: { in: groupIds }, isDemo: false } });
     const units = await prisma.unit.findMany({
@@ -53,18 +61,21 @@ export async function GET(request: NextRequest) {
 
     // ── DATOS FINANCIEROS ──
     const accounts = await prisma.financialAccount.findMany({
-      where: { companyId, activa: true },
+      where: { companyId: { in: groupIds }, activa: true },
       include: { positions: true },
     });
     const valorFinanciero = accounts.reduce((s, a) => s + a.positions.reduce((ps, p) => ps + p.valorActual, 0), 0);
     const pnlFinanciero = accounts.reduce((s, a) => s + a.positions.reduce((ps, p) => ps + p.pnlNoRealizado + p.pnlRealizado, 0), 0);
-    const saldoTesoreria = accounts.reduce((s, a) => s + a.saldoActual, 0);
+    const saldoTesoreria = accounts.reduce((s, a) => s + getAccountLiquidBalance(a), 0);
 
     // ── PRIVATE EQUITY ──
     const participations = await prisma.participation.findMany({
-      where: { companyId, activa: true },
+      where: { companyId: { in: groupIds }, activa: true },
     });
-    const valorPE = participations.reduce((s, p) => s + (p.valorEstimado || p.valorContable), 0);
+    const valorPE = participations.reduce(
+      (s, p) => s + (p.valoracionActual || p.valorEstimado || p.valorContable || 0),
+      0
+    );
 
     // ── PATRIMONIO TOTAL ──
     const patrimonioTotal = valorInmobiliario + valorFinanciero + valorPE + saldoTesoreria;

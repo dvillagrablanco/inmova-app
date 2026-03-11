@@ -78,6 +78,7 @@ const fmtK = (n: number) => {
 
 const pnlColor = (n: number) => (n >= 0 ? 'text-green-600' : 'text-red-600');
 const tvpiColor = (n: number) => (n >= 1 ? 'text-green-600' : n >= 0.9 ? 'text-yellow-600' : 'text-red-600');
+const isViblaVehicle = (value: string) => value.replace(/\s+/g, '_').toUpperCase() === 'VIBLA_SCR';
 
 export default function PEPage() {
   const { status } = useSession();
@@ -257,10 +258,10 @@ export default function PEPage() {
                       <td className="text-right px-2 py-2 tabular-nums">{fmt(f.capitalLlamado)}</td>
                       <td className="text-center px-2 py-2">
                         <Badge
-                          variant={f.vehiculoInversor === 'VIBLA_SCR' ? 'default' : 'secondary'}
+                          variant={isViblaVehicle(f.vehiculoInversor) ? 'default' : 'secondary'}
                           className="text-[10px] px-1.5 py-0"
                         >
-                          {f.vehiculoInversor === 'VIBLA_SCR' ? 'VIBLA SCR' : 'Directo'}
+                          {isViblaVehicle(f.vehiculoInversor) ? 'VIBLA SCR' : 'Directo'}
                         </Badge>
                       </td>
                     </tr>
@@ -412,8 +413,8 @@ export default function PEPage() {
                 {(data?.vehiculos ?? []).map((v) => (
                   <div key={v.nombre} className="p-3 rounded-lg bg-gray-50 border">
                     <div className="flex items-center justify-between mb-2">
-                      <Badge variant={v.nombre === 'VIBLA_SCR' ? 'default' : 'secondary'}>
-                        {v.nombre === 'VIBLA_SCR' ? 'VIBLA SCR' : v.nombre}
+                      <Badge variant={isViblaVehicle(v.nombre) ? 'default' : 'secondary'}>
+                        {isViblaVehicle(v.nombre) ? 'VIBLA SCR' : v.nombre}
                       </Badge>
                       <span className="text-xs text-gray-500">{v.fondos} fondos</span>
                     </div>

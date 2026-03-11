@@ -39,6 +39,33 @@ export default function CuadroDeMandosPage() {
     ejercicio: new Date().getFullYear(),
   });
 
+  const costCenterBreakdownData = data
+    ? {
+        categories: data.centrosCoste
+          .map((centro) => {
+            const ingresos = Math.max(0, centro.pyg.totalIngresos.importe);
+            const gastos = Math.abs(Math.min(0, centro.pyg.totalGastos.importe));
+            const saldo = centro.pyg.resultadoPeriodo.importe;
+
+            return {
+              code: centro.codigo,
+              name: centro.nombre,
+              ingresos,
+              gastos,
+              saldo,
+              percentage: ingresos + gastos > 0 ? gastos / (ingresos + gastos) : 0,
+              color: centro.tipo,
+            };
+          })
+          .filter((centro) => centro.ingresos > 0 || centro.gastos > 0 || centro.saldo !== 0),
+        total: {
+          ingresos: Math.max(0, data.pygTotal.totalIngresos.importe),
+          gastos: Math.abs(Math.min(0, data.pygTotal.totalGastos.importe)),
+          saldo: data.pygTotal.resultadoPeriodo.importe,
+        },
+      }
+    : undefined;
+
   // Cargar filtros disponibles
   useEffect(() => {
     async function loadFiltros() {
@@ -217,7 +244,7 @@ export default function CuadroDeMandosPage() {
         {/* Desglose por Centro de Coste */}
         <section className="mt-6">
           <h2 className="text-lg font-semibold mb-4">Desglose por Centro de Coste</h2>
-          <CostCenterBreakdown />
+          <CostCenterBreakdown data={costCenterBreakdownData} />
         </section>
       </div>
     </AuthenticatedLayout>

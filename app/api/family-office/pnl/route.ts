@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import logger from '@/lib/logger';
 import * as Sentry from '@sentry/nextjs';
+import { resolveFamilyOfficeScope } from '@/lib/family-office-scope';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -25,23 +26,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const { searchParams } = new URL(request.url);
-    const queryCompanyId = searchParams.get('companyId');
-    const companyId = (session.user.role === 'super_admin' && queryCompanyId)
-      ? queryCompanyId
-      : session.user.companyId;
-
-    // Consolidated: include child companies
-    const company = await prisma.company.findUnique({
-      where: { id: companyId },
-      select: { childCompanies: { select: { id: true } } },
+    const scope = await resolveFamilyOfficeScope(request, {
+      id: session.user.id,
+      role: session.user.role,
+      companyId: session.user.companyId,
     });
-    const allIds = company
-      ? [companyId, ...company.childCompanies.map((c: { id: string }) => c.id)]
-      : [companyId];
 
     const accounts = await prisma.financialAccount.findMany({
-      where: { companyId: { in: allIds }, activa: true },
+      where: { companyId: { in: scope.groupCompanyIds }, activa: true },
       include: {
         positions: {
           orderBy: { valorActual: 'desc' },

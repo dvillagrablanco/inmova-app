@@ -374,6 +374,8 @@ async function getCarteraKpis(
   });
 
   const historicoMap = new Map(historicos.map((h) => [h.unitId, h]));
+  const currentYear = new Date().getFullYear();
+  const allowCurrentFallback = ejercicio === currentYear;
 
   let valorInversion = 0;
   let valorMercado = 0;
@@ -391,7 +393,7 @@ async function getCarteraKpis(
         unidadesDisponibles += historico.tasaDisponibilidad;
       if (historico.tasaOcupacion !== null) unidadesOcupadas += historico.tasaOcupacion;
       totalUnidades += 1;
-    } else {
+    } else if (allowCurrentFallback) {
       // Usar datos actuales de la unidad
       valorInversion += unit.precioCompra || 0;
       valorMercado += unit.valorMercado || 0;
@@ -504,9 +506,21 @@ export async function getCuadroMandosData(
     ),
   }));
 
-  // 7. Ejercicios comparativos (últimos 4 años)
+  // 7. Ejercicios comparativos — solo años con histórico real + ejercicio actual
   const currentYear = new Date().getFullYear();
-  const ejerciciosRange = [currentYear - 3, currentYear - 2, currentYear - 1, currentYear];
+  const historicalYears = await prisma.propertyValuationHistory.findMany({
+    where: {
+      unit: { buildingId: { in: companyBuildingIds } },
+    },
+    distinct: ['ejercicio'],
+    select: { ejercicio: true },
+    orderBy: { ejercicio: 'asc' },
+  });
+  const ejerciciosRange = Array.from(
+    new Set([...historicalYears.map((row) => row.ejercicio), currentYear])
+  )
+    .filter((year) => year >= currentYear - 3 && year <= currentYear)
+    .sort((a, b) => a - b);
   const ejerciciosComparativos: EjercicioComparativo[] = [];
 
   for (const ej of ejerciciosRange) {
