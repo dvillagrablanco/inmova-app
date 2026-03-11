@@ -95,21 +95,25 @@ export interface FiscalSummary {
  * @param consolidateHolding - If true and company is a holding, consolidate subsidiaries.
  *                             Default: true. Set false for comparativa per-company view.
  */
-export async function getCompanyPortfolio(companyId: string, consolidateHolding = true): Promise<PortfolioSummary> {
+export async function getCompanyPortfolio(
+  companyId: string,
+  consolidateHolding = true
+): Promise<PortfolioSummary> {
   // Check if this company is a holding (has child companies)
   const company = await prisma.company.findUnique({
     where: { id: companyId },
     include: { childCompanies: { select: { id: true } } },
   });
-  
-  const isHolding = consolidateHolding && company?.childCompanies && company.childCompanies.length > 0;
-  
+
+  const isHolding =
+    consolidateHolding && company?.childCompanies && company.childCompanies.length > 0;
+
   // For holdings (when consolidating): query across all group companies
   // For subsidiaries or non-consolidated: query only their own data
-  const scopeIds = isHolding 
+  const scopeIds = isHolding
     ? [companyId, ...company!.childCompanies.map((c: any) => c.id)]
     : [companyId];
-  
+
   const scopeFilter = { in: scopeIds };
 
   const [assets, buildings, units, contracts, payments, expenses, mortgages] = await Promise.all([
@@ -154,7 +158,7 @@ export async function getCompanyPortfolio(companyId: string, consolidateHolding 
   // Ingresos: suma la renta de TODAS las unidades con renta > 0
   // (dato más fiable, viene de contabilidad/escrituras/gestión directa)
   const unitRentTotal = units
-    .filter(u => u.rentaMensual > 0)
+    .filter((u) => u.rentaMensual > 0)
     .reduce((s, u) => s + u.rentaMensual, 0);
   const totalMonthlyIncome = unitRentTotal;
 
@@ -171,9 +175,13 @@ export async function getCompanyPortfolio(companyId: string, consolidateHolding 
   // Valor de mercado: preferir valoraciones actualizadas de unidades sobre AssetAcquisition.
   // AssetAcquisition.valorMercadoEstimado suele ser el precio de compra sin actualizar.
   // Unit.valorMercado se actualiza con valoraciones periódicas y es más fiable.
-  const assetMarketValue = assets.reduce((sum, a) => sum + (a.valorMercadoEstimado || a.precioCompra), 0);
+  const assetMarketValue = assets.reduce(
+    (sum, a) => sum + (a.valorMercadoEstimado || a.precioCompra),
+    0
+  );
   const unitMarketValue = units.reduce((s, u) => s + ((u as any).valorMercado || 0), 0);
-  let totalMarketValue = unitMarketValue > 0 ? Math.max(unitMarketValue, assetMarketValue) : assetMarketValue;
+  let totalMarketValue =
+    unitMarketValue > 0 ? Math.max(unitMarketValue, assetMarketValue) : assetMarketValue;
 
   // Renta contratada: suma de rentas de contratos activos
   const contractedRent = contracts.reduce((sum, c) => sum + (c.rentaMensual || 0), 0);
@@ -181,7 +189,7 @@ export async function getCompanyPortfolio(companyId: string, consolidateHolding 
   // Si no hay AssetAcquisitions, usar renta de unidades ocupadas como proxy
   if (totalInvestment === 0 && totalMonthlyIncome === 0) {
     const unitRents = units
-      .filter(u => u.estado === 'ocupada' && u.rentaMensual > 0)
+      .filter((u) => u.estado === 'ocupada' && u.rentaMensual > 0)
       .reduce((s, u) => s + u.rentaMensual, 0);
     const effectiveRent = Math.max(contractedRent, unitRents);
     // No se asigna valor ficticio - yield queda 0 sin precio de compra real
@@ -193,10 +201,13 @@ export async function getCompanyPortfolio(companyId: string, consolidateHolding 
   const annualIncome = totalMonthlyIncome * 12;
   const annualExpenses = totalMonthlyExpenses * 12;
   const grossYield = totalInvestment > 0 ? (annualIncome / totalInvestment) * 100 : 0;
-  const netYield = totalInvestment > 0 ? ((annualIncome - annualExpenses) / totalInvestment) * 100 : 0;
+  const netYield =
+    totalInvestment > 0 ? ((annualIncome - annualExpenses) / totalInvestment) * 100 : 0;
 
   const totalUnits = units.length;
-  const occupiedUnits = units.filter(u => u.contracts.length > 0 || u.estado === 'ocupada').length;
+  const occupiedUnits = units.filter(
+    (u) => u.contracts.length > 0 || u.estado === 'ocupada'
+  ).length;
   const averageOccupancy = totalUnits > 0 ? (occupiedUnits / totalUnits) * 100 : 0;
 
   const ltv = totalMarketValue > 0 ? (totalMortgageDebt / totalMarketValue) * 100 : 0;
@@ -307,8 +318,8 @@ export async function getCompanyAssetPerformance(companyId: string): Promise<Ass
     // Gastos mensuales estimados
     const monthlyExpenses = asset.building
       ? asset.building.units.reduce((s, u) => s + (u.gastosComunidad || 0), 0) +
-        (asset.building.units.reduce((s, u) => s + (u.ibiAnual || 0), 0) / 12)
-      : (asset.unit?.gastosComunidad || 0) + ((asset.unit?.ibiAnual || 0) / 12);
+        asset.building.units.reduce((s, u) => s + (u.ibiAnual || 0), 0) / 12
+      : (asset.unit?.gastosComunidad || 0) + (asset.unit?.ibiAnual || 0) / 12;
 
     const mortgagePayment = asset.mortgages.reduce((s, m) => s + m.cuotaMensual, 0);
     const monthlyCashFlow = monthlyRent - monthlyExpenses - mortgagePayment;
@@ -380,8 +391,8 @@ export async function getCompanyAssetPerformance(companyId: string): Promise<Ass
       const annualRent = monthlyRent * 12;
       // No usar PER estimado - sin precio de compra real no hay yield significativo
       // Se muestra 0 hasta que se registre el AssetAcquisition
-      const monthlyExpenses = (b.gastosComunidad || 0) + ((b.ibiAnual || 0) / 12);
-      const noi = annualRent - (monthlyExpenses * 12);
+      const monthlyExpenses = (b.gastosComunidad || 0) + (b.ibiAnual || 0) / 12;
+      const noi = annualRent - monthlyExpenses * 12;
       const occupancyRate = totalUnits > 0 ? (occupiedUnits / totalUnits) * 100 : 0;
 
       return {
@@ -417,9 +428,23 @@ export async function getCompanyAssetPerformance(companyId: string): Promise<Ass
  * Agrega datos de empresa matriz + todas sus filiales
  */
 export async function getConsolidatedReport(parentCompanyId: string): Promise<ConsolidatedReport> {
-  // Obtener empresa matriz + filiales
-  const parentCompany = await prisma.company.findUnique({
+  const selectedCompany = await prisma.company.findUnique({
     where: { id: parentCompanyId },
+    select: {
+      id: true,
+      parentCompanyId: true,
+    },
+  });
+
+  if (!selectedCompany) {
+    throw new Error('Company not found');
+  }
+
+  const rootCompanyId = selectedCompany.parentCompanyId || selectedCompany.id;
+
+  // Acepta tanto la matriz como cualquiera de sus filiales y siempre consolida el grupo completo.
+  const parentCompany = await prisma.company.findUnique({
+    where: { id: rootCompanyId },
     include: { childCompanies: true },
   });
 
@@ -427,13 +452,14 @@ export async function getConsolidatedReport(parentCompanyId: string): Promise<Co
     throw new Error('Company not found');
   }
 
-  const allCompanyIds = [parentCompany.id, ...parentCompany.childCompanies.map(c => c.id)];
+  const allCompanyIds = [parentCompany.id, ...parentCompany.childCompanies.map((c) => c.id)];
   const companies: CompanySummary[] = [];
 
   for (const companyId of allCompanyIds) {
-    const company = companyId === parentCompany.id
-      ? parentCompany
-      : parentCompany.childCompanies.find(c => c.id === companyId);
+    const company =
+      companyId === parentCompany.id
+        ? parentCompany
+        : parentCompany.childCompanies.find((c) => c.id === companyId);
 
     if (!company) continue;
 
@@ -468,7 +494,10 @@ export async function getConsolidatedReport(parentCompanyId: string): Promise<Co
     averageOccupancy: 0,
     ltv: 0,
     totalPrecioCompra: companies.reduce((s, c) => s + (c.portfolio.totalPrecioCompra || 0), 0),
-    totalValorMercadoUnidades: companies.reduce((s, c) => s + (c.portfolio.totalValorMercadoUnidades || 0), 0),
+    totalValorMercadoUnidades: companies.reduce(
+      (s, c) => s + (c.portfolio.totalValorMercadoUnidades || 0),
+      0
+    ),
     revalorizacion: companies.reduce((s, c) => s + (c.portfolio.revalorizacion || 0), 0),
     revalorizacionPct: 0,
   };
@@ -476,21 +505,30 @@ export async function getConsolidatedReport(parentCompanyId: string): Promise<Co
   // Recalcular ratios consolidados
   const totalAnnualIncome = consolidated.totalMonthlyIncome * 12;
   const totalAnnualExpenses = consolidated.totalMonthlyExpenses * 12;
-  consolidated.grossYield = consolidated.totalInvestment > 0
-    ? Math.round((totalAnnualIncome / consolidated.totalInvestment) * 10000) / 100
-    : 0;
-  consolidated.netYield = consolidated.totalInvestment > 0
-    ? Math.round(((totalAnnualIncome - totalAnnualExpenses) / consolidated.totalInvestment) * 10000) / 100
-    : 0;
-  consolidated.averageOccupancy = companies.length > 0
-    ? Math.round(companies.reduce((s, c) => s + c.portfolio.averageOccupancy, 0) / companies.length * 100) / 100
-    : 0;
-  consolidated.ltv = consolidated.totalMarketValue > 0
-    ? Math.round((consolidated.totalMortgageDebt / consolidated.totalMarketValue) * 10000) / 100
-    : 0;
-  consolidated.revalorizacionPct = consolidated.totalPrecioCompra > 0
-    ? Math.round((consolidated.revalorizacion / consolidated.totalPrecioCompra) * 10000) / 100
-    : 0;
+  consolidated.grossYield =
+    consolidated.totalInvestment > 0
+      ? Math.round((totalAnnualIncome / consolidated.totalInvestment) * 10000) / 100
+      : 0;
+  consolidated.netYield =
+    consolidated.totalInvestment > 0
+      ? Math.round(
+          ((totalAnnualIncome - totalAnnualExpenses) / consolidated.totalInvestment) * 10000
+        ) / 100
+      : 0;
+  consolidated.averageOccupancy =
+    companies.length > 0
+      ? Math.round(
+          (companies.reduce((s, c) => s + c.portfolio.averageOccupancy, 0) / companies.length) * 100
+        ) / 100
+      : 0;
+  consolidated.ltv =
+    consolidated.totalMarketValue > 0
+      ? Math.round((consolidated.totalMortgageDebt / consolidated.totalMarketValue) * 10000) / 100
+      : 0;
+  consolidated.revalorizacionPct =
+    consolidated.totalPrecioCompra > 0
+      ? Math.round((consolidated.revalorizacion / consolidated.totalPrecioCompra) * 10000) / 100
+      : 0;
 
   return {
     companies,
@@ -564,16 +602,16 @@ export async function calculateFiscalSummary(
   const interesesHipoteca = mortgagePayments.reduce((s, mp) => s + mp.intereses, 0);
 
   // Base imponible IS
-  const baseImponible = Math.max(0,
+  const baseImponible = Math.max(
+    0,
     ingresosBrutos - gastosDeducibles - amortizaciones - interesesHipoteca
   );
 
   // Cuota IS al 25%
   const TIPO_IS = 25;
-  const cuotaIS = Math.round(baseImponible * TIPO_IS / 100 * 100) / 100;
-  const tipoEfectivo = ingresosBrutos > 0
-    ? Math.round((cuotaIS / ingresosBrutos) * 10000) / 100
-    : 0;
+  const cuotaIS = Math.round(((baseImponible * TIPO_IS) / 100) * 100) / 100;
+  const tipoEfectivo =
+    ingresosBrutos > 0 ? Math.round((cuotaIS / ingresosBrutos) * 10000) / 100 : 0;
 
   // Pagos fraccionados (modelo 202): 3 pagos al ano
   // Cada pago = 18% del ultimo IS pagado (simplificado)
@@ -616,12 +654,11 @@ export async function generateDepreciationTable(assetId: string): Promise<void> 
 
   // Base amortizable: valor construccion (catastral) + reformas capitalizables
   // Si no hay desglose catastral, usar 50% del precio de compra como construccion
-  const valorConstruccion = asset.valorCatastralConstruccion
-    || (asset.precioCompra * 0.5);
+  const valorConstruccion = asset.valorCatastralConstruccion || asset.precioCompra * 0.5;
   const baseAmortizable = valorConstruccion + asset.reformasCapitalizadas;
 
   const PORCENTAJE_AMORTIZACION = 3; // 3% anual para inmuebles
-  const cuotaAnual = Math.round(baseAmortizable * PORCENTAJE_AMORTIZACION / 100 * 100) / 100;
+  const cuotaAnual = Math.round(((baseAmortizable * PORCENTAJE_AMORTIZACION) / 100) * 100) / 100;
 
   const anoInicio = asset.fechaAdquisicion.getFullYear();
   const anoActual = new Date().getFullYear();

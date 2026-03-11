@@ -1,6 +1,6 @@
 /**
  * Resolución de scope de empresa para APIs de contabilidad.
- * 
+ *
  * Soporta:
  * - Query param ?companyId=xxx (usado por selector de empresa y filtros)
  * - Cookie activeCompanyId (persistida por switch-company)
@@ -10,6 +10,8 @@
  */
 
 import { NextRequest } from 'next/server';
+import type { UserRole } from '@/types/prisma-types';
+import { resolveCompanyScope } from '@/lib/company-scope';
 
 export interface AccountingScope {
   /** IDs de empresa para filtrar (puede ser 1 o varios si es holding) */
@@ -20,10 +22,60 @@ export interface AccountingScope {
   isConsolidated: boolean;
 }
 
+const ROLE_ALLOWLIST: UserRole[] = [
+  'super_admin',
+  'administrador',
+  'gestor',
+  'operador',
+  'soporte',
+  'community_manager',
+  'socio_ewoorker',
+  'contratista_ewoorker',
+  'subcontratista_ewoorker',
+];
+
+function resolveUserRole(role: unknown): UserRole | null {
+  if (typeof role !== 'string') {
+    return null;
+  }
+
+  return ROLE_ALLOWLIST.includes(role as UserRole) ? (role as UserRole) : null;
+}
+
 export async function resolveAccountingScope(
   request: NextRequest,
   sessionUser: { companyId?: string; role?: string; id?: string }
 ): Promise<AccountingScope | null> {
+  const role = resolveUserRole(sessionUser.role);
+
+  if (sessionUser.id && role) {
+    const scope = await resolveCompanyScope({
+      userId: sessionUser.id,
+      role,
+      primaryCompanyId: sessionUser.companyId,
+      request,
+    });
+
+    if (!scope.activeCompanyId) {
+      return null;
+    }
+
+    return {
+      companyIds:
+        scope.scopeCompanyIds.length > 0 ? scope.scopeCompanyIds : [scope.activeCompanyId],
+      activeCompanyId: scope.activeCompanyId,
+      isConsolidated: scope.isConsolidated,
+    };
+  }
+
+  if (sessionUser.companyId) {
+    return {
+      companyIds: [sessionUser.companyId],
+      activeCompanyId: sessionUser.companyId,
+      isConsolidated: false,
+    };
+  }
+
   // Lazy load Prisma to avoid build-time issues
   const { getPrismaClient } = await import('@/lib/db');
   const prisma = getPrismaClient();
@@ -32,9 +84,9 @@ export async function resolveAccountingScope(
   const { searchParams } = new URL(request.url);
   const queryCompanyId = searchParams.get('companyId');
   const cookieCompanyId = request.cookies.get('activeCompanyId')?.value;
-  
+
   const activeCompanyId = queryCompanyId || cookieCompanyId || sessionUser.companyId;
-  
+
   if (!activeCompanyId) {
     // Para super_admin sin empresa asignada, intentar obtener todas
     if (sessionUser.role === 'super_admin' || sessionUser.role === 'administrador') {
@@ -45,7 +97,7 @@ export async function resolveAccountingScope(
       });
       if (allCompanies.length > 0) {
         return {
-          companyIds: allCompanies.map(c => c.id),
+          companyIds: allCompanies.map((c) => c.id),
           activeCompanyId: allCompanies[0].id,
           isConsolidated: allCompanies.length > 1,
         };
@@ -75,9 +127,9 @@ export async function resolveAccountingScope(
       });
       if (user?.companyId && user.companyId !== activeCompanyId) {
         // Recursión con el companyId del user actualizado
-        return resolveAccountingScope(request, { 
-          ...sessionUser, 
-          companyId: user.companyId 
+        return resolveAccountingScope(request, {
+          ...sessionUser,
+          companyId: user.companyId,
         });
       }
     }
@@ -86,7 +138,7 @@ export async function resolveAccountingScope(
 
   // 3. Si tiene filiales (es holding), incluir datos consolidados
   const childIds = company.childCompanies.map((c) => c.id);
-  
+
   if (childIds.length > 0) {
     return {
       companyIds: [activeCompanyId, ...childIds],
@@ -104,7 +156,7 @@ export async function resolveAccountingScope(
         _count: true,
       });
       const bankCompanyIds = result
-        .map(r => r.companyId)
+        .map((r) => r.companyId)
         .filter((id): id is string => !!id && id.length > 0);
 
       if (bankCompanyIds.length > 0) {

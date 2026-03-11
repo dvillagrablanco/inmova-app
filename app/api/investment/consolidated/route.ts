@@ -3,10 +3,30 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import logger from '@/lib/logger';
 import * as Sentry from '@sentry/nextjs';
-import { getPrismaClient } from '@/lib/db';
+import type { UserRole } from '@/types/prisma-types';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+const ROLE_ALLOWLIST: UserRole[] = [
+  'super_admin',
+  'administrador',
+  'gestor',
+  'operador',
+  'soporte',
+  'community_manager',
+  'socio_ewoorker',
+  'contratista_ewoorker',
+  'subcontratista_ewoorker',
+];
+
+function resolveUserRole(role: unknown): UserRole | null {
+  if (typeof role !== 'string') {
+    return null;
+  }
+
+  return ROLE_ALLOWLIST.includes(role as UserRole) ? (role as UserRole) : null;
+}
 
 /**
  * GET /api/investment/consolidated
@@ -16,25 +36,33 @@ export const runtime = 'nodejs';
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = session.user.companyId;
+    const role = resolveUserRole(session.user.role);
+    if (!role) {
+      return NextResponse.json({ error: 'Rol inválido' }, { status: 403 });
+    }
+
+    const { resolveCompanyScope } = await import('@/lib/company-scope');
+    const scope = await resolveCompanyScope({
+      userId: session.user.id,
+      role,
+      primaryCompanyId: session.user.companyId,
+      request,
+    });
+
+    const { searchParams } = new URL(request.url);
+    const requestedCompanyId = searchParams.get('companyId');
+    if (requestedCompanyId && !scope.accessibleCompanyIds.includes(requestedCompanyId)) {
+      return NextResponse.json({ error: 'Sin acceso a la sociedad solicitada' }, { status: 403 });
+    }
+
+    const companyId = requestedCompanyId || scope.activeCompanyId;
     if (!companyId) {
       return NextResponse.json({ error: 'Sin empresa asociada' }, { status: 400 });
     }
-
-    const prisma = getPrismaClient();
-
-    // Consolidated: include child companies for group view
-    const companyHierarchy = await prisma.company.findUnique({
-      where: { id: session.user.companyId },
-      select: { childCompanies: { select: { id: true } } },
-    });
-    const allCompanyIds = companyHierarchy
-      ? [session.user.companyId, ...companyHierarchy.childCompanies.map((c: { id: string }) => c.id)]
-      : [session.user.companyId];
 
     const { getConsolidatedReport } = await import('@/lib/investment-service');
     const report = await getConsolidatedReport(companyId);
