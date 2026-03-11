@@ -23,13 +23,13 @@ function log(msg: string) {
 async function getCompanyId(): Promise<string> {
   const company = await prisma.company.findFirst({
     where: { OR: [
-      { name: { contains: 'Vidaro', mode: 'insensitive' } },
-      { name: { contains: 'Baldomero', mode: 'insensitive' } },
+      { nombre: { contains: 'Vidaro', mode: 'insensitive' } },
+      { nombre: { contains: 'Baldomero', mode: 'insensitive' } },
     ]},
-    select: { id: true, name: true },
+    select: { id: true, nombre: true },
   });
   if (!company) throw new Error('Vidaro company not found');
-  log(`Company: ${company.name} (${company.id})`);
+  log(`Company: ${company.nombre} (${company.id})`);
   return company.id;
 }
 

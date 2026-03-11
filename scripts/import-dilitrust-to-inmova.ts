@@ -60,18 +60,18 @@ async function getVidaroCompanyId(): Promise<string> {
   const company = await prisma.company.findFirst({
     where: {
       OR: [
-        { name: { contains: 'Vidaro', mode: 'insensitive' } },
-        { name: { contains: 'Baldomero', mode: 'insensitive' } },
+        { nombre: { contains: 'Vidaro', mode: 'insensitive' } },
+        { nombre: { contains: 'Baldomero', mode: 'insensitive' } },
       ],
     },
-    select: { id: true, name: true },
+    select: { id: true, nombre: true },
   });
 
   if (!company) {
     throw new Error('Company Vidaro not found in database. Run seed script first.');
   }
 
-  log(`Company: ${company.name} (${company.id})`);
+  log(`Company: ${company.nombre} (${company.id})`);
   return company.id;
 }
 
