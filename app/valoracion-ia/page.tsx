@@ -30,6 +30,7 @@ import {
 } from '@/components/ui/accordion';
 import {
   Home,
+  Store,
   ArrowLeft,
   Brain,
   TrendingUp,
@@ -163,21 +164,112 @@ interface ValoracionResult {
   aiSourcesUsed?: string[];
 }
 
-// Características del inmueble
-const CARACTERISTICAS = [
-  { id: 'ascensor', label: 'Ascensor', icon: ArrowUpRight },
-  { id: 'terraza', label: 'Terraza', icon: Trees },
-  { id: 'piscina', label: 'Piscina', icon: Waves },
-  { id: 'garaje', label: 'Garaje', icon: Car },
-  { id: 'trastero', label: 'Trastero', icon: Building2 },
-  { id: 'aire_acondicionado', label: 'Aire acondicionado', icon: Zap },
-  { id: 'calefaccion', label: 'Calefacción', icon: Zap },
-  { id: 'jardin', label: 'Jardín', icon: Trees },
-  { id: 'portero', label: 'Portero/Conserje', icon: Users },
-  { id: 'armarios_empotrados', label: 'Armarios empotrados', icon: Building2 },
-  { id: 'lavadero', label: 'Lavadero', icon: Waves },
-  { id: 'videoportero', label: 'Videoportero', icon: Zap },
-];
+// Características por tipo de activo
+const CARACTERISTICAS_POR_TIPO: Record<string, Array<{ id: string; label: string; icon: any }>> = {
+  vivienda: [
+    { id: 'ascensor', label: 'Ascensor', icon: ArrowUpRight },
+    { id: 'terraza', label: 'Terraza', icon: Trees },
+    { id: 'piscina', label: 'Piscina', icon: Waves },
+    { id: 'garaje', label: 'Garaje', icon: Car },
+    { id: 'trastero', label: 'Trastero', icon: Building2 },
+    { id: 'aire_acondicionado', label: 'Aire acondicionado', icon: Zap },
+    { id: 'calefaccion', label: 'Calefacción', icon: Zap },
+    { id: 'jardin', label: 'Jardín', icon: Trees },
+    { id: 'portero', label: 'Portero/Conserje', icon: Users },
+    { id: 'armarios_empotrados', label: 'Armarios empotrados', icon: Building2 },
+    { id: 'lavadero', label: 'Lavadero', icon: Waves },
+    { id: 'videoportero', label: 'Videoportero', icon: Zap },
+  ],
+  local_comercial: [
+    { id: 'fachada', label: 'Fachada a calle', icon: Building2 },
+    { id: 'escaparate', label: 'Escaparate', icon: Store },
+    { id: 'esquina', label: 'Esquina', icon: MapPin },
+    { id: 'aire_acondicionado', label: 'Climatización', icon: Zap },
+    { id: 'salida_humos', label: 'Salida de humos', icon: Zap },
+    { id: 'licencia_actividad', label: 'Licencia actividad', icon: FileText },
+    { id: 'aseo', label: 'Aseo propio', icon: Building2 },
+    { id: 'almacen', label: 'Almacén/Trastienda', icon: Building2 },
+    { id: 'carga_descarga', label: 'Zona carga/descarga', icon: Car },
+    { id: 'persiana_seguridad', label: 'Persiana seguridad', icon: Zap },
+  ],
+  oficina: [
+    { id: 'ascensor', label: 'Ascensor', icon: ArrowUpRight },
+    { id: 'aire_acondicionado', label: 'Climatización central', icon: Zap },
+    { id: 'calefaccion', label: 'Calefacción', icon: Zap },
+    { id: 'fibra_optica', label: 'Fibra óptica', icon: Zap },
+    { id: 'planta_diafana', label: 'Planta diáfana', icon: Building2 },
+    { id: 'suelo_tecnico', label: 'Suelo técnico', icon: Building2 },
+    { id: 'falso_techo', label: 'Falso techo', icon: Building2 },
+    { id: 'garaje', label: 'Parking propio', icon: Car },
+    { id: 'recepcion', label: 'Recepción/Lobby', icon: Users },
+    { id: 'sala_reuniones', label: 'Sala reuniones', icon: Users },
+    { id: 'terraza', label: 'Terraza', icon: Trees },
+    { id: 'portero', label: 'Seguridad/Conserje', icon: Users },
+  ],
+  nave_industrial: [
+    { id: 'muelle_carga', label: 'Muelle de carga', icon: Car },
+    { id: 'puente_grua', label: 'Puente grúa', icon: Building2 },
+    { id: 'oficinas_anexas', label: 'Oficinas anexas', icon: Building2 },
+    { id: 'patio_maniobras', label: 'Patio de maniobras', icon: Car },
+    { id: 'acceso_trailer', label: 'Acceso tráiler', icon: Car },
+    { id: 'instalacion_electrica', label: 'Inst. eléctrica industrial', icon: Zap },
+    { id: 'agua_industrial', label: 'Agua industrial', icon: Waves },
+    { id: 'sprinklers', label: 'Sistema anti-incendios', icon: Zap },
+    { id: 'acceso_autopista', label: 'Acceso autopista', icon: Car },
+    { id: 'vigilancia', label: 'Vigilancia 24h', icon: Users },
+  ],
+  garaje: [
+    { id: 'plaza_doble', label: 'Plaza doble', icon: Car },
+    { id: 'acceso_facil', label: 'Acceso fácil', icon: ArrowUpRight },
+    { id: 'punto_carga', label: 'Punto carga eléctrica', icon: Zap },
+    { id: 'vigilancia', label: 'Vigilancia/Cámaras', icon: Users },
+    { id: 'trastero_anejo', label: 'Trastero anejo', icon: Building2 },
+    { id: 'preinstalacion_carga', label: 'Pre-inst. carga VE', icon: Zap },
+  ],
+  edificio_completo: [
+    { id: 'ascensor', label: 'Ascensor', icon: ArrowUpRight },
+    { id: 'portero', label: 'Portero/Conserje', icon: Users },
+    { id: 'garaje', label: 'Garaje comunitario', icon: Car },
+    { id: 'piscina', label: 'Piscina', icon: Waves },
+    { id: 'jardin', label: 'Jardín/Patio', icon: Trees },
+    { id: 'locales', label: 'Locales en planta baja', icon: Store },
+    { id: 'aire_acondicionado', label: 'Climatización central', icon: Zap },
+    { id: 'fachada_reformada', label: 'Fachada reformada', icon: Building2 },
+    { id: 'cubierta_reformada', label: 'Cubierta reformada', icon: Building2 },
+    { id: 'ite_favorable', label: 'ITE favorable', icon: FileText },
+  ],
+  solar: [
+    { id: 'uso_residencial', label: 'Uso residencial', icon: Home },
+    { id: 'uso_comercial', label: 'Uso comercial', icon: Store },
+    { id: 'uso_industrial', label: 'Uso industrial', icon: Building2 },
+    { id: 'urbanizado', label: 'Urbanizado', icon: Building2 },
+    { id: 'acceso_rodado', label: 'Acceso rodado', icon: Car },
+    { id: 'servicios_basicos', label: 'Servicios (agua, luz)', icon: Zap },
+    { id: 'licencia_tramite', label: 'Licencia en trámite', icon: FileText },
+  ],
+};
+
+// Campos del formulario que aplican según tipo
+const CAMPOS_POR_TIPO: Record<string, { habitaciones: boolean; banos: boolean; planta: boolean; orientacion: boolean }> = {
+  vivienda:          { habitaciones: true,  banos: true,  planta: true,  orientacion: true },
+  local_comercial:   { habitaciones: false, banos: false, planta: true,  orientacion: false },
+  oficina:           { habitaciones: false, banos: true,  planta: true,  orientacion: true },
+  nave_industrial:   { habitaciones: false, banos: false, planta: false, orientacion: false },
+  garaje:            { habitaciones: false, banos: false, planta: true,  orientacion: false },
+  edificio_completo: { habitaciones: true,  banos: true,  planta: false, orientacion: false },
+  solar:             { habitaciones: false, banos: false, planta: false, orientacion: false },
+};
+
+// Labels adaptados por tipo
+const LABELS_POR_TIPO: Record<string, Record<string, string>> = {
+  vivienda:          { superficie: 'Superficie (m²)', habitaciones: 'Habitaciones', banos: 'Baños', planta: 'Planta' },
+  local_comercial:   { superficie: 'Superficie (m²)', planta: 'Planta (0=calle)' },
+  oficina:           { superficie: 'Superficie (m²)', banos: 'Aseos', planta: 'Planta' },
+  nave_industrial:   { superficie: 'Superficie (m²)' },
+  garaje:            { superficie: 'Superficie (m²)', planta: 'Sótano (-1, -2...)' },
+  edificio_completo: { superficie: 'Superficie total (m²)', habitaciones: 'Nº unidades', banos: 'Nº plantas' },
+  solar:             { superficie: 'Superficie parcela (m²)' },
+};
 
 // Pasos del proceso de valoración
 const VALUATION_STEPS = [
@@ -1297,35 +1389,39 @@ ${resultado.recomendaciones?.length ? `<div class="section">
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="superficie">Superficie (m²) *</Label>
+                    <Label htmlFor="superficie">{(LABELS_POR_TIPO[formData.tipoActivo] || LABELS_POR_TIPO.vivienda).superficie || 'Superficie (m²)'} *</Label>
                     <Input
                       id="superficie"
                       type="number"
-                      placeholder="85"
+                      placeholder={formData.tipoActivo === 'nave_industrial' ? '500' : formData.tipoActivo === 'garaje' ? '12' : formData.tipoActivo === 'solar' ? '1000' : '85'}
                       value={formData.superficie}
                       onChange={(e) => setFormData({ ...formData, superficie: e.target.value })}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="habitaciones">Habitaciones</Label>
-                    <Input
-                      id="habitaciones"
-                      type="number"
-                      placeholder="3"
-                      value={formData.habitaciones}
-                      onChange={(e) => setFormData({ ...formData, habitaciones: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="banos">Baños</Label>
-                    <Input
-                      id="banos"
-                      type="number"
-                      placeholder="2"
-                      value={formData.banos}
-                      onChange={(e) => setFormData({ ...formData, banos: e.target.value })}
-                    />
-                  </div>
+                  {(CAMPOS_POR_TIPO[formData.tipoActivo] || CAMPOS_POR_TIPO.vivienda).habitaciones && (
+                    <div className="space-y-2">
+                      <Label htmlFor="habitaciones">{(LABELS_POR_TIPO[formData.tipoActivo] || LABELS_POR_TIPO.vivienda).habitaciones || 'Habitaciones'}</Label>
+                      <Input
+                        id="habitaciones"
+                        type="number"
+                        placeholder={formData.tipoActivo === 'edificio_completo' ? '12' : '3'}
+                        value={formData.habitaciones}
+                        onChange={(e) => setFormData({ ...formData, habitaciones: e.target.value })}
+                      />
+                    </div>
+                  )}
+                  {(CAMPOS_POR_TIPO[formData.tipoActivo] || CAMPOS_POR_TIPO.vivienda).banos && (
+                    <div className="space-y-2">
+                      <Label htmlFor="banos">{(LABELS_POR_TIPO[formData.tipoActivo] || LABELS_POR_TIPO.vivienda).banos || 'Baños'}</Label>
+                      <Input
+                        id="banos"
+                        type="number"
+                        placeholder={formData.tipoActivo === 'edificio_completo' ? '4' : '2'}
+                        value={formData.banos}
+                        onChange={(e) => setFormData({ ...formData, banos: e.target.value })}
+                      />
+                    </div>
+                  )}
                   <div className="space-y-2">
                     <Label htmlFor="antiguedad">Antigüedad (años)</Label>
                     <Input
@@ -1336,16 +1432,18 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                       onChange={(e) => setFormData({ ...formData, antiguedad: e.target.value })}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="planta">Planta</Label>
-                    <Input
-                      id="planta"
-                      type="number"
-                      placeholder="3"
-                      value={formData.planta}
-                      onChange={(e) => setFormData({ ...formData, planta: e.target.value })}
-                    />
-                  </div>
+                  {(CAMPOS_POR_TIPO[formData.tipoActivo] || CAMPOS_POR_TIPO.vivienda).planta && (
+                    <div className="space-y-2">
+                      <Label htmlFor="planta">{(LABELS_POR_TIPO[formData.tipoActivo] || LABELS_POR_TIPO.vivienda).planta || 'Planta'}</Label>
+                      <Input
+                        id="planta"
+                        type="number"
+                        placeholder={formData.tipoActivo === 'garaje' ? '-1' : formData.tipoActivo === 'local_comercial' ? '0' : '3'}
+                        value={formData.planta}
+                        onChange={(e) => setFormData({ ...formData, planta: e.target.value })}
+                      />
+                    </div>
+                  )}
                   <div className="space-y-2">
                     <Label>Estado</Label>
                     <Select
@@ -1367,23 +1465,25 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Orientación</Label>
-                    <Select
-                      value={formData.orientacion}
-                      onValueChange={(v) => setFormData({ ...formData, orientacion: v })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="norte">Norte</SelectItem>
-                        <SelectItem value="sur">Sur</SelectItem>
-                        <SelectItem value="este">Este</SelectItem>
-                        <SelectItem value="oeste">Oeste</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  {(CAMPOS_POR_TIPO[formData.tipoActivo] || CAMPOS_POR_TIPO.vivienda).orientacion && (
+                    <div className="space-y-2">
+                      <Label>Orientación</Label>
+                      <Select
+                        value={formData.orientacion}
+                        onValueChange={(v) => setFormData({ ...formData, orientacion: v })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="norte">Norte</SelectItem>
+                          <SelectItem value="sur">Sur</SelectItem>
+                          <SelectItem value="este">Este</SelectItem>
+                          <SelectItem value="oeste">Oeste</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
                   <div className="space-y-2">
                     <Label>Finalidad</Label>
                     <Select
@@ -1462,7 +1562,7 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                     <Label>Tipo de activo</Label>
                     <Select
                       value={formData.tipoActivo}
-                      onValueChange={(v) => setFormData({ ...formData, tipoActivo: v })}
+                      onValueChange={(v) => setFormData({ ...formData, tipoActivo: v, caracteristicas: [] })}
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -1482,11 +1582,19 @@ ${resultado.recomendaciones?.length ? `<div class="section">
 
                 <Separator />
 
-                {/* Características adicionales */}
+                {/* Características adaptadas al tipo de activo */}
                 <div className="space-y-2">
-                  <Label>Equipamiento y extras</Label>
+                  <Label>Equipamiento y extras — {
+                    formData.tipoActivo === 'vivienda' ? 'Vivienda' :
+                    formData.tipoActivo === 'local_comercial' ? 'Local comercial' :
+                    formData.tipoActivo === 'oficina' ? 'Oficina' :
+                    formData.tipoActivo === 'nave_industrial' ? 'Nave industrial' :
+                    formData.tipoActivo === 'garaje' ? 'Garaje' :
+                    formData.tipoActivo === 'edificio_completo' ? 'Edificio' :
+                    formData.tipoActivo === 'solar' ? 'Solar' : 'General'
+                  }</Label>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {CARACTERISTICAS.map((car) => {
+                    {(CARACTERISTICAS_POR_TIPO[formData.tipoActivo] || CARACTERISTICAS_POR_TIPO.vivienda).map((car) => {
                       const Icon = car.icon;
                       const isSelected = formData.caracteristicas.includes(car.id);
                       return (
