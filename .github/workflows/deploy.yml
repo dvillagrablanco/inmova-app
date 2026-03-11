@@ -24,13 +24,13 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Lint
-        run: yarn lint || echo "Linting warnings detected"
+        run: yarn lint
 
       - name: Type check
-        run: npx tsc --noEmit || echo "Type errors detected"
+        run: npx tsc --noEmit
 
       - name: Run tests
-        run: yarn test --passWithNoTests || echo "Tests completed"
+        run: yarn test --passWithNoTests
 
       - name: Build
         env:
