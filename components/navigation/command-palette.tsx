@@ -277,7 +277,7 @@ export function CommandPalette() {
       label: 'Reportar Incidencia',
       icon: AlertCircle,
       action: () => {
-        router.push('/incidencias/nueva');
+        router.push('/incidencias?crear=true');
       },
       keywords: ['incident', 'incidencia', 'problema'],
       group: 'actions',

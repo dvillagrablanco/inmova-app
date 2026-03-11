@@ -9,6 +9,10 @@
 import { prisma } from './db';
 import logger from './logger';
 
+// TODO: AUDIT-2026-03 — This file references prisma.property which no longer exists in the schema.
+// The Property model was removed; properties are now managed via Building + Unit.
+// References to prisma.property will throw at runtime. Migrate to Building/Unit queries.
+
 // Inline cache fallback (cache-service.ts was removed in dead code cleanup)
 const cache = {
   get: async (_key: string) => null,

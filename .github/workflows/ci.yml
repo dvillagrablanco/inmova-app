@@ -24,7 +24,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
       - run: npm ci --ignore-scripts
-      - run: npx eslint app/ lib/ components/ --max-warnings 0 || true
+      - run: npx eslint app/ lib/ components/ --max-warnings 0
 
   test:
     name: 🧪 Test
@@ -36,7 +36,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
       - run: npm ci --ignore-scripts
-      - run: npx prisma generate || true
+      - run: npx prisma generate
       - run: npx vitest run --reporter=verbose
         env:
           SKIP_PRISMA: 'true'
@@ -53,7 +53,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
       - run: npm ci --ignore-scripts
-      - run: npx prisma generate || true
+      - run: npx prisma generate
       - run: npm run build
         env:
           DATABASE_URL: 'postgresql://placeholder@localhost:5432/placeholder'
@@ -68,4 +68,5 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-      - run: npm audit --audit-level=high || true
+      # audit is advisory — high/critical findings are logged but don't block deploy
+      - run: npm audit --audit-level=critical || true

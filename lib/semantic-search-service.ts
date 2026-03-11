@@ -16,6 +16,10 @@ import { prisma } from './db';
 import logger from './logger';
 import { redis } from './redis';
 
+// TODO: AUDIT-2026-03 — This file references prisma.property which no longer exists in the schema.
+// The Property model was removed; properties are now managed via Building + Unit.
+// References to prisma.property will throw at runtime. Migrate to Building/Unit queries.
+
 // Lazy initialization — optional dependency
 let openai: OpenAI | null = null;
 let openaiUnavailableWarned = false;

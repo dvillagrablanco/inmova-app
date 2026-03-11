@@ -143,7 +143,7 @@ export default function RegisterPage() {
           email: data.email,
           recoveryEmail: data.recoveryEmail || undefined,
           password: data.password,
-          role: selectedRole === 'propietario' ? 'gestor' : 'gestor',
+          role: selectedRole === 'propietario' ? 'propietario' : 'gestor',
           businessVertical: data.businessVertical,
         }),
       });

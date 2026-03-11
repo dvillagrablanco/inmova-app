@@ -75,6 +75,10 @@ scripts/deploy-ssh-paramiko.py
 *password*
 *secret*
 
+# Archivos con secretos expuestos - NUNCA commitear
+VARIABLES_ENTORNO*.txt
+.archived_docs/
+
 # Permitir rutas de recuperación de contraseña
 !app/**/forgot-password/
 !app/**/reset-password/

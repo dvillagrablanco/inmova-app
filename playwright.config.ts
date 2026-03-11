@@ -11,8 +11,8 @@ import { defineConfig, devices } from '@playwright/test';
  */
 
 export default defineConfig({
-  testDir: './tests',
-  testMatch: ['**/*.spec.ts', '**/__tests__/e2e/**/*.spec.ts'],
+  testDir: '.',
+  testMatch: ['tests/**/*.spec.ts', 'e2e/**/*.spec.ts', '__tests__/e2e/**/*.spec.ts'],
 
   // Timeout por test (30 segundos)
   timeout: 30 * 1000,
@@ -96,13 +96,13 @@ export default defineConfig({
     },
   ],
 
-  // Run your local dev server before starting the tests
-  webServer: process.env.CI
-    ? undefined
-    : {
-        command: 'npm run dev',
-        url: 'http://localhost:3000',
-        reuseExistingServer: !process.env.CI,
-        timeout: 120 * 1000,
-      },
+  // Run local dev server before starting the tests
+  // In CI: use reuseExistingServer so tests connect to an already-running app
+  // (the CI workflow must start the app before running playwright)
+  webServer: {
+    command: process.env.CI ? 'npm run start' : 'npm run dev',
+    url: 'http://localhost:3000',
+    reuseExistingServer: true,
+    timeout: 120 * 1000,
+  },
 });

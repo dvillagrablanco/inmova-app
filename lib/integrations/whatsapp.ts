@@ -2,6 +2,11 @@ import axios, { AxiosInstance } from 'axios';
 import { prisma } from '@/lib/db';
 
 import logger from '@/lib/logger';
+
+// TODO: AUDIT-2026-03 — This file references prisma.property which no longer exists in the schema.
+// The Property model was removed; properties are now managed via Building + Unit.
+// References to prisma.property will throw at runtime. Migrate to Building/Unit queries.
+
 interface WhatsAppConfig {
   phoneNumberId: string;
   accessToken: string;

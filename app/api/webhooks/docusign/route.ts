@@ -16,9 +16,11 @@
  *   Trigger events: Envelope Sent, Envelope Delivered, Envelope Completed,
  *                   Envelope Declined, Envelope Voided
  *   Data format: JSON
+ *   Include HMAC Signature: Yes (configure key in DOCUSIGN_CONNECT_KEY)
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import crypto from 'crypto';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -40,12 +42,38 @@ const STATUS_MAP: Record<string, string> = {
   created: 'PENDING',
 };
 
+/**
+ * Verify HMAC signature from DocuSign Connect.
+ * DocuSign sends the signature in X-DocuSign-Signature-1 header,
+ * computed as HMAC-SHA256 of the raw body using the Connect Key.
+ */
+function verifyDocuSignSignature(rawBody: string, signature: string | null, connectKey: string): boolean {
+  if (!signature) return false;
+  const computed = crypto.createHmac('sha256', connectKey).update(rawBody, 'utf8').digest('base64');
+  return crypto.timingSafeEqual(Buffer.from(computed), Buffer.from(signature));
+}
+
 export async function POST(req: NextRequest) {
+  // 1. Verify HMAC signature before processing anything
+  const connectKey = process.env.DOCUSIGN_CONNECT_KEY;
+  if (!connectKey) {
+    logger.error('[DocuSign Webhook] DOCUSIGN_CONNECT_KEY not configured — rejecting request');
+    return NextResponse.json({ error: 'Webhook not configured' }, { status: 500 });
+  }
+
+  const rawBody = await req.text();
+  const signature = req.headers.get('x-docusign-signature-1');
+
+  if (!verifyDocuSignSignature(rawBody, signature, connectKey)) {
+    logger.warn('[DocuSign Webhook] Invalid HMAC signature — rejecting request');
+    return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+  }
+
   const prisma = await getPrisma();
   
   try {
-    // 1. Parse JSON body from DocuSign Connect
-    const payload = await req.json();
+    // 2. Parse JSON body (already validated by HMAC)
+    const payload = JSON.parse(rawBody);
     
     // DocuSign Connect JSON format has the envelope info at the top level
     const envelopeId = payload?.envelopeId || payload?.EnvelopeStatus?.EnvelopeID;
@@ -64,7 +92,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ received: true, warning: 'No envelope ID' });
     }
 
-    // 2. Save raw webhook for audit trail
+    // 3. Save raw webhook for audit trail
     try {
       await prisma.signatureWebhook.create({
         data: {
@@ -81,20 +109,20 @@ export async function POST(req: NextRequest) {
       // Continue processing even if save fails
     }
 
-    // 3. Find the corresponding ContractSignature
-    const signature = await prisma.contractSignature.findFirst({
+    // 4. Find the corresponding ContractSignature
+    const signatureRecord = await prisma.contractSignature.findFirst({
       where: {
         externalId: envelopeId,
         provider: 'DOCUSIGN',
       },
     });
 
-    if (!signature) {
+    if (!signatureRecord) {
       logger.warn('[DocuSign Webhook] No matching signature found for envelope:', envelopeId);
       return NextResponse.json({ received: true, matched: false });
     }
 
-    // 4. Map status and update if it's a terminal status
+    // 5. Map status and update if it's a terminal status
     const newStatus = STATUS_MAP[event];
     
     if (!newStatus) {
@@ -104,7 +132,7 @@ export async function POST(req: NextRequest) {
 
     // Only update for terminal status changes
     const isTerminal = ['SIGNED', 'DECLINED', 'EXPIRED'].includes(newStatus);
-    const isStatusChange = newStatus !== signature.status;
+    const isStatusChange = newStatus !== signatureRecord.status;
 
     if (isTerminal && isStatusChange) {
       // Extract signer info if available
@@ -112,7 +140,7 @@ export async function POST(req: NextRequest) {
                                  payload?.EnvelopeStatus?.RecipientStatuses || [];
       
       // Update signatories with their individual status
-      let updatedSignatories = signature.signatories;
+      let updatedSignatories = signatureRecord.signatories;
       if (Array.isArray(updatedSignatories) && Array.isArray(recipientStatuses)) {
         updatedSignatories = (updatedSignatories as any[]).map((s: any) => {
           const recipientMatch = recipientStatuses.find(
@@ -134,7 +162,7 @@ export async function POST(req: NextRequest) {
       }
 
       await prisma.contractSignature.update({
-        where: { id: signature.id },
+        where: { id: signatureRecord.id },
         data: {
           status: newStatus,
           signatories: updatedSignatories as any,
@@ -157,20 +185,20 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      logger.info(`[DocuSign Webhook] Signature ${signature.id} updated to ${newStatus}`, {
+      logger.info(`[DocuSign Webhook] Signature ${signatureRecord.id} updated to ${newStatus}`, {
         envelopeId,
-        contractId: signature.contractId,
-        previousStatus: signature.status,
+        contractId: signatureRecord.contractId,
+        previousStatus: signatureRecord.status,
         newStatus,
       });
     } else {
       logger.info(`[DocuSign Webhook] No status change needed for ${event}`, {
-        currentStatus: signature.status,
+        currentStatus: signatureRecord.status,
         mappedStatus: newStatus,
       });
     }
 
-    // 5. Always return 200 to DocuSign (prevent retries)
+    // 6. Always return 200 to DocuSign (prevent retries)
     return NextResponse.json({
       received: true,
       matched: true,

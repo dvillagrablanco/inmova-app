@@ -24,7 +24,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json().catch(() => ({}));
     const { jobId, all } = body;
     const session = await getServerSession(authOptions);
-    const companyId = body.companyId || session?.user?.companyId;
+    // Security: only use companyId from authenticated session, never from request body
+    const companyId = session?.user?.companyId;
     if (all) {
       const results = await executeAllCronJobs(companyId);
       

@@ -229,7 +229,7 @@ function generateActions(
           label: 'Reportar Incidencia',
           icon: AlertCircle,
           onClick: () =>
-            router.push(`/incidencias/nueva?propertyId=${props.propertyId}`),
+            router.push(`/incidencias?crear=true&propertyId=${props.propertyId}`),
           variant: 'ghost',
           badge: props.hasActiveIncidents ? '!' : undefined,
         },
@@ -255,7 +255,7 @@ function generateActions(
           label: 'Publicar Anuncio',
           icon: TrendingUp,
           onClick: () =>
-            router.push(`/anuncios/nuevo?propertyId=${props.propertyId}`),
+            router.push(`/anuncios?crear=true&propertyId=${props.propertyId}`),
           variant: 'default',
           tooltip: 'Publicar en portales inmobiliarios',
         },
@@ -278,7 +278,7 @@ function generateActions(
           label: 'Programar Visita',
           icon: Calendar,
           onClick: () =>
-            router.push(`/visitas/nueva?propertyId=${props.propertyId}`),
+            router.push(`/visitas?crear=true&propertyId=${props.propertyId}`),
           variant: 'ghost',
         },
         {
@@ -685,7 +685,7 @@ function generateActions(
       {
         label: 'Nueva Solicitud',
         icon: Plus,
-        onClick: () => router.push('/mantenimiento/nueva'),
+        onClick: () => router.push('/mantenimiento/nuevo'),
         variant: 'default',
       },
       {

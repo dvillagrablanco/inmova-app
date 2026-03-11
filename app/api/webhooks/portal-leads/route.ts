@@ -23,9 +23,13 @@ export async function POST(request: NextRequest) {
     const portalSource = request.headers.get('x-portal-source') || body.source || 'unknown';
     const webhookSecret = request.headers.get('x-webhook-secret');
 
-    // Validar secret si está configurado
+    // Validate webhook secret — required, not optional
     const expectedSecret = process.env.PORTAL_WEBHOOK_SECRET;
-    if (expectedSecret && webhookSecret !== expectedSecret) {
+    if (!expectedSecret) {
+      logger.error('[Portal Lead] PORTAL_WEBHOOK_SECRET not configured — rejecting request');
+      return NextResponse.json({ error: 'Webhook not configured' }, { status: 500 });
+    }
+    if (webhookSecret !== expectedSecret) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
