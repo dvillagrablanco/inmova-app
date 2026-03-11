@@ -91,11 +91,15 @@ export default function MapaPatrimonioPage() {
       if (res.ok) {
         const data = await res.json();
         const blds = (data.buildings || data || []).map((b: any) => {
-          const totalUnits = b.units?.length || b._count?.units || 0;
-          const occupiedUnits = b.units?.filter((u: any) => u.tenantId || u.estado === 'ocupada').length || 0;
-          const occupancy = totalUnits > 0 ? Math.round((occupiedUnits / totalUnits) * 100) : 0;
-          const monthlyRent = b.units?.reduce((s: number, u: any) => s + (u.rentaMensual || 0), 0) || 0;
-          const coords = getCoords(b.nombre || b.direccion || '');
+          const totalUnits = b.totalUnidades || b.units?.length || b._count?.units || b.numeroUnidades || 0;
+          const occupiedUnits = b.unidadesOcupadas || b.units?.filter((u: any) => u.tenantId || u.estado === 'ocupada').length || 0;
+          const occupancy = b.metrics?.ocupacionPct || (totalUnits > 0 ? Math.round((occupiedUnits / totalUnits) * 100) : 0);
+          const monthlyRent = b.metrics?.ingresosMensuales || b.units?.reduce((s: number, u: any) => s + (u.rentaMensual || 0), 0) || 0;
+          // Use DB coordinates if available, otherwise fallback to name-based geocoding
+          const dbLat = b.latitud || b.lat;
+          const dbLng = b.longitud || b.lng;
+          const coords = (dbLat && dbLng) ? [dbLat, dbLng] : getCoords(b.nombre || b.direccion || '');
+          const valorMercado = b.metrics?.valorMercado || b.valorMercado || 0;
           return {
             id: b.id,
             nombre: b.nombre || b.direccion || 'Sin nombre',
@@ -111,7 +115,7 @@ export default function MapaPatrimonioPage() {
             hasInsurance: (b.insurances?.length || 0) > 0,
             insuranceExpiring: false,
             pendingMaintenance: b.maintenanceRequests?.filter((m: any) => m.status !== 'completado').length || 0,
-            yieldEstimated: monthlyRent > 0 && b.valorMercado ? ((monthlyRent * 12) / b.valorMercado) * 100 : 0,
+            yieldEstimated: b.metrics?.yieldBruto || (monthlyRent > 0 && valorMercado > 0 ? ((monthlyRent * 12) / valorMercado) * 100 : 0),
           };
         });
         setBuildings(blds);

@@ -108,6 +108,8 @@ export async function GET(req: NextRequest) {
         companyId: building.companyId,
         company: (building as any).company,
         ibiAnual: (building as { ibiAnual?: number | null }).ibiAnual ?? null,
+        latitud: (building as any).latitud ?? null,
+        longitud: (building as any).longitud ?? null,
         createdAt: building.createdAt,
         updatedAt: building.updatedAt,
         totalUnidades: totalUnits,
