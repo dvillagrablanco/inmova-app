@@ -91,3 +91,9 @@ scripts/deploy-ssh-paramiko.py
 # DF financial data (confidential)
 data/df-files/
 data/vidaro-files/
+data/dilitrust-docs/
+data/dilitrust-manifest.json
+data/dilitrust-inventory.json
+scripts/dilitrust-all-findings.json
+scripts/dilitrust-documents.json
+data/dilitrust-doc-urls.json
