@@ -29,8 +29,7 @@ async function getPrisma() {
 const ENCRYPTION_KEY = process.env.CONTASIMPLE_ENCRYPTION_KEY || 'default-key-change-in-production-32b';
 const ALGORITHM = 'aes-256-cbc';
 
-async function encrypt(text: string): string {
-  const prisma = await getPrisma();
+function encrypt(text: string): string {
   const iv = crypto.randomBytes(16);
   const key = Buffer.from(ENCRYPTION_KEY.padEnd(32, '0').slice(0, 32));
   const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
@@ -39,8 +38,7 @@ async function encrypt(text: string): string {
   return iv.toString('hex') + ':' + encrypted;
 }
 
-async function decrypt(text: string): string {
-  const prisma = await getPrisma();
+function decrypt(text: string): string {
   const parts = text.split(':');
   const iv = Buffer.from(parts[0], 'hex');
   const encrypted = parts[1];
@@ -213,6 +211,7 @@ export async function getContasimpleCredentials(companyId: string): Promise<{
   enabled: boolean;
 } | null> {
   try {
+    const prisma = await getPrisma();
     const company = await prisma.company.findUnique({
       where: { id: companyId },
       select: {

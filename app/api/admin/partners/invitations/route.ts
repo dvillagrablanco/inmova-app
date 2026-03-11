@@ -16,6 +16,11 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 const createInvitationSchema = z.object({
   email: z.string().email(),
   nombre: z.string().optional(),
@@ -32,6 +37,7 @@ export async function GET(request: NextRequest) {
     if (!session?.user || sessionUser?.role !== 'super_admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
+    const prisma = await getPrisma();
 
     const [invitations, statusCounts] = await prisma.$transaction([
       prisma.partnerInvitation.findMany({
@@ -127,6 +133,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const validated = createInvitationSchema.parse(body);
+    const prisma = await getPrisma();
 
     const partnerIdFromBody = validated.partnerId?.trim();
     const defaultPartnerId = process.env.DEFAULT_PARTNER_ID;

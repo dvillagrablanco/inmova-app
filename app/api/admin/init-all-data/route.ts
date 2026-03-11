@@ -20,6 +20,11 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 // ═══════════════════════════════════════════════════════════════
 // PLANES INMOVA (Sincronizados con /landing/precios/page.tsx)
 // ═══════════════════════════════════════════════════════════════
@@ -548,7 +553,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Permisos insuficientes' }, { status: 403 });
     }
 
-    // 2. Lazy load Prisma
+    const prisma = await getPrisma();
 
     const results = {
       plans: { created: 0, updated: 0 },

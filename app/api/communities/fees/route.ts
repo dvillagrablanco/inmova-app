@@ -87,10 +87,17 @@ export async function POST(req: NextRequest) {
     }
 
     if (parsed.data.action === 'generate') {
+      const companyId = parsed.data.companyId || session.user.companyId;
+      if (!companyId) {
+        return NextResponse.json(
+          { error: 'companyId es requerido' },
+          { status: 400 }
+        );
+      }
       const params: GenerateFeesParams = {
         buildingId: parsed.data.buildingId,
-        companyId: parsed.data.companyId,
-        periodo: parsed.data.periodo,
+        companyId,
+        periodo: parsed.data.periodo || new Date().toISOString().slice(0, 7),
         tipo: parsed.data.tipo as any,
         montoPorUnidad: parsed.data.montoPorUnidad,
       };
@@ -102,7 +109,7 @@ export async function POST(req: NextRequest) {
       const fee = await markFeeAsPaid(
         parsed.data.feeId,
         new Date(parsed.data.fechaPago),
-        parsed.data.metodoPago
+        parsed.data.metodoPago || ''
       );
       return NextResponse.json(fee);
     }

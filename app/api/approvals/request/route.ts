@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/permissions';
 import {
+  type ApprovalType,
   createApprovalRequest,
   requestExpenseApproval,
   requestMaintenanceApproval,
@@ -76,7 +77,7 @@ export async function POST(request: Request) {
         }
         approval = await createApprovalRequest({
           companyId: user.companyId as string,
-          type,
+          type: type as ApprovalType,
           title,
           description,
           amount: amount ?? undefined,

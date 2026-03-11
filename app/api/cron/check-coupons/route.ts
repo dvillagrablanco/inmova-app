@@ -18,7 +18,10 @@ import { requireCronSecret } from '@/lib/api-auth-guard';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-const CRON_SECRET = process.env.CRON_SECRET;
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 interface AlertConfig {
   diasAntes: number;
@@ -34,7 +37,6 @@ const ALERT_CONFIGS: AlertConfig[] = [
 ];
 
 async function sendEmailAlert(subject: string, html: string) {
-  const prisma = await getPrisma();
   try {
     const nodemailer = await import('nodemailer');
     
@@ -67,16 +69,8 @@ export async function GET(request: NextRequest) {
   const cronAuth = requireCronSecret(request);
   if (!cronAuth.authenticated) return cronAuth.response;
 
-
   try {
-
-    if (authHeader !== `Bearer ${CRON_SECRET}`) {
-      // También permitir desde Vercel Cron
-      const vercelCron = request.headers.get('x-vercel-cron');
-      if (!vercelCron) {
-        return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
-      }
-    }
+    const prisma = await getPrisma();
 
     const now = new Date();
     let alertasEnviadas = 0;

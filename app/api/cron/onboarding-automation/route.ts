@@ -31,16 +31,7 @@ export async function GET(request: NextRequest) {
   const cronAuth = requireCronSecret(request);
   if (!cronAuth.authenticated) return cronAuth.response;
 
-
   try {
-
-    if (authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-    
     logger.info('[CRON_ONBOARDING] Starting automation tasks...');
     
     // Ejecutar tareas en paralelo
@@ -88,7 +79,6 @@ export async function POST(request: NextRequest) {
   // Cron auth guard
   const cronAuth = requireCronSecret(request);
   if (!cronAuth.authenticated) return cronAuth.response;
-
 
   return GET(request);
 }

@@ -65,7 +65,14 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Unidad no encontrada' }, { status: 404 });
       }
       targetSuperficie = unit.superficie;
-      targetCiudad = unit.building.ciudad ?? '';
+      targetCiudad =
+        ciudad ||
+        unit.building.direccion
+          .split(',')
+          .map((segment) => segment.trim())
+          .filter(Boolean)
+          .pop() ||
+        '';
       targetTipo = unit.tipo;
       targetHabitaciones = unit.habitaciones;
     } else if (superficie && ciudad) {
@@ -82,7 +89,7 @@ export async function POST(request: NextRequest) {
 
     const similarWhere: Record<string, unknown> = {
       building: {
-        ciudad: { equals: targetCiudad, mode: 'insensitive' },
+        direccion: { contains: targetCiudad, mode: 'insensitive' },
         companyId: session.user.companyId ?? undefined,
       },
       superficie: {

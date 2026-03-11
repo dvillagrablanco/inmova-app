@@ -14,6 +14,11 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -25,6 +30,7 @@ export async function GET(
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
+    const prisma = await getPrisma();
     const invitation = await prisma.partnerInvitation.findUnique({
       where: { id: params.id },
       include: {
@@ -84,6 +90,7 @@ export async function PUT(
 
     const body = await request.json();
 
+    const prisma = await getPrisma();
     const invitation = await prisma.partnerInvitation.findUnique({
       where: { id: params.id },
     });
@@ -136,6 +143,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
+    const prisma = await getPrisma();
     const invitation = await prisma.partnerInvitation.findUnique({
       where: { id: params.id },
     });

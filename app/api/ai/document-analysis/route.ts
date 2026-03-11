@@ -413,7 +413,10 @@ async function analyzeDocumentWithVision(
     },
   } as const;
 
-  logger.error('[Vision Analysis] 📤 Enviando a Claude Vision:', file.name, 'isPDF:', isPDF);
+  logger.error('[Vision Analysis] 📤 Enviando a Claude Vision', {
+    fileName: file.name,
+    isPDF,
+  });
 
   const prompt = getVisionPromptForContext(context, companyInfo);
 
@@ -439,7 +442,9 @@ async function analyzeDocumentWithVision(
   });
 
   const processingTimeMs = Date.now() - startTime;
-  logger.error('[Vision Analysis] ✅ Claude respondió en', processingTimeMs, 'ms');
+  logger.error('[Vision Analysis] ✅ Claude respondió', {
+    processingTimeMs,
+  });
 
   const content = response.content[0];
 

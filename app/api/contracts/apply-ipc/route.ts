@@ -106,11 +106,8 @@ export async function POST(request: NextRequest) {
     const actualizaciones = contracts.map((contract) => {
       let incrementoPct = ipcPct;
 
-      // Si es ipc_mas_diferencial, sumar el valor adicional
-      if (
-        contract.incrementoType === 'ipc_mas_diferencial' &&
-        contract.incrementoValor
-      ) {
+      // Si el contrato usa IPC y define diferencial/ajuste adicional, sumarlo
+      if (contract.incrementoType === 'ipc' && contract.incrementoValor) {
         incrementoPct += contract.incrementoValor;
       }
 

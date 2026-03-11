@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     try {
       const { getOrCompute } = await import('@/lib/cache-service');
       const cacheKey = `dashboard:${user.companyId || user.id}`;
-      const cached = await getOrCompute(cacheKey, async () => null, 300);
+      const cached = await getOrCompute(cacheKey, async () => null, { ttl: 300 });
       if (cached) return NextResponse.json(cached);
     } catch {} // Redis not configured, continue without cache
 
@@ -322,6 +322,16 @@ export async function GET(request: NextRequest) {
       }));
     }
 
+    // Renta mensual esperada = suma de rentas de contratos activos
+    const activeContractsRent = await prisma.contract.aggregate({
+      where: {
+        unit: { building: { companyId: companyFilter } },
+        estado: 'activo',
+      },
+      _sum: { rentaMensual: true },
+    });
+    const rentaMensualEsperada = Number(activeContractsRent._sum.rentaMensual) || 0;
+
     // Ingresos históricos (últimos 6 meses) - cascada: Payment → Accounting → Bank
     // Pre-fetch bank transactions for the period
     let bankTransactionsHistorical: Array<{ monto: number; fecha: Date }> = [];
@@ -424,17 +434,6 @@ export async function GET(request: NextRequest) {
 
     // Cálculos de KPIs - Usar renta de contratos activos como fuente principal (fiable)
     // Los pagos y transacciones bancarias pueden contener duplicados o movimientos no-alquiler
-    const activeContractsRent = await prisma.contract.aggregate({
-      where: {
-        unit: { building: { companyId: companyFilter } },
-        estado: 'activo',
-      },
-      _sum: { rentaMensual: true },
-    });
-    
-    // Renta mensual esperada = suma de rentas de contratos activos
-    const rentaMensualEsperada = Number(activeContractsRent._sum.rentaMensual) || 0;
-    
     // Ingresos totales: usar renta esperada como base fiable
     // Solo usar pagos/contabilidad/banco si NO hay contratos (empresa sin datos de contratos)
     let ingresosTotalesMensuales = rentaMensualEsperada;

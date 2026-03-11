@@ -9,6 +9,11 @@ import logger from '@/lib/logger';
 // IDs de usuarios autorizados (socio fundador)
 const SOCIO_FUNDADOR_IDS = process.env.EWOORKER_SOCIO_IDS?.split(",") || [];
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 type EngagementMetricsRow = {
   total_ofertas: number | string | bigint | null;
   total_contratos: number | string | bigint | null;
@@ -32,6 +37,7 @@ const toNumber = (value: number | string | bigint | null | undefined): number =>
 
 export async function GET(request: NextRequest) {
   try {
+    const prisma = await getPrisma();
     const session = await getServerSession(authOptions);
 
     if (!session || !session.user?.id) {

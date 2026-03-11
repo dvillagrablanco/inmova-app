@@ -18,6 +18,11 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 const validateSchema = z.object({
   code: z.string().min(3),
   planTier: z.string().optional(),
@@ -33,6 +38,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const validated = validateSchema.parse(body);
+    const prisma = await getPrisma();
 
     // Buscar cupón
     const coupon = await prisma.promoCoupon.findUnique({

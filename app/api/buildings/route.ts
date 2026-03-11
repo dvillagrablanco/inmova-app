@@ -90,7 +90,7 @@ export async function GET(req: NextRequest) {
     ]);
 
     // Calcular métricas para cada edificio
-    const buildingsWithMetrics = buildings.map((building) => {
+    const buildingsWithMetrics = buildings.map((building: any) => {
       const totalUnits = building.units.length;
       const occupiedUnits = building.units.filter((u: any) => u.estado === 'ocupada').length;
       const ocupacionPct = totalUnits > 0 ? (occupiedUnits / totalUnits) * 100 : 0;
@@ -107,9 +107,9 @@ export async function GET(req: NextRequest) {
         numeroUnidades: building.numeroUnidades,
         companyId: building.companyId,
         company: (building as any).company,
-        ibiAnual: (building as { ibiAnual?: number | null }).ibiAnual ?? null,
-        latitud: (building as any).latitud ?? null,
-        longitud: (building as any).longitud ?? null,
+        ibiAnual: null,
+        latitud: null,
+        longitud: null,
         createdAt: building.createdAt,
         updatedAt: building.updatedAt,
         totalUnidades: totalUnits,
@@ -213,12 +213,6 @@ export async function POST(req: NextRequest) {
       anoConstructor: validatedData.anoConstructor || new Date().getFullYear(),
       numeroUnidades: validatedData.numeroUnidades || 0,
     };
-
-    // Optional fields — only add if present in schema (ciudad/pais may not exist in older schemas)
-    if (validatedData.estadoConservacion)
-      createData.estadoConservacion = validatedData.estadoConservacion;
-    if (validatedData.ascensor !== undefined) createData.ascensor = validatedData.ascensor;
-    if (validatedData.garaje !== undefined) createData.garaje = validatedData.garaje;
 
     const building = await prisma.building.create({ data: createData });
 

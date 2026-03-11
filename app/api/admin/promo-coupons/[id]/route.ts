@@ -16,6 +16,11 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 const updateCouponSchema = z.object({
   codigo: z.string().min(3).max(20).toUpperCase().optional(),
   nombre: z.string().min(3).optional(),
@@ -43,6 +48,7 @@ export async function GET(
     if (!session?.user || session.user.role !== 'super_admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
+    const prisma = await getPrisma();
 
     const coupon = await prisma.promoCoupon.findUnique({
       where: { id: params.id },
@@ -86,6 +92,7 @@ export async function PUT(
     if (!session?.user || session.user.role !== 'super_admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
+    const prisma = await getPrisma();
 
     const body = await request.json();
     const validated = updateCouponSchema.parse(body);
@@ -164,6 +171,7 @@ export async function DELETE(
     if (!session?.user || session.user.role !== 'super_admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
+    const prisma = await getPrisma();
 
     // Verificar que existe y no tiene usos
     const existing = await prisma.promoCoupon.findUnique({

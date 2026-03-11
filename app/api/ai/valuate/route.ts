@@ -539,7 +539,8 @@ export async function POST(request: NextRequest) {
       capRate: valuation.capRate,
     };
 
-    const normalizedTrend = valuation.tendenciaMercado ?? valuation.marketTrend;
+    const normalizedTrend =
+      valuation.tendenciaMercado ?? (valuation as { marketTrend?: string }).marketTrend;
     const marketTrend =
       normalizedTrend === 'alcista'
         ? 'UP'

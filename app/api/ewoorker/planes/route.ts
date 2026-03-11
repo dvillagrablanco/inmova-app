@@ -7,6 +7,11 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 /**
  * GET /api/ewoorker/planes
  * Lista los planes de suscripción de eWoorker
@@ -18,7 +23,7 @@ export const runtime = 'nodejs';
  */
 export async function GET(request: NextRequest) {
   try {
-    // Lazy load Prisma
+    const prisma = await getPrisma();
 
     // Intentar obtener de BD
     let planesFromDB: any[] = [];

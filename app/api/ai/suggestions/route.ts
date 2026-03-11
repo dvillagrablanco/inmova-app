@@ -22,13 +22,11 @@ const SUGGESTIONS_CACHE_TTL_SECONDS = 60;
 const SUGGESTIONS_CACHE_PREFIX = 'ai:suggestions:';
 const SUGGESTIONS_TIMEOUT_MS = 12000;
 
-async function getCacheKey(userId: string) {
-  const prisma = await getPrisma();
+function getCacheKey(userId: string) {
   return `${SUGGESTIONS_CACHE_PREFIX}${userId}`;
 }
 
 async function getCachedSuggestions(userId: string) {
-  const prisma = await getPrisma();
   try {
     const redis = getRedisClient();
     if (!redis) return null;
@@ -40,7 +38,6 @@ async function getCachedSuggestions(userId: string) {
 }
 
 async function setCachedSuggestions(userId: string, payload: unknown) {
-  const prisma = await getPrisma();
   try {
     const redis = getRedisClient();
     if (!redis) return;
@@ -55,7 +52,6 @@ async function setCachedSuggestions(userId: string, payload: unknown) {
 }
 
 async function isSuggestionsAIConfigured() {
-  const prisma = await getPrisma();
   return !!process.env.ABACUSAI_API_KEY;
 }
 

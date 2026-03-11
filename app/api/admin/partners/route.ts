@@ -7,6 +7,11 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 /**
  * GET /api/admin/partners
  * Lista todos los partners
@@ -35,6 +40,7 @@ export async function GET(request: NextRequest) {
     if (tipo && tipo !== 'all') {
       where.tipo = tipo;
     }
+    const prisma = await getPrisma();
 
     const partners = await prisma.partner.findMany({
       where,
@@ -130,6 +136,7 @@ export async function POST(request: NextRequest) {
     });
 
     const validated = schema.parse(body);
+    const prisma = await getPrisma();
 
     // Verificar que no existe un partner con el mismo CIF o email
     const existing = await prisma.partner.findFirst({

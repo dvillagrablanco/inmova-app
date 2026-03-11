@@ -51,13 +51,11 @@ const ALERTS_RATE_LIMIT = {
   uniqueTokenPerInterval: 90,
 };
 
-async function getCacheKey(companyId: string) {
-  const prisma = await getPrisma();
+function getCacheKey(companyId: string) {
   return `${CACHE_KEY_PREFIX}${companyId}`;
 }
 
 async function getCachedAlerts(key: string): Promise<AlertsResponse | null> {
-  const prisma = await getPrisma();
   try {
     const redis = getRedisClient();
     if (!redis) return null;
@@ -69,7 +67,6 @@ async function getCachedAlerts(key: string): Promise<AlertsResponse | null> {
 }
 
 async function setCachedAlerts(key: string, payload: AlertsResponse): Promise<void> {
-  const prisma = await getPrisma();
   try {
     const redis = getRedisClient();
     if (!redis) return;

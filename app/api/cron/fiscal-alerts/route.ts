@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
           const existing = await prisma.notification.findFirst({
             where: {
               userId: admin.id,
-              tipo: 'fiscal',
+              tipo: 'alerta_sistema',
               titulo: { contains: alert.titulo },
               createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }, // últimos 7 días
             },
@@ -56,11 +56,12 @@ export async function POST(request: NextRequest) {
           if (!existing) {
             await prisma.notification.create({
               data: {
+                companyId: alert.companyId,
                 userId: admin.id,
-                tipo: 'fiscal',
+                tipo: 'alerta_sistema',
                 titulo: alert.titulo,
                 mensaje: `${alert.descripcion}. Faltan ${alert.diasRestantes} días (fecha límite: ${alert.fechaLimite.toLocaleDateString('es-ES')})`,
-                prioridad: alert.urgencia === 'critica' ? 'critica' : 'alta',
+                prioridad: alert.urgencia === 'critica' ? 'alto' : 'alto',
                 leida: false,
               },
             });

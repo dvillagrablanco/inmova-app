@@ -134,8 +134,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function normalizeBuildingType(tipoPropiedad: string): 'residencial' | 'mixto' | 'comercial' {
-  const prisma = await getPrisma();
+function normalizeBuildingType(tipoPropiedad: string): 'residencial' | 'mixto' | 'comercial' {
   const normalized = tipoPropiedad.trim().toLowerCase();
 
   if (normalized.includes('mixto')) {
@@ -149,10 +148,9 @@ async function normalizeBuildingType(tipoPropiedad: string): 'residencial' | 'mi
   return 'residencial';
 }
 
-async function normalizeUnitType(
+function normalizeUnitType(
   tipo: string
 ): 'vivienda' | 'local' | 'garaje' | 'trastero' | 'oficina' | 'nave_industrial' | 'coworking_space' {
-  const prisma = await getPrisma();
   const normalized = tipo.trim().toLowerCase();
 
   if (normalized.includes('garaje')) return 'garaje';
@@ -165,8 +163,7 @@ async function normalizeUnitType(
   return 'vivienda';
 }
 
-async function normalizeMaintenancePriority(prioridad: string): 'baja' | 'media' | 'alta' {
-  const prisma = await getPrisma();
+function normalizeMaintenancePriority(prioridad: string): 'baja' | 'media' | 'alta' {
   const normalized = prioridad.trim().toLowerCase();
 
   if (normalized === 'alta') return 'alta';

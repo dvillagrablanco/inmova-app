@@ -19,7 +19,7 @@ export const maxDuration = 60;
  */
 export async function POST(req: NextRequest) {
   // Cron auth guard
-  const cronAuth = requireCronSecret(request);
+  const cronAuth = requireCronSecret(req);
   if (!cronAuth.authenticated) return cronAuth.response;
 
 
@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
  */
 export async function GET(req: NextRequest) {
   // Cron auth guard
-  const cronAuth = requireCronSecret(request);
+  const cronAuth = requireCronSecret(req);
   if (!cronAuth.authenticated) return cronAuth.response;
 
 

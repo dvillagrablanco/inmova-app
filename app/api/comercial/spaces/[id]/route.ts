@@ -28,8 +28,11 @@ export async function GET(
         building: { select: { nombre: true, direccion: true } },
         commercialLeases: {
           where: { estado: 'activo' },
-          include: {
-            tenant: { select: { nombreCompleto: true, email: true, telefono: true } },
+          select: {
+            id: true,
+            arrendatarioNombre: true,
+            arrendatarioEmail: true,
+            arrendatarioTelefono: true,
           },
           take: 1,
         },

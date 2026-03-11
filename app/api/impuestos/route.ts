@@ -8,6 +8,11 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 const PROVIDER = 'impuestos';
 
 interface TaxObligation {
@@ -119,6 +124,7 @@ const mapTipo = (obligacion: StoredObligation): TaxObligation['tipo'] => {
 // GET - Obtener obligaciones fiscales
 export async function GET(request: NextRequest) {
   try {
+    const prisma = await getPrisma();
     const session = await getServerSession(authOptions);
     const sessionUser = session?.user as
       | { id?: string; role?: string | null; companyId?: string | null }
@@ -353,6 +359,7 @@ export async function GET(request: NextRequest) {
 // POST - Registrar presentación/pago de obligación
 export async function POST(request: NextRequest) {
   try {
+    const prisma = await getPrisma();
     const session = await getServerSession(authOptions);
     const sessionUser = session?.user as
       | { id?: string; role?: string | null; companyId?: string | null }

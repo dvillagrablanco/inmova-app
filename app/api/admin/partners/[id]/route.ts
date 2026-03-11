@@ -7,6 +7,11 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 /**
  * GET /api/admin/partners/[id]
  * Obtener un partner específico
@@ -21,6 +26,7 @@ export async function GET(
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
+    const prisma = await getPrisma();
     const partner = await prisma.partner.findUnique({
       where: { id: params.id },
       include: {
@@ -125,6 +131,8 @@ export async function PUT(
 
     const validated = schema.parse(body);
 
+    const prisma = await getPrisma();
+
     // Verificar que existe
     const existing = await prisma.partner.findUnique({
       where: { id: params.id },
@@ -186,6 +194,8 @@ export async function DELETE(
     if (!session?.user || !['super_admin'].includes(session.user.role)) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
+
+    const prisma = await getPrisma();
 
     // Verificar que existe
     const existing = await prisma.partner.findUnique({

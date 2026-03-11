@@ -74,8 +74,17 @@ export async function POST(request: NextRequest) {
       const buffer = Buffer.from(await file.arrayBuffer());
 
       try {
-        const pdfParse = await import('pdf-parse');
-        const pdfData = await pdfParse.default(buffer);
+        const pdfParseModule = await import('pdf-parse');
+        const pdfParse =
+          typeof pdfParseModule.default === 'function'
+            ? pdfParseModule.default
+            : typeof (pdfParseModule as any) === 'function'
+              ? (pdfParseModule as any)
+              : null;
+        if (!pdfParse) {
+          throw new Error('pdf-parse no disponible como función');
+        }
+        const pdfData = await pdfParse(buffer);
         textToProcess = pdfData.text;
       } catch {
         // Fallback: send raw buffer to Claude for vision analysis

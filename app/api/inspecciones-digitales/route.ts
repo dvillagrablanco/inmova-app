@@ -24,6 +24,11 @@ interface Inspeccion {
   incidencias?: number;
 }
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 const querySchema = z.object({
   tipo: z.enum(['entrada', 'salida', 'periodica']).optional(),
   estado: z.enum(['programada', 'en_proceso', 'completada']).optional(),
@@ -38,21 +43,18 @@ const createSchema = z.object({
   descripcion: z.string().optional(),
 });
 
-async function normalizeTipo(tipo: string): InspeccionTipo {
-  const prisma = await getPrisma();
+function normalizeTipo(tipo: string): InspeccionTipo {
   if (tipo === 'entrada' || tipo === 'salida') return tipo;
   return 'periodica';
 }
 
-async function normalizeEstado(estado: string): InspeccionEstado {
-  const prisma = await getPrisma();
+function normalizeEstado(estado: string): InspeccionEstado {
   if (estado === 'completada') return 'completada';
   if (estado === 'programada') return 'programada';
   return 'en_proceso';
 }
 
-async function getErrorMessage(error: unknown) {
-  const prisma = await getPrisma();
+function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : 'Error desconocido';
 }
 

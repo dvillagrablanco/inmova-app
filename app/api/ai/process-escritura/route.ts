@@ -203,7 +203,7 @@ async function storeDocument(
     const { uploadToS3, isS3Configured } = await import('@/lib/aws-s3-service');
     if (isS3Configured()) {
       const result = await uploadToS3(pdfBuffer, 'escrituras', 'document', fileName, 'application/pdf');
-      storagePath = result.key;
+      storagePath = result.key || storagePath;
       logger.info(`[Escritura] Guardada en S3: ${storagePath}`);
     }
   } catch {

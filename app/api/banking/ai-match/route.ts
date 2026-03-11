@@ -44,10 +44,10 @@ export async function POST(request: NextRequest) {
     const unmatchedTxs = await prisma.bankTransaction.findMany({
       where: {
         companyId,
-        reconciled: false,
-        amount: { gt: 0 }, // Solo ingresos
+        estado: 'pendiente_revision',
+        monto: { gt: 0 }, // Solo ingresos
       },
-      orderBy: { date: 'desc' },
+      orderBy: { fecha: 'desc' },
       take: 50,
     });
 
@@ -95,9 +95,9 @@ export async function POST(request: NextRequest) {
     let aiSuggested = 0;
 
     for (const tx of unmatchedTxs) {
-      const amount = Math.abs(tx.amount);
-      const txDebtorName = ((tx as any).debtorName || '').toUpperCase();
-      const concept = (tx.description || (tx as any).remittanceInfo || '').toLowerCase();
+      const amount = Math.abs(tx.monto);
+      const txDebtorName = (tx.debtorName || '').toUpperCase();
+      const concept = (tx.descripcion || tx.referencia || '').toLowerCase();
 
       // Buscar pagos por importe exacto (±0.50€ tolerancia para garajes)
       const exactMatches = pendingPayments.filter(
@@ -126,9 +126,9 @@ export async function POST(request: NextRequest) {
         const confidence = exactMatches.length === 1 ? 'high' : (txDebtorName ? 'high' : 'medium');
         matches.push({
           bankTxId: tx.id,
-          bankTxDate: tx.date,
+            bankTxDate: tx.fecha,
           bankTxAmount: amount,
-          bankTxConcept: tx.description || (tx as any).remittanceInfo || '',
+            bankTxConcept: tx.descripcion || tx.referencia || '',
           paymentId: exactMatch.id,
           tenantName: exactMatch.contract?.tenant?.nombreCompleto || null,
           buildingName: exactMatch.contract?.unit?.building?.nombre || null,
@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
         });
       } else {
         // Para importes que no coinciden exactamente, buscar por aproximación
-        const concept = (tx.description || tx.remittanceInfo || '').toLowerCase();
+        const concept = (tx.descripcion || tx.referencia || '').toLowerCase();
 
         // Buscar en concepto bancario nombres de inquilinos
         const conceptMatch = pendingPayments.find(
@@ -153,7 +153,7 @@ export async function POST(request: NextRequest) {
           aiSuggested++;
           matches.push({
             bankTxId: tx.id,
-            bankTxDate: tx.date,
+            bankTxDate: tx.fecha,
             bankTxAmount: amount,
             bankTxConcept: concept,
             paymentId: conceptMatch.id,
@@ -166,7 +166,7 @@ export async function POST(request: NextRequest) {
         } else {
           matches.push({
             bankTxId: tx.id,
-            bankTxDate: tx.date,
+            bankTxDate: tx.fecha,
             bankTxAmount: amount,
             bankTxConcept: concept,
             paymentId: null,

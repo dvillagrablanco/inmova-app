@@ -17,6 +17,11 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 const createCouponSchema = z.object({
   codigo: z.string().min(3).max(20).toUpperCase(),
   nombre: z.string().min(3),
@@ -55,6 +60,7 @@ export async function GET(request: NextRequest) {
     const estadoFiltro = allowedStatuses.includes(estado as (typeof allowedStatuses)[number])
       ? (estado as (typeof allowedStatuses)[number])
       : null;
+    const prisma = await getPrisma();
 
     const coupons = await prisma.promoCoupon.findMany({
       where: {
@@ -122,6 +128,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const validated = createCouponSchema.parse(body);
+    const prisma = await getPrisma();
 
     // Verificar que no exista otro cupón con el mismo código
     const existing = await prisma.promoCoupon.findUnique({

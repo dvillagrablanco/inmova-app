@@ -21,9 +21,12 @@ async function getPrisma() {
 }
 
 export async function POST(request: NextRequest) {
-  const authResult = verifyCronAuth(request);
+  const authResult = await verifyCronAuth(request);
   if (!authResult.authorized) {
-    return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    return NextResponse.json(
+      { error: authResult.error || 'No autorizado' },
+      { status: authResult.status }
+    );
   }
 
   const prisma = await getPrisma();
@@ -66,7 +69,7 @@ export async function POST(request: NextRequest) {
           const payMonth = p.fechaVencimiento
             ? `${p.fechaVencimiento.getFullYear()}-${String(p.fechaVencimiento.getMonth() + 1).padStart(2, '0')}`
             : '';
-          return payMonth === currentMonth && (p.estado === 'pagado' || p.estado === 'parcial');
+          return payMonth === currentMonth && p.estado === 'pagado';
         })
         .map(p => p.contractId)
     );

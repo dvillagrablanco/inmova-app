@@ -77,14 +77,14 @@ export async function GET(request: NextRequest) {
           // Actualizar estado del pago
           await prisma.payment.update({
             where: { id: payment.id },
-            data: { estado: 'atrasado', notas: `[Auto-Agent ${today.toISOString()}] Derivación legal - ${diasRetraso} días retraso` },
+            data: { estado: 'atrasado' },
           });
         } else if (diasRetraso >= 20) {
           nivel = 'requerimiento';
           accion = 'Carta de requerimiento formal generada';
           await prisma.payment.update({
             where: { id: payment.id },
-            data: { estado: 'atrasado', notas: `[Auto-Agent ${today.toISOString()}] Requerimiento formal - ${diasRetraso} días retraso` },
+            data: { estado: 'atrasado' },
           });
         } else if (diasRetraso >= 10) {
           nivel = 'aviso_formal';

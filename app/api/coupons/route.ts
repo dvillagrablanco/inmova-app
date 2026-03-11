@@ -20,7 +20,7 @@ const validateCouponSchema = z.object({
 });
 
 const createCouponSchema = z.object({
-  action: z.optional(),
+  action: z.string().optional(),
   codigo: z.string().min(1),
   tipo: z.string().min(1),
   valor: z.union([z.string(), z.number()]).transform((v) => (typeof v === 'string' ? parseFloat(v) : v)),

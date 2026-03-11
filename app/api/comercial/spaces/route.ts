@@ -98,7 +98,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Formatear respuesta
-    const formattedSpaces = spaces.map((space) => {
+    const formattedSpaces: Array<Record<string, any>> = spaces.map((space) => {
       const activeLease = space.commercialLeases[0];
       return {
         id: space.id,
@@ -147,7 +147,7 @@ export async function GET(request: NextRequest) {
           building: { companyId: companyFilter },
           tipo: { in: unitTipos as any },
           ...(estadoFilter === 'disponible' ? { estado: 'disponible' } : {}),
-          ...(estadoFilter === 'ocupada' ? { estado: 'ocupado' } : {}),
+          ...(estadoFilter === 'ocupada' ? { estado: 'ocupada' } : {}),
         },
         include: {
           building: { select: { id: true, nombre: true, direccion: true } },
@@ -163,14 +163,14 @@ export async function GET(request: NextRequest) {
           referencia: unit.referenciaCatastral || null,
           tipo: unit.tipo,
           direccion: unit.building?.direccion || '',
-          ciudad: '',
+          ciudad: unit.building?.direccion?.split(',').map((part) => part.trim()).filter(Boolean).pop() || '',
           planta: unit.planta,
           superficie: unit.superficie,
           superficieUtil: unit.superficieUtil || unit.superficie * 0.9,
           estado: unit.tenant ? 'ocupada' : (unit.estado === 'disponible' ? 'disponible' : unit.estado),
           rentaMensual: unit.rentaMensual,
           arrendatario: unit.tenant?.nombreCompleto || null,
-          arrendatarioId: unit.tenant?.id || null,
+          arrendatarioId: unit.tenantId || null,
           buildingId: unit.buildingId,
           buildingName: unit.building?.nombre,
           caracteristicas: [
@@ -189,7 +189,7 @@ export async function GET(request: NextRequest) {
     const stats = {
       total: formattedSpaces.length,
       ocupadas: formattedSpaces.filter((s) => s.estado === 'ocupada').length,
-      disponibles: formattedSpaces.filter((s) => s.estado === 'disponible' || s.estado === 'disponible').length,
+      disponibles: formattedSpaces.filter((s) => s.estado === 'disponible').length,
       reservadas: 0,
       superficieTotal: formattedSpaces.reduce((sum, s) => sum + (s.superficie || 0), 0),
       rentaMensualTotal: formattedSpaces

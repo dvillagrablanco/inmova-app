@@ -78,11 +78,11 @@ export async function GET(request: NextRequest) {
           for (const admin of admins) {
             await prisma.notification.create({
               data: {
+                companyId: pol.building.companyId,
                 userId: admin.id,
-                tipo: 'alerta',
+                tipo: 'seguro_renovacion',
                 titulo: `Seguro renovado: ${pol.building?.nombre || pol.numeroPoliza}`,
                 mensaje: `La póliza ${pol.numeroPoliza} (${pol.aseguradora}) se ha renovado automáticamente hasta ${newVenc.toISOString().substring(0, 10)}. Verificar en contabilidad que la prima del nuevo periodo ha sido cargada correctamente (posible subida por IPC).`,
-                enlace: `/inversiones`,
               },
             });
           }
@@ -123,11 +123,11 @@ export async function GET(request: NextRequest) {
           for (const admin of admins) {
             await prisma.notification.create({
               data: {
+                companyId: pol.building.companyId,
                 userId: admin.id,
-                tipo: 'recordatorio',
+                tipo: 'seguro_renovacion',
                 titulo: `Seguro vence en ${daysLeft} días: ${pol.building?.nombre || pol.numeroPoliza}`,
                 mensaje: `La póliza ${pol.numeroPoliza} (${pol.aseguradora}) vence el ${pol.fechaVencimiento.toISOString().substring(0, 10)}. Contactar mediador: ${pol.agente || ''} ${pol.emailAgente || ''} ${pol.telefonoAgente || ''}. Prima actual: ${pol.primaAnual || 'desconocida'}€/año.`,
-                enlace: `/inversiones`,
               },
             });
           }

@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
     const tenantsNoDni = await prisma.tenant.findMany({
       where: {
         companyId,
-        OR: [{ dni: null }, { dni: '' }],
+        dni: '',
       },
       select: {
         nombreCompleto: true,
