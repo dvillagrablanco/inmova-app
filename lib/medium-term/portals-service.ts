@@ -12,7 +12,7 @@
 
 import { prisma } from '../db';
 import { format } from 'date-fns';
-import { es, en, fr } from 'date-fns/locale';
+import { es, enUS, fr } from 'date-fns/locale';
 
 // ==========================================
 // TIPOS
@@ -439,7 +439,7 @@ function generateDescriptionEN(property: any, contract: any, services: any): str
     services.limpieza ? `✓ ${services.limpiezaFrecuencia || 'Weekly'} cleaning` : '',
     '',
     '📅 AVAILABILITY:',
-    `Available from ${format(contract.fechaInicio, "MMMM d, yyyy", { locale: en })}`,
+    `Available from ${format(contract.fechaInicio, "MMMM d, yyyy", { locale: enUS })}`,
     `Minimum stay: 1 month`,
     `Maximum stay: ${contract.duracionMesesPrevista || 11} months`,
     '',
