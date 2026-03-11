@@ -46,11 +46,15 @@ export async function GET(request: NextRequest) {
     // Scope: holding = solo empresa raíz, consolidated = empresa + filiales
     const scopeIds = view === 'holding' ? [companyId] : allCompanyIds;
 
+    // Inmobiliario siempre incluye filiales — los edificios en SPVs (Rovida, Viroda)
+    // son activos del holding gestionados a través de sociedades vehículo
+    const inmobScopeIds = allCompanyIds;
+
     const round2 = (n: number) => Math.round(n * 100) / 100;
 
     // --- 1. INMOBILIARIO ---
     const buildings = await prisma.building.findMany({
-      where: { companyId: { in: scopeIds } },
+      where: { companyId: { in: inmobScopeIds } },
       include: {
         units: {
           select: {
