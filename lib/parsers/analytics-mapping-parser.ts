@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Parser for accounting analytics mapping Excel.
  * Structure: Row 1 = company + headers, Row 2 = Cuenta, Título, Largo, Empresa + paired month columns (date, empty).

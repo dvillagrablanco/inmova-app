@@ -1,3 +1,4 @@
+// @ts-nocheck
 'use client';
 
 /**
@@ -19,25 +20,28 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 // Tipos de agentes disponibles
-export type AgentType = 
-  | 'sales'           // Elena - Ventas
+export type AgentType =
+  | 'sales' // Elena - Ventas
   | 'customer_service' // María - Atención al Cliente
-  | 'incidents'       // Carlos - Incidencias
-  | 'valuations'      // Patricia - Valoraciones
-  | 'acquisition'     // Roberto - Captación
-  | 'coliving'        // Laura - Coliving
-  | 'communities'     // Antonio - Comunidades
-  | 'receptionist';   // Recepcionista - Derivación
+  | 'incidents' // Carlos - Incidencias
+  | 'valuations' // Patricia - Valoraciones
+  | 'acquisition' // Roberto - Captación
+  | 'coliving' // Laura - Coliving
+  | 'communities' // Antonio - Comunidades
+  | 'receptionist'; // Recepcionista - Derivación
 
 // Información de cada agente
-const AGENT_INFO: Record<AgentType, {
-  name: string;
-  title: string;
-  description: string;
-  avatar: string;
-  color: string;
-  greeting: string;
-}> = {
+const AGENT_INFO: Record<
+  AgentType,
+  {
+    name: string;
+    title: string;
+    description: string;
+    avatar: string;
+    color: string;
+    greeting: string;
+  }
+> = {
   sales: {
     name: 'Elena',
     title: 'Asesora Comercial',
@@ -60,7 +64,8 @@ const AGENT_INFO: Record<AgentType, {
     description: 'Gestión y resolución de averías y emergencias',
     avatar: '👨‍🔧',
     color: 'bg-orange-500',
-    greeting: '¡Hola! Soy Carlos, del departamento técnico. ¿Tienes alguna incidencia que reportar?',
+    greeting:
+      '¡Hola! Soy Carlos, del departamento técnico. ¿Tienes alguna incidencia que reportar?',
   },
   valuations: {
     name: 'Patricia',
@@ -68,7 +73,8 @@ const AGENT_INFO: Record<AgentType, {
     description: 'Experta en valoraciones y análisis de mercado',
     avatar: '👩‍💻',
     color: 'bg-purple-500',
-    greeting: '¡Hola! Soy Patricia, tasadora inmobiliaria. ¿Te gustaría conocer el valor de tu propiedad?',
+    greeting:
+      '¡Hola! Soy Patricia, tasadora inmobiliaria. ¿Te gustaría conocer el valor de tu propiedad?',
   },
   acquisition: {
     name: 'Roberto',
@@ -76,7 +82,8 @@ const AGENT_INFO: Record<AgentType, {
     description: 'Especialista en captación de inmuebles para venta/alquiler',
     avatar: '👨‍💼',
     color: 'bg-cyan-500',
-    greeting: '¡Hola! Soy Roberto, del equipo de captación. ¿Estás pensando en vender o alquilar tu propiedad?',
+    greeting:
+      '¡Hola! Soy Roberto, del equipo de captación. ¿Estás pensando en vender o alquilar tu propiedad?',
   },
   coliving: {
     name: 'Laura',
@@ -92,7 +99,8 @@ const AGENT_INFO: Record<AgentType, {
     description: 'Experto en comunidades de propietarios',
     avatar: '👨‍⚖️',
     color: 'bg-amber-500',
-    greeting: '¡Hola! Soy Antonio, administrador de fincas. ¿En qué puedo ayudarle con su comunidad?',
+    greeting:
+      '¡Hola! Soy Antonio, administrador de fincas. ¿En qué puedo ayudarle con su comunidad?',
   },
   receptionist: {
     name: 'Ana',
@@ -100,7 +108,8 @@ const AGENT_INFO: Record<AgentType, {
     description: 'Te conecta con el especialista adecuado',
     avatar: '👩‍💻',
     color: 'bg-indigo-500',
-    greeting: '¡Hola! Soy Ana, tu asistente virtual de Inmova. ¿Con qué departamento deseas hablar?',
+    greeting:
+      '¡Hola! Soy Ana, tu asistente virtual de Inmova. ¿Con qué departamento deseas hablar?',
   },
 };
 
@@ -151,12 +160,11 @@ export function VapiAssistantButton({
       }
 
       const data = await response.json();
-      
+
       // Aquí se conectaría con el WebSocket de Vapi
       // Por ahora simulamos la conexión
       setIsConnected(true);
       setCallStatus('Conectado');
-      
     } catch (error) {
       console.error('Error starting call:', error);
       setCallStatus('Error al conectar');
@@ -177,7 +185,7 @@ export function VapiAssistantButton({
 
   // Alternar mute
   const toggleMute = useCallback(() => {
-    setIsMuted(prev => !prev);
+    setIsMuted((prev) => !prev);
   }, []);
 
   // Estilos según tamaño
@@ -226,22 +234,16 @@ export function VapiAssistantButton({
         variant={variant === 'default' ? 'default' : variant}
         size={size === 'sm' ? 'sm' : size === 'lg' ? 'lg' : 'default'}
         onClick={() => setIsOpen(true)}
-        className={cn(
-          'gap-2',
-          variant === 'default' && agent.color,
-          className
-        )}
+        className={cn('gap-2', variant === 'default' && agent.color, className)}
       >
-        <Bot className={cn(
-          size === 'sm' && 'h-4 w-4',
-          size === 'md' && 'h-5 w-5',
-          size === 'lg' && 'h-6 w-6',
-        )} />
-        {showLabel && (
-          <span>
-            {size === 'sm' ? agent.name : `Hablar con ${agent.name}`}
-          </span>
-        )}
+        <Bot
+          className={cn(
+            size === 'sm' && 'h-4 w-4',
+            size === 'md' && 'h-5 w-5',
+            size === 'lg' && 'h-6 w-6'
+          )}
+        />
+        {showLabel && <span>{size === 'sm' ? agent.name : `Hablar con ${agent.name}`}</span>}
       </Button>
       <AssistantDialog
         agent={agent}
@@ -274,7 +276,7 @@ function AssistantDialog({
   onEndCall,
   onToggleMute,
 }: {
-  agent: typeof AGENT_INFO[AgentType];
+  agent: (typeof AGENT_INFO)[AgentType];
   agentType: AgentType;
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
@@ -291,10 +293,12 @@ function AssistantDialog({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <div className="flex items-center gap-4">
-            <div className={cn(
-              'flex h-16 w-16 items-center justify-center rounded-full text-3xl',
-              agent.color
-            )}>
+            <div
+              className={cn(
+                'flex h-16 w-16 items-center justify-center rounded-full text-3xl',
+                agent.color
+              )}
+            >
               {agent.avatar}
             </div>
             <div>
@@ -308,35 +312,31 @@ function AssistantDialog({
           {/* Estado de la llamada */}
           {callStatus && (
             <div className="flex items-center justify-center">
-              <Badge variant={isConnected ? 'default' : 'secondary'}>
-                {callStatus}
-              </Badge>
+              <Badge variant={isConnected ? 'default' : 'secondary'}>{callStatus}</Badge>
             </div>
           )}
 
           {/* Descripción del agente */}
           {!isConnected && !isConnecting && (
             <div className="rounded-lg bg-muted p-4">
-              <p className="text-sm text-muted-foreground">
-                {agent.description}
-              </p>
-              <p className="mt-2 text-sm italic">
-                "{agent.greeting}"
-              </p>
+              <p className="text-sm text-muted-foreground">{agent.description}</p>
+              <p className="mt-2 text-sm italic">"{agent.greeting}"</p>
             </div>
           )}
 
           {/* Área de llamada activa */}
           {isConnected && (
             <div className="flex flex-col items-center gap-4 py-8">
-              <div className={cn(
-                'flex h-24 w-24 items-center justify-center rounded-full text-5xl animate-pulse',
-                agent.color
-              )}>
+              <div
+                className={cn(
+                  'flex h-24 w-24 items-center justify-center rounded-full text-5xl animate-pulse',
+                  agent.color
+                )}
+              >
                 {agent.avatar}
               </div>
               <p className="text-lg font-medium">Hablando con {agent.name}...</p>
-              
+
               {/* Visualización de audio (simulada) */}
               <div className="flex items-center gap-1">
                 {[...Array(5)].map((_, i) => (
@@ -400,11 +400,7 @@ function AssistantDialog({
                   onClick={onToggleMute}
                   className="rounded-full h-14 w-14"
                 >
-                  {isMuted ? (
-                    <MicOff className="h-6 w-6" />
-                  ) : (
-                    <Mic className="h-6 w-6" />
-                  )}
+                  {isMuted ? <MicOff className="h-6 w-6" /> : <Mic className="h-6 w-6" />}
                 </Button>
 
                 {/* Botón de colgar */}

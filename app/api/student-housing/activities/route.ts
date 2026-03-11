@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { StudentHousingService } from '@/lib/services/student-housing-service';
+import logger from '@/lib/logger';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
@@ -24,7 +25,7 @@ const createActivitySchema = z.object({
   capacidad: z.number().optional(),
   organizador: z.string().optional(),
   precio: z.number().optional(),
-  requiereInscripcion: z.boolean().optional()
+  requiereInscripcion: z.boolean().optional(),
 });
 
 export async function GET(request: NextRequest) {
@@ -44,7 +45,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: activities
+      data: activities,
     });
   } catch (error: any) {
     logger.error('[Student Housing Activities GET Error]:', error);
@@ -67,14 +68,17 @@ export async function POST(request: NextRequest) {
 
     const activity = await StudentHousingService.createActivity({
       ...validated,
-      companyId: session.user.companyId
+      companyId: session.user.companyId,
     });
 
-    return NextResponse.json({
-      success: true,
-      data: activity,
-      message: 'Actividad creada correctamente'
-    }, { status: 201 });
+    return NextResponse.json(
+      {
+        success: true,
+        data: activity,
+        message: 'Actividad creada correctamente',
+      },
+      { status: 201 }
+    );
   } catch (error: any) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(

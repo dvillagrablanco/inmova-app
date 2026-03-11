@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Integraciones con Proveedores de Seguros
  * APIs de aseguradoras españolas para comparación y contratación

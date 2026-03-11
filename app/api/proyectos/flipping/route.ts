@@ -73,8 +73,7 @@ const statusToUi: Record<ProjectStatusDb, ProjectStatusUi> = {
   CANCELADO: 'cancelado',
 };
 
-async function mapStatusToDb(value: string | undefined): ProjectStatusDb {
-  const prisma = await getPrisma();
+function mapStatusToDb(value: string | undefined): ProjectStatusDb {
   if (!value) {
     return 'PROSPECTO';
   }
@@ -82,8 +81,7 @@ async function mapStatusToDb(value: string | undefined): ProjectStatusDb {
   return statusToDb[normalized] || 'PROSPECTO';
 }
 
-async function mapStatusToUi(value: ProjectStatusDb): ProjectStatusUi {
-  const prisma = await getPrisma();
+function mapStatusToUi(value: ProjectStatusDb): ProjectStatusUi {
   return statusToUi[value];
 }
 
@@ -105,15 +103,11 @@ export async function GET(request: NextRequest) {
     });
 
     const response = projects.map((project) => {
-      const startDate =
-        project.fechaInicioObra || project.fechaCompra || project.createdAt;
-      const endDate =
-        project.fechaFinObra || project.fechaVenta || project.updatedAt;
+      const startDate = project.fechaInicioObra || project.fechaCompra || project.createdAt;
+      const endDate = project.fechaFinObra || project.fechaVenta || project.updatedAt;
       const progress =
         project.presupuestoRenovacion > 0
-          ? Math.round(
-              (project.gastosRealesRenovacion / project.presupuestoRenovacion) * 100
-            )
+          ? Math.round((project.gastosRealesRenovacion / project.presupuestoRenovacion) * 100)
           : 0;
 
       return {
@@ -161,10 +155,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     logger.error('[Flipping Projects Error]:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener proyectos' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener proyectos' }, { status: 500 });
   }
 }
 
@@ -180,10 +171,7 @@ export async function POST(request: NextRequest) {
     const body: unknown = await request.json();
     const parsed = createProjectSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json(
-        { error: 'Datos inválidos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 });
     }
 
     const project = await prisma.flippingProject.create({
@@ -228,10 +216,7 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     logger.error('[Flipping Create Error]:', error);
-    return NextResponse.json(
-      { error: 'Error al crear proyecto' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear proyecto' }, { status: 500 });
   }
 }
 
@@ -247,19 +232,13 @@ export async function PUT(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const projectId = searchParams.get('id');
     if (!projectId) {
-      return NextResponse.json(
-        { error: 'ID del proyecto es requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'ID del proyecto es requerido' }, { status: 400 });
     }
 
     const body: unknown = await request.json();
     const parsed = updateProjectSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json(
-        { error: 'Datos inválidos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 });
     }
 
     const existing = await prisma.flippingProject.findFirst({
@@ -267,10 +246,7 @@ export async function PUT(request: NextRequest) {
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { error: 'Proyecto no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Proyecto no encontrado' }, { status: 404 });
     }
 
     const updateData: Record<string, unknown> = {};
@@ -303,10 +279,7 @@ export async function PUT(request: NextRequest) {
     });
   } catch (error) {
     logger.error('[Flipping Update Error]:', error);
-    return NextResponse.json(
-      { error: 'Error al actualizar proyecto' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar proyecto' }, { status: 500 });
   }
 }
 
@@ -322,10 +295,7 @@ export async function DELETE(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const projectId = searchParams.get('id');
     if (!projectId) {
-      return NextResponse.json(
-        { error: 'ID del proyecto es requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'ID del proyecto es requerido' }, { status: 400 });
     }
 
     const existing = await prisma.flippingProject.findFirst({
@@ -333,10 +303,7 @@ export async function DELETE(request: NextRequest) {
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { error: 'Proyecto no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Proyecto no encontrado' }, { status: 404 });
     }
 
     await prisma.flippingProject.delete({
@@ -349,9 +316,6 @@ export async function DELETE(request: NextRequest) {
     });
   } catch (error) {
     logger.error('[Flipping Delete Error]:', error);
-    return NextResponse.json(
-      { error: 'Error al eliminar proyecto' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al eliminar proyecto' }, { status: 500 });
   }
 }

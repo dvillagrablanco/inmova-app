@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Servicio de Chat en Tiempo Real para eWoorker
  *

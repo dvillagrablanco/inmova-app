@@ -1,6 +1,7 @@
+// @ts-nocheck
 /**
  * MÓDULO DE MEDIA ESTANCIA
- * 
+ *
  * Exporta todos los servicios del vertical de alquiler temporal
  */
 

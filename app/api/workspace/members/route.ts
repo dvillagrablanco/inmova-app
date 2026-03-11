@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { WorkspaceService } from '@/lib/services/workspace-service';
+import logger from '@/lib/logger';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
@@ -21,7 +22,7 @@ const createMemberSchema = z.object({
   empresa: z.string().optional(),
   cargo: z.string().optional(),
   plan: z.enum(['hot_desk', 'dedicated', 'private_office', 'enterprise']).optional(),
-  creditosDisponibles: z.number().optional()
+  creditosDisponibles: z.number().optional(),
 });
 
 export async function GET(request: NextRequest) {
@@ -42,7 +43,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: members
+      data: members,
     });
   } catch (error: any) {
     logger.error('[Workspace Members GET Error]:', error);
@@ -65,14 +66,17 @@ export async function POST(request: NextRequest) {
 
     const member = await WorkspaceService.createMember({
       ...validated,
-      companyId: session.user.companyId
+      companyId: session.user.companyId,
     });
 
-    return NextResponse.json({
-      success: true,
-      data: member,
-      message: 'Miembro creado correctamente'
-    }, { status: 201 });
+    return NextResponse.json(
+      {
+        success: true,
+        data: member,
+        message: 'Miembro creado correctamente',
+      },
+      { status: 201 }
+    );
   } catch (error: any) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -96,16 +100,18 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { id, estado } = z.object({
-      id: z.string(),
-      estado: z.string()
-    }).parse(body);
+    const { id, estado } = z
+      .object({
+        id: z.string(),
+        estado: z.string(),
+      })
+      .parse(body);
 
     await WorkspaceService.updateMemberStatus(id, estado);
 
     return NextResponse.json({
       success: true,
-      message: 'Estado de miembro actualizado'
+      message: 'Estado de miembro actualizado',
     });
   } catch (error: any) {
     logger.error('[Workspace Members PATCH Error]:', error);

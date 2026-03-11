@@ -89,8 +89,7 @@ const reservaEstadoToBookingStatus: Record<ReservaEstado, BookingStatus> = {
   cancelada: 'CANCELADA',
 };
 
-async function getErrorMessage(error: unknown) {
-  const prisma = await getPrisma();
+function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : 'Error desconocido';
 }
 
@@ -144,7 +143,10 @@ export async function GET(request: NextRequest) {
 
     let reservas: Reserva[] = bookings.map((booking) => ({
       id: booking.id,
-      propiedad: booking.listing?.unit?.building?.nombre || booking.listing?.unit?.building?.direccion || 'Sin propiedad',
+      propiedad:
+        booking.listing?.unit?.building?.nombre ||
+        booking.listing?.unit?.building?.direccion ||
+        'Sin propiedad',
       unidad: booking.listing?.unit?.numero || '',
       cliente: booking.guestNombre,
       email: booking.guestEmail,
@@ -216,7 +218,10 @@ export async function POST(request: NextRequest) {
 
     const tarifaNocturna = data.tarifaNocturna ?? data.precioPorNoche ?? 0;
     if (tarifaNocturna <= 0) {
-      return NextResponse.json({ error: 'precioPorNoche/tarifaNocturna inválido' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'precioPorNoche/tarifaNocturna inválido' },
+        { status: 400 }
+      );
     }
 
     let listingId = data.listingId;

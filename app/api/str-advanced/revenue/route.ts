@@ -28,19 +28,22 @@ export async function GET(request: NextRequest) {
     const bookings = await prisma.sTRBooking.findMany({
       where: {
         companyId,
-        estado: { in: ['CONFIRMADA', 'COMPLETADA'] },
+        estado: { in: ['CONFIRMADA', 'CHECK_OUT'] },
       },
       select: {
         precioTotal: true,
-        precioPorNoche: true,
-        noches: true,
-        checkIn: true,
-        checkOut: true,
+        tarifaNocturna: true,
+        numNoches: true,
+        checkInDate: true,
+        checkOutDate: true,
       },
     });
 
-    const totalRevenue = bookings.reduce((s: number, b: any) => s + (Number(b.precioTotal) || 0), 0);
-    const totalNights = bookings.reduce((s: number, b: any) => s + (b.noches || 0), 0);
+    const totalRevenue = bookings.reduce(
+      (s: number, b: any) => s + (Number(b.precioTotal) || 0),
+      0
+    );
+    const totalNights = bookings.reduce((s: number, b: any) => s + (b.numNoches || 0), 0);
     const avgNightlyRate = totalNights > 0 ? totalRevenue / totalNights : 0;
 
     // Obtener listings para occupancy
@@ -50,9 +53,10 @@ export async function GET(request: NextRequest) {
     });
 
     const totalListings = listings.length;
-    const occupancyRate = totalListings > 0 && totalNights > 0
-      ? Math.min(100, Math.round((totalNights / (totalListings * 30)) * 100))
-      : 0;
+    const occupancyRate =
+      totalListings > 0 && totalNights > 0
+        ? Math.min(100, Math.round((totalNights / (totalListings * 30)) * 100))
+        : 0;
 
     // Estrategias de precios dinámicos
     const strategies = await prisma.sTRDynamicPricingRule.findMany({
@@ -60,9 +64,9 @@ export async function GET(request: NextRequest) {
       select: {
         id: true,
         nombre: true,
-        tipo: true,
-        activa: true,
-        ajustePorcentaje: true,
+        activo: true,
+        accionTipo: true,
+        accionValor: true,
         listingId: true,
       },
     });
@@ -70,10 +74,10 @@ export async function GET(request: NextRequest) {
     const mappedStrategies = strategies.map((s: any) => ({
       id: s.id,
       name: s.nombre,
-      type: s.tipo,
-      active: s.activa,
+      type: s.accionTipo,
+      active: s.activo,
       listings: 1,
-      avgIncrease: Number(s.ajustePorcentaje) || 0,
+      avgIncrease: Number(s.accionValor) || 0,
     }));
 
     return NextResponse.json({

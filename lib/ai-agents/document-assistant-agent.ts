@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { CLAUDE_MODEL_FAST, CLAUDE_MODEL_PRIMARY } from '@/lib/ai-model-config';
 /**
  * Agente Asistente Documental

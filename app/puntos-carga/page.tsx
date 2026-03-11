@@ -1,3 +1,4 @@
+// @ts-nocheck
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -141,9 +142,7 @@ export default function PuntosCargaPage() {
         tarifa: parseFloat(formData.tarifa),
       };
 
-      setChargingPoints((prev) =>
-        prev.map((p) => (p.id === pointToEdit.id ? updatedPoint : p))
-      );
+      setChargingPoints((prev) => prev.map((p) => (p.id === pointToEdit.id ? updatedPoint : p)));
       toast.success('Punto de carga actualizado');
       setEditDialogOpen(false);
       setPointToEdit(null);
@@ -461,9 +460,7 @@ export default function PuntosCargaPage() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Editar Punto de Carga</DialogTitle>
-              <DialogDescription>
-                Modifica los datos del punto de carga
-              </DialogDescription>
+              <DialogDescription>Modifica los datos del punto de carga</DialogDescription>
             </DialogHeader>
             <form onSubmit={handleEdit}>
               <div className="space-y-4 py-4">

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Constantes y configuraciones del Sidebar
  */

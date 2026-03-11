@@ -46,16 +46,14 @@ const RENOVATION_CATEGORIES = new Set<RenovationCategory>([
   'OTROS',
 ]);
 
-async function mapStatusToCompletion(status: string | undefined, progress: number): boolean {
-  const prisma = await getPrisma();
+function mapStatusToCompletion(status: string | undefined, progress: number): boolean {
   if (status === 'completada') {
     return true;
   }
   return progress >= 100;
 }
 
-async function normalizeCategory(value: string | undefined): RenovationCategory {
-  const prisma = await getPrisma();
+function normalizeCategory(value: string | undefined): RenovationCategory {
   if (!value) {
     return 'OTROS';
   }
@@ -77,10 +75,7 @@ export async function POST(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const projectId = searchParams.get('projectId');
     if (!projectId) {
-      return NextResponse.json(
-        { error: 'ID del proyecto es requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'ID del proyecto es requerido' }, { status: 400 });
     }
 
     const project = await prisma.flippingProject.findFirst({
@@ -88,19 +83,13 @@ export async function POST(request: NextRequest) {
     });
 
     if (!project) {
-      return NextResponse.json(
-        { error: 'Proyecto no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Proyecto no encontrado' }, { status: 404 });
     }
 
     const body: unknown = await request.json();
     const parsed = createTaskSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json(
-        { error: 'Datos inválidos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 });
     }
 
     const progress = parsed.data.progress ?? 0;
@@ -147,10 +136,7 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     logger.error('[Flipping Task Create Error]:', error);
-    return NextResponse.json(
-      { error: 'Error al crear tarea' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear tarea' }, { status: 500 });
   }
 }
 
@@ -175,10 +161,7 @@ export async function PUT(request: NextRequest) {
     });
 
     if (!project) {
-      return NextResponse.json(
-        { error: 'Proyecto no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Proyecto no encontrado' }, { status: 404 });
     }
 
     const task = await prisma.flippingRenovation.findFirst({
@@ -186,19 +169,13 @@ export async function PUT(request: NextRequest) {
     });
 
     if (!task) {
-      return NextResponse.json(
-        { error: 'Tarea no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Tarea no encontrada' }, { status: 404 });
     }
 
     const body: unknown = await request.json();
     const parsed = updateTaskSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json(
-        { error: 'Datos inválidos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 });
     }
 
     const progress = parsed.data.progress ?? task.porcentajeAvance;
@@ -208,7 +185,8 @@ export async function PUT(request: NextRequest) {
     if (parsed.data.description !== undefined) updateData.notas = parsed.data.description;
     if (parsed.data.startDate) updateData.fechaInicio = new Date(parsed.data.startDate);
     if (parsed.data.endDate) updateData.fechaFin = new Date(parsed.data.endDate);
-    if (parsed.data.estimatedCost !== undefined) updateData.presupuestado = parsed.data.estimatedCost;
+    if (parsed.data.estimatedCost !== undefined)
+      updateData.presupuestado = parsed.data.estimatedCost;
     if (parsed.data.actualCost !== undefined) updateData.costoReal = parsed.data.actualCost;
     if (parsed.data.assignee !== undefined) updateData.proveedorNombre = parsed.data.assignee;
     if (parsed.data.category) updateData.categoria = normalizeCategory(parsed.data.category);
@@ -226,10 +204,7 @@ export async function PUT(request: NextRequest) {
     });
   } catch (error) {
     logger.error('[Flipping Task Update Error]:', error);
-    return NextResponse.json(
-      { error: 'Error al actualizar tarea' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar tarea' }, { status: 500 });
   }
 }
 
@@ -254,10 +229,7 @@ export async function DELETE(request: NextRequest) {
     });
 
     if (!project) {
-      return NextResponse.json(
-        { error: 'Proyecto no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Proyecto no encontrado' }, { status: 404 });
     }
 
     const task = await prisma.flippingRenovation.findFirst({
@@ -265,10 +237,7 @@ export async function DELETE(request: NextRequest) {
     });
 
     if (!task) {
-      return NextResponse.json(
-        { error: 'Tarea no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Tarea no encontrada' }, { status: 404 });
     }
 
     await prisma.flippingRenovation.delete({ where: { id: task.id } });
@@ -279,9 +248,6 @@ export async function DELETE(request: NextRequest) {
     });
   } catch (error) {
     logger.error('[Flipping Task Delete Error]:', error);
-    return NextResponse.json(
-      { error: 'Error al eliminar tarea' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al eliminar tarea' }, { status: 500 });
   }
 }

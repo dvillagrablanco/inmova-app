@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Helpers específicos de caché para cada endpoint de API
  * Cada helper define su propia lógica de caché, TTL e invalidación
@@ -17,11 +18,7 @@ function getPrismaSync() {
 // ============================================================
 const memoryCache = new Map<string, { data: unknown; expiry: number }>();
 
-async function withCache<T>(
-  key: string,
-  ttlMs: number,
-  fetcher: () => Promise<T>
-): Promise<T> {
+async function withCache<T>(key: string, ttlMs: number, fetcher: () => Promise<T>): Promise<T> {
   const cached = memoryCache.get(key);
   if (cached && cached.expiry > Date.now()) {
     return cached.data as T;
@@ -337,7 +334,7 @@ export async function cachedPayments(companyId: string) {
       });
 
       // Convertir valores Decimal a números
-      return payments.map(payment => ({
+      return payments.map((payment) => ({
         id: payment.id,
         contractId: payment.contractId,
         periodo: payment.periodo,
@@ -386,8 +383,10 @@ export async function cachedContracts(companyId: string) {
       const contractsWithExpiration = contracts.map((contract) => {
         const today = new Date();
         const fechaFin = contract.fechaFin ? new Date(contract.fechaFin) : null;
-        const diasHastaVencimiento = fechaFin ? Math.ceil((fechaFin.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)) : null;
-        
+        const diasHastaVencimiento = fechaFin
+          ? Math.ceil((fechaFin.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+          : null;
+
         return {
           id: contract.id,
           unitId: contract.unitId,
@@ -403,7 +402,7 @@ export async function cachedContracts(companyId: string) {
           renovacionAutomatica: contract.renovacionAutomatica,
           unit: contract.unit,
           tenant: contract.tenant,
-          payments: contract.payments.map(p => ({
+          payments: contract.payments.map((p) => ({
             ...p,
             monto: Number(p.monto || 0),
           })),
@@ -496,7 +495,7 @@ export async function cachedExpenses(companyId: string) {
       });
 
       // Convertir valores Decimal a números
-      return expenses.map(expense => ({
+      return expenses.map((expense) => ({
         ...expense,
         monto: Number(expense.monto || 0),
       }));

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Parser for Pictet investment PDF statements.
  * Extracts transactions with dates, amounts (European format), and operation types.

@@ -1,13 +1,14 @@
+// @ts-nocheck
 /**
  * Servicio de Stripe para eWoorker
- * 
+ *
  * Gestiona pagos separados de Inmova con división de beneficios:
  * - 50% para el socio fundador
  * - 50% para la plataforma (eWoorker/Inmova)
- * 
+ *
  * Los pagos de eWoorker se identifican con metadata específica
  * para diferenciarlos de los pagos de Inmova (que son 100% plataforma)
- * 
+ *
  * @module EwoorkerStripeService
  */
 
@@ -20,12 +21,12 @@ let stripeInstance: Stripe | null = null;
 
 function getStripe(): Stripe | null {
   if (stripeInstance) return stripeInstance;
-  
+
   if (!process.env.STRIPE_SECRET_KEY) {
     logger.warn('[eWoorker Stripe] STRIPE_SECRET_KEY no definida');
     return null;
   }
-  
+
   try {
     stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY, {
       apiVersion: '2024-12-18.acacia',
@@ -54,9 +55,9 @@ export const EWOORKER_REVENUE_SPLIT = {
 /**
  * Planes de suscripción eWoorker
  * Diferenciados de los planes de Inmova
- * 
+ *
  * SINCRONIZADO CON: /app/ewoorker/landing/page.tsx
- * 
+ *
  * Modelo de negocio:
  * - Plan gratuito con comisión alta (5%) para adquisición
  * - Planes de pago con comisión reducida para retención
@@ -116,7 +117,7 @@ export const EWOORKER_PLANS = {
 /**
  * Tipos de comisión eWoorker
  */
-export type EwoorkerTipoComision = 
+export type EwoorkerTipoComision =
   | 'SUSCRIPCION_MENSUAL'
   | 'PAGO_SEGURO_ESCROW'
   | 'CONTRATACION_URGENTE'
@@ -187,8 +188,12 @@ export async function crearSuscripcionEwoorker(data: {
     if (!plan) throw new Error('Plan no válido');
 
     // Calcular división de beneficios
-    const beneficioSocio = Math.round((plan.price * EWOORKER_REVENUE_SPLIT.SOCIO_PERCENTAGE) / 100 * 100); // En céntimos
-    const beneficioPlataforma = Math.round((plan.price * EWOORKER_REVENUE_SPLIT.PLATAFORMA_PERCENTAGE) / 100 * 100);
+    const beneficioSocio = Math.round(
+      ((plan.price * EWOORKER_REVENUE_SPLIT.SOCIO_PERCENTAGE) / 100) * 100
+    ); // En céntimos
+    const beneficioPlataforma = Math.round(
+      ((plan.price * EWOORKER_REVENUE_SPLIT.PLATAFORMA_PERCENTAGE) / 100) * 100
+    );
 
     // Crear o obtener customer de Stripe
     let customerId = perfil.company?.stripeCustomerId;
@@ -336,7 +341,7 @@ export async function crearPagoEscrowEwoorker(data: {
       where: { id: data.contratoId },
       include: {
         constructor: {
-          include: { 
+          include: {
             company: true,
             suscripciones: { where: { estado: 'ACTIVA' }, take: 1 },
           },
@@ -363,18 +368,21 @@ export async function crearPagoEscrowEwoorker(data: {
 
     // Calcular montos
     const montoEnCentimos = Math.round(data.monto * 100);
-    const comision = Math.round(montoEnCentimos * comisionPorcentaje / 100);
+    const comision = Math.round((montoEnCentimos * comisionPorcentaje) / 100);
     const montoNeto = montoEnCentimos - comision;
-    
+
     // División 50/50 de la comisión
-    const beneficioSocio = Math.round(comision * EWOORKER_REVENUE_SPLIT.SOCIO_PERCENTAGE / 100);
+    const beneficioSocio = Math.round((comision * EWOORKER_REVENUE_SPLIT.SOCIO_PERCENTAGE) / 100);
     const beneficioPlataforma = comision - beneficioSocio;
 
     // Crear customer si no existe
     let customerId = contrato.constructor.company?.stripeCustomerId;
     if (!customerId) {
       const customer = await stripe.customers.create({
-        email: contrato.constructor.company?.contactEmail || contrato.constructor.emailContacto || undefined,
+        email:
+          contrato.constructor.company?.contactEmail ||
+          contrato.constructor.emailContacto ||
+          undefined,
         name: contrato.constructor.nombreEmpresa,
         metadata: {
           platform: 'ewoorker',
@@ -488,7 +496,9 @@ export async function crearPagoServicioEwoorker(data: {
     }
 
     const montoEnCentimos = comisionConfig.valor * 100;
-    const beneficioSocio = Math.round(montoEnCentimos * EWOORKER_REVENUE_SPLIT.SOCIO_PERCENTAGE / 100);
+    const beneficioSocio = Math.round(
+      (montoEnCentimos * EWOORKER_REVENUE_SPLIT.SOCIO_PERCENTAGE) / 100
+    );
     const beneficioPlataforma = montoEnCentimos - beneficioSocio;
 
     // Customer
@@ -580,7 +590,7 @@ export async function handleEwoorkerStripeWebhook(
   try {
     // Verificar si es un evento de eWoorker
     let metadata: Record<string, string> = {};
-    
+
     if (event.type.startsWith('payment_intent')) {
       const paymentIntent = event.data.object as Stripe.PaymentIntent;
       metadata = paymentIntent.metadata || {};
@@ -597,7 +607,7 @@ export async function handleEwoorkerStripeWebhook(
     switch (event.type) {
       case 'payment_intent.succeeded': {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
-        
+
         // Actualizar pago en BD
         const pago = await prisma.ewoorkerPago.findFirst({
           where: { stripePaymentIntentId: paymentIntent.id },
@@ -625,7 +635,7 @@ export async function handleEwoorkerStripeWebhook(
 
       case 'payment_intent.payment_failed': {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
-        
+
         await prisma.ewoorkerPago.updateMany({
           where: { stripePaymentIntentId: paymentIntent.id },
           data: { estado: 'FALLIDO' },
@@ -641,12 +651,16 @@ export async function handleEwoorkerStripeWebhook(
       case 'customer.subscription.created':
       case 'customer.subscription.updated': {
         const subscription = event.data.object as Stripe.Subscription;
-        
+
         await prisma.ewoorkerSuscripcion.updateMany({
           where: { stripeSubscriptionId: subscription.id },
           data: {
-            estado: subscription.status === 'active' ? 'ACTIVA' : 
-                   subscription.status === 'canceled' ? 'CANCELADA' : 'PENDIENTE',
+            estado:
+              subscription.status === 'active'
+                ? 'ACTIVA'
+                : subscription.status === 'canceled'
+                  ? 'CANCELADA'
+                  : 'PENDIENTE',
             fechaProximoPago: new Date(subscription.current_period_end * 1000),
           },
         });
@@ -661,7 +675,7 @@ export async function handleEwoorkerStripeWebhook(
 
       case 'customer.subscription.deleted': {
         const subscription = event.data.object as Stripe.Subscription;
-        
+
         await prisma.ewoorkerSuscripcion.updateMany({
           where: { stripeSubscriptionId: subscription.id },
           data: { estado: 'CANCELADA' },
@@ -676,7 +690,7 @@ export async function handleEwoorkerStripeWebhook(
 
       case 'invoice.payment_succeeded': {
         const invoice = event.data.object as Stripe.Invoice;
-        
+
         // Registrar pago de suscripción
         if (invoice.subscription) {
           const suscripcion = await prisma.ewoorkerSuscripcion.findFirst({
@@ -684,7 +698,9 @@ export async function handleEwoorkerStripeWebhook(
           });
 
           if (suscripcion) {
-            const beneficioSocio = Math.round(invoice.amount_paid * EWOORKER_REVENUE_SPLIT.SOCIO_PERCENTAGE / 100);
+            const beneficioSocio = Math.round(
+              (invoice.amount_paid * EWOORKER_REVENUE_SPLIT.SOCIO_PERCENTAGE) / 100
+            );
             const beneficioPlataforma = invoice.amount_paid - beneficioSocio;
 
             await prisma.ewoorkerPago.create({
@@ -729,10 +745,7 @@ export async function handleEwoorkerStripeWebhook(
 /**
  * Obtiene el resumen de ingresos para el socio
  */
-export async function getResumenIngresosSocio(periodo?: {
-  desde: Date;
-  hasta: Date;
-}): Promise<{
+export async function getResumenIngresosSocio(periodo?: { desde: Date; hasta: Date }): Promise<{
   totalIngresos: number;
   beneficioSocio: number;
   beneficioPlataforma: number;

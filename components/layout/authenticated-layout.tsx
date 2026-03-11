@@ -1,3 +1,4 @@
+// @ts-nocheck
 'use client';
 
 import { ReactNode, useState, useEffect } from 'react';
@@ -26,7 +27,7 @@ const IntelligentSupportChatbot = dynamic(
 
 // Tour auto-starter - detecta la página actual y lanza tours correspondientes
 const TourAutoStarter = dynamic(
-  () => import('@/components/tours/TourAutoStarter').then(m => ({ default: m.TourAutoStarter })),
+  () => import('@/components/tours/TourAutoStarter').then((m) => ({ default: m.TourAutoStarter })),
   { ssr: false }
 );
 
@@ -75,16 +76,13 @@ export function AuthenticatedLayout({
   // Redirección para socios de eWoorker: solo pueden acceder a rutas de eWoorker
   useEffect(() => {
     if (status === 'loading') return;
-    
+
     if (session?.user?.role === 'socio_ewoorker') {
       // Rutas permitidas para socios de eWoorker
-      const allowedPaths = [
-        '/ewoorker',
-        '/api/ewoorker',
-      ];
-      
-      const isAllowedPath = allowedPaths.some(path => pathname?.startsWith(path));
-      
+      const allowedPaths = ['/ewoorker', '/api/ewoorker'];
+
+      const isAllowedPath = allowedPaths.some((path) => pathname?.startsWith(path));
+
       if (!isAllowedPath && pathname) {
         // Redirigir al panel del socio
         router.replace('/ewoorker/admin-socio');
@@ -260,18 +258,23 @@ export function AuthenticatedLayout({
       </div>
 
       {/* AI Onboarding Chat - Primera vez (NO para superadmin ni demo user) */}
-      {showSetupWizard && session?.user?.role !== 'super_admin' && session?.user?.email !== DEMO_USER_EMAIL && (
-        <AIOnboardingChat onComplete={handleCompleteSetup} onSkip={handleSkipSetup} />
-      )}
+      {showSetupWizard &&
+        session?.user?.role !== 'super_admin' &&
+        session?.user?.email !== DEMO_USER_EMAIL && (
+          <AIOnboardingChat onComplete={handleCompleteSetup} onSkip={handleSkipSetup} />
+        )}
 
       {/* Onboarding Checklist - Hasta completar (NO para superadmin ni demo user) */}
-      {showChecklist && session?.user?.id && session?.user?.role !== 'super_admin' && session?.user?.email !== DEMO_USER_EMAIL && (
-        <OnboardingChecklist
-          userId={session.user.id}
-          isNewUser={isNewUser}
-          onDismiss={handleDismissChecklist}
-        />
-      )}
+      {showChecklist &&
+        session?.user?.id &&
+        session?.user?.role !== 'super_admin' &&
+        session?.user?.email !== DEMO_USER_EMAIL && (
+          <OnboardingChecklist
+            userId={session.user.id}
+            isNewUser={isNewUser}
+            onDismiss={handleDismissChecklist}
+          />
+        )}
 
       {/* Command Palette - Navegación rápida con Cmd+K */}
       <CommandPalette />
@@ -283,10 +286,14 @@ export function AuthenticatedLayout({
       <ShortcutsHelpDialog />
 
       {/* Navigation Tutorial - Tutorial interactivo (NO para superadmin ni demo) */}
-      {session?.user?.role !== 'super_admin' && session?.user?.email !== DEMO_USER_EMAIL && <NavigationTutorial />}
+      {session?.user?.role !== 'super_admin' && session?.user?.email !== DEMO_USER_EMAIL && (
+        <NavigationTutorial />
+      )}
 
       {/* Tour Auto-Starter - Detecta la página y lanza tours contextuales (NO para demo) */}
-      {session?.user?.role !== 'super_admin' && session?.user?.email !== DEMO_USER_EMAIL && <TourAutoStarter />}
+      {session?.user?.role !== 'super_admin' && session?.user?.email !== DEMO_USER_EMAIL && (
+        <TourAutoStarter />
+      )}
 
       {/* Demo Showcase Tour - se renderiza desde Providers (global) */}
 

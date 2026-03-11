@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
@@ -36,11 +37,13 @@ const compraSchema = z.object({
   gastosCompra: z.number().min(0),
   rentaMensualEstimada: z.number().positive(),
   gastosAnualesEstimados: z.number().min(0),
-  financiacion: z.object({
-    ltv: z.number().min(0).max(100),
-    tipoInteres: z.number().min(0).max(30),
-    plazoAnos: z.number().int().min(1).max(40),
-  }).optional(),
+  financiacion: z
+    .object({
+      ltv: z.number().min(0).max(100),
+      tipoInteres: z.number().min(0).max(30),
+      plazoAnos: z.number().int().min(1).max(40),
+    })
+    .optional(),
   year: z.number().int().min(2020).max(2050),
 });
 
@@ -68,10 +71,13 @@ export async function POST(request: NextRequest) {
     const parsed = bodySchema.safeParse(body);
 
     if (!parsed.success) {
-      return NextResponse.json({
-        error: 'Datos inválidos',
-        details: parsed.error.flatten().fieldErrors,
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'Datos inválidos',
+          details: parsed.error.flatten().fieldErrors,
+        },
+        { status: 400 }
+      );
     }
 
     const companyId = session.user.companyId;

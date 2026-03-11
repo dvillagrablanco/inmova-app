@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import {
-  connectChannel,
-  ChannelCredentials,
-} from '@/lib/str-channel-integration-service';
+import { connectChannel, ChannelCredentials } from '@/lib/str-channel-integration-service';
 import logger, { logError } from '@/lib/logger';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+type ExternalChannelType = 'AIRBNB' | 'BOOKING' | 'VRBO' | 'HOMEAWAY';
 
 const connectChannelSchema = z.object({
   listingId: z.string().min(1),
@@ -16,6 +14,13 @@ const connectChannelSchema = z.object({
   credentials: z.record(z.unknown()).optional(),
 });
 export const runtime = 'nodejs';
+
+const channelMap: Record<'airbnb' | 'booking' | 'vrbo' | 'homeaway', ExternalChannelType> = {
+  airbnb: 'AIRBNB',
+  booking: 'BOOKING',
+  vrbo: 'VRBO',
+  homeaway: 'HOMEAWAY',
+};
 
 /**
  * POST /api/str/channels/connect
@@ -33,17 +38,14 @@ export async function POST(request: NextRequest) {
     if (!parsed.success) {
       return NextResponse.json(
         { error: 'Datos inválidos', details: parsed.error.flatten().fieldErrors },
-        { status: 400 },
+        { status: 400 }
       );
     }
     const { listingId, channel, credentials } = parsed.data;
 
     const companyId = session?.user?.companyId;
     if (!companyId) {
-      return NextResponse.json(
-        { error: 'Usuario sin compañía asignada' },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: 'Usuario sin compañía asignada' }, { status: 400 });
     }
 
     logger.info(`[STR API] Conectando canal ${channel} para listing ${listingId}`);
@@ -51,8 +53,8 @@ export async function POST(request: NextRequest) {
     const result = await connectChannel(
       companyId,
       listingId,
-      channel,
-      (credentials || {}) as ChannelCredentials,
+      channelMap[channel],
+      (credentials || {}) as ChannelCredentials
     );
 
     if (result.success) {
@@ -68,7 +70,7 @@ export async function POST(request: NextRequest) {
           message: 'Error al conectar el canal',
           errors: result.errors,
         },
-        { status: 500 },
+        { status: 500 }
       );
     }
   } catch (error) {
@@ -78,7 +80,7 @@ export async function POST(request: NextRequest) {
         error: 'Error al conectar el canal',
         details: (error as Error).message,
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

@@ -5,6 +5,7 @@ import {
   syncCalendar,
   importBookings,
   updateChannelPrices,
+  type PriceUpdate,
 } from '@/lib/str-channel-integration-service';
 import { addDays } from 'date-fns';
 import logger, { logError } from '@/lib/logger';
@@ -15,11 +16,13 @@ export const dynamic = 'force-dynamic';
 const syncBodySchema = z.object({
   channel: z.enum(['airbnb', 'booking', 'vrbo', 'homeaway']),
   type: z.enum(['calendar', 'bookings', 'prices']),
-  data: z.object({
-    startDate: z.string().optional(),
-    endDate: z.string().optional(),
-    priceUpdates: z.array(z.unknown()).optional(),
-  }).optional(),
+  data: z
+    .object({
+      startDate: z.string().optional(),
+      endDate: z.string().optional(),
+      priceUpdates: z.array(z.unknown()).optional(),
+    })
+    .optional(),
 });
 export const runtime = 'nodejs';
 
@@ -27,10 +30,7 @@ export const runtime = 'nodejs';
  * POST /api/str/channels/[listingId]/sync
  * Sincroniza datos con un canal externo
  */
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { listingId: string } },
-) {
+export async function POST(request: NextRequest, { params }: { params: { listingId: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user) {
@@ -43,22 +43,17 @@ export async function POST(
     if (!parsed.success) {
       return NextResponse.json(
         { error: 'Datos inválidos', details: parsed.error.flatten().fieldErrors },
-        { status: 400 },
+        { status: 400 }
       );
     }
     const { channel, type, data } = parsed.data;
 
     const companyId = session?.user?.companyId;
     if (!companyId) {
-      return NextResponse.json(
-        { error: 'Usuario sin compañía asignada' },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: 'Usuario sin compañía asignada' }, { status: 400 });
     }
 
-    logger.info(
-      `[STR API] Sincronizando ${type} para listing ${listingId} en canal ${channel}`,
-    );
+    logger.info(`[STR API] Sincronizando ${type} para listing ${listingId} en canal ${channel}`);
 
     let result;
 
@@ -66,15 +61,8 @@ export async function POST(
       case 'calendar':
         // Sincronizar calendario (por defecto 90 días)
         const startDate = data?.startDate ? new Date(data.startDate) : new Date();
-        const endDate = data?.endDate
-          ? new Date(data.endDate)
-          : addDays(new Date(), 90);
-        result = await syncCalendar(
-          listingId,
-          channel as any,
-          startDate,
-          endDate,
-        );
+        const endDate = data?.endDate ? new Date(data.endDate) : addDays(new Date(), 90);
+        result = await syncCalendar(listingId, channel as any, startDate, endDate);
         break;
 
       case 'bookings':
@@ -87,21 +75,18 @@ export async function POST(
         if (!data || !data.priceUpdates) {
           return NextResponse.json(
             { error: 'Se requieren actualizaciones de precio' },
-            { status: 400 },
+            { status: 400 }
           );
         }
         result = await updateChannelPrices(
           listingId,
           channel as any,
-          data.priceUpdates,
+          data.priceUpdates as PriceUpdate[]
         );
         break;
 
       default:
-        return NextResponse.json(
-          { error: 'Tipo de sincronización no válido' },
-          { status: 400 },
-        );
+        return NextResponse.json({ error: 'Tipo de sincronización no válido' }, { status: 400 });
     }
 
     if (result.success) {
@@ -118,7 +103,7 @@ export async function POST(
           errors: result.errors,
           warnings: result.warnings,
         },
-        { status: 500 },
+        { status: 500 }
       );
     }
   } catch (error) {
@@ -130,7 +115,7 @@ export async function POST(
         error: 'Error al sincronizar',
         details: (error as Error).message,
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

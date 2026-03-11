@@ -30,43 +30,18 @@ export async function GET(request: NextRequest) {
       select: {
         id: true,
         titulo: true,
-        licenciaTuristica: true,
-        licenciaFechaExpiracion: true,
         activo: true,
       },
     });
 
-    const now = new Date();
-    const thirtyDays = 30 * 24 * 60 * 60 * 1000;
-
     const licenses = listings.map((l: any) => {
-      let status = 'sin_licencia';
-      let daysUntilExpiry: number | null = null;
-
-      if (l.licenciaTuristica) {
-        if (l.licenciaFechaExpiracion) {
-          const expiry = new Date(l.licenciaFechaExpiracion);
-          daysUntilExpiry = Math.ceil((expiry.getTime() - now.getTime()) / (24 * 60 * 60 * 1000));
-
-          if (daysUntilExpiry < 0) {
-            status = 'vencida';
-          } else if (daysUntilExpiry <= 30) {
-            status = 'proximo_vencimiento';
-          } else {
-            status = 'vigente';
-          }
-        } else {
-          status = 'vigente';
-        }
-      }
-
       return {
         id: l.id,
         property: l.titulo,
-        licenseNumber: l.licenciaTuristica || 'Pendiente',
-        expiryDate: l.licenciaFechaExpiracion?.toISOString().split('T')[0] || null,
-        status,
-        daysUntilExpiry,
+        licenseNumber: 'Pendiente',
+        expiryDate: null,
+        status: l.activo ? 'sin_licencia' : 'inactiva',
+        daysUntilExpiry: null,
       };
     });
 

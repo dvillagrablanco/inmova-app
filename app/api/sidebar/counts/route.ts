@@ -48,7 +48,7 @@ export async function GET() {
       incidencias_abiertas = await prisma.maintenanceRequest.count({
         where: {
           unit: { building: { companyId } },
-          estado: { in: ['pendiente', 'en_proceso', 'abierta', 'asignada'] },
+          estado: { in: ['pendiente', 'en_progreso', 'programado'] },
         },
       });
 

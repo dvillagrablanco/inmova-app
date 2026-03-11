@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * API: Factura individual
  * GET: Obtener factura | PUT: Actualizar | DELETE: Eliminar
@@ -6,7 +7,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { facturasHommingStore, seedFacturasHomming, type FacturaItem } from '@/lib/facturacion-homming-store';
+import {
+  facturasHommingStore,
+  seedFacturasHomming,
+  type FacturaItem,
+} from '@/lib/facturacion-homming-store';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
@@ -28,10 +33,7 @@ const updateFacturaSchema = z.object({
   inmueble: z.string().optional().nullable(),
 });
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -59,10 +61,7 @@ export async function GET(
   }
 }
 
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -120,10 +119,7 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {

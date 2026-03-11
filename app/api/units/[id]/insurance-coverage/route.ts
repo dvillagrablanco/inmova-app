@@ -13,15 +13,12 @@ async function getPrisma() {
 
 /**
  * GET /api/units/[id]/insurance-coverage
- * 
+ *
  * Devuelve la cobertura de seguro de una unidad:
  * - Pólizas directas (asignadas a la unidad específica)
  * - Pólizas de edificio (asignadas al edificio, cubren todas sus unidades)
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
@@ -79,8 +76,12 @@ export async function GET(
 
     // Calculate coverage status
     const now = new Date();
-    const activeDirect = directPolicies.filter(p => p.estado === 'activa' && new Date(p.fechaVencimiento) > now);
-    const activeBuilding = buildingPolicies.filter(p => p.estado === 'activa' && new Date(p.fechaVencimiento) > now);
+    const activeDirect = directPolicies.filter(
+      (p) => p.estado === 'activa' && new Date(p.fechaVencimiento) > now
+    );
+    const activeBuilding = buildingPolicies.filter(
+      (p) => p.estado === 'activa' && new Date(p.fechaVencimiento) > now
+    );
     const hasCoverage = activeDirect.length > 0 || activeBuilding.length > 0;
 
     // Count total units covered by building policies
@@ -97,14 +98,15 @@ export async function GET(
       buildingId: unit.buildingId,
       buildingName: unit.building?.nombre,
       hasCoverage,
-      coverageSource: activeDirect.length > 0 && activeBuilding.length > 0
-        ? 'both'
-        : activeDirect.length > 0
-          ? 'direct'
-          : activeBuilding.length > 0
-            ? 'building'
-            : 'none',
-      directPolicies: directPolicies.map(p => ({
+      coverageSource:
+        activeDirect.length > 0 && activeBuilding.length > 0
+          ? 'both'
+          : activeDirect.length > 0
+            ? 'direct'
+            : activeBuilding.length > 0
+              ? 'building'
+              : 'none',
+      directPolicies: directPolicies.map((p) => ({
         id: p.id,
         tipo: p.tipo,
         aseguradora: p.aseguradora,
@@ -114,10 +116,10 @@ export async function GET(
         fechaVencimiento: p.fechaVencimiento,
         estado: p.estado,
         cobertura: p.cobertura,
-        documentoPath: p.documentoPath,
+        documentoPath: p.urlDocumento,
         claims: p._count.claims,
       })),
-      buildingPolicies: buildingPolicies.map(p => ({
+      buildingPolicies: buildingPolicies.map((p) => ({
         id: p.id,
         tipo: p.tipo,
         aseguradora: p.aseguradora,
@@ -127,7 +129,7 @@ export async function GET(
         fechaVencimiento: p.fechaVencimiento,
         estado: p.estado,
         cobertura: p.cobertura,
-        documentoPath: p.documentoPath,
+        documentoPath: p.urlDocumento,
         buildingName: p.building?.nombre,
         unidadesCubiertas: buildingUnitsCount,
         claims: p._count.claims,
@@ -136,8 +138,8 @@ export async function GET(
         totalPolicies: directPolicies.length + buildingPolicies.length,
         activePolicies: activeDirect.length + activeBuilding.length,
         totalCoverage: [
-          ...activeDirect.map(p => p.sumaAsegurada || 0),
-          ...activeBuilding.map(p => p.sumaAsegurada || 0),
+          ...activeDirect.map((p) => p.sumaAsegurada || 0),
+          ...activeBuilding.map((p) => p.sumaAsegurada || 0),
         ].reduce((s, v) => s + v, 0),
       },
     });

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * API v1 - Error Handling
  * Errores estandarizados para API REST

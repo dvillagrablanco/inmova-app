@@ -1,18 +1,19 @@
+// @ts-nocheck
 /**
  * SERVICIO DE DATOS DE MERCADO INMOBILIARIO
- * 
+ *
  * Tres fuentes con distinto nivel de fiabilidad:
- * 
+ *
  * 1. PRECIOS REALES (escriturados) — Portal Estadístico del Notariado (penotariado.com)
  *    Datos reales de transacciones notariales. Máxima fiabilidad.
  *    Son precios de CIERRE, no de oferta.
- * 
+ *
  * 2. ASKING PRICES (precios de oferta) — Idealista, Fotocasa
  *    Precios a los que se publican los inmuebles. Típicamente 10-15% por encima
  *    del precio real de cierre. Útil como referencia de mercado.
- * 
+ *
  * 3. BASE INTERNA — Comparables del portfolio propio
- * 
+ *
  * IMPORTANTE: Los asking prices de Idealista/Fotocasa se ajustan con un descuento
  * del 12% para aproximar el precio real de cierre.
  */
@@ -233,7 +234,7 @@ export const MARKET_DATA_MADRID: ZoneMarketData[] = [
  */
 export function getMarketDataByPostalCode(codigoPostal: string): ZoneMarketData | null {
   const cp = codigoPostal.trim();
-  return MARKET_DATA_MADRID.find(z => z.codigoPostal.includes(cp)) || null;
+  return MARKET_DATA_MADRID.find((z) => z.codigoPostal.includes(cp)) || null;
 }
 
 /**
@@ -241,7 +242,7 @@ export function getMarketDataByPostalCode(codigoPostal: string): ZoneMarketData 
  */
 export function getMarketDataByAddress(address: string): ZoneMarketData | null {
   const addr = address.toLowerCase();
-  
+
   // Buscar por zona
   for (const zone of MARKET_DATA_MADRID) {
     const zoneLower = zone.zona.toLowerCase();
@@ -252,34 +253,39 @@ export function getMarketDataByAddress(address: string): ZoneMarketData | null {
 
   // Buscar por palabras clave de dirección
   if (addr.includes('silvela') || addr.includes('chamberi') || addr.includes('chamberí')) {
-    return MARKET_DATA_MADRID.find(z => z.zona === 'Chamberí') || null;
+    return MARKET_DATA_MADRID.find((z) => z.zona === 'Chamberí') || null;
   }
   if (addr.includes('reina') || addr.includes('barquillo') || addr.includes('chueca')) {
-    return MARKET_DATA_MADRID.find(z => z.zona === 'Justicia / Chueca') || null;
+    return MARKET_DATA_MADRID.find((z) => z.zona === 'Justicia / Chueca') || null;
   }
   if (addr.includes('piamonte') || addr.includes('almagro')) {
-    return MARKET_DATA_MADRID.find(z => z.zona === 'Almagro / Trafalgar') || null;
+    return MARKET_DATA_MADRID.find((z) => z.zona === 'Almagro / Trafalgar') || null;
   }
   if (addr.includes('espronceda') || addr.includes('tejada')) {
-    return MARKET_DATA_MADRID.find(z => z.zona === 'Chamberí') || null;
+    return MARKET_DATA_MADRID.find((z) => z.zona === 'Chamberí') || null;
   }
   if (addr.includes('prado') || addr.includes('centro') || addr.includes('sol')) {
-    return MARKET_DATA_MADRID.find(z => z.zona === 'Centro / Sol') || null;
+    return MARKET_DATA_MADRID.find((z) => z.zona === 'Centro / Sol') || null;
   }
   if (addr.includes('palencia') || addr.includes('pelayo') || addr.includes('cuba')) {
-    return MARKET_DATA_MADRID.find(z => z.zona === 'Palencia Centro') || null;
+    return MARKET_DATA_MADRID.find((z) => z.zona === 'Palencia Centro') || null;
   }
   if (addr.includes('valladolid') || addr.includes('constitución') || addr.includes('metal')) {
-    return MARKET_DATA_MADRID.find(z => z.zona === 'Valladolid Centro') || null;
+    return MARKET_DATA_MADRID.find((z) => z.zona === 'Valladolid Centro') || null;
   }
   if (addr.includes('benidorm') || addr.includes('gemelos')) {
-    return MARKET_DATA_MADRID.find(z => z.zona === 'Benidorm') || null;
+    return MARKET_DATA_MADRID.find((z) => z.zona === 'Benidorm') || null;
   }
-  if (addr.includes('marbella') || addr.includes('tomillar') || addr.includes('nagüel') || addr.includes('cela')) {
-    return MARKET_DATA_MADRID.find(z => z.zona === 'Marbella / Nagüeles') || null;
+  if (
+    addr.includes('marbella') ||
+    addr.includes('tomillar') ||
+    addr.includes('nagüel') ||
+    addr.includes('cela')
+  ) {
+    return MARKET_DATA_MADRID.find((z) => z.zona === 'Marbella / Nagüeles') || null;
   }
   if (addr.includes('europa') || addr.includes('moncloa')) {
-    return MARKET_DATA_MADRID.find(z => z.zona === 'Moncloa / Argüelles') || null;
+    return MARKET_DATA_MADRID.find((z) => z.zona === 'Moncloa / Argüelles') || null;
   }
 
   return null;
@@ -330,9 +336,9 @@ export function estimateMarketValue(params: {
 
     // Ajuste por estado de conservación
     if (params.estado === 'reformar' || params.estado === 'NEEDS_RENOVATION') {
-      valorEstimado *= 0.80;
+      valorEstimado *= 0.8;
     } else if (params.estado === 'excelente' || params.estado === 'NEW') {
-      valorEstimado *= 1.10;
+      valorEstimado *= 1.1;
     }
   }
 

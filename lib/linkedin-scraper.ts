@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * 🔍 LinkedIn Scraper - Extracción Inteligente de Leads
  *

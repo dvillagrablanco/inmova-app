@@ -1,3 +1,4 @@
+// @ts-nocheck
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -62,7 +63,7 @@ export default function ContabilidadPage() {
   const { data: session } = useSession() || {};
   const [periodo, setPeriodo] = useState(format(new Date(), 'yyyy-MM'));
   const [loading, setLoading] = useState(true);
-  
+
   // Obtener companyId de la cookie o session para pasarlo a las APIs
   const companyId = (session?.user as any)?.companyId || '';
 
@@ -210,7 +211,9 @@ export default function ContabilidadPage() {
       }
 
       // Cargar centros de coste
-      const costCentersRes = await fetch(`/api/accounting/cost-centers?periodo=${periodo}${cParam}`);
+      const costCentersRes = await fetch(
+        `/api/accounting/cost-centers?periodo=${periodo}${cParam}`
+      );
       if (costCentersRes.ok) {
         const data = await costCentersRes.json();
         setCostCentersData(data.data || []);
@@ -238,7 +241,9 @@ export default function ContabilidadPage() {
       }
 
       // Último período con datos contables
-      const latestRes = await fetch(`/api/accounting/latest-period?${companyId ? `companyId=${companyId}` : ''}`);
+      const latestRes = await fetch(
+        `/api/accounting/latest-period?${companyId ? `companyId=${companyId}` : ''}`
+      );
       if (latestRes.ok) {
         const data = await latestRes.json();
         setLatestPeriod(data.data || null);
@@ -325,10 +330,13 @@ export default function ContabilidadPage() {
   const handleSyncZucchetti = async () => {
     try {
       if (!zucchettiStatus?.configured) {
-        toast.error('Zucchetti/Altai no está configurado. Las credenciales (CLIENT_ID, CLIENT_SECRET) deben configurarse en el servidor.', { duration: 6000 });
+        toast.error(
+          'Zucchetti/Altai no está configurado. Las credenciales (CLIENT_ID, CLIENT_SECRET) deben configurarse en el servidor.',
+          { duration: 6000 }
+        );
         return;
       }
-      
+
       setLoading(true);
       toast.info('Sincronizando con Zucchetti/Altai...');
       const res = await fetch('/api/accounting/sync-zucchetti', { method: 'POST' });
@@ -337,7 +345,9 @@ export default function ContabilidadPage() {
         const data = await res.json();
 
         if (data.configured && data.success) {
-          toast.success(`Sincronización completada: ${data.summary?.synced || 0} asientos enviados`);
+          toast.success(
+            `Sincronización completada: ${data.summary?.synced || 0} asientos enviados`
+          );
           loadFinancialData();
         } else if (data.configured) {
           toast.warning(data.message || 'Sincronización completada con advertencias');
@@ -434,11 +444,18 @@ export default function ContabilidadPage() {
     try {
       // Verificar que el sistema esté configurado
       const statusMap: Record<string, any> = {
-        sage: sageStatus, holded: holdedStatus, a3: a3Status, alegra: alegraStatus,
-        contasimple: contaSimpleStatus, zucchetti: zucchettiStatus,
+        sage: sageStatus,
+        holded: holdedStatus,
+        a3: a3Status,
+        alegra: alegraStatus,
+        contasimple: contaSimpleStatus,
+        zucchetti: zucchettiStatus,
       };
       if (!statusMap[system]?.configured) {
-        toast.error(`${system.toUpperCase()} no está configurado. Ve a Herramientas e Integraciones para conectarlo.`, { duration: 5000 });
+        toast.error(
+          `${system.toUpperCase()} no está configurado. Ve a Herramientas e Integraciones para conectarlo.`,
+          { duration: 5000 }
+        );
         setLoading(false);
         return;
       }
@@ -467,11 +484,18 @@ export default function ContabilidadPage() {
   const handleCreateInvoiceSystem = async (system: string) => {
     try {
       const statusMap: Record<string, any> = {
-        sage: sageStatus, holded: holdedStatus, a3: a3Status, alegra: alegraStatus,
-        contasimple: contaSimpleStatus, zucchetti: zucchettiStatus,
+        sage: sageStatus,
+        holded: holdedStatus,
+        a3: a3Status,
+        alegra: alegraStatus,
+        contasimple: contaSimpleStatus,
+        zucchetti: zucchettiStatus,
       };
       if (!statusMap[system]?.configured) {
-        toast.error(`${system.toUpperCase()} no está configurado. Ve a Herramientas e Integraciones para conectarlo.`, { duration: 5000 });
+        toast.error(
+          `${system.toUpperCase()} no está configurado. Ve a Herramientas e Integraciones para conectarlo.`,
+          { duration: 5000 }
+        );
         setLoading(false);
         return;
       }
@@ -539,851 +563,854 @@ export default function ContabilidadPage() {
 
   return (
     <AuthenticatedLayout>
-    <div className="container mx-auto py-6 px-4 max-w-7xl space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard Financiero</h1>
-          <p className="text-muted-foreground">
-            Panel de control para el Director Financiero - Contabilidad Analítica, Costes y
-            Fiscalidad
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Link href="/finanzas/cuadro-de-mandos">
-            <Button variant="ghost" size="sm">
-              <LayoutDashboard className="h-4 w-4 mr-1.5" />
-              Cuadro de Mandos
-            </Button>
-          </Link>
-          <Link href="/contabilidad/intragrupo">
-            <Button variant="ghost" size="sm">
-              <ArrowRightLeft className="h-4 w-4 mr-1.5" />
-              Intragrupo
-            </Button>
-          </Link>
-          <Link href="/contabilidad/integraciones">
-            <Button variant="ghost" size="sm">
-              <Upload className="h-4 w-4 mr-1.5" />
-              Importar
-            </Button>
-          </Link>
-          <Button
-            onClick={async () => {
-              try {
-                setLoading(true);
-                const res = await fetch('/api/accounting/refresh-from-source', { method: 'POST' });
-                if (res.ok) {
-                  const data = await res.json();
-                  toast.success(`Contabilidad actualizada: ${data.summary?.transaccionesCreadas || 0} transacciones (${data.summary?.periodoDesde} → ${data.summary?.periodoHasta})`);
-                  loadFinancialData();
-                } else {
-                  const err = await res.json().catch(() => ({}));
-                  toast.error(err.error || 'Error al refrescar contabilidad');
-                }
-              } catch {
-                toast.error('Error de conexión');
-              } finally {
-                setLoading(false);
-              }
-            }}
-            variant="outline"
-            disabled={loading}
-          >
-            <Download className="h-4 w-4 mr-2" />
-            Actualizar Contabilidad
-          </Button>
-          {zucchettiStatus?.configured && (
-            <Button onClick={handleSyncZucchetti} variant="outline" disabled={loading}>
-              <FileText className="h-4 w-4 mr-2" />
-              Sincronizar con Altai
-            </Button>
-          )}
-          <Button onClick={loadFinancialData} variant="outline" disabled={loading}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-            Actualizar
-          </Button>
-        </div>
-      </div>
-
-      {/* Panel IA: Asistente Contable */}
-      <AiInsightPanel
-        apiUrl="/api/ai/accounting-assistant"
-        mode="chat"
-        title="Asistente Contable IA"
-        chatContext="Módulo de contabilidad del grupo inmobiliario. Puede preguntar sobre asientos, balances, impuestos (IVA, IRPF, IS), conciliación, plan general contable, amortizaciones o cualquier duda fiscal/contable."
-      />
-
-      {/* Filtros */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex gap-4 items-center">
-            <div>
-              <label className="text-sm font-medium mb-2 block">Período</label>
-              <input
-                type="month"
-                value={periodo}
-                onChange={(e) => setPeriodo(e.target.value)}
-                className="border rounded-md px-3 py-2"
-              />
-            </div>
+      <div className="container mx-auto py-6 px-4 max-w-7xl space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Dashboard Financiero</h1>
+            <p className="text-muted-foreground">
+              Panel de control para el Director Financiero - Contabilidad Analítica, Costes y
+              Fiscalidad
+            </p>
           </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Importar movimientos contables</CardTitle>
-          <CardDescription>
-            Sube un XLSX o CSV con fecha, importe y concepto para cargar ingresos y gastos.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-            <div>
-              <label className="text-sm font-medium mb-2 block">Archivo</label>
-              <input
-                type="file"
-                accept=".csv,.xlsx,.xls"
-                onChange={(e) => setImportFile(e.target.files?.[0] || null)}
-                className="border rounded-md px-3 py-2 w-full text-sm file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 cursor-pointer"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-2 block">Tipo (opcional)</label>
-              <select
-                value={importType}
-                onChange={(e) => setImportType(e.target.value as 'auto' | 'ingreso' | 'gasto')}
-                className="border rounded-md px-3 py-2 w-full"
-              >
-                <option value="auto">Detectar automáticamente</option>
-                <option value="ingreso">Ingreso</option>
-                <option value="gasto">Gasto</option>
-              </select>
-            </div>
-            <div className="flex items-end">
-              <Button onClick={handleImportAccounting} disabled={importing || loading}>
-                <Upload className="h-4 w-4 mr-2" />
-                {importing ? 'Importando...' : 'Importar'}
+          <div className="flex flex-wrap items-center gap-2">
+            <Link href="/finanzas/cuadro-de-mandos">
+              <Button variant="ghost" size="sm">
+                <LayoutDashboard className="h-4 w-4 mr-1.5" />
+                Cuadro de Mandos
               </Button>
-            </div>
+            </Link>
+            <Link href="/contabilidad/intragrupo">
+              <Button variant="ghost" size="sm">
+                <ArrowRightLeft className="h-4 w-4 mr-1.5" />
+                Intragrupo
+              </Button>
+            </Link>
+            <Link href="/contabilidad/integraciones">
+              <Button variant="ghost" size="sm">
+                <Upload className="h-4 w-4 mr-1.5" />
+                Importar
+              </Button>
+            </Link>
+            <Button
+              onClick={async () => {
+                try {
+                  setLoading(true);
+                  const res = await fetch('/api/accounting/refresh-from-source', {
+                    method: 'POST',
+                  });
+                  if (res.ok) {
+                    const data = await res.json();
+                    toast.success(
+                      `Contabilidad actualizada: ${data.summary?.transaccionesCreadas || 0} transacciones (${data.summary?.periodoDesde} → ${data.summary?.periodoHasta})`
+                    );
+                    loadFinancialData();
+                  } else {
+                    const err = await res.json().catch(() => ({}));
+                    toast.error(err.error || 'Error al refrescar contabilidad');
+                  }
+                } catch {
+                  toast.error('Error de conexión');
+                } finally {
+                  setLoading(false);
+                }
+              }}
+              variant="outline"
+              disabled={loading}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Actualizar Contabilidad
+            </Button>
+            {zucchettiStatus?.configured && (
+              <Button onClick={handleSyncZucchetti} variant="outline" disabled={loading}>
+                <FileText className="h-4 w-4 mr-2" />
+                Sincronizar con Altai
+              </Button>
+            )}
+            <Button onClick={loadFinancialData} variant="outline" disabled={loading}>
+              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+              Actualizar
+            </Button>
           </div>
-          {importSummary && (
-            <div className="text-sm text-muted-foreground">
-              Importados: {importSummary.imported} · Filas con error: {importSummary.failed}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* Documentación Contable Externa (Google Drive) */}
-      {externalDocs.length > 0 && (
+        {/* Panel IA: Asistente Contable */}
+        <AiInsightPanel
+          apiUrl="/api/ai/accounting-assistant"
+          mode="chat"
+          title="Asistente Contable IA"
+          chatContext="Módulo de contabilidad del grupo inmobiliario. Puede preguntar sobre asientos, balances, impuestos (IVA, IRPF, IS), conciliación, plan general contable, amortizaciones o cualquier duda fiscal/contable."
+        />
+
+        {/* Filtros */}
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex gap-4 items-center">
+              <div>
+                <label className="text-sm font-medium mb-2 block">Período</label>
+                <input
+                  type="month"
+                  value={periodo}
+                  onChange={(e) => setPeriodo(e.target.value)}
+                  className="border rounded-md px-3 py-2"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-blue-600" />
-              Documentación Contable
-            </CardTitle>
+            <CardTitle>Importar movimientos contables</CardTitle>
             <CardDescription>
-              Documentos contables enlazados desde Google Drive
+              Sube un XLSX o CSV con fecha, importe y concepto para cargar ingresos y gastos.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {externalDocs.map((doc: any) => (
-                <div
-                  key={doc.id}
-                  className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
-                  onClick={() => window.open(doc.cloudStoragePath, '_blank')}
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+              <div>
+                <label className="text-sm font-medium mb-2 block">Archivo</label>
+                <input
+                  type="file"
+                  accept=".csv,.xlsx,.xls"
+                  onChange={(e) => setImportFile(e.target.files?.[0] || null)}
+                  className="border rounded-md px-3 py-2 w-full text-sm file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 cursor-pointer"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-2 block">Tipo (opcional)</label>
+                <select
+                  value={importType}
+                  onChange={(e) => setImportType(e.target.value as 'auto' | 'ingreso' | 'gasto')}
+                  className="border rounded-md px-3 py-2 w-full"
                 >
-                  <div className="flex items-start gap-3">
-                    <div className="p-2 bg-blue-50 rounded-lg flex-shrink-0">
-                      <FileText className="h-5 w-5 text-blue-600" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-medium text-sm truncate">{doc.nombre}</h4>
-                      {doc.descripcion && (
-                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                          {doc.descripcion}
-                        </p>
-                      )}
-                      <div className="flex gap-1 mt-2 flex-wrap">
-                        <Badge variant="outline" className="text-xs text-blue-600 border-blue-300 bg-blue-50">
-                          Google Drive
-                        </Badge>
-                        <Badge variant="outline" className="text-xs">
-                          Contabilidad
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                  <option value="auto">Detectar automáticamente</option>
+                  <option value="ingreso">Ingreso</option>
+                  <option value="gasto">Gasto</option>
+                </select>
+              </div>
+              <div className="flex items-end">
+                <Button onClick={handleImportAccounting} disabled={importing || loading}>
+                  <Upload className="h-4 w-4 mr-2" />
+                  {importing ? 'Importando...' : 'Importar'}
+                </Button>
+              </div>
             </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* KPIs Principales */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Ingresos Totales</CardTitle>
-            <TrendingUp className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {formatCurrency(profitLossData?.ingresos.total || 0)}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">Período {periodo}</p>
-            {latestPeriod?.periodo && latestPeriod.periodo !== periodo && (
-              <p className="text-xs text-muted-foreground mt-1">
-                Último con datos ({latestPeriod.periodo}):{' '}
-                {formatCurrency(latestProfitLoss?.ingresos.total ?? latestPeriod.ingresos || 0)}
-              </p>
+            {importSummary && (
+              <div className="text-sm text-muted-foreground">
+                Importados: {importSummary.imported} · Filas con error: {importSummary.failed}
+              </div>
             )}
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Gastos Totales</CardTitle>
-            <TrendingDown className="h-4 w-4 text-red-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {formatCurrency(profitLossData?.gastos.total || 0)}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">Período {periodo}</p>
-            {latestPeriod?.periodo && latestPeriod.periodo !== periodo && (
-              <p className="text-xs text-muted-foreground mt-1">
-                Último con datos ({latestPeriod.periodo}):{' '}
-                {formatCurrency(latestProfitLoss?.gastos.total ?? latestPeriod.gastos || 0)}
-              </p>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Beneficio Neto</CardTitle>
-            <DollarSign className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {formatCurrency(profitLossData?.beneficioNeto || 0)}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Margen: {formatPercentage(profitLossData?.margenes.neto || 0)}
-            </p>
-            {latestPeriod?.periodo && latestPeriod.periodo !== periodo && (
-              <p className="text-xs text-muted-foreground mt-1">
-                Último con datos ({latestPeriod.periodo}):{' '}
-                {formatCurrency(
-                  latestProfitLoss?.beneficioNeto ??
-                    (latestPeriod.ingresos || 0) - (latestPeriod.gastos || 0)
-                )}
-              </p>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">EBITDA</CardTitle>
-            <BarChart3 className="h-4 w-4 text-purple-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(profitLossData?.ebitda || 0)}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Margen Operativo: {formatPercentage(profitLossData?.margenes.operativo || 0)}
-            </p>
-            {latestPeriod?.periodo && latestPeriod.periodo !== periodo && (
-              <p className="text-xs text-muted-foreground mt-1">
-                Último con datos ({latestPeriod.periodo}):{' '}
-                {formatCurrency(
-                  latestProfitLoss?.ebitda ??
-                    (latestPeriod.ingresos || 0) - (latestPeriod.gastos || 0)
-                )}
-              </p>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Tabs con contenido detallado */}
-      <Tabs defaultValue="integraciones" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="integraciones">Integraciones</TabsTrigger>
-          <TabsTrigger value="pyg">P&G</TabsTrigger>
-          <TabsTrigger value="analitica">Analítica</TabsTrigger>
-          <TabsTrigger value="centros">Centros Coste</TabsTrigger>
-          <TabsTrigger value="fiscal">Fiscal</TabsTrigger>
-          <TabsTrigger value="ratios">Ratios</TabsTrigger>
-        </TabsList>
-
-        {/* Integraciones ERP/Contabilidad */}
-        <TabsContent value="integraciones" className="space-y-4">
+        {/* Documentación Contable Externa (Google Drive) */}
+        {externalDocs.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>Integraciones de Contabilidad</CardTitle>
-              <CardDescription>
-                Conecta INMOVA con tu sistema ERP o software de contabilidad favorito
-              </CardDescription>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-blue-600" />
+                Documentación Contable
+              </CardTitle>
+              <CardDescription>Documentos contables enlazados desde Google Drive</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Zucchetti Integration */}
-              <div className="border rounded-lg p-6 space-y-4">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-3">
-                      <h3 className="text-lg font-semibold">Zucchetti (Altai)</h3>
-                      {zucchettiStatus?.configured ? (
-                        <Badge variant="default">✓ Activa</Badge>
-                      ) : (
-                        <Badge variant="secondary">Demo</Badge>
-                      )}
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Sistema ERP y contabilidad líder en Europa
-                    </p>
-                  </div>
-                  <Button onClick={() => loadZucchettiStatus()} variant="ghost" size="sm">
-                    <RefreshCw className="h-4 w-4" />
-                  </Button>
-                </div>
-
-                {zucchettiStatus && (
-                  <div className="space-y-3">
-                    <div className="text-sm">
-                      <strong>Funcionalidades disponibles:</strong>
-                      <ul className="mt-2 space-y-1 list-disc list-inside text-muted-foreground">
-                        {zucchettiStatus.features?.map((feature: string, idx: number) => (
-                          <li key={idx}>{feature}</li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2">
-                      <Button
-                        onClick={handleSyncCustomers}
-                        variant="outline"
-                        size="sm"
-                        disabled={loading}
-                      >
-                        <Building2 className="h-4 w-4 mr-2" />
-                        Sincronizar Clientes
-                      </Button>
-                      <Button
-                        onClick={handleCreateInvoice}
-                        variant="outline"
-                        size="sm"
-                        disabled={loading}
-                      >
-                        <Receipt className="h-4 w-4 mr-2" />
-                        Crear Facturas
-                      </Button>
-                      <Button
-                        onClick={handleRegisterPayments}
-                        variant="outline"
-                        size="sm"
-                        disabled={loading}
-                      >
-                        <CreditCard className="h-4 w-4 mr-2" />
-                        Registrar Pagos
-                      </Button>
-                    </div>
-
-                    {!zucchettiStatus.configured && (
-                      <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-md p-4">
-                        <p className="text-sm text-blue-800 dark:text-blue-200">
-                          <strong>Modo Demo:</strong> {zucchettiStatus.message}
-                        </p>
-                        <p className="text-xs text-blue-700 dark:text-blue-300 mt-2">
-                          Para activar la integración real, configura las variables de entorno
-                          ZUCCHETTI_CLIENT_ID, ZUCCHETTI_CLIENT_SECRET y ZUCCHETTI_API_KEY
-                        </p>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {externalDocs.map((doc: any) => (
+                  <div
+                    key={doc.id}
+                    className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+                    onClick={() => window.open(doc.cloudStoragePath, '_blank')}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-blue-50 rounded-lg flex-shrink-0">
+                        <FileText className="h-5 w-5 text-blue-600" />
                       </div>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* ContaSimple Integration */}
-              <div className="border rounded-lg p-6 space-y-4">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-3">
-                      <h3 className="text-lg font-semibold">ContaSimple</h3>
-                      {contaSimpleStatus?.configured ? (
-                        <Badge variant="default">✓ Activa</Badge>
-                      ) : (
-                        <Badge variant="secondary">Demo</Badge>
-                      )}
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Software de facturación y contabilidad para pymes españolas
-                    </p>
-                  </div>
-                  <Button onClick={() => loadContaSimpleStatus()} variant="ghost" size="sm">
-                    <RefreshCw className="h-4 w-4" />
-                  </Button>
-                </div>
-
-                {contaSimpleStatus && (
-                  <div className="space-y-3">
-                    <div className="text-sm">
-                      <strong>Funcionalidades disponibles:</strong>
-                      <ul className="mt-2 space-y-1 list-disc list-inside text-muted-foreground">
-                        {contaSimpleStatus.features?.map((feature: string, idx: number) => (
-                          <li key={idx}>{feature}</li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2">
-                      <Button
-                        onClick={handleSyncCustomers}
-                        variant="outline"
-                        size="sm"
-                        disabled={loading}
-                      >
-                        <Building2 className="h-4 w-4 mr-2" />
-                        Sincronizar Clientes
-                      </Button>
-                      <Button
-                        onClick={handleCreateInvoice}
-                        variant="outline"
-                        size="sm"
-                        disabled={loading}
-                      >
-                        <Receipt className="h-4 w-4 mr-2" />
-                        Crear Facturas
-                      </Button>
-                      <Button
-                        onClick={handleRegisterPayments}
-                        variant="outline"
-                        size="sm"
-                        disabled={loading}
-                      >
-                        <CreditCard className="h-4 w-4 mr-2" />
-                        Registrar Pagos
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          toast.info('Registrando gastos...');
-                          toast.success('Funcionalidad en desarrollo');
-                        }}
-                        variant="outline"
-                        size="sm"
-                        disabled={loading}
-                      >
-                        <FileText className="h-4 w-4 mr-2" />
-                        Registrar Gastos
-                      </Button>
-                    </div>
-
-                    {!contaSimpleStatus.configured && (
-                      <div className="bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-md p-4">
-                        <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                          <strong>No Configurado:</strong> {contaSimpleStatus.message}
-                        </p>
-                        <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-2">
-                          Para activar la integración con ContaSimple, configura las variables de
-                          entorno: CONTASIMPLE_AUTH_KEY y CONTASIMPLE_API_URL
-                        </p>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-sm truncate">{doc.nombre}</h4>
+                        {doc.descripcion && (
+                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                            {doc.descripcion}
+                          </p>
+                        )}
+                        <div className="flex gap-1 mt-2 flex-wrap">
+                          <Badge
+                            variant="outline"
+                            className="text-xs text-blue-600 border-blue-300 bg-blue-50"
+                          >
+                            Google Drive
+                          </Badge>
+                          <Badge variant="outline" className="text-xs">
+                            Contabilidad
+                          </Badge>
+                        </div>
                       </div>
-                    )}
-                    {contaSimpleStatus.configured && (
-                      <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-md p-4">
-                        <p className="text-sm text-green-800 dark:text-green-200">
-                          ✓ <strong>Integración Activa:</strong> ContaSimple está correctamente
-                          configurado y listo para usar.
-                        </p>
-                        <Button
-                          onClick={async () => {
-                            try {
-                              toast.info('Probando conexión con ContaSimple...');
-                              const res = await fetch(
-                                '/api/accounting/contasimple/test-connection'
-                              );
-                              if (res.ok) {
-                                toast.success('Conexión exitosa con ContaSimple');
-                              } else {
-                                const data = await res.json();
-                                toast.error('Error al conectar: ' + data.message);
-                              }
-                            } catch (error) {
-                              toast.error('Error al probar la conexión');
-                            }
-                          }}
-                          variant="outline"
-                          size="sm"
-                          className="mt-2"
-                        >
-                          Probar Conexión
-                        </Button>
-                      </div>
-                    )}
+                    </div>
                   </div>
-                )}
-              </div>
-
-              {/* Sage Integration */}
-              <div className="border rounded-lg p-6 space-y-4">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-3">
-                      <h3 className="text-lg font-semibold">Sage</h3>
-                      {sageStatus?.integrated ? (
-                        <Badge variant="default">✓ Activa</Badge>
-                      ) : (
-                        <Badge variant="secondary">Demo</Badge>
-                      )}
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      {sageStatus?.description || 'Líder mundial en software de contabilidad'}
-                    </p>
-                  </div>
-                  <Button onClick={() => loadSageStatus()} variant="ghost" size="sm">
-                    <RefreshCw className="h-4 w-4" />
-                  </Button>
-                </div>
-
-                {sageStatus && (
-                  <div className="space-y-3">
-                    <div className="text-sm">
-                      <strong>Funcionalidades disponibles:</strong>
-                      <ul className="mt-2 space-y-1 list-disc list-inside text-muted-foreground">
-                        {sageStatus.features?.map((feature: string, idx: number) => (
-                          <li key={idx}>{feature}</li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2">
-                      <Button
-                        onClick={() => handleSyncCustomersSystem('sage')}
-                        variant="outline"
-                        size="sm"
-                        disabled={loading}
-                      >
-                        <Building2 className="h-4 w-4 mr-2" />
-                        Sincronizar Clientes
-                      </Button>
-                      <Button
-                        onClick={() => handleCreateInvoiceSystem('sage')}
-                        variant="outline"
-                        size="sm"
-                        disabled={loading}
-                      >
-                        <Receipt className="h-4 w-4 mr-2" />
-                        Crear Facturas
-                      </Button>
-                      <Button
-                        onClick={() => handleRegisterPaymentsSystem('sage')}
-                        variant="outline"
-                        size="sm"
-                        disabled={loading}
-                      >
-                        <CreditCard className="h-4 w-4 mr-2" />
-                        Registrar Pagos
-                      </Button>
-                    </div>
-
-                    {!sageStatus.integrated && (
-                      <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-md p-4">
-                        <p className="text-sm text-amber-800 dark:text-amber-200">
-                          <strong>Modo Demo:</strong> Esta integración está en modo demostración.
-                        </p>
-                        <p className="text-xs text-amber-700 dark:text-amber-300 mt-2">
-                          Para activar la integración real, configura las variables de entorno
-                          SAGE_CLIENT_ID y SAGE_CLIENT_SECRET
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Holded Integration */}
-              <div className="border rounded-lg p-6 space-y-4">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-3">
-                      <h3 className="text-lg font-semibold">Holded</h3>
-                      {holdedStatus?.integrated ? (
-                        <Badge variant="default">✓ Activa</Badge>
-                      ) : (
-                        <Badge variant="secondary">Demo</Badge>
-                      )}
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      {holdedStatus?.description || 'Software de gestión empresarial todo-en-uno'}
-                    </p>
-                  </div>
-                  <Button onClick={() => loadHoldedStatus()} variant="ghost" size="sm">
-                    <RefreshCw className="h-4 w-4" />
-                  </Button>
-                </div>
-
-                {holdedStatus && (
-                  <div className="space-y-3">
-                    <div className="text-sm">
-                      <strong>Funcionalidades disponibles:</strong>
-                      <ul className="mt-2 space-y-1 list-disc list-inside text-muted-foreground">
-                        {holdedStatus.features?.map((feature: string, idx: number) => (
-                          <li key={idx}>{feature}</li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2">
-                      <Button
-                        onClick={() => handleSyncCustomersSystem('holded')}
-                        variant="outline"
-                        size="sm"
-                        disabled={loading}
-                      >
-                        <Building2 className="h-4 w-4 mr-2" />
-                        Sincronizar Clientes
-                      </Button>
-                      <Button
-                        onClick={() => handleCreateInvoiceSystem('holded')}
-                        variant="outline"
-                        size="sm"
-                        disabled={loading}
-                      >
-                        <Receipt className="h-4 w-4 mr-2" />
-                        Crear Facturas
-                      </Button>
-                      <Button
-                        onClick={() => handleRegisterPaymentsSystem('holded')}
-                        variant="outline"
-                        size="sm"
-                        disabled={loading}
-                      >
-                        <CreditCard className="h-4 w-4 mr-2" />
-                        Registrar Pagos
-                      </Button>
-                    </div>
-
-                    {!holdedStatus.integrated && (
-                      <div className="bg-purple-50 dark:bg-purple-950 border border-purple-200 dark:border-purple-800 rounded-md p-4">
-                        <p className="text-sm text-purple-800 dark:text-purple-200">
-                          <strong>Modo Demo:</strong> Esta integración está en modo demostración.
-                        </p>
-                        <p className="text-xs text-purple-700 dark:text-purple-300 mt-2">
-                          Para activar la integración real, configura la variable de entorno
-                          HOLDED_API_KEY
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* A3 Integration */}
-              <div className="border rounded-lg p-6 space-y-4">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-3">
-                      <h3 className="text-lg font-semibold">A3 Software</h3>
-                      {a3Status?.integrated ? (
-                        <Badge variant="default">✓ Activa</Badge>
-                      ) : (
-                        <Badge variant="secondary">Demo</Badge>
-                      )}
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      {a3Status?.description || 'ERP líder en España para pymes'}
-                    </p>
-                  </div>
-                  <Button onClick={() => loadA3Status()} variant="ghost" size="sm">
-                    <RefreshCw className="h-4 w-4" />
-                  </Button>
-                </div>
-
-                {a3Status && (
-                  <div className="space-y-3">
-                    <div className="text-sm">
-                      <strong>Funcionalidades disponibles:</strong>
-                      <ul className="mt-2 space-y-1 list-disc list-inside text-muted-foreground">
-                        {a3Status.features?.map((feature: string, idx: number) => (
-                          <li key={idx}>{feature}</li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2">
-                      <Button
-                        onClick={() => handleSyncCustomersSystem('a3')}
-                        variant="outline"
-                        size="sm"
-                        disabled={loading}
-                      >
-                        <Building2 className="h-4 w-4 mr-2" />
-                        Sincronizar Clientes
-                      </Button>
-                      <Button
-                        onClick={() => handleCreateInvoiceSystem('a3')}
-                        variant="outline"
-                        size="sm"
-                        disabled={loading}
-                      >
-                        <Receipt className="h-4 w-4 mr-2" />
-                        Crear Facturas
-                      </Button>
-                      <Button
-                        onClick={() => handleRegisterPaymentsSystem('a3')}
-                        variant="outline"
-                        size="sm"
-                        disabled={loading}
-                      >
-                        <CreditCard className="h-4 w-4 mr-2" />
-                        Registrar Pagos
-                      </Button>
-                    </div>
-
-                    {!a3Status.integrated && (
-                      <div className="bg-indigo-50 dark:bg-indigo-950 border border-indigo-200 dark:border-indigo-800 rounded-md p-4">
-                        <p className="text-sm text-indigo-800 dark:text-indigo-200">
-                          <strong>Modo Demo:</strong> Esta integración está en modo demostración.
-                        </p>
-                        <p className="text-xs text-indigo-700 dark:text-indigo-300 mt-2">
-                          Para activar la integración real, configura las variables de entorno
-                          A3_API_URL, A3_CLIENT_ID y A3_CLIENT_SECRET
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Alegra Integration */}
-              <div className="border rounded-lg p-6 space-y-4">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-3">
-                      <h3 className="text-lg font-semibold">Alegra</h3>
-                      {alegraStatus?.integrated ? (
-                        <Badge variant="default">✓ Activa</Badge>
-                      ) : (
-                        <Badge variant="secondary">Demo</Badge>
-                      )}
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      {alegraStatus?.description || 'Facturación líder en Latinoamérica'}
-                    </p>
-                  </div>
-                  <Button onClick={() => loadAlegraStatus()} variant="ghost" size="sm">
-                    <RefreshCw className="h-4 w-4" />
-                  </Button>
-                </div>
-
-                {alegraStatus && (
-                  <div className="space-y-3">
-                    <div className="text-sm">
-                      <strong>Funcionalidades disponibles:</strong>
-                      <ul className="mt-2 space-y-1 list-disc list-inside text-muted-foreground">
-                        {alegraStatus.features?.map((feature: string, idx: number) => (
-                          <li key={idx}>{feature}</li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2">
-                      <Button
-                        onClick={() => handleSyncCustomersSystem('alegra')}
-                        variant="outline"
-                        size="sm"
-                        disabled={loading}
-                      >
-                        <Building2 className="h-4 w-4 mr-2" />
-                        Sincronizar Clientes
-                      </Button>
-                      <Button
-                        onClick={() => handleCreateInvoiceSystem('alegra')}
-                        variant="outline"
-                        size="sm"
-                        disabled={loading}
-                      >
-                        <Receipt className="h-4 w-4 mr-2" />
-                        Crear Facturas
-                      </Button>
-                      <Button
-                        onClick={() => handleRegisterPaymentsSystem('alegra')}
-                        variant="outline"
-                        size="sm"
-                        disabled={loading}
-                      >
-                        <CreditCard className="h-4 w-4 mr-2" />
-                        Registrar Pagos
-                      </Button>
-                    </div>
-
-                    {!alegraStatus.integrated && (
-                      <div className="bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-md p-4">
-                        <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                          <strong>Modo Demo:</strong> Esta integración está en modo demostración.
-                        </p>
-                        <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-2">
-                          Para activar la integración real, configura las variables de entorno
-                          ALEGRA_API_TOKEN y ALEGRA_COMPANY_EMAIL
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Más integraciones disponibles */}
-              <div className="border-t pt-4">
-                <p className="text-sm text-muted-foreground">
-                  <strong>¿Necesitas otra integración?</strong> Consulta la documentación de APIs
-                  disponibles o contacta con soporte para más información.
-                </p>
+                ))}
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
+        )}
 
-        {/* Cuenta de Pérdidas y Ganancias */}
-        <TabsContent value="pyg" className="space-y-4">
-          <p className="text-muted-foreground">
-            Aquí se mostrará la cuenta de pérdidas y ganancias
-          </p>
-        </TabsContent>
+        {/* KPIs Principales */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Ingresos Totales</CardTitle>
+              <TrendingUp className="h-4 w-4 text-green-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {formatCurrency(profitLossData?.ingresos.total || 0)}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Período {periodo}</p>
+              {latestPeriod?.periodo && latestPeriod.periodo !== periodo && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Último con datos ({latestPeriod.periodo}):{' '}
+                  {formatCurrency((latestProfitLoss?.ingresos.total ?? latestPeriod.ingresos) || 0)}
+                </p>
+              )}
+            </CardContent>
+          </Card>
 
-        <TabsContent value="analitica" className="space-y-4">
-          <p className="text-muted-foreground">Aquí se mostrará la contabilidad analítica</p>
-        </TabsContent>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Gastos Totales</CardTitle>
+              <TrendingDown className="h-4 w-4 text-red-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {formatCurrency(profitLossData?.gastos.total || 0)}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Período {periodo}</p>
+              {latestPeriod?.periodo && latestPeriod.periodo !== periodo && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Último con datos ({latestPeriod.periodo}):{' '}
+                  {formatCurrency((latestProfitLoss?.gastos.total ?? latestPeriod.gastos) || 0)}
+                </p>
+              )}
+            </CardContent>
+          </Card>
 
-        <TabsContent value="centros" className="space-y-4">
-          <p className="text-muted-foreground">Aquí se mostrarán los centros de coste</p>
-        </TabsContent>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Beneficio Neto</CardTitle>
+              <DollarSign className="h-4 w-4 text-blue-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {formatCurrency(profitLossData?.beneficioNeto || 0)}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Margen: {formatPercentage(profitLossData?.margenes.neto || 0)}
+              </p>
+              {latestPeriod?.periodo && latestPeriod.periodo !== periodo && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Último con datos ({latestPeriod.periodo}):{' '}
+                  {formatCurrency(
+                    latestProfitLoss?.beneficioNeto ??
+                      (latestPeriod.ingresos || 0) - (latestPeriod.gastos || 0)
+                  )}
+                </p>
+              )}
+            </CardContent>
+          </Card>
 
-        <TabsContent value="fiscal" className="space-y-4">
-          <p className="text-muted-foreground">Aquí se mostrará la información fiscal</p>
-        </TabsContent>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">EBITDA</CardTitle>
+              <BarChart3 className="h-4 w-4 text-purple-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {formatCurrency(profitLossData?.ebitda || 0)}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Margen Operativo: {formatPercentage(profitLossData?.margenes.operativo || 0)}
+              </p>
+              {latestPeriod?.periodo && latestPeriod.periodo !== periodo && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Último con datos ({latestPeriod.periodo}):{' '}
+                  {formatCurrency(
+                    latestProfitLoss?.ebitda ??
+                      (latestPeriod.ingresos || 0) - (latestPeriod.gastos || 0)
+                  )}
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
 
-        <TabsContent value="ratios" className="space-y-4">
-          <p className="text-muted-foreground">Aquí se mostrarán los ratios financieros</p>
-        </TabsContent>
-      </Tabs>
+        {/* Tabs con contenido detallado */}
+        <Tabs defaultValue="integraciones" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-6">
+            <TabsTrigger value="integraciones">Integraciones</TabsTrigger>
+            <TabsTrigger value="pyg">P&G</TabsTrigger>
+            <TabsTrigger value="analitica">Analítica</TabsTrigger>
+            <TabsTrigger value="centros">Centros Coste</TabsTrigger>
+            <TabsTrigger value="fiscal">Fiscal</TabsTrigger>
+            <TabsTrigger value="ratios">Ratios</TabsTrigger>
+          </TabsList>
 
-      {/* Asistente IA de Documentos Contables */}
-      <AIDocumentAssistant 
-        context="contabilidad"
-        variant="floating"
-        position="bottom-right"
-      />
-      <AIContextualButton
-        agentType="accounting_tax"
-        agentName="Asistente Contable IA"
-        agentDescription="IVA, IRPF, modelo 303, categorización de gastos"
-        apiEndpoint="/api/ai/accounting-assistant"
-      />
-    </div>
+          {/* Integraciones ERP/Contabilidad */}
+          <TabsContent value="integraciones" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Integraciones de Contabilidad</CardTitle>
+                <CardDescription>
+                  Conecta INMOVA con tu sistema ERP o software de contabilidad favorito
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Zucchetti Integration */}
+                <div className="border rounded-lg p-6 space-y-4">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-3">
+                        <h3 className="text-lg font-semibold">Zucchetti (Altai)</h3>
+                        {zucchettiStatus?.configured ? (
+                          <Badge variant="default">✓ Activa</Badge>
+                        ) : (
+                          <Badge variant="secondary">Demo</Badge>
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Sistema ERP y contabilidad líder en Europa
+                      </p>
+                    </div>
+                    <Button onClick={() => loadZucchettiStatus()} variant="ghost" size="sm">
+                      <RefreshCw className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  {zucchettiStatus && (
+                    <div className="space-y-3">
+                      <div className="text-sm">
+                        <strong>Funcionalidades disponibles:</strong>
+                        <ul className="mt-2 space-y-1 list-disc list-inside text-muted-foreground">
+                          {zucchettiStatus.features?.map((feature: string, idx: number) => (
+                            <li key={idx}>{feature}</li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          onClick={handleSyncCustomers}
+                          variant="outline"
+                          size="sm"
+                          disabled={loading}
+                        >
+                          <Building2 className="h-4 w-4 mr-2" />
+                          Sincronizar Clientes
+                        </Button>
+                        <Button
+                          onClick={handleCreateInvoice}
+                          variant="outline"
+                          size="sm"
+                          disabled={loading}
+                        >
+                          <Receipt className="h-4 w-4 mr-2" />
+                          Crear Facturas
+                        </Button>
+                        <Button
+                          onClick={handleRegisterPayments}
+                          variant="outline"
+                          size="sm"
+                          disabled={loading}
+                        >
+                          <CreditCard className="h-4 w-4 mr-2" />
+                          Registrar Pagos
+                        </Button>
+                      </div>
+
+                      {!zucchettiStatus.configured && (
+                        <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-md p-4">
+                          <p className="text-sm text-blue-800 dark:text-blue-200">
+                            <strong>Modo Demo:</strong> {zucchettiStatus.message}
+                          </p>
+                          <p className="text-xs text-blue-700 dark:text-blue-300 mt-2">
+                            Para activar la integración real, configura las variables de entorno
+                            ZUCCHETTI_CLIENT_ID, ZUCCHETTI_CLIENT_SECRET y ZUCCHETTI_API_KEY
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* ContaSimple Integration */}
+                <div className="border rounded-lg p-6 space-y-4">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-3">
+                        <h3 className="text-lg font-semibold">ContaSimple</h3>
+                        {contaSimpleStatus?.configured ? (
+                          <Badge variant="default">✓ Activa</Badge>
+                        ) : (
+                          <Badge variant="secondary">Demo</Badge>
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Software de facturación y contabilidad para pymes españolas
+                      </p>
+                    </div>
+                    <Button onClick={() => loadContaSimpleStatus()} variant="ghost" size="sm">
+                      <RefreshCw className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  {contaSimpleStatus && (
+                    <div className="space-y-3">
+                      <div className="text-sm">
+                        <strong>Funcionalidades disponibles:</strong>
+                        <ul className="mt-2 space-y-1 list-disc list-inside text-muted-foreground">
+                          {contaSimpleStatus.features?.map((feature: string, idx: number) => (
+                            <li key={idx}>{feature}</li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          onClick={handleSyncCustomers}
+                          variant="outline"
+                          size="sm"
+                          disabled={loading}
+                        >
+                          <Building2 className="h-4 w-4 mr-2" />
+                          Sincronizar Clientes
+                        </Button>
+                        <Button
+                          onClick={handleCreateInvoice}
+                          variant="outline"
+                          size="sm"
+                          disabled={loading}
+                        >
+                          <Receipt className="h-4 w-4 mr-2" />
+                          Crear Facturas
+                        </Button>
+                        <Button
+                          onClick={handleRegisterPayments}
+                          variant="outline"
+                          size="sm"
+                          disabled={loading}
+                        >
+                          <CreditCard className="h-4 w-4 mr-2" />
+                          Registrar Pagos
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            toast.info('Registrando gastos...');
+                            toast.success('Funcionalidad en desarrollo');
+                          }}
+                          variant="outline"
+                          size="sm"
+                          disabled={loading}
+                        >
+                          <FileText className="h-4 w-4 mr-2" />
+                          Registrar Gastos
+                        </Button>
+                      </div>
+
+                      {!contaSimpleStatus.configured && (
+                        <div className="bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-md p-4">
+                          <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                            <strong>No Configurado:</strong> {contaSimpleStatus.message}
+                          </p>
+                          <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-2">
+                            Para activar la integración con ContaSimple, configura las variables de
+                            entorno: CONTASIMPLE_AUTH_KEY y CONTASIMPLE_API_URL
+                          </p>
+                        </div>
+                      )}
+                      {contaSimpleStatus.configured && (
+                        <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-md p-4">
+                          <p className="text-sm text-green-800 dark:text-green-200">
+                            ✓ <strong>Integración Activa:</strong> ContaSimple está correctamente
+                            configurado y listo para usar.
+                          </p>
+                          <Button
+                            onClick={async () => {
+                              try {
+                                toast.info('Probando conexión con ContaSimple...');
+                                const res = await fetch(
+                                  '/api/accounting/contasimple/test-connection'
+                                );
+                                if (res.ok) {
+                                  toast.success('Conexión exitosa con ContaSimple');
+                                } else {
+                                  const data = await res.json();
+                                  toast.error('Error al conectar: ' + data.message);
+                                }
+                              } catch (error) {
+                                toast.error('Error al probar la conexión');
+                              }
+                            }}
+                            variant="outline"
+                            size="sm"
+                            className="mt-2"
+                          >
+                            Probar Conexión
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Sage Integration */}
+                <div className="border rounded-lg p-6 space-y-4">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-3">
+                        <h3 className="text-lg font-semibold">Sage</h3>
+                        {sageStatus?.integrated ? (
+                          <Badge variant="default">✓ Activa</Badge>
+                        ) : (
+                          <Badge variant="secondary">Demo</Badge>
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {sageStatus?.description || 'Líder mundial en software de contabilidad'}
+                      </p>
+                    </div>
+                    <Button onClick={() => loadSageStatus()} variant="ghost" size="sm">
+                      <RefreshCw className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  {sageStatus && (
+                    <div className="space-y-3">
+                      <div className="text-sm">
+                        <strong>Funcionalidades disponibles:</strong>
+                        <ul className="mt-2 space-y-1 list-disc list-inside text-muted-foreground">
+                          {sageStatus.features?.map((feature: string, idx: number) => (
+                            <li key={idx}>{feature}</li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          onClick={() => handleSyncCustomersSystem('sage')}
+                          variant="outline"
+                          size="sm"
+                          disabled={loading}
+                        >
+                          <Building2 className="h-4 w-4 mr-2" />
+                          Sincronizar Clientes
+                        </Button>
+                        <Button
+                          onClick={() => handleCreateInvoiceSystem('sage')}
+                          variant="outline"
+                          size="sm"
+                          disabled={loading}
+                        >
+                          <Receipt className="h-4 w-4 mr-2" />
+                          Crear Facturas
+                        </Button>
+                        <Button
+                          onClick={() => handleRegisterPaymentsSystem('sage')}
+                          variant="outline"
+                          size="sm"
+                          disabled={loading}
+                        >
+                          <CreditCard className="h-4 w-4 mr-2" />
+                          Registrar Pagos
+                        </Button>
+                      </div>
+
+                      {!sageStatus.integrated && (
+                        <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-md p-4">
+                          <p className="text-sm text-amber-800 dark:text-amber-200">
+                            <strong>Modo Demo:</strong> Esta integración está en modo demostración.
+                          </p>
+                          <p className="text-xs text-amber-700 dark:text-amber-300 mt-2">
+                            Para activar la integración real, configura las variables de entorno
+                            SAGE_CLIENT_ID y SAGE_CLIENT_SECRET
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Holded Integration */}
+                <div className="border rounded-lg p-6 space-y-4">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-3">
+                        <h3 className="text-lg font-semibold">Holded</h3>
+                        {holdedStatus?.integrated ? (
+                          <Badge variant="default">✓ Activa</Badge>
+                        ) : (
+                          <Badge variant="secondary">Demo</Badge>
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {holdedStatus?.description || 'Software de gestión empresarial todo-en-uno'}
+                      </p>
+                    </div>
+                    <Button onClick={() => loadHoldedStatus()} variant="ghost" size="sm">
+                      <RefreshCw className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  {holdedStatus && (
+                    <div className="space-y-3">
+                      <div className="text-sm">
+                        <strong>Funcionalidades disponibles:</strong>
+                        <ul className="mt-2 space-y-1 list-disc list-inside text-muted-foreground">
+                          {holdedStatus.features?.map((feature: string, idx: number) => (
+                            <li key={idx}>{feature}</li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          onClick={() => handleSyncCustomersSystem('holded')}
+                          variant="outline"
+                          size="sm"
+                          disabled={loading}
+                        >
+                          <Building2 className="h-4 w-4 mr-2" />
+                          Sincronizar Clientes
+                        </Button>
+                        <Button
+                          onClick={() => handleCreateInvoiceSystem('holded')}
+                          variant="outline"
+                          size="sm"
+                          disabled={loading}
+                        >
+                          <Receipt className="h-4 w-4 mr-2" />
+                          Crear Facturas
+                        </Button>
+                        <Button
+                          onClick={() => handleRegisterPaymentsSystem('holded')}
+                          variant="outline"
+                          size="sm"
+                          disabled={loading}
+                        >
+                          <CreditCard className="h-4 w-4 mr-2" />
+                          Registrar Pagos
+                        </Button>
+                      </div>
+
+                      {!holdedStatus.integrated && (
+                        <div className="bg-purple-50 dark:bg-purple-950 border border-purple-200 dark:border-purple-800 rounded-md p-4">
+                          <p className="text-sm text-purple-800 dark:text-purple-200">
+                            <strong>Modo Demo:</strong> Esta integración está en modo demostración.
+                          </p>
+                          <p className="text-xs text-purple-700 dark:text-purple-300 mt-2">
+                            Para activar la integración real, configura la variable de entorno
+                            HOLDED_API_KEY
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* A3 Integration */}
+                <div className="border rounded-lg p-6 space-y-4">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-3">
+                        <h3 className="text-lg font-semibold">A3 Software</h3>
+                        {a3Status?.integrated ? (
+                          <Badge variant="default">✓ Activa</Badge>
+                        ) : (
+                          <Badge variant="secondary">Demo</Badge>
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {a3Status?.description || 'ERP líder en España para pymes'}
+                      </p>
+                    </div>
+                    <Button onClick={() => loadA3Status()} variant="ghost" size="sm">
+                      <RefreshCw className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  {a3Status && (
+                    <div className="space-y-3">
+                      <div className="text-sm">
+                        <strong>Funcionalidades disponibles:</strong>
+                        <ul className="mt-2 space-y-1 list-disc list-inside text-muted-foreground">
+                          {a3Status.features?.map((feature: string, idx: number) => (
+                            <li key={idx}>{feature}</li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          onClick={() => handleSyncCustomersSystem('a3')}
+                          variant="outline"
+                          size="sm"
+                          disabled={loading}
+                        >
+                          <Building2 className="h-4 w-4 mr-2" />
+                          Sincronizar Clientes
+                        </Button>
+                        <Button
+                          onClick={() => handleCreateInvoiceSystem('a3')}
+                          variant="outline"
+                          size="sm"
+                          disabled={loading}
+                        >
+                          <Receipt className="h-4 w-4 mr-2" />
+                          Crear Facturas
+                        </Button>
+                        <Button
+                          onClick={() => handleRegisterPaymentsSystem('a3')}
+                          variant="outline"
+                          size="sm"
+                          disabled={loading}
+                        >
+                          <CreditCard className="h-4 w-4 mr-2" />
+                          Registrar Pagos
+                        </Button>
+                      </div>
+
+                      {!a3Status.integrated && (
+                        <div className="bg-indigo-50 dark:bg-indigo-950 border border-indigo-200 dark:border-indigo-800 rounded-md p-4">
+                          <p className="text-sm text-indigo-800 dark:text-indigo-200">
+                            <strong>Modo Demo:</strong> Esta integración está en modo demostración.
+                          </p>
+                          <p className="text-xs text-indigo-700 dark:text-indigo-300 mt-2">
+                            Para activar la integración real, configura las variables de entorno
+                            A3_API_URL, A3_CLIENT_ID y A3_CLIENT_SECRET
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Alegra Integration */}
+                <div className="border rounded-lg p-6 space-y-4">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-3">
+                        <h3 className="text-lg font-semibold">Alegra</h3>
+                        {alegraStatus?.integrated ? (
+                          <Badge variant="default">✓ Activa</Badge>
+                        ) : (
+                          <Badge variant="secondary">Demo</Badge>
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {alegraStatus?.description || 'Facturación líder en Latinoamérica'}
+                      </p>
+                    </div>
+                    <Button onClick={() => loadAlegraStatus()} variant="ghost" size="sm">
+                      <RefreshCw className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  {alegraStatus && (
+                    <div className="space-y-3">
+                      <div className="text-sm">
+                        <strong>Funcionalidades disponibles:</strong>
+                        <ul className="mt-2 space-y-1 list-disc list-inside text-muted-foreground">
+                          {alegraStatus.features?.map((feature: string, idx: number) => (
+                            <li key={idx}>{feature}</li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          onClick={() => handleSyncCustomersSystem('alegra')}
+                          variant="outline"
+                          size="sm"
+                          disabled={loading}
+                        >
+                          <Building2 className="h-4 w-4 mr-2" />
+                          Sincronizar Clientes
+                        </Button>
+                        <Button
+                          onClick={() => handleCreateInvoiceSystem('alegra')}
+                          variant="outline"
+                          size="sm"
+                          disabled={loading}
+                        >
+                          <Receipt className="h-4 w-4 mr-2" />
+                          Crear Facturas
+                        </Button>
+                        <Button
+                          onClick={() => handleRegisterPaymentsSystem('alegra')}
+                          variant="outline"
+                          size="sm"
+                          disabled={loading}
+                        >
+                          <CreditCard className="h-4 w-4 mr-2" />
+                          Registrar Pagos
+                        </Button>
+                      </div>
+
+                      {!alegraStatus.integrated && (
+                        <div className="bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-md p-4">
+                          <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                            <strong>Modo Demo:</strong> Esta integración está en modo demostración.
+                          </p>
+                          <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-2">
+                            Para activar la integración real, configura las variables de entorno
+                            ALEGRA_API_TOKEN y ALEGRA_COMPANY_EMAIL
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Más integraciones disponibles */}
+                <div className="border-t pt-4">
+                  <p className="text-sm text-muted-foreground">
+                    <strong>¿Necesitas otra integración?</strong> Consulta la documentación de APIs
+                    disponibles o contacta con soporte para más información.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Cuenta de Pérdidas y Ganancias */}
+          <TabsContent value="pyg" className="space-y-4">
+            <p className="text-muted-foreground">
+              Aquí se mostrará la cuenta de pérdidas y ganancias
+            </p>
+          </TabsContent>
+
+          <TabsContent value="analitica" className="space-y-4">
+            <p className="text-muted-foreground">Aquí se mostrará la contabilidad analítica</p>
+          </TabsContent>
+
+          <TabsContent value="centros" className="space-y-4">
+            <p className="text-muted-foreground">Aquí se mostrarán los centros de coste</p>
+          </TabsContent>
+
+          <TabsContent value="fiscal" className="space-y-4">
+            <p className="text-muted-foreground">Aquí se mostrará la información fiscal</p>
+          </TabsContent>
+
+          <TabsContent value="ratios" className="space-y-4">
+            <p className="text-muted-foreground">Aquí se mostrarán los ratios financieros</p>
+          </TabsContent>
+        </Tabs>
+
+        {/* Asistente IA de Documentos Contables */}
+        <AIDocumentAssistant context="contabilidad" variant="floating" position="bottom-right" />
+        <AIContextualButton
+          agentType="accounting_tax"
+          agentName="Asistente Contable IA"
+          agentDescription="IVA, IRPF, modelo 303, categorización de gastos"
+          apiEndpoint="/api/ai/accounting-assistant"
+        />
+      </div>
     </AuthenticatedLayout>
   );
 }

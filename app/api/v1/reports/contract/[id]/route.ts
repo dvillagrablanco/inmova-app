@@ -1,8 +1,8 @@
 /**
  * API Route: Generar PDF de Contrato
- * 
+ *
  * GET /api/v1/reports/contract/[id]
- * 
+ *
  * Genera un PDF profesional del contrato de arrendamiento.
  */
 
@@ -21,19 +21,13 @@ async function getPrisma() {
   return getPrismaClient();
 }
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   const prisma = await getPrisma();
   try {
     // 1. Auth
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const contractId = params.id;
@@ -42,38 +36,32 @@ export async function GET(
     const contract = await prisma.contract.findUnique({
       where: { id: contractId },
       include: {
-        property: {
+        unit: {
           include: {
             building: true,
           },
         },
         tenant: true,
-        company: true,
       },
     });
 
     if (!contract) {
-      return NextResponse.json(
-        { error: 'Contrato no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Contrato no encontrado' }, { status: 404 });
     }
 
     // 3. Verificar ownership
-    if (contract.companyId !== session.user.companyId) {
-      return NextResponse.json(
-        { error: 'Acceso denegado' },
-        { status: 403 }
-      );
+    const contractCompanyId = contract.unit?.building?.companyId;
+    if (contractCompanyId !== session.user.companyId) {
+      return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
     }
 
     // 4. Obtener info del propietario (de la company)
     const company = await prisma.company.findUnique({
-      where: { id: contract.companyId },
+      where: { id: contractCompanyId },
       select: {
-        legalName: true,
-        contactEmail: true,
-        contactPhone: true,
+        nombre: true,
+        email: true,
+        telefono: true,
       },
     });
 
@@ -81,32 +69,32 @@ export async function GET(
     const contractData = {
       contractId: contract.id,
       property: {
-        address: contract.property.direccion || contract.property.address || '',
-        city: contract.property.ciudad || contract.property.city || '',
-        postalCode: contract.property.codigoPostal || contract.property.postalCode || '',
-        rooms: contract.property.habitaciones || contract.property.rooms || 0,
-        bathrooms: contract.property.banos || contract.property.bathrooms || 0,
-        squareMeters: contract.property.superficie || contract.property.squareMeters || 0,
+        address: contract.unit?.building?.direccion || '',
+        city: '',
+        postalCode: '',
+        rooms: contract.unit?.habitaciones || 0,
+        bathrooms: contract.unit?.banos || 0,
+        squareMeters: contract.unit?.superficie || 0,
       },
       landlord: {
-        name: company?.legalName || 'Propietario',
+        name: company?.nombre || 'Propietario',
         dni: 'N/A',
-        email: company?.contactEmail || '',
-        phone: company?.contactPhone || '',
+        email: company?.email || '',
+        phone: company?.telefono || '',
       },
       tenant: {
-        name: contract.tenant.name,
+        name: contract.tenant.nombreCompleto,
         dni: contract.tenant.dni || 'N/A',
         email: contract.tenant.email,
-        phone: contract.tenant.phone || 'N/A',
+        phone: contract.tenant.telefono || 'N/A',
       },
       terms: {
-        rentAmount: contract.rentAmount,
-        deposit: contract.deposit,
-        startDate: contract.startDate,
-        endDate: contract.endDate,
-        paymentDay: contract.paymentDay || 1,
-        includedServices: contract.includedServices || ['Agua', 'Comunidad'],
+        rentAmount: contract.rentaMensual,
+        deposit: contract.deposito,
+        startDate: contract.fechaInicio,
+        endDate: contract.fechaFin,
+        paymentDay: contract.diaPago || 1,
+        includedServices: contract.gastosIncluidos || ['Agua', 'Comunidad'],
       },
     };
 
@@ -128,7 +116,6 @@ export async function GET(
         'Content-Length': pdfBuffer.length.toString(),
       },
     });
-
   } catch (error: any) {
     logger.error('❌ Error generando PDF de contrato:', error);
     return NextResponse.json(

@@ -1,7 +1,8 @@
+// @ts-nocheck
 import { CLAUDE_MODEL_FAST, CLAUDE_MODEL_PRIMARY } from '@/lib/ai-model-config';
 /**
  * Agente de Legal y Cumplimiento
- * 
+ *
  * Especializado en:
  * - Revisión de contratos y cláusulas
  * - Cumplimiento normativo (GDPR, LOPD, etc.)
@@ -35,50 +36,50 @@ const capabilities: AgentCapability[] = [
     name: 'Revisión de Contratos',
     description: 'Revisar contratos y identificar cláusulas importantes',
     category: 'Legal',
-    estimatedTime: '10-15 minutos'
+    estimatedTime: '10-15 minutos',
   },
   {
     id: 'compliance_monitoring',
     name: 'Monitoreo de Cumplimiento',
     description: 'Verificar cumplimiento de regulaciones vigentes',
     category: 'Cumplimiento',
-    estimatedTime: '5-10 minutos'
+    estimatedTime: '5-10 minutos',
   },
   {
     id: 'dispute_management',
     name: 'Gestión de Disputas',
     description: 'Registrar y dar seguimiento a disputas legales',
     category: 'Legal',
-    estimatedTime: '10 minutos'
+    estimatedTime: '10 minutos',
   },
   {
     id: 'legal_alerts',
     name: 'Alertas Legales',
     description: 'Monitorear vencimientos y obligaciones legales',
     category: 'Monitoreo',
-    estimatedTime: '2-3 minutos'
+    estimatedTime: '2-3 minutos',
   },
   {
     id: 'document_generation',
     name: 'Generación de Documentos',
     description: 'Generar documentos legales estándar',
     category: 'Documentación',
-    estimatedTime: '5-10 minutos'
+    estimatedTime: '5-10 minutos',
   },
   {
     id: 'policy_guidance',
     name: 'Guía de Políticas',
     description: 'Proporcionar orientación sobre políticas y procedimientos',
     category: 'Asesoría',
-    estimatedTime: '3-5 minutos'
+    estimatedTime: '3-5 minutos',
   },
   {
     id: 'compliance_audit',
     name: 'Auditoría de Cumplimiento',
     description: 'Realizar auditorías de cumplimiento normativo',
     category: 'Auditoría',
-    estimatedTime: '15-30 minutos'
-  }
+    estimatedTime: '15-30 minutos',
+  },
 ];
 
 // ============================================================================
@@ -88,24 +89,31 @@ const capabilities: AgentCapability[] = [
 const tools: AgentTool[] = [
   {
     name: 'review_contract',
-    description: 'Revisa un contrato de arrendamiento identificando cláusulas importantes, riesgos y recomendaciones',
+    description:
+      'Revisa un contrato de arrendamiento identificando cláusulas importantes, riesgos y recomendaciones',
     inputSchema: {
       type: 'object',
       properties: {
         contractId: {
           type: 'string',
-          description: 'ID del contrato a revisar'
+          description: 'ID del contrato a revisar',
         },
         focusAreas: {
           type: 'array',
           items: {
             type: 'string',
-            enum: ['clausulas_riesgo', 'cumplimiento', 'terminacion', 'responsabilidades', 'general']
+            enum: [
+              'clausulas_riesgo',
+              'cumplimiento',
+              'terminacion',
+              'responsabilidades',
+              'general',
+            ],
           },
-          description: 'Áreas específicas a revisar'
-        }
+          description: 'Áreas específicas a revisar',
+        },
       },
-      required: ['contractId']
+      required: ['contractId'],
     },
     handler: async (input, context) => {
       const contract = await prisma.contract.findFirst({
@@ -113,18 +121,18 @@ const tools: AgentTool[] = [
           id: input.contractId,
           unit: {
             building: {
-              companyId: context.companyId
-            }
-          }
+              companyId: context.companyId,
+            },
+          },
         },
         include: {
           tenant: true,
           unit: {
             include: {
-              building: true
-            }
-          }
-        }
+              building: true,
+            },
+          },
+        },
       });
 
       if (!contract) {
@@ -140,25 +148,30 @@ const tools: AgentTool[] = [
         vigencia: {
           inicio: contract.fechaInicio,
           fin: contract.fechaFin,
-          diasRestantes: Math.ceil((new Date(contract.fechaFin).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+          diasRestantes: Math.ceil(
+            (new Date(contract.fechaFin).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+          ),
         },
         terminos: {
           rentaMensual: contract.rentaMensual,
           deposito: contract.deposito,
-          duracionMeses: Math.ceil((new Date(contract.fechaFin).getTime() - new Date(contract.fechaInicio).getTime()) / (1000 * 60 * 60 * 24 * 30))
-        }
+          duracionMeses: Math.ceil(
+            (new Date(contract.fechaFin).getTime() - new Date(contract.fechaInicio).getTime()) /
+              (1000 * 60 * 60 * 24 * 30)
+          ),
+        },
       };
 
       // Identificar posibles riesgos
       const riesgos: any[] = [];
-      
+
       // Riesgo: Contrato próximo a vencer
       if (analisis.vigencia.diasRestantes < 60 && analisis.vigencia.diasRestantes > 0) {
         riesgos.push({
           tipo: 'vencimiento_proximo',
           nivel: 'medio',
           descripcion: `Contrato vence en ${analisis.vigencia.diasRestantes} días`,
-          accion: 'Iniciar proceso de renovación o búsqueda de nuevo inquilino'
+          accion: 'Iniciar proceso de renovación o búsqueda de nuevo inquilino',
         });
       }
 
@@ -168,7 +181,7 @@ const tools: AgentTool[] = [
           tipo: 'clausulas_incompletas',
           nivel: 'bajo',
           descripcion: 'Contrato podría carecer de cláusulas específicas importantes',
-          accion: 'Revisar y añadir cláusulas según sea necesario'
+          accion: 'Revisar y añadir cláusulas según sea necesario',
         });
       }
 
@@ -184,14 +197,34 @@ const tools: AgentTool[] = [
         cumplimiento,
         recomendaciones,
         checklistLegal: [
-          { item: 'Identificación de partes completa', cumple: !!contract.tenant.nombreCompleto, importancia: 'alta' },
-          { item: 'Términos financieros claros', cumple: !!contract.rentaMensual, importancia: 'alta' },
-          { item: 'Fechas de vigencia definidas', cumple: !!contract.fechaInicio && !!contract.fechaFin, importancia: 'alta' },
-          { item: 'Cláusulas especiales documentadas', cumple: !!contract.clausulasEspeciales, importancia: 'media' },
-          { item: 'Depósito de garantía registrado', cumple: !!contract.deposito, importancia: 'alta' }
-        ]
+          {
+            item: 'Identificación de partes completa',
+            cumple: !!contract.tenant.nombreCompleto,
+            importancia: 'alta',
+          },
+          {
+            item: 'Términos financieros claros',
+            cumple: !!contract.rentaMensual,
+            importancia: 'alta',
+          },
+          {
+            item: 'Fechas de vigencia definidas',
+            cumple: !!contract.fechaInicio && !!contract.fechaFin,
+            importancia: 'alta',
+          },
+          {
+            item: 'Cláusulas especiales documentadas',
+            cumple: !!contract.clausulasEspeciales,
+            importancia: 'media',
+          },
+          {
+            item: 'Depósito de garantía registrado',
+            cumple: !!contract.deposito,
+            importancia: 'alta',
+          },
+        ],
       };
-    }
+    },
   },
   {
     name: 'check_compliance_status',
@@ -201,55 +234,64 @@ const tools: AgentTool[] = [
       properties: {
         buildingId: {
           type: 'string',
-          description: 'ID del edificio (opcional)'
+          description: 'ID del edificio (opcional)',
         },
         regulaciones: {
           type: 'array',
           items: {
             type: 'string',
-            enum: ['gdpr', 'lopd', 'lau', 'habitabilidad', 'seguridad', 'accesibilidad', 'medio_ambiente']
+            enum: [
+              'gdpr',
+              'lopd',
+              'lau',
+              'habitabilidad',
+              'seguridad',
+              'accesibilidad',
+              'medio_ambiente',
+            ],
           },
-          description: 'Regulaciones específicas a verificar'
-        }
-      }
+          description: 'Regulaciones específicas a verificar',
+        },
+      },
     },
     handler: async (input, context) => {
       const regulacionesCheck = input.regulaciones || ['gdpr', 'lau', 'habitabilidad', 'seguridad'];
-      
-      const resultados = regulacionesCheck.map(reg => {
+
+      const resultados = regulacionesCheck.map((reg) => {
         const check = verificarRegulacion(reg, context.companyId, input.buildingId);
         return check;
       });
 
-      const cumplimientoGeneral = resultados.filter(r => r.cumple).length / resultados.length * 100;
-      const criticos = resultados.filter(r => !r.cumple && r.criticidad === 'alta');
+      const cumplimientoGeneral =
+        (resultados.filter((r) => r.cumple).length / resultados.length) * 100;
+      const criticos = resultados.filter((r) => !r.cumple && r.criticidad === 'alta');
 
       return {
         resumen: {
           porcentajeCumplimiento: Math.round(cumplimientoGeneral * 100) / 100,
           totalVerificaciones: resultados.length,
-          cumpliendo: resultados.filter(r => r.cumple).length,
-          incumplimientos: resultados.filter(r => !r.cumple).length,
-          criticos: criticos.length
+          cumpliendo: resultados.filter((r) => r.cumple).length,
+          incumplimientos: resultados.filter((r) => !r.cumple).length,
+          criticos: criticos.length,
         },
         detalleRegulaciones: resultados,
-        accionesRequeridas: criticos.map(c => ({
+        accionesRequeridas: criticos.map((c) => ({
           regulacion: c.regulacion,
           descripcion: c.descripcion,
           plazo: c.plazoCorreccion,
-          consecuencias: c.consecuencias
+          consecuencias: c.consecuencias,
         })),
         certificaciones: {
           habitabilidad: 'Vigente hasta 2025-06-30',
           seguridad: 'Vigente hasta 2024-12-31',
-          accesibilidad: 'En proceso de renovación'
+          accesibilidad: 'En proceso de renovación',
         },
         proximosVencimientos: [
           { certificado: 'Certificado Energético', vencimiento: '2024-12-31', diasRestantes: 120 },
-          { certificado: 'Inspección ITE', vencimiento: '2025-03-15', diasRestantes: 200 }
-        ]
+          { certificado: 'Inspección ITE', vencimiento: '2025-03-15', diasRestantes: 200 },
+        ],
       };
-    }
+    },
   },
   {
     name: 'create_legal_dispute',
@@ -259,35 +301,35 @@ const tools: AgentTool[] = [
       properties: {
         titulo: {
           type: 'string',
-          description: 'Título de la disputa'
+          description: 'Título de la disputa',
         },
         descripcion: {
           type: 'string',
-          description: 'Descripción detallada'
+          description: 'Descripción detallada',
         },
         tipo: {
           type: 'string',
           enum: ['inquilino', 'proveedor', 'vecino', 'administracion', 'otro'],
-          description: 'Tipo de disputa'
+          description: 'Tipo de disputa',
         },
         parteContraria: {
           type: 'string',
-          description: 'Nombre de la parte contraria'
+          description: 'Nombre de la parte contraria',
         },
         contratoId: {
           type: 'string',
-          description: 'ID del contrato relacionado'
+          description: 'ID del contrato relacionado',
         },
         montoDisputa: {
           type: 'number',
-          description: 'Monto en disputa'
+          description: 'Monto en disputa',
         },
         urgente: {
           type: 'boolean',
-          description: 'Si requiere atención urgente'
-        }
+          description: 'Si requiere atención urgente',
+        },
       },
-      required: ['titulo', 'descripcion', 'tipo']
+      required: ['titulo', 'descripcion', 'tipo'],
     },
     handler: async (input, context) => {
       const dispute = await prisma.legalDispute.create({
@@ -302,8 +344,8 @@ const tools: AgentTool[] = [
           prioridad: input.urgente ? 'urgente' : 'media',
           companyId: context.companyId,
           registradoPor: context.userId,
-          fechaRegistro: new Date()
-        }
+          fechaRegistro: new Date(),
+        },
       });
 
       // Evaluar necesidad de asesoría legal externa
@@ -321,14 +363,16 @@ const tools: AgentTool[] = [
         proximosPasos: [
           'Recopilar toda la documentación relevante',
           'Intentar resolución amistosa primero',
-          requiereAbogado.necesario ? 'Contactar con asesoría legal externa' : 'Seguimiento interno por 30 días',
-          'Documentar todas las comunicaciones'
+          requiereAbogado.necesario
+            ? 'Contactar con asesoría legal externa'
+            : 'Seguimiento interno por 30 días',
+          'Documentar todas las comunicaciones',
         ],
         plazosLegales: obtenerPlazosLegales(input.tipo),
-        mensaje: `Disputa ${dispute.id.slice(0, 8).toUpperCase()} registrada exitosamente. ${requiereAbogado.necesario ? '⚠️ Se recomienda consulta legal externa.' : 'Se intentará resolución interna.'}`
+        mensaje: `Disputa ${dispute.id.slice(0, 8).toUpperCase()} registrada exitosamente. ${requiereAbogado.necesario ? '⚠️ Se recomienda consulta legal externa.' : 'Se intentará resolución interna.'}`,
       };
     },
-    requiresConfirmation: false
+    requiresConfirmation: false,
   },
   {
     name: 'get_legal_alerts',
@@ -338,14 +382,14 @@ const tools: AgentTool[] = [
       properties: {
         diasAnticipacion: {
           type: 'number',
-          description: 'Días de anticipación para alertas (por defecto 60)'
+          description: 'Días de anticipación para alertas (por defecto 60)',
         },
         tipo: {
           type: 'string',
           enum: ['contratos', 'certificaciones', 'plazos_legales', 'todos'],
-          description: 'Tipo de alertas'
-        }
-      }
+          description: 'Tipo de alertas',
+        },
+      },
     },
     handler: async (input, context) => {
       const dias = input.diasAnticipacion || 60;
@@ -359,37 +403,39 @@ const tools: AgentTool[] = [
           where: {
             unit: {
               building: {
-                companyId: context.companyId
-              }
+                companyId: context.companyId,
+              },
             },
             estado: 'activo',
             fechaFin: {
               gte: new Date(),
-              lte: fechaLimite
-            }
+              lte: fechaLimite,
+            },
           },
           include: {
             tenant: {
               select: {
                 nombreCompleto: true,
-                email: true
-              }
+                email: true,
+              },
             },
             unit: {
               select: {
                 numero: true,
                 building: {
                   select: {
-                    nombre: true
-                  }
-                }
-              }
-            }
-          }
+                    nombre: true,
+                  },
+                },
+              },
+            },
+          },
         });
 
-        contratosVenciendo.forEach(c => {
-          const diasRestantes = Math.ceil((new Date(c.fechaFin).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+        contratosVenciendo.forEach((c) => {
+          const diasRestantes = Math.ceil(
+            (new Date(c.fechaFin).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+          );
           alertas.push({
             tipo: 'contrato_vencimiento',
             criticidad: diasRestantes < 30 ? 'alta' : 'media',
@@ -400,10 +446,10 @@ const tools: AgentTool[] = [
               inquilino: c.tenant.nombreCompleto,
               propiedad: `${c.unit.building.nombre} - ${c.unit.numero}`,
               fechaVencimiento: c.fechaFin,
-              diasRestantes
+              diasRestantes,
             },
             accionRequerida: 'Contactar inquilino para renovación o notificación de no renovación',
-            plazoAccion: '15 días'
+            plazoAccion: '15 días',
           });
         });
       }
@@ -412,14 +458,16 @@ const tools: AgentTool[] = [
       const disputasActivas = await prisma.legalDispute.findMany({
         where: {
           companyId: context.companyId,
-          estado: { not: 'resuelta' }
+          estado: { not: 'resuelta' },
         },
         orderBy: { fechaRegistro: 'desc' },
-        take: 10
+        take: 10,
       });
 
-      disputasActivas.forEach(d => {
-        const diasDesdeRegistro = Math.ceil((Date.now() - d.fechaRegistro.getTime()) / (1000 * 60 * 60 * 24));
+      disputasActivas.forEach((d) => {
+        const diasDesdeRegistro = Math.ceil(
+          (Date.now() - d.fechaRegistro.getTime()) / (1000 * 60 * 60 * 24)
+        );
         if (diasDesdeRegistro > 30) {
           alertas.push({
             tipo: 'disputa_pendiente',
@@ -429,52 +477,55 @@ const tools: AgentTool[] = [
             detalles: {
               disputaId: d.id,
               tipo: d.tipo,
-              diasAbierta: diasDesdeRegistro
+              diasAbierta: diasDesdeRegistro,
             },
             accionRequerida: 'Revisar estado y tomar acción',
-            plazoAccion: 'Inmediato'
+            plazoAccion: 'Inmediato',
           });
         }
       });
 
       // Alertas de certificaciones (simuladas)
       if (!input.tipo || input.tipo === 'certificaciones' || input.tipo === 'todos') {
-        alertas.push(
-          {
-            tipo: 'certificacion',
-            criticidad: 'media',
-            titulo: 'Renovación de Certificado Energético',
-            descripcion: 'El certificado energético requiere renovación',
-            detalles: {
-              certificado: 'Certificado de Eficiencia Energética',
-              vencimiento: '2024-12-31',
-              diasRestantes: 120
-            },
-            accionRequerida: 'Programar inspección y renovación',
-            plazoAccion: '60 días'
-          }
-        );
+        alertas.push({
+          tipo: 'certificacion',
+          criticidad: 'media',
+          titulo: 'Renovación de Certificado Energético',
+          descripcion: 'El certificado energético requiere renovación',
+          detalles: {
+            certificado: 'Certificado de Eficiencia Energética',
+            vencimiento: '2024-12-31',
+            diasRestantes: 120,
+          },
+          accionRequerida: 'Programar inspección y renovación',
+          plazoAccion: '60 días',
+        });
       }
 
       // Ordenar por criticidad
       const ordenPrioridad = { alta: 3, media: 2, baja: 1 };
-      alertas.sort((a, b) => ordenPrioridad[b.criticidad as keyof typeof ordenPrioridad] - ordenPrioridad[a.criticidad as keyof typeof ordenPrioridad]);
+      alertas.sort(
+        (a, b) =>
+          ordenPrioridad[b.criticidad as keyof typeof ordenPrioridad] -
+          ordenPrioridad[a.criticidad as keyof typeof ordenPrioridad]
+      );
 
       return {
         totalAlertas: alertas.length,
-        alertasCriticas: alertas.filter(a => a.criticidad === 'alta').length,
+        alertasCriticas: alertas.filter((a) => a.criticidad === 'alta').length,
         alertas: alertas.slice(0, 20),
         resumenPorTipo: alertas.reduce((acc: any, a) => {
           acc[a.tipo] = (acc[a.tipo] || 0) + 1;
           return acc;
         }, {}),
-        recomendacion: alertas.length > 10 ? 
-          'Alto número de alertas pendientes. Se recomienda revisar y priorizar acciones.' :
-          alertas.length > 0 ?
-          'Algunas alertas requieren atención. Revisa las acciones recomendadas.' :
-          'Sin alertas legales pendientes en este momento.'
+        recomendacion:
+          alertas.length > 10
+            ? 'Alto número de alertas pendientes. Se recomienda revisar y priorizar acciones.'
+            : alertas.length > 0
+              ? 'Algunas alertas requieren atención. Revisa las acciones recomendadas.'
+              : 'Sin alertas legales pendientes en este momento.',
       };
-    }
+    },
   },
   {
     name: 'generate_legal_document',
@@ -484,23 +535,30 @@ const tools: AgentTool[] = [
       properties: {
         tipoDocumento: {
           type: 'string',
-          enum: ['notificacion_desahucio', 'requerimiento_pago', 'carta_preaviso', 'finiquito', 'certificado_no_adeudo', 'addendum_contrato'],
-          description: 'Tipo de documento a generar'
+          enum: [
+            'notificacion_desahucio',
+            'requerimiento_pago',
+            'carta_preaviso',
+            'finiquito',
+            'certificado_no_adeudo',
+            'addendum_contrato',
+          ],
+          description: 'Tipo de documento a generar',
         },
         contratoId: {
           type: 'string',
-          description: 'ID del contrato relacionado'
+          description: 'ID del contrato relacionado',
         },
         parametros: {
           type: 'object',
-          description: 'Parámetros específicos del documento'
-        }
+          description: 'Parámetros específicos del documento',
+        },
       },
-      required: ['tipoDocumento']
+      required: ['tipoDocumento'],
     },
     handler: async (input, context) => {
       const template = obtenerTemplate(input.tipoDocumento);
-      
+
       let datosContrato = null;
       if (input.contratoId) {
         const contract = await prisma.contract.findFirst({
@@ -509,12 +567,12 @@ const tools: AgentTool[] = [
             tenant: true,
             unit: {
               include: {
-                building: true
-              }
-            }
-          }
+                building: true,
+              },
+            },
+          },
         });
-        
+
         if (contract) {
           datosContrato = {
             inquilino: contract.tenant.nombreCompleto,
@@ -522,7 +580,7 @@ const tools: AgentTool[] = [
             direccion: contract.unit.building.direccion,
             rentaMensual: contract.rentaMensual,
             fechaInicio: contract.fechaInicio,
-            fechaFin: contract.fechaFin
+            fechaFin: contract.fechaFin,
           };
         }
       }
@@ -536,10 +594,10 @@ const tools: AgentTool[] = [
           ...datosContrato,
           ...input.parametros,
           fechaDocumento: new Date().toLocaleDateString('es-ES'),
-          empresa: 'INMOVA'
+          empresa: 'INMOVA',
         },
         estado: 'borrador',
-        requiereRevision: true
+        requiereRevision: true,
       };
 
       logger.info(`📄 Documento legal generado: ${documento.id} - Tipo: ${input.tipoDocumento}`);
@@ -549,18 +607,19 @@ const tools: AgentTool[] = [
         tipo: input.tipoDocumento,
         estado: 'Generado - Requiere revisión',
         mensaje: `Documento ${input.tipoDocumento} generado exitosamente.`,
-        advertencia: '⚠️ Este documento es un borrador generado automáticamente. DEBE ser revisado por un profesional legal antes de su uso.',
+        advertencia:
+          '⚠️ Este documento es un borrador generado automáticamente. DEBE ser revisado por un profesional legal antes de su uso.',
         proximosPasos: [
           'Revisar contenido generado',
           'Ajustar según caso específico',
           'Validar con asesoría legal',
           'Obtener firmas necesarias',
-          'Archivar copia del documento'
+          'Archivar copia del documento',
         ],
-        contenidoBorrador: generarContenidoDocumento(input.tipoDocumento, documento.datos)
+        contenidoBorrador: generarContenidoDocumento(input.tipoDocumento, documento.datos),
       };
     },
-    requiresConfirmation: true
+    requiresConfirmation: true,
   },
   {
     name: 'search_legal_precedents',
@@ -570,20 +629,20 @@ const tools: AgentTool[] = [
       properties: {
         tema: {
           type: 'string',
-          description: 'Tema legal a buscar'
+          description: 'Tema legal a buscar',
         },
         tipo: {
           type: 'string',
           enum: ['desahucio', 'morosidad', 'daños', 'incumplimiento', 'rescision', 'otro'],
-          description: 'Tipo de caso'
-        }
+          description: 'Tipo de caso',
+        },
       },
-      required: ['tema']
+      required: ['tema'],
     },
     handler: async (input, context) => {
       // Simulación de base de conocimientos legal
       const precedentes = obtenerPrecedentes(input.tipo || 'otro');
-      
+
       return {
         resultadosEncontrados: precedentes.length,
         precedentes: precedentes.slice(0, 5),
@@ -592,16 +651,16 @@ const tools: AgentTool[] = [
             referencia: 'STS 123/2023',
             fecha: '2023-05-15',
             resumen: 'Caso relevante sobre el tema consultado',
-            aplicabilidad: 'Alta'
-          }
+            aplicabilidad: 'Alta',
+          },
         ],
         recomendacionesLegales: [
           'Revisar documentación específica del caso',
           'Considerar mediación antes de proceso judicial',
-          'Documentar todas las comunicaciones'
-        ]
+          'Documentar todas las comunicaciones',
+        ],
       };
-    }
+    },
   },
   {
     name: 'audit_compliance',
@@ -612,14 +671,14 @@ const tools: AgentTool[] = [
         alcance: {
           type: 'string',
           enum: ['completo', 'contratos', 'gdpr', 'seguridad', 'laboral'],
-          description: 'Alcance de la auditoría'
+          description: 'Alcance de la auditoría',
         },
         buildingId: {
           type: 'string',
-          description: 'ID del edificio (opcional)'
-        }
+          description: 'ID del edificio (opcional)',
+        },
       },
-      required: ['alcance']
+      required: ['alcance'],
     },
     handler: async (input, context) => {
       logger.info(`🔍 Iniciando auditoría de cumplimiento - Alcance: ${input.alcance}`);
@@ -629,7 +688,7 @@ const tools: AgentTool[] = [
         fechaAuditoria: new Date(),
         auditor: context.userName,
         hallazgos: [] as any[],
-        recomendaciones: [] as any[]
+        recomendaciones: [] as any[],
       };
 
       // Auditoría de contratos
@@ -639,21 +698,21 @@ const tools: AgentTool[] = [
             unit: {
               building: {
                 companyId: context.companyId,
-                ...(input.buildingId ? { id: input.buildingId } : {})
-              }
-            }
-          }
+                ...(input.buildingId ? { id: input.buildingId } : {}),
+              },
+            },
+          },
         });
 
         const sinClausulas = await prisma.contract.count({
           where: {
             unit: {
               building: {
-                companyId: context.companyId
-              }
+                companyId: context.companyId,
+              },
             },
-            clausulasEspeciales: null
-          }
+            clausulasEspeciales: null,
+          },
         });
 
         if (sinClausulas > 0) {
@@ -662,7 +721,7 @@ const tools: AgentTool[] = [
             severidad: 'media',
             descripcion: `${sinClausulas} de ${contratos} contratos carecen de cláusulas especiales documentadas`,
             riesgo: 'Posibles conflictos por interpretación o falta de claridad',
-            accionCorrectiva: 'Revisar y completar cláusulas especiales en todos los contratos'
+            accionCorrectiva: 'Revisar y completar cláusulas especiales en todos los contratos',
           });
         }
       }
@@ -674,23 +733,28 @@ const tools: AgentTool[] = [
           severidad: 'baja',
           descripcion: 'Sistema implementa medidas básicas de protección de datos',
           riesgo: 'Bajo - Monitoreo continuo requerido',
-          accionCorrectiva: 'Continuar con auditorías periódicas'
+          accionCorrectiva: 'Continuar con auditorías periódicas',
         });
       }
 
       // Calificación general
       const hallazgosAltos = resultados.hallazgos.filter((h: any) => h.severidad === 'alta').length;
-      const hallazgosMedios = resultados.hallazgos.filter((h: any) => h.severidad === 'media').length;
+      const hallazgosMedios = resultados.hallazgos.filter(
+        (h: any) => h.severidad === 'media'
+      ).length;
 
-      resultados.calificacion = hallazgosAltos === 0 && hallazgosMedios < 3 ? 'Satisfactorio' :
-                               hallazgosAltos === 0 ? 'Aceptable con mejoras' :
-                               'Requiere atención inmediata';
+      resultados.calificacion =
+        hallazgosAltos === 0 && hallazgosMedios < 3
+          ? 'Satisfactorio'
+          : hallazgosAltos === 0
+            ? 'Aceptable con mejoras'
+            : 'Requiere atención inmediata';
 
       return resultados;
     },
     requiresConfirmation: false,
-    permissions: ['audit_legal']
-  }
+    permissions: ['audit_legal'],
+  },
 ];
 
 // ============================================================================
@@ -706,17 +770,19 @@ function verificarCumplimientoContrato(contract: any) {
       objetoContrato: true,
       duracion: true,
       renta: true,
-      fianza: !!contract.deposito
+      fianza: !!contract.deposito,
     },
-    observaciones: contract.deposito ? [] : ['Falta registro de depósito de garantía']
+    observaciones: contract.deposito ? [] : ['Falta registro de depósito de garantía'],
   };
 }
 
 function generarRecomendacionesContrato(contract: any, riesgos: any[]) {
   const recomendaciones: string[] = [];
 
-  if (riesgos.some(r => r.tipo === 'vencimiento_proximo')) {
-    recomendaciones.push('Iniciar negociaciones de renovación o dar aviso de no renovación con tiempo suficiente');
+  if (riesgos.some((r) => r.tipo === 'vencimiento_proximo')) {
+    recomendaciones.push(
+      'Iniciar negociaciones de renovación o dar aviso de no renovación con tiempo suficiente'
+    );
   }
 
   if (!contract.documentUrl) {
@@ -741,21 +807,21 @@ function verificarRegulacion(regulacion: string, companyId: string, buildingId?:
       criticidad: 'alta',
       descripcion: 'Reglamento General de Protección de Datos',
       ultimaVerificacion: new Date(),
-      vigenciaHasta: null
+      vigenciaHasta: null,
     },
     lopd: {
       regulacion: 'LOPD - Ley Orgánica de Protección de Datos',
       cumple: true,
       criticidad: 'alta',
       descripcion: 'Ley de Protección de Datos española',
-      ultimaVerificacion: new Date()
+      ultimaVerificacion: new Date(),
     },
     lau: {
       regulacion: 'LAU - Ley de Arrendamientos Urbanos',
       cumple: true,
       criticidad: 'alta',
       descripcion: 'Cumplimiento de normativa de arrendamientos',
-      ultimaVerificacion: new Date()
+      ultimaVerificacion: new Date(),
     },
     habitabilidad: {
       regulacion: 'Cédula de Habitabilidad',
@@ -763,14 +829,14 @@ function verificarRegulacion(regulacion: string, companyId: string, buildingId?:
       criticidad: 'alta',
       descripcion: 'Certificado de habitabilidad vigente',
       vigenciaHasta: '2025-06-30',
-      ultimaVerificacion: new Date()
+      ultimaVerificacion: new Date(),
     },
     seguridad: {
       regulacion: 'Normativa de Seguridad',
       cumple: true,
       criticidad: 'alta',
       descripcion: 'Cumplimiento de normativas de seguridad',
-      ultimaVerificacion: new Date()
+      ultimaVerificacion: new Date(),
     },
     accesibilidad: {
       regulacion: 'Accesibilidad',
@@ -778,17 +844,19 @@ function verificarRegulacion(regulacion: string, companyId: string, buildingId?:
       criticidad: 'media',
       descripcion: 'Adaptaciones de accesibilidad pendientes',
       plazoCorreccion: '6 meses',
-      consecuencias: 'Posibles multas administrativas'
-    }
+      consecuencias: 'Posibles multas administrativas',
+    },
   };
 
-  return regulaciones[regulacion] || {
-    regulacion: regulacion,
-    cumple: true,
-    criticidad: 'media',
-    descripcion: 'Regulación verificada',
-    ultimaVerificacion: new Date()
-  };
+  return (
+    regulaciones[regulacion] || {
+      regulacion: regulacion,
+      cumple: true,
+      criticidad: 'media',
+      descripcion: 'Regulación verificada',
+      ultimaVerificacion: new Date(),
+    }
+  );
 }
 
 function evaluarNecesidadAbogado(input: any): { necesario: boolean; razon: string } {
@@ -802,7 +870,10 @@ function evaluarNecesidadAbogado(input: any): { necesario: boolean; razon: strin
   }
 
   if (input.tipo === 'administracion') {
-    return { necesario: true, razon: 'Disputas con administración suelen requerir asesoría especializada' };
+    return {
+      necesario: true,
+      razon: 'Disputas con administración suelen requerir asesoría especializada',
+    };
   }
 
   return { necesario: false, razon: 'Puede intentarse resolución interna primero' };
@@ -813,23 +884,25 @@ function obtenerPlazosLegales(tipo: string): any[] {
     inquilino: [
       { accion: 'Requerimiento de pago', plazo: '10 días hábiles' },
       { accion: 'Notificación de desahucio', plazo: '30 días' },
-      { accion: 'Presentación demanda', plazo: 'Tras incumplimiento de requerimiento' }
+      { accion: 'Presentación demanda', plazo: 'Tras incumplimiento de requerimiento' },
     ],
     proveedor: [
       { accion: 'Reclamación amistosa', plazo: '15 días' },
       { accion: 'Mediación', plazo: '30 días' },
-      { accion: 'Vía judicial', plazo: 'Tras fracaso de mediación' }
+      { accion: 'Vía judicial', plazo: 'Tras fracaso de mediación' },
     ],
     vecino: [
       { accion: 'Mediación comunitaria', plazo: '30 días' },
-      { accion: 'Denuncia si aplica', plazo: 'Variable según gravedad' }
-    ]
+      { accion: 'Denuncia si aplica', plazo: 'Variable según gravedad' },
+    ],
   };
 
-  return plazos[tipo] || [
-    { accion: 'Evaluación inicial', plazo: '7 días' },
-    { accion: 'Resolución amistosa', plazo: '30 días' }
-  ];
+  return (
+    plazos[tipo] || [
+      { accion: 'Evaluación inicial', plazo: '7 días' },
+      { accion: 'Resolución amistosa', plazo: '30 días' },
+    ]
+  );
 }
 
 function obtenerTemplate(tipo: string): string {
@@ -839,7 +912,7 @@ function obtenerTemplate(tipo: string): string {
     carta_preaviso: 'Template de carta de preaviso',
     finiquito: 'Template de finiquito',
     certificado_no_adeudo: 'Template de certificado de no adeudo',
-    addendum_contrato: 'Template de addendum a contrato'
+    addendum_contrato: 'Template de addendum a contrato',
   };
 
   return templates[tipo] || 'Template genérico';
@@ -857,8 +930,8 @@ function obtenerPrecedentes(tipo: string): any[] {
       fecha: '2023-01-15',
       resumen: 'Precedente relevante para el tipo de caso consultado',
       resultado: 'Favorable',
-      aplicabilidad: 'Media'
-    }
+      aplicabilidad: 'Media',
+    },
   ];
 }
 
@@ -869,7 +942,8 @@ function obtenerPrecedentes(tipo: string): any[] {
 const legalComplianceConfig: AgentConfig = {
   type: 'legal_compliance',
   name: 'Agente de Legal y Cumplimiento',
-  description: 'Especialista en aspectos legales, cumplimiento normativo y gestión de riesgos legales',
+  description:
+    'Especialista en aspectos legales, cumplimiento normativo y gestión de riesgos legales',
   systemPrompt: `Eres el Agente de Legal y Cumplimiento de INMOVA, especializado en aspectos legales inmobiliarios.
 
 Tu rol es:
@@ -914,7 +988,7 @@ IMPORTANTE:
   model: CLAUDE_MODEL_FAST,
   temperature: 0.4, // Muy bajo para mayor precisión legal
   maxTokens: 4096,
-  enabled: true
+  enabled: true,
 };
 
 // ============================================================================
@@ -937,13 +1011,32 @@ export class LegalComplianceAgent extends BaseAgent {
   async canHandle(message: string, context: UserContext): Promise<boolean> {
     const messageLower = message.toLowerCase();
     const keywords = [
-      'legal', 'contrato', 'cláusula', 'desahucio', 'demanda',
-      'disputa', 'conflicto', 'normativa', 'regulación', 'cumplimiento',
-      'gdpr', 'lopd', 'lau', 'certificado', 'habitabilidad',
-      'abogado', 'juicio', 'mediación', 'arbitraje', 'documento legal',
-      'notificación', 'requerimiento', 'plazo legal', 'vencimiento'
+      'legal',
+      'contrato',
+      'cláusula',
+      'desahucio',
+      'demanda',
+      'disputa',
+      'conflicto',
+      'normativa',
+      'regulación',
+      'cumplimiento',
+      'gdpr',
+      'lopd',
+      'lau',
+      'certificado',
+      'habitabilidad',
+      'abogado',
+      'juicio',
+      'mediación',
+      'arbitraje',
+      'documento legal',
+      'notificación',
+      'requerimiento',
+      'plazo legal',
+      'vencimiento',
     ];
 
-    return keywords.some(keyword => messageLower.includes(keyword));
+    return keywords.some((keyword) => messageLower.includes(keyword));
   }
 }

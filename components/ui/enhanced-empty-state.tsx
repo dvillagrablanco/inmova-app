@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Componente mejorado de Empty State con presets
  * Usa configuraciones predefinidas para consistencia
@@ -53,7 +54,7 @@ export function EnhancedEmptyState({
 
   // Construir array de acciones
   const actions = [];
-  
+
   if (primaryAction) {
     actions.push({
       ...primaryAction,

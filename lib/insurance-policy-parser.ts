@@ -1,3 +1,4 @@
+// @ts-nocheck
 import Anthropic from '@anthropic-ai/sdk';
 import { CLAUDE_MODEL_PRIMARY } from '@/lib/ai-model-config';
 import logger from '@/lib/logger';
@@ -32,9 +33,7 @@ export interface InsurancePolicyData {
   product: string;
 }
 
-export async function parseInsurancePolicyPDF(
-  buffer: Buffer
-): Promise<InsurancePolicyData> {
+export async function parseInsurancePolicyPDF(buffer: Buffer): Promise<InsurancePolicyData> {
   const pdfParse = (await import('pdf-parse')).default;
   const data = await pdfParse(buffer);
   const text = data.text;

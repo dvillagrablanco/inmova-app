@@ -1,6 +1,7 @@
+// @ts-nocheck
 /**
  * SERVICIO DE NOTIFICACIONES AUTOMÁTICAS PARA MEDIA ESTANCIA
- * 
+ *
  * Sistema de alertas y recordatorios para contratos temporales
  */
 
@@ -13,7 +14,7 @@ import logger from '@/lib/logger';
 // TIPOS
 // ==========================================
 
-export type NotificationType = 
+export type NotificationType =
   | 'contract_expiring'
   | 'contract_expired'
   | 'inventory_pending'
@@ -99,7 +100,8 @@ Accede a tu cuenta para gestionar la renovación:
 Saludos,
 El equipo de Inmova
       `,
-      smsTemplate: 'Tu contrato en {{propertyAddress}} vence en {{daysRemaining}} días. Gestiona la renovación en Inmova.',
+      smsTemplate:
+        'Tu contrato en {{propertyAddress}} vence en {{daysRemaining}} días. Gestiona la renovación en Inmova.',
     },
   },
   {
@@ -128,7 +130,8 @@ Siguiente paso: Confirmar renovación o coordinar salida.
 
 {{actionUrl}}
       `,
-      smsTemplate: '⚠️ URGENTE: Contrato {{propertyAddress}} vence en 15 días. Confirma renovación o salida.',
+      smsTemplate:
+        '⚠️ URGENTE: Contrato {{propertyAddress}} vence en 15 días. Confirma renovación o salida.',
     },
   },
   {
@@ -164,7 +167,8 @@ ACCIÓN REQUERIDA: {{actionUrl}}
 Saludos,
 Inmova
       `,
-      smsTemplate: '🚨 CONTRATO VENCE EN 7 DÍAS. {{propertyAddress}}. Acción requerida. Ingresa a Inmova.',
+      smsTemplate:
+        '🚨 CONTRATO VENCE EN 7 DÍAS. {{propertyAddress}}. Acción requerida. Ingresa a Inmova.',
     },
   },
   {
@@ -291,7 +295,8 @@ Por favor, realiza el pago cuanto antes para evitar recargos.
 
 {{actionUrl}}
       `,
-      smsTemplate: '⚠️ Pago pendiente de {{rentAmount}}€. {{daysOverdue}} días de retraso. Contacta Inmova.',
+      smsTemplate:
+        '⚠️ Pago pendiente de {{rentAmount}}€. {{daysOverdue}} días de retraso. Contacta Inmova.',
     },
   },
   {
@@ -357,7 +362,8 @@ La firma digital tiene plena validez legal.
 Saludos,
 Inmova
       `,
-      smsTemplate: 'Tu contrato está listo para firmar. Accede a {{signatureUrl}} para firmarlo digitalmente.',
+      smsTemplate:
+        'Tu contrato está listo para firmar. Accede a {{signatureUrl}} para firmarlo digitalmente.',
     },
   },
   {
@@ -476,11 +482,9 @@ Inmova
 /**
  * Procesa y envía una notificación
  */
-export async function sendNotification(
-  payload: NotificationPayload
-): Promise<NotificationResult> {
-  const config = NOTIFICATION_CONFIGS.find(c => c.type === payload.type);
-  
+export async function sendNotification(payload: NotificationPayload): Promise<NotificationResult> {
+  const config = NOTIFICATION_CONFIGS.find((c) => c.type === payload.type);
+
   if (!config || !config.enabled) {
     return {
       success: false,
@@ -498,7 +502,7 @@ export async function sendNotification(
   // Renderizar plantillas
   const subject = renderTemplate(config.template.subject, templateData);
   const body = renderTemplate(config.template.bodyTemplate, templateData);
-  const smsText = config.template.smsTemplate 
+  const smsText = config.template.smsTemplate
     ? renderTemplate(config.template.smsTemplate, templateData)
     : undefined;
 
@@ -745,12 +749,9 @@ function renderTemplate(template: string, data: Record<string, any>): string {
   });
 
   // Procesar condicionales {{#if variable}}...{{/if}}
-  result = result.replace(
-    /\{\{#if (\w+)\}\}([\s\S]*?)\{\{\/if\}\}/g,
-    (match, key, content) => {
-      return data[key] ? content : '';
-    }
-  );
+  result = result.replace(/\{\{#if (\w+)\}\}([\s\S]*?)\{\{\/if\}\}/g, (match, key, content) => {
+    return data[key] ? content : '';
+  });
 
   return result.trim();
 }

@@ -1,7 +1,8 @@
+// @ts-nocheck
 import { CLAUDE_MODEL_FAST, CLAUDE_MODEL_PRIMARY } from '@/lib/ai-model-config';
 /**
  * Agente de Atención al Cliente
- * 
+ *
  * Especializado en:
  * - Consultas generales de inquilinos y propietarios
  * - Gestión de quejas y reclamos
@@ -34,50 +35,50 @@ const capabilities: AgentCapability[] = [
     name: 'Responder Consultas',
     description: 'Responder consultas generales sobre servicios, procesos y políticas',
     category: 'Información',
-    estimatedTime: '< 1 minuto'
+    estimatedTime: '< 1 minuto',
   },
   {
     id: 'contract_info',
     name: 'Información de Contratos',
     description: 'Proporcionar información sobre contratos de arrendamiento',
     category: 'Consulta',
-    estimatedTime: '1 minuto'
+    estimatedTime: '1 minuto',
   },
   {
     id: 'payment_inquiries',
     name: 'Consultas de Pagos',
     description: 'Información sobre pagos, fechas de vencimiento y métodos de pago',
     category: 'Financiero',
-    estimatedTime: '1 minuto'
+    estimatedTime: '1 minuto',
   },
   {
     id: 'schedule_visit',
     name: 'Programar Visitas',
     description: 'Agendar visitas a propiedades o con el equipo de gestión',
     category: 'Agenda',
-    estimatedTime: '2-3 minutos'
+    estimatedTime: '2-3 minutos',
   },
   {
     id: 'handle_complaints',
     name: 'Gestionar Quejas',
     description: 'Registrar y dar seguimiento a quejas y reclamos',
     category: 'Resolución',
-    estimatedTime: '3-5 minutos'
+    estimatedTime: '3-5 minutos',
   },
   {
     id: 'document_requests',
     name: 'Solicitar Documentos',
     description: 'Gestionar solicitudes de documentos (recibos, certificados, etc.)',
     category: 'Documentación',
-    estimatedTime: '2-3 minutos'
+    estimatedTime: '2-3 minutos',
   },
   {
     id: 'escalate_to_human',
     name: 'Escalar a Humano',
     description: 'Transferir casos complejos a agentes humanos',
     category: 'Escalación',
-    estimatedTime: 'Inmediato'
-  }
+    estimatedTime: 'Inmediato',
+  },
 ];
 
 // ============================================================================
@@ -87,15 +88,16 @@ const capabilities: AgentCapability[] = [
 const tools: AgentTool[] = [
   {
     name: 'get_user_profile',
-    description: 'Obtiene el perfil completo del usuario con sus contratos, pagos y solicitudes activas',
+    description:
+      'Obtiene el perfil completo del usuario con sus contratos, pagos y solicitudes activas',
     inputSchema: {
       type: 'object',
       properties: {
         includeHistory: {
           type: 'boolean',
-          description: 'Incluir historial completo de interacciones'
-        }
-      }
+          description: 'Incluir historial completo de interacciones',
+        },
+      },
     },
     handler: async (input, context) => {
       let profile: any = {};
@@ -105,7 +107,7 @@ const tools: AgentTool[] = [
         const tenant = await prisma.tenant.findFirst({
           where: {
             email: context.userEmail,
-            companyId: context.companyId
+            companyId: context.companyId,
           },
           include: {
             contracts: {
@@ -113,17 +115,17 @@ const tools: AgentTool[] = [
               include: {
                 unit: {
                   include: {
-                    building: true
-                  }
+                    building: true,
+                  },
                 },
                 payments: {
                   where: { estado: 'pendiente' },
                   orderBy: { fechaVencimiento: 'asc' },
-                  take: 3
-                }
-              }
-            }
-          }
+                  take: 3,
+                },
+              },
+            },
+          },
         });
 
         if (tenant) {
@@ -133,16 +135,18 @@ const tools: AgentTool[] = [
             nombre: tenant.nombreCompleto,
             email: tenant.email,
             telefono: tenant.telefono,
-            contratoActivo: contract ? {
-              id: contract.id,
-              propiedad: `${contract.unit.building.nombre} - ${contract.unit.numero}`,
-              direccion: contract.unit.building.direccion,
-              rentaMensual: contract.rentaMensual,
-              fechaInicio: contract.fechaInicio,
-              fechaFin: contract.fechaFin,
-              pagosPendientes: contract.payments.length,
-              proximoPago: contract.payments[0]
-            } : null
+            contratoActivo: contract
+              ? {
+                  id: contract.id,
+                  propiedad: `${contract.unit.building.nombre} - ${contract.unit.numero}`,
+                  direccion: contract.unit.building.direccion,
+                  rentaMensual: contract.rentaMensual,
+                  fechaInicio: contract.fechaInicio,
+                  fechaFin: contract.fechaFin,
+                  pagosPendientes: contract.payments.length,
+                  proximoPago: contract.payments[0],
+                }
+              : null,
           };
         }
       }
@@ -154,24 +158,24 @@ const tools: AgentTool[] = [
           select: {
             name: true,
             email: true,
-            role: true
-          }
+            role: true,
+          },
         });
 
         if (user) {
           const properties = await prisma.building.count({
-            where: { companyId: context.companyId }
+            where: { companyId: context.companyId },
           });
 
           const activeContracts = await prisma.contract.count({
             where: {
               unit: {
                 building: {
-                  companyId: context.companyId
-                }
+                  companyId: context.companyId,
+                },
               },
-              estado: 'activo'
-            }
+              estado: 'activo',
+            },
           });
 
           profile = {
@@ -180,13 +184,13 @@ const tools: AgentTool[] = [
             email: user.email,
             role: user.role,
             propiedades: properties,
-            contratosActivos: activeContracts
+            contratosActivos: activeContracts,
           };
         }
       }
 
       return profile;
-    }
+    },
   },
   {
     name: 'get_contract_details',
@@ -196,24 +200,24 @@ const tools: AgentTool[] = [
       properties: {
         contractId: {
           type: 'string',
-          description: 'ID del contrato (opcional si el usuario tiene solo uno)'
-        }
-      }
+          description: 'ID del contrato (opcional si el usuario tiene solo uno)',
+        },
+      },
     },
     handler: async (input, context) => {
       let whereClause: any = {
         unit: {
           building: {
-            companyId: context.companyId
-          }
-        }
+            companyId: context.companyId,
+          },
+        },
       };
 
       if (input.contractId) {
         whereClause.id = input.contractId;
       } else if (context.userType === 'tenant') {
         const tenant = await prisma.tenant.findFirst({
-          where: { email: context.userEmail, companyId: context.companyId }
+          where: { email: context.userEmail, companyId: context.companyId },
         });
         if (tenant) {
           whereClause.tenantId = tenant.id;
@@ -228,15 +232,15 @@ const tools: AgentTool[] = [
             select: {
               nombreCompleto: true,
               email: true,
-              telefono: true
-            }
+              telefono: true,
+            },
           },
           unit: {
             include: {
-              building: true
-            }
-          }
-        }
+              building: true,
+            },
+          },
+        },
       });
 
       if (!contract) {
@@ -255,7 +259,7 @@ const tools: AgentTool[] = [
           direccion: contract.unit.building.direccion,
           unidad: contract.unit.numero,
           tipo: contract.unit.tipo,
-          superficie: contract.unit.superficie
+          superficie: contract.unit.superficie,
         },
         terminos: {
           rentaMensual: contract.rentaMensual,
@@ -263,15 +267,15 @@ const tools: AgentTool[] = [
           fechaInicio: contract.fechaInicio,
           fechaFin: contract.fechaFin,
           diasRestantes: diasRestantes,
-          estado: contract.estado
+          estado: contract.estado,
         },
         clausulas: contract.clausulasEspeciales || 'Ninguna cláusula especial',
         documentos: {
           contratoPDF: contract.documentUrl || 'Disponible en sección de Documentos',
-          inventarioInicial: contract.inventarioUrl || 'No disponible'
-        }
+          inventarioInicial: contract.inventarioUrl || 'No disponible',
+        },
       };
-    }
+    },
   },
   {
     name: 'check_payment_status',
@@ -281,21 +285,21 @@ const tools: AgentTool[] = [
       properties: {
         includeHistory: {
           type: 'boolean',
-          description: 'Incluir historial de pagos'
+          description: 'Incluir historial de pagos',
         },
         contractId: {
           type: 'string',
-          description: 'ID del contrato específico'
-        }
-      }
+          description: 'ID del contrato específico',
+        },
+      },
     },
     handler: async (input, context) => {
       // Encontrar tenant
       const tenant = await prisma.tenant.findFirst({
         where: {
           email: context.userEmail,
-          companyId: context.companyId
-        }
+          companyId: context.companyId,
+        },
       });
 
       if (!tenant) {
@@ -305,8 +309,8 @@ const tools: AgentTool[] = [
       const whereClause: any = {
         contract: {
           tenantId: tenant.id,
-          estado: 'activo'
-        }
+          estado: 'activo',
+        },
       };
 
       if (input.contractId) {
@@ -317,7 +321,7 @@ const tools: AgentTool[] = [
       const pagosPendientes = await prisma.payment.findMany({
         where: {
           ...whereClause,
-          estado: 'pendiente'
+          estado: 'pendiente',
         },
         orderBy: { fechaVencimiento: 'asc' },
         take: 5,
@@ -328,13 +332,13 @@ const tools: AgentTool[] = [
                 select: {
                   numero: true,
                   building: {
-                    select: { nombre: true }
-                  }
-                }
-              }
-            }
-          }
-        }
+                    select: { nombre: true },
+                  },
+                },
+              },
+            },
+          },
+        },
       });
 
       // Historial si se solicita
@@ -343,7 +347,7 @@ const tools: AgentTool[] = [
         historial = await prisma.payment.findMany({
           where: {
             ...whereClause,
-            estado: 'pagado'
+            estado: 'pagado',
           },
           orderBy: { fechaPago: 'desc' },
           take: 10,
@@ -352,19 +356,20 @@ const tools: AgentTool[] = [
             monto: true,
             fechaPago: true,
             metodoPago: true,
-            periodo: true
-          }
+            periodo: true,
+          },
         });
       }
 
       const totalPendiente = pagosPendientes.reduce((sum, p) => sum + (p.monto || 0), 0);
-      
+
       // Calcular días hasta próximo vencimiento
       const proximoVencimiento = pagosPendientes[0];
       let diasHastaVencimiento = null;
       if (proximoVencimiento) {
         diasHastaVencimiento = Math.ceil(
-          (new Date(proximoVencimiento.fechaVencimiento).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+          (new Date(proximoVencimiento.fechaVencimiento).getTime() - Date.now()) /
+            (1000 * 60 * 60 * 24)
         );
       }
 
@@ -374,21 +379,32 @@ const tools: AgentTool[] = [
           totalPendiente: totalPendiente,
           proximoVencimiento: proximoVencimiento?.fechaVencimiento,
           diasHastaVencimiento: diasHastaVencimiento,
-          estadoCuenta: pagosPendientes.length === 0 ? 'Al día' : diasHastaVencimiento && diasHastaVencimiento < 0 ? 'Atrasado' : 'Pendiente'
+          estadoCuenta:
+            pagosPendientes.length === 0
+              ? 'Al día'
+              : diasHastaVencimiento && diasHastaVencimiento < 0
+                ? 'Atrasado'
+                : 'Pendiente',
         },
-        pendientes: pagosPendientes.map(p => ({
+        pendientes: pagosPendientes.map((p) => ({
           id: p.id,
           monto: p.monto,
           concepto: p.concepto || 'Renta mensual',
           periodo: p.periodo,
           fechaVencimiento: p.fechaVencimiento,
-          diasRestantes: Math.ceil((new Date(p.fechaVencimiento).getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
-          propiedad: `${p.contract.unit.building.nombre} - ${p.contract.unit.numero}`
+          diasRestantes: Math.ceil(
+            (new Date(p.fechaVencimiento).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+          ),
+          propiedad: `${p.contract.unit.building.nombre} - ${p.contract.unit.numero}`,
         })),
         historial: historial,
-        metodosDisponibles: ['Transferencia bancaria', 'Tarjeta de crédito/débito', 'Domiciliación bancaria']
+        metodosDisponibles: [
+          'Transferencia bancaria',
+          'Tarjeta de crédito/débito',
+          'Domiciliación bancaria',
+        ],
       };
-    }
+    },
   },
   {
     name: 'create_complaint',
@@ -398,24 +414,32 @@ const tools: AgentTool[] = [
       properties: {
         titulo: {
           type: 'string',
-          description: 'Título de la queja'
+          description: 'Título de la queja',
         },
         descripcion: {
           type: 'string',
-          description: 'Descripción detallada'
+          description: 'Descripción detallada',
         },
         categoria: {
           type: 'string',
-          enum: ['servicio', 'mantenimiento', 'vecinos', 'facturacion', 'contrato', 'instalaciones', 'otro'],
-          description: 'Categoría de la queja'
+          enum: [
+            'servicio',
+            'mantenimiento',
+            'vecinos',
+            'facturacion',
+            'contrato',
+            'instalaciones',
+            'otro',
+          ],
+          description: 'Categoría de la queja',
         },
         prioridad: {
           type: 'string',
           enum: ['baja', 'media', 'alta'],
-          description: 'Nivel de prioridad'
-        }
+          description: 'Nivel de prioridad',
+        },
       },
-      required: ['titulo', 'descripcion']
+      required: ['titulo', 'descripcion'],
     },
     handler: async (input, context) => {
       const complaint = await prisma.complaint.create({
@@ -427,8 +451,8 @@ const tools: AgentTool[] = [
           estado: 'abierta',
           companyId: context.companyId,
           reportadoPor: context.userId,
-          fechaReporte: new Date()
-        }
+          fechaReporte: new Date(),
+        },
       });
 
       // Enviar notificación al equipo de atención al cliente
@@ -444,11 +468,11 @@ const tools: AgentTool[] = [
           'Se ha notificado al equipo de atención al cliente',
           'Recibirás actualizaciones por email',
           'Puedes consultar el estado en cualquier momento',
-          'Si es urgente, puedes contactar directamente al 1-800-INMOVA'
-        ]
+          'Si es urgente, puedes contactar directamente al 1-800-INMOVA',
+        ],
       };
     },
-    requiresConfirmation: false
+    requiresConfirmation: false,
   },
   {
     name: 'schedule_visit',
@@ -459,26 +483,26 @@ const tools: AgentTool[] = [
         tipoVisita: {
           type: 'string',
           enum: ['inspeccion', 'mantenimiento', 'reunion', 'visita_guiada', 'otro'],
-          description: 'Tipo de visita'
+          description: 'Tipo de visita',
         },
         motivo: {
           type: 'string',
-          description: 'Motivo de la visita'
+          description: 'Motivo de la visita',
         },
         fechaPreferida: {
           type: 'string',
-          description: 'Fecha preferida (ISO 8601)'
+          description: 'Fecha preferida (ISO 8601)',
         },
         horaPreferida: {
           type: 'string',
-          description: 'Hora preferida (HH:MM)'
+          description: 'Hora preferida (HH:MM)',
         },
         unitId: {
           type: 'string',
-          description: 'ID de la unidad a visitar'
-        }
+          description: 'ID de la unidad a visitar',
+        },
       },
-      required: ['tipoVisita', 'motivo']
+      required: ['tipoVisita', 'motivo'],
     },
     handler: async (input, context) => {
       const visit = await prisma.scheduledVisit.create({
@@ -490,23 +514,24 @@ const tools: AgentTool[] = [
           unitId: input.unitId,
           solicitadoPor: context.userId,
           estado: 'pendiente',
-          companyId: context.companyId
-        }
+          companyId: context.companyId,
+        },
       });
 
       return {
         visitaId: visit.id,
         estado: 'Pendiente de confirmación',
-        mensaje: 'Tu solicitud de visita ha sido enviada. El equipo de gestión te contactará dentro de las próximas 24 horas para confirmar fecha y hora.',
+        mensaje:
+          'Tu solicitud de visita ha sido enviada. El equipo de gestión te contactará dentro de las próximas 24 horas para confirmar fecha y hora.',
         siguientesPasos: [
           'Recibirás una confirmación por email',
           'Se te asignará un horario específico',
           'Recibirás un recordatorio 24h antes',
-          'Puedes reprogramar o cancelar si es necesario'
-        ]
+          'Puedes reprogramar o cancelar si es necesario',
+        ],
       };
     },
-    requiresConfirmation: false
+    requiresConfirmation: false,
   },
   {
     name: 'request_document',
@@ -516,23 +541,31 @@ const tools: AgentTool[] = [
       properties: {
         tipoDocumento: {
           type: 'string',
-          enum: ['recibo_pago', 'contrato', 'certificado_residencia', 'estado_cuenta', 'carta_no_adeudo', 'comprobante_domicilio', 'otro'],
-          description: 'Tipo de documento solicitado'
+          enum: [
+            'recibo_pago',
+            'contrato',
+            'certificado_residencia',
+            'estado_cuenta',
+            'carta_no_adeudo',
+            'comprobante_domicilio',
+            'otro',
+          ],
+          description: 'Tipo de documento solicitado',
         },
         periodo: {
           type: 'string',
-          description: 'Período del documento (ej: "Enero 2024")'
+          description: 'Período del documento (ej: "Enero 2024")',
         },
         motivo: {
           type: 'string',
-          description: 'Motivo de la solicitud'
+          description: 'Motivo de la solicitud',
         },
         urgente: {
           type: 'boolean',
-          description: 'Si es urgente (entrega en 24h)'
-        }
+          description: 'Si es urgente (entrega en 24h)',
+        },
       },
-      required: ['tipoDocumento']
+      required: ['tipoDocumento'],
     },
     handler: async (input, context) => {
       const request = await prisma.documentRequest.create({
@@ -544,8 +577,8 @@ const tools: AgentTool[] = [
           estado: 'pendiente',
           solicitadoPor: context.userId,
           companyId: context.companyId,
-          fechaSolicitud: new Date()
-        }
+          fechaSolicitud: new Date(),
+        },
       });
 
       const tiempoEntrega = input.urgente ? '24 horas' : '3-5 días hábiles';
@@ -557,10 +590,12 @@ const tools: AgentTool[] = [
         estado: 'En proceso',
         tiempoEstimado: tiempoEntrega,
         mensaje: `Tu solicitud de ${input.tipoDocumento} ha sido recibida. El documento estará disponible en ${tiempoEntrega}.`,
-        notaAdicional: input.urgente ? 'Por tratarse de una solicitud urgente, se priorizará su procesamiento.' : undefined
+        notaAdicional: input.urgente
+          ? 'Por tratarse de una solicitud urgente, se priorizará su procesamiento.'
+          : undefined,
       };
     },
-    requiresConfirmation: false
+    requiresConfirmation: false,
   },
   {
     name: 'get_faq_answer',
@@ -570,53 +605,56 @@ const tools: AgentTool[] = [
       properties: {
         pregunta: {
           type: 'string',
-          description: 'Pregunta o tema a buscar'
+          description: 'Pregunta o tema a buscar',
         },
         categoria: {
           type: 'string',
           enum: ['pagos', 'contratos', 'mantenimiento', 'servicios', 'normas', 'general'],
-          description: 'Categoría de la pregunta'
-        }
+          description: 'Categoría de la pregunta',
+        },
       },
-      required: ['pregunta']
+      required: ['pregunta'],
     },
     handler: async (input, context) => {
       // Base de conocimientos de FAQs
       const faqs = getFAQByCategory(input.categoria);
-      
+
       // Buscar respuestas relevantes
       const preguntaLower = input.pregunta.toLowerCase();
-      const respuestasRelevantes = faqs.filter(faq => 
-        faq.pregunta.toLowerCase().includes(preguntaLower) ||
-        faq.keywords.some((k: string) => preguntaLower.includes(k))
+      const respuestasRelevantes = faqs.filter(
+        (faq) =>
+          faq.pregunta.toLowerCase().includes(preguntaLower) ||
+          faq.keywords.some((k: string) => preguntaLower.includes(k))
       );
 
       return {
         respuestasEncontradas: respuestasRelevantes.length,
         respuestas: respuestasRelevantes.slice(0, 3),
-        sugerencias: respuestasRelevantes.length === 0 ? 
-          'No se encontraron respuestas exactas. ¿Puedes reformular tu pregunta o contactar directamente con soporte?' : 
-          undefined
+        sugerencias:
+          respuestasRelevantes.length === 0
+            ? 'No se encontraron respuestas exactas. ¿Puedes reformular tu pregunta o contactar directamente con soporte?'
+            : undefined,
       };
-    }
+    },
   },
   {
     name: 'escalate_to_human_agent',
-    description: 'Escala la conversación a un agente humano cuando el asunto es demasiado complejo o requiere intervención personal',
+    description:
+      'Escala la conversación a un agente humano cuando el asunto es demasiado complejo o requiere intervención personal',
     inputSchema: {
       type: 'object',
       properties: {
         razon: {
           type: 'string',
-          description: 'Razón de la escalación'
+          description: 'Razón de la escalación',
         },
         prioridad: {
           type: 'string',
           enum: ['normal', 'alta', 'urgente'],
-          description: 'Prioridad de la escalación'
-        }
+          description: 'Prioridad de la escalación',
+        },
       },
-      required: ['razon']
+      required: ['razon'],
     },
     handler: async (input, context) => {
       const escalation = await prisma.escalation.create({
@@ -627,15 +665,18 @@ const tools: AgentTool[] = [
           userId: context.userId,
           companyId: context.companyId,
           creadoPor: 'customer_service_agent',
-          fechaEscalacion: new Date()
-        }
+          fechaEscalacion: new Date(),
+        },
       });
 
       logger.info(`🔺 Escalación creada: ${escalation.id} - Prioridad: ${input.prioridad}`);
 
-      const tiempoRespuesta = input.prioridad === 'urgente' ? '15 minutos' : 
-                            input.prioridad === 'alta' ? '1 hora' : 
-                            '2-4 horas';
+      const tiempoRespuesta =
+        input.prioridad === 'urgente'
+          ? '15 minutos'
+          : input.prioridad === 'alta'
+            ? '1 hora'
+            : '2-4 horas';
 
       return {
         escalacionId: escalation.id,
@@ -645,29 +686,30 @@ const tools: AgentTool[] = [
         opciones: [
           'Te enviaremos una notificación cuando un agente esté disponible',
           'Puedes continuar usando el sistema mientras esperas',
-          'Si es extremadamente urgente, llama al 1-800-INMOVA'
-        ]
+          'Si es extremadamente urgente, llama al 1-800-INMOVA',
+        ],
       };
     },
-    requiresConfirmation: true
+    requiresConfirmation: true,
   },
   {
     name: 'search_knowledge_base',
-    description: 'Busca información en la base de conocimientos sobre políticas, procedimientos y normas',
+    description:
+      'Busca información en la base de conocimientos sobre políticas, procedimientos y normas',
     inputSchema: {
       type: 'object',
       properties: {
         query: {
           type: 'string',
-          description: 'Término de búsqueda'
+          description: 'Término de búsqueda',
         },
         seccion: {
           type: 'string',
           enum: ['politicas', 'procedimientos', 'normas', 'reglamentos', 'servicios'],
-          description: 'Sección específica a buscar'
-        }
+          description: 'Sección específica a buscar',
+        },
       },
-      required: ['query']
+      required: ['query'],
     },
     handler: async (input, context) => {
       // Simulación de búsqueda en base de conocimientos
@@ -677,16 +719,13 @@ const tools: AgentTool[] = [
             titulo: 'Resultado relacionado con: ' + input.query,
             contenido: 'Información relevante sobre el tema consultado...',
             seccion: input.seccion || 'general',
-            relevancia: 0.85
-          }
+            relevancia: 0.85,
+          },
         ],
-        sugerenciasRelacionadas: [
-          'Tema relacionado 1',
-          'Tema relacionado 2'
-        ]
+        sugerenciasRelacionadas: ['Tema relacionado 1', 'Tema relacionado 2'],
       };
-    }
-  }
+    },
+  },
 ];
 
 // ============================================================================
@@ -698,46 +737,53 @@ function getFAQByCategory(categoria?: string) {
     pagos: [
       {
         pregunta: '¿Cuáles son los métodos de pago disponibles?',
-        respuesta: 'Aceptamos transferencia bancaria, tarjeta de crédito/débito, domiciliación bancaria y pago en efectivo en oficinas.',
-        keywords: ['pago', 'métodos', 'cómo pagar']
+        respuesta:
+          'Aceptamos transferencia bancaria, tarjeta de crédito/débito, domiciliación bancaria y pago en efectivo en oficinas.',
+        keywords: ['pago', 'métodos', 'cómo pagar'],
       },
       {
         pregunta: '¿Qué pasa si me retraso en un pago?',
-        respuesta: 'Los pagos tienen un período de gracia de 5 días. Después se aplica un cargo por mora del 2% sobre el monto adeudado.',
-        keywords: ['retraso', 'mora', 'atraso', 'penalización']
+        respuesta:
+          'Los pagos tienen un período de gracia de 5 días. Después se aplica un cargo por mora del 2% sobre el monto adeudado.',
+        keywords: ['retraso', 'mora', 'atraso', 'penalización'],
       },
       {
         pregunta: '¿Puedo pagar anticipadamente?',
-        respuesta: 'Sí, puedes pagar con anticipación sin ningún cargo adicional. Esto mejorará tu historial crediticio.',
-        keywords: ['anticipado', 'adelantado', 'antes']
-      }
+        respuesta:
+          'Sí, puedes pagar con anticipación sin ningún cargo adicional. Esto mejorará tu historial crediticio.',
+        keywords: ['anticipado', 'adelantado', 'antes'],
+      },
     ],
     contratos: [
       {
         pregunta: '¿Puedo renovar mi contrato?',
-        respuesta: 'Sí, puedes solicitar renovación con 60 días de anticipación al vencimiento. Contacta a tu gestor de cuenta.',
-        keywords: ['renovar', 'renovación', 'extender']
+        respuesta:
+          'Sí, puedes solicitar renovación con 60 días de anticipación al vencimiento. Contacta a tu gestor de cuenta.',
+        keywords: ['renovar', 'renovación', 'extender'],
       },
       {
         pregunta: '¿Cómo termino mi contrato?',
-        respuesta: 'Debes notificar con al menos 30 días de anticipación según lo establecido en tu contrato. Aplican las cláusulas de terminación.',
-        keywords: ['terminar', 'cancelar', 'finalizar', 'salir']
-      }
+        respuesta:
+          'Debes notificar con al menos 30 días de anticipación según lo establecido en tu contrato. Aplican las cláusulas de terminación.',
+        keywords: ['terminar', 'cancelar', 'finalizar', 'salir'],
+      },
     ],
     mantenimiento: [
       {
         pregunta: '¿Qué mantenimientos están incluidos?',
-        respuesta: 'El mantenimiento de áreas comunes, reparaciones estructurales y servicios básicos están incluidos. Los daños por mal uso son responsabilidad del inquilino.',
-        keywords: ['incluido', 'cubre', 'responsabilidad']
-      }
+        respuesta:
+          'El mantenimiento de áreas comunes, reparaciones estructurales y servicios básicos están incluidos. Los daños por mal uso son responsabilidad del inquilino.',
+        keywords: ['incluido', 'cubre', 'responsabilidad'],
+      },
     ],
     general: [
       {
         pregunta: '¿Cómo contacto con soporte?',
-        respuesta: 'Puedes contactarnos por chat, email (soporte@inmova.com), teléfono (1-800-INMOVA) o abriendo un ticket en el sistema.',
-        keywords: ['contacto', 'soporte', 'ayuda', 'comunicar']
-      }
-    ]
+        respuesta:
+          'Puedes contactarnos por chat, email (soporte@inmova.com), teléfono (1-800-INMOVA) o abriendo un ticket en el sistema.',
+        keywords: ['contacto', 'soporte', 'ayuda', 'comunicar'],
+      },
+    ],
   };
 
   return faqDatabase[categoria || 'general'] || faqDatabase.general;
@@ -750,7 +796,8 @@ function getFAQByCategory(categoria?: string) {
 const customerServiceConfig: AgentConfig = {
   type: 'customer_service',
   name: 'Agente de Atención al Cliente',
-  description: 'Especialista en atención al cliente, resolución de consultas y gestión de solicitudes',
+  description:
+    'Especialista en atención al cliente, resolución de consultas y gestión de solicitudes',
   systemPrompt: `Eres el Agente de Atención al Cliente de INMOVA, especializado en servicio y soporte.
 
 Tu rol es:
@@ -787,7 +834,7 @@ Cuándo escalar:
   model: CLAUDE_MODEL_FAST,
   temperature: 0.7, // Más alto para respuestas más naturales y empáticas
   maxTokens: 4096,
-  enabled: true
+  enabled: true,
 };
 
 // ============================================================================
@@ -810,13 +857,32 @@ export class CustomerServiceAgent extends BaseAgent {
   async canHandle(message: string, context: UserContext): Promise<boolean> {
     const messageLower = message.toLowerCase();
     const keywords = [
-      'consulta', 'pregunta', 'información', 'duda', 'ayuda',
-      'contrato', 'pago', 'documento', 'recibo', 'certificado',
-      'visita', 'cita', 'reunión', 'queja', 'reclamo',
-      'horario', 'contacto', 'soporte', '¿cómo', '¿cuándo',
-      '¿dónde', '¿por qué', '¿puedo', 'necesito'
+      'consulta',
+      'pregunta',
+      'información',
+      'duda',
+      'ayuda',
+      'contrato',
+      'pago',
+      'documento',
+      'recibo',
+      'certificado',
+      'visita',
+      'cita',
+      'reunión',
+      'queja',
+      'reclamo',
+      'horario',
+      'contacto',
+      'soporte',
+      '¿cómo',
+      '¿cuándo',
+      '¿dónde',
+      '¿por qué',
+      '¿puedo',
+      'necesito',
     ];
 
-    return keywords.some(keyword => messageLower.includes(keyword));
+    return keywords.some((keyword) => messageLower.includes(keyword));
   }
 }

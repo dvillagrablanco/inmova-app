@@ -2,10 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { applyUtilityProrationToUnit, calculateUtilityProration } from '@/lib/room-rental-service';
-import logger, { logError } from '@/lib/logger';
+import logger from '@/lib/logger';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+
+type ProrationMethod = 'equal' | 'combined' | 'by_surface' | 'by_occupants';
 
 const prorationSchema = z.object({
   unitId: z.string().min(1),
@@ -51,7 +53,7 @@ export async function POST(request: NextRequest) {
         internet: utilities.internet,
         cleaning: utilities.cleaning,
       },
-      prorationMethod || 'combined'
+      (prorationMethod || 'combined') as ProrationMethod
     );
 
     return NextResponse.json({
@@ -93,7 +95,7 @@ export async function GET(request: NextRequest) {
     const result = await calculateUtilityProration({
       totalAmount: parseFloat(totalAmount),
       rooms,
-      prorationMethod: prorationMethod as any,
+      prorationMethod: prorationMethod as ProrationMethod,
     });
 
     return NextResponse.json({

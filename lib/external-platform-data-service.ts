@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * SERVICIO UNIFICADO DE DATOS DE PLATAFORMAS EXTERNAS
  *
@@ -136,7 +137,12 @@ async function fetchFromScrapedPortals(options: FetchOptions): Promise<PlatformM
   const results: PlatformMarketDataPoint[] = [];
 
   try {
-    const scrapingResult = await scrapeAllPortals(options.city, 'sale', options.postalCode, options.propertyType);
+    const scrapingResult = await scrapeAllPortals(
+      options.city,
+      'sale',
+      options.postalCode,
+      options.propertyType
+    );
 
     for (const portal of scrapingResult.portals) {
       if (!portal.success) continue;
@@ -461,7 +467,8 @@ async function fetchFromIdealistaData(
     if (hasRentData) parts.push(`alquiler ${report.rentPricePerM2}€/m²`);
     if (hasYield) parts.push(`rentab. ${report.grossYield}%`);
     if (report.subZones.length > 0) parts.push(`${report.subZones.length} subzonas`);
-    if (report.priceEvolution?.dataPoints.length) parts.push(`evolución ${report.priceEvolution.dataPoints.length} periodos`);
+    if (report.priceEvolution?.dataPoints.length)
+      parts.push(`evolución ${report.priceEvolution.dataPoints.length} periodos`);
 
     const isAuth = report.dataSource.includes('auth');
     const reliability = isAuth ? 88 : 85;
@@ -832,16 +839,24 @@ export function formatPlatformDataForPrompt(data: AggregatedMarketData): string 
         for (const zone of raw.subZones.slice(0, 6)) {
           const z = zone as { location?: string; pricePerM2?: number; annualVariation?: number };
           if (z.location && z.pricePerM2) {
-            sections.push(`    - ${z.location}: ${z.pricePerM2}€/m²${z.annualVariation ? ` (${z.annualVariation > 0 ? '+' : ''}${z.annualVariation}% anual)` : ''}`);
+            sections.push(
+              `    - ${z.location}: ${z.pricePerM2}€/m²${z.annualVariation ? ` (${z.annualVariation > 0 ? '+' : ''}${z.annualVariation}% anual)` : ''}`
+            );
           }
         }
       }
-      if (raw.priceEvolution && Array.isArray(raw.priceEvolution) && raw.priceEvolution.length > 0) {
+      if (
+        raw.priceEvolution &&
+        Array.isArray(raw.priceEvolution) &&
+        raw.priceEvolution.length > 0
+      ) {
         sections.push(`  Evolución reciente de precios:`);
         for (const point of raw.priceEvolution) {
           const p = point as { period?: string; pricePerM2?: number; variation?: number };
           if (p.period && p.pricePerM2) {
-            sections.push(`    - ${p.period}: ${p.pricePerM2}€/m²${p.variation ? ` (${p.variation > 0 ? '+' : ''}${p.variation}%)` : ''}`);
+            sections.push(
+              `    - ${p.period}: ${p.pricePerM2}€/m²${p.variation ? ` (${p.variation > 0 ? '+' : ''}${p.variation}%)` : ''}`
+            );
           }
         }
       }

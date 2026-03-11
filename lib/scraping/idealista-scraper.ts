@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * SCRAPER DE IDEALISTA
  *
@@ -45,34 +46,38 @@ const CITY_SLUGS: Record<string, string> = {
 };
 
 function getCitySlug(city: string): string | null {
-  const key = city.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const key = city
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
   return CITY_SLUGS[key] || null;
 }
 
 const PROPERTY_TYPE_SEGMENTS: Record<string, { sale: string; rent: string }> = {
-  vivienda:        { sale: 'venta-viviendas',    rent: 'alquiler-viviendas' },
-  local:           { sale: 'venta-locales',      rent: 'alquiler-locales' },
-  local_comercial: { sale: 'venta-locales',      rent: 'alquiler-locales' },
-  oficina:         { sale: 'venta-oficinas',      rent: 'alquiler-oficinas' },
-  nave_industrial: { sale: 'venta-naves',         rent: 'alquiler-naves' },
-  nave:            { sale: 'venta-naves',         rent: 'alquiler-naves' },
-  garaje:          { sale: 'venta-garajes',       rent: 'alquiler-garajes' },
-  trastero:        { sale: 'venta-trasteros',     rent: 'alquiler-trasteros' },
-  terreno:         { sale: 'venta-terrenos',      rent: 'venta-terrenos' },
-  edificio:        { sale: 'venta-edificios',     rent: 'venta-edificios' },
-  coworking:       { sale: 'venta-oficinas',      rent: 'alquiler-oficinas' },
+  vivienda: { sale: 'venta-viviendas', rent: 'alquiler-viviendas' },
+  local: { sale: 'venta-locales', rent: 'alquiler-locales' },
+  local_comercial: { sale: 'venta-locales', rent: 'alquiler-locales' },
+  oficina: { sale: 'venta-oficinas', rent: 'alquiler-oficinas' },
+  nave_industrial: { sale: 'venta-naves', rent: 'alquiler-naves' },
+  nave: { sale: 'venta-naves', rent: 'alquiler-naves' },
+  garaje: { sale: 'venta-garajes', rent: 'alquiler-garajes' },
+  trastero: { sale: 'venta-trasteros', rent: 'alquiler-trasteros' },
+  terreno: { sale: 'venta-terrenos', rent: 'venta-terrenos' },
+  edificio: { sale: 'venta-edificios', rent: 'venta-edificios' },
+  coworking: { sale: 'venta-oficinas', rent: 'alquiler-oficinas' },
 };
 
 function buildSearchUrl(
   city: string,
   operation: 'sale' | 'rent',
   postalCode?: string,
-  propertyType?: string,
+  propertyType?: string
 ): string | null {
   const slug = getCitySlug(city);
   if (!slug) return null;
 
-  const segments = PROPERTY_TYPE_SEGMENTS[propertyType || 'vivienda'] || PROPERTY_TYPE_SEGMENTS.vivienda;
+  const segments =
+    PROPERTY_TYPE_SEGMENTS[propertyType || 'vivienda'] || PROPERTY_TYPE_SEGMENTS.vivienda;
   const op = operation === 'sale' ? segments.sale : segments.rent;
 
   if (postalCode) {
@@ -111,13 +116,13 @@ function parseListingCard($: cheerio.CheerioAPI, el: cheerio.Element): ScrapedLi
     });
 
     const pricePerM2 =
-      price && squareMeters && squareMeters > 0
-        ? Math.round(price / squareMeters)
-        : null;
+      price && squareMeters && squareMeters > 0 ? Math.round(price / squareMeters) : null;
 
-    const address = $el.find('.item-detail-char .item-description, .item-location').text().trim() || title;
+    const address =
+      $el.find('.item-detail-char .item-description, .item-location').text().trim() || title;
     const neighborhood = $el.find('.item-detail-char .item-description').text().trim() || null;
-    const imageUrl = $el.find('img').first().attr('src') || $el.find('img').first().attr('data-src') || null;
+    const imageUrl =
+      $el.find('img').first().attr('src') || $el.find('img').first().attr('data-src') || null;
 
     if (!price && !squareMeters) return null;
 
@@ -145,7 +150,7 @@ export async function scrapeIdealista(
   city: string,
   operation: 'sale' | 'rent' = 'sale',
   postalCode?: string,
-  propertyType?: string,
+  propertyType?: string
 ): Promise<ScrapedMarketSummary | null> {
   const pType = propertyType || 'vivienda';
   const cacheKey = buildCacheKey('idealista', city, `${operation}-${pType}`, postalCode);

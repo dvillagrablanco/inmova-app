@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { resolveAccountingScope } from '@/lib/accounting-scope';
+import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -50,7 +51,7 @@ export async function GET(request: NextRequest) {
         where: { building: { companyId: { in: companyIds } }, estado: 'ocupada' },
       }),
       prisma.tenant.count({
-        where: { companyId: { in: companyIds }, activo: true },
+        where: { companyId: { in: companyIds } },
       }),
       prisma.contract.count({
         where: {
@@ -86,7 +87,7 @@ export async function GET(request: NextRequest) {
       prisma.maintenanceRequest.count({
         where: {
           unit: { building: { companyId: { in: companyIds } } },
-          estado: { in: ['completada', 'cerrada'] },
+          estado: 'completado',
         },
       }),
     ]);
@@ -97,17 +98,20 @@ export async function GET(request: NextRequest) {
       const resolved = await prisma.maintenanceRequest.findMany({
         where: {
           unit: { building: { companyId: { in: companyIds } } },
-          estado: { in: ['completada', 'cerrada'] },
-          fechaResolucion: { not: null },
+          estado: 'completado',
+          fechaCompletada: { not: null },
         },
-        select: { fechaSolicitud: true, fechaResolucion: true },
+        select: { fechaSolicitud: true, fechaCompletada: true },
         take: 100,
-        orderBy: { fechaResolucion: 'desc' },
+        orderBy: { fechaCompletada: 'desc' },
       });
       if (resolved.length > 0) {
         const totalDias = resolved.reduce((sum, r) => {
-          if (r.fechaResolucion) {
-            return sum + (r.fechaResolucion.getTime() - r.fechaSolicitud.getTime()) / (1000 * 60 * 60 * 24);
+          if (r.fechaCompletada) {
+            return (
+              sum +
+              (r.fechaCompletada.getTime() - r.fechaSolicitud.getTime()) / (1000 * 60 * 60 * 24)
+            );
           }
           return sum;
         }, 0);
@@ -134,7 +138,7 @@ export async function GET(request: NextRequest) {
       ocupacionMedia: Math.round(ocupacion * 10) / 10,
     };
 
-    const contratosPorVencer = expiringContracts.map(c => ({
+    const contratosPorVencer = expiringContracts.map((c) => ({
       id: c.id,
       inquilino: c.tenant?.nombreCompleto || 'Sin inquilino',
       propiedad: c.unit?.building?.nombre || '-',

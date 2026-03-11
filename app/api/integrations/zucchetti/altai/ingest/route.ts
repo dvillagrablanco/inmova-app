@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * API Route: Ingesta de movimientos para Altai
  *

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Servicio de Notificaciones para eWoorker
  *

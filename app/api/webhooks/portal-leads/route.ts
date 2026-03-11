@@ -71,17 +71,19 @@ export async function POST(request: NextRequest) {
     // Crear candidato en el sistema
     let candidate = null;
     try {
+      if (!unitId) {
+        throw new Error('No unit linked for candidate creation');
+      }
       candidate = await prisma.candidate.create({
         data: {
-          nombre: candidateName || 'Lead Portal',
-          email: candidateEmail || null,
-          telefono: candidatePhone || null,
-          nacionalidad: candidateNationality || null,
-          ocupacion: candidateOccupation || null,
+          unitId,
+          nombreCompleto: candidateName || 'Lead Portal',
+          dni: `PORTAL-${leadId || Date.now()}`,
+          email: candidateEmail || `lead-${leadId || Date.now()}@inmova.local`,
+          telefono: candidatePhone || '000000000',
+          fechaNacimiento: new Date('1990-01-01'),
           notas: `Lead de ${portalSource}. ${candidateMessage || ''}\n\nFechas: ${requestedCheckIn || 'N/A'} → ${requestedCheckOut || 'N/A'}\nPresupuesto: ${requestedBudget || 'N/A'}€\nLead ID portal: ${leadId || 'N/A'}`,
           estado: 'nuevo',
-          origen: portalSource,
-          ...(unitId && { unitId }),
         },
       });
     } catch (err: any) {

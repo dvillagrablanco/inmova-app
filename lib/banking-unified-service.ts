@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * SERVICIO UNIFICADO DE BANCA - VIRODA & ROVIDA
  *

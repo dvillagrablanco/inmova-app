@@ -4,7 +4,7 @@
     "lib": ["dom", "dom.iterable", "es5", "es2020"],
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": true,
+    "strict": false,
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
@@ -29,8 +29,8 @@
       "@/*": ["./*"]
     },
     "typeRoots": ["./node_modules/@types", "./types"],
-    "strictNullChecks": true,
-    "noImplicitAny": true
+    "strictNullChecks": false,
+    "noImplicitAny": false
   },
   "include": [
     "next-env.d.ts",

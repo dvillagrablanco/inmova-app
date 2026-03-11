@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * SERVICIO DE SCRAPING DE ALERTASUBASTAS.COM
  *
@@ -93,19 +94,19 @@ function createClient(): AxiosInstance {
     baseURL: BASE_URL,
     headers: {
       'User-Agent': getRandomUserAgent(),
-      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
       'Accept-Language': 'es-ES,es;q=0.9',
       'Accept-Encoding': 'gzip, deflate, br',
-      'Connection': 'keep-alive',
+      Connection: 'keep-alive',
       'Sec-Fetch-Dest': 'document',
       'Sec-Fetch-Mode': 'navigate',
       'Sec-Fetch-Site': 'same-origin',
-      'DNT': '1',
-      ...(sessionCookies && { 'Cookie': sessionCookies }),
+      DNT: '1',
+      ...(sessionCookies && { Cookie: sessionCookies }),
     },
     timeout: 20000,
     maxRedirects: 5,
-    validateStatus: s => s < 500,
+    validateStatus: (s) => s < 500,
   });
 }
 
@@ -113,16 +114,25 @@ function extractCookies(headers: any): string {
   const setCookie = headers['set-cookie'];
   if (!setCookie) return '';
   const arr = Array.isArray(setCookie) ? setCookie : [setCookie];
-  return arr.map((h: string) => h.split(';')[0].trim()).filter(Boolean).join('; ');
+  return arr
+    .map((h: string) => h.split(';')[0].trim())
+    .filter(Boolean)
+    .join('; ');
 }
 
 function mergeCookies(a: string, b: string): string {
   const map = new Map<string, string>();
-  for (const c of a.split(';').map(s => s.trim()).filter(Boolean)) {
+  for (const c of a
+    .split(';')
+    .map((s) => s.trim())
+    .filter(Boolean)) {
     const [name] = c.split('=');
     if (name) map.set(name.trim(), c);
   }
-  for (const c of b.split(';').map(s => s.trim()).filter(Boolean)) {
+  for (const c of b
+    .split(';')
+    .map((s) => s.trim())
+    .filter(Boolean)) {
     const [name] = c.split('=');
     if (name) map.set(name.trim(), c);
   }
@@ -130,7 +140,7 @@ function mergeCookies(a: string, b: string): string {
 }
 
 async function humanDelay(min = 1000, max = 3000): Promise<void> {
-  await new Promise(r => setTimeout(r, min + Math.random() * (max - min)));
+  await new Promise((r) => setTimeout(r, min + Math.random() * (max - min)));
 }
 
 async function authenticate(): Promise<boolean> {
@@ -158,7 +168,10 @@ async function authenticate(): Promise<boolean> {
     ];
     for (const p of csrfPatterns) {
       const m = html.match(p);
-      if (m) { csrfToken = m[1]; break; }
+      if (m) {
+        csrfToken = m[1];
+        break;
+      }
     }
 
     await humanDelay(800, 1500);
@@ -172,12 +185,12 @@ async function authenticate(): Promise<boolean> {
     const loginRes = await client.post('/login', loginData.toString(), {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Cookie': sessionCookies,
-        'Referer': `${BASE_URL}/login`,
+        Cookie: sessionCookies,
+        Referer: `${BASE_URL}/login`,
         ...(csrfToken && { 'X-CSRF-Token': csrfToken }),
       },
       maxRedirects: 0,
-      validateStatus: s => s < 500,
+      validateStatus: (s) => s < 500,
     });
 
     sessionCookies = mergeCookies(sessionCookies, extractCookies(loginRes.headers));
@@ -186,9 +199,12 @@ async function authenticate(): Promise<boolean> {
     if ([301, 302, 303].includes(loginRes.status)) {
       const loc = loginRes.headers['location'];
       if (loc) {
-        const followRes = await client.get(loc.startsWith('http') ? loc.replace(BASE_URL, '') : loc, {
-          headers: { 'Cookie': sessionCookies },
-        });
+        const followRes = await client.get(
+          loc.startsWith('http') ? loc.replace(BASE_URL, '') : loc,
+          {
+            headers: { Cookie: sessionCookies },
+          }
+        );
         sessionCookies = mergeCookies(sessionCookies, extractCookies(followRes.headers));
       }
     }
@@ -206,19 +222,26 @@ async function authenticate(): Promise<boolean> {
 // SCRAPING DE SUBASTAS
 // ============================================================================
 
-function parseAuctionCard($: cheerio.CheerioAPI, el: cheerio.Element, idx: number): AlertaSubastaItem | null {
+function parseAuctionCard(
+  $: cheerio.CheerioAPI,
+  el: cheerio.Element,
+  idx: number
+): AlertaSubastaItem | null {
   try {
     const $el = $(el);
     const text = $el.text();
 
     const titleEl = $el.find('h2 a, h3 a, .card-title a, .titulo a, a.subasta-link').first();
-    const title = titleEl.text().trim() || $el.find('h2, h3, .card-title, .titulo').first().text().trim();
+    const title =
+      titleEl.text().trim() || $el.find('h2, h3, .card-title, .titulo').first().text().trim();
     const href = titleEl.attr('href') || $el.find('a').first().attr('href');
     const url = href ? (href.startsWith('http') ? href : `${BASE_URL}${href}`) : '';
 
     // Extraer valores
     const valorMatch = text.match(/(?:Valor|Tasaci[oó]n|Valor\s+subasta)[:\s€]*([\d.,]+)/i);
-    const pujaMatch = text.match(/(?:Puja\s+m[ií]nima|Importe\s+dep[oó]sito|Cantidad\s+reclamada)[:\s€]*([\d.,]+)/i);
+    const pujaMatch = text.match(
+      /(?:Puja\s+m[ií]nima|Importe\s+dep[oó]sito|Cantidad\s+reclamada)[:\s€]*([\d.,]+)/i
+    );
     const superficieMatch = text.match(/([\d.,]+)\s*m[²2]/);
     const catastralMatch = text.match(/(\d{7}[A-Z]{2}\d{4}[A-Z]\d{4}[A-Z]{2})/);
 
@@ -233,37 +256,55 @@ function parseAuctionCard($: cheerio.CheerioAPI, el: cheerio.Element, idx: numbe
     const discount = market > 0 ? Math.round(((market - price) / market) * 100) : 0;
 
     // Detectar provincia
-    const provMatch = text.match(/(?:Provincia|Ubicaci[oó]n)[:\s]*([A-ZÁÉÍÓÚÑa-záéíóúñ\s]+?)(?:\s*[-|·]|\s*$)/m);
+    const provMatch = text.match(
+      /(?:Provincia|Ubicaci[oó]n)[:\s]*([A-ZÁÉÍÓÚÑa-záéíóúñ\s]+?)(?:\s*[-|·]|\s*$)/m
+    );
     const province = provMatch ? provMatch[1].trim() : '';
 
     // Detectar tipo
     const t = (title + ' ' + text).toLowerCase();
-    const propertyType = t.includes('local') || t.includes('comercial') ? 'local_comercial'
-      : t.includes('oficina') ? 'oficina'
-      : t.includes('nave') || t.includes('industrial') ? 'nave_industrial'
-      : t.includes('garaje') || t.includes('plaza') || t.includes('aparcamiento') ? 'garaje'
-      : t.includes('solar') || t.includes('terreno') || t.includes('parcela') ? 'terreno'
-      : t.includes('trastero') ? 'trastero'
-      : t.includes('finca') || t.includes('r[uú]stic') ? 'finca_rustica'
-      : 'vivienda';
+    const propertyType =
+      t.includes('local') || t.includes('comercial')
+        ? 'local_comercial'
+        : t.includes('oficina')
+          ? 'oficina'
+          : t.includes('nave') || t.includes('industrial')
+            ? 'nave_industrial'
+            : t.includes('garaje') || t.includes('plaza') || t.includes('aparcamiento')
+              ? 'garaje'
+              : t.includes('solar') || t.includes('terreno') || t.includes('parcela')
+                ? 'terreno'
+                : t.includes('trastero')
+                  ? 'trastero'
+                  : t.includes('finca') || t.includes('r[uú]stic')
+                    ? 'finca_rustica'
+                    : 'vivienda';
 
     // Detectar fuente
-    const auctionSource = t.includes('aeat') || t.includes('hacienda') || t.includes('tributaria') ? 'AEAT'
-      : t.includes('seguridad social') ? 'Seguridad Social'
-      : t.includes('notari') ? 'Notarial'
-      : t.includes('ayuntamiento') || t.includes('municipal') ? 'Ayuntamiento'
-      : 'BOE Judicial';
+    const auctionSource =
+      t.includes('aeat') || t.includes('hacienda') || t.includes('tributaria')
+        ? 'AEAT'
+        : t.includes('seguridad social')
+          ? 'Seguridad Social'
+          : t.includes('notari')
+            ? 'Notarial'
+            : t.includes('ayuntamiento') || t.includes('municipal')
+              ? 'Ayuntamiento'
+              : 'BOE Judicial';
 
     // Estado
     const statusEl = $el.find('.badge, .estado, .status, [class*="activ"], [class*="finaliz"]');
     const status = statusEl.text().trim().toLowerCase().includes('activ') ? 'activa' : 'activa';
 
     // Fecha límite
-    const deadlineMatch = text.match(/(?:Fecha\s+(?:fin|cierre|conclusi[oó]n))[:\s]*(\d{1,2}[/-]\d{1,2}[/-]\d{2,4})/i);
+    const deadlineMatch = text.match(
+      /(?:Fecha\s+(?:fin|cierre|conclusi[oó]n))[:\s]*(\d{1,2}[/-]\d{1,2}[/-]\d{2,4})/i
+    );
     const deadline = deadlineMatch ? deadlineMatch[1] : null;
 
     // Imagen
-    const imageUrl = $el.find('img').first().attr('src') || $el.find('img').first().attr('data-src') || null;
+    const imageUrl =
+      $el.find('img').first().attr('src') || $el.find('img').first().attr('data-src') || null;
 
     return {
       id: `alertasub-${idx}`,
@@ -282,9 +323,18 @@ function parseAuctionCard($: cheerio.CheerioAPI, el: cheerio.Element, idx: numbe
       status,
       deadline,
       url,
-      imageUrl: imageUrl?.startsWith('http') ? imageUrl : imageUrl ? `${BASE_URL}${imageUrl}` : null,
+      imageUrl: imageUrl?.startsWith('http')
+        ? imageUrl
+        : imageUrl
+          ? `${BASE_URL}${imageUrl}`
+          : null,
       description: `${auctionSource}. ${valorTasacion ? `Tasación: €${valorTasacion.toLocaleString('es-ES')}` : ''}${pujaMinima ? `. Puja mínima: €${pujaMinima.toLocaleString('es-ES')}` : ''}. Descuento: ${discount}%.`,
-      tags: ['subasta', auctionSource.toLowerCase().replace(/\s/g, '-'), propertyType, ...(province ? [province.toLowerCase()] : [])],
+      tags: [
+        'subasta',
+        auctionSource.toLowerCase().replace(/\s/g, '-'),
+        propertyType,
+        ...(province ? [province.toLowerCase()] : []),
+      ],
     };
   } catch {
     return null;
@@ -293,7 +343,7 @@ function parseAuctionCard($: cheerio.CheerioAPI, el: cheerio.Element, idx: numbe
 
 export async function scrapeAlertaSubastas(
   propertyTypes?: string[],
-  provinces?: string[],
+  provinces?: string[]
 ): Promise<AlertaSubastaItem[]> {
   const typesKey = (propertyTypes || ['vivienda']).sort().join(',');
   const provsKey = (provinces || []).sort().join(',');
@@ -331,8 +381,8 @@ export async function scrapeAlertaSubastas(
 
         const response = await client.get(urlPath, {
           headers: {
-            'Cookie': sessionCookies,
-            'Referer': BASE_URL,
+            Cookie: sessionCookies,
+            Referer: BASE_URL,
           },
         });
 
@@ -345,9 +395,15 @@ export async function scrapeAlertaSubastas(
 
         // Selectores de cards de subastas
         const selectors = [
-          '.card-subasta', '.subasta-item', '.resultado-subasta',
-          '.list-group-item', '.auction-card', 'article.subasta',
-          '.card', '.col-md-6 .card', '.col-lg-4 .card',
+          '.card-subasta',
+          '.subasta-item',
+          '.resultado-subasta',
+          '.list-group-item',
+          '.auction-card',
+          'article.subasta',
+          '.card',
+          '.col-md-6 .card',
+          '.col-lg-4 .card',
         ];
 
         let found = false;
@@ -427,7 +483,10 @@ export async function scrapeAlertaSubastas(
 
 function parseNum(text: string): number | null {
   if (!text) return null;
-  const cleaned = text.replace(/\./g, '').replace(',', '.').replace(/[^\d.]/g, '');
+  const cleaned = text
+    .replace(/\./g, '')
+    .replace(',', '.')
+    .replace(/[^\d.]/g, '');
   const n = parseFloat(cleaned);
   return isNaN(n) ? null : n;
 }

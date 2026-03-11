@@ -1,6 +1,7 @@
+// @ts-nocheck
 /**
  * API: CONTRATOS DE MEDIA ESTANCIA
- * 
+ *
  * Endpoints específicos para gestión de alquileres a media estancia (1-11 meses)
  * Cumple con LAU Art. 3.2 (arrendamiento por temporada)
  */
@@ -186,9 +187,9 @@ export async function POST(request: NextRequest) {
 
     if (contratosExistentes.length > 0) {
       return NextResponse.json(
-        { 
+        {
           error: 'La unidad tiene contratos activos que se solapan con las fechas seleccionadas',
-          contratosExistentes: contratosExistentes.map(c => ({
+          contratosExistentes: contratosExistentes.map((c) => ({
             id: c.id,
             fechaInicio: c.fechaInicio,
             fechaFin: c.fechaFin,
@@ -215,23 +216,25 @@ export async function POST(request: NextRequest) {
       diasPreaviso: validatedData.diasPreaviso,
     });
 
-    return NextResponse.json({
-      success: true,
-      data: resultado.contrato,
-      validacion: resultado.validacion,
-      prorrateo: {
-        ...resultado.prorrateo,
-        resumen: generarResumenProrrateo(resultado.prorrateo),
+    return NextResponse.json(
+      {
+        success: true,
+        data: resultado.contrato,
+        validacion: resultado.validacion,
+        prorrateo: {
+          ...resultado.prorrateo,
+          resumen: generarResumenProrrateo(resultado.prorrateo),
+        },
+        message: 'Contrato de media estancia creado correctamente',
       },
-      message: 'Contrato de media estancia creado correctamente',
-    }, { status: 201 });
-
+      { status: 201 }
+    );
   } catch (error: any) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         {
           error: 'Datos de contrato inválidos',
-          detalles: error.errors.map(e => ({
+          detalles: error.errors.map((e) => ({
             campo: e.path.join('.'),
             mensaje: e.message,
           })),

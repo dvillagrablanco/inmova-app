@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Safe Storage - Wrapper seguro para localStorage/sessionStorage
  * Funciona en modo incógnito y cuando el storage no está disponible

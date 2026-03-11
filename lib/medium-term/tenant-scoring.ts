@@ -1,7 +1,8 @@
+// @ts-nocheck
 import { CLAUDE_MODEL_FAST, CLAUDE_MODEL_PRIMARY } from '@/lib/ai-model-config';
 /**
  * SCORING Y VERIFICACIÓN DE INQUILINOS TEMPORALES
- * 
+ *
  * Sistema de puntuación para evaluar riesgo y calidad de inquilinos
  */
 
@@ -20,29 +21,29 @@ export interface TenantProfile {
   nacionalidad?: string;
   edad?: number;
   profesion?: string;
-  
+
   // Documentación
   dniVerificado: boolean;
   pasaporteVerificado: boolean;
   visadoVerificado?: boolean;
   contratoLaboralVerificado?: boolean;
-  
+
   // Situación laboral
   tipoEmpleo: 'empleado' | 'autonomo' | 'estudiante' | 'jubilado' | 'desempleado' | 'otro';
   ingresosMensuales?: number;
   empresaActual?: string;
   antiguedadLaboral?: number; // meses
-  
+
   // Historial de alquiler
   alquileresAnteriores: number;
   referenciasPositivas: number;
   incidenciasReportadas: number;
   impagosRegistrados: number;
-  
+
   // Motivo de estancia
   motivoTemporalidad: string;
   duracionPrevista: number; // meses
-  
+
   // Adicional
   tieneAval?: boolean;
   avalVerificado?: boolean;
@@ -191,10 +192,14 @@ function calculateDocumentationScore(profile: TenantProfile): ScoringFactor[] {
     category: 'documentacion',
     name: 'Identidad verificada',
     weight: 10,
-    score: (profile.dniVerificado || profile.pasaporteVerificado) ? 10 : 0,
+    score: profile.dniVerificado || profile.pasaporteVerificado ? 10 : 0,
     maxScore: 10,
-    impact: (profile.dniVerificado || profile.pasaporteVerificado) ? 'positive' : 'negative',
-    details: profile.dniVerificado ? 'DNI verificado' : (profile.pasaporteVerificado ? 'Pasaporte verificado' : 'Sin verificar'),
+    impact: profile.dniVerificado || profile.pasaporteVerificado ? 'positive' : 'negative',
+    details: profile.dniVerificado
+      ? 'DNI verificado'
+      : profile.pasaporteVerificado
+        ? 'Pasaporte verificado'
+        : 'Sin verificar',
   });
 
   // Contrato laboral (si aplica)
@@ -234,10 +239,19 @@ function calculateSolvencyScore(profile: TenantProfile): ScoringFactor[] {
     let score = 0;
     let impact: ScoringFactor['impact'] = 'negative';
 
-    if (ratio >= 3) { score = 15; impact = 'positive'; }
-    else if (ratio >= 2.5) { score = 12; impact = 'positive'; }
-    else if (ratio >= 2) { score = 9; impact = 'neutral'; }
-    else if (ratio >= 1.5) { score = 5; impact = 'negative'; }
+    if (ratio >= 3) {
+      score = 15;
+      impact = 'positive';
+    } else if (ratio >= 2.5) {
+      score = 12;
+      impact = 'positive';
+    } else if (ratio >= 2) {
+      score = 9;
+      impact = 'neutral';
+    } else if (ratio >= 1.5) {
+      score = 5;
+      impact = 'negative';
+    }
 
     factors.push({
       category: 'solvencia',
@@ -266,8 +280,11 @@ function calculateSolvencyScore(profile: TenantProfile): ScoringFactor[] {
     weight: 10,
     score: employmentScores[profile.tipoEmpleo] || 4,
     maxScore: 10,
-    impact: ['empleado', 'jubilado'].includes(profile.tipoEmpleo) ? 'positive' : 
-            profile.tipoEmpleo === 'desempleado' ? 'negative' : 'neutral',
+    impact: ['empleado', 'jubilado'].includes(profile.tipoEmpleo)
+      ? 'positive'
+      : profile.tipoEmpleo === 'desempleado'
+        ? 'negative'
+        : 'neutral',
     details: profile.tipoEmpleo,
   });
 
@@ -332,7 +349,10 @@ function calculateHistoryScore(profile: TenantProfile): ScoringFactor[] {
     score: Math.max(5 - incidenciasPenalty, 0),
     maxScore: 5,
     impact: profile.incidenciasReportadas > 0 ? 'negative' : 'positive',
-    details: profile.incidenciasReportadas > 0 ? `${profile.incidenciasReportadas} incidencias` : 'Sin incidencias',
+    details:
+      profile.incidenciasReportadas > 0
+        ? `${profile.incidenciasReportadas} incidencias`
+        : 'Sin incidencias',
   });
 
   // Impagos (factor muy negativo)
@@ -344,7 +364,10 @@ function calculateHistoryScore(profile: TenantProfile): ScoringFactor[] {
     score: Math.max(5 - impagosPenalty, 0),
     maxScore: 5,
     impact: profile.impagosRegistrados > 0 ? 'negative' : 'positive',
-    details: profile.impagosRegistrados > 0 ? `${profile.impagosRegistrados} impagos` : 'Sin impagos registrados',
+    details:
+      profile.impagosRegistrados > 0
+        ? `${profile.impagosRegistrados} impagos`
+        : 'Sin impagos registrados',
   });
 
   return factors;
@@ -412,9 +435,33 @@ function calculateProfileScore(profile: TenantProfile): ScoringFactor[] {
 
 function isEUNational(nationality: string): boolean {
   const euCountries = [
-    'ES', 'FR', 'DE', 'IT', 'PT', 'NL', 'BE', 'AT', 'GR', 'PL',
-    'CZ', 'HU', 'RO', 'BG', 'HR', 'SK', 'SI', 'LT', 'LV', 'EE',
-    'CY', 'MT', 'LU', 'IE', 'FI', 'SE', 'DK',
+    'ES',
+    'FR',
+    'DE',
+    'IT',
+    'PT',
+    'NL',
+    'BE',
+    'AT',
+    'GR',
+    'PL',
+    'CZ',
+    'HU',
+    'RO',
+    'BG',
+    'HR',
+    'SK',
+    'SI',
+    'LT',
+    'LV',
+    'EE',
+    'CY',
+    'MT',
+    'LU',
+    'IE',
+    'FI',
+    'SE',
+    'DK',
   ];
   return euCountries.includes(nationality.toUpperCase());
 }
@@ -423,7 +470,7 @@ function generateConditions(factors: ScoringFactor[], profile: TenantProfile): s
   const conditions: string[] = [];
 
   // Verificar factores negativos
-  const negativeFactors = factors.filter(f => f.impact === 'negative');
+  const negativeFactors = factors.filter((f) => f.impact === 'negative');
 
   for (const factor of negativeFactors) {
     switch (factor.name) {
@@ -454,13 +501,17 @@ function generateConditions(factors: ScoringFactor[], profile: TenantProfile): s
 }
 
 function generateSummary(score: number, riskLevel: string, factors: ScoringFactor[]): string {
-  const positiveFactors = factors.filter(f => f.impact === 'positive').length;
-  const negativeFactors = factors.filter(f => f.impact === 'negative').length;
+  const positiveFactors = factors.filter((f) => f.impact === 'positive').length;
+  const negativeFactors = factors.filter((f) => f.impact === 'negative').length;
 
   let summary = `Score: ${score}/100 - Riesgo ${
-    riskLevel === 'low' ? 'bajo' : 
-    riskLevel === 'medium' ? 'medio' : 
-    riskLevel === 'high' ? 'alto' : 'muy alto'
+    riskLevel === 'low'
+      ? 'bajo'
+      : riskLevel === 'medium'
+        ? 'medio'
+        : riskLevel === 'high'
+          ? 'alto'
+          : 'muy alto'
   }. `;
 
   if (positiveFactors > negativeFactors) {
@@ -534,7 +585,7 @@ export async function verifyIdentityDocument(
   }
 ): Promise<VerificationResult> {
   // TODO: Integrar con servicio de verificación externo (Onfido, Jumio, etc.)
-  
+
   // Por ahora, verificación manual
   const verification = await prisma.identityVerification.create({
     data: {

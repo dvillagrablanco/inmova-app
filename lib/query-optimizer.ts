@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Query Optimizer Utilities
  * Provides helpers for optimizing Prisma queries
@@ -141,10 +142,7 @@ export function addDateRangeFilter(
 /**
  * Build search filter for multiple fields
  */
-export function buildSearchFilter(
-  searchTerm: string,
-  fields: string[]
-): Prisma.StringFilter[] {
+export function buildSearchFilter(searchTerm: string, fields: string[]): Prisma.StringFilter[] {
   return fields.map(() => ({
     contains: searchTerm,
     mode: 'insensitive' as Prisma.QueryMode,

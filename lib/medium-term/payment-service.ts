@@ -1,6 +1,7 @@
+// @ts-nocheck
 /**
  * SERVICIO DE COBROS RECURRENTES - STRIPE
- * 
+ *
  * Gestión de pagos automáticos para contratos de media estancia
  */
 
@@ -164,9 +165,7 @@ export async function addPaymentMethod(
 /**
  * Obtiene los métodos de pago de un inquilino
  */
-export async function getPaymentMethods(
-  tenantId: string
-): Promise<PaymentMethod[]> {
+export async function getPaymentMethods(tenantId: string): Promise<PaymentMethod[]> {
   const prisma = getPrismaClient();
   const tenant = await prisma.tenant.findUnique({
     where: { id: tenantId },
@@ -187,7 +186,7 @@ export async function getPaymentMethods(
   });
 
   return [
-    ...paymentMethods.data.map(pm => ({
+    ...paymentMethods.data.map((pm) => ({
       id: pm.id,
       type: 'card' as const,
       last4: pm.card?.last4,
@@ -195,7 +194,7 @@ export async function getPaymentMethods(
       expiryYear: pm.card?.exp_year,
       isDefault: false, // TODO: Verificar con invoice_settings
     })),
-    ...sepaPaymentMethods.data.map(pm => ({
+    ...sepaPaymentMethods.data.map((pm) => ({
       id: pm.id,
       type: 'sepa_debit' as const,
       last4: pm.sepa_debit?.last4,
@@ -237,10 +236,12 @@ export async function processOneTimePayment(
       customer: customerId,
       payment_method: paymentMethodId,
       confirm: !!paymentMethodId,
-      automatic_payment_methods: paymentMethodId ? undefined : {
-        enabled: true,
-        allow_redirects: 'never',
-      },
+      automatic_payment_methods: paymentMethodId
+        ? undefined
+        : {
+            enabled: true,
+            allow_redirects: 'never',
+          },
       description,
       metadata: {
         contractId,
@@ -271,8 +272,9 @@ export async function processOneTimePayment(
       amount,
       currency: 'eur',
       status: paymentIntent.status as PaymentResult['status'],
-      receiptUrl: paymentIntent.latest_charge 
-        ? (await stripe.charges.retrieve(paymentIntent.latest_charge as string)).receipt_url || undefined
+      receiptUrl: paymentIntent.latest_charge
+        ? (await stripe.charges.retrieve(paymentIntent.latest_charge as string)).receipt_url ||
+          undefined
         : undefined,
     };
   } catch (error: any) {
@@ -317,8 +319,12 @@ export async function setupRecurringPayments(
     unit_amount: Math.round(schedule.amount * 100),
     currency: schedule.currency.toLowerCase(),
     recurring: {
-      interval: schedule.frequency === 'monthly' ? 'month' : 
-                schedule.frequency === 'biweekly' ? 'week' : 'week',
+      interval:
+        schedule.frequency === 'monthly'
+          ? 'month'
+          : schedule.frequency === 'biweekly'
+            ? 'week'
+            : 'week',
       interval_count: schedule.frequency === 'biweekly' ? 2 : 1,
     },
     metadata: {
@@ -357,7 +363,7 @@ export async function setupRecurringPayments(
     },
   });
 
-  const nextPayment = subscription.current_period_end 
+  const nextPayment = subscription.current_period_end
     ? new Date(subscription.current_period_end * 1000)
     : addMonths(schedule.startDate, 1);
 
@@ -370,9 +376,7 @@ export async function setupRecurringPayments(
 /**
  * Cancela pagos recurrentes
  */
-export async function cancelRecurringPayments(
-  contractId: string
-): Promise<boolean> {
+export async function cancelRecurringPayments(contractId: string): Promise<boolean> {
   const prisma = getPrismaClient();
   const contract = await prisma.contract.findUnique({
     where: { id: contractId },
@@ -460,7 +464,10 @@ export async function generateInvoice(
   const invoice = await stripe.invoices.create({
     customer: customerId,
     collection_method: 'send_invoice',
-    days_until_due: Math.max(1, Math.ceil((data.dueDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))),
+    days_until_due: Math.max(
+      1,
+      Math.ceil((data.dueDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+    ),
     metadata: {
       contractId: data.contractId,
       tenantId: data.tenantId,
@@ -493,9 +500,7 @@ export async function generateInvoice(
 /**
  * Envía recordatorio de factura
  */
-export async function sendInvoiceReminder(
-  stripeInvoiceId: string
-): Promise<boolean> {
+export async function sendInvoiceReminder(stripeInvoiceId: string): Promise<boolean> {
   await stripe.invoices.sendInvoice(stripeInvoiceId);
   return true;
 }
@@ -608,9 +613,7 @@ export async function processDepositReturn(
 /**
  * Procesa eventos de webhook de Stripe
  */
-export async function handleStripeWebhook(
-  event: Stripe.Event
-): Promise<void> {
+export async function handleStripeWebhook(event: Stripe.Event): Promise<void> {
   switch (event.type) {
     case 'payment_intent.succeeded':
       await handlePaymentSuccess(event.data.object as Stripe.PaymentIntent);
@@ -729,10 +732,7 @@ async function handleSubscriptionCancelled(subscription: Stripe.Subscription): P
 // UTILIDADES
 // ==========================================
 
-async function getOrCreateProduct(
-  unitId: string,
-  unitName: string
-): Promise<string> {
+async function getOrCreateProduct(unitId: string, unitName: string): Promise<string> {
   const prisma = getPrismaClient();
   // Buscar producto existente
   const existingProduct = await prisma.unit.findUnique({

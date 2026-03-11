@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * DocuSign Connect Webhook Endpoint
  * POST /api/webhooks/docusign

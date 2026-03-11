@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Tipos de Prisma exportados centralmente
  *

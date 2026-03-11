@@ -35,8 +35,7 @@ interface ObjetivosStats {
   progreso: number;
 }
 
-async function getErrorMessage(error: unknown) {
-  const prisma = await getPrisma();
+function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : 'Error desconocido';
 }
 
@@ -179,12 +178,9 @@ export async function GET(request: NextRequest) {
 
       const leadsObjetivo = target?.objetivoLeads ?? 0;
       const conversionesObjetivo = target?.objetivoConversiones ?? 0;
-      const progresoLeads =
-        leadsObjetivo > 0 ? Math.min(1, leadsStats.total / leadsObjetivo) : 0;
+      const progresoLeads = leadsObjetivo > 0 ? Math.min(1, leadsStats.total / leadsObjetivo) : 0;
       const progresoConv =
-        conversionesObjetivo > 0
-          ? Math.min(1, leadsStats.convertidos / conversionesObjetivo)
-          : 0;
+        conversionesObjetivo > 0 ? Math.min(1, leadsStats.convertidos / conversionesObjetivo) : 0;
       const progreso =
         leadsObjetivo > 0 || conversionesObjetivo > 0
           ? ((progresoLeads + progresoConv) / 2) * 100

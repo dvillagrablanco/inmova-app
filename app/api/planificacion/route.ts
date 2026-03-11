@@ -1,6 +1,6 @@
 /**
  * API de Planificación
- * 
+ *
  * Gestión de eventos programados
  */
 
@@ -21,12 +21,9 @@ export async function GET() {
   const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const companyId = (session.user as any)?.companyId;
@@ -45,12 +42,17 @@ export async function GET() {
       titulo: e.titulo,
       tipo: e.tipo || 'otro',
       fecha: e.fechaInicio,
-      hora: e.fechaInicio ? new Date(e.fechaInicio).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '',
+      hora: e.fechaInicio
+        ? new Date(e.fechaInicio).toLocaleTimeString('es-ES', {
+            hour: '2-digit',
+            minute: '2-digit',
+          })
+        : '',
       duracion: 30,
       descripcion: e.descripcion || '',
       propiedad: e.ubicacion || '',
-      asignado: e.asignadoA || '',
-      completado: e.estado === 'completado',
+      asignado: Array.isArray(e.participantes) ? e.participantes[0] || '' : '',
+      completado: !!e.completado,
     }));
 
     return NextResponse.json({
@@ -59,10 +61,7 @@ export async function GET() {
     });
   } catch (error) {
     logger.error('[API Error] Planificación:', error);
-    return NextResponse.json(
-      { error: 'Error obteniendo eventos' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error obteniendo eventos' }, { status: 500 });
   }
 }
 
@@ -70,7 +69,7 @@ export async function POST(request: NextRequest) {
   const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
@@ -81,7 +80,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    
+
     const event = await prisma.calendarEvent.create({
       data: {
         companyId,
@@ -90,22 +89,25 @@ export async function POST(request: NextRequest) {
         fechaInicio: new Date(body.fecha || Date.now()),
         descripcion: body.descripcion || '',
         ubicacion: body.propiedad || '',
-        asignadoA: body.asignado || '',
-        estado: 'pendiente',
-        creadorId: (session.user as any).id,
+        participantes: body.asignado ? [body.asignado] : [],
+        completado: false,
+        creadoPor: (session.user as any).id,
       },
     });
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        id: event.id,
-        titulo: event.titulo,
-        tipo: event.tipo,
-        fecha: event.fechaInicio,
-        completado: false,
+    return NextResponse.json(
+      {
+        success: true,
+        data: {
+          id: event.id,
+          titulo: event.titulo,
+          tipo: event.tipo,
+          fecha: event.fechaInicio,
+          completado: false,
+        },
       },
-    }, { status: 201 });
+      { status: 201 }
+    );
   } catch (error) {
     logger.error('[API Error] Create Event:', error);
     return NextResponse.json({ error: 'Error creando evento' }, { status: 500 });

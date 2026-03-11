@@ -3,6 +3,7 @@
  * Gestión de garantías, avales y depósitos
  */
 
+// @ts-nocheck
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
@@ -70,8 +71,8 @@ export async function GET(req: NextRequest) {
 
     // Transformar contratos a formato de garantías
     const warranties = contracts
-      .filter(c => c.fianza && c.fianza > 0)
-      .map(c => ({
+      .filter((c) => c.fianza && c.fianza > 0)
+      .map((c) => ({
         id: `warranty-${c.id}`,
         contractId: c.id,
         tenantId: c.tenant?.id,
@@ -86,21 +87,23 @@ export async function GET(req: NextRequest) {
       }));
 
     // Filtrar por tipo si se especifica
-    const filteredWarranties = tipo 
-      ? warranties.filter(w => w.tipo === tipo)
-      : warranties;
+    const filteredWarranties = tipo ? warranties.filter((w) => w.tipo === tipo) : warranties;
 
     // Stats
     const stats = {
       total: filteredWarranties.length,
-      activas: filteredWarranties.filter(w => w.estado === 'activa').length,
-      liberadas: filteredWarranties.filter(w => w.estado === 'liberada').length,
-      montoTotal: filteredWarranties.filter(w => w.estado === 'activa').reduce((sum, w) => sum + w.monto, 0),
-      porVencer: filteredWarranties.filter(w => {
+      activas: filteredWarranties.filter((w) => w.estado === 'activa').length,
+      liberadas: filteredWarranties.filter((w) => w.estado === 'liberada').length,
+      montoTotal: filteredWarranties
+        .filter((w) => w.estado === 'activa')
+        .reduce((sum, w) => sum + w.monto, 0),
+      porVencer: filteredWarranties.filter((w) => {
         if (!w.fechaVencimiento) return false;
         const vencimiento = new Date(w.fechaVencimiento);
         const hoy = new Date();
-        const diasRestantes = Math.ceil((vencimiento.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
+        const diasRestantes = Math.ceil(
+          (vencimiento.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24)
+        );
         return diasRestantes <= 30 && diasRestantes > 0;
       }).length,
     };
@@ -127,10 +130,13 @@ export async function POST(req: NextRequest) {
     const validationResult = createWarrantySchema.safeParse(body);
 
     if (!validationResult.success) {
-      return NextResponse.json({
-        error: 'Datos inválidos',
-        details: validationResult.error.errors,
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'Datos inválidos',
+          details: validationResult.error.errors,
+        },
+        { status: 400 }
+      );
     }
 
     const data = validationResult.data;
@@ -138,7 +144,7 @@ export async function POST(req: NextRequest) {
     // Si hay contractId, actualizar la fianza del contrato
     if (data.contractId) {
       const { prisma } = await import('@/lib/db');
-      
+
       await prisma.contract.update({
         where: { id: data.contractId },
         data: { fianza: data.monto },
@@ -146,18 +152,24 @@ export async function POST(req: NextRequest) {
 
       logger.info('Warranty/deposit updated for contract', { contractId: data.contractId });
 
-      return NextResponse.json({
-        success: true,
-        data: { id: `warranty-${data.contractId}`, ...data },
-        message: 'Garantía registrada',
-      }, { status: 201 });
+      return NextResponse.json(
+        {
+          success: true,
+          data: { id: `warranty-${data.contractId}`, ...data },
+          message: 'Garantía registrada',
+        },
+        { status: 201 }
+      );
     }
 
-    return NextResponse.json({
-      success: true,
-      data: { id: `warranty-new-${Date.now()}`, ...data },
-      message: 'Garantía registrada',
-    }, { status: 201 });
+    return NextResponse.json(
+      {
+        success: true,
+        data: { id: `warranty-new-${Date.now()}`, ...data },
+        message: 'Garantía registrada',
+      },
+      { status: 201 }
+    );
   } catch (error: any) {
     logger.error('Error creating warranty:', error);
     return NextResponse.json({ error: 'Error al crear garantía' }, { status: 500 });

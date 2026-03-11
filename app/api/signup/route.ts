@@ -11,10 +11,16 @@ import * as Sentry from '@sentry/nextjs';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 // Schema de validacion Zod para signup
 const signupSchema = z.object({
   email: z.string().email('Email invalido').max(255).toLowerCase().trim(),
-  password: z.string()
+  password: z
+    .string()
     .min(8, 'La contrasena debe tener al menos 8 caracteres')
     .max(128, 'La contrasena no puede exceder 128 caracteres')
     .regex(/[A-Z]/, 'Debe contener al menos una mayuscula')
@@ -22,15 +28,30 @@ const signupSchema = z.object({
     .regex(/[0-9]/, 'Debe contener al menos un numero'),
   name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres').max(100).trim(),
   role: z.enum(['administrador', 'gestor', 'operador']).optional().default('gestor'),
-  businessVertical: z.enum([
-    'alquiler_tradicional', 'str_vacacional', 'coliving',
-    'room_rental', 'construccion', 'flipping',
-    'servicios_profesionales', 'comunidades', 'mixto'
-  ]).optional().default('alquiler_tradicional'),
+  businessVertical: z
+    .enum([
+      'alquiler_tradicional',
+      'str_vacacional',
+      'coliving',
+      'room_rental',
+      'construccion',
+      'flipping',
+      'servicios_profesionales',
+      'comunidades',
+      'mixto',
+    ])
+    .optional()
+    .default('alquiler_tradicional'),
   recoveryEmail: z.string().email().optional().nullable(),
-  experienceLevel: z.enum(['principiante', 'intermedio', 'avanzado']).optional().default('intermedio'),
+  experienceLevel: z
+    .enum(['principiante', 'intermedio', 'avanzado'])
+    .optional()
+    .default('intermedio'),
   techSavviness: z.enum(['bajo', 'medio', 'alto']).optional().default('medio'),
-  portfolioSize: z.enum(['size_1_5', 'size_6_20', 'size_21_100', 'size_100_plus']).optional().default('size_1_5'),
+  portfolioSize: z
+    .enum(['size_1_5', 'size_6_20', 'size_21_100', 'size_100_plus'])
+    .optional()
+    .default('size_1_5'),
 });
 
 export async function POST(req: NextRequest) {
@@ -49,9 +70,9 @@ async function handleSignup(req: NextRequest) {
     const parseResult = signupSchema.safeParse(body);
     if (!parseResult.success) {
       return NextResponse.json(
-        { 
+        {
           error: 'Datos invalidos',
-          details: parseResult.error.errors.map(e => ({
+          details: parseResult.error.errors.map((e) => ({
             field: e.path.join('.'),
             message: e.message,
           })),
@@ -79,10 +100,7 @@ async function handleSignup(req: NextRequest) {
     });
 
     if (existingUser) {
-      return NextResponse.json(
-        { error: 'El email ya esta registrado' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'El email ya esta registrado' }, { status: 400 });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -128,7 +146,7 @@ async function handleSignup(req: NextRequest) {
     } catch (onboardingError) {
       // No fallar el signup si hay error en onboarding, solo registrar
       logger.error('Error inicializando onboarding tasks:', onboardingError);
-      Sentry.captureException(error);
+      Sentry.captureException(onboardingError);
     }
 
     // Programar secuencia automática de emails de onboarding
@@ -138,7 +156,7 @@ async function handleSignup(req: NextRequest) {
     } catch (emailError) {
       // No fallar el signup si hay error en emails, solo registrar
       logger.error('Error programando emails de onboarding:', emailError);
-      Sentry.captureException(error);
+      Sentry.captureException(emailError);
     }
 
     // Programar emails automáticos diferidos (2h, 24h, 7d, 30d)
@@ -148,7 +166,7 @@ async function handleSignup(req: NextRequest) {
     } catch (emailTriggersError) {
       // No fallar el signup si hay error en triggers, solo registrar
       logger.error('Error programando email triggers:', emailTriggersError);
-      Sentry.captureException(error);
+      Sentry.captureException(emailTriggersError);
     }
 
     return NextResponse.json(
@@ -167,10 +185,7 @@ async function handleSignup(req: NextRequest) {
     );
   } catch (error) {
     logger.error('Signup error:', error);
-      Sentry.captureException(error);
-    return NextResponse.json(
-      { error: 'Error al crear usuario' },
-      { status: 500 }
-    );
+    Sentry.captureException(error);
+    return NextResponse.json({ error: 'Error al crear usuario' }, { status: 500 });
   }
 } // handleSignup

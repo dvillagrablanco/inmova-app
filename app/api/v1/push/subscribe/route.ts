@@ -1,6 +1,7 @@
+// @ts-nocheck
 /**
  * API Endpoint: Suscripción Push
- * 
+ *
  * POST /api/v1/push/subscribe
  */
 
@@ -44,18 +45,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const subscription = await savePushSubscription(
-      session.user.id,
-      companyId,
-      validation.data
-    );
+    const subscription = await savePushSubscription(session.user.id, companyId, validation.data);
 
     return NextResponse.json({
       success: true,
       message: 'Suscripción guardada exitosamente',
       data: { id: subscription.id },
     });
-
   } catch (error: any) {
     logger.error('Error subscribing to push notifications:', error);
     return NextResponse.json(

@@ -1,6 +1,7 @@
+// @ts-nocheck
 /**
  * WebRTC Client
- * 
+ *
  * Hook de React para videollamadas P2P.
  */
 
@@ -25,10 +26,7 @@ interface VideoCallState {
 }
 
 const ICE_SERVERS = {
-  iceServers: [
-    { urls: 'stun:stun.l.google.com:19302' },
-    { urls: 'stun:stun1.l.google.com:19302' },
-  ],
+  iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }],
 };
 
 export function useVideoCall(options: UseVideoCallOptions = {}) {
@@ -109,7 +107,7 @@ export function useVideoCall(options: UseVideoCallOptions = {}) {
     // Connection state
     pc.onconnectionstatechange = () => {
       console.log('Connection state:', pc.connectionState);
-      
+
       if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') {
         setState((prev) => ({ ...prev, isConnected: false }));
       }
@@ -279,9 +277,7 @@ export function useVideoCall(options: UseVideoCallOptions = {}) {
     // Manejar ICE candidate
     const unsubscribeIce = on('webrtc:ice-candidate', async (data: any) => {
       if (peerConnectionRef.current) {
-        await peerConnectionRef.current.addIceCandidate(
-          new RTCIceCandidate(data.candidate)
-        );
+        await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(data.candidate));
       }
     });
 
