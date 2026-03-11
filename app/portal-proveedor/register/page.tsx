@@ -28,6 +28,7 @@ export default function ProveedorRegisterPage() {
     password: '',
     confirmPassword: '',
     direccion: '',
+    companyCode: '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -40,8 +41,8 @@ export default function ProveedorRegisterPage() {
     }
 
     // Validar longitud de contraseña
-    if (formData.password.length < 6) {
-      toast.error('La contraseña debe tener al menos 6 caracteres');
+    if (formData.password.length < 8) {
+      toast.error('La contraseña debe tener al menos 8 caracteres');
       return;
     }
 
@@ -183,13 +184,26 @@ export default function ProveedorRegisterPage() {
               />
             </div>
 
+            <div className="space-y-2">
+              <Label htmlFor="companyCode">Código empresa (CIF o nombre) *</Label>
+              <Input
+                id="companyCode"
+                type="text"
+                placeholder="Ej: B12345678 o Vidaro"
+                value={formData.companyCode}
+                onChange={(e) => setFormData({ ...formData, companyCode: e.target.value })}
+                required
+                disabled={loading}
+              />
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="password">Contraseña *</Label>
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Mínimo 6 caracteres"
+                  placeholder="Mínimo 8 caracteres"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   required

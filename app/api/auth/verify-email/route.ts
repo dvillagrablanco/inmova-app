@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import logger from '@/lib/logger';
+import { validateInvitationCode } from '@/lib/tenant-invitation-service';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -39,14 +40,13 @@ export async function GET(req: NextRequest) {
     }
 
     if (type === 'tenant') {
-      // Tenant activation uses a different flow (set password page)
-      const tenant = await prisma.tenant.findFirst({
-        where: { password: token }, // token stored temporarily in password field
-      });
-      if (!tenant) {
+      const invitation = await validateInvitationCode(token);
+      if (!invitation.valid) {
         return NextResponse.redirect(new URL('/login?error=token_invalid', req.url));
       }
-      return NextResponse.redirect(new URL(`/portal-inquilino/activar?token=${token}`, req.url));
+      return NextResponse.redirect(
+        new URL(`/portal-inquilino/activar?code=${encodeURIComponent(token)}`, req.url)
+      );
     }
 
     return NextResponse.redirect(new URL('/login?error=type_invalid', req.url));

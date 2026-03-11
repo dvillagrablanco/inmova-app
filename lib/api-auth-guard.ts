@@ -1,6 +1,6 @@
 /**
  * API Auth Guard - Utilidad para proteger API routes
- * 
+ *
  * Proporciona helpers para verificar autenticacion en diferentes contextos:
  * - NextAuth sessions (dashboard, admin)
  * - JWT tokens (portales: proveedor, inquilino, propietario, partners)
@@ -22,10 +22,7 @@ export async function requireSession(request?: NextRequest) {
     if (!session?.user) {
       return {
         authenticated: false as const,
-        response: NextResponse.json(
-          { error: 'No autenticado' },
-          { status: 401 }
-        ),
+        response: NextResponse.json({ error: 'No autenticado' }, { status: 401 }),
       };
     }
     return {
@@ -37,10 +34,7 @@ export async function requireSession(request?: NextRequest) {
     logger.error('[Auth Guard] Error verificando sesion:', error);
     return {
       authenticated: false as const,
-      response: NextResponse.json(
-        { error: 'Error de autenticacion' },
-        { status: 500 }
-      ),
+      response: NextResponse.json({ error: 'Error de autenticacion' }, { status: 500 }),
     };
   }
 }
@@ -54,10 +48,7 @@ export async function requireJWT(request: NextRequest) {
   if (!authHeader?.startsWith('Bearer ')) {
     return {
       authenticated: false as const,
-      response: NextResponse.json(
-        { error: 'Token de autorizacion requerido' },
-        { status: 401 }
-      ),
+      response: NextResponse.json({ error: 'Token de autorizacion requerido' }, { status: 401 }),
     };
   }
 
@@ -85,10 +76,7 @@ export async function requireJWT(request: NextRequest) {
   } catch {
     return {
       authenticated: false as const,
-      response: NextResponse.json(
-        { error: 'Token invalido o expirado' },
-        { status: 401 }
-      ),
+      response: NextResponse.json({ error: 'Token invalido o expirado' }, { status: 401 }),
     };
   }
 }
@@ -100,18 +88,18 @@ export async function requireJWT(request: NextRequest) {
 export function requireCronSecret(request: NextRequest) {
   const cronSecret = process.env.CRON_SECRET;
   if (!cronSecret) {
-    logger.warn('[Auth Guard] CRON_SECRET no configurado - cron jobs desprotegidos');
-    return { authenticated: true as const };
+    logger.error('[Auth Guard] CRON_SECRET no configurado');
+    return {
+      authenticated: false as const,
+      response: NextResponse.json({ error: 'CRON_SECRET no configurado' }, { status: 503 }),
+    };
   }
 
   const authHeader = request.headers.get('authorization');
   if (authHeader !== `Bearer ${cronSecret}`) {
     return {
       authenticated: false as const,
-      response: NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      ),
+      response: NextResponse.json({ error: 'No autorizado' }, { status: 401 }),
     };
   }
 

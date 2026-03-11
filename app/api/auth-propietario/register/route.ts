@@ -21,37 +21,51 @@ export async function POST(req: NextRequest) {
     const { nombreCompleto, email, telefono, password, companyCode } = await req.json();
 
     if (!nombreCompleto || !email || !password) {
-      return NextResponse.json({ error: 'Nombre, email y contraseña son requeridos' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Nombre, email y contraseña son requeridos' },
+        { status: 400 }
+      );
     }
 
     if (password.length < 8) {
-      return NextResponse.json({ error: 'La contraseña debe tener al menos 8 caracteres' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'La contraseña debe tener al menos 8 caracteres' },
+        { status: 400 }
+      );
+    }
+
+    if (!companyCode || !String(companyCode).trim()) {
+      return NextResponse.json(
+        { error: 'Debes indicar el código de empresa (CIF o nombre).' },
+        { status: 400 }
+      );
     }
 
     // Check if email already exists
-    const existing = await prisma.owner.findFirst({ where: { email } });
+    const normalizedEmail = String(email).trim().toLowerCase();
+    const existing = await prisma.owner.findFirst({ where: { email: normalizedEmail } });
     if (existing) {
       return NextResponse.json({ error: 'Ya existe una cuenta con este email' }, { status: 409 });
     }
 
     // Find company by code (CIF or name fragment)
-    let company = null;
-    if (companyCode) {
-      company = await prisma.company.findFirst({
-        where: { OR: [{ cif: companyCode }, { nombre: { contains: companyCode, mode: 'insensitive' } }] },
-        select: { id: true, nombre: true },
-      });
-    }
+    const normalizedCompanyCode = String(companyCode).trim();
+    const company = await prisma.company.findFirst({
+      where: {
+        activo: true,
+        esEmpresaPrueba: false,
+        OR: [
+          { cif: normalizedCompanyCode },
+          { nombre: { contains: normalizedCompanyCode, mode: 'insensitive' } },
+        ],
+      },
+      select: { id: true, nombre: true },
+    });
     if (!company) {
-      // Fallback: find any non-demo company
-      company = await prisma.company.findFirst({
-        where: { isDemo: false },
-        select: { id: true, nombre: true },
-        orderBy: { createdAt: 'asc' },
-      });
-    }
-    if (!company) {
-      return NextResponse.json({ error: 'Empresa no encontrada' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Empresa no encontrada para el código indicado' },
+        { status: 404 }
+      );
     }
 
     // Hash password
@@ -65,7 +79,7 @@ export async function POST(req: NextRequest) {
       data: {
         companyId: company.id,
         nombreCompleto,
-        email,
+        email: normalizedEmail,
         telefono: telefono || null,
         password: hashedPassword,
         activo: true,
@@ -95,11 +109,14 @@ export async function POST(req: NextRequest) {
       logger.warn('[Owner Register] Email send failed:', emailErr);
     }
 
-    return NextResponse.json({
-      success: true,
-      message: 'Cuenta creada. Revisa tu email para verificar.',
-      ownerId: owner.id,
-    }, { status: 201 });
+    return NextResponse.json(
+      {
+        success: true,
+        message: 'Cuenta creada. Revisa tu email para verificar.',
+        ownerId: owner.id,
+      },
+      { status: 201 }
+    );
   } catch (error: any) {
     logger.error('[Owner Register]:', error);
     return NextResponse.json({ error: 'Error en el registro' }, { status: 500 });

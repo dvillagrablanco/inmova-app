@@ -4,7 +4,14 @@ import { NextRequest } from 'next/server';
 import { prisma } from './db';
 
 import logger from '@/lib/logger';
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET || process.env.NEXTAUTH_SECRET;
+  if (!secret) {
+    throw new Error('JWT secret no configurado');
+  }
+  return secret;
+}
+
 const TOKEN_EXPIRY = '7d'; // 7 días
 const COOKIE_NAME = 'provider-auth-token';
 
@@ -19,7 +26,7 @@ export interface ProviderTokenPayload {
  * Genera un JWT token para un proveedor
  */
 export function generateProviderToken(payload: ProviderTokenPayload): string {
-  return jwt.sign(payload, JWT_SECRET, {
+  return jwt.sign(payload, getJwtSecret(), {
     expiresIn: TOKEN_EXPIRY,
   });
 }
@@ -29,7 +36,7 @@ export function generateProviderToken(payload: ProviderTokenPayload): string {
  */
 export function verifyProviderToken(token: string): ProviderTokenPayload | null {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as ProviderTokenPayload;
+    const decoded = jwt.verify(token, getJwtSecret()) as ProviderTokenPayload;
     return decoded;
   } catch (error) {
     return null;

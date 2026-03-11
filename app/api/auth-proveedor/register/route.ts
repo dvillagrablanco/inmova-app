@@ -12,20 +12,12 @@ async function getPrisma() {
   return getPrismaClient();
 }
 
-
 // POST /api/auth-proveedor/register - Registro de proveedores
 export async function POST(req: NextRequest) {
   const prisma = await getPrisma();
   try {
-    const { 
-      nombre, 
-      tipo, 
-      telefono, 
-      email, 
-      password, 
-      direccion,
-      companyId 
-    } = await req.json();
+    const { nombre, tipo, telefono, email, password, direccion, companyId, companyCode } =
+      await req.json();
 
     // Validaciones
     if (!nombre || !tipo || !telefono || !email || !password) {
@@ -35,30 +27,52 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Verificar que el email no esté registrado
-    const proveedorExistente = await prisma.provider.findFirst({
-      where: { email },
-    });
-
-    if (proveedorExistente) {
+    if (!companyId && !companyCode) {
       return NextResponse.json(
-        { error: 'El email ya está registrado' },
+        { error: 'Debes indicar la empresa (código o identificador).' },
         { status: 400 }
       );
     }
 
-    // Si no se proporciona companyId, usar el primero disponible (para demo)
-    // En producción, esto debería manejarse de forma diferente
+    if (String(password).length < 8) {
+      return NextResponse.json(
+        { error: 'La contraseña debe tener al menos 8 caracteres' },
+        { status: 400 }
+      );
+    }
+
+    const normalizedEmail = String(email).trim().toLowerCase();
+
+    // Verificar que el email no esté registrado
+    const proveedorExistente = await prisma.provider.findFirst({
+      where: { email: normalizedEmail },
+    });
+
+    if (proveedorExistente) {
+      return NextResponse.json({ error: 'El email ya está registrado' }, { status: 400 });
+    }
+
     let targetCompanyId = companyId;
+    if (!targetCompanyId && companyCode) {
+      const company = await prisma.company.findFirst({
+        where: {
+          activo: true,
+          esEmpresaPrueba: false,
+          OR: [
+            { cif: String(companyCode).trim() },
+            { nombre: { contains: String(companyCode).trim(), mode: 'insensitive' } },
+          ],
+        },
+        select: { id: true },
+      });
+      targetCompanyId = company?.id;
+    }
+
     if (!targetCompanyId) {
-      const firstCompany = await prisma.company.findFirst();
-      if (!firstCompany) {
-        return NextResponse.json(
-          { error: 'No hay empresas disponibles' },
-          { status: 500 }
-        );
-      }
-      targetCompanyId = firstCompany.id;
+      return NextResponse.json(
+        { error: 'Empresa no encontrada para el código indicado' },
+        { status: 404 }
+      );
     }
 
     // Hash de la contraseña
@@ -71,7 +85,7 @@ export async function POST(req: NextRequest) {
         nombre,
         tipo,
         telefono,
-        email,
+        email: normalizedEmail,
         direccion,
         password: hashedPassword,
         activo: false, // Requiere aprobación de administrador
@@ -79,13 +93,12 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    logger.info(
-      `Nuevo proveedor registrado: ${nuevoProveedor.nombre} (${nuevoProveedor.email})`
-    );
+    logger.info(`Nuevo proveedor registrado: ${nuevoProveedor.nombre} (${nuevoProveedor.email})`);
 
     return NextResponse.json({
       success: true,
-      message: 'Registro exitoso. Tu cuenta está pendiente de aprobación por parte del administrador.',
+      message:
+        'Registro exitoso. Tu cuenta está pendiente de aprobación por parte del administrador.',
       proveedor: {
         id: nuevoProveedor.id,
         nombre: nuevoProveedor.nombre,
@@ -94,9 +107,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     logger.error('Error en registro de proveedor:', error);
-    return NextResponse.json(
-      { error: 'Error al registrar proveedor' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al registrar proveedor' }, { status: 500 });
   }
 }

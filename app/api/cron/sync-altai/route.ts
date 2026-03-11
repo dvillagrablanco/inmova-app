@@ -1,20 +1,16 @@
 /**
  * CRON: Sincronización automática con Altai
- * 
+ *
  * Ejecuta la sincronización de asientos contables para todas las empresas
  * que tienen Altai activado. Diseñado para ejecutarse vía cron job diario.
- * 
+ *
  * GET /api/cron/sync-altai
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import {
-  getAltaiAccessToken,
-  getAltaiConfig,
-  isAltaiConfigured,
-} from '@/lib/zucchetti-altai-service';
+import { getAltaiAccessToken, getAltaiConfig } from '@/lib/zucchetti-altai-service';
 import logger from '@/lib/logger';
-import { requireCronSecret } from '@/lib/api-auth-guard';
+import { authorizeCronRequest } from '@/lib/cron-auth';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -25,13 +21,18 @@ async function getPrisma() {
   return getPrismaClient();
 }
 
-// Verificar token de cron (seguridad)
-async function verifyCronAuth(request: NextRequest): boolean {
-  const prisma = await getPrisma();
-  const cronSecret = process.env.CRON_SECRET;
-  if (!cronSecret) return true; // Sin secret configurado, permitir
-
+export async function GET(request: NextRequest) {
   try {
+    const auth = await authorizeCronRequest(request, {
+      allowSession: false,
+      requireSuperAdmin: true,
+    });
+    if (!auth.authorized) {
+      return NextResponse.json({ error: auth.error || 'No autorizado' }, { status: auth.status });
+    }
+
+    const prisma = await getPrisma();
+
     // Obtener todas las empresas con Altai activado
     const companies = await prisma.company.findMany({
       where: {
@@ -83,7 +84,7 @@ async function verifyCronAuth(request: NextRequest): boolean {
             const response = await fetch(altaiUrl, {
               method: 'POST',
               headers: {
-                'Authorization': `Bearer ${tokenResult.accessToken}`,
+                Authorization: `Bearer ${tokenResult.accessToken}`,
                 'Content-Type': 'application/json',
               },
               body: JSON.stringify({

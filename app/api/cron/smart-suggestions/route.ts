@@ -4,6 +4,7 @@ export const runtime = 'nodejs';
 import { NextRequest, NextResponse } from 'next/server';
 import { runSmartAnalysis } from '@/lib/smart-suggestions-service';
 import logger from '@/lib/logger';
+import { authorizeCronRequest } from '@/lib/cron-auth';
 
 async function getPrisma() {
   const { getPrismaClient } = await import('@/lib/db');
@@ -15,15 +16,12 @@ async function getPrisma() {
  * Cron diario: analiza todas las empresas activas y genera sugerencias
  */
 export async function GET(request: NextRequest) {
-  // Verify cron secret or allow manual trigger
-  const authHeader = request.headers.get('authorization');
-  const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-    // Allow without secret for manual testing
-    const url = new URL(request.url);
-    if (!url.searchParams.get('manual')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+  const auth = await authorizeCronRequest(request, {
+    allowSession: false,
+    requireSuperAdmin: true,
+  });
+  if (!auth.authorized) {
+    return NextResponse.json({ error: auth.error || 'Unauthorized' }, { status: auth.status });
   }
 
   try {
