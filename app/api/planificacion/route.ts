@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -45,7 +46,7 @@ export async function GET() {
       tipo: e.tipo || 'otro',
       fecha: e.fechaInicio,
       hora: e.fechaInicio ? new Date(e.fechaInicio).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '',
-      duracion: e.duracionMinutos || 30,
+      duracion: 30,
       descripcion: e.descripcion || '',
       propiedad: e.ubicacion || '',
       asignado: e.asignadoA || '',
@@ -87,7 +88,6 @@ export async function POST(request: NextRequest) {
         titulo: body.titulo || 'Nuevo evento',
         tipo: body.tipo || 'otro',
         fechaInicio: new Date(body.fecha || Date.now()),
-        duracionMinutos: body.duracion || 30,
         descripcion: body.descripcion || '',
         ubicacion: body.propiedad || '',
         asignadoA: body.asignado || '',

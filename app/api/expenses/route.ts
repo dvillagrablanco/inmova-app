@@ -347,7 +347,7 @@ export async function POST(req: NextRequest) {
           buildingName: expense.building?.nombre,
           unitNumero: expense.unit?.numero,
           expenseId: expense.id,
-        }).catch(err => logger.warn('Zucchetti sync error (no bloqueante):', err.message));
+        }).catch((err: any) => logger.warn('Zucchetti sync error (no bloqueante):', err.message));
       }).catch(() => {});
     }
 

@@ -34,17 +34,17 @@ export async function GET(request: NextRequest) {
 
     // Referrals this month
     const referralsThisMonth = await prisma.lead.count({
-      where: { sourceDetail: partnerId, source: 'partner_referral', createdAt: { gte: monthStart, lt: monthEnd } },
+      where: { origenDetalle: partnerId, fuente: 'partner_referral', createdAt: { gte: monthStart, lt: monthEnd } },
     });
 
     // Total referrals all time
     const referralsTotal = await prisma.lead.count({
-      where: { sourceDetail: partnerId, source: 'partner_referral' },
+      where: { origenDetalle: partnerId, fuente: 'partner_referral' },
     });
 
     // Conversions this month
     const conversionsThisMonth = await prisma.lead.count({
-      where: { sourceDetail: partnerId, source: 'partner_referral', estado: { in: ['convertido', 'cliente'] }, updatedAt: { gte: monthStart, lt: monthEnd } },
+      where: { origenDetalle: partnerId, fuente: 'partner_referral', estado: { in: ['convertido', 'cliente', 'ganado'] }, updatedAt: { gte: monthStart, lt: monthEnd } },
     });
 
     // Commissions this month
@@ -62,13 +62,13 @@ export async function GET(request: NextRequest) {
 
     // Pending commissions
     const commissionsPending = await prisma.commission.aggregate({
-      where: { partnerId, estado: 'pendiente' },
+      where: { partnerId, estado: 'PENDING' },
       _sum: { montoComision: true },
     });
 
     // Certification
     const clientesConvertidos = await prisma.lead.count({
-      where: { sourceDetail: partnerId, source: 'partner_referral', estado: { in: ['convertido', 'cliente'] } },
+      where: { origenDetalle: partnerId, fuente: 'partner_referral', estado: { in: ['convertido', 'cliente', 'ganado'] } },
     });
     let tier = 'silver';
     if (clientesConvertidos >= 50) tier = 'platinum';
@@ -89,7 +89,7 @@ export async function GET(request: NextRequest) {
         delMes: Math.round((commissionsMonth._sum.montoComision || 0) * 100) / 100,
         pagosDelMes: commissionsMonth._count,
         acumuladoTotal: Math.round((commissionsTotal._sum.montoComision || 0) * 100) / 100,
-        pendientePago: Math.round((commissionsPending._sum.montoComision || 0) * 100) / 100,
+        pendientePago: Math.round(((commissionsPending._sum?.montoComision) || 0) * 100) / 100,
         porcentajeActual: partner.comisionPorcentaje,
       },
       ranking: {

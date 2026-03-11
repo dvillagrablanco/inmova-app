@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
 
     // Count referrals converted
     const clientesConvertidos = await prisma.lead.count({
-      where: { sourceDetail: partnerId, source: 'partner_referral', estado: { in: ['convertido', 'cliente'] } },
+      where: { origenDetalle: partnerId, fuente: 'partner_referral', estado: { in: ['convertido', 'cliente', 'ganado'] } },
     });
 
     // Sum commissions

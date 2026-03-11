@@ -29,6 +29,7 @@ import {
   getRecentNotifications,
   createNotification,
   CreateNotificationParams,
+  type NotificationType,
 } from '@/lib/notification-service';
 
 /**
@@ -100,7 +101,7 @@ export async function POST(request: NextRequest) {
     const params: CreateNotificationParams = {
       userId: data.userId || session.user.id,
       companyId: data.companyId || session.user.companyId || '',
-      type: data.type || 'info',
+      type: (data.type || 'info') as NotificationType,
       title: data.title,
       message: data.message,
       icon: data.icon,

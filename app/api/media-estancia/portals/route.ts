@@ -69,10 +69,6 @@ export async function POST(request: NextRequest) {
           select: {
             nombre: true,
             direccion: true,
-            ciudad: true,
-            latitud: true,
-            longitud: true,
-            ascensor: true,
           },
         },
       },
@@ -106,10 +102,13 @@ export async function POST(request: NextRequest) {
         photos: unit.imagenes || [],
         location: {
           address: unit.building?.direccion || '',
-          city: unit.building?.ciudad || 'Madrid',
-          coordinates: unit.building?.latitud && unit.building?.longitud
-            ? { lat: unit.building.latitud, lng: unit.building.longitud }
-            : undefined,
+          city:
+            unit.building?.direccion
+              ?.split(',')
+              .map((part) => part.trim())
+              .filter(Boolean)
+              .pop() || 'Madrid',
+          coordinates: undefined,
         },
         property: {
           type: unit.tipo === 'vivienda' ? 'apartment' : 'room',

@@ -292,11 +292,10 @@ async function generateAIAnalysis(
 }
 
 // Determinar estado basado en scoring y contratos
-async function determineStatus(
+function determineStatus(
   tenant: any,
   totalScore: number
 ): 'pending' | 'approved' | 'rejected' {
-  const prisma = await getPrisma();
   // Si tiene contrato activo, está aprobado
   const hasActiveContract =
     tenant.contracts?.some((c: any) => c.estado === 'activo') || false;

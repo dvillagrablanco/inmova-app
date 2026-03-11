@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'leadId, fromPartnerId, toPartnerId required' }, { status: 400 });
     }
 
-    const lead = await prisma.lead.findUnique({ where: { id: leadId }, select: { id: true, nombre: true, sourceDetail: true } });
+    const lead = await prisma.lead.findUnique({ where: { id: leadId }, select: { id: true, nombre: true, origenDetalle: true } });
     if (!lead) return NextResponse.json({ error: 'Lead not found' }, { status: 404 });
 
     const toPartner = await prisma.partner.findUnique({ where: { id: toPartnerId }, select: { id: true, nombre: true, contactoEmail: true } });
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
       where: { id: leadId },
       data: {
         notas: `Derivado de partner ${fromPartnerId} a ${toPartner.nombre}. Comisión compartida: ${comisionCompartida || 50}%`,
-        sourceDetail: toPartnerId, // Now belongs to target partner
+        origenDetalle: toPartnerId, // Now belongs to target partner
       },
     });
 

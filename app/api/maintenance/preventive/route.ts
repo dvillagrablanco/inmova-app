@@ -92,12 +92,12 @@ export async function GET(request: NextRequest) {
           building: { select: { nombre: true } },
           unit: { select: { numero: true, building: { select: { nombre: true } } } },
         },
-        orderBy: { proximaEjecucion: 'asc' },
+        orderBy: { proximaFecha: 'asc' },
       });
 
       for (const sch of schedules) {
-        const diasRestantes = sch.proximaEjecucion
-          ? differenceInDays(sch.proximaEjecucion, today)
+        const diasRestantes = sch.proximaFecha
+          ? differenceInDays(sch.proximaFecha, today)
           : 999;
         const edificio =
           sch.building?.nombre || sch.unit?.building?.nombre || 'Sin edificio';
@@ -110,7 +110,7 @@ export async function GET(request: NextRequest) {
           descripcion: sch.descripcion || `Frecuencia: ${sch.frecuencia}`,
           edificio,
           estado: diasRestantes < 0 ? 'vencido' : 'programado',
-          fechaVencimiento: sch.proximaEjecucion,
+          fechaVencimiento: sch.proximaFecha,
           diasRestantes,
           prioridad: diasRestantes < 0 ? 'alta' : diasRestantes <= 30 ? 'media' : 'baja',
           entityId: sch.id,

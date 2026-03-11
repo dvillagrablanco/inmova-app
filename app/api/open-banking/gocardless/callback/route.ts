@@ -72,8 +72,7 @@ export async function GET(request: NextRequest) {
         .update({
           where: { id: tenantId },
           data: {
-            // Store in JSON metadata since specific GC fields may not exist
-            observaciones: `GC_MANDATE=${mandateId}|GC_CUSTOMER=${customerId}|GC_BANK_ACCOUNT=${customerBankAccountId}`,
+            notas: `GC_MANDATE=${mandateId}|GC_CUSTOMER=${customerId}|GC_BANK_ACCOUNT=${customerBankAccountId}`,
           },
         })
         .catch(() => {

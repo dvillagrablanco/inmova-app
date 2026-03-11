@@ -31,32 +31,41 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Mensaje requerido' }, { status: 400 });
     }
 
-    const userId = session.user.id as string;
+    const userEmail = session.user.email || '';
 
     // Obtener datos del inquilino
     const tenant = await prisma.tenant.findFirst({
-      where: { userId },
-      include: {
-        contracts: {
-          where: { estado: 'activo' },
+      where: { email: userEmail },
+    });
+
+    const contracts = tenant
+      ? await prisma.contract.findMany({
+          where: { tenantId: tenant.id, estado: 'activo' },
           include: {
             unit: { include: { building: { select: { nombre: true, direccion: true } } } },
             payments: { orderBy: { fechaVencimiento: 'desc' }, take: 6 },
           },
-        },
-        maintenanceRequests: {
-          where: { estado: { in: ['pendiente', 'en_progreso'] } },
-          orderBy: { fechaSolicitud: 'desc' },
-          take: 5,
-        },
-      },
-    });
+          orderBy: { fechaInicio: 'desc' },
+          take: 1,
+        })
+      : [];
+    const contract = contracts[0];
+    const maintenanceRequests =
+      tenant && contract?.unitId
+        ? await prisma.maintenanceRequest.findMany({
+            where: {
+              unitId: contract.unitId,
+              estado: { in: ['pendiente', 'en_progreso'] },
+            },
+            orderBy: { fechaSolicitud: 'desc' },
+            take: 5,
+          })
+        : [];
 
     // Contexto del inquilino para la IA
-    const contract = tenant?.contracts?.[0];
     const payments = contract?.payments || [];
     const pendingPayments = payments.filter((p: any) => p.estado === 'pendiente' || p.estado === 'atrasado');
-    const openIncidencias = tenant?.maintenanceRequests?.length || 0;
+    const openIncidencias = maintenanceRequests.length || 0;
 
     const tenantContext = tenant ? `
 Datos del inquilino:

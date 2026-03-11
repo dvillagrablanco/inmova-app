@@ -28,7 +28,18 @@ export async function GET(request: NextRequest) {
 
     const leads = await prisma.lead.findMany({
       where: { companyId: { in: scope.scopeCompanyIds } },
-      select: { id: true, nombre: true, email: true, telefono: true, empresa: true, estado: true, prioridad: true, source: true, createdAt: true, updatedAt: true },
+      select: {
+        id: true,
+        nombre: true,
+        email: true,
+        telefono: true,
+        empresa: true,
+        estado: true,
+        temperatura: true,
+        fuente: true,
+        createdAt: true,
+        updatedAt: true,
+      },
       orderBy: { updatedAt: 'desc' },
       take: 200,
     });

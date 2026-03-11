@@ -69,8 +69,7 @@ export async function GET(request: NextRequest) {
       where: { id: connection.id },
       data: {
         estado: 'conectado',
-        cuentas: JSON.stringify(accounts),
-        ultimaSincronizacion: new Date(),
+        ultimaSync: new Date(),
         accessToken: requisition.accounts.join(','), // Store account IDs
       },
     });

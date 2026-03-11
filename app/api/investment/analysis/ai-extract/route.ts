@@ -86,22 +86,32 @@ ${documentContent.substring(0, 15000)}
 Responde SOLO con JSON valido, sin markdown.`;
 
     const analysisResult = await analyzeDocument({
-      documentContent: prompt,
-      analysisType: 'investment_analysis',
-      additionalContext: analysisContext || undefined,
+      text: prompt,
+      filename: fileName,
+      mimeType,
+      companyInfo: {
+        cif: null,
+        nombre: 'Análisis de inversión',
+        direccion: analysisContext || null,
+      },
     });
 
     // 2. Parsear resultado de IA
     let extracted: any = {};
     try {
-      // Intentar parsear JSON de la respuesta
-      const jsonMatch = analysisResult.analysis?.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        extracted = JSON.parse(jsonMatch[0]);
-      }
+      extracted = {
+        rent_roll:
+          analysisResult.suggestedActions
+            .filter((action) => action.entity === 'rent_roll')
+            .map((action) => action.data) || [],
+        datos_activo:
+          analysisResult.suggestedActions.find((action) => action.entity === 'asset')?.data || {},
+        valoracion_datos:
+          analysisResult.suggestedActions.find((action) => action.entity === 'valuation')?.data || null,
+      };
     } catch (parseErr) {
       logger.warn('[AI Extract] Could not parse JSON from AI response:', parseErr);
-      extracted = { raw: analysisResult.analysis };
+      extracted = { raw: analysisResult.summary };
     }
 
     // 3. Si hay datos de valoracion, lanzar valoracion IA en paralelo
@@ -136,7 +146,7 @@ Responde SOLO con JSON valido, sin markdown.`;
         datosActivo: extracted.datos_activo || {},
         valoracionDatos: extracted.valoracion_datos || null,
         valoracionIA: valuation?.data || null,
-        rawAnalysis: analysisResult.analysis,
+        rawAnalysis: analysisResult.summary,
       },
     });
   } catch (error: any) {

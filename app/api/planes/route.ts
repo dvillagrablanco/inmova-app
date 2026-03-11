@@ -5,6 +5,11 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 /**
  * GET /api/planes
  * API pública para obtener los planes y add-ons disponibles
@@ -16,7 +21,7 @@ export const runtime = 'nodejs';
  */
 export async function GET(request: NextRequest) {
   try {
-    // Lazy load Prisma
+    const prisma = await getPrisma();
 
     // Intentar obtener de BD
     let planesFromDB: any[] = [];

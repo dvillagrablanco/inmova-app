@@ -167,7 +167,6 @@ export async function POST(req: NextRequest) {
         tarifaNocturna: Number(listing.precioPorNoche),
         ingresoNeto: precioTotal,
         estado: 'CONFIRMADA',
-        notas: body.notas || null,
       },
     });
 

@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
       where: { companyId: session.user.companyId, proveedor: 'gocardless' },
       select: {
         id: true, tenantId: true, nombreBanco: true, estado: true,
-        ultimaSincronizacion: true, createdAt: true,
+        ultimaSync: true, createdAt: true,
       },
       orderBy: { createdAt: 'desc' },
     });

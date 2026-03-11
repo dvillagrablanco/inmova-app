@@ -43,6 +43,17 @@ async function handleCaptureLead(req: NextRequest) {
       );
     }
     const body = parsed.data;
+    const stringValue = (value: unknown): string => (typeof value === 'string' ? value : '');
+    const stringArrayValue = (value: unknown): string[] =>
+      Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
+    const numberValue = (value: unknown): number | null => {
+      if (typeof value === 'number' && Number.isFinite(value)) return value;
+      if (typeof value === 'string' && value.trim()) {
+        const parsedNumber = Number(value);
+        return Number.isFinite(parsedNumber) ? parsedNumber : null;
+      }
+      return null;
+    };
 
     // Buscar o crear compañía demo para leads públicos
     let demoCompany = await prisma.company.findFirst({
@@ -66,14 +77,18 @@ async function handleCaptureLead(req: NextRequest) {
 
     // Calcular scoring y probabilidad inicial
     const leadData = {
-      ...body,
-      nombre: body.nombre || body.name || '',
-      fuente: body.fuente || (body.conversacionId ? 'chatbot' : 'landing'),
-      urgencia: body.urgencia || 'media',
+      hasEmail: !!body.email,
+      hasTelefono: !!(body.telefono || body.phone),
+      hasEmpresa: !!(body.empresa || body.company),
+      hasCargo: !!body.cargo,
+      hasCiudad: !!body.ciudad,
+      hasPresupuesto: numberValue(body.presupuestoMensual) !== null,
+      contactosRealizados: 0,
+      urgencia: stringValue(body.urgencia) || 'media',
     };
 
     const puntuacionInicial = calculateLeadScoring(leadData);
-    const probabilidadInicial = calculateProbabilidadCierre(leadData);
+    const probabilidadInicial = calculateProbabilidadCierre(puntuacionInicial, 'nuevo');
     const temperaturaInicial = determinarTemperatura(puntuacionInicial);
 
     // Verificar si el lead ya existe
@@ -89,18 +104,26 @@ async function handleCaptureLead(req: NextRequest) {
       const updatedLead = await prisma.lead.update({
         where: { id: existingLead.id },
         data: {
-          nombre: body.nombre || existingLead.nombre,
-          apellidos: body.apellidos || existingLead.apellidos,
-          telefono: body.telefono || existingLead.telefono,
-          empresa: body.empresa || existingLead.empresa,
-          cargo: body.cargo || existingLead.cargo,
-          paginaOrigen: body.paginaOrigen || existingLead.paginaOrigen,
-          verticalesInteres: body.verticalesInteres || existingLead.verticalesInteres,
-          presupuestoMensual: body.presupuestoMensual ? parseFloat(body.presupuestoMensual) : existingLead.presupuestoMensual,
-          numeroUnidades: body.numeroUnidades ? parseInt(body.numeroUnidades) : existingLead.numeroUnidades,
-          conversacionId: body.conversacionId || existingLead.conversacionId,
-          mensajeInicial: body.mensajeInicial || existingLead.mensajeInicial,
-          preguntasFrecuentes: body.preguntasFrecuentes || existingLead.preguntasFrecuentes,
+          nombre: stringValue(body.nombre) || stringValue(body.name) || existingLead.nombre,
+          apellidos: stringValue(body.apellidos) || existingLead.apellidos,
+          telefono: stringValue(body.telefono) || stringValue(body.phone) || existingLead.telefono,
+          empresa: stringValue(body.empresa) || stringValue(body.company) || existingLead.empresa,
+          cargo: stringValue(body.cargo) || existingLead.cargo,
+          paginaOrigen: stringValue(body.paginaOrigen) || existingLead.paginaOrigen,
+          verticalesInteres: stringArrayValue(body.verticalesInteres).length
+            ? stringArrayValue(body.verticalesInteres)
+            : existingLead.verticalesInteres,
+          presupuestoMensual: numberValue(body.presupuestoMensual) ?? existingLead.presupuestoMensual,
+          numeroUnidades:
+            (numberValue(body.numeroUnidades) !== null
+              ? Math.trunc(numberValue(body.numeroUnidades) as number)
+              : existingLead.numeroUnidades),
+          conversacionId: stringValue(body.conversacionId) || existingLead.conversacionId,
+          mensajeInicial:
+            stringValue(body.mensajeInicial) || stringValue(body.mensaje) || existingLead.mensajeInicial,
+          preguntasFrecuentes: stringArrayValue(body.preguntasFrecuentes).length
+            ? stringArrayValue(body.preguntasFrecuentes)
+            : existingLead.preguntasFrecuentes,
           puntuacion: puntuacionInicial,
           probabilidadCierre: probabilidadInicial,
           temperatura: temperaturaInicial,
@@ -119,33 +142,36 @@ async function handleCaptureLead(req: NextRequest) {
     const lead = await prisma.lead.create({
       data: {
         companyId: demoCompany.id,
-        nombre: body.nombre || body.name || '',
-        apellidos: body.apellidos || '',
+        nombre: stringValue(body.nombre) || stringValue(body.name) || '',
+        apellidos: stringValue(body.apellidos) || '',
         email: body.email,
-        telefono: body.telefono || body.phone || '',
-        empresa: body.empresa || body.company || '',
-        cargo: body.cargo || '',
-        direccion: body.direccion || '',
-        ciudad: body.ciudad || '',
-        codigoPostal: body.codigoPostal || '',
-        pais: body.pais || 'España',
-        fuente: body.fuente || (body.conversacionId ? 'chatbot' : 'landing'),
-        origenDetalle: body.origenDetalle || '',
-        paginaOrigen: body.paginaOrigen || req.headers.get('referer') || '',
+        telefono: stringValue(body.telefono) || stringValue(body.phone) || '',
+        empresa: stringValue(body.empresa) || stringValue(body.company) || '',
+        cargo: stringValue(body.cargo) || '',
+        direccion: stringValue(body.direccion) || '',
+        ciudad: stringValue(body.ciudad) || '',
+        codigoPostal: stringValue(body.codigoPostal) || '',
+        pais: stringValue(body.pais) || 'España',
+        fuente: stringValue(body.fuente) || (stringValue(body.conversacionId) ? 'chatbot' : 'landing'),
+        origenDetalle: stringValue(body.origenDetalle) || '',
+        paginaOrigen: stringValue(body.paginaOrigen) || req.headers.get('referer') || '',
         estado: 'nuevo',
         etapa: 'contacto_inicial',
         puntuacion: puntuacionInicial,
         temperatura: temperaturaInicial,
-        tipoNegocio: body.tipoNegocio || '',
-        verticalesInteres: body.verticalesInteres || [],
-        numeroUnidades: body.numeroUnidades ? parseInt(body.numeroUnidades) : null,
-        presupuestoMensual: body.presupuestoMensual ? parseFloat(body.presupuestoMensual) : null,
-        urgencia: body.urgencia || 'media',
-        notas: body.notas || body.mensaje || '',
+        tipoNegocio: stringValue(body.tipoNegocio) || '',
+        verticalesInteres: stringArrayValue(body.verticalesInteres),
+        numeroUnidades:
+          numberValue(body.numeroUnidades) !== null
+            ? Math.trunc(numberValue(body.numeroUnidades) as number)
+            : null,
+        presupuestoMensual: numberValue(body.presupuestoMensual),
+        urgencia: stringValue(body.urgencia) || 'media',
+        notas: stringValue(body.notas) || stringValue(body.mensaje) || '',
         probabilidadCierre: probabilidadInicial,
-        conversacionId: body.conversacionId || '',
-        mensajeInicial: body.mensajeInicial || body.mensaje || '',
-        preguntasFrecuentes: body.preguntasFrecuentes || [],
+        conversacionId: stringValue(body.conversacionId) || '',
+        mensajeInicial: stringValue(body.mensajeInicial) || stringValue(body.mensaje) || '',
+        preguntasFrecuentes: stringArrayValue(body.preguntasFrecuentes),
         ultimoContacto: new Date(),
       },
     });

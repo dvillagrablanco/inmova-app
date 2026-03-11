@@ -18,8 +18,7 @@ const LEVEL_THRESHOLDS = [
   { name: 'PLATINUM', clients: 100 },
 ] as const;
 
-async function getPartnerLevel(clientCount: number): string {
-  const prisma = await getPrisma();
+function getPartnerLevel(clientCount: number): string {
   if (clientCount >= 100) return 'PLATINUM';
   if (clientCount >= 50) return 'GOLD';
   if (clientCount >= 25) return 'SILVER';
@@ -27,19 +26,16 @@ async function getPartnerLevel(clientCount: number): string {
   return 'BRONZE';
 }
 
-async function getNextLevelClients(clientCount: number): number {
-  const prisma = await getPrisma();
+function getNextLevelClients(clientCount: number): number {
   const next = LEVEL_THRESHOLDS.find((level) => clientCount < level.clients);
   return next ? next.clients - clientCount : 0;
 }
 
-async function formatPeriod(date: Date): string {
-  const prisma = await getPrisma();
+function formatPeriod(date: Date): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 }
 
-async function getErrorMessage(error: unknown): string {
-  const prisma = await getPrisma();
+function getErrorMessage(error: unknown): string {
   if (error instanceof Error) {
     return error.message;
   }

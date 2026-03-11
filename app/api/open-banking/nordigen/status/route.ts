@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
       where: { companyId: session.user.companyId, proveedor: 'nordigen' },
       select: {
         id: true, nombreBanco: true, estado: true,
-        ultimaSincronizacion: true, createdAt: true, cuentas: true,
+        ultimaSync: true, createdAt: true, accessToken: true,
       },
       orderBy: { createdAt: 'desc' },
     });
