@@ -475,9 +475,10 @@ async function parsePdfBuffer(buffer: Buffer): Promise<{ text: string }> {
     return mod(buffer);
   }
 
-  // v2.x+: exports PDFParse class — use new PDFParse(buffer).getText()
+  // v2.x+: exports PDFParse class — requires Uint8Array, not Buffer
   if (mod.PDFParse && typeof mod.PDFParse === 'function') {
-    const parser = new mod.PDFParse(buffer);
+    const uint8 = new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+    const parser = new mod.PDFParse(uint8);
     const text = await parser.getText();
     return { text };
   }
