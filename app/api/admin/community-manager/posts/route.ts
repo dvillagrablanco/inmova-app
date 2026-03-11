@@ -7,6 +7,11 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 const PLATFORM_MAP = {
   instagram: 'INSTAGRAM',
   facebook: 'FACEBOOK',
@@ -140,6 +145,7 @@ export async function GET(request: NextRequest) {
     if (!companyId) {
       return NextResponse.json({ error: 'CompanyId no disponible' }, { status: 400 });
     }
+    const prisma = await getPrisma();
 
     const posts = await prisma.socialMediaPost.findMany({
       where: { companyId },
@@ -201,6 +207,7 @@ export async function POST(request: NextRequest) {
     if (!companyId) {
       return NextResponse.json({ error: 'CompanyId no disponible' }, { status: 400 });
     }
+    const prisma = await getPrisma();
 
     const body = await request.json();
     const { content, platforms, status, scheduledDate, mediaUrl } = postSchema.parse(body);

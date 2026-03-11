@@ -8,6 +8,11 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 // Canva OAuth configuration
 const CANVA_AUTH_URL = 'https://www.canva.com/api/oauth/authorize';
 const CANVA_TOKEN_URL = 'https://api.canva.com/rest/v1/oauth/token';
@@ -231,6 +236,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+    const prisma = await getPrisma();
     const existing = await prisma.integrationConfig.findUnique({
       where: { companyId_provider: { companyId, provider: 'canva' } },
       select: { credentials: true, settings: true },

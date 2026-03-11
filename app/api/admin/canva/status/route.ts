@@ -6,6 +6,11 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 const toObjectRecord = (value: unknown): Record<string, unknown> => {
   if (value && typeof value === 'object' && !Array.isArray(value)) {
     return value as Record<string, unknown>;
@@ -72,6 +77,7 @@ export async function GET(request: NextRequest) {
     if (!companyId) {
       return NextResponse.json({ error: 'CompanyId no disponible' }, { status: 400 });
     }
+    const prisma = await getPrisma();
 
     // Verificar si hay credenciales de Canva configuradas
     const canvaClientId = process.env.CANVA_CLIENT_ID;

@@ -8,6 +8,11 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 const BLOG_PROVIDER = 'community_blog';
 
 const blogPostSchema = z.object({
@@ -103,6 +108,7 @@ export async function GET(request: NextRequest) {
     if (!companyId) {
       return NextResponse.json({ error: 'CompanyId no disponible' }, { status: 400 });
     }
+    const prisma = await getPrisma();
     const integration = await prisma.integrationConfig.findUnique({
       where: { companyId_provider: { companyId, provider: BLOG_PROVIDER } },
       select: { settings: true },
@@ -157,6 +163,7 @@ export async function POST(request: NextRequest) {
     if (!companyId) {
       return NextResponse.json({ error: 'CompanyId no disponible' }, { status: 400 });
     }
+    const prisma = await getPrisma();
 
     const body = await request.json();
     const { title, content, excerpt, category, status, publishDate } = blogPostSchema.parse(body);

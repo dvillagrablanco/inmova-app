@@ -8,6 +8,11 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 // Configuración por defecto
 const DEFAULT_CONFIG = {
   autoPost: false,
@@ -98,6 +103,7 @@ export async function GET(request: NextRequest) {
     if (!companyId) {
       return NextResponse.json({ error: 'CompanyId no disponible' }, { status: 400 });
     }
+    const prisma = await getPrisma();
     const integration = await prisma.integrationConfig.findUnique({
       where: { companyId_provider: { companyId, provider: CONFIG_PROVIDER } },
       select: { settings: true },
@@ -147,6 +153,7 @@ export async function PUT(request: NextRequest) {
     if (!companyId) {
       return NextResponse.json({ error: 'CompanyId no disponible' }, { status: 400 });
     }
+    const prisma = await getPrisma();
 
     const body = await request.json();
     const { config } = body;

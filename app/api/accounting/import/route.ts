@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { validateFile } from '@/lib/file-validation';
 import { parseCSV } from '@/lib/import-service';
 import logger from '@/lib/logger';
+import type { AccountingCategory } from '@/types/prisma-types';
 import * as XLSX from 'xlsx';
 
 export const dynamic = 'force-dynamic';
@@ -18,7 +19,7 @@ async function getPrisma() {
 type TransactionType = 'ingreso' | 'gasto';
 
 const TRANSACTION_TYPES: TransactionType[] = ['ingreso', 'gasto'];
-const ACCOUNTING_CATEGORIES = [
+const ACCOUNTING_CATEGORIES: AccountingCategory[] = [
   'ingreso_renta',
   'ingreso_deposito',
   'ingreso_otro',
@@ -29,9 +30,12 @@ const ACCOUNTING_CATEGORIES = [
   'gasto_reparacion',
   'gasto_comunidad',
   'gasto_administracion',
+  'gasto_arrendamiento',
+  'gasto_bancario',
+  'gasto_personal',
+  'gasto_amortizacion',
   'gasto_otro',
-] as const;
-type AccountingCategory = typeof ACCOUNTING_CATEGORIES[number];
+];
 
 const KEY_ALIASES = {
   fecha: ['fecha', 'date', 'fechaoperacion', 'fechavalor', 'fecha_contable', 'fechamovimiento'],
@@ -306,19 +310,11 @@ export async function POST(request: NextRequest) {
     const fileExtension = file.name.split('.').pop()?.toLowerCase();
     const isCsv = fileExtension === 'csv' || file.type === 'text/csv';
 
-    const validation = await validateFile(
-      {
-        name: file.name,
-        type: file.type,
-        size: file.size,
-        buffer: fileBuffer,
-      },
-      isCsv ? 'csv' : 'document'
-    );
+    const validation = validateFile(fileBuffer, file.name, isCsv ? 'any' : 'document');
 
-    if (!validation.isValid) {
+    if (!validation.valid) {
       return NextResponse.json(
-        { error: 'Archivo inválido', details: validation.errors },
+        { error: 'Archivo inválido', details: validation.error },
         { status: 400 }
       );
     }

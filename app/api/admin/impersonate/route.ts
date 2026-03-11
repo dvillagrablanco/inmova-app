@@ -6,6 +6,11 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 /**
  * POST /api/admin/impersonate
  * Permite al super_admin "loguearse como" cualquier empresa
@@ -38,6 +43,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Lazy load Prisma
+
+    const prisma = await getPrisma();
 
     // Verificar que la empresa existe
     const company = await prisma.company.findUnique({

@@ -7,6 +7,11 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 /**
  * GET /api/admin/ewoorker-planes/[id]
  * Obtener un plan específico
@@ -18,6 +23,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
+    const prisma = await getPrisma();
     const plan = await prisma.ewoorkerPlan.findUnique({
       where: { id: params.id },
     });
@@ -73,6 +79,8 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     });
 
     const validated = schema.parse(body);
+
+    const prisma = await getPrisma();
 
     // Verificar que el plan existe
     const existing = await prisma.ewoorkerPlan.findUnique({
@@ -168,6 +176,8 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     if (!session?.user || !['super_admin', 'administrador'].includes(session.user.role)) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
+
+    const prisma = await getPrisma();
 
     // Verificar que el plan existe
     const existing = await prisma.ewoorkerPlan.findUnique({

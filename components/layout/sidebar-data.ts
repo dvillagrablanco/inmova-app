@@ -98,8 +98,6 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/contratos': 'contratos',
   '/contratos-gestion': 'documentos',
   '/liquidaciones': 'finanzas',
-  '/facturacion': 'facturacion',
-  '/garajes-trasteros': 'unidades',
   '/suministros': 'operaciones',
   '/avalistas': 'contratos',
   '/actualizaciones-renta': 'contratos',

@@ -8,6 +8,11 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 const PROVIDER = 'impuestos';
 
 const querySchema = z.object({
@@ -153,6 +158,7 @@ export async function GET(request: NextRequest) {
     if (!companyId) {
       return NextResponse.json({ error: 'CompanyId no disponible' }, { status: 400 });
     }
+    const prisma = await getPrisma();
 
     const { searchParams } = new URL(request.url);
     const parsedQuery = querySchema.parse({
@@ -415,6 +421,7 @@ export async function POST(request: NextRequest) {
     if (!companyId) {
       return NextResponse.json({ error: 'CompanyId no disponible' }, { status: 400 });
     }
+    const prisma = await getPrisma();
 
     const body = createObligationSchema.parse(await request.json());
     const metadata = getModelMetadata(body.modelo);

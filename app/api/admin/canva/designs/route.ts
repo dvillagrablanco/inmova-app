@@ -8,6 +8,11 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 const designSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -99,6 +104,7 @@ export async function GET(request: NextRequest) {
     if (!companyId) {
       return NextResponse.json({ error: 'CompanyId no disponible' }, { status: 400 });
     }
+    const prisma = await getPrisma();
     const integration = await prisma.integrationConfig.findUnique({
       where: { companyId_provider: { companyId, provider: 'canva' } },
       select: { settings: true },
@@ -156,6 +162,7 @@ export async function POST(request: NextRequest) {
 
     const body = createSchema.parse(await request.json());
     const { name, templateId, category, dimensions } = body;
+    const prisma = await getPrisma();
 
     const now = new Date();
     const newDesign: CanvaDesign = {
@@ -244,6 +251,7 @@ export async function DELETE(request: NextRequest) {
     if (!companyId) {
       return NextResponse.json({ error: 'CompanyId no disponible' }, { status: 400 });
     }
+    const prisma = await getPrisma();
 
     const { searchParams } = new URL(request.url);
     const designId = searchParams.get('id');

@@ -54,6 +54,14 @@ interface Plantilla {
   activa: boolean;
 }
 
+type PlantillaFormState = {
+  nombre: string;
+  asunto: string;
+  cuerpo: string;
+  tipo: Plantilla['tipo'];
+  evento_trigger: Plantilla['evento_trigger'];
+};
+
 const VARIABLES_EJEMPLO: Record<string, string> = {
   inquilino_nombre: 'Juan García',
   inmueble_direccion: 'Calle Mayor 123, Piso 1A, Madrid',
@@ -86,7 +94,13 @@ export default function PlantillasComunicacionPage() {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [editing, setEditing] = useState<Plantilla | null>(null);
   const [previewPlantilla, setPreviewPlantilla] = useState<Plantilla | null>(null);
-  const [form, setForm] = useState({ nombre: '', asunto: '', cuerpo: '', tipo: 'email' as const, evento_trigger: 'manual' as const });
+  const [form, setForm] = useState<PlantillaFormState>({
+    nombre: '',
+    asunto: '',
+    cuerpo: '',
+    tipo: 'email',
+    evento_trigger: 'manual',
+  });
 
   useEffect(() => {
     if (status === 'unauthenticated') {

@@ -7,6 +7,11 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 const PLATFORM_MAP: Record<string, 'FACEBOOK' | 'INSTAGRAM' | 'LINKEDIN' | 'TWITTER'> = {
   facebook: 'FACEBOOK',
   instagram: 'INSTAGRAM',
@@ -40,6 +45,7 @@ export async function GET(request: NextRequest) {
         message: 'No hay empresa asociada para cargar cuentas.',
       });
     }
+    const prisma = await getPrisma();
 
     const accounts = await prisma.socialMediaAccount.findMany({
       where: { companyId },
@@ -128,6 +134,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+    const prisma = await getPrisma();
 
     const platformValue = PLATFORM_MAP[platform.toLowerCase()];
     if (!platformValue) {

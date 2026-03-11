@@ -48,6 +48,7 @@ export type {
   Payment,
   PaymentStatus,
   PaymentMethod,
+  AccountingCategory,
 
   // Invoice types
   Invoice,
