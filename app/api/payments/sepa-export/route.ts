@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
 
     const scope = await resolveCompanyScope({
       userId: session.user.id as string,
-      role: (session.user as { role?: string }).role as string,
+      role: (session.user as any).role,
       primaryCompanyId: session.user?.companyId,
       request: req,
     });

@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
     });
 
     const validIds = new Set(payments.map((p) => p.id));
-    let failed = paymentIds.filter((id) => !validIds.has(id)).length;
+    let failed = paymentIds.filter((id: string) => !validIds.has(id)).length;
 
     const toUpdate = payments.filter((p) => p.estado !== 'pagado');
     let updated = 0;

@@ -313,37 +313,7 @@ export async function POST(req: NextRequest) {
         // Zucchetti sync (disabled - module removed in cleanup)
         Promise.resolve()
           .then(async () => {
-            return; // TODO: Re-enable when Zucchetti integration is active
-            try {
-              // Obtener datos del contrato para referencia
-              const contract = await prisma.contract.findUnique({
-                where: { id: validatedData.contractId },
-                select: {
-                  unit: {
-                    select: {
-                      numero: true,
-                      building: { select: { nombre: true, companyId: true } },
-                    },
-                  },
-                  tenant: { select: { nombreCompleto: true } },
-                },
-              });
-
-              const companyId = contract?.unit?.building?.companyId || scope.activeCompanyId;
-
-              await syncIncomeToZucchetti({
-                companyId,
-                concepto: validatedData.concepto || `Renta ${payment.periodo}`,
-                monto: validatedData.monto,
-                fecha: validatedData.fechaPago ? new Date(validatedData.fechaPago) : new Date(),
-                tenantName: contract?.tenant?.nombreCompleto,
-                buildingName: contract?.unit?.building?.nombre,
-                unitNumero: contract?.unit?.numero,
-                paymentId: payment.id,
-              });
-            } catch (err: any) {
-              logger.warn('Zucchetti sync error (no bloqueante):', err.message);
-            }
+            return;
           })
           .catch(() => {});
       }

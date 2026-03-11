@@ -21,10 +21,8 @@ export async function GET(request: NextRequest) {
     if (!providerId) return NextResponse.json({ error: 'providerId required' }, { status: 400 });
 
     const workOrders = await prisma.maintenanceRequest.findMany({
-      where: { proveedorAsignado: providerId },
-      select: {
-        id: true, titulo: true, descripcion: true, estado: true, prioridad: true,
-        fechaSolicitud: true, fechaCompletado: true, costoEstimado: true,
+      where: { providerId },
+      include: {
         unit: { select: { numero: true, building: { select: { nombre: true, direccion: true } } } },
       },
       orderBy: { fechaSolicitud: 'desc' },
@@ -38,7 +36,7 @@ export async function GET(request: NextRequest) {
       location: `${wo.unit?.building?.nombre || ''} ${wo.unit?.numero || ''}`,
       address: wo.unit?.building?.direccion || '',
       date: wo.fechaSolicitud.toISOString(),
-      completedDate: wo.fechaCompletado?.toISOString() || null,
+      completedDate: wo.fechaCompletada?.toISOString() || null,
       status: wo.estado,
       priority: wo.prioridad,
       cost: wo.costoEstimado,
