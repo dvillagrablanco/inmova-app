@@ -1,11 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import {
-  createCoupon,
-  getCompanyCoupons,
-  validateCoupon,
-} from '@/lib/coupon-service';
+import { createCoupon, getCompanyCoupons, validateCoupon } from '@/lib/coupon-service';
 import logger, { logError } from '@/lib/logger';
 import { z } from 'zod';
 
@@ -14,20 +10,33 @@ export const dynamic = 'force-dynamic';
 const validateCouponSchema = z.object({
   action: z.literal('validate'),
   codigo: z.string().min(1),
-  montoCompra: z.union([z.string(), z.number()]).transform((v) => (typeof v === 'string' ? parseFloat(v) : v)),
+  montoCompra: z
+    .union([z.string(), z.number()])
+    .transform((v) => (typeof v === 'string' ? parseFloat(v) : v)),
   userId: z.string().optional(),
   tenantId: z.string().optional(),
 });
 
 const createCouponSchema = z.object({
-  action: z.optional(),
+  action: z.string().optional(),
   codigo: z.string().min(1),
   tipo: z.string().min(1),
-  valor: z.union([z.string(), z.number()]).transform((v) => (typeof v === 'string' ? parseFloat(v) : v)),
+  valor: z
+    .union([z.string(), z.number()])
+    .transform((v) => (typeof v === 'string' ? parseFloat(v) : v)),
   descripcion: z.string().optional(),
-  usosMaximos: z.union([z.string(), z.number()]).optional().transform((v) => (v != null ? (typeof v === 'string' ? parseInt(v) : v) : undefined)),
-  usosPorUsuario: z.union([z.string(), z.number()]).optional().transform((v) => (v != null ? (typeof v === 'string' ? parseInt(v) : v) : 1)),
-  montoMinimo: z.union([z.string(), z.number()]).optional().transform((v) => (v != null ? (typeof v === 'string' ? parseFloat(v) : v) : undefined)),
+  usosMaximos: z
+    .union([z.string(), z.number()])
+    .optional()
+    .transform((v) => (v != null ? (typeof v === 'string' ? parseInt(v) : v) : undefined)),
+  usosPorUsuario: z
+    .union([z.string(), z.number()])
+    .optional()
+    .transform((v) => (v != null ? (typeof v === 'string' ? parseInt(v) : v) : 1)),
+  montoMinimo: z
+    .union([z.string(), z.number()])
+    .optional()
+    .transform((v) => (v != null ? (typeof v === 'string' ? parseFloat(v) : v) : undefined)),
   fechaInicio: z.string(),
   fechaExpiracion: z.string(),
   aplicaATodos: z.boolean().optional().default(true),
@@ -56,10 +65,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(coupons);
   } catch (error) {
     logger.error('Error al obtener cupones:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener cupones' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener cupones' }, { status: 500 });
   }
 }
 
@@ -127,9 +133,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(coupon, { status: 201 });
   } catch (error: any) {
     logger.error('Error al crear cupón:', error);
-    return NextResponse.json(
-      { error: error.message || 'Error al crear cupón' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Error al crear cupón' }, { status: 500 });
   }
 }

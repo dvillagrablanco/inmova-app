@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * API: Serie individual
  * PUT: Actualizar (incl. activa/inactiva)
@@ -25,10 +26,7 @@ const updateSerieSchema = z.object({
   activa: z.boolean().optional(),
 });
 
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {

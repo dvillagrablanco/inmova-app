@@ -62,6 +62,11 @@ interface ProjectSummary {
   buildingName: string | null;
 }
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 const PHASE_LABELS: Record<PhaseKey, string> = {
   PLANIFICACION: 'Planificación',
   PERMISOS: 'Permisos',
@@ -74,24 +79,21 @@ const PHASE_LABELS: Record<PhaseKey, string> = {
   GARANTIA: 'Garantía',
 };
 
-async function getErrorMessage(error: unknown): string {
-  const prisma = await getPrisma();
+function getErrorMessage(error: unknown): string {
   if (error instanceof Error) {
     return error.message;
   }
   return 'Error desconocido';
 }
 
-async function toDateString(date: Date | null): string | null {
-  const prisma = await getPrisma();
+function toDateString(date: Date | null): string | null {
   if (!date) {
     return null;
   }
   return date.toISOString().split('T')[0];
 }
 
-async function average(values: number[]): number {
-  const prisma = await getPrisma();
+function average(values: number[]): number {
   if (values.length === 0) {
     return 0;
   }
@@ -99,8 +101,7 @@ async function average(values: number[]): number {
   return sum / values.length;
 }
 
-async function getMinDate(dates: Date[]): Date | null {
-  const prisma = await getPrisma();
+function getMinDate(dates: Date[]): Date | null {
   if (dates.length === 0) {
     return null;
   }
@@ -108,8 +109,7 @@ async function getMinDate(dates: Date[]): Date | null {
   return new Date(minValue);
 }
 
-async function getMaxDate(dates: Date[]): Date | null {
-  const prisma = await getPrisma();
+function getMaxDate(dates: Date[]): Date | null {
   if (dates.length === 0) {
     return null;
   }
@@ -117,8 +117,7 @@ async function getMaxDate(dates: Date[]): Date | null {
   return new Date(maxValue);
 }
 
-async function getPhaseStatus(progress: number, endDate: Date | null, hasTasks: boolean): PhaseStatus {
-  const prisma = await getPrisma();
+function getPhaseStatus(progress: number, endDate: Date | null, hasTasks: boolean): PhaseStatus {
   if (!hasTasks) {
     return 'not_started';
   }

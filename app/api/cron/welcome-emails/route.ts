@@ -7,16 +7,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { processWelcomeSequence } from '@/lib/welcome-email-sequence';
 import logger from '@/lib/logger';
+import { authorizeCronRequest } from '@/lib/cron-auth';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
-  const cronSecret = request.headers.get('x-cron-secret') || request.nextUrl.searchParams.get('secret');
-  const expectedSecret = process.env.CRON_SECRET || 'inmova-cron-2026';
-
-  if (cronSecret !== expectedSecret) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const auth = await authorizeCronRequest(request, {
+    allowSession: false,
+    requireSuperAdmin: true,
+  });
+  if (!auth.authorized) {
+    return NextResponse.json({ error: auth.error || 'Unauthorized' }, { status: auth.status });
   }
 
   try {

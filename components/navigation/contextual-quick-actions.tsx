@@ -60,18 +60,18 @@ interface ContextualQuickActionsProps {
   daysUntilExpiration?: number;
   pendingPayments?: number;
   hasActiveIncidents?: boolean;
-  
+
   // Nuevos metadatos para Contratos, Pagos, Incidencias
   expiringContracts?: number;
   overduePayments?: number;
   pendingIssues?: number;
   criticalIssues?: number;
-  
+
   // Nuevos metadatos para Candidatos
   newCandidates?: number;
   highScoreCandidates?: number;
   pendingReviewCandidates?: number;
-  
+
   // Nuevos metadatos para Mantenimiento
   pendingMaintenanceRequests?: number;
   urgentMaintenanceRequests?: number;
@@ -104,7 +104,11 @@ export function ContextualQuickActions(props: ContextualQuickActionsProps) {
             <action.icon className="h-4 w-4" />
             {action.label}
             {action.badge && (
-              <Badge variant="secondary" className="ml-1 text-xs" title={`${action.badge} pendientes`}>
+              <Badge
+                variant="secondary"
+                className="ml-1 text-xs"
+                title={`${action.badge} pendientes`}
+              >
                 {action.badge}
               </Badge>
             )}
@@ -189,7 +193,11 @@ function generateActions(
   // ========================================
   // PROPIEDADES - DETALLES
   // ========================================
-  if (pathname.startsWith('/propiedades/') && props.propertyId && pathname !== '/propiedades/crear') {
+  if (
+    pathname.startsWith('/propiedades/') &&
+    props.propertyId &&
+    pathname !== '/propiedades/crear'
+  ) {
     // Si la propiedad está OCUPADA
     if (props.propertyStatus === 'ocupada') {
       actions.push(
@@ -203,8 +211,7 @@ function generateActions(
         {
           label: 'Registrar Pago',
           icon: DollarSign,
-          onClick: () =>
-            router.push(`/pagos/nuevo?propertyId=${props.propertyId}`),
+          onClick: () => router.push(`/pagos/nuevo?propertyId=${props.propertyId}`),
           variant: 'outline',
           badge: props.pendingPayments ? `${props.pendingPayments}` : undefined,
         },
@@ -228,8 +235,7 @@ function generateActions(
         {
           label: 'Reportar Incidencia',
           icon: AlertCircle,
-          onClick: () =>
-            router.push(`/incidencias/nueva?propertyId=${props.propertyId}`),
+          onClick: () => router.push(`/incidencias?openNew=1&propertyId=${props.propertyId}`),
           variant: 'ghost',
           badge: props.hasActiveIncidents ? '!' : undefined,
         },
@@ -254,8 +260,7 @@ function generateActions(
         {
           label: 'Publicar Anuncio',
           icon: TrendingUp,
-          onClick: () =>
-            router.push(`/anuncios/nuevo?propertyId=${props.propertyId}`),
+          onClick: () => router.push(`/anuncios/nuevo?propertyId=${props.propertyId}`),
           variant: 'default',
           tooltip: 'Publicar en portales inmobiliarios',
         },
@@ -277,8 +282,7 @@ function generateActions(
         {
           label: 'Programar Visita',
           icon: Calendar,
-          onClick: () =>
-            router.push(`/visitas/nueva?propertyId=${props.propertyId}`),
+          onClick: () => router.push(`/visitas?openNew=1&propertyId=${props.propertyId}`),
           variant: 'ghost',
         },
         {
@@ -296,8 +300,7 @@ function generateActions(
         {
           label: 'Ver Incidencias',
           icon: AlertCircle,
-          onClick: () =>
-            router.push(`/mantenimiento?propertyId=${props.propertyId}`),
+          onClick: () => router.push(`/mantenimiento?propertyId=${props.propertyId}`),
           variant: 'default',
           badge: props.hasActiveIncidents ? '!' : undefined,
         },
@@ -323,8 +326,7 @@ function generateActions(
       {
         label: 'Documentos',
         icon: FileText,
-        onClick: () =>
-          router.push(`/documentos?propertyId=${props.propertyId}`),
+        onClick: () => router.push(`/documentos?propertyId=${props.propertyId}`),
         variant: 'ghost',
       }
     );
@@ -467,8 +469,7 @@ function generateActions(
         actions.unshift({
           label: `Renovar (${props.daysUntilExpiration}d)`,
           icon: Clock,
-          onClick: () =>
-            router.push(`/contratos/nuevo?renovacionDeId=${props.contractId}`),
+          onClick: () => router.push(`/contratos/nuevo?renovacionDeId=${props.contractId}`),
           variant: 'destructive',
         });
       }
@@ -685,7 +686,7 @@ function generateActions(
       {
         label: 'Nueva Solicitud',
         icon: Plus,
-        onClick: () => router.push('/mantenimiento/nueva'),
+        onClick: () => router.push('/mantenimiento?openNew=1'),
         variant: 'default',
       },
       {

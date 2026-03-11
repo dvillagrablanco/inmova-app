@@ -7,10 +7,15 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 /**
  * GET /api/ewoorker/planes
  * Lista los planes de suscripción de eWoorker
- * 
+ *
  * Modelo de negocio freemium + comisión:
  * - Obrero: Gratis + 5% comisión
  * - Capataz: €49/mes + 2% comisión (MÁS POPULAR)
@@ -18,11 +23,11 @@ export const runtime = 'nodejs';
  */
 export async function GET(request: NextRequest) {
   try {
-    // Lazy load Prisma
+    const prisma = await getPrisma();
 
     // Intentar obtener de BD
     let planesFromDB: any[] = [];
-    
+
     try {
       planesFromDB = await prisma.ewoorkerPlan.findMany({
         where: { activo: true },
@@ -63,7 +68,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Fallback: usar config
-    const planes = Object.values(EWOORKER_PLANS).map(plan => ({
+    const planes = Object.values(EWOORKER_PLANS).map((plan) => ({
       id: plan.id,
       codigo: plan.id.replace('ewoorker_', '').toUpperCase(),
       nombre: plan.name,
@@ -88,7 +93,7 @@ export async function GET(request: NextRequest) {
     logger.error('[eWoorker Planes Error]:', error);
 
     // Fallback a config siempre
-    const planes = Object.values(EWOORKER_PLANS).map(plan => ({
+    const planes = Object.values(EWOORKER_PLANS).map((plan) => ({
       id: plan.id,
       codigo: plan.id.replace('ewoorker_', '').toUpperCase(),
       nombre: plan.name,

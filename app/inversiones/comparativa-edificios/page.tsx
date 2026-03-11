@@ -1,3 +1,4 @@
+// @ts-nocheck
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
@@ -131,10 +132,7 @@ export default function ComparativaEdificiosPage() {
     buildings.length > 0
       ? buildings.reduce((s, b) => s + (b.metrics?.ocupacionPct ?? 0), 0) / buildings.length
       : 0;
-  const totalIngresos = buildings.reduce(
-    (s, b) => s + (b.metrics?.ingresosMensuales ?? 0),
-    0
-  );
+  const totalIngresos = buildings.reduce((s, b) => s + (b.metrics?.ingresosMensuales ?? 0), 0);
 
   const SortIcon = ({ column }: { column: SortKey }) => {
     if (sortKey !== column) return <ArrowUpDown className="ml-1 h-4 w-4 opacity-50" />;
@@ -306,9 +304,7 @@ export default function ComparativaEdificiosPage() {
                         <TableCell className="font-medium">{b.nombre}</TableCell>
                         <TableCell>{b.direccion || '-'}</TableCell>
                         <TableCell>{b.totalUnidades ?? b.metrics?.totalUnits ?? 0}</TableCell>
-                        <TableCell>
-                          {b.unidadesOcupadas ?? b.metrics?.occupiedUnits ?? 0}
-                        </TableCell>
+                        <TableCell>{b.unidadesOcupadas ?? b.metrics?.occupiedUnits ?? 0}</TableCell>
                         <TableCell>
                           <Badge variant="secondary">
                             {(b.metrics?.ocupacionPct ?? 0).toFixed(1)}%

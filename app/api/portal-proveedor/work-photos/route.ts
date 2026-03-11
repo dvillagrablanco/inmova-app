@@ -30,8 +30,16 @@ export async function POST(request: NextRequest) {
       try {
         const { uploadDocument } = await import('@/lib/document-service');
         const buffer = Buffer.from(await file.arrayBuffer());
-        const result = await uploadDocument(buffer, `work-photos/${workOrderId}/${tipo}-${Date.now()}.${file.name.split('.').pop()}`, file.type);
-        fileUrl = result;
+        const result = await uploadDocument({
+          file: buffer,
+          filename: `${tipo}-${Date.now()}.${file.name.split('.').pop()}`,
+          mimeType: file.type,
+          companyId: 'provider-work-photos',
+          userId: 'provider-portal',
+          entityType: 'maintenance',
+          entityId: workOrderId,
+        });
+        fileUrl = result.url;
       } catch (e) {
         logger.warn('[Work Photos] Upload failed, continuing without file');
       }
@@ -49,7 +57,7 @@ export async function POST(request: NextRequest) {
       where: { id: workOrderId },
       data: {
         descripcion: (current?.descripcion || '') + photoNote,
-        ...(tipo === 'despues' ? { estado: 'completado', fechaCompletado: new Date() } : {}),
+        ...(tipo === 'despues' ? { estado: 'completado', fechaCompletada: new Date() } : {}),
       },
     });
 

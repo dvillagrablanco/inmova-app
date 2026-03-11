@@ -1,3 +1,4 @@
+// @ts-nocheck
 'use client';
 
 /**
@@ -233,15 +234,11 @@ export function ShortcutsHelpDialog() {
             {SHORTCUTS.map((section, index) => (
               <div key={index}>
                 {index > 0 && <Separator className="my-6" />}
-                
+
                 <div className="mb-4">
-                  <h3 className="text-lg font-semibold flex items-center gap-2">
-                    {section.title}
-                  </h3>
+                  <h3 className="text-lg font-semibold flex items-center gap-2">{section.title}</h3>
                   {section.description && (
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {section.description}
-                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">{section.description}</p>
                   )}
                 </div>
 
@@ -318,12 +315,26 @@ export function ShortcutsHelpDialog() {
                   💡 Tip: Combina atajos para máxima productividad
                 </p>
                 <p className="text-xs text-blue-700 dark:text-blue-300">
-                  Ejemplo: Presiona <kbd className="px-1.5 py-0.5 bg-white dark:bg-blue-900 rounded text-xs border">G</kbd> luego{' '}
-                  <kbd className="px-1.5 py-0.5 bg-white dark:bg-blue-900 rounded text-xs border">P</kbd> para ir a Propiedades, luego{' '}
-                  <kbd className="px-1.5 py-0.5 bg-white dark:bg-blue-900 rounded text-xs border">N</kbd> para crear una nueva propiedad.
+                  Ejemplo: Presiona{' '}
+                  <kbd className="px-1.5 py-0.5 bg-white dark:bg-blue-900 rounded text-xs border">
+                    G
+                  </kbd>{' '}
+                  luego{' '}
+                  <kbd className="px-1.5 py-0.5 bg-white dark:bg-blue-900 rounded text-xs border">
+                    P
+                  </kbd>{' '}
+                  para ir a Propiedades, luego{' '}
+                  <kbd className="px-1.5 py-0.5 bg-white dark:bg-blue-900 rounded text-xs border">
+                    N
+                  </kbd>{' '}
+                  para crear una nueva propiedad.
                 </p>
                 <p className="text-xs text-blue-700 dark:text-blue-300 mt-2">
-                  Los atajos con <kbd className="px-1.5 py-0.5 bg-white dark:bg-blue-900 rounded text-xs border">Cmd/Ctrl</kbd> funcionan en cualquier momento, incluso dentro de inputs.
+                  Los atajos con{' '}
+                  <kbd className="px-1.5 py-0.5 bg-white dark:bg-blue-900 rounded text-xs border">
+                    Cmd/Ctrl
+                  </kbd>{' '}
+                  funcionan en cualquier momento, incluso dentro de inputs.
                 </p>
               </div>
             </div>

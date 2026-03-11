@@ -1,7 +1,7 @@
 /**
  * Cron Job para verificar cupones próximos a expirar
  * Ejecuta diariamente a las 9:00 AM
- * 
+ *
  * Configurar en vercel.json:
  * {
  *   "crons": [{
@@ -18,7 +18,10 @@ import { requireCronSecret } from '@/lib/api-auth-guard';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-const CRON_SECRET = process.env.CRON_SECRET;
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 interface AlertConfig {
   diasAntes: number;
@@ -34,10 +37,9 @@ const ALERT_CONFIGS: AlertConfig[] = [
 ];
 
 async function sendEmailAlert(subject: string, html: string) {
-  const prisma = await getPrisma();
   try {
     const nodemailer = await import('nodemailer');
-    
+
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST || 'smtp.gmail.com',
       port: parseInt(process.env.SMTP_PORT || '587'),
@@ -67,16 +69,8 @@ export async function GET(request: NextRequest) {
   const cronAuth = requireCronSecret(request);
   if (!cronAuth.authenticated) return cronAuth.response;
 
-
   try {
-
-    if (authHeader !== `Bearer ${CRON_SECRET}`) {
-      // También permitir desde Vercel Cron
-      const vercelCron = request.headers.get('x-vercel-cron');
-      if (!vercelCron) {
-        return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
-      }
-    }
+    const prisma = await getPrisma();
 
     const now = new Date();
     let alertasEnviadas = 0;
@@ -129,7 +123,7 @@ export async function GET(request: NextRequest) {
       // Verificar alertas pendientes
       for (const config of ALERT_CONFIGS) {
         if (diasRestantes <= config.diasAntes && !coupon[config.campo]) {
-          const porcentajeUso = coupon.usosMaximos 
+          const porcentajeUso = coupon.usosMaximos
             ? Math.round((coupon._count.usos / coupon.usosMaximos) * 100)
             : 0;
 
@@ -192,7 +186,11 @@ export async function GET(request: NextRequest) {
       }
 
       // Verificar cupones agotados
-      if (coupon.usosMaximos && coupon._count.usos >= coupon.usosMaximos && coupon.estado !== 'EXHAUSTED') {
+      if (
+        coupon.usosMaximos &&
+        coupon._count.usos >= coupon.usosMaximos &&
+        coupon.estado !== 'EXHAUSTED'
+      ) {
         await prisma.promoCoupon.update({
           where: { id: coupon.id },
           data: { estado: 'EXHAUSTED' },
@@ -227,9 +225,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error: unknown) {
     logger.error('[Cron CheckCoupons Error]:', error);
-    return NextResponse.json(
-      { error: 'Error verificando cupones' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error verificando cupones' }, { status: 500 });
   }
 }

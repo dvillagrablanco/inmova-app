@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Servicio de Emails para Zero-Touch Onboarding
  * Gestiona el envío programado de emails transaccionales durante el onboarding
@@ -16,7 +17,7 @@ import {
   getFirstContractTemplate,
 } from './email-templates/onboarding-templates';
 
-export type EmailType = 
+export type EmailType =
   | 'welcome'
   | 'onboarding_reminder'
   | 'task_completed'

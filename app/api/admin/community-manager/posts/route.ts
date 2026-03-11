@@ -7,6 +7,11 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 const PLATFORM_MAP = {
   instagram: 'INSTAGRAM',
   facebook: 'FACEBOOK',
@@ -140,6 +145,7 @@ export async function GET(request: NextRequest) {
     if (!companyId) {
       return NextResponse.json({ error: 'CompanyId no disponible' }, { status: 400 });
     }
+    const prisma = await getPrisma();
 
     const posts = await prisma.socialMediaPost.findMany({
       where: { companyId },
@@ -149,26 +155,18 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: 'desc' },
     });
 
-    const mapped = posts.map((post) =>
-      mapPostToResponse(post, post.account?.platform ?? null)
-    );
+    const mapped = posts.map((post) => mapPostToResponse(post, post.account?.platform ?? null));
 
     return NextResponse.json({
       success: true,
       posts: mapped,
       total: mapped.length,
-      message:
-        mapped.length > 0
-          ? undefined
-          : 'No hay publicaciones. Crea tu primera publicación.',
+      message: mapped.length > 0 ? undefined : 'No hay publicaciones. Crea tu primera publicación.',
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('[Community Manager Posts Error]:', { message });
-    return NextResponse.json(
-      { error: 'Error al obtener publicaciones' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener publicaciones' }, { status: 500 });
   }
 }
 
@@ -201,6 +199,7 @@ export async function POST(request: NextRequest) {
     if (!companyId) {
       return NextResponse.json({ error: 'CompanyId no disponible' }, { status: 400 });
     }
+    const prisma = await getPrisma();
 
     const body = await request.json();
     const { content, platforms, status, scheduledDate, mediaUrl } = postSchema.parse(body);
@@ -217,14 +216,16 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    const accountByPlatform = new Map<SocialMediaPlatform, typeof accounts[0]>();
+    const accountByPlatform = new Map<SocialMediaPlatform, (typeof accounts)[0]>();
     const accountPlatformById = new Map<string, SocialMediaPlatform>();
     accounts.forEach((account) => {
       accountByPlatform.set(account.platform, account);
       accountPlatformById.set(account.id, account.platform);
     });
 
-    const missingPlatforms = requestedPlatforms.filter((platform) => !accountByPlatform.has(platform));
+    const missingPlatforms = requestedPlatforms.filter(
+      (platform) => !accountByPlatform.has(platform)
+    );
     if (missingPlatforms.length > 0) {
       return NextResponse.json(
         {
@@ -265,9 +266,6 @@ export async function POST(request: NextRequest) {
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('[Community Manager Create Post Error]:', { message });
-    return NextResponse.json(
-      { error: 'Error al crear publicación' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear publicación' }, { status: 500 });
   }
 }

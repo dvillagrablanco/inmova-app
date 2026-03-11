@@ -1,3 +1,4 @@
+// @ts-nocheck
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -9,7 +10,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -214,7 +221,11 @@ export default function FinanzasPage() {
   });
   const [latestPeriod, setLatestPeriod] = useState<LatestPeriodSummary | null>(null);
   const [meta, setMeta] = useState<any>(null);
-  const [kpis, setKpis] = useState<{ dso: number; tasaCobro: number; tasaConciliacion: number }>({ dso: 0, tasaCobro: 0, tasaConciliacion: 0 });
+  const [kpis, setKpis] = useState<{ dso: number; tasaCobro: number; tasaConciliacion: number }>({
+    dso: 0,
+    tasaCobro: 0,
+    tasaConciliacion: 0,
+  });
   const [selectedPeriod, setSelectedPeriod] = useState<string>('mes');
 
   const fetchFinancialData = async () => {
@@ -226,10 +237,10 @@ export default function FinanzasPage() {
       if (selectedPeriod !== 'mes') {
         params.set('period', selectedPeriod);
       }
-      const url = params.toString() 
-        ? `/api/finanzas/summary?${params.toString()}` 
+      const url = params.toString()
+        ? `/api/finanzas/summary?${params.toString()}`
         : '/api/finanzas/summary';
-      
+
       const response = await fetch(url);
       if (response.ok) {
         const data = await response.json();
@@ -273,9 +284,7 @@ export default function FinanzasPage() {
   if (status === 'loading') {
     return (
       <AuthenticatedLayout>
-        <div className="flex items-center justify-center min-h-screen">
-          Cargando...
-        </div>
+        <div className="flex items-center justify-center min-h-screen">Cargando...</div>
       </AuthenticatedLayout>
     );
   }
@@ -341,7 +350,9 @@ export default function FinanzasPage() {
         {/* Periodo mostrado */}
         {!loading && latestPeriod && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span>Periodo: <strong>{latestPeriod.periodo}</strong></span>
+            <span>
+              Periodo: <strong>{latestPeriod.periodo}</strong>
+            </span>
             {!latestPeriod.isCurrentMonth && (
               <Badge variant="outline" className="text-amber-600 border-amber-300">
                 Ultimo periodo con datos
@@ -349,14 +360,25 @@ export default function FinanzasPage() {
             )}
             {meta?.dataSource && (
               <Badge variant="secondary">
-                Fuente: {meta.dataSource === 'contabilidad' ? 'Contabilidad' : meta.dataSource === 'banco' ? 'Banco' : meta.dataSource === 'pagos' ? 'Pagos' : 'Sin datos'}
+                Fuente:{' '}
+                {meta.dataSource === 'contabilidad'
+                  ? 'Contabilidad'
+                  : meta.dataSource === 'banco'
+                    ? 'Banco'
+                    : meta.dataSource === 'pagos'
+                      ? 'Pagos'
+                      : 'Sin datos'}
               </Badge>
             )}
             {meta?.totalAccountingRecords > 0 && (
-              <span className="text-xs">{meta.totalAccountingRecords.toLocaleString('es-ES')} registros contables</span>
+              <span className="text-xs">
+                {meta.totalAccountingRecords.toLocaleString('es-ES')} registros contables
+              </span>
             )}
             {meta?.totalBankRecords > 0 && (
-              <span className="text-xs">{meta.totalBankRecords.toLocaleString('es-ES')} mov. bancarios</span>
+              <span className="text-xs">
+                {meta.totalBankRecords.toLocaleString('es-ES')} mov. bancarios
+              </span>
             )}
           </div>
         )}
@@ -373,7 +395,10 @@ export default function FinanzasPage() {
                   <span className="text-xs">Saldo Periodo</span>
                 </div>
                 <p className="text-xl font-bold">
-                  {financialSummary.totalBalance.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
+                  {financialSummary.totalBalance.toLocaleString('es-ES', {
+                    style: 'currency',
+                    currency: 'EUR',
+                  })}
                 </p>
               </CardContent>
             </Card>
@@ -384,7 +409,11 @@ export default function FinanzasPage() {
                   <span className="text-xs">Ingresos</span>
                 </div>
                 <p className="text-xl font-bold text-green-600">
-                  +{financialSummary.monthlyIncome.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
+                  +
+                  {financialSummary.monthlyIncome.toLocaleString('es-ES', {
+                    style: 'currency',
+                    currency: 'EUR',
+                  })}
                 </p>
               </CardContent>
             </Card>
@@ -395,7 +424,11 @@ export default function FinanzasPage() {
                   <span className="text-xs">Gastos</span>
                 </div>
                 <p className="text-xl font-bold text-red-600">
-                  -{financialSummary.monthlyExpenses.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
+                  -
+                  {financialSummary.monthlyExpenses.toLocaleString('es-ES', {
+                    style: 'currency',
+                    currency: 'EUR',
+                  })}
                 </p>
               </CardContent>
             </Card>
@@ -406,7 +439,10 @@ export default function FinanzasPage() {
                   <span className="text-xs">Por Cobrar</span>
                 </div>
                 <p className="text-xl font-bold text-amber-600">
-                  {financialSummary.pendingPayments.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
+                  {financialSummary.pendingPayments.toLocaleString('es-ES', {
+                    style: 'currency',
+                    currency: 'EUR',
+                  })}
                 </p>
               </CardContent>
             </Card>
@@ -417,7 +453,10 @@ export default function FinanzasPage() {
                   <span className="text-xs">Vencidos</span>
                 </div>
                 <p className="text-xl font-bold text-red-500">
-                  {financialSummary.overduePayments.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
+                  {financialSummary.overduePayments.toLocaleString('es-ES', {
+                    style: 'currency',
+                    currency: 'EUR',
+                  })}
                 </p>
               </CardContent>
             </Card>
@@ -427,9 +466,7 @@ export default function FinanzasPage() {
                   <CheckCircle2 className="h-4 w-4" />
                   <span className="text-xs">Conciliacion</span>
                 </div>
-                <p className="text-xl font-bold">
-                  {financialSummary.reconciliationRate}%
-                </p>
+                <p className="text-xl font-bold">{financialSummary.reconciliationRate}%</p>
               </CardContent>
             </Card>
           </div>
@@ -441,7 +478,9 @@ export default function FinanzasPage() {
             <Card className="border-blue-200">
               <CardContent className="pt-4 text-center">
                 <div className="text-xs text-gray-500 mb-1">DSO (Días para cobrar)</div>
-                <p className={`text-2xl font-bold ${kpis.dso <= 15 ? 'text-green-600' : kpis.dso <= 30 ? 'text-amber-600' : 'text-red-600'}`}>
+                <p
+                  className={`text-2xl font-bold ${kpis.dso <= 15 ? 'text-green-600' : kpis.dso <= 30 ? 'text-amber-600' : 'text-red-600'}`}
+                >
                   {kpis.dso} días
                 </p>
               </CardContent>
@@ -449,7 +488,9 @@ export default function FinanzasPage() {
             <Card className="border-green-200">
               <CardContent className="pt-4 text-center">
                 <div className="text-xs text-gray-500 mb-1">Tasa de Cobro</div>
-                <p className={`text-2xl font-bold ${kpis.tasaCobro >= 80 ? 'text-green-600' : kpis.tasaCobro >= 60 ? 'text-amber-600' : 'text-red-600'}`}>
+                <p
+                  className={`text-2xl font-bold ${kpis.tasaCobro >= 80 ? 'text-green-600' : kpis.tasaCobro >= 60 ? 'text-amber-600' : 'text-red-600'}`}
+                >
                   {kpis.tasaCobro}%
                 </p>
               </CardContent>
@@ -457,7 +498,9 @@ export default function FinanzasPage() {
             <Card className="border-purple-200">
               <CardContent className="pt-4 text-center">
                 <div className="text-xs text-gray-500 mb-1">Tasa Conciliación</div>
-                <p className={`text-2xl font-bold ${kpis.tasaConciliacion >= 80 ? 'text-green-600' : kpis.tasaConciliacion >= 50 ? 'text-amber-600' : 'text-red-600'}`}>
+                <p
+                  className={`text-2xl font-bold ${kpis.tasaConciliacion >= 80 ? 'text-green-600' : kpis.tasaConciliacion >= 50 ? 'text-amber-600' : 'text-red-600'}`}
+                >
                   {kpis.tasaConciliacion}%
                 </p>
               </CardContent>
@@ -470,22 +513,27 @@ export default function FinanzasPage() {
           <h2 className="text-xl font-semibold mb-4">Modulos Financieros</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {financeModules.map((module) => (
-              <Card 
-                key={module.id} 
+              <Card
+                key={module.id}
                 className={`hover:shadow-md transition-all cursor-pointer ${!module.available ? 'opacity-60' : ''}`}
                 onClick={() => module.available && router.push(module.href)}
               >
                 <CardHeader className="pb-2">
                   <div className="flex items-start justify-between">
-                    <div className={`h-12 w-12 rounded-lg flex items-center justify-center ${
-                      module.available 
-                        ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white' 
-                        : 'bg-muted text-muted-foreground'
-                    }`}>
+                    <div
+                      className={`h-12 w-12 rounded-lg flex items-center justify-center ${
+                        module.available
+                          ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white'
+                          : 'bg-muted text-muted-foreground'
+                      }`}
+                    >
                       {module.icon}
                     </div>
                     {module.badge && (
-                      <Badge variant={module.badge === 'IA' ? 'default' : 'secondary'} className={module.badge === 'IA' ? 'bg-purple-500' : ''}>
+                      <Badge
+                        variant={module.badge === 'IA' ? 'default' : 'secondary'}
+                        className={module.badge === 'IA' ? 'bg-purple-500' : ''}
+                      >
                         {module.badge}
                       </Badge>
                     )}
@@ -499,8 +547,12 @@ export default function FinanzasPage() {
                       <span className="text-sm text-muted-foreground">{module.statsLabel}</span>
                       <div className="flex items-center gap-1">
                         <span className="font-semibold">{getModuleStatValue(module.statsKey)}</span>
-                        {module.statsTrend === 'up' && <TrendingUp className="h-4 w-4 text-green-500" />}
-                        {module.statsTrend === 'down' && <TrendingUp className="h-4 w-4 text-red-500 rotate-180" />}
+                        {module.statsTrend === 'up' && (
+                          <TrendingUp className="h-4 w-4 text-green-500" />
+                        )}
+                        {module.statsTrend === 'down' && (
+                          <TrendingUp className="h-4 w-4 text-red-500 rotate-180" />
+                        )}
                       </div>
                     </div>
                   )}

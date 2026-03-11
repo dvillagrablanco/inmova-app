@@ -1,9 +1,9 @@
 /**
  * API Hospitality: Housekeeping
- * 
+ *
  * GET   - Lista tareas de limpieza generadas desde check-outs
  * PATCH - Actualizar estado de una tarea
- * 
+ *
  * Genera tareas dinámicamente desde STRBookings con check-out próximo.
  */
 
@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
       where: {
         companyId,
         checkOutDate: { gte: today, lte: tomorrow },
-        estado: { in: ['checked_in', 'completada'] },
+        estado: { in: ['CHECK_IN', 'CHECK_OUT'] },
       },
       include: {
         listing: {
@@ -67,7 +67,7 @@ export async function GET(req: NextRequest) {
       where: {
         companyId,
         checkInDate: { gte: today, lte: tomorrow },
-        estado: 'confirmada',
+        estado: 'CONFIRMADA',
       },
       include: {
         listing: {
@@ -92,7 +92,7 @@ export async function GET(req: NextRequest) {
         unitNumero: b.listing?.unit?.numero || 'N/A',
         buildingNombre: b.listing?.unit?.building?.nombre || b.listing?.titulo || 'N/A',
         tipo: 'checkout_clean' as const,
-        estado: b.estado === 'completada' ? 'pendiente' as const : 'pendiente' as const,
+        estado: b.estado === 'completada' ? ('pendiente' as const) : ('pendiente' as const),
         prioridad: 'alta' as const,
         checkoutDate: b.checkOutDate,
         notas: `Check-out: ${b.guestNombre}`,

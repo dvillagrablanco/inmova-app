@@ -82,25 +82,19 @@ export async function GET(request: NextRequest) {
     try {
       const schedules = await prisma.maintenanceSchedule.findMany({
         where: {
-          OR: [
-            { building: { companyId } },
-            { unit: { building: { companyId } } },
-          ],
+          OR: [{ building: { companyId } }, { unit: { building: { companyId } } }],
           activo: true,
         },
         include: {
           building: { select: { nombre: true } },
           unit: { select: { numero: true, building: { select: { nombre: true } } } },
         },
-        orderBy: { proximaEjecucion: 'asc' },
+        orderBy: { proximaFecha: 'asc' },
       });
 
       for (const sch of schedules) {
-        const diasRestantes = sch.proximaEjecucion
-          ? differenceInDays(sch.proximaEjecucion, today)
-          : 999;
-        const edificio =
-          sch.building?.nombre || sch.unit?.building?.nombre || 'Sin edificio';
+        const diasRestantes = sch.proximaFecha ? differenceInDays(sch.proximaFecha, today) : 999;
+        const edificio = sch.building?.nombre || sch.unit?.building?.nombre || 'Sin edificio';
 
         items.push({
           id: `schedule-${sch.id}`,
@@ -110,7 +104,7 @@ export async function GET(request: NextRequest) {
           descripcion: sch.descripcion || `Frecuencia: ${sch.frecuencia}`,
           edificio,
           estado: diasRestantes < 0 ? 'vencido' : 'programado',
-          fechaVencimiento: sch.proximaEjecucion,
+          fechaVencimiento: sch.proximaFecha,
           diasRestantes,
           prioridad: diasRestantes < 0 ? 'alta' : diasRestantes <= 30 ? 'media' : 'baja',
           entityId: sch.id,
@@ -186,6 +180,9 @@ export async function GET(request: NextRequest) {
   } catch (error: any) {
     logger.error('[Preventive Maintenance]:', error);
     Sentry.captureException(error);
-    return NextResponse.json({ error: 'Error obteniendo mantenimiento preventivo' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Error obteniendo mantenimiento preventivo' },
+      { status: 500 }
+    );
   }
 }

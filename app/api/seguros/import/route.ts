@@ -43,7 +43,10 @@ const FIELD_ALIASES = {
 };
 
 function normalizeKey(value: string): string {
-  return value.trim().toLowerCase().replace(/[\s_-]+/g, '');
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_-]+/g, '');
 }
 
 function normalizeRecord(record: Record<string, any>): Record<string, any> {
@@ -64,8 +67,7 @@ function getValue(record: Record<string, any>, aliases: string[]): any {
   return undefined;
 }
 
-async function parseNumber(value: any): number | null {
-  const prisma = await getPrisma();
+function parseNumber(value: any): number | null {
   if (value === null || value === undefined) return null;
   if (typeof value === 'number') return value;
   const raw = String(value).trim();
@@ -75,8 +77,7 @@ async function parseNumber(value: any): number | null {
   return Number.isNaN(parsed) ? null : parsed;
 }
 
-async function parseBoolean(value: any): boolean | null {
-  const prisma = await getPrisma();
+function parseBoolean(value: any): boolean | null {
   if (value === null || value === undefined) return null;
   if (typeof value === 'boolean') return value;
   const raw = String(value).trim().toLowerCase();
@@ -85,8 +86,7 @@ async function parseBoolean(value: any): boolean | null {
   return null;
 }
 
-async function parseExcelDate(value: any): Date | null {
-  const prisma = await getPrisma();
+function parseExcelDate(value: any): Date | null {
   if (!value) return null;
   if (value instanceof Date) return value;
   if (typeof value === 'number') {
@@ -99,12 +99,12 @@ async function parseExcelDate(value: any): Date | null {
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
-async function normalizeInsuranceType(raw: any): InsuranceType {
-  const prisma = await getPrisma();
+function normalizeInsuranceType(raw: any): InsuranceType {
   const normalized = String(raw || '').toLowerCase();
   if (normalized.includes('hogar') || normalized.includes('vivienda')) return 'hogar';
   if (normalized.includes('comunidad') || normalized.includes('edificio')) return 'comunidad';
-  if (normalized.includes('responsabilidad') || normalized.includes('rc')) return 'responsabilidad_civil';
+  if (normalized.includes('responsabilidad') || normalized.includes('rc'))
+    return 'responsabilidad_civil';
   if (normalized.includes('impago') || normalized.includes('alquiler')) return 'impago_alquiler';
   if (normalized.includes('incendio')) return 'incendio';
   if (normalized.includes('robo')) return 'robo';
@@ -112,18 +112,17 @@ async function normalizeInsuranceType(raw: any): InsuranceType {
   return 'otro';
 }
 
-async function normalizeInsuranceStatus(raw: any): InsuranceStatus {
-  const prisma = await getPrisma();
+function normalizeInsuranceStatus(raw: any): InsuranceStatus {
   const normalized = String(raw || '').toLowerCase();
   if (normalized.includes('vencid')) return 'vencida';
   if (normalized.includes('cancel')) return 'cancelada';
-  if (normalized.includes('pendiente') || normalized.includes('renov')) return 'pendiente_renovacion';
+  if (normalized.includes('pendiente') || normalized.includes('renov'))
+    return 'pendiente_renovacion';
   if (normalized.includes('activa') || normalized.includes('activo')) return 'activa';
   return 'activa';
 }
 
-async function parseSheet(buffer: Buffer, sheetName?: string): any[] {
-  const prisma = await getPrisma();
+function parseSheet(buffer: Buffer, sheetName?: string): any[] {
   const workbook = XLSX.read(buffer, { type: 'buffer', cellDates: true });
   const targetSheet = sheetName || workbook.SheetNames[0];
   const sheet = workbook.Sheets[targetSheet];
@@ -173,19 +172,11 @@ export async function POST(request: NextRequest) {
     const isZip = fileExtension === 'zip';
     const isCsv = fileExtension === 'csv' || file.type === 'text/csv';
 
-    const validation = await validateFile(
-      {
-        name: file.name,
-        type: file.type,
-        size: file.size,
-        buffer: fileBuffer,
-      },
-      isZip ? 'archive' : isCsv ? 'csv' : 'document'
-    );
+    const validation = validateFile(fileBuffer, file.name, isZip ? 'any' : 'document');
 
-    if (!validation.isValid) {
+    if (!validation.valid) {
       return NextResponse.json(
-        { error: 'Archivo inválido', details: validation.errors },
+        { error: 'Archivo inválido', details: validation.error },
         { status: 400 }
       );
     }
@@ -269,9 +260,7 @@ export async function POST(request: NextRequest) {
     for (let i = 0; i < rows.length; i++) {
       const normalized = normalizeRecord(rows[i]);
 
-      const numeroPoliza = String(
-        getValue(normalized, FIELD_ALIASES.numeroPoliza) || ''
-      ).trim();
+      const numeroPoliza = String(getValue(normalized, FIELD_ALIASES.numeroPoliza) || '').trim();
       const aseguradora = String(getValue(normalized, FIELD_ALIASES.aseguradora) || '').trim();
       const rawTipo = getValue(normalized, FIELD_ALIASES.tipo);
       const rawEstado = getValue(normalized, FIELD_ALIASES.estado);
@@ -356,7 +345,9 @@ export async function POST(request: NextRequest) {
       }
 
       let urlDocumento: string | undefined;
-      let documentosAdjuntos: Array<{ filename: string; url: string; uploadedAt: string }> | undefined;
+      let documentosAdjuntos:
+        | Array<{ filename: string; url: string; uploadedAt: string }>
+        | undefined;
       const documentoName = getValue(normalized, FIELD_ALIASES.documento);
       if (documentoName) {
         const normalizedDoc = String(documentoName).trim().toLowerCase();
@@ -365,7 +356,11 @@ export async function POST(request: NextRequest) {
           const uploadResult = await S3Service.uploadFile(attachment, documentoName, 'seguros');
           urlDocumento = uploadResult.url;
           documentosAdjuntos = [
-            { filename: documentoName, url: uploadResult.url, uploadedAt: new Date().toISOString() },
+            {
+              filename: documentoName,
+              url: uploadResult.url,
+              uploadedAt: new Date().toISOString(),
+            },
           ];
         } else {
           warnings.push(`Fila ${i + 2}: documento no encontrado (${documentoName})`);

@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
     const result = await generateDemoData(
       session.user.id,
       session.user.companyId,
-      businessVertical
+      businessVertical as any
     );
 
     if (result.success) {

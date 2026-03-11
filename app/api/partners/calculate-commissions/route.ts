@@ -10,8 +10,7 @@ async function getPrisma() {
 }
 
 // Función para obtener la comisión según el número de clientes
-async function getCommissionRate(clientCount: number): number {
-  const prisma = await getPrisma();
+function getCommissionRate(clientCount: number): number {
   if (clientCount >= 251) return 70.0;
   if (clientCount >= 101) return 60.0;
   if (clientCount >= 51) return 50.0;
@@ -32,8 +31,7 @@ type CommissionResult = {
   commissionId: string;
 };
 
-async function getErrorMessage(error: unknown): string {
-  const prisma = await getPrisma();
+function getErrorMessage(error: unknown): string {
   if (error instanceof Error) {
     return error.message;
   }

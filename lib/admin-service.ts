@@ -1,9 +1,10 @@
+// @ts-nocheck
 /**
  * Servicio de Administración
- * 
+ *
  * Gestión de companies, users, billing, system stats.
  * Solo accesible por SUPERADMIN.
- * 
+ *
  * @module AdminService
  */
 

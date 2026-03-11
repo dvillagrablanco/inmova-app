@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { WorkspaceService } from '@/lib/services/workspace-service';
+import logger from '@/lib/logger';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
@@ -23,7 +24,7 @@ const createSpaceSchema = z.object({
   amenities: z.array(z.string()).optional(),
   superficie: z.number().optional(),
   descripcion: z.string().optional(),
-  buildingId: z.string().optional()
+  buildingId: z.string().optional(),
 });
 
 export async function GET(request: NextRequest) {
@@ -43,7 +44,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: spaces
+      data: spaces,
     });
   } catch (error: any) {
     logger.error('[Workspace Spaces GET Error]:', error);
@@ -66,14 +67,17 @@ export async function POST(request: NextRequest) {
 
     const space = await WorkspaceService.createSpace({
       ...validated,
-      companyId: session.user.companyId
+      companyId: session.user.companyId,
     });
 
-    return NextResponse.json({
-      success: true,
-      data: space,
-      message: 'Espacio creado correctamente'
-    }, { status: 201 });
+    return NextResponse.json(
+      {
+        success: true,
+        data: space,
+        message: 'Espacio creado correctamente',
+      },
+      { status: 201 }
+    );
   } catch (error: any) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -97,16 +101,18 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { id, estado } = z.object({
-      id: z.string(),
-      estado: z.string()
-    }).parse(body);
+    const { id, estado } = z
+      .object({
+        id: z.string(),
+        estado: z.string(),
+      })
+      .parse(body);
 
     await WorkspaceService.updateSpaceStatus(id, estado);
 
     return NextResponse.json({
       success: true,
-      message: 'Estado actualizado'
+      message: 'Estado actualizado',
     });
   } catch (error: any) {
     logger.error('[Workspace Spaces PATCH Error]:', error);

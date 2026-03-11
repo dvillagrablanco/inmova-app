@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/permissions';
 import {
+  type ApprovalType,
   createApprovalRequest,
   requestExpenseApproval,
   requestMaintenanceApproval,
@@ -16,7 +17,10 @@ const approvalRequestSchema = z.object({
   entityId: z.string().optional(),
   title: z.string().optional(),
   description: z.string().optional(),
-  amount: z.union([z.string(), z.number()]).optional().transform((v) => (typeof v === 'string' ? parseFloat(v) : v)),
+  amount: z
+    .union([z.string(), z.number()])
+    .optional()
+    .transform((v) => (typeof v === 'string' ? parseFloat(v) : v)),
   entityType: z.string().optional(),
   metadata: z.record(z.unknown()).optional(),
 });
@@ -44,10 +48,7 @@ export async function POST(request: Request) {
     switch (type) {
       case 'gasto':
         if (!entityId) {
-          return NextResponse.json(
-            { error: 'Se requiere entityId para gastos' },
-            { status: 400 }
-          );
+          return NextResponse.json({ error: 'Se requiere entityId para gastos' }, { status: 400 });
         }
         approval = await requestExpenseApproval(user.companyId as string, entityId, user.id);
         break;
@@ -59,24 +60,17 @@ export async function POST(request: Request) {
             { status: 400 }
           );
         }
-        approval = await requestMaintenanceApproval(
-          user.companyId as string,
-          entityId,
-          user.id
-        );
+        approval = await requestMaintenanceApproval(user.companyId as string, entityId, user.id);
         break;
 
       default:
         // Crear solicitud genérica
         if (!title || !description) {
-          return NextResponse.json(
-            { error: 'Se requieren title y description' },
-            { status: 400 }
-          );
+          return NextResponse.json({ error: 'Se requieren title y description' }, { status: 400 });
         }
         approval = await createApprovalRequest({
           companyId: user.companyId as string,
-          type,
+          type: type as ApprovalType,
           title,
           description,
           amount: amount ?? undefined,
@@ -90,7 +84,9 @@ export async function POST(request: Request) {
 
     return NextResponse.json(approval);
   } catch (error: any) {
-    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) { return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 }); }
+    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) {
+      return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 });
+    }
     logger.error('Error creando solicitud de aprobación:', error);
     return NextResponse.json(
       { error: error.message || 'Error creando solicitud de aprobación' },

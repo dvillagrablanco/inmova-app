@@ -29,7 +29,6 @@ const feesBodySchema = z.union([
   }),
 ]);
 
-
 /**
  * @swagger
  * /api/communities/fees:
@@ -53,10 +52,7 @@ export async function GET(req: NextRequest) {
     const periodo = searchParams.get('periodo') || undefined;
 
     if (!buildingId) {
-      return NextResponse.json(
-        { error: 'buildingId es requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'buildingId es requerido' }, { status: 400 });
     }
 
     const fees = await getCommunityFeesByBuilding(buildingId, periodo);
@@ -87,10 +83,14 @@ export async function POST(req: NextRequest) {
     }
 
     if (parsed.data.action === 'generate') {
+      const companyId = parsed.data.companyId || session.user.companyId;
+      if (!companyId) {
+        return NextResponse.json({ error: 'companyId es requerido' }, { status: 400 });
+      }
       const params: GenerateFeesParams = {
         buildingId: parsed.data.buildingId,
-        companyId: parsed.data.companyId,
-        periodo: parsed.data.periodo,
+        companyId,
+        periodo: parsed.data.periodo || new Date().toISOString().slice(0, 7),
         tipo: parsed.data.tipo as any,
         montoPorUnidad: parsed.data.montoPorUnidad,
       };
@@ -102,15 +102,12 @@ export async function POST(req: NextRequest) {
       const fee = await markFeeAsPaid(
         parsed.data.feeId,
         new Date(parsed.data.fechaPago),
-        parsed.data.metodoPago
+        parsed.data.metodoPago || ''
       );
       return NextResponse.json(fee);
     }
 
-    return NextResponse.json(
-      { error: 'Acción no válida' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: 'Acción no válida' }, { status: 400 });
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message || 'Error al procesar cuotas' },

@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     try {
       const { getOrCompute } = await import('@/lib/cache-service');
       const cacheKey = `dashboard:${user.companyId || user.id}`;
-      const cached = await getOrCompute(cacheKey, async () => null, 300);
+      const cached = await getOrCompute(cacheKey, async () => null, { ttl: 300 });
       if (cached) return NextResponse.json(cached);
     } catch {} // Redis not configured, continue without cache
 
@@ -239,8 +239,8 @@ export async function GET(request: NextRequest) {
     };
 
     const occupancyByType = occupancyChartData
-      .filter(t => t.total > 0)
-      .map(t => {
+      .filter((t) => t.total > 0)
+      .map((t) => {
         const rate = t.total > 0 ? (t.ocupadas / t.total) * 100 : 0;
         // Buscar renta de contratos de ese tipo (contrato.tipo puede ser residencial/comercial/temporal)
         // Usamos la renta de las unidades ocupadas en su lugar
@@ -256,14 +256,20 @@ export async function GET(request: NextRequest) {
       })
       .sort((a, b) => {
         // Orden de relevancia: vivienda > local > oficina > nave > garaje > trastero > coworking
-        const order = ['vivienda', 'local', 'oficina', 'nave_industrial', 'garaje', 'trastero', 'coworking_space'];
+        const order = [
+          'vivienda',
+          'local',
+          'oficina',
+          'nave_industrial',
+          'garaje',
+          'trastero',
+          'coworking_space',
+        ];
         return order.indexOf(a.tipo) - order.indexOf(b.tipo);
       });
 
     // Tasa de ocupación excluyendo garajes/trasteros (activos "de peso")
-    const coreTypes = occupancyChartData.filter(t =>
-      !['garaje', 'trastero'].includes(t.name)
-    );
+    const coreTypes = occupancyChartData.filter((t) => !['garaje', 'trastero'].includes(t.name));
     const coreTotal = coreTypes.reduce((s, t) => s + t.total, 0);
     const coreOcupadas = coreTypes.reduce((s, t) => s + t.ocupadas, 0);
     const tasaOcupacionCore = coreTotal > 0 ? (coreOcupadas / coreTotal) * 100 : 0;
@@ -321,6 +327,16 @@ export async function GET(request: NextRequest) {
         value,
       }));
     }
+
+    // Renta mensual esperada = suma de rentas de contratos activos
+    const activeContractsRent = await prisma.contract.aggregate({
+      where: {
+        unit: { building: { companyId: companyFilter } },
+        estado: 'activo',
+      },
+      _sum: { rentaMensual: true },
+    });
+    const rentaMensualEsperada = Number(activeContractsRent._sum.rentaMensual) || 0;
 
     // Ingresos históricos (últimos 6 meses) - cascada: Payment → Accounting → Bank
     // Pre-fetch bank transactions for the period
@@ -424,17 +440,6 @@ export async function GET(request: NextRequest) {
 
     // Cálculos de KPIs - Usar renta de contratos activos como fuente principal (fiable)
     // Los pagos y transacciones bancarias pueden contener duplicados o movimientos no-alquiler
-    const activeContractsRent = await prisma.contract.aggregate({
-      where: {
-        unit: { building: { companyId: companyFilter } },
-        estado: 'activo',
-      },
-      _sum: { rentaMensual: true },
-    });
-    
-    // Renta mensual esperada = suma de rentas de contratos activos
-    const rentaMensualEsperada = Number(activeContractsRent._sum.rentaMensual) || 0;
-    
     // Ingresos totales: usar renta esperada como base fiable
     // Solo usar pagos/contabilidad/banco si NO hay contratos (empresa sin datos de contratos)
     let ingresosTotalesMensuales = rentaMensualEsperada;
@@ -481,7 +486,8 @@ export async function GET(request: NextRequest) {
         contracts: { some: { estado: 'activo' } },
       },
     });
-    const tasaOcupacion = totalUnits > 0 ? Math.min((occupiedUnitsCount / totalUnits) * 100, 100) : 0;
+    const tasaOcupacion =
+      totalUnits > 0 ? Math.min((occupiedUnitsCount / totalUnits) * 100, 100) : 0;
 
     // Calcular morosidad (pagos vencidos no pagados)
     const overduePayments = await prisma.payment.count({

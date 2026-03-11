@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { StudentHousingService } from '@/lib/services/student-housing-service';
+import logger from '@/lib/logger';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
@@ -30,7 +31,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: payments
+      data: payments,
     });
   } catch (error: any) {
     logger.error('[Student Housing Payments GET Error]:', error);
@@ -49,17 +50,19 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { id, estado, metodoPago } = z.object({
-      id: z.string(),
-      estado: z.string(),
-      metodoPago: z.string().optional()
-    }).parse(body);
+    const { id, estado, metodoPago } = z
+      .object({
+        id: z.string(),
+        estado: z.string(),
+        metodoPago: z.string().optional(),
+      })
+      .parse(body);
 
     await StudentHousingService.updatePaymentStatus(id, estado, metodoPago);
 
     return NextResponse.json({
       success: true,
-      message: 'Estado de pago actualizado'
+      message: 'Estado de pago actualizado',
     });
   } catch (error: any) {
     logger.error('[Student Housing Payments PATCH Error]:', error);

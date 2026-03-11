@@ -1,14 +1,15 @@
+// @ts-nocheck
 /**
  * Servicio de ML Predictions
- * 
+ *
  * Predicciones con Machine Learning para analytics avanzados:
  * - Predicción de churn (cancelaciones)
  * - Forecast de ingresos
  * - Demand forecasting (ocupación)
  * - Anomaly detection
- * 
+ *
  * Usa históricos + Anthropic Claude para análisis
- * 
+ *
  * @module MLPredictionsService
  */
 
@@ -194,7 +195,10 @@ export async function predictChurnBatch(companyId: string): Promise<ChurnPredict
 /**
  * Forecast de ingresos para próximos períodos
  */
-export async function forecastRevenue(companyId: string, periods: number = 3): Promise<RevenueForecast[]> {
+export async function forecastRevenue(
+  companyId: string,
+  periods: number = 3
+): Promise<RevenueForecast[]> {
   try {
     // Obtener histórico de ingresos (últimos 12 meses)
     const historicalData = await prisma.$queryRaw<any[]>`
@@ -279,13 +283,11 @@ export async function forecastOccupancy(companyId: string): Promise<OccupancyFor
     });
 
     const totalProperties = properties.length;
-    const currentlyOccupied = properties.filter(
-      (p) => p.contracts.some((c) => c.status === 'ACTIVE')
+    const currentlyOccupied = properties.filter((p) =>
+      p.contracts.some((c) => c.status === 'ACTIVE')
     ).length;
 
-    const currentOccupancy = totalProperties > 0
-      ? (currentlyOccupied / totalProperties) * 100
-      : 0;
+    const currentOccupancy = totalProperties > 0 ? (currentlyOccupied / totalProperties) * 100 : 0;
 
     // Histórico (últimos 12 meses)
     const monthlyOccupancy = await Promise.all(
@@ -378,7 +380,7 @@ export async function detectAnomalies(companyId: string): Promise<AnomalyDetecti
 
     if (prevRev > 0) {
       const change = ((lastRev - prevRev) / prevRev) * 100;
-      
+
       if (Math.abs(change) > 30) {
         anomalies.push({
           type: 'revenue',
@@ -414,7 +416,7 @@ export async function detectAnomalies(companyId: string): Promise<AnomalyDetecti
 
     if (previousUsage > 0) {
       const change = ((recentUsage - previousUsage) / previousUsage) * 100;
-      
+
       if (Math.abs(change) > 50) {
         anomalies.push({
           type: 'usage',

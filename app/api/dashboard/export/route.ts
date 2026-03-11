@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { resolveAccountingScope } from '@/lib/accounting-scope';
+import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -33,20 +34,20 @@ export async function GET(request: NextRequest) {
       prisma.unit.findMany({
         where: { building: { companyId: { in: companyIds } } },
         include: { building: true },
-        take: 100
+        take: 100,
       }),
       prisma.tenant.findMany({
         where: { companyId: { in: companyIds } },
-        take: 100
+        take: 100,
       }),
       prisma.contract.findMany({
         where: { unit: { building: { companyId: { in: companyIds } } } },
-        take: 100
+        take: 100,
       }),
       prisma.payment.findMany({
         where: { contract: { unit: { building: { companyId: { in: companyIds } } } } },
-        take: 100
-      })
+        take: 100,
+      }),
     ]);
 
     // Create CSV content
@@ -57,7 +58,7 @@ export async function GET(request: NextRequest) {
     // Properties section
     csvContent += '=== PROPIEDADES ===\n';
     csvContent += 'ID,Numero,Edificio,Estado,Renta\n';
-    properties.forEach(p => {
+    properties.forEach((p) => {
       csvContent += `${p.id},"${p.numero}","${p.building?.nombre || ''}",${p.estado},${p.rentaMensual || 0}\n`;
     });
     csvContent += '\n';
@@ -65,15 +66,15 @@ export async function GET(request: NextRequest) {
     // Tenants section
     csvContent += '=== INQUILINOS ===\n';
     csvContent += 'ID,Nombre,Email,Riesgo\n';
-    tenants.forEach(t => {
+    tenants.forEach((t) => {
       csvContent += `${t.id},"${t.nombreCompleto}",${t.email},${t.nivelRiesgo}\n`;
     });
     csvContent += '\n';
 
-    // Contracts section  
+    // Contracts section
     csvContent += '=== CONTRATOS ===\n';
     csvContent += 'ID,Estado,Inicio,Fin,Renta\n';
-    contracts.forEach(c => {
+    contracts.forEach((c) => {
       csvContent += `${c.id},${c.estado},${c.fechaInicio?.toISOString().split('T')[0] || ''},${c.fechaFin?.toISOString().split('T')[0] || ''},${c.rentaMensual || 0}\n`;
     });
     csvContent += '\n';
@@ -81,7 +82,7 @@ export async function GET(request: NextRequest) {
     // Payments section
     csvContent += '=== PAGOS ===\n';
     csvContent += 'ID,Periodo,Monto,Estado,Fecha\n';
-    payments.forEach(p => {
+    payments.forEach((p) => {
       csvContent += `${p.id},"${p.periodo}",${p.monto},${p.estado},${p.fechaPago?.toISOString().split('T')[0] || ''}\n`;
     });
 

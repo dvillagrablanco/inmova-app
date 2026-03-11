@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { PORTAL_CONFIGS, type PortalName, type PropertyListing, type PublicationResult } from '@/lib/medium-term/portals-service';
+import {
+  PORTAL_CONFIGS,
+  type PortalName,
+  type PropertyListing,
+  type PublicationResult,
+} from '@/lib/medium-term/portals-service';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -69,10 +74,6 @@ export async function POST(request: NextRequest) {
           select: {
             nombre: true,
             direccion: true,
-            ciudad: true,
-            latitud: true,
-            longitud: true,
-            ascensor: true,
           },
         },
       },
@@ -106,10 +107,13 @@ export async function POST(request: NextRequest) {
         photos: unit.imagenes || [],
         location: {
           address: unit.building?.direccion || '',
-          city: unit.building?.ciudad || 'Madrid',
-          coordinates: unit.building?.latitud && unit.building?.longitud
-            ? { lat: unit.building.latitud, lng: unit.building.longitud }
-            : undefined,
+          city:
+            unit.building?.direccion
+              ?.split(',')
+              .map((part) => part.trim())
+              .filter(Boolean)
+              .pop() || 'Madrid',
+          coordinates: undefined,
         },
         property: {
           type: unit.tipo === 'vivienda' ? 'apartment' : 'room',
@@ -140,11 +144,14 @@ export async function POST(request: NextRequest) {
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
       });
 
-      logger.info(`[Portal Publish] ${portalConfig.displayName}: ${unit.building?.nombre} ${unit.numero}`, {
-        companyId: session.user.companyId,
-        portal: portalName,
-        price: listing.price,
-      });
+      logger.info(
+        `[Portal Publish] ${portalConfig.displayName}: ${unit.building?.nombre} ${unit.numero}`,
+        {
+          companyId: session.user.companyId,
+          portal: portalName,
+          price: listing.price,
+        }
+      );
     }
 
     const exitosos = results.filter((r) => r.success).length;

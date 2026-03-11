@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import logger from '@/lib/logger';
 import * as Sentry from '@sentry/nextjs';
+import { getAccountLiquidBalance, resolveFamilyOfficeScope } from '@/lib/family-office-scope';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -26,28 +27,30 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const queryCompanyId = searchParams.get('companyId');
     const view = (searchParams.get('view') || 'holding') as 'holding' | 'consolidated';
-    const companyId = (session.user.role === 'super_admin' && queryCompanyId)
-      ? queryCompanyId
-      : session.user.companyId;
     const prisma = await getPrisma();
+    const scope = await resolveFamilyOfficeScope(request, {
+      id: session.user.id,
+      role: session.user.role,
+      companyId: session.user.companyId,
+    });
 
-    // Obtener empresa + filiales
+    // Obtener holding + filiales del grupo activo
     const company = await prisma.company.findUnique({
-      where: { id: companyId },
+      where: { id: scope.rootCompanyId },
       include: { childCompanies: { select: { id: true, nombre: true, cif: true } } },
     });
 
     const childIds = company?.childCompanies?.map((c: any) => c.id) || [];
     const childCIFs = company?.childCompanies?.map((c: any) => c.cif).filter(Boolean) || [];
-    const allCompanyIds = company ? [company.id, ...childIds] : [companyId];
+    const allCompanyIds = company
+      ? Array.from(new Set([company.id, ...childIds, ...scope.groupCompanyIds]))
+      : scope.groupCompanyIds;
 
     // Scope: holding = solo empresa raíz, consolidated = empresa + filiales
-    const scopeIds = view === 'holding' ? [companyId] : allCompanyIds;
+    const scopeIds = view === 'holding' ? [scope.rootCompanyId] : allCompanyIds;
 
-    // Inmobiliario siempre incluye filiales — los edificios en SPVs (Rovida, Viroda)
-    // son activos del holding gestionados a través de sociedades vehículo
+    // El inmobiliario del grupo se mantiene consolidado por SPVs para reflejar el patrimonio real.
     const inmobScopeIds = allCompanyIds;
 
     const round2 = (n: number) => Math.round(n * 100) / 100;
@@ -200,10 +203,14 @@ export async function GET(request: NextRequest) {
     }
 
     const isinDedupTotal = Object.values(isinMaxValue).reduce((s, p) => s + p.valor, 0);
-    const valorFinancieroBruto = accounts.reduce((s: number, a: any) =>
-      s + a.positions.reduce((s2: number, p: any) => s2 + (p.valorActual || 0), 0), 0);
+    const valorFinancieroBruto = accounts.reduce(
+      (s: number, a: any) =>
+        s + a.positions.reduce((s2: number, p: any) => s2 + (p.valorActual || 0), 0),
+      0
+    );
     const valorFinanciero = isinDedupTotal + noIsinTotal;
-    const valorFinancieroEliminado = valorFinancieroBruto - valorFinanciero - peDuplicadoExcluido - isinFromNameExcluido;
+    const valorFinancieroEliminado =
+      valorFinancieroBruto - valorFinanciero - peDuplicadoExcluido - isinFromNameExcluido;
 
     let pnlFinanciero = 0;
     let tesoreriaTotal = 0;
@@ -211,20 +218,20 @@ export async function GET(request: NextRequest) {
 
     const cuentas = accounts.map((acc: any) => {
       const valorCuenta = acc.positions.reduce(
-        (sum: number, p: any) => sum + (p.valorActual || 0), 0
+        (sum: number, p: any) => sum + (p.valorActual || 0),
+        0
       );
       const pnlCuenta = acc.positions.reduce(
-        (sum: number, p: any) => sum + (p.pnlNoRealizado || 0) + (p.pnlRealizado || 0), 0
+        (sum: number, p: any) => sum + (p.pnlNoRealizado || 0) + (p.pnlRealizado || 0),
+        0
       );
       pnlFinanciero += pnlCuenta;
 
       // Anti-duplicidad tesorería: Si saldoActual ≈ sum(posiciones) (±10%),
       // el saldo ES el NAV de las posiciones, no liquidez adicional.
       const saldo = acc.saldoActual || 0;
-      const isNavDuplicate = valorCuenta > 1000 && saldo > 1000 &&
-        Math.abs(saldo - valorCuenta) / valorCuenta < 0.10;
-
-      const tesoreriaContable = isNavDuplicate ? 0 : saldo;
+      const tesoreriaContable = getAccountLiquidBalance(acc);
+      const isNavDuplicate = tesoreriaContable === 0 && saldo > 0 && valorCuenta > 0;
       tesoreriaTotal += tesoreriaContable;
       if (tesoreriaContable > 0) {
         tesoreriaPorEntidad[acc.entidad] =
@@ -249,21 +256,23 @@ export async function GET(request: NextRequest) {
     const allParticipations = allParticipationsPreload;
 
     // En vista consolidada: excluir participaciones intragrupo (donde el CIF del target = CIF de filial)
-    const participations = view === 'consolidated'
-      ? allParticipations.filter((p: any) => {
-          const targetCIF = p.targetCompanyCIF?.toUpperCase()?.replace(/[-\s]/g, '');
-          if (!targetCIF) return true; // Sin CIF → mantener
-          return !childCIFs.some((cif: string) =>
-            cif?.toUpperCase()?.replace(/[-\s]/g, '') === targetCIF
-          );
-        })
-      : allParticipations;
+    const participations =
+      view === 'consolidated'
+        ? allParticipations.filter((p: any) => {
+            const targetCIF = p.targetCompanyCIF?.toUpperCase()?.replace(/[-\s]/g, '');
+            if (!targetCIF) return true; // Sin CIF → mantener
+            return !childCIFs.some(
+              (cif: string) => cif?.toUpperCase()?.replace(/[-\s]/g, '') === targetCIF
+            );
+          })
+        : allParticipations;
 
     const participacionesExcluidas = allParticipations.length - participations.length;
 
     let valorPE = 0;
     const participacionesData = participations.map((p: any) => {
-      const valor = p.valorEstimado ?? p.valorContable ?? p.costeAdquisicion ?? 0;
+      const valor =
+        p.valoracionActual ?? p.valorEstimado ?? p.valorContable ?? p.costeAdquisicion ?? 0;
       valorPE += valor;
       return {
         id: p.id,
@@ -284,23 +293,32 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       view,
-      viewLabel: view === 'holding'
-        ? `Vista Holding — ${company?.nombre || 'Empresa'}`
-        : `Vista Grupo Consolidado — ${company?.nombre || 'Grupo'}`,
-      viewDescription: view === 'holding'
-        ? 'Solo activos directos del holding. Las filiales se reflejan como participaciones en Private Equity.'
-        : `Activos consolidados del grupo (${allCompanyIds.length} sociedades). Se eliminan ${participacionesExcluidas} participaciones intragrupo para evitar doble conteo.`,
+      viewLabel:
+        view === 'holding'
+          ? `Vista Holding — ${scope.rootCompanyName}`
+          : `Vista Grupo Consolidado — ${scope.rootCompanyName}`,
+      viewDescription:
+        view === 'holding'
+          ? 'Activos directos del holding en financiero, PE y tesorería. El inmobiliario se consolida con las SPVs del grupo para mantener la foto patrimonial real.'
+          : `Activos consolidados del grupo (${allCompanyIds.length} sociedades). Se eliminan ${participacionesExcluidas} participaciones intragrupo para evitar doble conteo.`,
       data: {
         inmobiliario: {
           valor: round2(valorInmobiliario),
           valorLibros: round2(valorInmobLibros),
           valorMercado: round2(valorInmobMercado),
           revalorizacion: round2(valorInmobMercado - valorInmobLibros),
-          revalorizacionPct: valorInmobLibros > 0 ? round2(((valorInmobMercado - valorInmobLibros) / valorInmobLibros) * 100) : 0,
+          revalorizacionPct:
+            valorInmobLibros > 0
+              ? round2(((valorInmobMercado - valorInmobLibros) / valorInmobLibros) * 100)
+              : 0,
           renta: round2(rentaMensualTotal),
           rentaAnual: round2(rentaMensualTotal * 12),
-          yieldBrutoLibros: valorInmobLibros > 0 ? round2((rentaMensualTotal * 12 / valorInmobLibros) * 100) : 0,
-          yieldBrutoMercado: valorInmobMercado > 0 ? round2((rentaMensualTotal * 12 / valorInmobMercado) * 100) : 0,
+          yieldBrutoLibros:
+            valorInmobLibros > 0 ? round2(((rentaMensualTotal * 12) / valorInmobLibros) * 100) : 0,
+          yieldBrutoMercado:
+            valorInmobMercado > 0
+              ? round2(((rentaMensualTotal * 12) / valorInmobMercado) * 100)
+              : 0,
           edificios,
         },
         financiero: {
@@ -311,7 +329,8 @@ export async function GET(request: NextRequest) {
         privateEquity: {
           valor: round2(valorPE),
           participaciones: participacionesData,
-          participacionesIntragrupoExcluidas: view === 'consolidated' ? participacionesExcluidas : 0,
+          participacionesIntragrupoExcluidas:
+            view === 'consolidated' ? participacionesExcluidas : 0,
           posicionesFinancierasDuplicadas: round2(valorFinancieroEliminado),
         },
         tesoreria: {
@@ -333,7 +352,7 @@ export async function GET(request: NextRequest) {
         sociedades: view === 'consolidated' ? allCompanyIds.length : 1,
 
         // --- G1-G9: Monthly snapshot data (if available) ---
-        ...(await getSnapshotData(prisma, companyId)),
+        ...(await getSnapshotData(prisma, scope.rootCompanyId)),
       },
     });
   } catch (error: any) {
@@ -379,61 +398,77 @@ async function getSnapshotData(prisma: any, companyId: string) {
       .filter((s: any) => s.portfolioCode === '1149.01')
       .sort((a: any, b: any) => b.reportDate.getTime() - a.reportDate.getTime())[0];
 
-    const performanceByYear = latestAF ? {
-      return2023: latestAF.return2023,
-      return2024: latestAF.return2024,
-      return2025: latestAF.return2025,
-      returnYtd: latestAF.returnYtd,
-      sinceInception: latestAF.returnSinceInception,
-      annualized: latestAF.annualizedReturn,
-      volatility12m: latestAF.volatility12m,
-      sharpeRatio: latestAF.sharpeRatio,
-    } : null;
+    const performanceByYear = latestAF
+      ? {
+          return2023: latestAF.return2023,
+          return2024: latestAF.return2024,
+          return2025: latestAF.return2025,
+          returnYtd: latestAF.returnYtd,
+          sinceInception: latestAF.returnSinceInception,
+          annualized: latestAF.annualizedReturn,
+          volatility12m: latestAF.volatility12m,
+          sharpeRatio: latestAF.sharpeRatio,
+        }
+      : null;
 
     // G3: Custodian breakdown
     const custodianBreakdown = latestAF?.custodianBreakdown || null;
 
     // G4: Asset allocation with targets
-    const allocationVsTarget = latestAF ? (() => {
-      const total = latestAF.totalValue || 1;
-      return [
-        {
-          name: 'Mercado monetario', value: latestAF.monetario,
-          weight: Math.round((latestAF.monetario / total) * 10000) / 100,
-          target: latestAF.targetMonetario, deviation: null as number | null,
-        },
-        {
-          name: 'Renta fija', value: latestAF.rentaFija,
-          weight: Math.round((latestAF.rentaFija / total) * 10000) / 100,
-          target: latestAF.targetRentaFija, deviation: null as number | null,
-        },
-        {
-          name: 'Renta variable', value: latestAF.rentaVariable,
-          weight: Math.round((latestAF.rentaVariable / total) * 10000) / 100,
-          target: latestAF.targetRentaVariable, deviation: null as number | null,
-        },
-        {
-          name: 'Commodities', value: latestAF.commodities,
-          weight: Math.round((latestAF.commodities / total) * 10000) / 100,
-          target: null, deviation: null as number | null,
-        },
-        {
-          name: 'Alternativos', value: latestAF.alternativos,
-          weight: Math.round((latestAF.alternativos / total) * 10000) / 100,
-          target: null, deviation: null as number | null,
-        },
-      ].map(a => ({
-        ...a,
-        deviation: a.target != null ? Math.round((a.weight - a.target) * 100) / 100 : null,
-      }));
-    })() : null;
+    const allocationVsTarget = latestAF
+      ? (() => {
+          const total = latestAF.totalValue || 1;
+          return [
+            {
+              name: 'Mercado monetario',
+              value: latestAF.monetario,
+              weight: Math.round((latestAF.monetario / total) * 10000) / 100,
+              target: latestAF.targetMonetario,
+              deviation: null as number | null,
+            },
+            {
+              name: 'Renta fija',
+              value: latestAF.rentaFija,
+              weight: Math.round((latestAF.rentaFija / total) * 10000) / 100,
+              target: latestAF.targetRentaFija,
+              deviation: null as number | null,
+            },
+            {
+              name: 'Renta variable',
+              value: latestAF.rentaVariable,
+              weight: Math.round((latestAF.rentaVariable / total) * 10000) / 100,
+              target: latestAF.targetRentaVariable,
+              deviation: null as number | null,
+            },
+            {
+              name: 'Commodities',
+              value: latestAF.commodities,
+              weight: Math.round((latestAF.commodities / total) * 10000) / 100,
+              target: null,
+              deviation: null as number | null,
+            },
+            {
+              name: 'Alternativos',
+              value: latestAF.alternativos,
+              weight: Math.round((latestAF.alternativos / total) * 10000) / 100,
+              target: null,
+              deviation: null as number | null,
+            },
+          ].map((a) => ({
+            ...a,
+            deviation: a.target != null ? Math.round((a.weight - a.target) * 100) / 100 : null,
+          }));
+        })()
+      : null;
 
     // G7: Fees
-    const feesSummary = latestAF ? {
-      totalFees: latestAF.fees,
-      breakdown: latestAF.feeBreakdown,
-      reportDate: latestAF.reportDate,
-    } : null;
+    const feesSummary = latestAF
+      ? {
+          totalFees: latestAF.fees,
+          breakdown: latestAF.feeBreakdown,
+          reportDate: latestAF.reportDate,
+        }
+      : null;
 
     return {
       patrimonioEvolution,

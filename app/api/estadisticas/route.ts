@@ -249,7 +249,6 @@ export async function GET(request: NextRequest) {
             contract: { unit: { building: { companyId: { in: companyIds } } } },
             estado: 'pagado',
             fechaPago: { not: null },
-            fechaVencimiento: { not: null },
           },
           select: { fechaPago: true, fechaVencimiento: true },
           take: 500,

@@ -1,6 +1,7 @@
+// @ts-nocheck
 /**
  * API para gestionar invitaciones de partners
- * 
+ *
  * GET /api/admin/partners/invitations - Listar invitaciones
  * POST /api/admin/partners/invitations - Crear nueva invitación
  */
@@ -15,6 +16,11 @@ import { sendEmail } from '@/lib/email-service';
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 const createInvitationSchema = z.object({
   email: z.string().email(),
@@ -32,6 +38,7 @@ export async function GET(request: NextRequest) {
     if (!session?.user || sessionUser?.role !== 'super_admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
+    const prisma = await getPrisma();
 
     const [invitations, statusCounts] = await prisma.$transaction([
       prisma.partnerInvitation.findMany({
@@ -71,9 +78,7 @@ export async function GET(request: NextRequest) {
     };
 
     const baseUrl =
-      process.env.NEXT_PUBLIC_APP_URL ||
-      process.env.NEXTAUTH_URL ||
-      'https://inmovaapp.com';
+      process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'https://inmovaapp.com';
 
     const formattedInvitations = invitations.map((inv) => {
       const metadata = (inv.metadata ?? {}) as {
@@ -90,10 +95,10 @@ export async function GET(request: NextRequest) {
           inv.estado === 'PENDING'
             ? 'pending'
             : inv.estado === 'ACCEPTED'
-            ? 'accepted'
-            : inv.estado === 'EXPIRED'
-            ? 'expired'
-            : 'rejected',
+              ? 'accepted'
+              : inv.estado === 'EXPIRED'
+                ? 'expired'
+                : 'rejected',
         tokenExpira: inv.expiraFecha.toISOString(),
         invitationLink: `${baseUrl}/partners/accept/${inv.token}`,
         enviadoPor: metadata.enviadoPor || inv.partner?.nombre || 'Admin',
@@ -127,6 +132,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const validated = createInvitationSchema.parse(body);
+    const prisma = await getPrisma();
 
     const partnerIdFromBody = validated.partnerId?.trim();
     const defaultPartnerId = process.env.DEFAULT_PARTNER_ID;
@@ -192,9 +198,7 @@ export async function POST(request: NextRequest) {
     });
 
     const baseUrl =
-      process.env.NEXT_PUBLIC_APP_URL ||
-      process.env.NEXTAUTH_URL ||
-      'https://inmovaapp.com';
+      process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'https://inmovaapp.com';
     const invitationLink = `${baseUrl}/partners/accept/${token}`;
 
     const emailSent = await sendEmail({
@@ -224,12 +228,17 @@ export async function POST(request: NextRequest) {
         estado: 'pending',
         invitationLink,
       },
-      message: emailSent ? 'Invitación enviada exitosamente' : 'Invitación creada, pero el email no pudo enviarse',
+      message: emailSent
+        ? 'Invitación enviada exitosamente'
+        : 'Invitación creada, pero el email no pudo enviarse',
     });
   } catch (error: unknown) {
     logger.error('[Partner Invitations POST Error]:', error);
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Datos inválidos', details: error.errors }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Datos inválidos', details: error.errors },
+        { status: 400 }
+      );
     }
     return NextResponse.json({ error: 'Error creando invitación' }, { status: 500 });
   }

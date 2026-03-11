@@ -1,10 +1,10 @@
 /**
  * API Route: Crear Firma Digital
  * POST /api/signatures/create
- * 
+ *
  * Crea una solicitud de firma digital con Signaturit
  * Genera PDF del contrato y envía a firmantes
- * 
+ *
  * Auth: Requiere sesión activa
  */
 
@@ -30,14 +30,16 @@ async function getPrisma() {
 // Schema de validación
 const createSignatureSchema = z.object({
   contractId: z.string().cuid(),
-  signers: z.array(
-    z.object({
-      email: z.string().email(),
-      name: z.string().min(2),
-      phone: z.string().optional(),
-      requireSmsVerification: z.boolean().optional(),
-    })
-  ).min(1),
+  signers: z
+    .array(
+      z.object({
+        email: z.string().email(),
+        name: z.string().min(2),
+        phone: z.string().optional(),
+        requireSmsVerification: z.boolean().optional(),
+      })
+    )
+    .min(1),
   options: z
     .object({
       type: z.enum(['simple', 'advanced', 'qualified']).optional(),
@@ -51,14 +53,14 @@ const createSignatureSchema = z.object({
 
 /**
  * POST /api/signatures/create
- * 
+ *
  * Body:
  * {
  *   contractId: string,
  *   signers: [{ email, name, phone?, requireSmsVerification? }],
  *   options?: { type?, subject?, message?, expirationDays?, requireEmailOtp? }
  * }
- * 
+ *
  * Response:
  * {
  *   success: true,
@@ -83,7 +85,7 @@ export async function POST(request: NextRequest) {
     if (!limitCheck.allowed) {
       return createLimitExceededResponse(limitCheck);
     }
-    
+
     // Log warning si está cerca del límite (80%)
     logUsageWarning(session.user.companyId, limitCheck);
 
@@ -92,7 +94,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error: 'Firma digital no configurada',
-          message: 'El servicio de firma digital no está disponible. Contacta al administrador de Inmova.',
+          message:
+            'El servicio de firma digital no está disponible. Contacta al administrador de Inmova.',
         },
         { status: 503 }
       );
@@ -116,10 +119,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!contract) {
-      return NextResponse.json(
-        { error: 'Contrato no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Contrato no encontrado' }, { status: 404 });
     }
 
     // 5. Verificar ownership
@@ -132,10 +132,7 @@ export async function POST(request: NextRequest) {
 
     // 6. Verificar que el contrato no esté ya firmado
     if (contract.estado === 'activo' || contract.estado === 'vencido') {
-      return NextResponse.json(
-        { error: 'El contrato ya está firmado' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'El contrato ya está firmado' }, { status: 400 });
     }
 
     // 7. Generar PDF del contrato
@@ -144,10 +141,7 @@ export async function POST(request: NextRequest) {
     const pdfBuffer = await generateContractPDF(contract);
 
     if (!pdfBuffer) {
-      return NextResponse.json(
-        { error: 'Error generando PDF del contrato' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Error generando PDF del contrato' }, { status: 500 });
     }
 
     // 8. Preparar opciones de firma
@@ -289,23 +283,9 @@ async function generateContractPDF(contract: any): Promise<Buffer | null> {
     // En producción, DEBES implementar esto
     logger.warn('[generateContractPDF] PDF generation not implemented');
 
-    // Simulación: retornar un PDF vacío (solo para testing)
+    // Simulación: retornar un buffer básico solo para desarrollo
     if (process.env.NODE_ENV === 'development') {
-      const { PDFDocument } = await import('pdf-lib');
-      const pdfDoc = await PDFDocument.create();
-      const page = pdfDoc.addPage();
-      page.drawText('Contrato de Arrendamiento (Demo)', {
-        x: 50,
-        y: page.getHeight() - 50,
-        size: 20,
-      });
-      page.drawText(`ID: ${contract.id}`, {
-        x: 50,
-        y: page.getHeight() - 80,
-        size: 12,
-      });
-      const pdfBytes = await pdfDoc.save();
-      return Buffer.from(pdfBytes);
+      return Buffer.from(`Contrato demo\nID: ${contract.id}\n`, 'utf-8');
     }
 
     return null;

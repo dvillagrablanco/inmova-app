@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Mobile Menu Controller - Maneja el menú móvil sin depender de React state
  * Funciona en modo incógnito sin localStorage

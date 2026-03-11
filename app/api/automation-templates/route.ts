@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -91,11 +92,11 @@ export async function GET(request: NextRequest) {
     let templates = [...TEMPLATES];
 
     if (categoria) {
-      templates = templates.filter(t => t.categoria === categoria);
+      templates = templates.filter((t) => t.categoria === categoria);
     }
 
     if (popular === 'true') {
-      templates = templates.filter(t => t.popular);
+      templates = templates.filter((t) => t.popular);
     }
 
     return NextResponse.json(templates);

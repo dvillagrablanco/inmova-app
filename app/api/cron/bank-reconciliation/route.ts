@@ -1,9 +1,9 @@
 /**
  * CRON: Reconciliación Bancaria Automática
- * 
+ *
  * Ejecutar diariamente. Compara cobros bancarios (GoCardless/Nordigen)
  * con pagos registrados en contratos. Detecta impagos y cobros sin asignar.
- * 
+ *
  * POST /api/cron/bank-reconciliation
  */
 
@@ -21,9 +21,12 @@ async function getPrisma() {
 }
 
 export async function POST(request: NextRequest) {
-  const authResult = verifyCronAuth(request);
+  const authResult = await verifyCronAuth(request);
   if (!authResult.authorized) {
-    return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    return NextResponse.json(
+      { error: authResult.error || 'No autorizado' },
+      { status: authResult.status }
+    );
   }
 
   const prisma = await getPrisma();
@@ -62,20 +65,20 @@ export async function POST(request: NextRequest) {
     const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
     const contractsWithPayment = new Set(
       recentPayments
-        .filter(p => {
+        .filter((p) => {
           const payMonth = p.fechaVencimiento
             ? `${p.fechaVencimiento.getFullYear()}-${String(p.fechaVencimiento.getMonth() + 1).padStart(2, '0')}`
             : '';
-          return payMonth === currentMonth && (p.estado === 'pagado' || p.estado === 'parcial');
+          return payMonth === currentMonth && p.estado === 'pagado';
         })
-        .map(p => p.contractId)
+        .map((p) => p.contractId)
     );
 
-    const unpaidContracts = activeContracts.filter(c => !contractsWithPayment.has(c.id));
+    const unpaidContracts = activeContracts.filter((c) => !contractsWithPayment.has(c.id));
 
     // 4. Pagos vencidos sin cobrar
     const overduePayments = recentPayments.filter(
-      p => p.estado === 'pendiente' && p.fechaVencimiento && p.fechaVencimiento < now
+      (p) => p.estado === 'pendiente' && p.fechaVencimiento && p.fechaVencimiento < now
     );
 
     // 5. Generar resumen
@@ -86,7 +89,7 @@ export async function POST(request: NextRequest) {
       unpaidThisMonth: unpaidContracts.length,
       overduePayments: overduePayments.length,
       totalOverdueAmount: overduePayments.reduce((sum, p) => sum + p.monto, 0),
-      unpaidDetails: unpaidContracts.slice(0, 20).map(c => ({
+      unpaidDetails: unpaidContracts.slice(0, 20).map((c) => ({
         contractId: c.id,
         tenant: c.tenant?.nombreCompleto || 'Sin inquilino',
         unit: `${c.unit?.building?.nombre || ''} - ${c.unit?.numero || ''}`,

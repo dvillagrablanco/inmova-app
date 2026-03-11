@@ -1,7 +1,7 @@
 /**
  * API para gestionar cupones promocionales INMOVA
  * Solo accesible para SUPERADMIN
- * 
+ *
  * GET /api/admin/promo-coupons - Listar cupones
  * POST /api/admin/promo-coupons - Crear cupón
  */
@@ -16,6 +16,11 @@ import { getStripe, formatAmountForStripe } from '@/lib/stripe-config';
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 const createCouponSchema = z.object({
   codigo: z.string().min(3).max(20).toUpperCase(),
@@ -55,6 +60,7 @@ export async function GET(request: NextRequest) {
     const estadoFiltro = allowedStatuses.includes(estado as (typeof allowedStatuses)[number])
       ? (estado as (typeof allowedStatuses)[number])
       : null;
+    const prisma = await getPrisma();
 
     const coupons = await prisma.promoCoupon.findMany({
       where: {
@@ -83,9 +89,11 @@ export async function GET(request: NextRequest) {
     // Calcular estadísticas
     const stats = {
       total: coupons.length,
-      activos: coupons.filter(c => c.estado === 'ACTIVE').length,
-      porExpirar: coupons.filter(c => {
-        const diasRestantes = Math.ceil((new Date(c.fechaExpiracion).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+      activos: coupons.filter((c) => c.estado === 'ACTIVE').length,
+      porExpirar: coupons.filter((c) => {
+        const diasRestantes = Math.ceil(
+          (new Date(c.fechaExpiracion).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+        );
         return diasRestantes <= 7 && diasRestantes > 0 && c.estado === 'ACTIVE';
       }).length,
       usosHoy,
@@ -93,10 +101,12 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: coupons.map(c => ({
+      data: coupons.map((c) => ({
         ...c,
         usosActuales: c._count.usos,
-        diasRestantes: Math.ceil((new Date(c.fechaExpiracion).getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
+        diasRestantes: Math.ceil(
+          (new Date(c.fechaExpiracion).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+        ),
       })),
       stats,
     });
@@ -122,6 +132,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const validated = createCouponSchema.parse(body);
+    const prisma = await getPrisma();
 
     // Verificar que no exista otro cupón con el mismo código
     const existing = await prisma.promoCoupon.findUnique({
@@ -183,10 +194,13 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({
-      success: true,
-      data: coupon,
-    }, { status: 201 });
+    return NextResponse.json(
+      {
+        success: true,
+        data: coupon,
+      },
+      { status: 201 }
+    );
   } catch (error: unknown) {
     logger.error('[PromoCoupons POST Error]:', error);
 

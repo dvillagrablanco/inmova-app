@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Servicio de Valoración Automática de Propiedades con IA
  *

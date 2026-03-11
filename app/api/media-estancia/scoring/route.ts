@@ -222,7 +222,11 @@ function calculateCategoryScores(factors: ReturnType<typeof calculateScoringFact
   );
   const documentationScore =
     docFactors.length > 0
-      ? Math.round((docFactors.reduce((sum, f) => sum + f.score, 0) / docFactors.reduce((sum, f) => sum + f.maxScore, 0)) * 100)
+      ? Math.round(
+          (docFactors.reduce((sum, f) => sum + f.score, 0) /
+            docFactors.reduce((sum, f) => sum + f.maxScore, 0)) *
+            100
+        )
       : 50;
 
   // Solvencia: situación laboral + ingresos + ratio
@@ -292,14 +296,9 @@ async function generateAIAnalysis(
 }
 
 // Determinar estado basado en scoring y contratos
-async function determineStatus(
-  tenant: any,
-  totalScore: number
-): 'pending' | 'approved' | 'rejected' {
-  const prisma = await getPrisma();
+function determineStatus(tenant: any, totalScore: number): 'pending' | 'approved' | 'rejected' {
   // Si tiene contrato activo, está aprobado
-  const hasActiveContract =
-    tenant.contracts?.some((c: any) => c.estado === 'activo') || false;
+  const hasActiveContract = tenant.contracts?.some((c: any) => c.estado === 'activo') || false;
   if (hasActiveContract) return 'approved';
 
   // Si tiene contratos finalizados sin incidencias, aprobar
@@ -480,7 +479,12 @@ export async function POST(request: NextRequest) {
     // Por ahora, solo retornamos éxito
     return NextResponse.json({
       success: true,
-      message: action === 'approve' ? 'Solicitud aprobada' : action === 'reject' ? 'Solicitud rechazada' : 'Scoring actualizado',
+      message:
+        action === 'approve'
+          ? 'Solicitud aprobada'
+          : action === 'reject'
+            ? 'Solicitud rechazada'
+            : 'Scoring actualizado',
     });
   } catch (error) {
     logger.error('Error updating tenant scoring:', error);

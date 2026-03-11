@@ -51,13 +51,11 @@ const ALERTS_RATE_LIMIT = {
   uniqueTokenPerInterval: 90,
 };
 
-async function getCacheKey(companyId: string) {
-  const prisma = await getPrisma();
+function getCacheKey(companyId: string) {
   return `${CACHE_KEY_PREFIX}${companyId}`;
 }
 
 async function getCachedAlerts(key: string): Promise<AlertsResponse | null> {
-  const prisma = await getPrisma();
   try {
     const redis = getRedisClient();
     if (!redis) return null;
@@ -69,7 +67,6 @@ async function getCachedAlerts(key: string): Promise<AlertsResponse | null> {
 }
 
 async function setCachedAlerts(key: string, payload: AlertsResponse): Promise<void> {
-  const prisma = await getPrisma();
   try {
     const redis = getRedisClient();
     if (!redis) return;
@@ -85,48 +82,97 @@ export async function GET(request: NextRequest) {
     request,
     async () => {
       try {
-    const session = await getServerSession(authOptions);
+        const session = await getServerSession(authOptions);
 
-    if (!session || !session.user) {
-      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
-    }
+        if (!session || !session.user) {
+          return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+        }
 
-    const companyId = session?.user?.companyId;
-    if (!companyId) {
-      return NextResponse.json({ error: 'Empresa no encontrada' }, { status: 400 });
-    }
-    const { searchParams } = new URL(request.url);
-    const skipCache = searchParams.get('fresh') === 'true';
-    const today = startOfDay(new Date());
-    const alerts: Alert[] = [];
-    const cacheKey = getCacheKey(companyId);
+        const companyId = session?.user?.companyId;
+        if (!companyId) {
+          return NextResponse.json({ error: 'Empresa no encontrada' }, { status: 400 });
+        }
+        const { searchParams } = new URL(request.url);
+        const skipCache = searchParams.get('fresh') === 'true';
+        const today = startOfDay(new Date());
+        const alerts: Alert[] = [];
+        const cacheKey = getCacheKey(companyId);
 
-    if (!skipCache) {
-      const cached = await getCachedAlerts(cacheKey);
-      if (cached) {
-        return NextResponse.json(cached);
-      }
-    }
+        if (!skipCache) {
+          const cached = await getCachedAlerts(cacheKey);
+          if (cached) {
+            return NextResponse.json(cached);
+          }
+        }
 
-    // ============================================
-    // ALERTAS DE PAGOS PENDIENTES
-    // ============================================
-    const pendingPayments = await prisma.payment.findMany({
-      where: {
-        estado: { in: ['pendiente', 'atrasado'] },
-        fechaVencimiento: {
-          lte: addDays(today, 7), // Pagos que vencen en los próximos 7 días
-        },
-        contract: {
-          unit: {
-            building: {
-              companyId,
+        // ============================================
+        // ALERTAS DE PAGOS PENDIENTES
+        // ============================================
+        const pendingPayments = await prisma.payment.findMany({
+          where: {
+            estado: { in: ['pendiente', 'atrasado'] },
+            fechaVencimiento: {
+              lte: addDays(today, 7), // Pagos que vencen en los próximos 7 días
+            },
+            contract: {
+              unit: {
+                building: {
+                  companyId,
+                },
+              },
             },
           },
-        },
-      },
-      include: {
-        contract: {
+          include: {
+            contract: {
+              include: {
+                tenant: true,
+                unit: {
+                  include: {
+                    building: true,
+                  },
+                },
+              },
+            },
+          },
+          orderBy: { fechaVencimiento: 'asc' },
+        });
+
+        for (const payment of pendingPayments) {
+          const daysRemaining = differenceInDays(payment.fechaVencimiento, today);
+          const isOverdue = daysRemaining < 0;
+
+          alerts.push({
+            id: `payment-${payment.id}`,
+            type: 'payment',
+            priority:
+              isOverdue || daysRemaining <= 1 ? 'alto' : daysRemaining <= 3 ? 'medio' : 'bajo',
+            title: isOverdue
+              ? `Pago Atrasado - ${payment.contract.tenant.nombreCompleto}`
+              : `Pago Próximo a Vencer`,
+            description: `${payment.contract.unit.building.nombre} - ${payment.contract.unit.numero} | ${payment.periodo} | ${payment.monto.toFixed(2)}€`,
+            date: payment.fechaVencimiento,
+            daysRemaining: Math.max(0, daysRemaining),
+            entityId: payment.id,
+            entityType: 'payment',
+          });
+        }
+
+        // ============================================
+        // ALERTAS DE CONTRATOS PRÓXIMOS A VENCER
+        // ============================================
+        const expiringContracts = await prisma.contract.findMany({
+          where: {
+            estado: 'activo',
+            fechaFin: {
+              gte: today,
+              lte: addDays(today, 60), // Contratos que vencen en los próximos 60 días
+            },
+            unit: {
+              building: {
+                companyId,
+              },
+            },
+          },
           include: {
             tenant: true,
             unit: {
@@ -135,333 +181,282 @@ export async function GET(request: NextRequest) {
               },
             },
           },
-        },
-      },
-      orderBy: { fechaVencimiento: 'asc' },
-    });
+          orderBy: { fechaFin: 'asc' },
+        });
 
-    for (const payment of pendingPayments) {
-      const daysRemaining = differenceInDays(payment.fechaVencimiento, today);
-      const isOverdue = daysRemaining < 0;
+        for (const contract of expiringContracts) {
+          const daysRemaining = differenceInDays(contract.fechaFin, today);
 
-      alerts.push({
-        id: `payment-${payment.id}`,
-        type: 'payment',
-        priority: isOverdue || daysRemaining <= 1 ? 'alto' : daysRemaining <= 3 ? 'medio' : 'bajo',
-        title: isOverdue
-          ? `Pago Atrasado - ${payment.contract.tenant.nombreCompleto}`
-          : `Pago Próximo a Vencer`,
-        description: `${payment.contract.unit.building.nombre} - ${payment.contract.unit.numero} | ${payment.periodo} | ${payment.monto.toFixed(2)}€`,
-        date: payment.fechaVencimiento,
-        daysRemaining: Math.max(0, daysRemaining),
-        entityId: payment.id,
-        entityType: 'payment',
-      });
-    }
+          alerts.push({
+            id: `contract-${contract.id}`,
+            type: 'contract',
+            priority: daysRemaining <= 30 ? 'alto' : 'medio',
+            title: `Contrato Próximo a Vencer`,
+            description: `${contract.tenant.nombreCompleto} | ${contract.unit.building.nombre} - ${contract.unit.numero}`,
+            date: contract.fechaFin,
+            daysRemaining,
+            entityId: contract.id,
+            entityType: 'contract',
+          });
+        }
 
-    // ============================================
-    // ALERTAS DE CONTRATOS PRÓXIMOS A VENCER
-    // ============================================
-    const expiringContracts = await prisma.contract.findMany({
-      where: {
-        estado: 'activo',
-        fechaFin: {
-          gte: today,
-          lte: addDays(today, 60), // Contratos que vencen en los próximos 60 días
-        },
-        unit: {
-          building: {
-            companyId,
-          },
-        },
-      },
-      include: {
-        tenant: true,
-        unit: {
-          include: {
-            building: true,
-          },
-        },
-      },
-      orderBy: { fechaFin: 'asc' },
-    });
-
-    for (const contract of expiringContracts) {
-      const daysRemaining = differenceInDays(contract.fechaFin, today);
-
-      alerts.push({
-        id: `contract-${contract.id}`,
-        type: 'contract',
-        priority: daysRemaining <= 30 ? 'alto' : 'medio',
-        title: `Contrato Próximo a Vencer`,
-        description: `${contract.tenant.nombreCompleto} | ${contract.unit.building.nombre} - ${contract.unit.numero}`,
-        date: contract.fechaFin,
-        daysRemaining,
-        entityId: contract.id,
-        entityType: 'contract',
-      });
-    }
-
-    // ============================================
-    // ALERTAS DE MANTENIMIENTO URGENTE
-    // ============================================
-    const urgentMaintenance = await prisma.maintenanceRequest.findMany({
-      where: {
-        estado: { in: ['pendiente', 'en_progreso'] },
-        prioridad: { in: ['alta', 'media'] },
-        unit: {
-          building: {
-            companyId,
-          },
-        },
-      },
-      include: {
-        unit: {
-          include: {
-            building: true,
-          },
-        },
-        provider: true,
-      },
-      orderBy: { fechaSolicitud: 'desc' },
-      take: 10,
-    });
-
-    for (const maintenance of urgentMaintenance) {
-      alerts.push({
-        id: `maintenance-${maintenance.id}`,
-        type: 'maintenance',
-        priority: maintenance.prioridad === 'alta' ? 'alto' : 'medio',
-        title: `Mantenimiento ${maintenance.prioridad === 'alta' ? 'Urgente' : 'Pendiente'}`,
-        description: `${maintenance.titulo} | ${maintenance.unit.building.nombre} - ${maintenance.unit.numero}`,
-        date: maintenance.fechaProgramada || maintenance.fechaSolicitud,
-        entityId: maintenance.id,
-        entityType: 'maintenancerequest',
-      });
-    }
-
-    // ============================================
-    // ALERTAS DE DOCUMENTOS PRÓXIMOS A VENCER
-    // ============================================
-    const expiringDocuments = await prisma.document.findMany({
-      where: {
-        fechaVencimiento: {
-          gte: today,
-          lte: addDays(today, 30), // Documentos que vencen en los próximos 30 días
-        },
-        OR: [
-          {
-            building: {
-              companyId,
-            },
-          },
-          {
+        // ============================================
+        // ALERTAS DE MANTENIMIENTO URGENTE
+        // ============================================
+        const urgentMaintenance = await prisma.maintenanceRequest.findMany({
+          where: {
+            estado: { in: ['pendiente', 'en_progreso'] },
+            prioridad: { in: ['alta', 'media'] },
             unit: {
               building: {
                 companyId,
               },
             },
           },
-          {
-            tenant: {
-              companyId,
-            },
-          },
-        ],
-      },
-      include: {
-        building: true,
-        unit: {
           include: {
-            building: true,
-          },
-        },
-        tenant: true,
-      },
-      orderBy: { fechaVencimiento: 'asc' },
-    });
-
-    for (const document of expiringDocuments) {
-      if (!document.fechaVencimiento) continue;
-
-      const daysRemaining = differenceInDays(document.fechaVencimiento, today);
-
-      let location = '';
-      if (document.building) {
-        location = document.building.nombre;
-      } else if (document.unit) {
-        location = `${document.unit.building.nombre} - ${document.unit.numero}`;
-      } else if (document.tenant) {
-        location = document.tenant.nombreCompleto;
-      }
-
-      alerts.push({
-        id: `document-${document.id}`,
-        type: 'document',
-        priority: daysRemaining <= 7 ? 'alto' : daysRemaining <= 15 ? 'medio' : 'bajo',
-        title: `Documento Próximo a Vencer`,
-        description: `${document.nombre} | ${location}`,
-        date: document.fechaVencimiento,
-        daysRemaining,
-        entityId: document.id,
-        entityType: 'document',
-      });
-    }
-
-    // ============================================
-    // ALERTAS DE SEGUROS PRÓXIMOS A VENCER
-    // ============================================
-    try {
-      const expiringInsurance = await prisma.insurance.findMany({
-        where: {
-          companyId,
-          estado: 'activa',
-          fechaVencimiento: {
-            gte: today,
-            lte: addDays(today, 30),
-          },
-        },
-        include: {
-          building: { select: { nombre: true } },
-        },
-        orderBy: { fechaVencimiento: 'asc' },
-        take: 10,
-      });
-
-      for (const seguro of expiringInsurance) {
-        const daysRemaining = differenceInDays(seguro.fechaVencimiento, today);
-        alerts.push({
-          id: `insurance-${seguro.id}`,
-          type: 'document',
-          priority: daysRemaining <= 7 ? 'alto' : 'medio',
-          title: `Seguro Próximo a Vencer`,
-          description: `${seguro.tipo} | ${seguro.building?.nombre || 'General'} | ${seguro.aseguradora}`,
-          date: seguro.fechaVencimiento,
-          daysRemaining,
-          entityId: seguro.id,
-          entityType: 'insurance',
-        });
-      }
-    } catch {
-      // Insurance model may not exist — skip silently
-    }
-
-    // ============================================
-    // ALERTAS DE UNIDADES VACÍAS >30 DÍAS
-    // ============================================
-    try {
-      const vacantUnits = await prisma.unit.findMany({
-        where: {
-          building: { companyId },
-          estado: 'disponible',
-          contracts: {
-            none: {
-              estado: 'activo',
-            },
-          },
-        },
-        include: {
-          building: { select: { nombre: true } },
-        },
-        take: 10,
-      });
-
-      for (const unit of vacantUnits) {
-        alerts.push({
-          id: `vacant-${unit.id}`,
-          type: 'contract',
-          priority: 'bajo',
-          title: `Unidad Vacía`,
-          description: `${unit.building?.nombre} - ${unit.numero} | ${unit.tipo || 'Sin tipo'} | Sin contrato activo`,
-          entityId: unit.id,
-          entityType: 'unit',
-        });
-      }
-    } catch {
-      // Skip if query fails
-    }
-
-    // ============================================
-    // ALERTAS DE MOROSIDAD CONSECUTIVA (2+ pagos atrasados)
-    // ============================================
-    try {
-      const tenantsWithOverdue = await prisma.tenant.findMany({
-        where: {
-          companyId,
-          contracts: {
-            some: {
-              estado: 'activo',
-              payments: { some: { estado: 'pendiente', fechaVencimiento: { lt: today } } },
-            },
-          },
-        },
-        select: {
-          id: true,
-          nombreCompleto: true,
-          contracts: {
-            where: { estado: 'activo' },
-            select: {
-              payments: {
-                where: { estado: 'pendiente', fechaVencimiento: { lt: today } },
-                select: { id: true },
+            unit: {
+              include: {
+                building: true,
               },
-              unit: { select: { numero: true, building: { select: { nombre: true } } } },
             },
-            take: 1,
+            provider: true,
           },
-        },
-        take: 20,
-      });
+          orderBy: { fechaSolicitud: 'desc' },
+          take: 10,
+        });
 
-      for (const tenant of tenantsWithOverdue) {
-        const overdueCount = tenant.contracts[0]?.payments?.length || 0;
-        if (overdueCount >= 2) {
-          const unit = tenant.contracts[0]?.unit;
+        for (const maintenance of urgentMaintenance) {
           alerts.push({
-            id: `moroso-${tenant.id}`,
-            type: 'payment',
-            priority: overdueCount >= 3 ? 'alto' : 'medio',
-            title: `Morosidad: ${overdueCount} pagos atrasados`,
-            description: `${tenant.nombreCompleto} | ${unit?.building?.nombre || ''} ${unit?.numero || ''}`,
-            entityId: tenant.id,
-            entityType: 'tenant',
+            id: `maintenance-${maintenance.id}`,
+            type: 'maintenance',
+            priority: maintenance.prioridad === 'alta' ? 'alto' : 'medio',
+            title: `Mantenimiento ${maintenance.prioridad === 'alta' ? 'Urgente' : 'Pendiente'}`,
+            description: `${maintenance.titulo} | ${maintenance.unit.building.nombre} - ${maintenance.unit.numero}`,
+            date: maintenance.fechaProgramada || maintenance.fechaSolicitud,
+            entityId: maintenance.id,
+            entityType: 'maintenancerequest',
           });
         }
-      }
-    } catch {
-      // Skip silently
-    }
 
-    // Ordenar alertas por prioridad y fecha
-    const priorityOrder = { alto: 0, medio: 1, bajo: 2 };
-    alerts.sort((a, b) => {
-      if (a.priority !== b.priority) {
-        return priorityOrder[a.priority] - priorityOrder[b.priority];
-      }
-      if (a.date && b.date) {
-        return a.date.getTime() - b.date.getTime();
-      }
-      return 0;
-    });
+        // ============================================
+        // ALERTAS DE DOCUMENTOS PRÓXIMOS A VENCER
+        // ============================================
+        const expiringDocuments = await prisma.document.findMany({
+          where: {
+            fechaVencimiento: {
+              gte: today,
+              lte: addDays(today, 30), // Documentos que vencen en los próximos 30 días
+            },
+            OR: [
+              {
+                building: {
+                  companyId,
+                },
+              },
+              {
+                unit: {
+                  building: {
+                    companyId,
+                  },
+                },
+              },
+              {
+                tenant: {
+                  companyId,
+                },
+              },
+            ],
+          },
+          include: {
+            building: true,
+            unit: {
+              include: {
+                building: true,
+              },
+            },
+            tenant: true,
+          },
+          orderBy: { fechaVencimiento: 'asc' },
+        });
 
-    const responsePayload: AlertsResponse = {
-      alerts,
-      summary: {
-        total: alerts.length,
-        high: alerts.filter((a) => a.priority === 'alto').length,
-        medium: alerts.filter((a) => a.priority === 'medio').length,
-        low: alerts.filter((a) => a.priority === 'bajo').length,
-      },
-    };
+        for (const document of expiringDocuments) {
+          if (!document.fechaVencimiento) continue;
+
+          const daysRemaining = differenceInDays(document.fechaVencimiento, today);
+
+          let location = '';
+          if (document.building) {
+            location = document.building.nombre;
+          } else if (document.unit) {
+            location = `${document.unit.building.nombre} - ${document.unit.numero}`;
+          } else if (document.tenant) {
+            location = document.tenant.nombreCompleto;
+          }
+
+          alerts.push({
+            id: `document-${document.id}`,
+            type: 'document',
+            priority: daysRemaining <= 7 ? 'alto' : daysRemaining <= 15 ? 'medio' : 'bajo',
+            title: `Documento Próximo a Vencer`,
+            description: `${document.nombre} | ${location}`,
+            date: document.fechaVencimiento,
+            daysRemaining,
+            entityId: document.id,
+            entityType: 'document',
+          });
+        }
+
+        // ============================================
+        // ALERTAS DE SEGUROS PRÓXIMOS A VENCER
+        // ============================================
+        try {
+          const expiringInsurance = await prisma.insurance.findMany({
+            where: {
+              companyId,
+              estado: 'activa',
+              fechaVencimiento: {
+                gte: today,
+                lte: addDays(today, 30),
+              },
+            },
+            include: {
+              building: { select: { nombre: true } },
+            },
+            orderBy: { fechaVencimiento: 'asc' },
+            take: 10,
+          });
+
+          for (const seguro of expiringInsurance) {
+            const daysRemaining = differenceInDays(seguro.fechaVencimiento, today);
+            alerts.push({
+              id: `insurance-${seguro.id}`,
+              type: 'document',
+              priority: daysRemaining <= 7 ? 'alto' : 'medio',
+              title: `Seguro Próximo a Vencer`,
+              description: `${seguro.tipo} | ${seguro.building?.nombre || 'General'} | ${seguro.aseguradora}`,
+              date: seguro.fechaVencimiento,
+              daysRemaining,
+              entityId: seguro.id,
+              entityType: 'insurance',
+            });
+          }
+        } catch {
+          // Insurance model may not exist — skip silently
+        }
+
+        // ============================================
+        // ALERTAS DE UNIDADES VACÍAS >30 DÍAS
+        // ============================================
+        try {
+          const vacantUnits = await prisma.unit.findMany({
+            where: {
+              building: { companyId },
+              estado: 'disponible',
+              contracts: {
+                none: {
+                  estado: 'activo',
+                },
+              },
+            },
+            include: {
+              building: { select: { nombre: true } },
+            },
+            take: 10,
+          });
+
+          for (const unit of vacantUnits) {
+            alerts.push({
+              id: `vacant-${unit.id}`,
+              type: 'contract',
+              priority: 'bajo',
+              title: `Unidad Vacía`,
+              description: `${unit.building?.nombre} - ${unit.numero} | ${unit.tipo || 'Sin tipo'} | Sin contrato activo`,
+              entityId: unit.id,
+              entityType: 'unit',
+            });
+          }
+        } catch {
+          // Skip if query fails
+        }
+
+        // ============================================
+        // ALERTAS DE MOROSIDAD CONSECUTIVA (2+ pagos atrasados)
+        // ============================================
+        try {
+          const tenantsWithOverdue = await prisma.tenant.findMany({
+            where: {
+              companyId,
+              contracts: {
+                some: {
+                  estado: 'activo',
+                  payments: { some: { estado: 'pendiente', fechaVencimiento: { lt: today } } },
+                },
+              },
+            },
+            select: {
+              id: true,
+              nombreCompleto: true,
+              contracts: {
+                where: { estado: 'activo' },
+                select: {
+                  payments: {
+                    where: { estado: 'pendiente', fechaVencimiento: { lt: today } },
+                    select: { id: true },
+                  },
+                  unit: { select: { numero: true, building: { select: { nombre: true } } } },
+                },
+                take: 1,
+              },
+            },
+            take: 20,
+          });
+
+          for (const tenant of tenantsWithOverdue) {
+            const overdueCount = tenant.contracts[0]?.payments?.length || 0;
+            if (overdueCount >= 2) {
+              const unit = tenant.contracts[0]?.unit;
+              alerts.push({
+                id: `moroso-${tenant.id}`,
+                type: 'payment',
+                priority: overdueCount >= 3 ? 'alto' : 'medio',
+                title: `Morosidad: ${overdueCount} pagos atrasados`,
+                description: `${tenant.nombreCompleto} | ${unit?.building?.nombre || ''} ${unit?.numero || ''}`,
+                entityId: tenant.id,
+                entityType: 'tenant',
+              });
+            }
+          }
+        } catch {
+          // Skip silently
+        }
+
+        // Ordenar alertas por prioridad y fecha
+        const priorityOrder = { alto: 0, medio: 1, bajo: 2 };
+        alerts.sort((a, b) => {
+          if (a.priority !== b.priority) {
+            return priorityOrder[a.priority] - priorityOrder[b.priority];
+          }
+          if (a.date && b.date) {
+            return a.date.getTime() - b.date.getTime();
+          }
+          return 0;
+        });
+
+        const responsePayload: AlertsResponse = {
+          alerts,
+          summary: {
+            total: alerts.length,
+            high: alerts.filter((a) => a.priority === 'alto').length,
+            medium: alerts.filter((a) => a.priority === 'medio').length,
+            low: alerts.filter((a) => a.priority === 'bajo').length,
+          },
+        };
 
         await setCachedAlerts(cacheKey, responsePayload);
         return NextResponse.json(responsePayload);
       } catch (error) {
         logger.error('Error obteniendo alertas:', error);
-        return NextResponse.json(
-          { error: 'Error al obtener alertas' },
-          { status: 500 }
-        );
+        return NextResponse.json({ error: 'Error al obtener alertas' }, { status: 500 });
       }
     },
     ALERTS_RATE_LIMIT

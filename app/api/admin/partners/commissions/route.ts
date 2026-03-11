@@ -7,6 +7,11 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 /**
  * GET /api/admin/partners/commissions
  * Lista todas las comisiones de partners
@@ -46,6 +51,7 @@ export async function GET(request: NextRequest) {
     if (periodo) {
       where.periodo = periodo;
     }
+    const prisma = await getPrisma();
 
     const commissions = await prisma.commission.findMany({
       where,
@@ -154,6 +160,7 @@ export async function PUT(request: NextRequest) {
     });
 
     const validated = schema.parse(body);
+    const prisma = await getPrisma();
 
     const commission = await prisma.commission.findUnique({
       where: { id: validated.id },
@@ -214,10 +221,13 @@ export async function PUT(request: NextRequest) {
     logger.error('[Commissions PUT Error]:', error);
 
     if (error instanceof z.ZodError) {
-      return NextResponse.json({
-        error: 'Datos inválidos',
-        details: error.errors,
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'Datos inválidos',
+          details: error.errors,
+        },
+        { status: 400 }
+      );
     }
 
     return NextResponse.json(

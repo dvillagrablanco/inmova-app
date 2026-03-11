@@ -22,13 +22,11 @@ const SUGGESTIONS_CACHE_TTL_SECONDS = 60;
 const SUGGESTIONS_CACHE_PREFIX = 'ai:suggestions:';
 const SUGGESTIONS_TIMEOUT_MS = 12000;
 
-async function getCacheKey(userId: string) {
-  const prisma = await getPrisma();
+function getCacheKey(userId: string) {
   return `${SUGGESTIONS_CACHE_PREFIX}${userId}`;
 }
 
 async function getCachedSuggestions(userId: string) {
-  const prisma = await getPrisma();
   try {
     const redis = getRedisClient();
     if (!redis) return null;
@@ -40,22 +38,16 @@ async function getCachedSuggestions(userId: string) {
 }
 
 async function setCachedSuggestions(userId: string, payload: unknown) {
-  const prisma = await getPrisma();
   try {
     const redis = getRedisClient();
     if (!redis) return;
-    await redis.setex(
-      getCacheKey(userId),
-      SUGGESTIONS_CACHE_TTL_SECONDS,
-      JSON.stringify(payload)
-    );
+    await redis.setex(getCacheKey(userId), SUGGESTIONS_CACHE_TTL_SECONDS, JSON.stringify(payload));
   } catch (error) {
     logger.warn('[AI Suggestions] Error setting cache:', error);
   }
 }
 
 async function isSuggestionsAIConfigured() {
-  const prisma = await getPrisma();
   return !!process.env.ABACUSAI_API_KEY;
 }
 
@@ -139,7 +131,9 @@ async function generateSuggestions({
       .map(([nombre, count]) => ({ nombre, count }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);
-  } catch { /* skip */ }
+  } catch {
+    /* skip */
+  }
 
   const userContext = {
     buildingsCount,
@@ -190,7 +184,7 @@ Responde SOLO con JSON válido (sin markdown):
 - ${pendingPayments} pagos pendientes, ${overduePayments} pagos atrasados
 - ${vacantUnits} unidades vacías sin contrato
 - ${pendingMaintenance} solicitudes de mantenimiento pendientes
-${expiringByBuilding.length > 0 ? `- Contratos por vencer por edificio: ${expiringByBuilding.map(e => `${e.nombre} (${e.count})`).join(', ')}` : ''}
+${expiringByBuilding.length > 0 ? `- Contratos por vencer por edificio: ${expiringByBuilding.map((e) => `${e.nombre} (${e.count})`).join(', ')}` : ''}
 
 Genera sugerencias accionables basadas en estos datos.`;
 

@@ -8,6 +8,11 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 // Canva OAuth configuration
 const CANVA_AUTH_URL = 'https://www.canva.com/api/oauth/authorize';
 const CANVA_TOKEN_URL = 'https://api.canva.com/rest/v1/oauth/token';
@@ -84,7 +89,8 @@ export async function GET(request: NextRequest) {
     }
 
     const clientId = process.env.CANVA_CLIENT_ID;
-    const redirectUri = process.env.CANVA_REDIRECT_URI || `${process.env.NEXTAUTH_URL}/api/admin/canva/callback`;
+    const redirectUri =
+      process.env.CANVA_REDIRECT_URI || `${process.env.NEXTAUTH_URL}/api/admin/canva/callback`;
 
     if (!clientId) {
       // Si no hay client ID, mostrar instrucciones de configuración
@@ -108,10 +114,12 @@ export async function GET(request: NextRequest) {
     }
 
     // Generar state para seguridad CSRF
-    const state = Buffer.from(JSON.stringify({
-      userId: sessionUser.id,
-      timestamp: Date.now(),
-    })).toString('base64');
+    const state = Buffer.from(
+      JSON.stringify({
+        userId: sessionUser.id,
+        timestamp: Date.now(),
+      })
+    ).toString('base64');
 
     // Scopes necesarios para la integración
     const scopes = [
@@ -139,10 +147,7 @@ export async function GET(request: NextRequest) {
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('[Canva Auth Error]:', { message });
-    return NextResponse.json(
-      { error: 'Error iniciando autenticación con Canva' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error iniciando autenticación con Canva' }, { status: 500 });
   }
 }
 
@@ -170,10 +175,7 @@ export async function POST(request: NextRequest) {
           userId?: string;
         };
         if (decoded.userId && decoded.userId !== sessionUser.id) {
-          return NextResponse.json(
-            { error: 'State inválido para este usuario' },
-            { status: 400 }
-          );
+          return NextResponse.json({ error: 'State inválido para este usuario' }, { status: 400 });
         }
       } catch (stateError) {
         logger.warn('[Canva Auth] State inválido', { stateError });
@@ -182,13 +184,11 @@ export async function POST(request: NextRequest) {
 
     const clientId = process.env.CANVA_CLIENT_ID;
     const clientSecret = process.env.CANVA_CLIENT_SECRET;
-    const redirectUri = process.env.CANVA_REDIRECT_URI || `${process.env.NEXTAUTH_URL}/api/admin/canva/callback`;
+    const redirectUri =
+      process.env.CANVA_REDIRECT_URI || `${process.env.NEXTAUTH_URL}/api/admin/canva/callback`;
 
     if (!clientId || !clientSecret) {
-      return NextResponse.json(
-        { error: 'Canva no configurado correctamente' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Canva no configurado correctamente' }, { status: 500 });
     }
 
     // Intercambiar código por token
@@ -196,7 +196,7 @@ export async function POST(request: NextRequest) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}`,
+        Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}`,
       },
       body: new URLSearchParams({
         grant_type: 'authorization_code',
@@ -208,10 +208,7 @@ export async function POST(request: NextRequest) {
     if (!tokenResponse.ok) {
       const error = await tokenResponse.json();
       logger.error('[Canva Token Error]:', error);
-      return NextResponse.json(
-        { error: 'Error obteniendo token de Canva' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Error obteniendo token de Canva' }, { status: 500 });
     }
 
     const tokens = tokenResponseSchema.parse(await tokenResponse.json());
@@ -231,6 +228,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+    const prisma = await getPrisma();
     const existing = await prisma.integrationConfig.findUnique({
       where: { companyId_provider: { companyId, provider: 'canva' } },
       select: { credentials: true, settings: true },
@@ -286,9 +284,6 @@ export async function POST(request: NextRequest) {
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('[Canva Token Exchange Error]:', { message });
-    return NextResponse.json(
-      { error: 'Error en el intercambio de tokens' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error en el intercambio de tokens' }, { status: 500 });
   }
 }

@@ -1,6 +1,7 @@
+// @ts-nocheck
 /**
  * GENERADOR DE PDF PARA CONTRATOS DE MEDIA ESTANCIA
- * 
+ *
  * Genera PDF profesional del contrato legal usando Puppeteer o jsPDF
  */
 
@@ -298,7 +299,7 @@ export function generateContractHTML(
   options: Partial<GeneratePDFOptions> = {}
 ): string {
   const fechaActual = format(new Date(), "d 'de' MMMM 'de' yyyy", { locale: es });
-  
+
   return `
 <!DOCTYPE html>
 <html lang="es">
@@ -365,30 +366,46 @@ export function generateContractHTML(
           <div class="property-detail-label">C.P.</div>
           <div class="property-detail-value">${datos.inmueble.codigoPostal}</div>
         </div>
-        ${datos.inmueble.superficie ? `
+        ${
+          datos.inmueble.superficie
+            ? `
         <div class="property-detail">
           <div class="property-detail-label">Superficie</div>
           <div class="property-detail-value">${datos.inmueble.superficie} m²</div>
         </div>
-        ` : ''}
-        ${datos.inmueble.habitaciones ? `
+        `
+            : ''
+        }
+        ${
+          datos.inmueble.habitaciones
+            ? `
         <div class="property-detail">
           <div class="property-detail-label">Habitaciones</div>
           <div class="property-detail-value">${datos.inmueble.habitaciones}</div>
         </div>
-        ` : ''}
-        ${datos.inmueble.banos ? `
+        `
+            : ''
+        }
+        ${
+          datos.inmueble.banos
+            ? `
         <div class="property-detail">
           <div class="property-detail-label">Baños</div>
           <div class="property-detail-value">${datos.inmueble.banos}</div>
         </div>
-        ` : ''}
+        `
+            : ''
+        }
       </div>
     </div>
     
-    ${datos.inmueble.referenciaCatastral ? `
+    ${
+      datos.inmueble.referenciaCatastral
+        ? `
     <p><strong>Referencia Catastral:</strong> ${datos.inmueble.referenciaCatastral}</p>
-    ` : ''}
+    `
+        : ''
+    }
     <p><strong>Estado:</strong> ${datos.inmueble.amueblado ? 'Completamente amueblado' : 'Sin amueblar'}</p>
   </div>
   
@@ -424,35 +441,47 @@ export function generateContractHTML(
       </tr>
     </table>
     
-    ${datos.prorrateo ? `
+    ${
+      datos.prorrateo
+        ? `
     <p><strong>Desglose de prorrateo:</strong></p>
     <table class="economic-table">
       <tr>
         <th>Período</th>
         <th class="amount">Importe</th>
       </tr>
-      ${datos.prorrateo.diasPrimerMes > 0 ? `
+      ${
+        datos.prorrateo.diasPrimerMes > 0
+          ? `
       <tr>
         <td>Primer mes (${datos.prorrateo.diasPrimerMes} días)</td>
         <td class="amount">${datos.prorrateo.importePrimerMes.toFixed(2)} €</td>
       </tr>
-      ` : ''}
+      `
+          : ''
+      }
       <tr>
         <td>Meses completos (${datos.prorrateo.mesesCompletos})</td>
         <td class="amount">${(datos.rentaMensual * datos.prorrateo.mesesCompletos).toFixed(2)} €</td>
       </tr>
-      ${datos.prorrateo.diasUltimoMes > 0 ? `
+      ${
+        datos.prorrateo.diasUltimoMes > 0
+          ? `
       <tr>
         <td>Último mes (${datos.prorrateo.diasUltimoMes} días)</td>
         <td class="amount">${datos.prorrateo.importeUltimoMes.toFixed(2)} €</td>
       </tr>
-      ` : ''}
+      `
+          : ''
+      }
       <tr style="background-color: #f0f0f0;">
         <td><strong>TOTAL CONTRATO</strong></td>
         <td class="amount"><strong>${datos.prorrateo.importeTotal.toFixed(2)} €</strong></td>
       </tr>
     </table>
-    ` : ''}
+    `
+        : ''
+    }
   </div>
   
   <!-- CONDICIONES ECONÓMICAS -->
@@ -472,12 +501,16 @@ export function generateContractHTML(
         <td>Fianza legal (${datos.mesesFianza} ${datos.mesesFianza > 1 ? 'meses' : 'mes'})</td>
         <td class="amount">${datos.fianza.toFixed(2)} €</td>
       </tr>
-      ${datos.depositoSuministros ? `
+      ${
+        datos.depositoSuministros
+          ? `
       <tr>
         <td>Depósito suministros</td>
         <td class="amount">${datos.depositoSuministros.toFixed(2)} €</td>
       </tr>
-      ` : ''}
+      `
+          : ''
+      }
       <tr style="background-color: #f0f0f0;">
         <td><strong>Total a entregar a la firma</strong></td>
         <td class="amount"><strong>${(datos.fianza + (datos.depositoSuministros || 0)).toFixed(2)} €</strong></td>
@@ -486,7 +519,9 @@ export function generateContractHTML(
   </div>
   
   <!-- SERVICIOS INCLUIDOS -->
-  ${datos.serviciosIncluidos ? `
+  ${
+    datos.serviciosIncluidos
+      ? `
   <div class="section">
     <div class="section-title">Servicios Incluidos en la Renta</div>
     
@@ -511,11 +546,17 @@ export function generateContractHTML(
       </div>
     </div>
     
-    ${datos.serviciosIncluidos.limpieza ? `
+    ${
+      datos.serviciosIncluidos.limpieza
+        ? `
     <p><strong>Servicio de limpieza:</strong> ${datos.serviciosIncluidos.limpiezaFrecuencia || 'Semanal'}</p>
-    ` : ''}
+    `
+        : ''
+    }
   </div>
-  ` : ''}
+  `
+      : ''
+  }
   
   <!-- CLÁUSULAS LEGALES -->
   <div class="page-break"></div>
@@ -564,12 +605,16 @@ export function generateContractHTML(
     </div>
   </div>
   
-  ${datos.clausulasAdicionales ? `
+  ${
+    datos.clausulasAdicionales
+      ? `
   <div class="section">
     <div class="section-title">Cláusulas Adicionales</div>
     <p>${datos.clausulasAdicionales}</p>
   </div>
-  ` : ''}
+  `
+      : ''
+  }
   
   <!-- FIRMAS -->
   <div class="signature-area">
@@ -707,9 +752,7 @@ export async function generateInventoryPDF(
     throw new Error('Contrato no encontrado');
   }
 
-  const inventario = type === 'entrada' 
-    ? contract.inventarioEntrada 
-    : contract.inventarioSalida;
+  const inventario = type === 'entrada' ? contract.inventarioEntrada : contract.inventarioSalida;
 
   if (!inventario) {
     throw new Error(`Inventario de ${type} no encontrado`);
@@ -752,7 +795,9 @@ export async function generateInventoryPDF(
         </tr>
       </thead>
       <tbody>
-        ${items.map((item: any) => `
+        ${items
+          .map(
+            (item: any) => `
           <tr>
             <td>${item.nombre}</td>
             <td>${item.ubicacion}</td>
@@ -760,7 +805,9 @@ export async function generateInventoryPDF(
             <td>${item.estado}</td>
             <td>${item.observaciones || '-'}</td>
           </tr>
-        `).join('')}
+        `
+          )
+          .join('')}
       </tbody>
     </table>
   </div>

@@ -7,6 +7,11 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 /**
  * GET /api/admin/partners
  * Lista todos los partners
@@ -35,6 +40,7 @@ export async function GET(request: NextRequest) {
     if (tipo && tipo !== 'all') {
       where.tipo = tipo;
     }
+    const prisma = await getPrisma();
 
     const partners = await prisma.partner.findMany({
       where,
@@ -118,7 +124,15 @@ export async function POST(request: NextRequest) {
       nombre: z.string().min(2).max(100),
       razonSocial: z.string().min(2).max(200),
       cif: z.string().min(9).max(15),
-      tipo: z.enum(['BANCO', 'MULTIFAMILY_OFFICE', 'PLATAFORMA_MEMBRESIA', 'ASOCIACION', 'CONSULTORA', 'INMOBILIARIA', 'OTRO']),
+      tipo: z.enum([
+        'BANCO',
+        'MULTIFAMILY_OFFICE',
+        'PLATAFORMA_MEMBRESIA',
+        'ASOCIACION',
+        'CONSULTORA',
+        'INMOBILIARIA',
+        'OTRO',
+      ]),
       contactoNombre: z.string().min(2).max(100),
       contactoEmail: z.string().email(),
       contactoTelefono: z.string().optional(),
@@ -130,6 +144,7 @@ export async function POST(request: NextRequest) {
     });
 
     const validated = schema.parse(body);
+    const prisma = await getPrisma();
 
     // Verificar que no existe un partner con el mismo CIF o email
     const existing = await prisma.partner.findFirst({
@@ -177,25 +192,31 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({
-      success: true,
-      partner: {
-        id: partner.id,
-        name: partner.nombre,
-        email: partner.email,
-        status: partner.estado,
-        referralCode: partner.slug || partner.id.substring(0, 8).toUpperCase(),
+    return NextResponse.json(
+      {
+        success: true,
+        partner: {
+          id: partner.id,
+          name: partner.nombre,
+          email: partner.email,
+          status: partner.estado,
+          referralCode: partner.slug || partner.id.substring(0, 8).toUpperCase(),
+        },
+        tempPassword, // Solo en creación - para enviar al partner
       },
-      tempPassword, // Solo en creación - para enviar al partner
-    }, { status: 201 });
+      { status: 201 }
+    );
   } catch (error: any) {
     logger.error('[Partners POST Error]:', error);
 
     if (error instanceof z.ZodError) {
-      return NextResponse.json({
-        error: 'Datos inválidos',
-        details: error.errors,
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'Datos inválidos',
+          details: error.errors,
+        },
+        { status: 400 }
+      );
     }
 
     return NextResponse.json(

@@ -8,6 +8,11 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 const BLOG_PROVIDER = 'community_blog';
 
 const blogPostSchema = z.object({
@@ -103,6 +108,7 @@ export async function GET(request: NextRequest) {
     if (!companyId) {
       return NextResponse.json({ error: 'CompanyId no disponible' }, { status: 400 });
     }
+    const prisma = await getPrisma();
     const integration = await prisma.integrationConfig.findUnique({
       where: { companyId_provider: { companyId, provider: BLOG_PROVIDER } },
       select: { settings: true },
@@ -115,17 +121,12 @@ export async function GET(request: NextRequest) {
       posts,
       total: posts.length,
       message:
-        posts.length > 0
-          ? undefined
-          : 'No hay artículos en el blog. Crea tu primer artículo.',
+        posts.length > 0 ? undefined : 'No hay artículos en el blog. Crea tu primer artículo.',
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('[Community Manager Blog Error]:', { message });
-    return NextResponse.json(
-      { error: 'Error al obtener artículos del blog' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener artículos del blog' }, { status: 500 });
   }
 }
 
@@ -157,6 +158,7 @@ export async function POST(request: NextRequest) {
     if (!companyId) {
       return NextResponse.json({ error: 'CompanyId no disponible' }, { status: 400 });
     }
+    const prisma = await getPrisma();
 
     const body = await request.json();
     const { title, content, excerpt, category, status, publishDate } = blogPostSchema.parse(body);
@@ -170,10 +172,7 @@ export async function POST(request: NextRequest) {
       excerpt: excerpt ?? content.substring(0, 200),
       category: category ?? 'General',
       status: statusValue,
-      publishDate:
-        statusValue === 'published'
-          ? now.toISOString()
-          : publishDate ?? null,
+      publishDate: statusValue === 'published' ? now.toISOString() : (publishDate ?? null),
       views: 0,
       createdAt: now.toISOString(),
       createdBy: sessionUser.id,
@@ -218,9 +217,6 @@ export async function POST(request: NextRequest) {
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('[Community Manager Create Blog Post Error]:', { message });
-    return NextResponse.json(
-      { error: 'Error al crear artículo' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear artículo' }, { status: 500 });
   }
 }

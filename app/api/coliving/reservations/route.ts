@@ -17,8 +17,7 @@ type SessionUser = {
   companyId?: string;
 };
 
-async function mapReservationStatus(status: string): string {
-  const prisma = await getPrisma();
+function mapReservationStatus(status: string): string {
   switch (status) {
     case 'pendiente':
       return 'pendiente';
@@ -77,9 +76,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(reservas);
   } catch (error) {
     logger.error('Error fetching coliving reservations', error);
-    return NextResponse.json(
-      { error: 'Error al obtener reservas' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener reservas' }, { status: 500 });
   }
 }

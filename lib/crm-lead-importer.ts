@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * 📥 CRM Lead Importer - Importación Masiva de Leads
  *

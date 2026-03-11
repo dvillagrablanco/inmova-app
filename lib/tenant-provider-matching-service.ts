@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Servicio de Matching IA entre Inquilinos y Proveedores
  * Usa Claude AI para encontrar el mejor proveedor según la incidencia

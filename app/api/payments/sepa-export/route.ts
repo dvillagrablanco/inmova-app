@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
 
     const scope = await resolveCompanyScope({
       userId: session.user.id as string,
-      role: (session.user as { role?: string }).role as string,
+      role: (session.user as any).role,
       primaryCompanyId: session.user?.companyId,
       request: req,
     });
@@ -53,9 +53,7 @@ export async function GET(req: NextRequest) {
 
     const prisma = await getPrisma();
     const companyFilter =
-      scope.scopeCompanyIds.length > 1
-        ? { in: scope.scopeCompanyIds }
-        : scope.activeCompanyId;
+      scope.scopeCompanyIds.length > 1 ? { in: scope.scopeCompanyIds } : scope.activeCompanyId;
 
     const company = await prisma.company.findUnique({
       where: { id: scope.activeCompanyId },
@@ -194,9 +192,6 @@ ${drctDbtTxInfList}
     });
   } catch (error: unknown) {
     logger.error('SEPA export error', { error });
-    return NextResponse.json(
-      { error: 'Error generando remesa SEPA' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error generando remesa SEPA' }, { status: 500 });
   }
 }

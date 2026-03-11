@@ -48,11 +48,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const {
-      ipcPct = 2.8,
-      contractIds,
-      dryRun = true,
-    } = body;
+    const { ipcPct = 2.8, contractIds, dryRun = true } = body;
 
     if (typeof ipcPct !== 'number' || ipcPct < -10 || ipcPct > 50) {
       return NextResponse.json({ error: 'IPC inválido (rango: -10% a 50%)' }, { status: 400 });
@@ -106,16 +102,12 @@ export async function POST(request: NextRequest) {
     const actualizaciones = contracts.map((contract) => {
       let incrementoPct = ipcPct;
 
-      // Si es ipc_mas_diferencial, sumar el valor adicional
-      if (
-        contract.incrementoType === 'ipc_mas_diferencial' &&
-        contract.incrementoValor
-      ) {
+      // Si el contrato usa IPC y define diferencial/ajuste adicional, sumarlo
+      if (contract.incrementoType === 'ipc' && contract.incrementoValor) {
         incrementoPct += contract.incrementoValor;
       }
 
-      const nuevaRenta =
-        Math.round(contract.rentaMensual * (1 + incrementoPct / 100) * 100) / 100;
+      const nuevaRenta = Math.round(contract.rentaMensual * (1 + incrementoPct / 100) * 100) / 100;
       const incremento = nuevaRenta - contract.rentaMensual;
 
       return {

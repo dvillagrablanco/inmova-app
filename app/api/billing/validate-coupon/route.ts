@@ -1,9 +1,9 @@
 /**
  * API para validar cupones promocionales
- * 
+ *
  * POST /api/billing/validate-coupon
  * Valida si un cupón es válido para un plan específico
- * 
+ *
  * Body:
  * - code: Código del cupón
  * - planTier: Tier del plan (STARTER, PROFESSIONAL, BUSINESS, ENTERPRISE)
@@ -17,6 +17,11 @@ import { z } from 'zod';
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 const validateSchema = z.object({
   code: z.string().min(3),
@@ -33,6 +38,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const validated = validateSchema.parse(body);
+    const prisma = await getPrisma();
 
     // Buscar cupón
     const coupon = await prisma.promoCoupon.findUnique({
@@ -72,7 +78,9 @@ export async function POST(request: NextRequest) {
     // Verificar plan permitido
     if (validated.planTier && coupon.planesPermitidos.length > 0) {
       if (!coupon.planesPermitidos.includes(validated.planTier)) {
-        errors.push(`Este cupón no es válido para el plan seleccionado. Válido para: ${coupon.planesPermitidos.join(', ')}`);
+        errors.push(
+          `Este cupón no es válido para el plan seleccionado. Válido para: ${coupon.planesPermitidos.join(', ')}`
+        );
       }
     }
 
@@ -169,9 +177,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return NextResponse.json(
-      { valid: false, error: 'Error validando cupón' },
-      { status: 500 }
-    );
+    return NextResponse.json({ valid: false, error: 'Error validando cupón' }, { status: 500 });
   }
 }

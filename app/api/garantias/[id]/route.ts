@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { z } from 'zod';
+import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -13,10 +14,7 @@ async function getPrisma() {
 }
 
 // GET - Obtener una garantía específica
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
@@ -59,10 +57,7 @@ export async function GET(
     });
 
     if (!deposit) {
-      return NextResponse.json(
-        { error: 'Garantía no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Garantía no encontrada' }, { status: 404 });
     }
 
     return NextResponse.json({
@@ -79,10 +74,7 @@ export async function GET(
 }
 
 // PUT - Actualizar garantía (añadir deducción o procesar devolución)
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
@@ -102,10 +94,7 @@ export async function PUT(
     });
 
     if (!deposit) {
-      return NextResponse.json(
-        { error: 'Garantía no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Garantía no encontrada' }, { status: 404 });
     }
 
     // Acción: añadir deducción
@@ -136,7 +125,7 @@ export async function PUT(
 
       // Actualizar deducciones
       const motivoActual = deposit.motivoDeducciones || '';
-      const nuevoMotivo = motivoActual 
+      const nuevoMotivo = motivoActual
         ? `${motivoActual}\n[${new Date().toLocaleDateString('es-ES')}] €${amount}: ${reason}`
         : `[${new Date().toLocaleDateString('es-ES')}] €${amount}: ${reason}`;
 
@@ -158,10 +147,7 @@ export async function PUT(
     // Acción: procesar devolución
     if (action === 'process_return') {
       if (deposit.devuelto) {
-        return NextResponse.json(
-          { error: 'Esta garantía ya ha sido devuelta' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Esta garantía ya ha sido devuelta' }, { status: 400 });
       }
 
       const returnSchema = z.object({
@@ -179,7 +165,7 @@ export async function PUT(
       }
 
       const { returnAmount, returnDate, notes } = validation.data;
-      const importeDevolver = returnAmount ?? (deposit.importeFianza - deposit.deducciones);
+      const importeDevolver = returnAmount ?? deposit.importeFianza - deposit.deducciones;
 
       const updated = await prisma.depositManagement.update({
         where: { id: params.id },
@@ -187,8 +173,10 @@ export async function PUT(
           devuelto: true,
           importeDevuelto: importeDevolver,
           fechaDevolucion: returnDate ? new Date(returnDate) : new Date(),
-          motivoDeducciones: notes 
-            ? (deposit.motivoDeducciones ? `${deposit.motivoDeducciones}\n[Devolución] ${notes}` : `[Devolución] ${notes}`)
+          motivoDeducciones: notes
+            ? deposit.motivoDeducciones
+              ? `${deposit.motivoDeducciones}\n[Devolución] ${notes}`
+              : `[Devolución] ${notes}`
             : deposit.motivoDeducciones,
         },
       });
@@ -235,10 +223,7 @@ export async function PUT(
 }
 
 // DELETE - Eliminar garantía
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
@@ -255,10 +240,7 @@ export async function DELETE(
     });
 
     if (!deposit) {
-      return NextResponse.json(
-        { error: 'Garantía no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Garantía no encontrada' }, { status: 404 });
     }
 
     // No permitir eliminar si no está devuelta

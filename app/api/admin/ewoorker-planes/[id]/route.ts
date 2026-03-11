@@ -7,6 +7,11 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 /**
  * GET /api/admin/ewoorker-planes/[id]
  * Obtener un plan específico
@@ -18,6 +23,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
+    const prisma = await getPrisma();
     const plan = await prisma.ewoorkerPlan.findUnique({
       where: { id: params.id },
     });
@@ -74,6 +80,8 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
     const validated = schema.parse(body);
 
+    const prisma = await getPrisma();
+
     // Verificar que el plan existe
     const existing = await prisma.ewoorkerPlan.findUnique({
       where: { id: params.id },
@@ -106,7 +114,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
         where: { id: session.user.id },
         select: { companyId: true },
       });
-      
+
       if (user?.companyId) {
         await prisma.auditLog.create({
           data: {
@@ -169,6 +177,8 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
+    const prisma = await getPrisma();
+
     // Verificar que el plan existe
     const existing = await prisma.ewoorkerPlan.findUnique({
       where: { id: params.id },
@@ -178,14 +188,12 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
       return NextResponse.json({ error: 'Plan no encontrado' }, { status: 404 });
     }
 
-    const planActualMap: Record<
-      string,
-      'OBRERO_FREE' | 'CAPATAZ_PRO' | 'CONSTRUCTOR_ENTERPRISE'
-    > = {
-      OBRERO: 'OBRERO_FREE',
-      CAPATAZ: 'CAPATAZ_PRO',
-      CONSTRUCTOR: 'CONSTRUCTOR_ENTERPRISE',
-    };
+    const planActualMap: Record<string, 'OBRERO_FREE' | 'CAPATAZ_PRO' | 'CONSTRUCTOR_ENTERPRISE'> =
+      {
+        OBRERO: 'OBRERO_FREE',
+        CAPATAZ: 'CAPATAZ_PRO',
+        CONSTRUCTOR: 'CONSTRUCTOR_ENTERPRISE',
+      };
 
     const planActual = planActualMap[existing.codigo];
 
@@ -209,8 +217,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
       return NextResponse.json(
         {
           error: 'No se puede eliminar el plan',
-          message:
-            'Existen empresas suscritas o perfiles activos asociados a este plan.',
+          message: 'Existen empresas suscritas o perfiles activos asociados a este plan.',
           activeSubscriptions,
           activeProfiles,
         },
@@ -229,7 +236,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
         where: { id: session.user.id },
         select: { companyId: true },
       });
-      
+
       if (user?.companyId) {
         await prisma.auditLog.create({
           data: {

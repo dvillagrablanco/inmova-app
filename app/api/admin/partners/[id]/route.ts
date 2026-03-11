@@ -7,20 +7,23 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 /**
  * GET /api/admin/partners/[id]
  * Obtener un partner específico
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user || !['super_admin', 'administrador'].includes(session.user.role)) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
+    const prisma = await getPrisma();
     const partner = await prisma.partner.findUnique({
       where: { id: params.id },
       include: {
@@ -96,10 +99,7 @@ export async function GET(
  * PUT /api/admin/partners/[id]
  * Actualizar un partner
  */
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user || !['super_admin', 'administrador'].includes(session.user.role)) {
@@ -111,7 +111,17 @@ export async function PUT(
     const schema = z.object({
       nombre: z.string().min(2).max(100).optional(),
       razonSocial: z.string().min(2).max(200).optional(),
-      tipo: z.enum(['BANCO', 'MULTIFAMILY_OFFICE', 'PLATAFORMA_MEMBRESIA', 'ASOCIACION', 'CONSULTORA', 'INMOBILIARIA', 'OTRO']).optional(),
+      tipo: z
+        .enum([
+          'BANCO',
+          'MULTIFAMILY_OFFICE',
+          'PLATAFORMA_MEMBRESIA',
+          'ASOCIACION',
+          'CONSULTORA',
+          'INMOBILIARIA',
+          'OTRO',
+        ])
+        .optional(),
       contactoNombre: z.string().min(2).max(100).optional(),
       contactoEmail: z.string().email().optional(),
       contactoTelefono: z.string().optional(),
@@ -125,6 +135,8 @@ export async function PUT(
 
     const validated = schema.parse(body);
 
+    const prisma = await getPrisma();
+
     // Verificar que existe
     const existing = await prisma.partner.findUnique({
       where: { id: params.id },
@@ -136,7 +148,7 @@ export async function PUT(
 
     // Actualizar
     const updateData: any = { ...validated };
-    
+
     // Si se está activando, registrar fecha
     if (validated.estado === 'ACTIVE' && existing.estado !== 'ACTIVE') {
       updateData.fechaActivacion = new Date();
@@ -160,10 +172,13 @@ export async function PUT(
     logger.error('[Partner PUT Error]:', error);
 
     if (error instanceof z.ZodError) {
-      return NextResponse.json({
-        error: 'Datos inválidos',
-        details: error.errors,
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'Datos inválidos',
+          details: error.errors,
+        },
+        { status: 400 }
+      );
     }
 
     return NextResponse.json(
@@ -177,15 +192,14 @@ export async function PUT(
  * DELETE /api/admin/partners/[id]
  * Eliminar un partner
  */
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user || !['super_admin'].includes(session.user.role)) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
+
+    const prisma = await getPrisma();
 
     // Verificar que existe
     const existing = await prisma.partner.findUnique({

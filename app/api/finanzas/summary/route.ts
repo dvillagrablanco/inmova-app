@@ -23,14 +23,17 @@ export async function GET(request: NextRequest) {
 
     const scope = await resolveAccountingScope(request, session.user as any);
     if (!scope) {
-      return NextResponse.json({
-        error: 'Sin empresa asociada',
-        debug: {
-          userId: (session.user as any)?.id,
-          companyId: (session.user as any)?.companyId,
-          role: (session.user as any)?.role,
+      return NextResponse.json(
+        {
+          error: 'Sin empresa asociada',
+          debug: {
+            userId: (session.user as any)?.id,
+            companyId: (session.user as any)?.companyId,
+            role: (session.user as any)?.role,
+          },
         },
-      }, { status: 403 });
+        { status: 403 }
+      );
     }
 
     const companyIds = scope.companyIds;
@@ -74,20 +77,29 @@ export async function GET(request: NextRequest) {
       const currentMonthCount = await prisma.accountingTransaction.count({
         where: { companyId: { in: companyIds }, fecha: { gte: monthStart, lte: monthEnd } },
       });
-      const currentMonthBank = await prisma.bankTransaction.count({
-        where: { companyId: { in: companyIds }, fecha: { gte: monthStart, lte: monthEnd } },
-      }).catch(() => 0);
+      const currentMonthBank = await prisma.bankTransaction
+        .count({
+          where: { companyId: { in: companyIds }, fecha: { gte: monthStart, lte: monthEnd } },
+        })
+        .catch(() => 0);
 
       if (currentMonthCount === 0 && currentMonthBank === 0) {
         const latestAccounting = await prisma.accountingTransaction.findFirst({
-          where: { companyId: { in: companyIds } }, orderBy: { fecha: 'desc' }, select: { fecha: true },
+          where: { companyId: { in: companyIds } },
+          orderBy: { fecha: 'desc' },
+          select: { fecha: true },
         });
-        const latestBank = await prisma.bankTransaction.findFirst({
-          where: { companyId: { in: companyIds } }, orderBy: { fecha: 'desc' }, select: { fecha: true },
-        }).catch(() => null);
+        const latestBank = await prisma.bankTransaction
+          .findFirst({
+            where: { companyId: { in: companyIds } },
+            orderBy: { fecha: 'desc' },
+            select: { fecha: true },
+          })
+          .catch(() => null);
 
         const latestDate = [latestAccounting?.fecha, latestBank?.fecha]
-          .filter(Boolean).sort((a, b) => (b as Date).getTime() - (a as Date).getTime())[0];
+          .filter(Boolean)
+          .sort((a, b) => (b as Date).getTime() - (a as Date).getTime())[0];
 
         if (latestDate) {
           displayStart = startOfMonth(latestDate);
@@ -128,11 +140,19 @@ export async function GET(request: NextRequest) {
     try {
       const [bankInc, bankExp, pendingTx, totalTx] = await Promise.all([
         prisma.bankTransaction.aggregate({
-          where: { companyId: { in: companyIds }, monto: { gt: 0 }, fecha: { gte: displayStart, lte: displayEnd } },
+          where: {
+            companyId: { in: companyIds },
+            monto: { gt: 0 },
+            fecha: { gte: displayStart, lte: displayEnd },
+          },
           _sum: { monto: true },
         }),
         prisma.bankTransaction.aggregate({
-          where: { companyId: { in: companyIds }, monto: { lt: 0 }, fecha: { gte: displayStart, lte: displayEnd } },
+          where: {
+            companyId: { in: companyIds },
+            monto: { lt: 0 },
+            fecha: { gte: displayStart, lte: displayEnd },
+          },
           _sum: { monto: true },
         }),
         prisma.bankTransaction.count({
@@ -151,27 +171,33 @@ export async function GET(request: NextRequest) {
     }
 
     // Pagos del periodo
-    const payments = await prisma.payment.findMany({
-      where: {
-        contract: { unit: { building: { companyId: { in: companyIds } } } },
-        fechaPago: { gte: displayStart, lte: displayEnd },
-        estado: 'pagado',
-      },
-      select: { monto: true },
-    }).catch(() => [] as { monto: number }[]);
+    const payments = await prisma.payment
+      .findMany({
+        where: {
+          contract: { unit: { building: { companyId: { in: companyIds } } } },
+          fechaPago: { gte: displayStart, lte: displayEnd },
+          estado: 'pagado',
+        },
+        select: { monto: true },
+      })
+      .catch(() => [] as { monto: number }[]);
 
     const paymentIncome = payments.reduce((s, p) => s + p.monto, 0);
 
     // Pagos pendientes (sin filtro de fecha - totales)
-    const pendingPayments = await prisma.payment.findMany({
-      where: {
-        contract: { unit: { building: { companyId: { in: companyIds } } } },
-        estado: 'pendiente',
-      },
-      select: { monto: true, fechaVencimiento: true },
-    }).catch(() => [] as { monto: number; fechaVencimiento: Date }[]);
+    const pendingPayments = await prisma.payment
+      .findMany({
+        where: {
+          contract: { unit: { building: { companyId: { in: companyIds } } } },
+          estado: 'pendiente',
+        },
+        select: { monto: true, fechaVencimiento: true },
+      })
+      .catch(() => [] as { monto: number; fechaVencimiento: Date }[]);
 
-    const overduePaymentsFromPayments = pendingPayments.filter(p => new Date(p.fechaVencimiento) < now);
+    const overduePaymentsFromPayments = pendingPayments.filter(
+      (p) => new Date(p.fechaVencimiento) < now
+    );
     let totalPendingAmount = pendingPayments.reduce((s, p) => s + p.monto, 0);
     let totalOverdueAmount = overduePaymentsFromPayments.reduce((s, p) => s + p.monto, 0);
 
@@ -181,9 +207,9 @@ export async function GET(request: NextRequest) {
       // Buscar transacciones recientes de tipo ingreso que podrían estar pendientes
       // (ingresos del periodo actual = facturado, lo pendiente de cobro estimado)
       const recentIncome = accountingTransactions
-        .filter(t => t.tipo === 'ingreso')
+        .filter((t) => t.tipo === 'ingreso')
         .reduce((s, t) => s + t.monto, 0);
-      
+
       // Si hay ingresos contables pero no hay pagos registrados, estimar pendientes
       // como porcentaje de los ingresos del periodo (ajuste conservador)
       if (recentIncome > 0 && paymentIncome === 0) {
@@ -191,15 +217,15 @@ export async function GET(request: NextRequest) {
         const prevMonthStart = startOfMonth(subMonths(displayStart, 0));
         const prevMonthEnd = endOfMonth(prevMonthStart);
         const currentPeriodIncome = accountingTransactions
-          .filter(t => t.tipo === 'ingreso' && t.fecha >= prevMonthStart && t.fecha <= prevMonthEnd)
+          .filter((t) => t.tipo === 'ingreso')
           .reduce((s, t) => s + t.monto, 0);
-        
+
         // Estimación: ingresos del periodo que aún no han sido cobrados
         // Para empresas con contabilidad pero sin Payment, mostrar los ingresos del último mes
         totalPendingAmount = currentPeriodIncome;
       }
     }
-    
+
     // Fallback para vencidos: buscar en BankTransaction movimientos negativos recientes no conciliados
     if (totalOverdueAmount === 0 && bankTxPending > 0) {
       try {
@@ -212,7 +238,9 @@ export async function GET(request: NextRequest) {
           _sum: { monto: true },
         });
         totalOverdueAmount = Number(overdueBank._sum.monto || 0);
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     }
 
     // ================================================================
@@ -235,14 +263,18 @@ export async function GET(request: NextRequest) {
         _sum: { monto: true },
       });
       monthlyExpenses = expenses._sum.monto || 0;
-    } catch { /* Expense model might not exist */ }
+    } catch {
+      /* Expense model might not exist */
+    }
     if (monthlyExpenses === 0) monthlyExpenses = accountingTotals.gastos;
     if (monthlyExpenses === 0) monthlyExpenses = bankTxExpense;
 
     // Bank connections
-    const bankConnections = await prisma.bankConnection.count({
-      where: { companyId: { in: companyIds }, estado: 'conectado' },
-    }).catch(() => 0);
+    const bankConnections = await prisma.bankConnection
+      .count({
+        where: { companyId: { in: companyIds }, estado: 'conectado' },
+      })
+      .catch(() => 0);
 
     // Accounting integrations
     let accountingIntegrations = 0;
@@ -252,10 +284,12 @@ export async function GET(request: NextRequest) {
     // Rentabilidad
     let rentabilidad = 0;
     if (monthlyIncome > 0) {
-      const totalRent = await prisma.unit.aggregate({
-        where: { building: { companyId: { in: companyIds }, isDemo: false }, isDemo: false },
-        _sum: { rentaMensual: true },
-      }).catch(() => ({ _sum: { rentaMensual: 0 } }));
+      const totalRent = await prisma.unit
+        .aggregate({
+          where: { building: { companyId: { in: companyIds }, isDemo: false }, isDemo: false },
+          _sum: { rentaMensual: true },
+        })
+        .catch(() => ({ _sum: { rentaMensual: 0 } }));
       const expectedRent = totalRent._sum.rentaMensual || 0;
       if (expectedRent > 0) {
         rentabilidad = Math.min((monthlyIncome / expectedRent) * 100, 100);
@@ -265,9 +299,11 @@ export async function GET(request: NextRequest) {
     // Reconciliation rate - cascada: BankTransaction → AccountingTransaction
     let reconciliationRate = 0;
     if (bankTxTotal > 0) {
-      const conciliados = await prisma.bankTransaction.count({
-        where: { companyId: { in: companyIds }, estado: 'conciliado' },
-      }).catch(() => 0);
+      const conciliados = await prisma.bankTransaction
+        .count({
+          where: { companyId: { in: companyIds }, estado: 'conciliado' },
+        })
+        .catch(() => 0);
       reconciliationRate = Math.round((conciliados / bankTxTotal) * 100);
     } else if (accountingTransactions.length > 0) {
       // Si hay contabilidad importada pero no hay banco, la tasa de conciliación
@@ -287,12 +323,15 @@ export async function GET(request: NextRequest) {
       where: { companyId: { in: companyIds }, fecha: { gte: prevStart, lte: prevEnd } },
       select: { tipo: true, monto: true },
     });
-    const prevIngresos = prevAccountingTx.filter(t => t.tipo === 'ingreso').reduce((s, t) => s + t.monto, 0);
+    const prevIngresos = prevAccountingTx
+      .filter((t) => t.tipo === 'ingreso')
+      .reduce((s, t) => s + t.monto, 0);
 
     // Determinar fuente de datos principal
     let dataSource = 'sin_datos';
     if (paymentIncome > 0) dataSource = 'pagos';
-    else if (accountingTotals.ingresos > 0 || accountingTotals.gastos > 0) dataSource = 'contabilidad';
+    else if (accountingTotals.ingresos > 0 || accountingTotals.gastos > 0)
+      dataSource = 'contabilidad';
     else if (bankTxIncome > 0 || bankTxExpense > 0) dataSource = 'banco';
 
     // Total de registros contables
@@ -314,7 +353,8 @@ export async function GET(request: NextRequest) {
     let dso = 0;
     if (paidWithDates.length > 0) {
       const totalDays = paidWithDates.reduce((s, p) => {
-        const diff = (new Date(p.fechaPago!).getTime() - new Date(p.fechaVencimiento).getTime()) / 86400000;
+        const diff =
+          (new Date(p.fechaPago!).getTime() - new Date(p.fechaVencimiento).getTime()) / 86400000;
         return s + Math.max(0, diff);
       }, 0);
       dso = Math.round(totalDays / paidWithDates.length);
@@ -322,7 +362,10 @@ export async function GET(request: NextRequest) {
 
     // Tasa de cobro
     const totalPaid = await prisma.payment.count({
-      where: { estado: 'pagado', contract: { unit: { building: { companyId: { in: companyIds } } } } },
+      where: {
+        estado: 'pagado',
+        contract: { unit: { building: { companyId: { in: companyIds } } } },
+      },
     });
     const totalPayments = await prisma.payment.count({
       where: { contract: { unit: { building: { companyId: { in: companyIds } } } } },
@@ -339,7 +382,12 @@ export async function GET(request: NextRequest) {
         reconciliationRate,
       },
       moduleStats: {
-        pendingReconciliation: bankTxPending > 0 ? bankTxPending : (pendingPayments.length > 0 ? pendingPayments.length : 0),
+        pendingReconciliation:
+          bankTxPending > 0
+            ? bankTxPending
+            : pendingPayments.length > 0
+              ? pendingPayments.length
+              : 0,
         bankConnections,
         pendingCollections: totalPendingAmount,
         monthlyInvoices: accountingTransactions.length,
@@ -367,9 +415,8 @@ export async function GET(request: NextRequest) {
         totalMovimientos: accountingTransactions.length + (bankTxTotal > 0 ? bankTxTotal : 0),
       },
       comparison: {
-        incomeChange: prevIngresos > 0
-          ? Math.round(((monthlyIncome - prevIngresos) / prevIngresos) * 100)
-          : 0,
+        incomeChange:
+          prevIngresos > 0 ? Math.round(((monthlyIncome - prevIngresos) / prevIngresos) * 100) : 0,
       },
       meta: {
         companyIds,
@@ -384,9 +431,12 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     logger.error('Error fetching financial summary:', error);
-    return NextResponse.json({
-      error: 'Error al obtener resumen financiero',
-      details: (error as any)?.message,
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'Error al obtener resumen financiero',
+        details: (error as any)?.message,
+      },
+      { status: 500 }
+    );
   }
 }

@@ -12,20 +12,26 @@ import { toast } from 'sonner';
 export default function TenantActivatePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const token = searchParams.get('token');
+  const token = searchParams.get('token') || searchParams.get('code');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
   const [form, setForm] = useState({ password: '', confirmPassword: '' });
 
   useEffect(() => {
-    if (!token) setError('Token de activación no válido');
+    if (!token) setError('Código de activación no válido');
   }, [token]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (form.password !== form.confirmPassword) { toast.error('Las contraseñas no coinciden'); return; }
-    if (form.password.length < 8) { toast.error('Mínimo 8 caracteres'); return; }
+    if (form.password !== form.confirmPassword) {
+      toast.error('Las contraseñas no coinciden');
+      return;
+    }
+    if (form.password.length < 8) {
+      toast.error('Mínimo 8 caracteres');
+      return;
+    }
 
     setLoading(true);
     try {
@@ -37,8 +43,11 @@ export default function TenantActivatePage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setSuccess(true);
-    } catch (err: any) { setError(err.message || 'Error activando cuenta'); }
-    finally { setLoading(false); }
+    } catch (err: any) {
+      setError(err.message || 'Error activando cuenta');
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (error) {
@@ -78,14 +87,39 @@ export default function TenantActivatePage() {
             <Users className="h-6 w-6 text-green-600" />
           </div>
           <CardTitle>Activa tu cuenta</CardTitle>
-          <CardDescription>Establece tu contraseña para acceder al portal de inquilino</CardDescription>
+          <CardDescription>
+            Establece tu contraseña para acceder al portal de inquilino
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div><Label>Nueva contraseña (mín. 8 caracteres)</Label><Input type="password" required minLength={8} value={form.password} onChange={e => setForm({...form, password: e.target.value})} /></div>
-            <div><Label>Confirmar contraseña</Label><Input type="password" required value={form.confirmPassword} onChange={e => setForm({...form, confirmPassword: e.target.value})} /></div>
+            <div>
+              <Label>Nueva contraseña (mín. 8 caracteres)</Label>
+              <Input
+                type="password"
+                required
+                minLength={8}
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Confirmar contraseña</Label>
+              <Input
+                type="password"
+                required
+                value={form.confirmPassword}
+                onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
+              />
+            </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Activando...</> : 'Activar cuenta'}
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Activando...
+                </>
+              ) : (
+                'Activar cuenta'
+              )}
             </Button>
           </form>
         </CardContent>

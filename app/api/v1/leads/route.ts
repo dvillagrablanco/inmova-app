@@ -32,10 +32,12 @@ export async function POST(request: NextRequest) {
 
     if (apiKey) {
       // Find API key
-      const key = await prisma.apiKey.findFirst({
-        where: { key: apiKey, activa: true },
-        select: { companyId: true },
-      }).catch(() => null);
+      const key = await prisma.apiKey
+        .findFirst({
+          where: { key: apiKey, status: 'ACTIVE' },
+          select: { companyId: true },
+        })
+        .catch(() => null);
       if (key) companyId = key.companyId;
     }
 
@@ -48,13 +50,22 @@ export async function POST(request: NextRequest) {
         partnerId = partner.id;
         source = 'partner_referral';
         // Get company from partner
-        const user = await prisma.user.findFirst({ where: { email: partner.email }, select: { companyId: true } });
+        const user = await prisma.user.findFirst({
+          where: { email: partner.email },
+          select: { companyId: true },
+        });
         if (user?.companyId) companyId = user.companyId;
       }
     }
 
     if (!companyId) {
-      companyId = (await prisma.company.findFirst({ where: { isDemo: false }, select: { id: true } }))?.id || null;
+      companyId =
+        (
+          await prisma.company.findFirst({
+            where: { esEmpresaPrueba: false },
+            select: { id: true },
+          })
+        )?.id || null;
     }
 
     if (!companyId) {
@@ -68,19 +79,21 @@ export async function POST(request: NextRequest) {
         email,
         telefono: telefono || null,
         empresa: empresa || null,
-        source,
-        sourceDetail: partnerId,
+        fuente: source,
+        origenDetalle: partnerId,
         notas: notas || null,
         estado: 'nuevo',
-        prioridad: 'media',
       },
     });
 
-    return NextResponse.json({
-      success: true,
-      leadId: lead.id,
-      message: 'Lead created successfully',
-    }, { status: 201 });
+    return NextResponse.json(
+      {
+        success: true,
+        leadId: lead.id,
+        message: 'Lead created successfully',
+      },
+      { status: 201 }
+    );
   } catch (error: any) {
     logger.error('[V1 Leads]:', error);
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
@@ -98,10 +111,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'x-api-key header required' }, { status: 401 });
     }
 
-    const key = await prisma.apiKey.findFirst({
-      where: { key: apiKey, activa: true },
-      select: { companyId: true },
-    }).catch(() => null);
+    const key = await prisma.apiKey
+      .findFirst({
+        where: { key: apiKey, status: 'ACTIVE' },
+        select: { companyId: true },
+      })
+      .catch(() => null);
 
     if (!key) {
       return NextResponse.json({ error: 'Invalid API key' }, { status: 401 });
@@ -113,7 +128,16 @@ export async function GET(request: NextRequest) {
 
     const leads = await prisma.lead.findMany({
       where: { companyId: key.companyId },
-      select: { id: true, nombre: true, email: true, telefono: true, empresa: true, estado: true, source: true, createdAt: true },
+      select: {
+        id: true,
+        nombre: true,
+        email: true,
+        telefono: true,
+        empresa: true,
+        estado: true,
+        fuente: true,
+        createdAt: true,
+      },
       orderBy: { createdAt: 'desc' },
       take: limit,
       skip: offset,

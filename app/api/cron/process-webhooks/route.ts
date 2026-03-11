@@ -1,6 +1,6 @@
 /**
  * API Cron Job: Procesar Webhooks Pendientes
- * 
+ *
  * Este endpoint debe ser llamado periódicamente (cada 1-5 minutos)
  * por un servicio cron externo
  */
@@ -19,9 +19,8 @@ export const maxDuration = 60;
  */
 export async function POST(req: NextRequest) {
   // Cron auth guard
-  const cronAuth = requireCronSecret(request);
+  const cronAuth = requireCronSecret(req);
   if (!cronAuth.authenticated) return cronAuth.response;
-
 
   try {
     // Verificar token de seguridad
@@ -29,10 +28,7 @@ export async function POST(req: NextRequest) {
     const cronSecret = process.env.CRON_SECRET;
 
     if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     logger.info('[CRON] Iniciando procesamiento de webhooks...');
@@ -65,9 +61,8 @@ export async function POST(req: NextRequest) {
  */
 export async function GET(req: NextRequest) {
   // Cron auth guard
-  const cronAuth = requireCronSecret(request);
+  const cronAuth = requireCronSecret(req);
   if (!cronAuth.authenticated) return cronAuth.response;
-
 
   return NextResponse.json({
     service: 'Webhook Processor',

@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { z } from 'zod';
 import { resolveCompanyScope } from '@/lib/company-scope';
+import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -62,10 +63,10 @@ export async function GET(request: NextRequest) {
     // Filtrar por tipo
     if (type && type !== 'all') {
       const typeMap: Record<string, string> = {
-        'cash': 'legal',
-        'bank_guarantee': 'aval_bancario',
-        'insurance': 'seguro_caucion',
-        'aval_personal': 'aval_personal',
+        cash: 'legal',
+        bank_guarantee: 'aval_bancario',
+        insurance: 'seguro_caucion',
+        aval_personal: 'aval_personal',
       };
       whereClause.tipoFianza = typeMap[type] || type;
     }
@@ -113,17 +114,18 @@ export async function GET(request: NextRequest) {
 
       // Mapear tipo de fianza a tipo de frontend
       const typeMap: Record<string, string> = {
-        'legal': 'cash',
-        'adicional': 'cash',
-        'aval_bancario': 'bank_guarantee',
-        'seguro_caucion': 'insurance',
-        'aval_personal': 'aval_personal',
+        legal: 'cash',
+        adicional: 'cash',
+        aval_bancario: 'bank_guarantee',
+        seguro_caucion: 'insurance',
+        aval_personal: 'aval_personal',
       };
 
       // Determinar estado
       let warrantyStatus = 'active';
       if (deposit.devuelto) {
-        warrantyStatus = deposit.importeDevuelto === deposit.importeFianza ? 'returned' : 'partial_return';
+        warrantyStatus =
+          deposit.importeDevuelto === deposit.importeFianza ? 'returned' : 'partial_return';
       } else if (contract?.estado === 'vencido' || contract?.estado === 'cancelado') {
         warrantyStatus = 'pending_return';
       } else if (deposit.deducciones > 0) {
@@ -134,9 +136,10 @@ export async function GET(request: NextRequest) {
       let documents: any[] = [];
       try {
         if (deposit.documentos) {
-          documents = typeof deposit.documentos === 'string' 
-            ? JSON.parse(deposit.documentos) 
-            : deposit.documentos;
+          documents =
+            typeof deposit.documentos === 'string'
+              ? JSON.parse(deposit.documentos)
+              : deposit.documentos;
           if (!Array.isArray(documents)) {
             documents = [];
           }
@@ -146,13 +149,18 @@ export async function GET(request: NextRequest) {
       }
 
       // Crear array de deducciones
-      const deductions = deposit.deducciones > 0 ? [{
-        id: `ded-${deposit.id}`,
-        amount: deposit.deducciones,
-        reason: deposit.motivoDeducciones || 'Deducción aplicada',
-        date: deposit.fechaDevolucion?.toISOString() || deposit.updatedAt.toISOString(),
-        approved: true,
-      }] : [];
+      const deductions =
+        deposit.deducciones > 0
+          ? [
+              {
+                id: `ded-${deposit.id}`,
+                amount: deposit.deducciones,
+                reason: deposit.motivoDeducciones || 'Deducción aplicada',
+                date: deposit.fechaDevolucion?.toISOString() || deposit.updatedAt.toISOString(),
+                approved: true,
+              },
+            ]
+          : [];
 
       return {
         id: deposit.id,
@@ -166,14 +174,17 @@ export async function GET(request: NextRequest) {
         contractId: contract?.id || '',
         amount: deposit.importeFianza,
         type: typeMap[deposit.tipoFianza] || 'cash',
-        depositDate: deposit.fechaDeposito?.toISOString().split('T')[0] || deposit.createdAt.toISOString().split('T')[0],
+        depositDate:
+          deposit.fechaDeposito?.toISOString().split('T')[0] ||
+          deposit.createdAt.toISOString().split('T')[0],
         status: warrantyStatus,
         contractStartDate: contract?.fechaInicio?.toISOString().split('T')[0] || '',
         contractEndDate: contract?.fechaFin?.toISOString().split('T')[0] || '',
         returnDate: deposit.fechaDevolucion?.toISOString().split('T')[0],
         returnedAmount: deposit.importeDevuelto,
         bankName: deposit.tipoFianza === 'aval_bancario' ? deposit.entidadDeposito : undefined,
-        insuranceCompany: deposit.tipoFianza === 'seguro_caucion' ? deposit.entidadDeposito : undefined,
+        insuranceCompany:
+          deposit.tipoFianza === 'seguro_caucion' ? deposit.entidadDeposito : undefined,
         policyNumber: deposit.numeroDeposito,
         depositedOfficially: deposit.depositadoOficialmente,
         depositEntity: deposit.entidadDeposito,
@@ -189,12 +200,17 @@ export async function GET(request: NextRequest) {
     // Calcular estadísticas
     const stats = {
       total: warranties.length,
-      totalAmount: warranties.filter(w => w.status === 'active' || w.status === 'pending_return').reduce((sum, w) => sum + w.amount, 0),
-      active: warranties.filter(w => w.status === 'active').length,
-      pendingReturn: warranties.filter(w => w.status === 'pending_return').length,
-      returned: warranties.filter(w => w.status === 'returned' || w.status === 'partial_return').length,
-      totalDeductions: warranties.reduce((sum, w) => 
-        sum + w.deductions.reduce((s, d) => s + d.amount, 0), 0),
+      totalAmount: warranties
+        .filter((w) => w.status === 'active' || w.status === 'pending_return')
+        .reduce((sum, w) => sum + w.amount, 0),
+      active: warranties.filter((w) => w.status === 'active').length,
+      pendingReturn: warranties.filter((w) => w.status === 'pending_return').length,
+      returned: warranties.filter((w) => w.status === 'returned' || w.status === 'partial_return')
+        .length,
+      totalDeductions: warranties.reduce(
+        (sum, w) => sum + w.deductions.reduce((s, d) => s + d.amount, 0),
+        0
+      ),
     };
 
     return NextResponse.json({
@@ -221,7 +237,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    
+
     // Validar datos
     const validation = warrantyCreateSchema.safeParse(body);
     if (!validation.success) {
@@ -231,7 +247,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { contractId, importeFianza, tipoFianza, entidadDeposito, numeroDeposito, fechaDeposito, notas } = validation.data;
+    const {
+      contractId,
+      importeFianza,
+      tipoFianza,
+      entidadDeposito,
+      numeroDeposito,
+      fechaDeposito,
+      notas,
+    } = validation.data;
 
     // Verificar que el contrato existe y pertenece a la empresa
     const contract = await prisma.contract.findFirst({
@@ -291,18 +315,21 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        id: newDeposit.id,
-        amount: newDeposit.importeFianza,
-        type: tipoFianza,
-        status: 'active',
-        tenant: newDeposit.contract.tenant?.nombreCompleto,
-        createdAt: newDeposit.createdAt.toISOString(),
+    return NextResponse.json(
+      {
+        success: true,
+        data: {
+          id: newDeposit.id,
+          amount: newDeposit.importeFianza,
+          type: tipoFianza,
+          status: 'active',
+          tenant: newDeposit.contract.tenant?.nombreCompleto,
+          createdAt: newDeposit.createdAt.toISOString(),
+        },
+        message: 'Garantía creada correctamente',
       },
-      message: 'Garantía creada correctamente',
-    }, { status: 201 });
+      { status: 201 }
+    );
   } catch (error: any) {
     logger.error('[API Garantías] Error POST:', error);
     return NextResponse.json(

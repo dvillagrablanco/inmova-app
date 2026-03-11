@@ -33,12 +33,16 @@ export async function POST(request: NextRequest) {
       totalAlerts += alerts.length;
 
       // Crear notificaciones solo para alertas urgentes (alta/critica)
-      const urgentAlerts = alerts.filter(a => a.urgencia === 'alta' || a.urgencia === 'critica');
+      const urgentAlerts = alerts.filter((a) => a.urgencia === 'alta' || a.urgencia === 'critica');
 
       for (const alert of urgentAlerts) {
         // Obtener admins de la empresa
         const admins = await prisma.user.findMany({
-          where: { companyId: alert.companyId, role: { in: ['administrador', 'super_admin'] }, activo: true },
+          where: {
+            companyId: alert.companyId,
+            role: { in: ['administrador', 'super_admin'] },
+            activo: true,
+          },
           select: { id: true },
         });
 
@@ -47,7 +51,7 @@ export async function POST(request: NextRequest) {
           const existing = await prisma.notification.findFirst({
             where: {
               userId: admin.id,
-              tipo: 'fiscal',
+              tipo: 'alerta_sistema',
               titulo: { contains: alert.titulo },
               createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }, // últimos 7 días
             },
@@ -56,11 +60,12 @@ export async function POST(request: NextRequest) {
           if (!existing) {
             await prisma.notification.create({
               data: {
+                companyId: alert.companyId,
                 userId: admin.id,
-                tipo: 'fiscal',
+                tipo: 'alerta_sistema',
                 titulo: alert.titulo,
                 mensaje: `${alert.descripcion}. Faltan ${alert.diasRestantes} días (fecha límite: ${alert.fechaLimite.toLocaleDateString('es-ES')})`,
-                prioridad: alert.urgencia === 'critica' ? 'critica' : 'alta',
+                prioridad: alert.urgencia === 'critica' ? 'alto' : 'alto',
                 leida: false,
               },
             });
@@ -70,7 +75,9 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    logger.info(`[Fiscal Alerts Cron] ${totalAlerts} alerts found, ${notificationsCreated} notifications created`);
+    logger.info(
+      `[Fiscal Alerts Cron] ${totalAlerts} alerts found, ${notificationsCreated} notifications created`
+    );
 
     return NextResponse.json({
       success: true,

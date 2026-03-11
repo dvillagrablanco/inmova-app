@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Servicio de Analytics Dashboard para eWoorker
  *

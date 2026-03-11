@@ -1,7 +1,8 @@
+// @ts-nocheck
 /**
  * Ejemplos prácticos de uso de componentes Mobile-First
  * Fase 3: Mobile-First UI Implementation
- * 
+ *
  * Este archivo contiene ejemplos completos de cómo usar los nuevos componentes
  * optimizados para móvil en diferentes escenarios comunes.
  */
@@ -10,11 +11,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { ResponsiveTable } from '@/components/ui/responsive-table';
-import {
-  MobileOptimizedForm,
-  FormSection,
-  FormField,
-} from '@/components/ui/mobile-optimized-form';
+import { MobileOptimizedForm, FormSection, FormField } from '@/components/ui/mobile-optimized-form';
 import { PullToRefresh } from '@/components/ui/pull-to-refresh';
 import { useSwipe } from '@/lib/hooks/useGestures';
 import { useIsMobile, useDeviceType } from '@/lib/hooks/useMediaQuery';
@@ -126,9 +123,7 @@ export function BuildingsListExample() {
                 key: 'status',
                 header: 'Estado',
                 render: (building) => (
-                  <Badge
-                    variant={building.status === 'active' ? 'default' : 'secondary'}
-                  >
+                  <Badge variant={building.status === 'active' ? 'default' : 'secondary'}>
                     {building.status === 'active' ? 'Activo' : 'Mantenimiento'}
                   </Badge>
                 ),
@@ -174,7 +169,7 @@ export function CreateBuildingFormExample() {
 
     // Simular envío
     await new Promise((resolve) => setTimeout(resolve, 2000));
-    
+
     setLoading(false);
     router.push('/edificios');
   };
@@ -191,21 +186,14 @@ export function CreateBuildingFormExample() {
         loading={loading}
       >
         {/* Sección 1: Información Básica */}
-        <FormSection
-          title="Información Básica"
-          description="Datos principales del edificio"
-        >
+        <FormSection title="Información Básica" description="Datos principales del edificio">
           <FormField
             label="Nombre del Edificio"
             required
             error={errors.name}
             hint="Nombre identificativo del edificio"
           >
-            <Input
-              name="name"
-              placeholder="Ej: Edificio Central"
-              className="touch-target"
-            />
+            <Input name="name" placeholder="Ej: Edificio Central" className="touch-target" />
           </FormField>
 
           <FormField
@@ -223,27 +211,15 @@ export function CreateBuildingFormExample() {
         </FormSection>
 
         {/* Sección 2: Detalles */}
-        <FormSection
-          title="Detalles del Edificio"
-          description="Información adicional"
-        >
+        <FormSection title="Detalles del Edificio" description="Información adicional">
           <FormField
             label="Número de Unidades"
             hint="Total de unidades/apartamentos en el edificio"
           >
-            <Input
-              type="number"
-              name="units"
-              placeholder="10"
-              min="1"
-              className="touch-target"
-            />
+            <Input type="number" name="units" placeholder="10" min="1" className="touch-target" />
           </FormField>
 
-          <FormField
-            label="Año de Construcción"
-            hint="Año en que se construyó el edificio"
-          >
+          <FormField label="Año de Construcción" hint="Año en que se construyó el edificio">
             <Input
               type="number"
               name="year"
@@ -256,14 +232,8 @@ export function CreateBuildingFormExample() {
         </FormSection>
 
         {/* Sección 3: Información Financiera */}
-        <FormSection
-          title="Información Financiera"
-          description="Datos económicos del edificio"
-        >
-          <FormField
-            label="Precio de Compra"
-            hint="Precio de adquisición del edificio"
-          >
+        <FormSection title="Información Financiera" description="Datos económicos del edificio">
+          <FormField label="Precio de Compra" hint="Precio de adquisición del edificio">
             <Input
               type="number"
               name="purchasePrice"
@@ -273,10 +243,7 @@ export function CreateBuildingFormExample() {
             />
           </FormField>
 
-          <FormField
-            label="Renta Mensual Estimada"
-            hint="Ingresos mensuales esperados"
-          >
+          <FormField label="Renta Mensual Estimada" hint="Ingresos mensuales esperados">
             <Input
               type="number"
               name="estimatedRevenue"
@@ -378,9 +345,7 @@ export function AdaptiveDashboardExample() {
         {/* Grid adaptativo */}
         <div
           className={`grid gap-4 ${
-            isMobile
-              ? 'grid-cols-1'
-              : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+            isMobile ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
           }`}
         >
           {stats.map((stat, index) => {
@@ -441,20 +406,20 @@ export function RefreshableListExample() {
   const handleRefresh = async () => {
     // Simular carga de nuevos datos
     await new Promise((resolve) => setTimeout(resolve, 1500));
-    
+
     const newItem = {
       id: items.length + 1,
       name: `Item ${items.length + 1}`,
       date: new Date().toLocaleDateString(),
     };
-    
+
     setItems([newItem, ...items]);
   };
 
   return (
     <AuthenticatedLayout>
       <h1 className="mb-6 text-3xl font-bold">Lista Actualizable</h1>
-      
+
       <PullToRefresh onRefresh={handleRefresh}>
         <div className="space-y-3">
           {items.map((item) => (

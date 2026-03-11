@@ -1,12 +1,12 @@
 /**
  * API Route: Inicializar todos los datos de la plataforma
- * 
+ *
  * Esta ruta crea/actualiza:
  * - Planes de suscripción de Inmova (sincronizados con landing /landing/precios)
  * - Planes de eWoorker
  * - Add-ons de Inmova y eWoorker
  * - Cupones promocionales
- * 
+ *
  * Solo accesible por super_admin
  * GET /api/admin/init-all-data
  */
@@ -19,6 +19,11 @@ import { isSuperAdmin } from '@/lib/admin-roles';
 import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 // ═══════════════════════════════════════════════════════════════
 // PLANES INMOVA (Sincronizados con /landing/precios/page.tsx)
@@ -48,7 +53,8 @@ const INMOVA_PLANS = [
   },
   {
     nombre: 'Profesional',
-    descripcion: 'Para propietarios activos y pequeñas agencias. Incluye firma digital y cobros automáticos.',
+    descripcion:
+      'Para propietarios activos y pequeñas agencias. Incluye firma digital y cobros automáticos.',
     tier: 'PROFESSIONAL' as const,
     precioMensual: 59,
     maxUsuarios: 5,
@@ -130,7 +136,8 @@ const EWOORKER_PLANS = [
   {
     codigo: 'OBRERO',
     nombre: 'eWoorker Obrero',
-    descripcion: 'Plan gratuito para empezar. Acceso básico al marketplace con comisión por obra cerrada.',
+    descripcion:
+      'Plan gratuito para empezar. Acceso básico al marketplace con comisión por obra cerrada.',
     precioMensual: 0,
     precioAnual: 0,
     maxOfertas: 3,
@@ -539,7 +546,7 @@ export async function GET(request: NextRequest) {
   try {
     // 1. Verificar autenticación y permisos
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
@@ -548,7 +555,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Permisos insuficientes' }, { status: 403 });
     }
 
-    // 2. Lazy load Prisma
+    const prisma = await getPrisma();
 
     const results = {
       plans: { created: 0, updated: 0 },
@@ -636,7 +643,7 @@ export async function GET(request: NextRequest) {
           activo: true,
         },
       });
-      
+
       const existing = await prisma.ewoorkerPlan.findUnique({ where: { codigo: planData.codigo } });
       if (existing) results.ewoorkerPlans.updated++;
       else results.ewoorkerPlans.created++;
@@ -645,7 +652,7 @@ export async function GET(request: NextRequest) {
     // 5. Crear/Actualizar add-ons
     for (const addon of ADDONS) {
       const existing = await prisma.addOn.findUnique({ where: { codigo: addon.codigo } });
-      
+
       await prisma.addOn.upsert({
         where: { codigo: addon.codigo },
         update: {
@@ -687,7 +694,7 @@ export async function GET(request: NextRequest) {
 
     for (const coupon of COUPONS) {
       const existing = await prisma.promoCoupon.findUnique({ where: { codigo: coupon.codigo } });
-      
+
       await prisma.promoCoupon.upsert({
         where: { codigo: coupon.codigo },
         update: {

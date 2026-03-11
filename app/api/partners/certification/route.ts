@@ -10,9 +10,36 @@ async function getPrisma() {
 }
 
 const CERTIFICATION_TIERS = [
-  { tier: 'silver', minClientes: 1, minComisiones: 0, label: 'Silver', color: '#C0C0C0', beneficios: ['Acceso al portal partner', 'Landing co-branded', 'Soporte por email'] },
-  { tier: 'gold', minClientes: 10, minComisiones: 5000, label: 'Gold', color: '#FFD700', beneficios: ['Todo de Silver', 'Comisión 30%', 'Soporte prioritario', 'Formación exclusiva'] },
-  { tier: 'platinum', minClientes: 50, minComisiones: 25000, label: 'Platinum', color: '#E5E4E2', beneficios: ['Todo de Gold', 'Comisión 50%', 'Account manager dedicado', 'White-label completo', 'API premium'] },
+  {
+    tier: 'silver',
+    minClientes: 1,
+    minComisiones: 0,
+    label: 'Silver',
+    color: '#C0C0C0',
+    beneficios: ['Acceso al portal partner', 'Landing co-branded', 'Soporte por email'],
+  },
+  {
+    tier: 'gold',
+    minClientes: 10,
+    minComisiones: 5000,
+    label: 'Gold',
+    color: '#FFD700',
+    beneficios: ['Todo de Silver', 'Comisión 30%', 'Soporte prioritario', 'Formación exclusiva'],
+  },
+  {
+    tier: 'platinum',
+    minClientes: 50,
+    minComisiones: 25000,
+    label: 'Platinum',
+    color: '#E5E4E2',
+    beneficios: [
+      'Todo de Gold',
+      'Comisión 50%',
+      'Account manager dedicado',
+      'White-label completo',
+      'API premium',
+    ],
+  },
 ];
 
 /**
@@ -34,7 +61,11 @@ export async function GET(request: NextRequest) {
 
     // Count referrals converted
     const clientesConvertidos = await prisma.lead.count({
-      where: { sourceDetail: partnerId, source: 'partner_referral', estado: { in: ['convertido', 'cliente'] } },
+      where: {
+        origenDetalle: partnerId,
+        fuente: 'partner_referral',
+        estado: { in: ['convertido', 'cliente', 'ganado'] },
+      },
     });
 
     // Sum commissions
@@ -54,7 +85,8 @@ export async function GET(request: NextRequest) {
 
     // Next tier
     const nextTierIdx = CERTIFICATION_TIERS.indexOf(currentTier) + 1;
-    const nextTier = nextTierIdx < CERTIFICATION_TIERS.length ? CERTIFICATION_TIERS[nextTierIdx] : null;
+    const nextTier =
+      nextTierIdx < CERTIFICATION_TIERS.length ? CERTIFICATION_TIERS[nextTierIdx] : null;
 
     return NextResponse.json({
       success: true,
@@ -66,12 +98,14 @@ export async function GET(request: NextRequest) {
         beneficios: currentTier.beneficios,
       },
       metrics: { clientesConvertidos, totalComisiones: Math.round(totalComisiones * 100) / 100 },
-      nextTier: nextTier ? {
-        tier: nextTier.tier,
-        label: nextTier.label,
-        clientesFaltan: Math.max(0, nextTier.minClientes - clientesConvertidos),
-        comisionesFaltan: Math.max(0, nextTier.minComisiones - totalComisiones),
-      } : null,
+      nextTier: nextTier
+        ? {
+            tier: nextTier.tier,
+            label: nextTier.label,
+            clientesFaltan: Math.max(0, nextTier.minClientes - clientesConvertidos),
+            comisionesFaltan: Math.max(0, nextTier.minComisiones - totalComisiones),
+          }
+        : null,
       allTiers: CERTIFICATION_TIERS,
     });
   } catch (error: any) {

@@ -1,6 +1,6 @@
 /**
  * Endpoints API para Gastos
- * 
+ *
  * Implementa operaciones CRUD con validación Zod, manejo de errores
  * y códigos de estado HTTP correctos.
  */
@@ -60,7 +60,7 @@ export async function GET(req: NextRequest) {
     if (unitId) where.unitId = unitId;
     if (providerId) where.providerId = providerId;
     if (categoria) where.categoria = categoria;
-    
+
     if (fechaDesde || fechaHasta) {
       where.fecha = {};
       if (fechaDesde) where.fecha.gte = new Date(fechaDesde);
@@ -87,7 +87,7 @@ export async function GET(req: NextRequest) {
     ]);
 
     // Convertir valores Decimal a números
-    const expensesWithNumbers = expenses.map(expense => ({
+    const expensesWithNumbers = expenses.map((expense) => ({
       ...expense,
       monto: Number(expense.monto || 0),
       source: 'expense' as const,
@@ -133,42 +133,50 @@ export async function GET(req: NextRequest) {
           source: 'accounting' as const,
         }));
 
-        logger.info(`Gastos contables (fallback): ${mappedAccounting.length} de ${accountingTotal}`, { userId: user.id });
+        logger.info(
+          `Gastos contables (fallback): ${mappedAccounting.length} de ${accountingTotal}`,
+          { userId: user.id }
+        );
 
-        return NextResponse.json({
-          data: mappedAccounting,
-          meta: {
-            total: accountingTotal,
-            limit: take,
-            offset: skip,
-            source: 'accounting',
+        return NextResponse.json(
+          {
+            data: mappedAccounting,
+            meta: {
+              total: accountingTotal,
+              limit: take,
+              offset: skip,
+              source: 'accounting',
+            },
           },
-        }, { status: 200 });
+          { status: 200 }
+        );
       }
     }
 
     logger.info(`Gastos obtenidos: ${expensesWithNumbers.length} de ${total}`, { userId: user.id });
-    
-    return NextResponse.json({
-      data: expensesWithNumbers,
-      meta: {
-        total,
-        limit: take,
-        offset: skip,
-        source: 'expense',
+
+    return NextResponse.json(
+      {
+        data: expensesWithNumbers,
+        meta: {
+          total,
+          limit: take,
+          offset: skip,
+          source: 'expense',
+        },
       },
-    }, { status: 200 });
-    
+      { status: 200 }
+    );
   } catch (error: any) {
     logger.error('Error fetching expenses:', error);
-    
+
     if (error.message === 'No autenticado') {
       return NextResponse.json(
         { error: 'No autenticado', message: 'Debe iniciar sesión' },
         { status: 401 }
       );
     }
-    
+
     return NextResponse.json(
       { error: 'Error interno del servidor', message: 'Error al obtener gastos' },
       { status: 500 }
@@ -334,25 +342,29 @@ export async function POST(req: NextRequest) {
     const companyIdForSync = expense.building?.companyId || scope.activeCompanyId;
     if (companyIdForSync) {
       // Zucchetti sync disabled - module removed in cleanup
-      Promise.resolve().then(() => { return; }).then(() => {
-        const syncExpenseToZucchetti = null as any;
-        if (!syncExpenseToZucchetti) return;
-        syncExpenseToZucchetti({
-          companyId: companyIdForSync,
-          concepto: validatedData.concepto,
-          monto: validatedData.monto,
-          fecha: new Date(validatedData.fecha),
-          categoria: validatedData.categoria,
-          providerName: expense.provider?.nombre,
-          buildingName: expense.building?.nombre,
-          unitNumero: expense.unit?.numero,
-          expenseId: expense.id,
-        }).catch(err => logger.warn('Zucchetti sync error (no bloqueante):', err.message));
-      }).catch(() => {});
+      Promise.resolve()
+        .then(() => {
+          return;
+        })
+        .then(() => {
+          const syncExpenseToZucchetti = null as any;
+          if (!syncExpenseToZucchetti) return;
+          syncExpenseToZucchetti({
+            companyId: companyIdForSync,
+            concepto: validatedData.concepto,
+            monto: validatedData.monto,
+            fecha: new Date(validatedData.fecha),
+            categoria: validatedData.categoria,
+            providerName: expense.provider?.nombre,
+            buildingName: expense.building?.nombre,
+            unitNumero: expense.unit?.numero,
+            expenseId: expense.id,
+          }).catch((err: any) => logger.warn('Zucchetti sync error (no bloqueante):', err.message));
+        })
+        .catch(() => {});
     }
 
     return NextResponse.json(expense, { status: 201 });
-    
   } catch (error: any) {
     logger.error('Error creating expense:', error);
 
@@ -368,12 +380,9 @@ export async function POST(req: NextRequest) {
     }
 
     if (error.message?.includes('permiso')) {
-      return NextResponse.json(
-        { error: 'Prohibido', message: error.message },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Prohibido', message: error.message }, { status: 403 });
     }
-    
+
     if (error.message === 'No autenticado') {
       return NextResponse.json(
         { error: 'No autenticado', message: 'Debe iniciar sesión' },

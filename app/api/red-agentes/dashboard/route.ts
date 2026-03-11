@@ -25,16 +25,18 @@ export async function GET(request: NextRequest) {
     }
 
     // Obtener agentes/comerciales
-    const agents = await prisma.salesRepresentative.findMany({
-      where: { companyId },
-      select: {
-        id: true,
-        nombreCompleto: true,
-        activo: true,
-        comisiones: { select: { monto: true, estado: true } },
-        leads: { select: { id: true, estado: true } },
-      },
-    }).catch(() => []);
+    const agents = await prisma.salesRepresentative
+      .findMany({
+        where: { companyId },
+        select: {
+          id: true,
+          nombreCompleto: true,
+          activo: true,
+          comisiones: { select: { montoComision: true, estado: true } },
+          leads: { select: { id: true, estado: true } },
+        },
+      })
+      .catch(() => []);
 
     // KPIs
     const totalAgents = agents.length;
@@ -45,8 +47,13 @@ export async function GET(request: NextRequest) {
     let totalLeads = 0;
 
     agents.forEach((a: any) => {
-      totalComisiones += (a.comisiones || []).reduce((s: number, c: any) => s + (Number(c.monto) || 0), 0);
-      totalOperaciones += (a.comisiones || []).filter((c: any) => c.estado === 'PAGADA' || c.estado === 'APROBADA').length;
+      totalComisiones += (a.comisiones || []).reduce(
+        (s: number, c: any) => s + (Number(c.montoComision) || 0),
+        0
+      );
+      totalOperaciones += (a.comisiones || []).filter(
+        (c: any) => c.estado === 'PAGADA' || c.estado === 'APROBADA'
+      ).length;
       totalLeads += (a.leads || []).length;
     });
 
@@ -54,21 +61,28 @@ export async function GET(request: NextRequest) {
     const ticketMedio = totalOperaciones > 0 ? Math.round(totalComisiones / totalOperaciones) : 0;
 
     // Rendimiento por agente
-    const metricasAgentes = agents.map((a: any) => {
-      const comisiones = (a.comisiones || []).reduce((s: number, c: any) => s + (Number(c.monto) || 0), 0);
-      const ops = (a.comisiones || []).filter((c: any) => c.estado === 'PAGADA' || c.estado === 'APROBADA').length;
-      const leads = (a.leads || []).length;
-      const conversion = leads > 0 ? Math.round((ops / leads) * 100) : 0;
-      const status = conversion >= 30 ? 'excellent' : conversion >= 15 ? 'good' : 'regular';
-      return {
-        nombre: a.nombreCompleto,
-        operaciones: ops,
-        conversion,
-        comisiones,
-        leads,
-        status,
-      };
-    }).sort((a: any, b: any) => b.comisiones - a.comisiones);
+    const metricasAgentes = agents
+      .map((a: any) => {
+        const comisiones = (a.comisiones || []).reduce(
+          (s: number, c: any) => s + (Number(c.montoComision) || 0),
+          0
+        );
+        const ops = (a.comisiones || []).filter(
+          (c: any) => c.estado === 'PAGADA' || c.estado === 'APROBADA'
+        ).length;
+        const leads = (a.leads || []).length;
+        const conversion = leads > 0 ? Math.round((ops / leads) * 100) : 0;
+        const status = conversion >= 30 ? 'excellent' : conversion >= 15 ? 'good' : 'regular';
+        return {
+          nombre: a.nombreCompleto,
+          operaciones: ops,
+          conversion,
+          comisiones,
+          leads,
+          status,
+        };
+      })
+      .sort((a: any, b: any) => b.comisiones - a.comisiones);
 
     // Objetivos (desde la BD o valores por defecto configurables)
     const objetivos = [

@@ -12,8 +12,7 @@ async function getPrisma() {
   return getPrismaClient();
 }
 
-async function calculateNextDate(currentDate: Date, frecuencia: string): Date {
-  const prisma = await getPrisma();
+function calculateNextDate(currentDate: Date, frecuencia: string): Date {
   const nextDate = new Date(currentDate);
 
   switch (frecuencia) {
@@ -36,10 +35,7 @@ async function calculateNextDate(currentDate: Date, frecuencia: string): Date {
   return nextDate;
 }
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);

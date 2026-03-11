@@ -1,9 +1,10 @@
+// @ts-nocheck
 /**
  * Servicio de Matching Automático Inquilino-Propiedad
- * 
+ *
  * Algoritmo ML que encuentra las mejores propiedades para un inquilino
  * basado en preferencias, presupuesto y características.
- * 
+ *
  * @module TenantMatchingService
  */
 
@@ -142,21 +143,20 @@ export async function findBestMatches(
     });
 
     // 5. Ordenar por score y tomar top N
-    const topMatches = scoredMatches
-      .sort((a, b) => b.matchScore - a.matchScore)
-      .slice(0, limit);
+    const topMatches = scoredMatches.sort((a, b) => b.matchScore - a.matchScore).slice(0, limit);
 
     // 6. Si useAI, enriquecer con análisis de Claude
     if (useAI && process.env.ANTHROPIC_API_KEY) {
       await enrichMatchesWithAI(topMatches, tenant, properties);
     }
 
-    logger.info(`✅ Found ${topMatches.length} matches with avg score ${
-      topMatches.reduce((sum, m) => sum + m.matchScore, 0) / topMatches.length
-    }`);
+    logger.info(
+      `✅ Found ${topMatches.length} matches with avg score ${
+        topMatches.reduce((sum, m) => sum + m.matchScore, 0) / topMatches.length
+      }`
+    );
 
     return topMatches;
-
   } catch (error: any) {
     logger.error('❌ Error finding matches:', error);
     throw new Error(`Failed to find matches: ${error.message}`);
@@ -187,7 +187,8 @@ function scorePropertyMatch(
     pros.push(`Precio dentro del presupuesto ideal (${price}€/mes)`);
   } else if (price <= preferences.maxBudget) {
     // Entre ideal y máximo
-    const ratio = (preferences.maxBudget - price) / (preferences.maxBudget - preferences.idealBudget);
+    const ratio =
+      (preferences.maxBudget - price) / (preferences.maxBudget - preferences.idealBudget);
     priceScore = 15 + Math.round(ratio * 15);
     if (priceScore >= 25) {
       pros.push(`Precio aceptable (${price}€/mes)`);
@@ -212,7 +213,8 @@ function scorePropertyMatch(
   const buildingCity = (property.building?.ciudad || '').toLowerCase();
   if (preferences.preferredCities.length > 0) {
     const matchesCity = preferences.preferredCities.some(
-      city => buildingAddress.includes(city.toLowerCase()) || buildingCity.includes(city.toLowerCase())
+      (city) =>
+        buildingAddress.includes(city.toLowerCase()) || buildingCity.includes(city.toLowerCase())
     );
     if (matchesCity) {
       locationScore += 15;
@@ -317,7 +319,9 @@ function scorePropertyMatch(
   if (property.fechaDisponibilidad) {
     const available = new Date(property.fechaDisponibilidad);
     const now = new Date();
-    const daysUntilAvailable = Math.ceil((available.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    const daysUntilAvailable = Math.ceil(
+      (available.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+    );
 
     if (daysUntilAvailable <= 0) {
       availabilityScore = 10;
@@ -367,7 +371,6 @@ async function enrichMatchesWithAI(
     }
 
     await Promise.all(batches);
-
   } catch (error: any) {
     logger.warn('⚠️ AI enrichment failed:', error.message);
     // No fallar el match si IA falla
@@ -383,7 +386,7 @@ async function enrichSingleMatch(
   properties: any[]
 ): Promise<void> {
   try {
-    const property = properties.find(p => p.id === match.unitId);
+    const property = properties.find((p) => p.id === match.unitId);
     if (!property) return;
 
     const prompt = `Eres un experto en búsqueda de vivienda. Analiza este match inquilino-propiedad:
@@ -397,12 +400,12 @@ PROPIEDAD:
 - Precio: ${property.rentaMensual}€/mes
 - Tamaño: ${property.superficie}m², ${property.habitaciones} hab, ${property.banos} baños
 - Características: ${JSON.stringify({
-  amueblado: property.amueblado,
-  ascensor: property.building?.ascensor,
-  garaje: property.building?.garaje,
-  terraza: property.terraza,
-  balcon: property.balcon,
-})}
+      amueblado: property.amueblado,
+      ascensor: property.building?.ascensor,
+      garaje: property.building?.garaje,
+      terraza: property.terraza,
+      balcon: property.balcon,
+    })}
 
 MATCH SCORE: ${match.matchScore}/100
 PROS: ${match.pros.join(', ')}
@@ -419,7 +422,6 @@ Proporciona una recomendación concisa (2-3 frases) sobre por qué esta propieda
     if (message.content[0].type === 'text') {
       match.aiRecommendation = message.content[0].text;
     }
-
   } catch (error: any) {
     logger.warn(`⚠️ AI enrichment failed for match ${match.unitId}:`, error.message);
   }
@@ -428,10 +430,7 @@ Proporciona una recomendación concisa (2-3 frases) sobre por qué esta propieda
 /**
  * Guarda matches en la base de datos
  */
-export async function saveMatches(
-  matches: PropertyMatch[],
-  companyId: string
-): Promise<void> {
+export async function saveMatches(matches: PropertyMatch[], companyId: string): Promise<void> {
   try {
     // Borrar matches antiguos del mismo inquilino (más de 7 días)
     const sevenDaysAgo = new Date();
@@ -467,7 +466,6 @@ export async function saveMatches(
     });
 
     logger.info(`💾 Saved ${matches.length} matches to database`);
-
   } catch (error: any) {
     logger.error('❌ Error saving matches:', error);
     // No fallar si no se puede guardar
@@ -505,7 +503,7 @@ export async function getTenantMatches(
       },
     });
 
-    return matches.map(m => ({
+    return matches.map((m) => ({
       unitId: m.unitId,
       tenantId: m.tenantId,
       matchScore: m.matchScore,

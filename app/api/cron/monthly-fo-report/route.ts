@@ -1,12 +1,12 @@
 /**
  * CRON: Informe Mensual Family Office
- * 
+ *
  * Genera y envía por email el informe consolidado del grupo:
  * - P&L por sociedad
  * - Posiciones financieras
  * - Morosidad
  * - Vencimientos de contratos próximos
- * 
+ *
  * POST /api/cron/monthly-fo-report
  */
 
@@ -14,6 +14,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import logger from '@/lib/logger';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { sendEmail } from '@/lib/email-service';
+import { getAccountLiquidBalance } from '@/lib/family-office-scope';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -25,9 +26,12 @@ async function getPrisma() {
 }
 
 export async function POST(request: NextRequest) {
-  const authResult = verifyCronAuth(request);
+  const authResult = await verifyCronAuth(request);
   if (!authResult.authorized) {
-    return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    return NextResponse.json(
+      { error: authResult.error || 'No autorizado' },
+      { status: authResult.status }
+    );
   }
 
   const prisma = await getPrisma();
@@ -37,9 +41,11 @@ export async function POST(request: NextRequest) {
     const monthName = now.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
 
     // Grupo Vidaro
-    const holdingId = 'c65159283deeaf6815f8eda95';
-    const company = await prisma.company.findUnique({
-      where: { id: holdingId },
+    const company = await prisma.company.findFirst({
+      where: {
+        parentCompanyId: null,
+        nombre: { contains: 'Vidaro', mode: 'insensitive' },
+      },
       include: { childCompanies: { select: { id: true, nombre: true } } },
     });
 
@@ -50,36 +56,67 @@ export async function POST(request: NextRequest) {
     const allIds = [company.id, ...company.childCompanies.map((c: any) => c.id)];
 
     // KPIs
-    const [totalUnits, occupiedUnits, activeContracts, overduePayments, expiringContracts] = await Promise.all([
-      prisma.unit.count({ where: { building: { companyId: { in: allIds }, isDemo: false } } }),
-      prisma.unit.count({ where: { building: { companyId: { in: allIds }, isDemo: false }, estado: 'ocupada' } }),
-      prisma.contract.count({ where: { unit: { building: { companyId: { in: allIds } } }, estado: 'activo' } }),
-      prisma.payment.count({ where: { contract: { unit: { building: { companyId: { in: allIds } } } }, estado: 'pendiente', fechaVencimiento: { lt: now } } }),
-      prisma.contract.count({
-        where: {
-          unit: { building: { companyId: { in: allIds } } },
-          estado: 'activo',
-          fechaFin: { lte: new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000) },
-        },
-      }),
-    ]);
+    const [totalUnits, occupiedUnits, activeContracts, overduePayments, expiringContracts] =
+      await Promise.all([
+        prisma.unit.count({ where: { building: { companyId: { in: allIds }, isDemo: false } } }),
+        prisma.unit.count({
+          where: { building: { companyId: { in: allIds }, isDemo: false }, estado: 'ocupada' },
+        }),
+        prisma.contract.count({
+          where: { unit: { building: { companyId: { in: allIds } } }, estado: 'activo' },
+        }),
+        prisma.payment.count({
+          where: {
+            contract: { unit: { building: { companyId: { in: allIds } } } },
+            estado: 'pendiente',
+            fechaVencimiento: { lt: now },
+          },
+        }),
+        prisma.contract.count({
+          where: {
+            unit: { building: { companyId: { in: allIds } } },
+            estado: 'activo',
+            fechaFin: { lte: new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000) },
+          },
+        }),
+      ]);
 
     const occupancyRate = totalUnits > 0 ? ((occupiedUnits / totalUnits) * 100).toFixed(1) : '0';
 
     // Patrimonio
-    const [inmobAgg, finAgg, peAgg, tesoAgg] = await Promise.all([
-      prisma.unit.aggregate({ _sum: { valorMercado: true }, where: { building: { companyId: { in: allIds }, isDemo: false } } }),
-      prisma.financialPosition.aggregate({ _sum: { valorActual: true }, where: { account: { companyId: { in: allIds } } } }),
-      prisma.participation.aggregate({ _sum: { valorEstimado: true }, where: { companyId: { in: allIds }, activa: true } }),
-      prisma.financialAccount.aggregate({ _sum: { saldoActual: true }, where: { companyId: { in: allIds }, activa: true } }),
+    const [inmobAgg, finAgg, peRows, tesoRows] = await Promise.all([
+      prisma.unit.aggregate({
+        _sum: { valorMercado: true },
+        where: { building: { companyId: { in: allIds }, isDemo: false } },
+      }),
+      prisma.financialPosition.aggregate({
+        _sum: { valorActual: true },
+        where: { account: { companyId: { in: allIds } } },
+      }),
+      prisma.participation.findMany({
+        where: { companyId: { in: allIds }, activa: true },
+        select: { valoracionActual: true, valorEstimado: true, valorContable: true },
+      }),
+      prisma.financialAccount.findMany({
+        where: { companyId: { in: allIds }, activa: true },
+        select: { saldoActual: true, positions: { select: { valorActual: true } } },
+      }),
     ]);
 
-    const fmt = (n: number) => new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
+    const fmt = (n: number) =>
+      new Intl.NumberFormat('es-ES', {
+        style: 'currency',
+        currency: 'EUR',
+        maximumFractionDigits: 0,
+      }).format(n);
 
     const inmob = inmobAgg._sum.valorMercado || 0;
     const fin = finAgg._sum.valorActual || 0;
-    const pe = peAgg._sum.valorEstimado || 0;
-    const teso = tesoAgg._sum.saldoActual || 0;
+    const pe = peRows.reduce(
+      (sum, row) => sum + (row.valoracionActual || row.valorEstimado || row.valorContable || 0),
+      0
+    );
+    const teso = tesoRows.reduce((sum, row) => sum + getAccountLiquidBalance(row), 0);
 
     // Generate HTML email
     const html = `
@@ -169,7 +206,7 @@ export async function POST(request: NextRequest) {
         patrimonio: { inmob, fin, pe, teso, total: inmob + fin + pe + teso },
         kpis: { totalUnits, occupancyRate, activeContracts, overduePayments, expiringContracts },
         emailsSent: sent,
-        recipients: adminUsers.map(u => u.email),
+        recipients: adminUsers.map((u) => u.email),
       },
     });
   } catch (error: any) {

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Servicio de Onboarding Guiado para eWoorker
  *

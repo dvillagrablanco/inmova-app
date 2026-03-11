@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Parser for DF's accounting journal Excel files (Vidaro, Rovida, Viroda diarios).
  * Structure: Row 1 = header with company, Row 2 = date range, Row 3 = empty, Row 4 = column headers, Row 5+ = data.

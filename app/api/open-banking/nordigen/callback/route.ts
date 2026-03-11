@@ -18,7 +18,9 @@ export async function GET(request: NextRequest) {
     const userId = request.nextUrl.searchParams.get('userId');
 
     if (!ref && !companyId) {
-      return NextResponse.redirect(new URL('/dashboard/finanzas?error=missing_params', request.url));
+      return NextResponse.redirect(
+        new URL('/dashboard/finanzas?error=missing_params', request.url)
+      );
     }
 
     const prisma = getPrismaClient();
@@ -36,11 +38,15 @@ export async function GET(request: NextRequest) {
     });
 
     if (!connection || !connection.consentId) {
-      return NextResponse.redirect(new URL('/dashboard/finanzas?error=connection_not_found', request.url));
+      return NextResponse.redirect(
+        new URL('/dashboard/finanzas?error=connection_not_found', request.url)
+      );
     }
 
     if (!isNordigenConfigured()) {
-      return NextResponse.redirect(new URL('/dashboard/finanzas?error=nordigen_not_configured', request.url));
+      return NextResponse.redirect(
+        new URL('/dashboard/finanzas?error=nordigen_not_configured', request.url)
+      );
     }
 
     // Check requisition status
@@ -52,7 +58,12 @@ export async function GET(request: NextRequest) {
         where: { id: connection.id },
         data: { estado: 'error' },
       });
-      return NextResponse.redirect(new URL(`/dashboard/finanzas?error=auth_failed&status=${requisition?.status || 'unknown'}`, request.url));
+      return NextResponse.redirect(
+        new URL(
+          `/dashboard/finanzas?error=auth_failed&status=${requisition?.status || 'unknown'}`,
+          request.url
+        )
+      );
     }
 
     // Get account details
@@ -69,15 +80,16 @@ export async function GET(request: NextRequest) {
       where: { id: connection.id },
       data: {
         estado: 'conectado',
-        cuentas: JSON.stringify(accounts),
-        ultimaSincronizacion: new Date(),
+        ultimaSync: new Date(),
         accessToken: requisition.accounts.join(','), // Store account IDs
       },
     });
 
     logger.info(`[Nordigen] Callback OK: ${connection.id} con ${accounts.length} cuentas`);
 
-    return NextResponse.redirect(new URL(`/dashboard/finanzas?success=bank_connected&accounts=${accounts.length}`, request.url));
+    return NextResponse.redirect(
+      new URL(`/dashboard/finanzas?success=bank_connected&accounts=${accounts.length}`, request.url)
+    );
   } catch (error: any) {
     logger.error('[Nordigen Callback Error]:', error);
     return NextResponse.redirect(new URL('/dashboard/finanzas?error=callback_failed', request.url));

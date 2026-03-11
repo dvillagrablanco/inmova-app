@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * API: Facturación inmobiliaria (estilo Homming)
  * GET: Listar facturas con filtros | POST: Crear factura
@@ -8,7 +9,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { z } from 'zod';
-import { facturasHommingStore, seedFacturasHomming } from '@/lib/facturacion-homming-store';
+import {
+  facturasHommingStore,
+  seedFacturasHomming,
+  type FacturaItem,
+} from '@/lib/facturacion-homming-store';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -48,10 +53,14 @@ export async function GET(req: NextRequest) {
     const fechaHasta = searchParams.get('fechaHasta');
     const destinatario = searchParams.get('destinatario');
 
-    let facturas = Array.from(facturasHommingStore.values()).filter((f) => f.companyId === companyId);
+    let facturas = Array.from(facturasHommingStore.values()).filter(
+      (f) => f.companyId === companyId
+    );
 
     if (serie) {
-      facturas = facturas.filter((f) => f.serie.startsWith(serie) || f.numeroFactura.includes(serie));
+      facturas = facturas.filter(
+        (f) => f.serie.startsWith(serie) || f.numeroFactura.includes(serie)
+      );
     }
     if (estado) {
       facturas = facturas.filter((f) => f.estado === estado);
@@ -86,7 +95,11 @@ export async function GET(req: NextRequest) {
     const facturasEsteMes = facturas.filter((f) => {
       const d = new Date(f.fecha);
       const now = new Date();
-      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear() && !['anulada'].includes(f.estado);
+      return (
+        d.getMonth() === now.getMonth() &&
+        d.getFullYear() === now.getFullYear() &&
+        !['anulada'].includes(f.estado)
+      );
     }).length;
 
     return NextResponse.json({

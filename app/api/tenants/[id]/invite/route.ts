@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import crypto from 'crypto';
 import logger from '@/lib/logger';
+import { createTenantInvitation } from '@/lib/tenant-invitation-service';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -17,17 +17,22 @@ async function getPrisma() {
  * Envía invitación al inquilino para acceder al portal
  */
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
-  const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
+    const prisma = await getPrisma();
     const tenant = await prisma.tenant.findUnique({
       where: { id: params.id },
-      select: { id: true, email: true, nombreCompleto: true, companyId: true, password: true,
-        company: { select: { nombre: true } } },
+      select: {
+        id: true,
+        email: true,
+        nombreCompleto: true,
+        companyId: true,
+        company: { select: { nombre: true } },
+      },
     });
 
     if (!tenant) {
@@ -38,17 +43,14 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       return NextResponse.json({ error: 'El inquilino no tiene email válido' }, { status: 400 });
     }
 
-    // Generate invitation token
-    const inviteToken = crypto.randomBytes(32).toString('hex');
+    if (session.user.companyId !== tenant.companyId) {
+      return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
+    }
 
-    // Store token temporarily in password field (will be replaced when tenant sets password)
-    await prisma.tenant.update({
-      where: { id: tenant.id },
-      data: { password: inviteToken },
-    });
+    const invitation = await createTenantInvitation(tenant.id, session.user.id, 7);
 
     // Send invitation email
-    const activateUrl = `${process.env.NEXTAUTH_URL || 'https://inmovaapp.com'}/portal-inquilino/activar?token=${inviteToken}`;
+    const activateUrl = `${process.env.NEXTAUTH_URL || 'https://inmovaapp.com'}/portal-inquilino/activar?code=${invitation.invitationCode}`;
 
     try {
       const { sendEmail } = await import('@/lib/email-service');
@@ -66,16 +68,16 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
             <li>Comunicarte con tu gestor</li>
           </ul>
           <p><a href="${activateUrl}" style="background:#2563eb;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;">Activar mi cuenta</a></p>
-          <p><small>Este enlace es de un solo uso.</small></p>
+          <p><small>Este enlace es de un solo uso y expira el ${new Date(invitation.expiresAt).toLocaleDateString('es-ES')}.</small></p>
         `,
       });
       logger.info('[Tenant Invite] Sent to:', tenant.email);
     } catch (emailErr) {
       logger.warn('[Tenant Invite] Email failed:', emailErr);
-      return NextResponse.json({ 
-        success: true, 
+      return NextResponse.json({
+        success: true,
         message: 'Invitación creada pero no se pudo enviar el email',
-        activateUrl, // Return URL so admin can share manually
+        activateUrl,
       });
     }
 

@@ -8,6 +8,11 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 const PROVIDER = 'impuestos';
 
 const querySchema = z.object({
@@ -97,9 +102,7 @@ const extractObligations = (settings: unknown): StoredObligation[] => {
 
   return obligacionesValue
     .map((item) => storedObligationSchema.safeParse(item))
-    .filter(
-      (result): result is { success: true; data: StoredObligation } => result.success
-    )
+    .filter((result): result is { success: true; data: StoredObligation } => result.success)
     .map((result) => result.data);
 };
 
@@ -153,6 +156,7 @@ export async function GET(request: NextRequest) {
     if (!companyId) {
       return NextResponse.json({ error: 'CompanyId no disponible' }, { status: 400 });
     }
+    const prisma = await getPrisma();
 
     const { searchParams } = new URL(request.url);
     const parsedQuery = querySchema.parse({
@@ -178,15 +182,54 @@ export async function GET(request: NextRequest) {
     const startDate = new Date(parsedQuery.ejercicio, 0, 1);
     const endDate = new Date(parsedQuery.ejercicio + 1, 0, 1);
 
-    const [paymentsAggregate, expensesAggregate, buildings, taxExpenses] =
-      await Promise.all([
-        prisma.payment.aggregate({
-          _sum: { monto: true },
-          where: {
-            estado: 'pagado',
+    const [paymentsAggregate, expensesAggregate, buildings, taxExpenses] = await Promise.all([
+      prisma.payment.aggregate({
+        _sum: { monto: true },
+        where: {
+          estado: 'pagado',
+          isDemo: false,
+          contract: {
             isDemo: false,
-            contract: {
-              isDemo: false,
+            unit: {
+              building: {
+                companyId,
+                isDemo: false,
+              },
+            },
+          },
+          OR: [
+            {
+              fechaPago: {
+                gte: startDate,
+                lt: endDate,
+              },
+            },
+            {
+              fechaPago: null,
+              fechaVencimiento: {
+                gte: startDate,
+                lt: endDate,
+              },
+            },
+          ],
+        },
+      }),
+      prisma.expense.aggregate({
+        _sum: { monto: true },
+        where: {
+          fecha: {
+            gte: startDate,
+            lt: endDate,
+          },
+          isDemo: false,
+          OR: [
+            {
+              building: {
+                companyId,
+                isDemo: false,
+              },
+            },
+            {
               unit: {
                 building: {
                   companyId,
@@ -194,95 +237,55 @@ export async function GET(request: NextRequest) {
                 },
               },
             },
-            OR: [
-              {
-                fechaPago: {
-                  gte: startDate,
-                  lt: endDate,
-                },
-              },
-              {
-                fechaPago: null,
-                fechaVencimiento: {
-                  gte: startDate,
-                  lt: endDate,
-                },
-              },
-            ],
+          ],
+        },
+      }),
+      prisma.building.findMany({
+        where: {
+          companyId,
+          isDemo: false,
+        },
+        select: {
+          id: true,
+          direccion: true,
+          ibiAnual: true,
+        },
+      }),
+      prisma.expense.findMany({
+        where: {
+          categoria: 'impuestos',
+          fecha: {
+            gte: startDate,
+            lt: endDate,
           },
-        }),
-        prisma.expense.aggregate({
-          _sum: { monto: true },
-          where: {
-            fecha: {
-              gte: startDate,
-              lt: endDate,
+          isDemo: false,
+          OR: [
+            {
+              building: {
+                companyId,
+                isDemo: false,
+              },
             },
-            isDemo: false,
-            OR: [
-              {
+            {
+              unit: {
                 building: {
                   companyId,
                   isDemo: false,
                 },
               },
-              {
-                unit: {
-                  building: {
-                    companyId,
-                    isDemo: false,
-                  },
-                },
-              },
-            ],
-          },
-        }),
-        prisma.building.findMany({
-          where: {
-            companyId,
-            isDemo: false,
-          },
-          select: {
-            id: true,
-            direccion: true,
-            ibiAnual: true,
-          },
-        }),
-        prisma.expense.findMany({
-          where: {
-            categoria: 'impuestos',
-            fecha: {
-              gte: startDate,
-              lt: endDate,
             },
-            isDemo: false,
-            OR: [
-              {
-                building: {
-                  companyId,
-                  isDemo: false,
-                },
-              },
-              {
-                unit: {
-                  building: {
-                    companyId,
-                    isDemo: false,
-                  },
-                },
-              },
-            ],
+          ],
+        },
+        select: {
+          buildingId: true,
+          fecha: true,
+          monto: true,
+          unit: {
+            select: { buildingId: true },
           },
-          select: {
-            buildingId: true,
-            fecha: true,
-            monto: true,
-            unit: {
-              select: { buildingId: true },
-            },
-          },
-        }),
-      ]);
+        },
+      }),
+    ]);
 
     const ingresosTotales = paymentsAggregate._sum.monto ?? 0;
     const gastosTotales = expensesAggregate._sum.monto ?? 0;
@@ -300,15 +303,9 @@ export async function GET(request: NextRequest) {
     const proximaObligacion = obligaciones
       .filter((obligacion) => obligacion.estado !== 'pagado')
       .filter((obligacion) => !Number.isNaN(Date.parse(obligacion.fechaLimite)))
-      .sort(
-        (a, b) =>
-          Date.parse(a.fechaLimite) - Date.parse(b.fechaLimite)
-      )[0];
+      .sort((a, b) => Date.parse(a.fechaLimite) - Date.parse(b.fechaLimite))[0];
 
-    const expensesByBuilding = new Map<
-      string,
-      { total: number; latest: Date | null }
-    >();
+    const expensesByBuilding = new Map<string, { total: number; latest: Date | null }>();
     taxExpenses.forEach((expense) => {
       const buildingId = expense.buildingId ?? expense.unit?.buildingId;
       if (!buildingId) {
@@ -318,8 +315,7 @@ export async function GET(request: NextRequest) {
         total: 0,
         latest: null,
       };
-      const latest =
-        !entry.latest || expense.fecha > entry.latest ? expense.fecha : entry.latest;
+      const latest = !entry.latest || expense.fecha > entry.latest ? expense.fecha : entry.latest;
       expensesByBuilding.set(buildingId, {
         total: entry.total + expense.monto,
         latest,
@@ -380,10 +376,7 @@ export async function GET(request: NextRequest) {
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('[Impuestos Resumen Error]:', { message });
-    return NextResponse.json(
-      { error: 'Error al obtener resumen fiscal' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener resumen fiscal' }, { status: 500 });
   }
 }
 
@@ -415,6 +408,7 @@ export async function POST(request: NextRequest) {
     if (!companyId) {
       return NextResponse.json({ error: 'CompanyId no disponible' }, { status: 400 });
     }
+    const prisma = await getPrisma();
 
     const body = createObligationSchema.parse(await request.json());
     const metadata = getModelMetadata(body.modelo);
@@ -477,9 +471,6 @@ export async function POST(request: NextRequest) {
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('[Impuestos Create Obligacion Error]:', { message });
-    return NextResponse.json(
-      { error: 'Error al registrar obligación fiscal' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al registrar obligación fiscal' }, { status: 500 });
   }
 }

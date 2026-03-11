@@ -295,6 +295,7 @@ export async function getZucchettiTokens(companyId: string): Promise<{
   companyId: string;
 } | null> {
   try {
+    const prisma = await getPrisma();
     const company = await prisma.company.findUnique({
       where: { id: companyId },
       select: {
@@ -329,6 +330,7 @@ export async function getZucchettiTokens(companyId: string): Promise<{
  */
 export async function refreshZucchettiToken(companyId: string): Promise<boolean> {
   try {
+    const prisma = await getPrisma();
     const company = await prisma.company.findUnique({
       where: { id: companyId },
       select: {

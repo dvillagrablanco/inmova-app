@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { validateFile } from '@/lib/file-validation';
 import { parseCSV } from '@/lib/import-service';
 import logger from '@/lib/logger';
+import type { AccountingCategory } from '@/types/prisma-types';
 import * as XLSX from 'xlsx';
 
 export const dynamic = 'force-dynamic';
@@ -18,7 +19,7 @@ async function getPrisma() {
 type TransactionType = 'ingreso' | 'gasto';
 
 const TRANSACTION_TYPES: TransactionType[] = ['ingreso', 'gasto'];
-const ACCOUNTING_CATEGORIES = [
+const ACCOUNTING_CATEGORIES: AccountingCategory[] = [
   'ingreso_renta',
   'ingreso_deposito',
   'ingreso_otro',
@@ -29,13 +30,24 @@ const ACCOUNTING_CATEGORIES = [
   'gasto_reparacion',
   'gasto_comunidad',
   'gasto_administracion',
+  'gasto_arrendamiento',
+  'gasto_bancario',
+  'gasto_personal',
+  'gasto_amortizacion',
   'gasto_otro',
-] as const;
-type AccountingCategory = typeof ACCOUNTING_CATEGORIES[number];
+];
 
 const KEY_ALIASES = {
   fecha: ['fecha', 'date', 'fechaoperacion', 'fechavalor', 'fecha_contable', 'fechamovimiento'],
-  concepto: ['concepto', 'descripcion', 'detalle', 'description', 'concept', 'asunto', 'titulodesubcuenta'],
+  concepto: [
+    'concepto',
+    'descripcion',
+    'detalle',
+    'description',
+    'concept',
+    'asunto',
+    'titulodesubcuenta',
+  ],
   categoria: ['categoria', 'category', 'tipogasto', 'naturaleza', 'clasificacion'],
   tipo: ['tipo', 'tipo_movimiento', 'ingresogasto', 'naturaleza'],
   monto: ['monto', 'importe', 'cantidad', 'amount', 'total', 'valor'],
@@ -137,9 +149,9 @@ function parseSheetWithHeaderDetection(buffer: Buffer, sheetName?: string): any[
   }
 
   const headers = rows[headerRowIndex].map((cell) => String(cell || '').trim());
-  const dataRows = rows.slice(headerRowIndex + 1).filter((row) =>
-    row.some((cell) => String(cell || '').trim() !== '')
-  );
+  const dataRows = rows
+    .slice(headerRowIndex + 1)
+    .filter((row) => row.some((cell) => String(cell || '').trim() !== ''));
 
   return dataRows.map((row) => {
     const record: Record<string, any> = {};
@@ -215,7 +227,11 @@ function normalizeCategory(
  * Classify transaction by PGC subcuenta code (Plan General Contable)
  * Spanish accounting chart: 4xx=Deudores/Acreedores, 6xx=Gastos, 7xx=Ingresos
  */
-function classifyBySubcuenta(tipo: TransactionType, subcuenta: string, concepto: string): AccountingCategory {
+function classifyBySubcuenta(
+  tipo: TransactionType,
+  subcuenta: string,
+  concepto: string
+): AccountingCategory {
   const p2 = subcuenta.substring(0, 2);
   const p3 = subcuenta.substring(0, 3);
   const p4 = subcuenta.substring(0, 4);
@@ -295,8 +311,7 @@ export async function POST(request: NextRequest) {
 
     // Soportar selector de empresa para todos los roles admin
     const cookieCompanyId = request.cookies.get('activeCompanyId')?.value;
-    const companyId =
-      requestedCompanyId || cookieCompanyId || session.user.companyId;
+    const companyId = requestedCompanyId || cookieCompanyId || session.user.companyId;
 
     if (!companyId) {
       return NextResponse.json({ error: 'Empresa no válida' }, { status: 400 });
@@ -306,19 +321,11 @@ export async function POST(request: NextRequest) {
     const fileExtension = file.name.split('.').pop()?.toLowerCase();
     const isCsv = fileExtension === 'csv' || file.type === 'text/csv';
 
-    const validation = await validateFile(
-      {
-        name: file.name,
-        type: file.type,
-        size: file.size,
-        buffer: fileBuffer,
-      },
-      isCsv ? 'csv' : 'document'
-    );
+    const validation = validateFile(fileBuffer, file.name, isCsv ? 'any' : 'document');
 
-    if (!validation.isValid) {
+    if (!validation.valid) {
       return NextResponse.json(
-        { error: 'Archivo inválido', details: validation.errors },
+        { error: 'Archivo inválido', details: validation.error },
         { status: 400 }
       );
     }
@@ -339,10 +346,11 @@ export async function POST(request: NextRequest) {
 
     // Detect if this is a Chart of Accounts (Plan de Cuentas) instead of transactions
     const firstRow = normalizeRecord(rows[0]);
-    const hasCodigoTitulo = getValue(firstRow, ['codigo', 'code']) !== undefined &&
-                            getValue(firstRow, ['titulo', 'title', 'nombre']) !== undefined;
+    const hasCodigoTitulo =
+      getValue(firstRow, ['codigo', 'code']) !== undefined &&
+      getValue(firstRow, ['titulo', 'title', 'nombre']) !== undefined;
     const hasGrupo = getValue(firstRow, ['grupo', 'group']) !== undefined;
-    
+
     if (hasCodigoTitulo && hasGrupo) {
       // This is a Plan de Cuentas (Chart of Accounts) - import as subcuentas
       let imported = 0;
@@ -468,7 +476,7 @@ export async function POST(request: NextRequest) {
 
       // Build concepto: prefer explicit concepto, fallback to Zucchetti titulodesubcuenta
       const concepto = rawConcept ? String(rawConcept).trim() : 'Movimiento importado';
-      
+
       // Use subcuenta (PGC account code) to improve category classification
       const subcuentaStr = rawSubcuenta ? String(rawSubcuenta).trim() : '';
       const categoria = subcuentaStr
@@ -502,7 +510,10 @@ export async function POST(request: NextRequest) {
       // Build referencia: Zucchetti Asiento-Apunte is the most unique identifier
       let referencia = rawReference ? String(rawReference).trim() : undefined;
       if (rawAsiento && rawApunte) {
-        referencia = `A${rawAsiento}-L${rawApunte}` + (rawFactura ? `-${String(rawFactura).trim()}` : '') + (referencia ? `-${referencia}` : '');
+        referencia =
+          `A${rawAsiento}-L${rawApunte}` +
+          (rawFactura ? `-${String(rawFactura).trim()}` : '') +
+          (referencia ? `-${referencia}` : '');
       } else if (rawFactura && !referencia) {
         referencia = String(rawFactura).trim();
       }
@@ -510,7 +521,9 @@ export async function POST(request: NextRequest) {
       // Build notas with extra Zucchetti context
       let notas = rawNotes ? String(rawNotes).trim() : undefined;
       if (subcuentaStr) {
-        const extra = `Subcuenta: ${subcuentaStr}` + (rawContrapartida ? `, Contrapartida: ${String(rawContrapartida).trim()}` : '');
+        const extra =
+          `Subcuenta: ${subcuentaStr}` +
+          (rawContrapartida ? `, Contrapartida: ${String(rawContrapartida).trim()}` : '');
         notas = notas ? `${notas} | ${extra}` : extra;
       }
 
@@ -529,14 +542,17 @@ export async function POST(request: NextRequest) {
     });
 
     if (!transactionsToCreate.length) {
-      const hint = errors.length > 0 && errors.every(e => e.message.includes('importe') || e.message.includes('tipo'))
-        ? ' El archivo debe contener columnas de Fecha, Concepto/Descripción, e Importe (o Debe/Haber). Si es un Plan de Cuentas o índice de subcuentas, se importó como referencia contable.'
-        : '';
+      const hint =
+        errors.length > 0 &&
+        errors.every((e) => e.message.includes('importe') || e.message.includes('tipo'))
+          ? ' El archivo debe contener columnas de Fecha, Concepto/Descripción, e Importe (o Debe/Haber). Si es un Plan de Cuentas o índice de subcuentas, se importó como referencia contable.'
+          : '';
       return NextResponse.json(
-        { 
+        {
           error: `No se encontraron movimientos contables válidos para importar.${hint}`,
           details: errors.slice(0, 10),
-          expectedFormat: 'El archivo debe tener columnas: Fecha, Concepto, Importe (o Debe/Haber). Opcionalmente: Subcuenta, Referencia, Edificio.',
+          expectedFormat:
+            'El archivo debe tener columnas: Fecha, Concepto, Importe (o Debe/Haber). Opcionalmente: Subcuenta, Referencia, Edificio.',
         },
         { status: 400 }
       );
@@ -578,9 +594,10 @@ export async function POST(request: NextRequest) {
       duplicates: skipped,
       failed: errors.length,
       errors: errors.slice(0, 20),
-      message: skipped > 0
-        ? `${uniqueTransactions.length} movimientos importados, ${skipped} duplicados omitidos`
-        : `${uniqueTransactions.length} movimientos importados correctamente`,
+      message:
+        skipped > 0
+          ? `${uniqueTransactions.length} movimientos importados, ${skipped} duplicados omitidos`
+          : `${uniqueTransactions.length} movimientos importados correctamente`,
     });
   } catch (error: any) {
     logger.error('[Accounting Import] Error:', error);

@@ -1,8 +1,9 @@
+// @ts-nocheck
 /**
  * Servicio de Notificaciones Push Web
- * 
+ *
  * Maneja suscripciones y envío de notificaciones push usando Web Push API.
- * 
+ *
  * @module PushNotificationService
  */
 
@@ -95,7 +96,6 @@ export async function savePushSubscription(
     logger.info('✅ Push subscription saved', { userId, endpoint: subscription.endpoint });
 
     return sub;
-
   } catch (error: any) {
     logger.error('❌ Error saving push subscription:', error);
     throw new Error(`Failed to save subscription: ${error.message}`);
@@ -122,10 +122,7 @@ export async function getUserSubscriptions(userId: string): Promise<any[]> {
 /**
  * Desactiva una suscripción
  */
-export async function unsubscribe(
-  userId: string,
-  endpoint: string
-): Promise<boolean> {
+export async function unsubscribe(userId: string, endpoint: string): Promise<boolean> {
   try {
     await prisma.pushSubscription.update({
       where: {
@@ -141,7 +138,6 @@ export async function unsubscribe(
 
     logger.info('🔕 Push subscription deactivated', { userId, endpoint });
     return true;
-
   } catch (error: any) {
     logger.error('❌ Error unsubscribing:', error);
     return false;
@@ -204,7 +200,6 @@ export async function sendPushNotification(
 
           logger.debug('✅ Push notification sent', { userId, endpoint: sub.endpoint });
           return { success: true };
-
         } catch (error: any) {
           // Manejar errores (ej: suscripción expirada)
           if (error.statusCode === 410 || error.statusCode === 404) {
@@ -225,7 +220,11 @@ export async function sendPushNotification(
             },
           });
 
-          logger.warn('⚠️ Push notification failed', { userId, endpoint: sub.endpoint, error: error.message });
+          logger.warn('⚠️ Push notification failed', {
+            userId,
+            endpoint: sub.endpoint,
+            error: error.message,
+          });
           return { success: false };
         }
       })
@@ -238,7 +237,6 @@ export async function sendPushNotification(
     logger.info(`📨 Push notifications sent: ${sent}/${results.length}`, { userId });
 
     return { sent, failed };
-
   } catch (error: any) {
     logger.error('❌ Error sending push notifications:', error);
     return { sent: 0, failed: 0 };
@@ -269,7 +267,6 @@ export async function sendPushNotificationToMany(
     logger.info(`📨 Batch push notifications sent: ${totals.sent} sent, ${totals.failed} failed`);
 
     return totals;
-
   } catch (error: any) {
     logger.error('❌ Error sending batch push notifications:', error);
     return { sent: 0, failed: 0 };

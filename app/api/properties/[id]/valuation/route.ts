@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { CLAUDE_MODEL_PRIMARY } from '@/lib/ai-model-config';
-import { getAggregatedMarketData, formatPlatformDataForPrompt } from '@/lib/external-platform-data-service';
+import {
+  getAggregatedMarketData,
+  formatPlatformDataForPrompt,
+} from '@/lib/external-platform-data-service';
 import { analyzeAndValuateProperty } from '@/lib/ai-property-analysis';
 
 import logger from '@/lib/logger';
@@ -18,19 +21,13 @@ async function getPrisma() {
  * GET /api/properties/[id]/valuation
  * Obtiene valoración con IA de una propiedad
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   const prisma = await getPrisma();
   try {
     // Autenticación
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const propertyId = params.id;
@@ -50,10 +47,7 @@ export async function GET(
     });
 
     if (!property) {
-      return NextResponse.json(
-        { error: 'Propiedad no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Propiedad no encontrada' }, { status: 404 });
     }
 
     // Verificar acceso (ownership) - soporta multi-empresa
@@ -64,12 +58,9 @@ export async function GET(
       primaryCompanyId: (session.user as any).companyId,
       request,
     });
-    
-    if (!scope.scopeCompanyIds.includes(property.building?.companyId || '')) {
-      return NextResponse.json(
-        { error: 'Acceso denegado' },
-        { status: 403 }
-      );
+
+    if (!(scope.scopeCompanyIds as string[]).includes(property.building?.companyId || '')) {
+      return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
     }
 
     const address = property.building?.direccion || '';
@@ -80,6 +71,17 @@ export async function GET(
       .pop();
     const city = cityGuess || 'Madrid';
     const buildingCompanyId = property.building?.companyId || session.user.companyId;
+    const unitTypeToPropertyType: Record<string, string> = {
+      vivienda: 'vivienda',
+      local: 'local_comercial',
+      garaje: 'garaje',
+      trastero: 'trastero',
+      oficina: 'oficina',
+      nave_industrial: 'nave_industrial',
+      coworking_space: 'coworking',
+      terreno: 'terreno',
+    };
+    const propertyType = unitTypeToPropertyType[property.tipo || 'vivienda'] || 'vivienda';
 
     // 1. Obtener datos de mercado de múltiples plataformas (scraping + Notariado + INE)
     let aggregatedMarketData = null;
@@ -91,7 +93,7 @@ export async function GET(
         companyId: buildingCompanyId,
         squareMeters: property.superficie,
         rooms: property.habitaciones || undefined,
-        propertyType: propertyType as any,
+        propertyType,
       });
       platformDataText = formatPlatformDataForPrompt(aggregatedMarketData);
     } catch (e) {
@@ -107,28 +109,20 @@ export async function GET(
         superficie: { gte: property.superficie * 0.8, lte: property.superficie * 1.2 },
       },
       select: {
-        numero: true, superficie: true, rentaMensual: true,
+        numero: true,
+        superficie: true,
+        rentaMensual: true,
         building: { select: { direccion: true } },
       },
       take: 5,
     });
     const internalComparables = similarProperties
       .filter((p: any) => p.rentaMensual)
-      .map((p: any) => `- ${p.building?.direccion || address}, Unidad ${p.numero}: ${(p.rentaMensual * 12 * 15).toLocaleString()}€ (${p.superficie}m²)`)
+      .map(
+        (p: any) =>
+          `- ${p.building?.direccion || address}, Unidad ${p.numero}: ${(p.rentaMensual * 12 * 15).toLocaleString()}€ (${p.superficie}m²)`
+      )
       .join('\n');
-
-    // Map UnitType → PropertyType for AI analysis
-    const unitTypeToPropertyType: Record<string, string> = {
-      vivienda: 'vivienda',
-      local: 'local_comercial',
-      garaje: 'garaje',
-      trastero: 'trastero',
-      oficina: 'oficina',
-      nave_industrial: 'nave_industrial',
-      coworking_space: 'coworking',
-      terreno: 'terreno',
-    };
-    const propertyType = unitTypeToPropertyType[(property as any).tipo || 'vivienda'] || 'vivienda';
 
     // 3. Valoración IA multi-paso (Fase 1: análisis comparables + Fase 2: valoración experta)
     const propertyForAI = {
@@ -141,7 +135,7 @@ export async function GET(
       bathrooms: property.banos || 0,
       floor: property.planta || undefined,
       condition: 'GOOD',
-      hasElevator: property.ascensor || false,
+      hasElevator: false,
       hasParking: false,
       hasGarden: false,
       hasPool: false,
@@ -155,7 +149,7 @@ export async function GET(
       propertyForAI,
       aggregatedMarketData,
       platformDataText,
-      internalComparables,
+      internalComparables
     );
 
     // 4. Guardar en BD
@@ -201,7 +195,12 @@ export async function GET(
         reasoning: valuation.reasoning,
         keyFactors: [...valuation.factoresPositivos, ...valuation.factoresNegativos],
         marketComparison: valuation.analisisMercado,
-        investmentPotential: valuation.rentabilidadAlquiler >= 5 ? 'HIGH' : valuation.rentabilidadAlquiler >= 3.5 ? 'MEDIUM' : 'LOW',
+        investmentPotential:
+          valuation.rentabilidadAlquiler >= 5
+            ? 'HIGH'
+            : valuation.rentabilidadAlquiler >= 3.5
+              ? 'MEDIUM'
+              : 'LOW',
         recommendations: valuation.recomendaciones,
         // Alquiler larga estancia
         alquilerEstimado: valuation.alquilerEstimado,

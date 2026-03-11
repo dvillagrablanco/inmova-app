@@ -26,13 +26,19 @@ export async function GET(request: NextRequest) {
     }
 
     const partner = partnerId
-      ? await prisma.partner.findUnique({ where: { id: partnerId }, select: { id: true, nombre: true } })
-      : await prisma.partner.findFirst({ where: { cif: partnerCode! }, select: { id: true, nombre: true } });
+      ? await prisma.partner.findUnique({
+          where: { id: partnerId },
+          select: { id: true, nombre: true },
+        })
+      : await prisma.partner.findFirst({
+          where: { cif: partnerCode! },
+          select: { id: true, nombre: true },
+        });
 
     if (!partner) return NextResponse.json({ error: 'Partner not found' }, { status: 404 });
 
     const referrals = await prisma.lead.findMany({
-      where: { source: 'partner_referral', sourceDetail: partner.id },
+      where: { fuente: 'partner_referral', origenDetalle: partner.id },
       select: { id: true, nombre: true, email: true, estado: true, createdAt: true },
       orderBy: { createdAt: 'desc' },
       take: 50,
@@ -40,11 +46,22 @@ export async function GET(request: NextRequest) {
 
     const stats = {
       total: referrals.length,
-      converted: referrals.filter(r => r.estado === 'convertido' || r.estado === 'cliente').length,
-      pending: referrals.filter(r => r.estado === 'nuevo' || r.estado === 'contactado').length,
-      conversionRate: referrals.length > 0
-        ? Math.round(referrals.filter(r => r.estado === 'convertido' || r.estado === 'cliente').length / referrals.length * 100)
-        : 0,
+      converted: referrals.filter(
+        (r) => r.estado === 'convertido' || r.estado === 'cliente' || r.estado === 'ganado'
+      ).length,
+      pending: referrals.filter(
+        (r) => r.estado === 'nuevo' || r.estado === 'contactado' || r.estado === 'calificado'
+      ).length,
+      conversionRate:
+        referrals.length > 0
+          ? Math.round(
+              (referrals.filter(
+                (r) => r.estado === 'convertido' || r.estado === 'cliente' || r.estado === 'ganado'
+              ).length /
+                referrals.length) *
+                100
+            )
+          : 0,
     };
 
     return NextResponse.json({ success: true, referrals, stats, partner: partner.nombre });
@@ -61,7 +78,10 @@ export async function POST(request: NextRequest) {
     const { partnerCode, nombre, email, telefono, empresa, mensaje } = body;
 
     if (!partnerCode || !nombre || !email) {
-      return NextResponse.json({ error: 'partnerCode, nombre y email requeridos' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'partnerCode, nombre y email requeridos' },
+        { status: 400 }
+      );
     }
 
     // Find partner by code (CIF) or by referral slug
@@ -76,7 +96,7 @@ export async function POST(request: NextRequest) {
 
     // Check duplicate
     const existing = await prisma.lead.findFirst({
-      where: { email, source: 'partner_referral', sourceDetail: partner.id },
+      where: { email, fuente: 'partner_referral', origenDetalle: partner.id },
     });
     if (existing) {
       return NextResponse.json({ error: 'Este referido ya está registrado' }, { status: 409 });
@@ -88,9 +108,15 @@ export async function POST(request: NextRequest) {
       select: { email: true },
     });
     const user = partnerFull?.email
-      ? await prisma.user.findFirst({ where: { email: partnerFull.email }, select: { companyId: true } })
+      ? await prisma.user.findFirst({
+          where: { email: partnerFull.email },
+          select: { companyId: true },
+        })
       : null;
-    const companyId = user?.companyId || (await prisma.company.findFirst({ where: { isDemo: false }, select: { id: true } }))?.id;
+    const companyId =
+      user?.companyId ||
+      (await prisma.company.findFirst({ where: { esEmpresaPrueba: false }, select: { id: true } }))
+        ?.id;
 
     if (!companyId) {
       return NextResponse.json({ error: 'No se pudo asignar empresa' }, { status: 500 });
@@ -104,19 +130,22 @@ export async function POST(request: NextRequest) {
         email,
         telefono: telefono || null,
         empresa: empresa || null,
-        source: 'partner_referral',
-        sourceDetail: partner.id,
+        fuente: 'partner_referral',
+        origenDetalle: partner.id,
         notas: `Referido por ${partner.nombre}. ${mensaje || ''}`.trim(),
         estado: 'nuevo',
-        prioridad: 'media',
+        urgencia: 'media',
       },
     });
 
-    return NextResponse.json({
-      success: true,
-      message: `Referido registrado. Partner: ${partner.nombre}`,
-      leadId: lead.id,
-    }, { status: 201 });
+    return NextResponse.json(
+      {
+        success: true,
+        message: `Referido registrado. Partner: ${partner.nombre}`,
+        leadId: lead.id,
+      },
+      { status: 201 }
+    );
   } catch (error: any) {
     logger.error('[Partner Referrals POST]:', error);
     return NextResponse.json({ error: 'Error registrando referido' }, { status: 500 });

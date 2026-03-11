@@ -36,8 +36,12 @@ interface FinancialReport {
 
 const periodSchema = z.enum(['month', 'quarter', 'year']);
 
-async function getPeriodRange(period: Period) {
-  const prisma = await getPrisma();
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
+function getPeriodRange(period: Period) {
   const now = new Date();
   let start: Date;
 
@@ -64,14 +68,12 @@ async function getPeriodRange(period: Period) {
   return { start, end, previousStart, previousEnd };
 }
 
-async function roundTo(value: number, decimals: number) {
-  const prisma = await getPrisma();
+function roundTo(value: number, decimals: number) {
   const factor = 10 ** decimals;
   return Math.round(value * factor) / factor;
 }
 
-async function getErrorMessage(error: unknown) {
-  const prisma = await getPrisma();
+function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : 'Error desconocido';
 }
 
@@ -109,7 +111,12 @@ export async function GET(request: NextRequest) {
       fecha: { gte: start, lte: end },
       OR: [
         { building: { companyId: { in: scope.scopeCompanyIds }, isDemo: false } },
-        { unit: { isDemo: false, building: { companyId: { in: scope.scopeCompanyIds }, isDemo: false } } },
+        {
+          unit: {
+            isDemo: false,
+            building: { companyId: { in: scope.scopeCompanyIds }, isDemo: false },
+          },
+        },
       ],
     };
 
@@ -205,7 +212,10 @@ export async function GET(request: NextRequest) {
     for (const payment of paidPayments) {
       const buildingId = payment.contract.unit?.buildingId;
       if (!buildingId) continue;
-      ingresosPorBuilding.set(buildingId, (ingresosPorBuilding.get(buildingId) ?? 0) + payment.monto);
+      ingresosPorBuilding.set(
+        buildingId,
+        (ingresosPorBuilding.get(buildingId) ?? 0) + payment.monto
+      );
     }
 
     const gastosPorBuilding = new Map<string, number>();
@@ -222,7 +232,8 @@ export async function GET(request: NextRequest) {
       const ocupacionProp =
         building.units.length > 0
           ? roundTo(
-              (building.units.filter((unit) => unit.estado === 'ocupada').length / building.units.length) *
+              (building.units.filter((unit) => unit.estado === 'ocupada').length /
+                building.units.length) *
                 100,
               1
             )

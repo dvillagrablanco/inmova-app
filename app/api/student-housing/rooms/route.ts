@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { StudentHousingService } from '@/lib/services/student-housing-service';
+import logger from '@/lib/logger';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
@@ -31,7 +32,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: rooms
+      data: rooms,
     });
   } catch (error: any) {
     logger.error('[Student Housing Rooms GET Error]:', error);
@@ -50,16 +51,18 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { roomId, status } = z.object({
-      roomId: z.string(),
-      status: z.string()
-    }).parse(body);
+    const { roomId, status } = z
+      .object({
+        roomId: z.string(),
+        status: z.string(),
+      })
+      .parse(body);
 
     await StudentHousingService.updateRoomStatus(roomId, status);
 
     return NextResponse.json({
       success: true,
-      message: 'Estado de habitación actualizado'
+      message: 'Estado de habitación actualizado',
     });
   } catch (error: any) {
     logger.error('[Student Housing Rooms PATCH Error]:', error);

@@ -44,10 +44,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(posts);
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Error al obtener posts' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener posts' }, { status: 500 });
   }
 }
 
@@ -71,16 +68,13 @@ export async function POST(request: NextRequest) {
 
     const result = await publishToSocialMedia(
       accountId,
-      content,
+      { mensaje: content },
       session.user.id,
       scheduleDate ? new Date(scheduleDate) : undefined
     );
 
     return NextResponse.json(result);
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Error al publicar' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al publicar' }, { status: 500 });
   }
 }

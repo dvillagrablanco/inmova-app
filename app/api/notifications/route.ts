@@ -17,7 +17,7 @@ const createNotificationSchema = z.object({
 /**
  * API: /api/notifications
  * Gestión de notificaciones in-app
- * 
+ *
  * GET: Obtener notificaciones del usuario autenticado
  * POST: Crear una nueva notificación (solo admin)
  */
@@ -29,6 +29,7 @@ import {
   getRecentNotifications,
   createNotification,
   CreateNotificationParams,
+  type NotificationType,
 } from '@/lib/notification-service';
 
 /**
@@ -40,10 +41,7 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     // Obtener el parámetro limit de la query string
@@ -53,20 +51,14 @@ export async function GET(request: NextRequest) {
     const result = await getRecentNotifications(session.user.id, limit);
 
     if (!result.success) {
-      return NextResponse.json(
-        { error: 'Error al obtener notificaciones' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Error al obtener notificaciones' }, { status: 500 });
     }
 
     return NextResponse.json({
       notifications: result.notifications,
     });
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Error interno del servidor' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 }
 
@@ -79,10 +71,7 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     // Verificar que el usuario sea admin o el sistema
@@ -100,7 +89,7 @@ export async function POST(request: NextRequest) {
     const params: CreateNotificationParams = {
       userId: data.userId || session.user.id,
       companyId: data.companyId || session.user.companyId || '',
-      type: data.type || 'info',
+      type: (data.type || 'info') as NotificationType,
       title: data.title,
       message: data.message,
       icon: data.icon,
@@ -117,14 +106,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return NextResponse.json(
-      { notification: result.notification },
-      { status: 201 }
-    );
+    return NextResponse.json({ notification: result.notification }, { status: 201 });
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Error interno del servidor' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 }

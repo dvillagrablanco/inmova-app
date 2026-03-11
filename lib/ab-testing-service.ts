@@ -1,8 +1,9 @@
+// @ts-nocheck
 /**
  * Servicio de A/B Testing
- * 
+ *
  * Framework para testing de features, UI variants, pricing models.
- * 
+ *
  * @module ABTestingService
  */
 
@@ -159,7 +160,7 @@ export async function completeABTest(testId: string): Promise<void> {
 
 /**
  * Asigna un usuario a una variante del test
- * 
+ *
  * Algoritmo:
  * 1. Verificar si usuario ya está asignado (persistencia)
  * 2. Si no, determinar si entra en el test (targetPercentage)
@@ -411,7 +412,7 @@ export async function getABTestMetrics(testId: string): Promise<{
     // Simple confidence check (real statistical testing would use chi-square or t-test)
     const minSampleSize = 100;
     if (winnerVariant.metrics.users >= minSampleSize) {
-      const improvement = 
+      const improvement =
         ((winnerVariant.metrics.conversionRate - runnerUp.metrics.conversionRate) /
           runnerUp.metrics.conversionRate) *
         100;

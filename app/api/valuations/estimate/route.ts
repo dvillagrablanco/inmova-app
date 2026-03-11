@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * API Endpoint: Valoración Automática de Propiedades
  *

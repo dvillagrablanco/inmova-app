@@ -4,6 +4,7 @@ export const runtime = 'nodejs';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import { normalizeInvestmentVehicleName } from '@/lib/family-office-scope';
 
 async function getPrisma() {
   const { getPrismaClient } = await import('@/lib/db');
@@ -55,22 +56,37 @@ export async function GET(request: NextRequest) {
     const includePl = request.nextUrl.searchParams.get('pl') === 'true';
 
     const { getCompanyPortfolio } = await import('@/lib/investment-service');
+    const holdingParticipations = await prisma.participation.findMany({
+      where: { companyId: holding.id, activa: true },
+      select: { vehiculoInversor: true },
+    });
 
     const results = [];
     for (const cid of allIds) {
-      const co = cid === holding.id ? holding : holding.childCompanies.find((c: { id: string }) => c.id === cid);
+      const co =
+        cid === holding.id
+          ? holding
+          : holding.childCompanies.find((c: { id: string }) => c.id === cid);
       if (!co) continue;
 
-      const [edificios, unidades, inquilinos, participaciones, cuentas, posiciones] = await Promise.all([
-        prisma.building.count({ where: { companyId: cid } }),
-        prisma.unit.count({ where: { building: { companyId: cid } } }),
-        prisma.tenant.count({ where: { companyId: cid } }),
-        prisma.participation.count({ where: { companyId: cid } }),
-        prisma.financialAccount.count({ where: { companyId: cid, activa: true } }),
-        prisma.financialPosition.count({
-          where: { account: { companyId: cid } },
-        }),
-      ]);
+      const [edificios, unidades, inquilinos, participaciones, cuentas, posiciones] =
+        await Promise.all([
+          prisma.building.count({ where: { companyId: cid } }),
+          prisma.unit.count({ where: { building: { companyId: cid } } }),
+          prisma.tenant.count({ where: { companyId: cid } }),
+          Promise.resolve(
+            (co as { nombre: string }).nombre.toUpperCase().includes('VIBLA')
+              ? holdingParticipations.filter(
+                  (participation) =>
+                    normalizeInvestmentVehicleName(participation.vehiculoInversor) === 'VIBLA_SCR'
+                ).length
+              : 0
+          ),
+          prisma.financialAccount.count({ where: { companyId: cid, activa: true } }),
+          prisma.financialPosition.count({
+            where: { account: { companyId: cid } },
+          }),
+        ]);
 
       const base: Record<string, unknown> = {
         id: cid,
@@ -92,9 +108,10 @@ export async function GET(request: NextRequest) {
           const ingresos = (portfolio.totalMonthlyIncome || 0) * 12;
           const gastos = (portfolio.totalMonthlyExpenses || 0) * 12;
           const beneficio = ingresos - gastos;
-          const roe = portfolio.totalEquity && portfolio.totalEquity > 0
-            ? (beneficio / portfolio.totalEquity) * 100
-            : null;
+          const roe =
+            portfolio.totalEquity && portfolio.totalEquity > 0
+              ? (beneficio / portfolio.totalEquity) * 100
+              : null;
           (base as any).pl = {
             ingresos,
             gastos,

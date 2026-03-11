@@ -16,11 +16,13 @@ async function getPrisma() {
 const createIntercompanySchema = z.object({
   fromCompanyId: z.string(),
   toCompanyId: z.string(),
-  conceptos: z.array(z.object({
-    descripcion: z.string(),
-    cantidad: z.number().default(1),
-    precioUnitario: z.number(),
-  })),
+  conceptos: z.array(
+    z.object({
+      descripcion: z.string(),
+      cantidad: z.number().default(1),
+      precioUnitario: z.number(),
+    })
+  ),
   periodo: z.string(), // "2026-01"
   notas: z.string().optional(),
 });
@@ -43,7 +45,10 @@ export async function GET(request: NextRequest) {
       select: { childCompanies: { select: { id: true } } },
     });
     const allCompanyIds = companyHierarchy
-      ? [session.user.companyId, ...companyHierarchy.childCompanies.map((c: { id: string }) => c.id)]
+      ? [
+          session.user.companyId,
+          ...companyHierarchy.childCompanies.map((c: { id: string }) => c.id),
+        ]
       : [session.user.companyId];
 
     // Buscar facturas B2B entre empresas del grupo
@@ -63,7 +68,7 @@ export async function GET(request: NextRequest) {
     const intercompanyTxs = await prisma.accountingTransaction.findMany({
       where: {
         companyId: { in: allCompanyIds },
-        category: { in: ['ingreso_servicios_intragrupo', 'gasto_intragrupo'] },
+        categoria: { in: ['ingreso_servicios_intragrupo', 'gasto_intragrupo'] },
       },
       orderBy: { fecha: 'desc' },
       take: 100,
@@ -99,8 +104,14 @@ export async function POST(request: NextRequest) {
 
     // Verificar que ambas empresas existen y son del mismo grupo
     const [fromCompany, toCompany] = await Promise.all([
-      prisma.company.findUnique({ where: { id: validated.fromCompanyId }, select: { id: true, nombre: true, parentCompanyId: true } }),
-      prisma.company.findUnique({ where: { id: validated.toCompanyId }, select: { id: true, nombre: true, parentCompanyId: true } }),
+      prisma.company.findUnique({
+        where: { id: validated.fromCompanyId },
+        select: { id: true, nombre: true, parentCompanyId: true },
+      }),
+      prisma.company.findUnique({
+        where: { id: validated.toCompanyId },
+        select: { id: true, nombre: true, parentCompanyId: true },
+      }),
     ]);
 
     if (!fromCompany || !toCompany) {
@@ -147,33 +158,41 @@ export async function POST(request: NextRequest) {
           companyId: validated.fromCompanyId,
           fecha: new Date(),
           concepto: `Factura intragrupo a ${toCompany.nombre}`,
-          debe: 0,
-          haber: total,
-          category: 'ingreso_servicios_intragrupo',
+          tipo: 'ingreso',
+          categoria: 'ingreso_servicios_intragrupo',
+          monto: total,
           referencia: numeroFactura,
         },
         {
           companyId: validated.toCompanyId,
           fecha: new Date(),
           concepto: `Factura intragrupo de ${fromCompany.nombre}`,
-          debe: total,
-          haber: 0,
-          category: 'gasto_intragrupo',
+          tipo: 'gasto',
+          categoria: 'gasto_intragrupo',
+          monto: total,
           referencia: numeroFactura,
         },
       ],
     });
 
-    logger.info(`[Intercompany] Factura ${numeroFactura} creada: ${fromCompany.nombre} → ${toCompany.nombre} = ${total}€`);
+    logger.info(
+      `[Intercompany] Factura ${numeroFactura} creada: ${fromCompany.nombre} → ${toCompany.nombre} = ${total}€`
+    );
 
-    return NextResponse.json({
-      success: true,
-      invoice,
-      message: `Factura ${numeroFactura} creada: ${total}€`,
-    }, { status: 201 });
+    return NextResponse.json(
+      {
+        success: true,
+        invoice,
+        message: `Factura ${numeroFactura} creada: ${total}€`,
+      },
+      { status: 201 }
+    );
   } catch (error: any) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Datos inválidos', details: error.errors }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Datos inválidos', details: error.errors },
+        { status: 400 }
+      );
     }
     logger.error('[Intercompany POST]:', error);
     Sentry.captureException(error);

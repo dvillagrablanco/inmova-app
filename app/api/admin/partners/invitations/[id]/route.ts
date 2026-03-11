@@ -1,6 +1,6 @@
 /**
  * API para gestionar una invitación específica de partner
- * 
+ *
  * GET /api/admin/partners/invitations/[id] - Obtener invitación
  * PUT /api/admin/partners/invitations/[id] - Actualizar invitación
  * DELETE /api/admin/partners/invitations/[id] - Eliminar invitación
@@ -14,10 +14,12 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     const sessionUser = session?.user as { role?: string | null } | undefined;
@@ -25,6 +27,7 @@ export async function GET(
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
+    const prisma = await getPrisma();
     const invitation = await prisma.partnerInvitation.findUnique({
       where: { id: params.id },
       include: {
@@ -54,10 +57,10 @@ export async function GET(
           invitation.estado === 'PENDING'
             ? 'pending'
             : invitation.estado === 'ACCEPTED'
-            ? 'accepted'
-            : invitation.estado === 'EXPIRED'
-            ? 'expired'
-            : 'rejected',
+              ? 'accepted'
+              : invitation.estado === 'EXPIRED'
+                ? 'expired'
+                : 'rejected',
         comisionOfrecida:
           typeof metadata.comisionOfrecida === 'number'
             ? metadata.comisionOfrecida
@@ -71,10 +74,7 @@ export async function GET(
   }
 }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     const sessionUser = session?.user as { role?: string | null } | undefined;
@@ -84,6 +84,7 @@ export async function PUT(
 
     const body = await request.json();
 
+    const prisma = await getPrisma();
     const invitation = await prisma.partnerInvitation.findUnique({
       where: { id: params.id },
     });
@@ -125,10 +126,7 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     const sessionUser = session?.user as { role?: string | null } | undefined;
@@ -136,6 +134,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
+    const prisma = await getPrisma();
     const invitation = await prisma.partnerInvitation.findUnique({
       where: { id: params.id },
     });

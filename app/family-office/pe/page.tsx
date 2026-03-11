@@ -7,7 +7,17 @@ import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Loader2, Home, Briefcase, TrendingUp, TrendingDown, RefreshCw, ChevronDown, ChevronUp, Landmark } from 'lucide-react';
+import {
+  Loader2,
+  Home,
+  Briefcase,
+  TrendingUp,
+  TrendingDown,
+  RefreshCw,
+  ChevronDown,
+  ChevronUp,
+  Landmark,
+} from 'lucide-react';
 import Link from 'next/link';
 import {
   Breadcrumb,
@@ -63,12 +73,27 @@ interface PEData {
     rentabilidadPeriodoPct: number;
   };
   fondos: Fondo[];
-  vehiculos: Array<{ nombre: string; fondos: number; totalComprometido: number; totalValoracion: number }>;
-  vintages: Array<{ year: number; count: number; comprometido: number; valoracion: number; tvpiAvg: number }>;
+  vehiculos: Array<{
+    nombre: string;
+    fondos: number;
+    totalComprometido: number;
+    totalValoracion: number;
+  }>;
+  vintages: Array<{
+    year: number;
+    count: number;
+    comprometido: number;
+    valoracion: number;
+    tvpiAvg: number;
+  }>;
 }
 
 const fmt = (n: number) =>
-  new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
+  new Intl.NumberFormat('es-ES', {
+    style: 'currency',
+    currency: 'EUR',
+    maximumFractionDigits: 0,
+  }).format(n);
 
 const fmtK = (n: number) => {
   if (Math.abs(n) >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M €`;
@@ -77,7 +102,9 @@ const fmtK = (n: number) => {
 };
 
 const pnlColor = (n: number) => (n >= 0 ? 'text-green-600' : 'text-red-600');
-const tvpiColor = (n: number) => (n >= 1 ? 'text-green-600' : n >= 0.9 ? 'text-yellow-600' : 'text-red-600');
+const tvpiColor = (n: number) =>
+  n >= 1 ? 'text-green-600' : n >= 0.9 ? 'text-yellow-600' : 'text-red-600';
+const isViblaVehicle = (value: string) => value.replace(/\s+/g, '_').toUpperCase() === 'VIBLA_SCR';
 
 export default function PEPage() {
   const { status } = useSession();
@@ -130,7 +157,9 @@ export default function PEPage() {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/dashboard"><Home className="h-4 w-4" /></BreadcrumbLink>
+              <BreadcrumbLink href="/dashboard">
+                <Home className="h-4 w-4" />
+              </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
@@ -146,8 +175,12 @@ export default function PEPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Private Equity — Activos en Crecimiento</h1>
-            <p className="text-gray-500">Reporting estilo MdF Family Partners · BALDOMERO PE GRUPO</p>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Private Equity — Activos en Crecimiento
+            </h1>
+            <p className="text-gray-500">
+              Reporting estilo MdF Family Partners · BALDOMERO PE GRUPO
+            </p>
           </div>
           <div className="flex items-center gap-2">
             <Link href="/family-office/dashboard">
@@ -185,13 +218,17 @@ export default function PEPage() {
           <Card>
             <CardContent className="pt-3 pb-2 px-3">
               <div className="text-[10px] text-gray-500 mb-0.5">Pendiente</div>
-              <div className="text-lg font-bold text-amber-600">{fmtK(r?.capitalPendiente ?? 0)}</div>
+              <div className="text-lg font-bold text-amber-600">
+                {fmtK(r?.capitalPendiente ?? 0)}
+              </div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-3 pb-2 px-3">
               <div className="text-[10px] text-gray-500 mb-0.5">Distribuido</div>
-              <div className="text-lg font-bold text-blue-600">{fmtK(r?.totalDistribuido ?? 0)}</div>
+              <div className="text-lg font-bold text-blue-600">
+                {fmtK(r?.totalDistribuido ?? 0)}
+              </div>
             </CardContent>
           </Card>
           <Card>
@@ -203,7 +240,9 @@ export default function PEPage() {
           <Card>
             <CardContent className="pt-3 pb-2 px-3">
               <div className="text-[10px] text-gray-500 mb-0.5">TVPI</div>
-              <div className={cn('text-lg font-bold', tvpiColor(r?.tvpiGlobal ?? 0))}>{(r?.tvpiGlobal ?? 0).toFixed(2)}x</div>
+              <div className={cn('text-lg font-bold', tvpiColor(r?.tvpiGlobal ?? 0))}>
+                {(r?.tvpiGlobal ?? 0).toFixed(2)}x
+              </div>
             </CardContent>
           </Card>
           <Card>
@@ -229,12 +268,31 @@ export default function PEPage() {
                   <tr className="border-b-2 border-gray-200 bg-gray-50/80">
                     <th className="text-left px-3 py-2 font-semibold text-gray-600">Fondos</th>
                     <th className="text-center px-2 py-2 font-semibold text-gray-600">Año</th>
-                    <th className="text-right px-2 py-2 font-semibold text-gray-600">Patrimonio<br />comprometido</th>
+                    <th className="text-right px-2 py-2 font-semibold text-gray-600">
+                      Patrimonio
+                      <br />
+                      comprometido
+                    </th>
                     <th className="text-right px-2 py-2 font-semibold text-gray-600">Valoración</th>
-                    <th className="text-right px-2 py-2 font-semibold text-gray-600">Desembolsos<br />pendientes</th>
-                    <th className="text-right px-2 py-2 font-semibold text-gray-600">Distribuciones<br />acumuladas</th>
-                    <th className="text-right px-2 py-2 font-semibold text-gray-600">Val+Dist /<br />Desemb</th>
-                    <th className="text-right px-2 py-2 font-semibold text-gray-600">Desemb.<br />acum.</th>
+                    <th className="text-right px-2 py-2 font-semibold text-gray-600">
+                      Desembolsos
+                      <br />
+                      pendientes
+                    </th>
+                    <th className="text-right px-2 py-2 font-semibold text-gray-600">
+                      Distribuciones
+                      <br />
+                      acumuladas
+                    </th>
+                    <th className="text-right px-2 py-2 font-semibold text-gray-600">
+                      Val+Dist /<br />
+                      Desemb
+                    </th>
+                    <th className="text-right px-2 py-2 font-semibold text-gray-600">
+                      Desemb.
+                      <br />
+                      acum.
+                    </th>
                     <th className="text-center px-2 py-2 font-semibold text-gray-600">Vehículo</th>
                   </tr>
                 </thead>
@@ -243,24 +301,33 @@ export default function PEPage() {
                     <tr key={f.id} className="border-b border-gray-100 hover:bg-gray-50/50">
                       <td className="px-3 py-2 font-medium whitespace-nowrap">{f.nombre}</td>
                       <td className="text-center px-2 py-2 text-gray-500">{f.anoCompromiso}</td>
-                      <td className="text-right px-2 py-2 tabular-nums">{fmt(f.compromisoTotal)}</td>
-                      <td className="text-right px-2 py-2 tabular-nums font-medium">{fmt(f.valoracionActual)}</td>
+                      <td className="text-right px-2 py-2 tabular-nums">
+                        {fmt(f.compromisoTotal)}
+                      </td>
+                      <td className="text-right px-2 py-2 tabular-nums font-medium">
+                        {fmt(f.valoracionActual)}
+                      </td>
                       <td className="text-right px-2 py-2 tabular-nums text-amber-600">
                         {f.capitalPendiente > 0 ? fmt(f.capitalPendiente) : '—'}
                       </td>
                       <td className="text-right px-2 py-2 tabular-nums text-blue-600">
                         {f.distribucionesAcumuladas > 0 ? fmt(f.distribucionesAcumuladas) : '—'}
                       </td>
-                      <td className={cn('text-right px-2 py-2 tabular-nums font-bold', tvpiColor(f.tvpi))}>
+                      <td
+                        className={cn(
+                          'text-right px-2 py-2 tabular-nums font-bold',
+                          tvpiColor(f.tvpi)
+                        )}
+                      >
                         {f.tvpi.toFixed(2)}x
                       </td>
                       <td className="text-right px-2 py-2 tabular-nums">{fmt(f.capitalLlamado)}</td>
                       <td className="text-center px-2 py-2">
                         <Badge
-                          variant={f.vehiculoInversor === 'VIBLA_SCR' ? 'default' : 'secondary'}
+                          variant={isViblaVehicle(f.vehiculoInversor) ? 'default' : 'secondary'}
                           className="text-[10px] px-1.5 py-0"
                         >
-                          {f.vehiculoInversor === 'VIBLA_SCR' ? 'VIBLA SCR' : 'Directo'}
+                          {isViblaVehicle(f.vehiculoInversor) ? 'VIBLA SCR' : 'Directo'}
                         </Badge>
                       </td>
                     </tr>
@@ -270,21 +337,38 @@ export default function PEPage() {
                     <tr className="border-t-2 border-gray-300 bg-gray-50 font-bold">
                       <td className="px-3 py-2">TOTAL</td>
                       <td></td>
-                      <td className="text-right px-2 py-2 tabular-nums">{fmt(r?.totalComprometido ?? 0)}</td>
-                      <td className="text-right px-2 py-2 tabular-nums">{fmt(r?.valorActual ?? 0)}</td>
-                      <td className="text-right px-2 py-2 tabular-nums text-amber-600">{fmt(r?.capitalPendiente ?? 0)}</td>
-                      <td className="text-right px-2 py-2 tabular-nums text-blue-600">{fmt(r?.totalDistribuido ?? 0)}</td>
-                      <td className={cn('text-right px-2 py-2 tabular-nums', tvpiColor(r?.tvpiGlobal ?? 0))}>
+                      <td className="text-right px-2 py-2 tabular-nums">
+                        {fmt(r?.totalComprometido ?? 0)}
+                      </td>
+                      <td className="text-right px-2 py-2 tabular-nums">
+                        {fmt(r?.valorActual ?? 0)}
+                      </td>
+                      <td className="text-right px-2 py-2 tabular-nums text-amber-600">
+                        {fmt(r?.capitalPendiente ?? 0)}
+                      </td>
+                      <td className="text-right px-2 py-2 tabular-nums text-blue-600">
+                        {fmt(r?.totalDistribuido ?? 0)}
+                      </td>
+                      <td
+                        className={cn(
+                          'text-right px-2 py-2 tabular-nums',
+                          tvpiColor(r?.tvpiGlobal ?? 0)
+                        )}
+                      >
                         {(r?.tvpiGlobal ?? 0).toFixed(2)}x
                       </td>
-                      <td className="text-right px-2 py-2 tabular-nums">{fmt(r?.totalLlamado ?? 0)}</td>
+                      <td className="text-right px-2 py-2 tabular-nums">
+                        {fmt(r?.totalLlamado ?? 0)}
+                      </td>
                       <td></td>
                     </tr>
                   )}
                 </tbody>
               </table>
               {fondos.length === 0 && (
-                <div className="text-center text-gray-400 py-8">Sin participaciones PE registradas.</div>
+                <div className="text-center text-gray-400 py-8">
+                  Sin participaciones PE registradas.
+                </div>
               )}
             </div>
           </CardContent>
@@ -292,13 +376,20 @@ export default function PEPage() {
 
         {/* Rentabilidad PE Mensual */}
         <Card>
-          <CardHeader className="pb-2 cursor-pointer" onClick={() => setShowRentabilidad(!showRentabilidad)}>
+          <CardHeader
+            className="pb-2 cursor-pointer"
+            onClick={() => setShowRentabilidad(!showRentabilidad)}
+          >
             <CardTitle className="text-sm flex items-center justify-between">
               <span className="flex items-center gap-2">
                 <TrendingUp className="h-4 w-4 text-green-600" />
                 Rentabilidad PE Mensual (1149.04)
               </span>
-              {showRentabilidad ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              {showRentabilidad ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
             </CardTitle>
           </CardHeader>
           {showRentabilidad && (
@@ -309,12 +400,32 @@ export default function PEPage() {
                     <tr className="border-b-2 border-gray-200 bg-gray-50/80">
                       <th className="text-left px-3 py-2 font-semibold text-gray-600">Fondos</th>
                       <th className="text-center px-2 py-2 font-semibold text-gray-600">Año</th>
-                      <th className="text-right px-2 py-2 font-semibold text-gray-600">Patrimonio<br />inicial</th>
-                      <th className="text-right px-2 py-2 font-semibold text-gray-600">Patrimonio<br />final</th>
-                      <th className="text-right px-2 py-2 font-semibold text-gray-600">Desembolsos<br />realizados</th>
-                      <th className="text-right px-2 py-2 font-semibold text-gray-600">Reembolsos<br />recibidos</th>
-                      <th className="text-right px-2 py-2 font-semibold text-gray-600">Rentabilidad</th>
-                      <th className="text-right px-2 py-2 font-semibold text-gray-600">Rent. (%)</th>
+                      <th className="text-right px-2 py-2 font-semibold text-gray-600">
+                        Patrimonio
+                        <br />
+                        inicial
+                      </th>
+                      <th className="text-right px-2 py-2 font-semibold text-gray-600">
+                        Patrimonio
+                        <br />
+                        final
+                      </th>
+                      <th className="text-right px-2 py-2 font-semibold text-gray-600">
+                        Desembolsos
+                        <br />
+                        realizados
+                      </th>
+                      <th className="text-right px-2 py-2 font-semibold text-gray-600">
+                        Reembolsos
+                        <br />
+                        recibidos
+                      </th>
+                      <th className="text-right px-2 py-2 font-semibold text-gray-600">
+                        Rentabilidad
+                      </th>
+                      <th className="text-right px-2 py-2 font-semibold text-gray-600">
+                        Rent. (%)
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -322,19 +433,37 @@ export default function PEPage() {
                       <tr key={f.id} className="border-b border-gray-100 hover:bg-gray-50/50">
                         <td className="px-3 py-2 font-medium whitespace-nowrap">{f.nombre}</td>
                         <td className="text-center px-2 py-2 text-gray-500">{f.anoCompromiso}</td>
-                        <td className="text-right px-2 py-2 tabular-nums">{fmt(f.rentabilidad.patrimonioInicio)}</td>
-                        <td className="text-right px-2 py-2 tabular-nums">{fmt(f.rentabilidad.patrimonioFin)}</td>
+                        <td className="text-right px-2 py-2 tabular-nums">
+                          {fmt(f.rentabilidad.patrimonioInicio)}
+                        </td>
+                        <td className="text-right px-2 py-2 tabular-nums">
+                          {fmt(f.rentabilidad.patrimonioFin)}
+                        </td>
                         <td className="text-right px-2 py-2 tabular-nums">
                           {f.rentabilidad.desembolsos > 0 ? fmt(f.rentabilidad.desembolsos) : '—'}
                         </td>
                         <td className="text-right px-2 py-2 tabular-nums">
                           {f.rentabilidad.reembolsos > 0 ? fmt(f.rentabilidad.reembolsos) : '—'}
                         </td>
-                        <td className={cn('text-right px-2 py-2 tabular-nums font-medium', pnlColor(f.rentabilidad.rentabilidadEur))}>
-                          {f.rentabilidad.rentabilidadEur !== 0 ? fmt(f.rentabilidad.rentabilidadEur) : '—'}
+                        <td
+                          className={cn(
+                            'text-right px-2 py-2 tabular-nums font-medium',
+                            pnlColor(f.rentabilidad.rentabilidadEur)
+                          )}
+                        >
+                          {f.rentabilidad.rentabilidadEur !== 0
+                            ? fmt(f.rentabilidad.rentabilidadEur)
+                            : '—'}
                         </td>
-                        <td className={cn('text-right px-2 py-2 tabular-nums', pnlColor(f.rentabilidad.rentabilidadPct))}>
-                          {f.rentabilidad.rentabilidadPct !== 0 ? `${f.rentabilidad.rentabilidadPct.toFixed(2)}%` : '—'}
+                        <td
+                          className={cn(
+                            'text-right px-2 py-2 tabular-nums',
+                            pnlColor(f.rentabilidad.rentabilidadPct)
+                          )}
+                        >
+                          {f.rentabilidad.rentabilidadPct !== 0
+                            ? `${f.rentabilidad.rentabilidadPct.toFixed(2)}%`
+                            : '—'}
                         </td>
                       </tr>
                     ))}
@@ -346,17 +475,29 @@ export default function PEPage() {
                         <td className="text-right px-2 py-2 tabular-nums">
                           {fmt(fondos.reduce((s, f) => s + f.rentabilidad.patrimonioInicio, 0))}
                         </td>
-                        <td className="text-right px-2 py-2 tabular-nums">{fmt(r?.valorActual ?? 0)}</td>
+                        <td className="text-right px-2 py-2 tabular-nums">
+                          {fmt(r?.valorActual ?? 0)}
+                        </td>
                         <td className="text-right px-2 py-2 tabular-nums">
                           {fmt(fondos.reduce((s, f) => s + f.rentabilidad.desembolsos, 0))}
                         </td>
                         <td className="text-right px-2 py-2 tabular-nums">
                           {fmt(fondos.reduce((s, f) => s + f.rentabilidad.reembolsos, 0))}
                         </td>
-                        <td className={cn('text-right px-2 py-2 tabular-nums', pnlColor(r?.rentabilidadPeriodoEur ?? 0))}>
+                        <td
+                          className={cn(
+                            'text-right px-2 py-2 tabular-nums',
+                            pnlColor(r?.rentabilidadPeriodoEur ?? 0)
+                          )}
+                        >
                           {fmt(r?.rentabilidadPeriodoEur ?? 0)}
                         </td>
-                        <td className={cn('text-right px-2 py-2 tabular-nums', pnlColor(r?.rentabilidadPeriodoPct ?? 0))}>
+                        <td
+                          className={cn(
+                            'text-right px-2 py-2 tabular-nums',
+                            pnlColor(r?.rentabilidadPeriodoPct ?? 0)
+                          )}
+                        >
                           {(r?.rentabilidadPeriodoPct ?? 0).toFixed(2)}%
                         </td>
                       </tr>
@@ -378,7 +519,10 @@ export default function PEPage() {
             <CardContent>
               <div className="space-y-2">
                 {(data?.vintages ?? []).map((v) => (
-                  <div key={v.year} className="flex items-center justify-between py-1.5 border-b last:border-0">
+                  <div
+                    key={v.year}
+                    className="flex items-center justify-between py-1.5 border-b last:border-0"
+                  >
                     <div>
                       <span className="font-bold text-sm">{v.year}</span>
                       <span className="text-xs text-gray-500 ml-2">{v.count} fondos</span>
@@ -412,8 +556,8 @@ export default function PEPage() {
                 {(data?.vehiculos ?? []).map((v) => (
                   <div key={v.nombre} className="p-3 rounded-lg bg-gray-50 border">
                     <div className="flex items-center justify-between mb-2">
-                      <Badge variant={v.nombre === 'VIBLA_SCR' ? 'default' : 'secondary'}>
-                        {v.nombre === 'VIBLA_SCR' ? 'VIBLA SCR' : v.nombre}
+                      <Badge variant={isViblaVehicle(v.nombre) ? 'default' : 'secondary'}>
+                        {isViblaVehicle(v.nombre) ? 'VIBLA SCR' : v.nombre}
                       </Badge>
                       <span className="text-xs text-gray-500">{v.fondos} fondos</span>
                     </div>

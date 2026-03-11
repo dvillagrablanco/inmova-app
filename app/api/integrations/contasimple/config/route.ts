@@ -1,6 +1,6 @@
 /**
  * API Route: Configuración de Contasimple por empresa
- * 
+ *
  * GET /api/integrations/contasimple/config - Obtener configuración actual
  * POST /api/integrations/contasimple/config - Guardar/actualizar credenciales
  * DELETE /api/integrations/contasimple/config - Eliminar integración
@@ -26,11 +26,11 @@ async function getPrisma() {
 // ENCRIPTACIÓN DE CREDENCIALES
 // ═══════════════════════════════════════════════════════════════
 
-const ENCRYPTION_KEY = process.env.CONTASIMPLE_ENCRYPTION_KEY || 'default-key-change-in-production-32b';
+const ENCRYPTION_KEY =
+  process.env.CONTASIMPLE_ENCRYPTION_KEY || 'default-key-change-in-production-32b';
 const ALGORITHM = 'aes-256-cbc';
 
-async function encrypt(text: string): string {
-  const prisma = await getPrisma();
+function encrypt(text: string): string {
   const iv = crypto.randomBytes(16);
   const key = Buffer.from(ENCRYPTION_KEY.padEnd(32, '0').slice(0, 32));
   const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
@@ -39,8 +39,7 @@ async function encrypt(text: string): string {
   return iv.toString('hex') + ':' + encrypted;
 }
 
-async function decrypt(text: string): string {
-  const prisma = await getPrisma();
+function decrypt(text: string): string {
   const parts = text.split(':');
   const iv = Buffer.from(parts[0], 'hex');
   const encrypted = parts[1];
@@ -87,10 +86,7 @@ export async function GET(req: NextRequest) {
     });
   } catch (error: any) {
     logger.error('[Contasimple Config] Error obteniendo configuración:', error);
-    return NextResponse.json(
-      { error: 'Error obteniendo configuración' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error obteniendo configuración' }, { status: 500 });
   }
 }
 
@@ -135,7 +131,9 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    logger.info(`[Contasimple Config] ✅ Credenciales guardadas para empresa ${session.user.companyId}`);
+    logger.info(
+      `[Contasimple Config] ✅ Credenciales guardadas para empresa ${session.user.companyId}`
+    );
 
     return NextResponse.json({
       success: true,
@@ -150,10 +148,7 @@ export async function POST(req: NextRequest) {
     }
 
     logger.error('[Contasimple Config] Error guardando configuración:', error);
-    return NextResponse.json(
-      { error: 'Error guardando configuración' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error guardando configuración' }, { status: 500 });
   }
 }
 
@@ -185,7 +180,9 @@ export async function DELETE(req: NextRequest) {
       },
     });
 
-    logger.info(`[Contasimple Config] ✅ Integración eliminada para empresa ${session.user.companyId}`);
+    logger.info(
+      `[Contasimple Config] ✅ Integración eliminada para empresa ${session.user.companyId}`
+    );
 
     return NextResponse.json({
       success: true,
@@ -193,10 +190,7 @@ export async function DELETE(req: NextRequest) {
     });
   } catch (error: any) {
     logger.error('[Contasimple Config] Error eliminando configuración:', error);
-    return NextResponse.json(
-      { error: 'Error eliminando configuración' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error eliminando configuración' }, { status: 500 });
   }
 }
 
@@ -213,6 +207,7 @@ export async function getContasimpleCredentials(companyId: string): Promise<{
   enabled: boolean;
 } | null> {
   try {
+    const prisma = await getPrisma();
     const company = await prisma.company.findUnique({
       where: { id: companyId },
       select: {

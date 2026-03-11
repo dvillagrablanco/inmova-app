@@ -54,10 +54,7 @@ export async function GET(request: NextRequest) {
       where: {
         unit: { building: { companyId } },
         estado: 'activo',
-        OR: [
-          { contractPdfPath: null },
-          { contractPdfPath: '' },
-        ],
+        OR: [{ contractPdfPath: null }, { contractPdfPath: '' }],
       },
       include: {
         tenant: { select: { nombreCompleto: true } },
@@ -79,7 +76,7 @@ export async function GET(request: NextRequest) {
     const tenantsNoDni = await prisma.tenant.findMany({
       where: {
         companyId,
-        OR: [{ dni: null }, { dni: '' }],
+        dni: '',
       },
       select: {
         nombreCompleto: true,
@@ -145,7 +142,9 @@ export async function GET(request: NextRequest) {
           accion: 'Renovar póliza inmediatamente',
         });
       }
-    } catch { /* Insurance model may not exist */ }
+    } catch {
+      /* Insurance model may not exist */
+    }
 
     // Ordenar por prioridad
     const prioridadOrden: Record<string, number> = { alta: 0, media: 1, baja: 2 };
@@ -155,9 +154,9 @@ export async function GET(request: NextRequest) {
       success: true,
       resumen: {
         total: issues.length,
-        alta: issues.filter(i => i.prioridad === 'alta').length,
-        media: issues.filter(i => i.prioridad === 'media').length,
-        baja: issues.filter(i => i.prioridad === 'baja').length,
+        alta: issues.filter((i) => i.prioridad === 'alta').length,
+        media: issues.filter((i) => i.prioridad === 'media').length,
+        baja: issues.filter((i) => i.prioridad === 'baja').length,
         porTipo: {
           contratosSinPdf: contractsNoPdf.length,
           inquilinosSinDni: tenantsNoDni.length,

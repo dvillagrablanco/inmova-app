@@ -31,8 +31,12 @@ export async function GET(request: NextRequest) {
     const mandates = await prisma.bankConnection.findMany({
       where: { companyId: session.user.companyId, proveedor: 'gocardless' },
       select: {
-        id: true, tenantId: true, nombreBanco: true, estado: true,
-        ultimaSincronizacion: true, createdAt: true,
+        id: true,
+        tenantId: true,
+        nombreBanco: true,
+        estado: true,
+        ultimaSync: true,
+        createdAt: true,
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -49,16 +53,17 @@ export async function GET(request: NextRequest) {
     });
 
     const txMap = Object.fromEntries(
-      txCounts.map(t => [t.connectionId, { count: t._count, total: t._sum.monto || 0 }])
+      txCounts.map((t) => [t.connectionId, { count: t._count, total: t._sum.monto || 0 }])
     );
 
     // Get creditor info from GoCardless API
     let creditor = null;
     try {
-      const baseUrl = env === 'live' ? 'https://api.gocardless.com' : 'https://api-sandbox.gocardless.com';
+      const baseUrl =
+        env === 'live' ? 'https://api.gocardless.com' : 'https://api-sandbox.gocardless.com';
       const res = await fetch(`${baseUrl}/creditors`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'GoCardless-Version': '2015-07-06',
         },
       });
@@ -78,13 +83,13 @@ export async function GET(request: NextRequest) {
         environment: env,
         creditor,
       },
-      mandates: mandates.map(m => ({
+      mandates: mandates.map((m) => ({
         ...m,
         payments: txMap[m.id] || { count: 0, total: 0 },
       })),
       summary: {
         totalMandates: mandates.length,
-        active: mandates.filter(m => m.estado === 'conectado').length,
+        active: mandates.filter((m) => m.estado === 'conectado').length,
         totalPayments: txCounts.reduce((s, t) => s + t._count, 0),
         totalAmount: txCounts.reduce((s, t) => s + (t._sum.monto || 0), 0),
       },

@@ -7,6 +7,11 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 /**
  * GET /api/admin/ewoorker-planes
  * Lista los planes de eWoorker
@@ -24,7 +29,7 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Lazy load Prisma
+    const prisma = await getPrisma();
 
     const planes = await prisma.ewoorkerPlan.findMany({
       orderBy: { orden: 'asc' },
@@ -77,7 +82,7 @@ export async function POST(request: NextRequest) {
 
     const validated = schema.parse(body);
 
-    // Lazy load Prisma
+    const prisma = await getPrisma();
 
     // Verificar que el código no existe
     const existing = await prisma.ewoorkerPlan.findUnique({
@@ -132,7 +137,7 @@ export async function POST(request: NextRequest) {
         where: { id: session.user.id },
         select: { companyId: true },
       });
-      
+
       if (user?.companyId) {
         await prisma.auditLog.create({
           data: {

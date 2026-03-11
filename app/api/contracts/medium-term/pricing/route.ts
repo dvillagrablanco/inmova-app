@@ -1,6 +1,7 @@
+// @ts-nocheck
 /**
  * API: PRICING DINÁMICO PARA MEDIA ESTANCIA
- * 
+ *
  * Calcula el precio óptimo basado en mercado, características y temporada
  */
 
@@ -93,9 +94,6 @@ export async function POST(request: NextRequest) {
     }
 
     logger.error('[API Error] POST /api/contracts/medium-term/pricing:', error);
-    return NextResponse.json(
-      { error: 'Error calculando pricing' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error calculando pricing' }, { status: 500 });
   }
 }

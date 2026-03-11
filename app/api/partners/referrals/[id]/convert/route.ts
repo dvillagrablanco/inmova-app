@@ -18,10 +18,17 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   try {
     const lead = await prisma.lead.findUnique({
       where: { id: params.id },
-      select: { id: true, source: true, sourceDetail: true, estado: true, companyId: true, nombre: true },
+      select: {
+        id: true,
+        fuente: true,
+        origenDetalle: true,
+        estado: true,
+        companyId: true,
+        nombre: true,
+      },
     });
 
-    if (!lead || lead.source !== 'partner_referral') {
+    if (!lead || lead.fuente !== 'partner_referral') {
       return NextResponse.json({ error: 'Referido no encontrado' }, { status: 404 });
     }
 
@@ -30,7 +37,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     }
 
     const partner = await prisma.partner.findUnique({
-      where: { id: lead.sourceDetail! },
+      where: { id: lead.origenDetalle! },
       select: { id: true, nombre: true, comisionPorcentaje: true },
     });
 
@@ -59,8 +66,9 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
           montoBruto,
           porcentaje: partner.comisionPorcentaje,
           montoComision: montoBruto * (partner.comisionPorcentaje / 100),
-          estado: 'pendiente',
-          concepto: `Referido convertido: ${lead.nombre}`,
+          estado: 'PENDING',
+          planNombre: `Referido convertido: ${lead.nombre}`,
+          clientesActivos: 1,
         },
       });
     }

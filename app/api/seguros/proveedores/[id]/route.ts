@@ -68,7 +68,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ error: 'Proveedor no encontrado' }, { status: 404 });
     }
 
-    if (!companyIds.includes(provider.companyId)) {
+    if (!(companyIds as string[]).includes(provider.companyId)) {
       return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
     }
 
@@ -99,7 +99,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ error: 'Proveedor no encontrado' }, { status: 404 });
     }
 
-    if (!companyIds.includes(existing.companyId)) {
+    if (!(companyIds as string[]).includes(existing.companyId)) {
       return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
     }
 
@@ -144,7 +144,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
       return NextResponse.json({ error: 'Proveedor no encontrado' }, { status: 404 });
     }
 
-    if (!companyIds.includes(existing.companyId)) {
+    if (!(companyIds as string[]).includes(existing.companyId)) {
       return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
     }
 

@@ -31,34 +31,46 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Mensaje requerido' }, { status: 400 });
     }
 
-    const userId = session.user.id as string;
+    const userEmail = session.user.email || '';
 
     // Obtener datos del inquilino
     const tenant = await prisma.tenant.findFirst({
-      where: { userId },
-      include: {
-        contracts: {
-          where: { estado: 'activo' },
+      where: { email: userEmail },
+    });
+
+    const contracts = tenant
+      ? await prisma.contract.findMany({
+          where: { tenantId: tenant.id, estado: 'activo' },
           include: {
             unit: { include: { building: { select: { nombre: true, direccion: true } } } },
             payments: { orderBy: { fechaVencimiento: 'desc' }, take: 6 },
           },
-        },
-        maintenanceRequests: {
-          where: { estado: { in: ['pendiente', 'en_progreso'] } },
-          orderBy: { fechaSolicitud: 'desc' },
-          take: 5,
-        },
-      },
-    });
+          orderBy: { fechaInicio: 'desc' },
+          take: 1,
+        })
+      : [];
+    const contract = contracts[0];
+    const maintenanceRequests =
+      tenant && contract?.unitId
+        ? await prisma.maintenanceRequest.findMany({
+            where: {
+              unitId: contract.unitId,
+              estado: { in: ['pendiente', 'en_progreso'] },
+            },
+            orderBy: { fechaSolicitud: 'desc' },
+            take: 5,
+          })
+        : [];
 
     // Contexto del inquilino para la IA
-    const contract = tenant?.contracts?.[0];
     const payments = contract?.payments || [];
-    const pendingPayments = payments.filter((p: any) => p.estado === 'pendiente' || p.estado === 'atrasado');
-    const openIncidencias = tenant?.maintenanceRequests?.length || 0;
+    const pendingPayments = payments.filter(
+      (p: any) => p.estado === 'pendiente' || p.estado === 'atrasado'
+    );
+    const openIncidencias = maintenanceRequests.length || 0;
 
-    const tenantContext = tenant ? `
+    const tenantContext = tenant
+      ? `
 Datos del inquilino:
 - Nombre: ${tenant.nombreCompleto}
 - Edificio: ${contract?.unit?.building?.nombre || 'N/A'}, Unidad: ${contract?.unit?.numero || 'N/A'}
@@ -66,8 +78,12 @@ Datos del inquilino:
 - Contrato hasta: ${contract?.fechaFin ? new Date(contract.fechaFin).toLocaleDateString('es-ES') : 'N/A'}
 - Pagos pendientes: ${pendingPayments.length} (${pendingPayments.reduce((s: number, p: any) => s + p.monto, 0)}€)
 - Incidencias abiertas: ${openIncidencias}
-- Últimos pagos: ${payments.slice(0, 3).map((p: any) => `${p.periodo}: ${p.monto}€ (${p.estado})`).join(', ')}
-` : 'No se encontraron datos del inquilino.';
+- Últimos pagos: ${payments
+          .slice(0, 3)
+          .map((p: any) => `${p.periodo}: ${p.monto}€ (${p.estado})`)
+          .join(', ')}
+`
+      : 'No se encontraron datos del inquilino.';
 
     // Llamar a Claude
     const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -96,9 +112,7 @@ ${tenantContext}`;
     const response = await anthropic.messages.create({
       model: CLAUDE_MODEL_PRIMARY,
       max_tokens: 500,
-      messages: [
-        { role: 'user', content: message },
-      ],
+      messages: [{ role: 'user', content: message }],
       system: systemPrompt,
     });
 
@@ -121,7 +135,9 @@ ${tenantContext}`;
           },
         });
         incidenciaCreada = incidencia.id;
-        logger.info(`[Tenant Chat] Incidencia creada: ${incidencia.id} por ${tenant.nombreCompleto}`);
+        logger.info(
+          `[Tenant Chat] Incidencia creada: ${incidencia.id} por ${tenant.nombreCompleto}`
+        );
       } catch (err) {
         logger.warn('[Tenant Chat] Error creando incidencia:', err);
       }

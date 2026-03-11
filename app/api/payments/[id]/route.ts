@@ -265,7 +265,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         logger.info(`✅ Recibo generado y enviado para pago ${payment.id}`);
       } catch (emailError) {
         logger.error('Error generando recibo o enviando email:', emailError);
-        Sentry.captureException(error);
+        Sentry.captureException(emailError);
         // No fallar la actualización del pago si falla el email
       }
     }

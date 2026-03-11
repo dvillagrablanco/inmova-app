@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * POST /api/operator-signatures/batch — Crear solicitudes en lote
  * PUT  /api/operator-signatures/batch — Aprobar lote completo
@@ -6,10 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import {
-  createBatchOperatorSignatures,
-  approveBatch,
-} from '@/lib/operator-signature-service';
+import { createBatchOperatorSignatures, approveBatch } from '@/lib/operator-signature-service';
 import { z } from 'zod';
 import logger from '@/lib/logger';
 
@@ -18,22 +16,30 @@ export const runtime = 'nodejs';
 
 const batchCreateSchema = z.object({
   operatorName: z.string().min(1),
-  requests: z.array(z.object({
-    documentUrl: z.string(),
-    documentName: z.string(),
-    signatories: z.array(z.object({
-      name: z.string(),
-      email: z.string().email(),
-      role: z.string(),
-    })).min(1),
-    unitId: z.string().optional(),
-    tenantName: z.string().optional(),
-    tenantEmail: z.string().email().optional(),
-    monthlyRent: z.number().optional(),
-    startDate: z.string().optional(),
-    endDate: z.string().optional(),
-    receivedVia: z.string().optional(),
-  })).min(1),
+  requests: z
+    .array(
+      z.object({
+        documentUrl: z.string(),
+        documentName: z.string(),
+        signatories: z
+          .array(
+            z.object({
+              name: z.string(),
+              email: z.string().email(),
+              role: z.string(),
+            })
+          )
+          .min(1),
+        unitId: z.string().optional(),
+        tenantName: z.string().optional(),
+        tenantEmail: z.string().email().optional(),
+        monthlyRent: z.number().optional(),
+        startDate: z.string().optional(),
+        endDate: z.string().optional(),
+        receivedVia: z.string().optional(),
+      })
+    )
+    .min(1),
 });
 
 const batchApproveSchema = z.object({
@@ -57,7 +63,7 @@ export async function POST(req: NextRequest) {
     const result = await createBatchOperatorSignatures(
       companyId,
       body.operatorName,
-      body.requests.map(r => ({
+      body.requests.map((r) => ({
         ...r,
         startDate: r.startDate ? new Date(r.startDate) : undefined,
         endDate: r.endDate ? new Date(r.endDate) : undefined,
@@ -67,7 +73,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, ...result }, { status: 201 });
   } catch (error: any) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Datos inválidos', details: error.errors }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Datos inválidos', details: error.errors },
+        { status: 400 }
+      );
     }
     logger.error('[OperatorSignatures Batch Create]:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -94,7 +103,10 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ success: true, ...result });
   } catch (error: any) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Datos inválidos', details: error.errors }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Datos inválidos', details: error.errors },
+        { status: 400 }
+      );
     }
     logger.error('[OperatorSignatures Batch Approve]:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });

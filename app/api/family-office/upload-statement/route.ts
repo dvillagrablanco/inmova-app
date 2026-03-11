@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
       const { uploadFile } = await import('@/lib/s3');
       const timestamp = Date.now();
       s3Key = `financial-statements/${bank}/${timestamp}_${fileName}`;
-      await uploadFile(s3Key, buffer, file.type || 'application/octet-stream');
+      await uploadFile(buffer, s3Key);
     } catch (s3Error: any) {
       logger.warn('[Upload Statement] S3 upload failed, processing from memory:', s3Error.message);
       s3Key = `local:${fileName}`;
@@ -93,10 +93,12 @@ export async function POST(req: NextRequest) {
       }
     } else if (type === 'pdf') {
       // PDF — will be processed with Claude OCR
-      result.message = 'PDF subido. Procesamiento OCR pendiente — usar /api/family-office/import/pictet-pdf para Pictet o enviar a Claude para extracción.';
+      result.message =
+        'PDF subido. Procesamiento OCR pendiente — usar /api/family-office/import/pictet-pdf para Pictet o enviar a Claude para extracción.';
       result.ocrEndpoint = '/api/family-office/import/pictet-pdf';
     } else if (type === 'camt053') {
-      result.message = 'CAMT.053 subido. Usar script import-bank-movements-camt053.ts para importar.';
+      result.message =
+        'CAMT.053 subido. Usar script import-bank-movements-camt053.ts para importar.';
     }
 
     return NextResponse.json({ success: true, ...result });

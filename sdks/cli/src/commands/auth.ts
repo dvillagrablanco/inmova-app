@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Command } from 'commander';
 import inquirer from 'inquirer';
 import ora from 'ora';

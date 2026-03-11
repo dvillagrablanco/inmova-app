@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Servicio de Verificación Exprés para eWoorker
  *

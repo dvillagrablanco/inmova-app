@@ -32,40 +32,117 @@ export async function POST(request: NextRequest) {
 
     // Recopilar TODOS los datos patrimoniales
     const groupIds = [companyId];
-    const children = await prisma.company.findMany({ where: { parentCompanyId: companyId }, select: { id: true, nombre: true } });
+    const children = await prisma.company.findMany({
+      where: { parentCompanyId: companyId },
+      select: { id: true, nombre: true },
+    });
     children.forEach((c) => groupIds.push(c.id));
 
-    const [contracts, units, accounts, participations, pendingPayments, overdueCount, suggestions, fianzas, expenses2025] = await Promise.all([
-      prisma.contract.findMany({ where: { unit: { building: { companyId: { in: groupIds } } }, estado: 'activo' }, select: { rentaMensual: true } }),
-      prisma.unit.findMany({ where: { building: { companyId: { in: groupIds }, isDemo: false } }, select: { estado: true, rentaMensual: true, valorMercado: true, precioCompra: true } }),
-      prisma.financialAccount.findMany({ where: { companyId, activa: true }, include: { positions: { select: { nombre: true, valorActual: true, pnlNoRealizado: true, pnlRealizado: true, tipo: true, entidad: true } } } }),
-      prisma.participation.findMany({ where: { companyId, activa: true }, select: { targetCompanyName: true, porcentaje: true, valorContable: true, valorEstimado: true, tipo: true, tvpi: true, capitalPendiente: true, vehiculoInversor: true } }),
-      prisma.payment.count({ where: { contract: { unit: { building: { companyId: { in: groupIds } } } }, estado: 'pendiente' } }),
-      prisma.payment.count({ where: { contract: { unit: { building: { companyId: { in: groupIds } } } }, estado: 'atrasado' } }),
-      prisma.smartSuggestion.findMany({ where: { companyId: { in: groupIds }, estado: 'pendiente' }, orderBy: { prioridad: 'asc' }, take: 10, select: { titulo: true, prioridad: true, area: true, accion: true } }),
-      prisma.fianzaDeposit.aggregate({ where: { companyId: { in: groupIds } }, _sum: { importeFianza: true }, _count: { id: true } }),
-      prisma.expense.groupBy({ by: ['categoria'], where: { ejercicio: 2025, building: { companyId: { in: groupIds } } }, _sum: { monto: true } }),
+    const [
+      contracts,
+      units,
+      accounts,
+      participations,
+      pendingPayments,
+      overdueCount,
+      suggestions,
+      fianzas,
+      expenses2025,
+    ] = await Promise.all([
+      prisma.contract.findMany({
+        where: { unit: { building: { companyId: { in: groupIds } } }, estado: 'activo' },
+        select: { rentaMensual: true },
+      }),
+      prisma.unit.findMany({
+        where: { building: { companyId: { in: groupIds }, isDemo: false } },
+        select: { estado: true, rentaMensual: true, valorMercado: true, precioCompra: true },
+      }),
+      prisma.financialAccount.findMany({
+        where: { companyId, activa: true },
+        include: {
+          positions: {
+            select: {
+              nombre: true,
+              valorActual: true,
+              pnlNoRealizado: true,
+              pnlRealizado: true,
+              tipo: true,
+            },
+          },
+        },
+      }),
+      prisma.participation.findMany({
+        where: { companyId, activa: true },
+        select: {
+          targetCompanyName: true,
+          porcentaje: true,
+          valorContable: true,
+          valorEstimado: true,
+          tipo: true,
+          tvpi: true,
+          capitalPendiente: true,
+          vehiculoInversor: true,
+        },
+      }),
+      prisma.payment.count({
+        where: {
+          contract: { unit: { building: { companyId: { in: groupIds } } } },
+          estado: 'pendiente',
+        },
+      }),
+      prisma.payment.count({
+        where: {
+          contract: { unit: { building: { companyId: { in: groupIds } } } },
+          estado: 'atrasado',
+        },
+      }),
+      prisma.smartSuggestion.findMany({
+        where: { companyId: { in: groupIds }, estado: 'pendiente' },
+        orderBy: { prioridad: 'asc' },
+        take: 10,
+        select: { titulo: true, prioridad: true, area: true, accion: true },
+      }),
+      prisma.fianzaDeposit.aggregate({
+        where: { companyId: { in: groupIds } },
+        _sum: { importeFianza: true },
+        _count: { id: true },
+      }),
+      prisma.expense.groupBy({
+        by: ['categoria'],
+        where: { ejercicio: 2025, building: { companyId: { in: groupIds } } },
+        _sum: { monto: true },
+      }),
     ]);
 
     const rentaTotal = contracts.reduce((s, c) => s + c.rentaMensual, 0);
     const valorInmob = units.reduce((s, u) => s + (u.valorMercado || u.precioCompra || 0), 0);
     const ocupadas = units.filter((u) => u.estado === 'ocupada').length;
-    const valorFin = accounts.reduce((s, a) => s + a.positions.reduce((ps, p) => ps + p.valorActual, 0), 0);
-    const pnlFin = accounts.reduce((s, a) => s + a.positions.reduce((ps, p) => ps + p.pnlNoRealizado + p.pnlRealizado, 0), 0);
+    const valorFin = accounts.reduce(
+      (s, a) => s + a.positions.reduce((ps: number, p: any) => ps + p.valorActual, 0),
+      0
+    );
+    const pnlFin = accounts.reduce(
+      (s, a) =>
+        s + a.positions.reduce((ps: number, p: any) => ps + p.pnlNoRealizado + p.pnlRealizado, 0),
+      0
+    );
     const saldos = accounts.reduce((s, a) => s + a.saldoActual, 0);
     const valorPE = participations.reduce((s, p) => s + (p.valorEstimado || p.valorContable), 0);
     const patrimonioTotal = valorInmob + valorFin + valorPE + saldos;
 
     // Top posiciones financieras
-    const topPositions = accounts.flatMap((a) => a.positions).sort((a, b) => b.valorActual - a.valorActual).slice(0, 10);
+    const topPositions = accounts
+      .flatMap((a) => a.positions)
+      .sort((a, b) => b.valorActual - a.valorActual)
+      .slice(0, 10);
 
     const context = `DATOS PATRIMONIALES EN TIEMPO REAL (Family Office):
 
 PATRIMONIO TOTAL: ${Math.round(patrimonioTotal).toLocaleString('es-ES')}€
 
 INMOBILIARIO: ${Math.round(valorInmob).toLocaleString('es-ES')}€
-- ${units.length} unidades (${ocupadas} ocupadas, ${(ocupadas/units.length*100).toFixed(0)}% ocupación)
-- Renta mensual: ${Math.round(rentaTotal).toLocaleString('es-ES')}€/mes (${Math.round(rentaTotal*12).toLocaleString('es-ES')}€/año)
+- ${units.length} unidades (${ocupadas} ocupadas, ${((ocupadas / units.length) * 100).toFixed(0)}% ocupación)
+- Renta mensual: ${Math.round(rentaTotal).toLocaleString('es-ES')}€/mes (${Math.round(rentaTotal * 12).toLocaleString('es-ES')}€/año)
 - Sociedades: ${children.map((c) => c.nombre).join(', ')}
 - Pagos pendientes: ${pendingPayments}, atrasados: ${overdueCount}
 
@@ -81,21 +158,27 @@ TESORERÍA: ${Math.round(saldos).toLocaleString('es-ES')}€
 - Por entidad: ${accounts.map((a) => `${a.entidad}: ${Math.round(a.saldoActual).toLocaleString('es-ES')}€`).join(', ')}
 
 ASSET ALLOCATION:
-- Inmobiliario: ${patrimonioTotal > 0 ? (valorInmob/patrimonioTotal*100).toFixed(1) : 0}%
-- Financiero: ${patrimonioTotal > 0 ? (valorFin/patrimonioTotal*100).toFixed(1) : 0}%
-- Private Equity: ${patrimonioTotal > 0 ? (valorPE/patrimonioTotal*100).toFixed(1) : 0}%
-- Liquidez: ${patrimonioTotal > 0 ? (saldos/patrimonioTotal*100).toFixed(1) : 0}%
+- Inmobiliario: ${patrimonioTotal > 0 ? ((valorInmob / patrimonioTotal) * 100).toFixed(1) : 0}%
+- Financiero: ${patrimonioTotal > 0 ? ((valorFin / patrimonioTotal) * 100).toFixed(1) : 0}%
+- Private Equity: ${patrimonioTotal > 0 ? ((valorPE / patrimonioTotal) * 100).toFixed(1) : 0}%
+- Liquidez: ${patrimonioTotal > 0 ? ((saldos / patrimonioTotal) * 100).toFixed(1) : 0}%
 
 PRIVATE EQUITY DETALLADO:
-${participations.filter(p => p.tipo === 'pe_fund').map(p => `- ${p.targetCompanyName}: TVPI ${p.tvpi?.toFixed(2) || 'N/A'}x, Pendiente: ${Math.round(p.capitalPendiente || 0).toLocaleString('es-ES')}€ (${p.vehiculoInversor || 'directo'})`).join('\n')}
+${participations
+  .filter((p) => p.tipo === 'pe_fund')
+  .map(
+    (p) =>
+      `- ${p.targetCompanyName}: TVPI ${p.tvpi?.toFixed(2) || 'N/A'}x, Pendiente: ${Math.round(p.capitalPendiente || 0).toLocaleString('es-ES')}€ (${p.vehiculoInversor || 'directo'})`
+  )
+  .join('\n')}
 
 FIANZAS: ${fianzas._count.id} fianzas depositadas, total ${Math.round(fianzas._sum.importeFianza || 0).toLocaleString('es-ES')}€
 
 GASTOS 2025 POR CATEGORÍA:
-${expenses2025.map(e => `- ${e.categoria}: ${Math.round(e._sum.monto || 0).toLocaleString('es-ES')}€`).join('\n')}
+${expenses2025.map((e) => `- ${e.categoria}: ${Math.round(e._sum.monto || 0).toLocaleString('es-ES')}€`).join('\n')}
 
 SUGERENCIAS INTELIGENTES PENDIENTES (${suggestions.length}):
-${suggestions.map(s => `- [${s.prioridad}] ${s.area}: ${s.titulo} → ${s.accion || 'Sin acción'}`).join('\n')}
+${suggestions.map((s) => `- [${s.prioridad}] ${s.area}: ${s.titulo} → ${s.accion || 'Sin acción'}`).join('\n')}
 
 FUNCIONALIDADES DISPONIBLES EN LA APP:
 - Cuadro de Mandos Financiero (/finanzas/cuadro-de-mandos): PyG Analítica por centro de coste

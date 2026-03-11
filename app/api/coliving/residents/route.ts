@@ -17,8 +17,7 @@ type SessionUser = {
   companyId?: string;
 };
 
-async function parseStringArray(value: unknown): string[] {
-  const prisma = await getPrisma();
+function parseStringArray(value: unknown): string[] {
   if (!Array.isArray(value)) {
     return [];
   }
@@ -64,9 +63,7 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    const contractByTenant = new Map(
-      contracts.map((contract) => [contract.tenantId, contract])
-    );
+    const contractByTenant = new Map(contracts.map((contract) => [contract.tenantId, contract]));
 
     const residents = profiles.map((profile) => {
       const contract = contractByTenant.get(profile.tenantId);
@@ -87,9 +84,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(residents);
   } catch (error) {
     logger.error('Error fetching coliving residents', error);
-    return NextResponse.json(
-      { error: 'Error al obtener residentes' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener residentes' }, { status: 500 });
   }
 }

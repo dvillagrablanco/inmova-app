@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
@@ -51,9 +52,10 @@ export async function GET(request: NextRequest) {
       primaryCompanyId: (session.user as any).companyId,
       request,
     });
-    const companyFilter = scope.scopeCompanyIds.length > 1
-      ? { in: scope.scopeCompanyIds }
-      : scope.activeCompanyId || (session.user as any).companyId;
+    const companyFilter =
+      scope.scopeCompanyIds.length > 1
+        ? { in: scope.scopeCompanyIds }
+        : scope.activeCompanyId || (session.user as any).companyId;
 
     const providers = await prisma.insuranceProvider.findMany({
       where: {

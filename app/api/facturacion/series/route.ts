@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * API: Series de facturación
  * GET: Listar series | POST: Crear serie

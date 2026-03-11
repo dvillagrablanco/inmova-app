@@ -63,12 +63,16 @@ export async function GET(request: NextRequest) {
         include: { childCompanies: { select: { id: true } } },
       });
       if (parentCompany?.childCompanies?.length) {
-        allScopeIds = [session.user.companyId, ...parentCompany.childCompanies.map((c: any) => c.id)];
+        allScopeIds = [
+          session.user.companyId,
+          ...parentCompany.childCompanies.map((c: any) => c.id),
+        ];
       }
     }
-    const companyFilter = allScopeIds.length > 1
-      ? { in: allScopeIds }
-      : scope.activeCompanyId || session.user.companyId;
+    const companyFilter =
+      allScopeIds.length > 1
+        ? { in: allScopeIds }
+        : scope.activeCompanyId || session.user.companyId;
 
     const spaces = await prisma.commercialSpace.findMany({
       where: {
@@ -98,7 +102,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Formatear respuesta
-    const formattedSpaces = spaces.map((space) => {
+    const formattedSpaces: Array<Record<string, any>> = spaces.map((space) => {
       const activeLease = space.commercialLeases[0];
       return {
         id: space.id,
@@ -138,16 +142,17 @@ export async function GET(request: NextRequest) {
         naves: ['nave_industrial'],
         coworking: ['coworking_space'],
       };
-      const unitTipos = categoria && UNIT_TIPO_MAPPING[categoria]
-        ? UNIT_TIPO_MAPPING[categoria]
-        : ['local', 'oficina', 'nave_industrial', 'coworking_space'];
+      const unitTipos =
+        categoria && UNIT_TIPO_MAPPING[categoria]
+          ? UNIT_TIPO_MAPPING[categoria]
+          : ['local', 'oficina', 'nave_industrial', 'coworking_space'];
 
       const units = await prisma.unit.findMany({
         where: {
           building: { companyId: companyFilter },
           tipo: { in: unitTipos as any },
           ...(estadoFilter === 'disponible' ? { estado: 'disponible' } : {}),
-          ...(estadoFilter === 'ocupada' ? { estado: 'ocupado' } : {}),
+          ...(estadoFilter === 'ocupada' ? { estado: 'ocupada' } : {}),
         },
         include: {
           building: { select: { id: true, nombre: true, direccion: true } },
@@ -163,14 +168,23 @@ export async function GET(request: NextRequest) {
           referencia: unit.referenciaCatastral || null,
           tipo: unit.tipo,
           direccion: unit.building?.direccion || '',
-          ciudad: '',
+          ciudad:
+            unit.building?.direccion
+              ?.split(',')
+              .map((part) => part.trim())
+              .filter(Boolean)
+              .pop() || '',
           planta: unit.planta,
           superficie: unit.superficie,
           superficieUtil: unit.superficieUtil || unit.superficie * 0.9,
-          estado: unit.tenant ? 'ocupada' : (unit.estado === 'disponible' ? 'disponible' : unit.estado),
+          estado: unit.tenant
+            ? 'ocupada'
+            : unit.estado === 'disponible'
+              ? 'disponible'
+              : unit.estado,
           rentaMensual: unit.rentaMensual,
           arrendatario: unit.tenant?.nombreCompleto || null,
-          arrendatarioId: unit.tenant?.id || null,
+          arrendatarioId: unit.tenantId || null,
           buildingId: unit.buildingId,
           buildingName: unit.building?.nombre,
           caracteristicas: [
@@ -189,7 +203,7 @@ export async function GET(request: NextRequest) {
     const stats = {
       total: formattedSpaces.length,
       ocupadas: formattedSpaces.filter((s) => s.estado === 'ocupada').length,
-      disponibles: formattedSpaces.filter((s) => s.estado === 'disponible' || s.estado === 'disponible').length,
+      disponibles: formattedSpaces.filter((s) => s.estado === 'disponible').length,
       reservadas: 0,
       superficieTotal: formattedSpaces.reduce((sum, s) => sum + (s.superficie || 0), 0),
       rentaMensualTotal: formattedSpaces
@@ -200,7 +214,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ spaces: formattedSpaces, stats });
   } catch (error: any) {
     logger.error('[CommercialSpaces GET] Error:', error);
-    return NextResponse.json({ error: 'Error al obtener espacios', details: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Error al obtener espacios', details: error.message },
+      { status: 500 }
+    );
   }
 }
 
@@ -244,10 +261,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!precioAlquiler) {
-      return NextResponse.json(
-        { error: 'El precio de alquiler es requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'El precio de alquiler es requerido' }, { status: 400 });
     }
 
     const rentaMensualBase = Number(precioAlquiler);
@@ -284,6 +298,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(space, { status: 201 });
   } catch (error: any) {
     logger.error('[CommercialSpaces POST] Error:', error);
-    return NextResponse.json({ error: 'Error al crear espacio', details: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Error al crear espacio', details: error.message },
+      { status: 500 }
+    );
   }
 }

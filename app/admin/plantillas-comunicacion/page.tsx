@@ -34,14 +34,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  MessageSquare,
-  Edit,
-  Eye,
-  Power,
-  PowerOff,
-  Loader2,
-} from 'lucide-react';
+import { MessageSquare, Edit, Eye, Power, PowerOff, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Plantilla {
@@ -53,6 +46,14 @@ interface Plantilla {
   evento_trigger: 'manual' | 'automatico';
   activa: boolean;
 }
+
+type PlantillaFormState = {
+  nombre: string;
+  asunto: string;
+  cuerpo: string;
+  tipo: Plantilla['tipo'];
+  evento_trigger: Plantilla['evento_trigger'];
+};
 
 const VARIABLES_EJEMPLO: Record<string, string> = {
   inquilino_nombre: 'Juan García',
@@ -86,7 +87,13 @@ export default function PlantillasComunicacionPage() {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [editing, setEditing] = useState<Plantilla | null>(null);
   const [previewPlantilla, setPreviewPlantilla] = useState<Plantilla | null>(null);
-  const [form, setForm] = useState({ nombre: '', asunto: '', cuerpo: '', tipo: 'email' as const, evento_trigger: 'manual' as const });
+  const [form, setForm] = useState<PlantillaFormState>({
+    nombre: '',
+    asunto: '',
+    cuerpo: '',
+    tipo: 'email',
+    evento_trigger: 'manual',
+  });
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -112,7 +119,13 @@ export default function PlantillasComunicacionPage() {
 
   function openEdit(p: Plantilla) {
     setEditing(p);
-    setForm({ nombre: p.nombre, asunto: p.asunto, cuerpo: p.cuerpo, tipo: p.tipo, evento_trigger: p.evento_trigger });
+    setForm({
+      nombre: p.nombre,
+      asunto: p.asunto,
+      cuerpo: p.cuerpo,
+      tipo: p.tipo,
+      evento_trigger: p.evento_trigger,
+    });
     setEditOpen(true);
   }
 
@@ -214,7 +227,9 @@ export default function PlantillasComunicacionPage() {
                         <Badge variant="outline">{p.tipo}</Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={p.evento_trigger === 'automatico' ? 'default' : 'secondary'}>
+                        <Badge
+                          variant={p.evento_trigger === 'automatico' ? 'default' : 'secondary'}
+                        >
                           {p.evento_trigger}
                         </Badge>
                       </TableCell>
@@ -225,10 +240,20 @@ export default function PlantillasComunicacionPage() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                          <Button variant="ghost" size="icon" onClick={() => openEdit(p)} title="Editar">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => openEdit(p)}
+                            title="Editar"
+                          >
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" onClick={() => openPreview(p)} title="Vista previa">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => openPreview(p)}
+                            title="Vista previa"
+                          >
                             <Eye className="h-4 w-4" />
                           </Button>
                           <Button
@@ -237,7 +262,11 @@ export default function PlantillasComunicacionPage() {
                             onClick={() => toggleActiva(p)}
                             title={p.activa ? 'Desactivar' : 'Activar'}
                           >
-                            {p.activa ? <PowerOff className="h-4 w-4" /> : <Power className="h-4 w-4" />}
+                            {p.activa ? (
+                              <PowerOff className="h-4 w-4" />
+                            ) : (
+                              <Power className="h-4 w-4" />
+                            )}
                           </Button>
                         </div>
                       </TableCell>
@@ -253,25 +282,47 @@ export default function PlantillasComunicacionPage() {
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Editar plantilla</DialogTitle>
-              <DialogDescription>Modifica el contenido de la plantilla. Usa variables como {'{{inquilino_nombre}}'}, {'{{inmueble_direccion}}'}, {'{{fecha}}'}, {'{{importe}}'}.</DialogDescription>
+              <DialogDescription>
+                Modifica el contenido de la plantilla. Usa variables como {'{{inquilino_nombre}}'},{' '}
+                {'{{inmueble_direccion}}'}, {'{{fecha}}'}, {'{{importe}}'}.
+              </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div>
                 <Label htmlFor="nombre">Nombre</Label>
-                <Input id="nombre" value={form.nombre} onChange={(e) => setForm((f) => ({ ...f, nombre: e.target.value }))} />
+                <Input
+                  id="nombre"
+                  value={form.nombre}
+                  onChange={(e) => setForm((f) => ({ ...f, nombre: e.target.value }))}
+                />
               </div>
               <div>
                 <Label htmlFor="asunto">Asunto</Label>
-                <Input id="asunto" value={form.asunto} onChange={(e) => setForm((f) => ({ ...f, asunto: e.target.value }))} />
+                <Input
+                  id="asunto"
+                  value={form.asunto}
+                  onChange={(e) => setForm((f) => ({ ...f, asunto: e.target.value }))}
+                />
               </div>
               <div>
                 <Label htmlFor="cuerpo">Cuerpo</Label>
-                <Textarea id="cuerpo" value={form.cuerpo} onChange={(e) => setForm((f) => ({ ...f, cuerpo: e.target.value }))} rows={8} className="font-mono text-sm" />
+                <Textarea
+                  id="cuerpo"
+                  value={form.cuerpo}
+                  onChange={(e) => setForm((f) => ({ ...f, cuerpo: e.target.value }))}
+                  rows={8}
+                  className="font-mono text-sm"
+                />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>Tipo</Label>
-                  <Select value={form.tipo} onValueChange={(v) => setForm((f) => ({ ...f, tipo: v as 'email' | 'sms' | 'ambos' }))}>
+                  <Select
+                    value={form.tipo}
+                    onValueChange={(v) =>
+                      setForm((f) => ({ ...f, tipo: v as 'email' | 'sms' | 'ambos' }))
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -284,7 +335,12 @@ export default function PlantillasComunicacionPage() {
                 </div>
                 <div>
                   <Label>Evento trigger</Label>
-                  <Select value={form.evento_trigger} onValueChange={(v) => setForm((f) => ({ ...f, evento_trigger: v as 'manual' | 'automatico' }))}>
+                  <Select
+                    value={form.evento_trigger}
+                    onValueChange={(v) =>
+                      setForm((f) => ({ ...f, evento_trigger: v as 'manual' | 'automatico' }))
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -297,7 +353,9 @@ export default function PlantillasComunicacionPage() {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setEditOpen(false)}>Cancelar</Button>
+              <Button variant="outline" onClick={() => setEditOpen(false)}>
+                Cancelar
+              </Button>
               <Button onClick={handleSave}>Guardar</Button>
             </DialogFooter>
           </DialogContent>
@@ -319,7 +377,9 @@ export default function PlantillasComunicacionPage() {
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Cuerpo</Label>
-                  <pre className="mt-2 whitespace-pre-wrap rounded bg-background p-4 text-sm">{renderPreview(previewPlantilla.cuerpo)}</pre>
+                  <pre className="mt-2 whitespace-pre-wrap rounded bg-background p-4 text-sm">
+                    {renderPreview(previewPlantilla.cuerpo)}
+                  </pre>
                 </div>
               </div>
             )}

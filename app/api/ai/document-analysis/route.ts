@@ -413,7 +413,10 @@ async function analyzeDocumentWithVision(
     },
   } as const;
 
-  logger.error('[Vision Analysis] 📤 Enviando a Claude Vision:', file.name, 'isPDF:', isPDF);
+  logger.error('[Vision Analysis] 📤 Enviando a Claude Vision', {
+    fileName: file.name,
+    isPDF,
+  });
 
   const prompt = getVisionPromptForContext(context, companyInfo);
 
@@ -439,7 +442,9 @@ async function analyzeDocumentWithVision(
   });
 
   const processingTimeMs = Date.now() - startTime;
-  logger.error('[Vision Analysis] ✅ Claude respondió en', processingTimeMs, 'ms');
+  logger.error('[Vision Analysis] ✅ Claude respondió', {
+    processingTimeMs,
+  });
 
   const content = response.content[0];
 
@@ -974,8 +979,19 @@ export async function POST(request: NextRequest) {
         ];
 
         const allowedExtensions = [
-          '.pdf', '.jpg', '.jpeg', '.png', '.gif', '.webp', '.heic', '.heif',
-          '.doc', '.docx', '.txt', '.bmp', '.tiff',
+          '.pdf',
+          '.jpg',
+          '.jpeg',
+          '.png',
+          '.gif',
+          '.webp',
+          '.heic',
+          '.heif',
+          '.doc',
+          '.docx',
+          '.txt',
+          '.bmp',
+          '.tiff',
         ];
 
         const fileExtension = (file.name || '').toLowerCase().match(/\.[a-z0-9]+$/)?.[0] || '';
@@ -989,7 +1005,9 @@ export async function POST(request: NextRequest) {
             fileExtension,
           });
           return NextResponse.json(
-            { error: `Tipo de archivo no permitido: ${file.type || 'desconocido'} (${file.name}). Formatos aceptados: PDF, JPG, PNG, WEBP, DOC, DOCX, TXT.` },
+            {
+              error: `Tipo de archivo no permitido: ${file.type || 'desconocido'} (${file.name}). Formatos aceptados: PDF, JPG, PNG, WEBP, DOC, DOCX, TXT.`,
+            },
             { status: 400 }
           );
         }

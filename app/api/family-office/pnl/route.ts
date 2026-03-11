@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import logger from '@/lib/logger';
 import * as Sentry from '@sentry/nextjs';
+import { resolveFamilyOfficeScope } from '@/lib/family-office-scope';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -25,23 +26,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const { searchParams } = new URL(request.url);
-    const queryCompanyId = searchParams.get('companyId');
-    const companyId = (session.user.role === 'super_admin' && queryCompanyId)
-      ? queryCompanyId
-      : session.user.companyId;
-
-    // Consolidated: include child companies
-    const company = await prisma.company.findUnique({
-      where: { id: companyId },
-      select: { childCompanies: { select: { id: true } } },
+    const scope = await resolveFamilyOfficeScope(request, {
+      id: session.user.id,
+      role: session.user.role,
+      companyId: session.user.companyId,
     });
-    const allIds = company
-      ? [companyId, ...company.childCompanies.map((c: { id: string }) => c.id)]
-      : [companyId];
 
     const accounts = await prisma.financialAccount.findMany({
-      where: { companyId: { in: allIds }, activa: true },
+      where: { companyId: { in: scope.groupCompanyIds }, activa: true },
       include: {
         positions: {
           orderBy: { valorActual: 'desc' },
@@ -64,7 +56,10 @@ export async function GET(request: NextRequest) {
         pnlNoRealizado: p.pnlNoRealizado,
         pnlRealizado: p.pnlRealizado,
         pnlTotal: p.pnlNoRealizado + p.pnlRealizado,
-        pnlPct: p.costeTotal > 0 ? ((p.valorActual - p.costeTotal + p.pnlRealizado) / p.costeTotal) * 100 : 0,
+        pnlPct:
+          p.costeTotal > 0
+            ? ((p.valorActual - p.costeTotal + p.pnlRealizado) / p.costeTotal) * 100
+            : 0,
         divisa: p.divisa,
         peso: 0, // se calcula después
       }))
@@ -76,23 +71,37 @@ export async function GET(request: NextRequest) {
     });
 
     // P&L por gestora/entidad
-    const byEntidad: Record<string, {
-      entidad: string;
-      cuentas: number;
-      posiciones: number;
-      costeTotal: number;
-      valorActual: number;
-      saldoCuenta: number;
-      valorTotalConSaldo: number;
-      pnlTotal: number;
-      pnlPct: number;
-      peso: number;
-    }> = {};
+    const byEntidad: Record<
+      string,
+      {
+        entidad: string;
+        cuentas: number;
+        posiciones: number;
+        costeTotal: number;
+        valorActual: number;
+        saldoCuenta: number;
+        valorTotalConSaldo: number;
+        pnlTotal: number;
+        pnlPct: number;
+        peso: number;
+      }
+    > = {};
 
     for (const account of accounts) {
       const key = account.entidad;
       if (!byEntidad[key]) {
-        byEntidad[key] = { entidad: key, cuentas: 0, posiciones: 0, costeTotal: 0, valorActual: 0, saldoCuenta: 0, valorTotalConSaldo: 0, pnlTotal: 0, pnlPct: 0, peso: 0 };
+        byEntidad[key] = {
+          entidad: key,
+          cuentas: 0,
+          posiciones: 0,
+          costeTotal: 0,
+          valorActual: 0,
+          saldoCuenta: 0,
+          valorTotalConSaldo: 0,
+          pnlTotal: 0,
+          pnlPct: 0,
+          peso: 0,
+        };
       }
       byEntidad[key].cuentas++;
       byEntidad[key].posiciones += account.positions.length;
@@ -100,7 +109,10 @@ export async function GET(request: NextRequest) {
       byEntidad[key].valorActual += account.positions.reduce((s, p) => s + p.valorActual, 0);
       byEntidad[key].saldoCuenta += account.saldoActual || 0;
       byEntidad[key].valorTotalConSaldo = byEntidad[key].valorActual + byEntidad[key].saldoCuenta;
-      byEntidad[key].pnlTotal += account.positions.reduce((s, p) => s + p.pnlNoRealizado + p.pnlRealizado, 0);
+      byEntidad[key].pnlTotal += account.positions.reduce(
+        (s, p) => s + p.pnlNoRealizado + p.pnlRealizado,
+        0
+      );
     }
 
     Object.values(byEntidad).forEach((e) => {
@@ -109,7 +121,10 @@ export async function GET(request: NextRequest) {
     });
 
     // P&L por tipo de instrumento
-    const byTipo: Record<string, { tipo: string; valorActual: number; pnlTotal: number; posiciones: number }> = {};
+    const byTipo: Record<
+      string,
+      { tipo: string; valorActual: number; pnlTotal: number; posiciones: number }
+    > = {};
     allPositions.forEach((p) => {
       const tipo = p.tipo || 'otro';
       if (!byTipo[tipo]) byTipo[tipo] = { tipo, valorActual: 0, pnlTotal: 0, posiciones: 0 };

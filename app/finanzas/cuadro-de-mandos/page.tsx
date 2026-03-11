@@ -25,7 +25,11 @@ import { ComparativoEjercicios } from '@/components/finanzas/cuadro-mandos/Compa
 import { CostCenterBreakdown } from '@/components/finanzas/cuadro-mandos/CostCenterBreakdown';
 import { ExportButton } from '@/components/finanzas/cuadro-mandos/ExportButton';
 
-import type { CuadroMandosResponse, FiltrosDisponibles, CuadroMandosFilters } from '@/types/finanzas';
+import type {
+  CuadroMandosResponse,
+  FiltrosDisponibles,
+  CuadroMandosFilters,
+} from '@/types/finanzas';
 
 export default function CuadroDeMandosPage() {
   const { data: session, status } = useSession();
@@ -38,6 +42,33 @@ export default function CuadroDeMandosPage() {
   const [filters, setFilters] = useState<CuadroMandosFilters>({
     ejercicio: new Date().getFullYear(),
   });
+
+  const costCenterBreakdownData = data
+    ? {
+        categories: data.centrosCoste
+          .map((centro) => {
+            const ingresos = Math.max(0, centro.pyg.totalIngresos.importe);
+            const gastos = Math.abs(Math.min(0, centro.pyg.totalGastos.importe));
+            const saldo = centro.pyg.resultadoPeriodo.importe;
+
+            return {
+              code: centro.codigo,
+              name: centro.nombre,
+              ingresos,
+              gastos,
+              saldo,
+              percentage: ingresos + gastos > 0 ? gastos / (ingresos + gastos) : 0,
+              color: centro.tipo,
+            };
+          })
+          .filter((centro) => centro.ingresos > 0 || centro.gastos > 0 || centro.saldo !== 0),
+        total: {
+          ingresos: Math.max(0, data.pygTotal.totalIngresos.importe),
+          gastos: Math.abs(Math.min(0, data.pygTotal.totalGastos.importe)),
+          saldo: data.pygTotal.resultadoPeriodo.importe,
+        },
+      }
+    : undefined;
 
   // Cargar filtros disponibles
   useEffect(() => {
@@ -58,33 +89,36 @@ export default function CuadroDeMandosPage() {
   }, [status]);
 
   // Cargar datos del cuadro de mandos
-  const loadData = useCallback(async (isRefresh = false) => {
-    if (isRefresh) setRefreshing(true);
-    else setLoading(true);
+  const loadData = useCallback(
+    async (isRefresh = false) => {
+      if (isRefresh) setRefreshing(true);
+      else setLoading(true);
 
-    try {
-      const params = new URLSearchParams();
-      params.set('ejercicio', String(filters.ejercicio));
-      if (filters.buildingIds && filters.buildingIds.length > 0) {
-        params.set('buildingIds', filters.buildingIds.join(','));
+      try {
+        const params = new URLSearchParams();
+        params.set('ejercicio', String(filters.ejercicio));
+        if (filters.buildingIds && filters.buildingIds.length > 0) {
+          params.set('buildingIds', filters.buildingIds.join(','));
+        }
+        if (filters.costCenterIds && filters.costCenterIds.length > 0) {
+          params.set('costCenterIds', filters.costCenterIds.join(','));
+        }
+
+        const res = await fetch(`/api/finanzas/cuadro-de-mandos?${params.toString()}`);
+        if (!res.ok) throw new Error('Error cargando datos');
+
+        const result = await res.json();
+        setData(result);
+      } catch (error) {
+        console.error('Error cargando cuadro de mandos:', error);
+        toast.error('Error al cargar el cuadro de mandos');
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
       }
-      if (filters.costCenterIds && filters.costCenterIds.length > 0) {
-        params.set('costCenterIds', filters.costCenterIds.join(','));
-      }
-
-      const res = await fetch(`/api/finanzas/cuadro-de-mandos?${params.toString()}`);
-      if (!res.ok) throw new Error('Error cargando datos');
-
-      const result = await res.json();
-      setData(result);
-    } catch (error) {
-      console.error('Error cargando cuadro de mandos:', error);
-      toast.error('Error al cargar el cuadro de mandos');
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [filters]);
+    },
+    [filters]
+  );
 
   useEffect(() => {
     if (status === 'authenticated') {
@@ -217,7 +251,7 @@ export default function CuadroDeMandosPage() {
         {/* Desglose por Centro de Coste */}
         <section className="mt-6">
           <h2 className="text-lg font-semibold mb-4">Desglose por Centro de Coste</h2>
-          <CostCenterBreakdown />
+          <CostCenterBreakdown data={costCenterBreakdownData} />
         </section>
       </div>
     </AuthenticatedLayout>

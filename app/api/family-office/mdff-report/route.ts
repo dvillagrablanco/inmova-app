@@ -5,6 +5,11 @@ import logger from '@/lib/logger';
 import * as Sentry from '@sentry/nextjs';
 import { format, subMonths, startOfYear } from 'date-fns';
 import { es } from 'date-fns/locale';
+import {
+  getAccountLiquidBalance,
+  normalizeInvestmentVehicleName,
+  resolveFamilyOfficeScope,
+} from '@/lib/family-office-scope';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -17,9 +22,9 @@ async function getPrisma() {
 
 /**
  * GET /api/family-office/mdff-report
- * 
+ *
  * Genera informe en formato MdF Family Partners (MDFF):
- * 
+ *
  * Estructura del informe (basado en reporting real MDFF):
  * 1. DATOS GENERALES — custodios, mandatos, benchmarks, tipos de cambio
  * 2. EVOLUCIÓN PATRIMONIAL — AF, PE, Renta, Personal, Estratégicos
@@ -40,10 +45,18 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const companyId = session?.user?.companyId || request.headers.get('x-company-id') || '';
+    const scope = session?.user?.companyId
+      ? await resolveFamilyOfficeScope(request, {
+          id: session.user.id,
+          role: session.user.role,
+          companyId: session.user.companyId,
+        })
+      : null;
+    const companyId = scope?.rootCompanyId || request.headers.get('x-company-id') || '';
+    const groupIds = scope?.groupCompanyIds || [companyId];
     const today = new Date();
-    const reportDate = format(today, "dd MMMM yyyy", { locale: es });
-    const reportMonth = format(today, "MMMM yyyy", { locale: es });
+    const reportDate = format(today, 'dd MMMM yyyy', { locale: es });
+    const reportMonth = format(today, 'MMMM yyyy', { locale: es });
 
     // ═══════════════════════════════════════════════════
     // 1. DATOS GENERALES
@@ -55,7 +68,7 @@ export async function GET(request: NextRequest) {
     });
 
     const accounts = await prisma.financialAccount.findMany({
-      where: { companyId, activa: true },
+      where: { companyId: { in: groupIds }, activa: true },
       include: {
         positions: { orderBy: { valorActual: 'desc' } },
         transactions: { orderBy: { fecha: 'desc' }, take: 50 },
@@ -63,17 +76,24 @@ export async function GET(request: NextRequest) {
     });
 
     const participations = await prisma.participation.findMany({
-      where: { companyId, activa: true },
+      where: { companyId: { in: groupIds }, activa: true },
     });
 
     // Grupo inmobiliario
-    const groupIds = [companyId];
-    const children = await prisma.company.findMany({ where: { parentCompanyId: companyId }, select: { id: true, nombre: true } });
-    children.forEach((c) => groupIds.push(c.id));
+    const children = await prisma.company.findMany({
+      where: { parentCompanyId: companyId },
+      select: { id: true, nombre: true },
+    });
 
     const units = await prisma.unit.findMany({
       where: { building: { companyId: { in: groupIds }, isDemo: false } },
-      select: { estado: true, rentaMensual: true, valorMercado: true, precioCompra: true, tipo: true },
+      select: {
+        estado: true,
+        rentaMensual: true,
+        valorMercado: true,
+        precioCompra: true,
+        tipo: true,
+      },
     });
 
     const datosGenerales = {
@@ -106,16 +126,32 @@ export async function GET(request: NextRequest) {
     // 2. EVOLUCIÓN PATRIMONIAL
     // ═══════════════════════════════════════════════════
 
-    const valorAF = accounts.reduce((s, a) => s + a.positions.reduce((ps, p) => ps + p.valorActual, 0), 0);
-    const saldoCuentas = accounts.reduce((s, a) => s + a.saldoActual, 0);
-    const valorPE = participations.reduce((s, p) => s + (p.valorEstimado || p.valorContable), 0);
-    const desembolsosPendientesPE = participations.reduce((s, p) => s + ((p.compromisoTotal || 0) - (p.capitalLlamado || p.costeAdquisicion)), 0);
+    const valorAF = accounts.reduce(
+      (s, a) => s + a.positions.reduce((ps, p) => ps + p.valorActual, 0),
+      0
+    );
+    const saldoCuentas = accounts.reduce((s, a) => s + getAccountLiquidBalance(a), 0);
+    const valorPE = participations.reduce(
+      (s, p) => s + (p.valoracionActual || p.valorEstimado || p.valorContable || 0),
+      0
+    );
+    const desembolsosPendientesPE = participations.reduce(
+      (s, p) => s + ((p.compromisoTotal || 0) - (p.capitalLlamado || p.costeAdquisicion)),
+      0
+    );
     const valorInmob = units.reduce((s, u) => s + (u.valorMercado || u.precioCompra || 0), 0);
-    const rentaAnual = units.filter((u) => u.estado === 'ocupada').reduce((s, u) => s + u.rentaMensual, 0) * 12;
+    const rentaAnual =
+      units.filter((u) => u.estado === 'ocupada').reduce((s, u) => s + u.rentaMensual, 0) * 12;
 
     const evolucionPatrimonial = {
-      activosFinancieros: { patrimonio: Math.round(valorAF + saldoCuentas), desembolsosPendientes: 0 },
-      activosEnCrecimiento: { patrimonio: Math.round(valorPE), desembolsosPendientes: Math.round(Math.max(0, desembolsosPendientesPE)) },
+      activosFinancieros: {
+        patrimonio: Math.round(valorAF + saldoCuentas),
+        desembolsosPendientes: 0,
+      },
+      activosEnCrecimiento: {
+        patrimonio: Math.round(valorPE),
+        desembolsosPendientes: Math.round(Math.max(0, desembolsosPendientesPE)),
+      },
       activosEnRenta: { patrimonio: Math.round(valorInmob), desembolsosPendientes: 0 },
       activosPersonales: { patrimonio: 0, desembolsosPendientes: 0 },
       activosEstrategicos: { patrimonio: 0, desembolsosPendientes: 0 },
@@ -132,7 +168,13 @@ export async function GET(request: NextRequest) {
 
       // Clasificar por tipo de activo (formato MDFF)
       const byCategory: Record<string, { valor: number; pct: number }> = {};
-      const categories = ['Mercado monetario', 'Renta fija', 'Renta variable', 'Commodities', 'Alternativos'];
+      const categories = [
+        'Mercado monetario',
+        'Renta fija',
+        'Renta variable',
+        'Commodities',
+        'Alternativos',
+      ];
 
       for (const pos of positions) {
         let cat = 'Alternativos';
@@ -141,11 +183,25 @@ export async function GET(request: NextRequest) {
 
         if (tipo.includes('deposito') || tipo.includes('cuenta') || categoria.includes('monetar')) {
           cat = 'Mercado monetario';
-        } else if (tipo.includes('bono') || categoria.includes('fija') || categoria.includes('gobierno') || categoria.includes('corporat')) {
+        } else if (
+          tipo.includes('bono') ||
+          categoria.includes('fija') ||
+          categoria.includes('gobierno') ||
+          categoria.includes('corporat')
+        ) {
           cat = 'Renta fija';
-        } else if (tipo.includes('accion') || tipo.includes('etf') || categoria.includes('variable') || categoria.includes('equity')) {
+        } else if (
+          tipo.includes('accion') ||
+          tipo.includes('etf') ||
+          categoria.includes('variable') ||
+          categoria.includes('equity')
+        ) {
           cat = 'Renta variable';
-        } else if (categoria.includes('commodity') || categoria.includes('metal') || categoria.includes('energ')) {
+        } else if (
+          categoria.includes('commodity') ||
+          categoria.includes('metal') ||
+          categoria.includes('energ')
+        ) {
           cat = 'Commodities';
         }
 
@@ -155,14 +211,16 @@ export async function GET(request: NextRequest) {
 
       // Añadir saldo cuenta como monetario
       if (account.saldoActual > 0) {
-        if (!byCategory['Mercado monetario']) byCategory['Mercado monetario'] = { valor: 0, pct: 0 };
+        if (!byCategory['Mercado monetario'])
+          byCategory['Mercado monetario'] = { valor: 0, pct: 0 };
         byCategory['Mercado monetario'].valor += account.saldoActual;
       }
 
       // Calcular porcentajes
       for (const cat of categories) {
         if (byCategory[cat]) {
-          byCategory[cat].pct = valorTotal > 0 ? Math.round((byCategory[cat].valor / valorTotal) * 10000) / 100 : 0;
+          byCategory[cat].pct =
+            valorTotal > 0 ? Math.round((byCategory[cat].valor / valorTotal) * 10000) / 100 : 0;
           byCategory[cat].valor = Math.round(byCategory[cat].valor);
         }
       }
@@ -197,8 +255,8 @@ export async function GET(request: NextRequest) {
       'Mercado monetario': 12,
       'Renta fija': 43,
       'Renta variable': 45,
-      'Commodities': 0,
-      'Alternativos': 0,
+      Commodities: 0,
+      Alternativos: 0,
     };
 
     const carteraPorTipo: Array<{
@@ -254,7 +312,11 @@ export async function GET(request: NextRequest) {
       sociedades: children.map((c) => c.nombre),
       unidadesTotales: units.length,
       ocupadas: units.filter((u) => u.estado === 'ocupada').length,
-      ocupacion: units.length > 0 ? Math.round((units.filter((u) => u.estado === 'ocupada').length / units.length) * 1000) / 10 : 0,
+      ocupacion:
+        units.length > 0
+          ? Math.round((units.filter((u) => u.estado === 'ocupada').length / units.length) * 1000) /
+            10
+          : 0,
       desglosePorTipo: (() => {
         const byTipo: Record<string, { count: number; valor: number; renta: number }> = {};
         for (const u of units) {
@@ -265,7 +327,10 @@ export async function GET(request: NextRequest) {
           if (u.estado === 'ocupada') byTipo[tipo].renta += u.rentaMensual * 12;
         }
         return Object.entries(byTipo).map(([tipo, data]) => ({
-          tipo, unidades: data.count, valor: Math.round(data.valor), rentaAnual: Math.round(data.renta),
+          tipo,
+          unidades: data.count,
+          valor: Math.round(data.valor),
+          rentaAnual: Math.round(data.renta),
         }));
       })(),
     };
@@ -279,11 +344,13 @@ export async function GET(request: NextRequest) {
       desembolsosPendientes: Math.round(Math.max(0, desembolsosPendientesPE)),
       participaciones: participations.map((p) => ({
         sociedad: p.targetCompanyName,
-        tipo: p.tipo,
+        tipo: normalizeInvestmentVehicleName(p.vehiculoInversor || p.tipo),
         porcentaje: p.porcentaje,
         coste: Math.round(p.costeAdquisicion),
-        valorActual: Math.round(p.valorEstimado || p.valorContable),
-        pnl: Math.round((p.valorEstimado || p.valorContable) - p.costeAdquisicion),
+        valorActual: Math.round(p.valoracionActual || p.valorEstimado || p.valorContable || 0),
+        pnl: Math.round(
+          (p.valoracionActual || p.valorEstimado || p.valorContable || 0) - p.costeAdquisicion
+        ),
       })),
     };
 
@@ -337,9 +404,11 @@ export async function GET(request: NextRequest) {
         mes: format(month, 'MMM yy', { locale: es }),
         mesISO: format(month, 'yyyy-MM'),
         // Estimación basada en distribución actual (en producción: datos históricos reales)
-        mercadoMonetario: carteraPorTipo.find((c) => c.activo === 'Mercado monetario')?.pctPatrimonio || 0,
+        mercadoMonetario:
+          carteraPorTipo.find((c) => c.activo === 'Mercado monetario')?.pctPatrimonio || 0,
         rentaFija: carteraPorTipo.find((c) => c.activo === 'Renta fija')?.pctPatrimonio || 0,
-        rentaVariable: carteraPorTipo.find((c) => c.activo === 'Renta variable')?.pctPatrimonio || 0,
+        rentaVariable:
+          carteraPorTipo.find((c) => c.activo === 'Renta variable')?.pctPatrimonio || 0,
         commodities: carteraPorTipo.find((c) => c.activo === 'Commodities')?.pctPatrimonio || 0,
         alternativos: carteraPorTipo.find((c) => c.activo === 'Alternativos')?.pctPatrimonio || 0,
       });
@@ -356,10 +425,16 @@ export async function GET(request: NextRequest) {
         actual: c.pctPatrimonio,
         objetivo: c.objetivo,
         desviacion: c.diferencia,
-        estado: Math.abs(c.diferencia) <= 2 ? 'en_rango' : c.diferencia > 0 ? 'sobreponderar' : 'infraponderar',
-        accion: Math.abs(c.diferencia) > 5
-          ? `Rebalancear: ${c.diferencia > 0 ? 'reducir' : 'aumentar'} ${Math.abs(c.diferencia).toFixed(1)}pp`
-          : 'Dentro de rango',
+        estado:
+          Math.abs(c.diferencia) <= 2
+            ? 'en_rango'
+            : c.diferencia > 0
+              ? 'sobreponderar'
+              : 'infraponderar',
+        accion:
+          Math.abs(c.diferencia) > 5
+            ? `Rebalancear: ${c.diferencia > 0 ? 'reducir' : 'aumentar'} ${Math.abs(c.diferencia).toFixed(1)}pp`
+            : 'Dentro de rango',
       }));
 
     // ═══════════════════════════════════════════════════
@@ -367,11 +442,16 @@ export async function GET(request: NextRequest) {
     // Cruce patrimonio financiero ↔ inmobiliario
     // ═══════════════════════════════════════════════════
 
-    const yieldInmobiliario = valorInmob > 0 ? Math.round((rentaAnual / valorInmob) * 1000) / 10 : 0;
-    const pesoInmobEnTotal = evolucionPatrimonial.totalEUR > 0
-      ? Math.round((valorInmob / evolucionPatrimonial.totalEUR) * 1000) / 10 : 0;
-    const pesoFinEnTotal = evolucionPatrimonial.totalEUR > 0
-      ? Math.round((valorAF + saldoCuentas) / evolucionPatrimonial.totalEUR * 1000) / 10 : 0;
+    const yieldInmobiliario =
+      valorInmob > 0 ? Math.round((rentaAnual / valorInmob) * 1000) / 10 : 0;
+    const pesoInmobEnTotal =
+      evolucionPatrimonial.totalEUR > 0
+        ? Math.round((valorInmob / evolucionPatrimonial.totalEUR) * 1000) / 10
+        : 0;
+    const pesoFinEnTotal =
+      evolucionPatrimonial.totalEUR > 0
+        ? Math.round(((valorAF + saldoCuentas) / evolucionPatrimonial.totalEUR) * 1000) / 10
+        : 0;
 
     const visionConsolidada = {
       patrimonioTotal: evolucionPatrimonial.totalEUR,
@@ -386,13 +466,19 @@ export async function GET(request: NextRequest) {
         valor: Math.round(valorAF + saldoCuentas),
         peso: pesoFinEnTotal,
         custodios: posicionPorCustodio.map((c) => c.custodio),
-        pnl: Math.round(accounts.reduce((s, a) => s + a.positions.reduce((ps, p) => ps + p.pnlNoRealizado + p.pnlRealizado, 0), 0)),
+        pnl: Math.round(
+          accounts.reduce(
+            (s, a) => s + a.positions.reduce((ps, p) => ps + p.pnlNoRealizado + p.pnlRealizado, 0),
+            0
+          )
+        ),
       },
-      recomendacionDiversificacion: pesoInmobEnTotal > 60
-        ? `⚠️ Concentración inmobiliaria ${pesoInmobEnTotal}%. Recomendable diversificar hacia activos financieros.`
-        : pesoFinEnTotal > 70
-          ? `⚠️ Concentración financiera ${pesoFinEnTotal}%. El inmobiliario aporta estabilidad.`
-          : `✅ Diversificación adecuada: ${pesoInmobEnTotal}% inmobiliario / ${pesoFinEnTotal}% financiero.`,
+      recomendacionDiversificacion:
+        pesoInmobEnTotal > 60
+          ? `⚠️ Concentración inmobiliaria ${pesoInmobEnTotal}%. Recomendable diversificar hacia activos financieros.`
+          : pesoFinEnTotal > 70
+            ? `⚠️ Concentración financiera ${pesoFinEnTotal}%. El inmobiliario aporta estabilidad.`
+            : `✅ Diversificación adecuada: ${pesoInmobEnTotal}% inmobiliario / ${pesoFinEnTotal}% financiero.`,
     };
 
     // ═══════════════════════════════════════════════════

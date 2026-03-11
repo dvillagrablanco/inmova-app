@@ -8,6 +8,11 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 const PROVIDER = 'impuestos';
 
 interface TaxObligation {
@@ -78,9 +83,7 @@ const extractObligations = (settings: unknown): StoredObligation[] => {
 
   return obligacionesValue
     .map((item) => storedObligationSchema.safeParse(item))
-    .filter(
-      (result): result is z.SafeParseSuccess<StoredObligation> => result.success
-    )
+    .filter((result): result is z.SafeParseSuccess<StoredObligation> => result.success)
     .map((result) => result.data);
 };
 
@@ -119,6 +122,7 @@ const mapTipo = (obligacion: StoredObligation): TaxObligation['tipo'] => {
 // GET - Obtener obligaciones fiscales
 export async function GET(request: NextRequest) {
   try {
+    const prisma = await getPrisma();
     const session = await getServerSession(authOptions);
     const sessionUser = session?.user as
       | { id?: string; role?: string | null; companyId?: string | null }
@@ -151,16 +155,12 @@ export async function GET(request: NextRequest) {
 
     const storedObligations = extractObligations(integration?.settings);
     let obligations = storedObligations.filter((obligacion) => {
-      const matchesYear = obligacion.ejercicio
-        ? obligacion.ejercicio === parsedQuery.year
-        : true;
+      const matchesYear = obligacion.ejercicio ? obligacion.ejercicio === parsedQuery.year : true;
       return matchesYear;
     });
 
     if (parsedQuery.status && parsedQuery.status !== 'all') {
-      obligations = obligations.filter(
-        (obligacion) => obligacion.estado === parsedQuery.status
-      );
+      obligations = obligations.filter((obligacion) => obligacion.estado === parsedQuery.status);
     }
 
     const startDate = new Date(parsedQuery.year, 0, 1);
@@ -263,10 +263,7 @@ export async function GET(request: NextRequest) {
       if (!buildingId) {
         return;
       }
-      ingresosByBuilding.set(
-        buildingId,
-        (ingresosByBuilding.get(buildingId) ?? 0) + payment.monto
-      );
+      ingresosByBuilding.set(buildingId, (ingresosByBuilding.get(buildingId) ?? 0) + payment.monto);
     });
 
     const gastosByBuilding = new Map<string, number>();
@@ -276,15 +273,9 @@ export async function GET(request: NextRequest) {
       if (!buildingId) {
         return;
       }
-      gastosByBuilding.set(
-        buildingId,
-        (gastosByBuilding.get(buildingId) ?? 0) + expense.monto
-      );
+      gastosByBuilding.set(buildingId, (gastosByBuilding.get(buildingId) ?? 0) + expense.monto);
       if (expense.categoria === 'impuestos') {
-        taxByBuilding.set(
-          buildingId,
-          (taxByBuilding.get(buildingId) ?? 0) + expense.monto
-        );
+        taxByBuilding.set(buildingId, (taxByBuilding.get(buildingId) ?? 0) + expense.monto);
       }
     });
 
@@ -306,7 +297,7 @@ export async function GET(request: NextRequest) {
       id: building.id,
       nombre: building.nombre || building.direccion,
       valorCatastral: 0,
-      ibi: building.ibiAnual ?? (taxByBuilding.get(building.id) ?? 0),
+      ibi: building.ibiAnual ?? taxByBuilding.get(building.id) ?? 0,
       ingresos: ingresosByBuilding.get(building.id) ?? 0,
       gastos: gastosByBuilding.get(building.id) ?? 0,
     }));
@@ -343,16 +334,14 @@ export async function GET(request: NextRequest) {
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('[API Impuestos] Error:', { message });
-    return NextResponse.json(
-      { error: 'Error al obtener datos fiscales' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener datos fiscales' }, { status: 500 });
   }
 }
 
 // POST - Registrar presentación/pago de obligación
 export async function POST(request: NextRequest) {
   try {
+    const prisma = await getPrisma();
     const session = await getServerSession(authOptions);
     const sessionUser = session?.user as
       | { id?: string; role?: string | null; companyId?: string | null }
@@ -374,11 +363,7 @@ export async function POST(request: NextRequest) {
 
     const body = updateSchema.parse(await request.json());
     const newStatus =
-      body.action === 'present'
-        ? 'presentado'
-        : body.action === 'pay'
-          ? 'pagado'
-          : 'pendiente';
+      body.action === 'present' ? 'presentado' : body.action === 'pay' ? 'pagado' : 'pendiente';
     const integration = await prisma.integrationConfig.findUnique({
       where: { companyId_provider: { companyId, provider: PROVIDER } },
       select: { credentials: true, settings: true },
@@ -390,10 +375,7 @@ export async function POST(request: NextRequest) {
     );
 
     if (targetIndex === -1) {
-      return NextResponse.json(
-        { error: 'Obligación no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Obligación no encontrada' }, { status: 404 });
     }
 
     const now = new Date();
@@ -448,9 +430,6 @@ export async function POST(request: NextRequest) {
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('[API Impuestos] Error POST:', { message });
-    return NextResponse.json(
-      { error: 'Error al actualizar obligación' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar obligación' }, { status: 500 });
   }
 }

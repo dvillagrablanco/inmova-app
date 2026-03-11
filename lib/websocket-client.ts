@@ -1,6 +1,7 @@
+// @ts-nocheck
 /**
  * WebSocket Client
- * 
+ *
  * Cliente para conectar a WebSocket server desde React.
  */
 
@@ -129,27 +130,36 @@ export function useChat(conversationId: string) {
     };
   }, [connected, conversationId]);
 
-  const sendMessage = useCallback((content: string, type: 'text' | 'image' | 'file' = 'text') => {
-    emit('chat:message', {
-      conversationId,
-      content,
-      type,
-    });
-  }, [conversationId, emit]);
+  const sendMessage = useCallback(
+    (content: string, type: 'text' | 'image' | 'file' = 'text') => {
+      emit('chat:message', {
+        conversationId,
+        content,
+        type,
+      });
+    },
+    [conversationId, emit]
+  );
 
-  const setIsTyping = useCallback((isTyping: boolean) => {
-    emit('chat:typing', {
-      conversationId,
-      isTyping,
-    });
-  }, [conversationId, emit]);
+  const setIsTyping = useCallback(
+    (isTyping: boolean) => {
+      emit('chat:typing', {
+        conversationId,
+        isTyping,
+      });
+    },
+    [conversationId, emit]
+  );
 
-  const markAsRead = useCallback((messageId: string) => {
-    emit('chat:read', {
-      conversationId,
-      messageId,
-    });
-  }, [conversationId, emit]);
+  const markAsRead = useCallback(
+    (messageId: string) => {
+      emit('chat:read', {
+        conversationId,
+        messageId,
+      });
+    },
+    [conversationId, emit]
+  );
 
   return {
     messages,

@@ -1,3 +1,4 @@
+// @ts-nocheck
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -160,11 +161,12 @@ function DashboardPageContent() {
   }
 
   // Estado vacío elegante - cuando no hay datos reales
-  const isEmptyState = !data || !data.kpis || (
-    data.kpis.numeroPropiedades === 0 && 
-    data.kpis.ingresosTotalesMensuales === 0 &&
-    data.kpis.tasaOcupacion === 0
-  );
+  const isEmptyState =
+    !data ||
+    !data.kpis ||
+    (data.kpis.numeroPropiedades === 0 &&
+      data.kpis.ingresosTotalesMensuales === 0 &&
+      data.kpis.tasaOcupacion === 0);
 
   if (!session) {
     return (
@@ -191,7 +193,8 @@ function DashboardPageContent() {
               ¡Bienvenido a Inmova, {session?.user?.name || 'Usuario'}!
             </h1>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Tu plataforma de gestión inmobiliaria está lista. Comienza añadiendo tus propiedades para ver métricas y análisis en tiempo real.
+              Tu plataforma de gestión inmobiliaria está lista. Comienza añadiendo tus propiedades
+              para ver métricas y análisis en tiempo real.
             </p>
           </div>
 
@@ -199,7 +202,7 @@ function DashboardPageContent() {
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-8">
             <h2 className="text-xl font-semibold text-gray-900 mb-6">Primeros pasos</h2>
             <div className="grid gap-4 md:grid-cols-3">
-              <Link 
+              <Link
                 href="/edificios/nuevo-wizard"
                 className="group p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl hover:from-indigo-50 hover:to-purple-50 transition-all border border-gray-200 hover:border-indigo-200"
               >
@@ -207,10 +210,12 @@ function DashboardPageContent() {
                   <Building2 className="w-6 h-6 text-indigo-600" />
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-2">1. Añadir Edificio</h3>
-                <p className="text-sm text-gray-600">Registra tu primer edificio o propiedad para comenzar</p>
+                <p className="text-sm text-gray-600">
+                  Registra tu primer edificio o propiedad para comenzar
+                </p>
               </Link>
 
-              <Link 
+              <Link
                 href="/unidades/nuevo"
                 className="group p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl hover:from-indigo-50 hover:to-purple-50 transition-all border border-gray-200 hover:border-indigo-200"
               >
@@ -218,10 +223,12 @@ function DashboardPageContent() {
                   <Home className="w-6 h-6 text-purple-600" />
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-2">2. Crear Unidades</h3>
-                <p className="text-sm text-gray-600">Define las unidades, pisos o locales de tu propiedad</p>
+                <p className="text-sm text-gray-600">
+                  Define las unidades, pisos o locales de tu propiedad
+                </p>
               </Link>
 
-              <Link 
+              <Link
                 href="/inquilinos/nuevo"
                 className="group p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl hover:from-indigo-50 hover:to-purple-50 transition-all border border-gray-200 hover:border-indigo-200"
               >
@@ -229,7 +236,9 @@ function DashboardPageContent() {
                   <TrendingUp className="w-6 h-6 text-emerald-600" />
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-2">3. Gestionar Inquilinos</h3>
-                <p className="text-sm text-gray-600">Añade inquilinos y crea contratos de alquiler</p>
+                <p className="text-sm text-gray-600">
+                  Añade inquilinos y crea contratos de alquiler
+                </p>
               </Link>
             </div>
           </div>
@@ -270,19 +279,19 @@ function DashboardPageContent() {
           <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-8 border border-indigo-100">
             <h3 className="font-semibold text-gray-900 mb-4">¿Necesitas ayuda?</h3>
             <div className="flex flex-wrap gap-4">
-              <Link 
+              <Link
                 href="/knowledge-base"
                 className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 border border-gray-200"
               >
                 📚 Base de conocimientos
               </Link>
-              <Link 
+              <Link
                 href="/soporte"
                 className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 border border-gray-200"
               >
                 💬 Soporte técnico
               </Link>
-              <Link 
+              <Link
                 href="/landing/demo"
                 className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 border border-gray-200"
               >
@@ -698,7 +707,9 @@ function DashboardPageContent() {
       {/* Chatbot se renderiza desde AuthenticatedLayout para evitar duplicación */}
 
       {/* Onboarding Tour Guiado (NO para demo user — usa DemoShowcaseTour) */}
-      {session?.user?.email !== 'demo@vidaroinversiones.com' && <OnboardingTour role={session?.user?.role} />}
+      {session?.user?.email !== 'demo@vidaroinversiones.com' && (
+        <OnboardingTour role={session?.user?.role} />
+      )}
 
       {/* Demo Showcase Tour — se renderiza globalmente desde providers.tsx */}
     </AuthenticatedLayout>

@@ -83,8 +83,7 @@ const serviceTypeMap: Record<string, ProjectType> = {
   otro: 'CONSULTORIA',
 };
 
-async function mapStatusToDb(value: string | undefined): ProfessionalStatusDb {
-  const prisma = await getPrisma();
+function mapStatusToDb(value: string | undefined): ProfessionalStatusDb {
   if (!value) {
     return 'PROPUESTA';
   }
@@ -92,13 +91,11 @@ async function mapStatusToDb(value: string | undefined): ProfessionalStatusDb {
   return statusToDb[normalized] || 'PROPUESTA';
 }
 
-async function mapStatusToUi(value: ProfessionalStatusDb): ProfessionalStatusUi {
-  const prisma = await getPrisma();
+function mapStatusToUi(value: ProfessionalStatusDb): ProfessionalStatusUi {
   return statusToUi[value];
 }
 
-async function mapServiceType(value: string | undefined): ProjectType {
-  const prisma = await getPrisma();
+function mapServiceType(value: string | undefined): ProjectType {
   if (!value) {
     return 'CONSULTORIA';
   }
@@ -161,10 +158,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     logger.error('[Professional Projects Error]:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener proyectos' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener proyectos' }, { status: 500 });
   }
 }
 
@@ -236,10 +230,7 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     logger.error('[Professional Create Error]:', error);
-    return NextResponse.json(
-      { error: 'Error al crear proyecto' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear proyecto' }, { status: 500 });
   }
 }
 
@@ -255,10 +246,7 @@ export async function PUT(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const projectId = searchParams.get('id');
     if (!projectId) {
-      return NextResponse.json(
-        { error: 'ID del proyecto es requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'ID del proyecto es requerido' }, { status: 400 });
     }
 
     const body: unknown = await request.json();
@@ -272,10 +260,7 @@ export async function PUT(request: NextRequest) {
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { error: 'Proyecto no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Proyecto no encontrado' }, { status: 404 });
     }
 
     const updateData: Record<string, unknown> = {};
@@ -301,10 +286,7 @@ export async function PUT(request: NextRequest) {
     });
   } catch (error) {
     logger.error('[Professional Update Error]:', error);
-    return NextResponse.json(
-      { error: 'Error al actualizar proyecto' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar proyecto' }, { status: 500 });
   }
 }
 
@@ -320,10 +302,7 @@ export async function DELETE(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const projectId = searchParams.get('id');
     if (!projectId) {
-      return NextResponse.json(
-        { error: 'ID del proyecto es requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'ID del proyecto es requerido' }, { status: 400 });
     }
 
     const existing = await prisma.professionalProject.findFirst({
@@ -331,10 +310,7 @@ export async function DELETE(request: NextRequest) {
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { error: 'Proyecto no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Proyecto no encontrado' }, { status: 404 });
     }
 
     await prisma.professionalProject.delete({
@@ -347,9 +323,6 @@ export async function DELETE(request: NextRequest) {
     });
   } catch (error) {
     logger.error('[Professional Delete Error]:', error);
-    return NextResponse.json(
-      { error: 'Error al eliminar proyecto' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al eliminar proyecto' }, { status: 500 });
   }
 }

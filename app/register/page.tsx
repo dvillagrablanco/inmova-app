@@ -41,20 +41,23 @@ import {
 } from '@/components/forms/AccessibleFormField';
 
 // Información de cupones disponibles
-const COUPON_INFO: Record<string, { nombre: string; descuento: string; plan: string; color: string }> = {
-  'STARTER26': {
+const COUPON_INFO: Record<
+  string,
+  { nombre: string; descuento: string; plan: string; color: string }
+> = {
+  STARTER26: {
     nombre: '¡Empieza a €17,50/mes!',
     descuento: '50% dto. 3 meses',
     plan: 'Starter',
     color: 'from-amber-500 to-orange-500',
   },
-  'COLIVING26': {
+  COLIVING26: {
     nombre: 'Coliving Sin Complicaciones',
     descuento: '1er mes GRATIS + 20% dto.',
     plan: 'Professional',
     color: 'from-green-500 to-emerald-500',
   },
-  'SWITCH26': {
+  SWITCH26: {
     nombre: 'Cambia y Ahorra',
     descuento: 'Igualamos precio + Upgrade',
     plan: 'Cualquier plan',
@@ -71,7 +74,7 @@ export default function RegisterPage() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
-  const [couponInfo, setCouponInfo] = useState<typeof COUPON_INFO[string] | null>(null);
+  const [couponInfo, setCouponInfo] = useState<(typeof COUPON_INFO)[string] | null>(null);
 
   // Redirigir si se selecciona inquilino o proveedor
   useEffect(() => {
@@ -84,18 +87,6 @@ export default function RegisterPage() {
       return;
     }
   }, [selectedRole, router]);
-
-  // Mostrar loading mientras redirigimos a portal específico
-  if (selectedRole === 'inquilino' || selectedRole === 'proveedor') {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center">
-        <div className="text-white text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p>Redirigiendo...</p>
-        </div>
-      </div>
-    );
-  }
 
   // Detectar cupón de la URL
   useEffect(() => {
@@ -143,7 +134,8 @@ export default function RegisterPage() {
           email: data.email,
           recoveryEmail: data.recoveryEmail || undefined,
           password: data.password,
-          role: selectedRole === 'propietario' ? 'gestor' : 'gestor',
+          // El perfil ajusta el onboarding; el rol de plataforma sigue siendo gestor.
+          role: 'gestor',
           businessVertical: data.businessVertical,
         }),
       });
@@ -178,6 +170,18 @@ export default function RegisterPage() {
       setIsLoading(false);
     }
   };
+
+  // Mostrar loading mientras redirigimos a portal específico
+  if (selectedRole === 'inquilino' || selectedRole === 'proveedor') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center">
+        <div className="text-white text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p>Redirigiendo...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
@@ -448,174 +452,179 @@ export default function RegisterPage() {
                       <ArrowLeft className="h-4 w-4" />
                       Cambiar perfil
                     </button>
-                <div className="mb-6">
-                  <h2 className="text-3xl font-bold text-gray-900 mb-2">Crea tu cuenta</h2>
-                  <p className="text-gray-600">Comienza tu prueba gratuita de 30 días hoy mismo</p>
-                </div>
+                    <div className="mb-6">
+                      <h2 className="text-3xl font-bold text-gray-900 mb-2">Crea tu cuenta</h2>
+                      <p className="text-gray-600">
+                        Comienza tu prueba gratuita de 30 días hoy mismo
+                      </p>
+                    </div>
 
-                {/* Banner de cupón aplicado */}
-                {appliedCoupon && couponInfo && (
-                  <div className={`mb-6 p-4 rounded-xl bg-gradient-to-r ${couponInfo.color} text-white`}>
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-white/20 rounded-lg">
-                        <Gift className="h-6 w-6" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold">{couponInfo.nombre}</span>
-                          <Badge className="bg-white/30 text-white text-xs">
-                            {appliedCoupon}
-                          </Badge>
+                    {/* Banner de cupón aplicado */}
+                    {appliedCoupon && couponInfo && (
+                      <div
+                        className={`mb-6 p-4 rounded-xl bg-gradient-to-r ${couponInfo.color} text-white`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-white/20 rounded-lg">
+                            <Gift className="h-6 w-6" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold">{couponInfo.nombre}</span>
+                              <Badge className="bg-white/30 text-white text-xs">
+                                {appliedCoupon}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-white/90">{couponInfo.descuento}</p>
+                          </div>
+                          <Tag className="h-5 w-5" />
                         </div>
-                        <p className="text-sm text-white/90">{couponInfo.descuento}</p>
+                        <p className="text-xs mt-2 text-white/80">
+                          Plan recomendado: {couponInfo.plan}. El descuento se aplicará
+                          automáticamente.
+                        </p>
                       </div>
-                      <Tag className="h-5 w-5" />
-                    </div>
-                    <p className="text-xs mt-2 text-white/80">
-                      Plan recomendado: {couponInfo.plan}. El descuento se aplicará automáticamente.
-                    </p>
-                  </div>
-                )}
-
-                {error && (
-                  <div
-                    role="alert"
-                    aria-live="assertive"
-                    className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-700"
-                  >
-                    <AlertCircle size={20} aria-hidden="true" />
-                    <span className="text-sm">{error}</span>
-                  </div>
-                )}
-
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
-                  <input type="hidden" name="profileRole" value={selectedRole || ''} />
-                  <AccessibleInputField
-                    id="name-field"
-                    name="name"
-                    label="Nombre Completo"
-                    type="text"
-                    placeholder="Juan Pérez"
-                    value={name}
-                    onChange={(val) => setValue('name', val)}
-                    error={errors.name?.message}
-                    required
-                  />
-
-                  <AccessibleSelectField
-                    id="businessVertical-field"
-                    name="businessVertical"
-                    label="Tipo de Negocio"
-                    placeholder="Selecciona tu tipo de negocio"
-                    value={businessVertical}
-                    onChange={(val) => setValue('businessVertical', val as BusinessVertical)}
-                    options={Object.entries(businessVerticalLabels).map(([value, label]) => ({
-                      value,
-                      label,
-                    }))}
-                    error={errors.businessVertical?.message}
-                    required
-                    helpText="Selecciona el tipo de negocio que mejor describa tu actividad"
-                  />
-
-                  <AccessibleInputField
-                    id="email-field"
-                    name="email"
-                    label="Correo Electrónico"
-                    type="email"
-                    placeholder="tu@email.com"
-                    value={email}
-                    onChange={(val) => setValue('email', val)}
-                    error={errors.email?.message}
-                    required
-                  />
-
-                  {/* Email de Recuperación con estilo destacado */}
-                  <div className="relative">
-                    <div className="absolute -left-2 top-0 bottom-0 w-1 bg-gradient-to-b from-amber-400 to-orange-500 rounded-full" />
-                    <div className="pl-3">
-                      <AccessibleInputField
-                        id="recoveryEmail-field"
-                        name="recoveryEmail"
-                        label="📧 Email de Recuperación"
-                        type="email"
-                        placeholder="email-alternativo@gmail.com"
-                        value={recoveryEmail}
-                        onChange={(val) => setValue('recoveryEmail', val)}
-                        error={errors.recoveryEmail?.message}
-                        helpText="⚠️ Recomendado: Si olvidas tu contraseña, te enviaremos un enlace a este email. Usa uno diferente al principal (ej: Gmail personal)."
-                      />
-                    </div>
-                  </div>
-
-                  <AccessibleInputField
-                    id="password-field"
-                    name="password"
-                    label="Contraseña"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(val) => setValue('password', val)}
-                    error={errors.password?.message}
-                    required
-                    helpText="Mínimo 8 caracteres, debe incluir mayúsculas, minúsculas, números y caracteres especiales"
-                  />
-
-                  <AccessibleInputField
-                    id="confirmPassword-field"
-                    name="confirmPassword"
-                    label="Confirmar Contraseña"
-                    type="password"
-                    placeholder="••••••••"
-                    value={confirmPassword}
-                    onChange={(val) => setValue('confirmPassword', val)}
-                    error={errors.confirmPassword?.message}
-                    required
-                  />
-
-                  <Button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full gradient-primary text-white py-3 rounded-lg font-medium hover:opacity-90 transition-all shadow-primary disabled:opacity-50"
-                    aria-busy={isLoading}
-                    aria-live="polite"
-                  >
-                    {isLoading && (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
                     )}
-                    {isLoading ? 'Registrando...' : 'Registrarse'}
-                  </Button>
-                </form>
 
-                <div className="mt-6 text-center">
-                  <p className="text-sm text-gray-600">
-                    ¿Ya tienes cuenta?{' '}
-                    <Link href="/login" className="text-black font-medium hover:underline">
-                      Inicia sesión aquí
-                    </Link>
-                  </p>
-                </div>
+                    {error && (
+                      <div
+                        role="alert"
+                        aria-live="assertive"
+                        className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-700"
+                      >
+                        <AlertCircle size={20} aria-hidden="true" />
+                        <span className="text-sm">{error}</span>
+                      </div>
+                    )}
 
-                {/* Trust Footer in Form */}
-                <div className="mt-6 pt-6 border-t border-gray-200">
-                  <p className="text-xs text-gray-500 text-center">
-                    Al crear una cuenta, aceptas nuestros{' '}
-                    <Link
-                      href="/landing/legal/terminos"
-                      className="text-indigo-600 hover:underline"
-                    >
-                      Términos y Condiciones
-                    </Link>{' '}
-                    y{' '}
-                    <Link
-                      href="/landing/legal/privacidad"
-                      className="text-indigo-600 hover:underline"
-                    >
-                      Política de Privacidad
-                    </Link>
-                  </p>
-                </div>
-              </div>
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
+                      <input type="hidden" name="profileRole" value={selectedRole || ''} />
+                      <AccessibleInputField
+                        id="name-field"
+                        name="name"
+                        label="Nombre Completo"
+                        type="text"
+                        placeholder="Juan Pérez"
+                        value={name}
+                        onChange={(val) => setValue('name', val)}
+                        error={errors.name?.message}
+                        required
+                      />
+
+                      <AccessibleSelectField
+                        id="businessVertical-field"
+                        name="businessVertical"
+                        label="Tipo de Negocio"
+                        placeholder="Selecciona tu tipo de negocio"
+                        value={businessVertical}
+                        onChange={(val) => setValue('businessVertical', val as BusinessVertical)}
+                        options={Object.entries(businessVerticalLabels).map(([value, label]) => ({
+                          value,
+                          label,
+                        }))}
+                        error={errors.businessVertical?.message}
+                        required
+                        helpText="Selecciona el tipo de negocio que mejor describa tu actividad"
+                      />
+
+                      <AccessibleInputField
+                        id="email-field"
+                        name="email"
+                        label="Correo Electrónico"
+                        type="email"
+                        placeholder="tu@email.com"
+                        value={email}
+                        onChange={(val) => setValue('email', val)}
+                        error={errors.email?.message}
+                        required
+                      />
+
+                      {/* Email de Recuperación con estilo destacado */}
+                      <div className="relative">
+                        <div className="absolute -left-2 top-0 bottom-0 w-1 bg-gradient-to-b from-amber-400 to-orange-500 rounded-full" />
+                        <div className="pl-3">
+                          <AccessibleInputField
+                            id="recoveryEmail-field"
+                            name="recoveryEmail"
+                            label="📧 Email de Recuperación"
+                            type="email"
+                            placeholder="email-alternativo@gmail.com"
+                            value={recoveryEmail}
+                            onChange={(val) => setValue('recoveryEmail', val)}
+                            error={errors.recoveryEmail?.message}
+                            helpText="⚠️ Recomendado: Si olvidas tu contraseña, te enviaremos un enlace a este email. Usa uno diferente al principal (ej: Gmail personal)."
+                          />
+                        </div>
+                      </div>
+
+                      <AccessibleInputField
+                        id="password-field"
+                        name="password"
+                        label="Contraseña"
+                        type="password"
+                        placeholder="••••••••"
+                        value={password}
+                        onChange={(val) => setValue('password', val)}
+                        error={errors.password?.message}
+                        required
+                        helpText="Mínimo 8 caracteres, debe incluir mayúsculas, minúsculas, números y caracteres especiales"
+                      />
+
+                      <AccessibleInputField
+                        id="confirmPassword-field"
+                        name="confirmPassword"
+                        label="Confirmar Contraseña"
+                        type="password"
+                        placeholder="••••••••"
+                        value={confirmPassword}
+                        onChange={(val) => setValue('confirmPassword', val)}
+                        error={errors.confirmPassword?.message}
+                        required
+                      />
+
+                      <Button
+                        type="submit"
+                        disabled={isLoading}
+                        className="w-full gradient-primary text-white py-3 rounded-lg font-medium hover:opacity-90 transition-all shadow-primary disabled:opacity-50"
+                        aria-busy={isLoading}
+                        aria-live="polite"
+                      >
+                        {isLoading && (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+                        )}
+                        {isLoading ? 'Registrando...' : 'Registrarse'}
+                      </Button>
+                    </form>
+
+                    <div className="mt-6 text-center">
+                      <p className="text-sm text-gray-600">
+                        ¿Ya tienes cuenta?{' '}
+                        <Link href="/login" className="text-black font-medium hover:underline">
+                          Inicia sesión aquí
+                        </Link>
+                      </p>
+                    </div>
+
+                    {/* Trust Footer in Form */}
+                    <div className="mt-6 pt-6 border-t border-gray-200">
+                      <p className="text-xs text-gray-500 text-center">
+                        Al crear una cuenta, aceptas nuestros{' '}
+                        <Link
+                          href="/landing/legal/terminos"
+                          className="text-indigo-600 hover:underline"
+                        >
+                          Términos y Condiciones
+                        </Link>{' '}
+                        y{' '}
+                        <Link
+                          href="/landing/legal/privacidad"
+                          className="text-indigo-600 hover:underline"
+                        >
+                          Política de Privacidad
+                        </Link>
+                      </p>
+                    </div>
+                  </div>
                 </>
               )}
             </div>

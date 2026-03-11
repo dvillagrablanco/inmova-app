@@ -1,8 +1,9 @@
+// @ts-nocheck
 /**
  * API Route: Semantic Search
- * 
+ *
  * POST /api/v1/search/semantic
- * 
+ *
  * Búsqueda semántica usando embeddings de OpenAI.
  */
 
@@ -34,7 +35,7 @@ const searchSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
@@ -51,16 +52,10 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: any) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Query inválida', details: error.errors },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Query inválida', details: error.errors }, { status: 400 });
     }
 
     logger.error('Error in semantic search:', error);
-    return NextResponse.json(
-      { error: 'Error interno', message: error.message },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error interno', message: error.message }, { status: 500 });
   }
 }

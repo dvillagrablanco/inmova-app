@@ -186,7 +186,7 @@ export async function GET(req: NextRequest) {
         try {
           const bankExpenses = await prisma.bankTransaction.findMany({
             where: { companyId: companyFilter, monto: { lt: 0 }, fecha: { gte: startDate } },
-            select: { monto: true, concepto: true },
+            select: { monto: true, descripcion: true },
           });
           bankExpenses.forEach((tx: any) => {
             gastosPorCategoria['banco'] = (gastosPorCategoria['banco'] || 0) + Math.abs(tx.monto);

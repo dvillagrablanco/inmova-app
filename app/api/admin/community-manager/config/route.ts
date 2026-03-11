@@ -8,6 +8,11 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 // Configuración por defecto
 const DEFAULT_CONFIG = {
   autoPost: false,
@@ -98,6 +103,7 @@ export async function GET(request: NextRequest) {
     if (!companyId) {
       return NextResponse.json({ error: 'CompanyId no disponible' }, { status: 400 });
     }
+    const prisma = await getPrisma();
     const integration = await prisma.integrationConfig.findUnique({
       where: { companyId_provider: { companyId, provider: CONFIG_PROVIDER } },
       select: { settings: true },
@@ -112,10 +118,7 @@ export async function GET(request: NextRequest) {
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('[Community Manager Config Error]:', { message });
-    return NextResponse.json(
-      { error: 'Error al obtener configuración' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener configuración' }, { status: 500 });
   }
 }
 
@@ -147,15 +150,13 @@ export async function PUT(request: NextRequest) {
     if (!companyId) {
       return NextResponse.json({ error: 'CompanyId no disponible' }, { status: 400 });
     }
+    const prisma = await getPrisma();
 
     const body = await request.json();
     const { config } = body;
 
     if (!config) {
-      return NextResponse.json(
-        { error: 'Configuración es requerida' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Configuración es requerida' }, { status: 400 });
     }
 
     const parsed = configSchema.partial().parse(config);
@@ -199,9 +200,6 @@ export async function PUT(request: NextRequest) {
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('[Community Manager Update Config Error]:', { message });
-    return NextResponse.json(
-      { error: 'Error al guardar configuración' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al guardar configuración' }, { status: 500 });
   }
 }

@@ -81,7 +81,10 @@ REGLAS:
 - Si no encuentras un dato, pon null
 - Las referencias catastrales tienen formato: XXXXXXXYYZZZZZ (7 dígitos + 2 letras + 4 dígitos + letras)`;
 
-async function extractTextFromPDF(pdfBuffer: Buffer, maxPages = 20): Promise<{ text: string; method: 'embedded' | 'ocr'; pages: number }> {
+async function extractTextFromPDF(
+  pdfBuffer: Buffer,
+  maxPages = 20
+): Promise<{ text: string; method: 'embedded' | 'ocr'; pages: number }> {
   const { spawn } = await import('child_process');
   const { writeFile, readFile, unlink, readdir } = await import('fs/promises');
   const { join } = await import('path');
@@ -98,11 +101,18 @@ async function extractTextFromPDF(pdfBuffer: Buffer, maxPages = 20): Promise<{ t
     embeddedText = await new Promise<string>((resolve, reject) => {
       const proc = spawn('pdftotext', ['-l', String(maxPages), pdfPath, '-']);
       let out = '';
-      proc.stdout.on('data', (d: Buffer) => { out += d.toString(); });
-      proc.on('close', (code: number) => { if (code === 0) resolve(out); else reject(new Error('pdftotext failed')); });
+      proc.stdout.on('data', (d: Buffer) => {
+        out += d.toString();
+      });
+      proc.on('close', (code: number) => {
+        if (code === 0) resolve(out);
+        else reject(new Error('pdftotext failed'));
+      });
       proc.on('error', reject);
     });
-  } catch { /* pdftotext not available or failed */ }
+  } catch {
+    /* pdftotext not available or failed */
+  }
 
   const cleanText = embeddedText.replace(/\s+/g, ' ').trim();
   if (cleanText.length > 500) {
@@ -116,8 +126,21 @@ async function extractTextFromPDF(pdfBuffer: Buffer, maxPages = 20): Promise<{ t
   const imgPrefix = join(tmpDir, `esc_img_${ts}`);
   try {
     await new Promise<void>((resolve, reject) => {
-      const proc = spawn('pdftoppm', ['-png', '-f', '1', '-l', String(maxPages), '-r', '200', pdfPath, imgPrefix]);
-      proc.on('close', (code: number) => { if (code === 0) resolve(); else reject(new Error('pdftoppm failed')); });
+      const proc = spawn('pdftoppm', [
+        '-png',
+        '-f',
+        '1',
+        '-l',
+        String(maxPages),
+        '-r',
+        '200',
+        pdfPath,
+        imgPrefix,
+      ]);
+      proc.on('close', (code: number) => {
+        if (code === 0) resolve();
+        else reject(new Error('pdftoppm failed'));
+      });
       proc.on('error', reject);
     });
   } catch (e) {
@@ -128,7 +151,7 @@ async function extractTextFromPDF(pdfBuffer: Buffer, maxPages = 20): Promise<{ t
   // Find generated images and OCR each
   const allFiles = await readdir(tmpDir);
   const imgFiles = allFiles
-    .filter(f => f.startsWith(`esc_img_${ts}`) && f.endsWith('.png'))
+    .filter((f) => f.startsWith(`esc_img_${ts}`) && f.endsWith('.png'))
     .sort();
 
   let ocrText = '';
@@ -140,9 +163,15 @@ async function extractTextFromPDF(pdfBuffer: Buffer, maxPages = 20): Promise<{ t
       const pageText = await new Promise<string>((resolve, reject) => {
         const proc = spawn('tesseract', [imgPath, 'stdout', '-l', 'spa']);
         let out = '';
-        proc.stdout.on('data', (d: Buffer) => { out += d.toString(); });
-        proc.on('close', (code: number) => { resolve(out); });
-        proc.on('error', () => { resolve(''); });
+        proc.stdout.on('data', (d: Buffer) => {
+          out += d.toString();
+        });
+        proc.on('close', (code: number) => {
+          resolve(out);
+        });
+        proc.on('error', () => {
+          resolve('');
+        });
       });
       if (pageText.trim()) {
         ocrText += `\n--- PAGE ${pagesProcessed + 1} ---\n${pageText}`;
@@ -169,10 +198,12 @@ async function extractDataWithAI(text: string, fileName: string): Promise<any> {
   const response = await client.messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 6000,
-    messages: [{
-      role: 'user',
-      content: `${ESCRITURA_EXTRACTION_PROMPT}\n\nArchivo: ${fileName}\n\nTexto de la escritura:\n${truncated}`,
-    }],
+    messages: [
+      {
+        role: 'user',
+        content: `${ESCRITURA_EXTRACTION_PROMPT}\n\nArchivo: ${fileName}\n\nTexto de la escritura:\n${truncated}`,
+      },
+    ],
   });
 
   const content = response.content.find((c: any) => c.type === 'text') as any;
@@ -181,7 +212,9 @@ async function extractDataWithAI(text: string, fileName: string): Promise<any> {
   try {
     const jsonMatch = rawText.match(/\{[\s\S]*\}/);
     if (jsonMatch) return JSON.parse(jsonMatch[0]);
-  } catch { /* parse error */ }
+  } catch {
+    /* parse error */
+  }
 
   return { raw: rawText, parseError: true };
 }
@@ -191,7 +224,7 @@ async function storeDocument(
   fileName: string,
   companyId: string,
   buildingId: string | null,
-  extractedData: any,
+  extractedData: any
 ) {
   const { getPrismaClient } = await import('@/lib/db');
   const prisma = getPrismaClient();
@@ -202,8 +235,14 @@ async function storeDocument(
   try {
     const { uploadToS3, isS3Configured } = await import('@/lib/aws-s3-service');
     if (isS3Configured()) {
-      const result = await uploadToS3(pdfBuffer, 'escrituras', 'document', fileName, 'application/pdf');
-      storagePath = result.key;
+      const result = await uploadToS3(
+        pdfBuffer,
+        'escrituras',
+        'document',
+        fileName,
+        'application/pdf'
+      );
+      storagePath = result.key || storagePath;
       logger.info(`[Escritura] Guardada en S3: ${storagePath}`);
     }
   } catch {
@@ -213,7 +252,9 @@ async function storeDocument(
       const result = await saveFile(pdfBuffer, `escrituras/${fileName}`, { type: 'escritura' });
       storagePath = result.path;
       logger.info(`[Escritura] Guardada localmente: ${storagePath}`);
-    } catch { /* local storage also failed */ }
+    } catch {
+      /* local storage also failed */
+    }
   }
 
   // Create Document record
@@ -221,10 +262,15 @@ async function storeDocument(
     data: {
       nombre: `Escritura ${extractedData.numero_escritura || ''} - ${extractedData.inmueble?.direccion || fileName}`,
       tipo: 'otro',
-      descripcion: extractedData.resumen || `${extractedData.tipo_escritura} (${extractedData.fecha})`,
+      descripcion:
+        extractedData.resumen || `${extractedData.tipo_escritura} (${extractedData.fecha})`,
       cloudStoragePath: storagePath,
       ...(buildingId && { buildingId }),
-      tags: ['escritura', extractedData.tipo_escritura, extractedData.fecha?.substring(0, 4)].filter(Boolean),
+      tags: [
+        'escritura',
+        extractedData.tipo_escritura,
+        extractedData.fecha?.substring(0, 4),
+      ].filter(Boolean),
     },
   });
 
@@ -234,7 +280,7 @@ async function storeDocument(
 async function createOrUpdateAssetAcquisition(
   companyId: string,
   buildingId: string | null,
-  extractedData: any,
+  extractedData: any
 ) {
   if (!extractedData.precio_total || extractedData.precio_total <= 0) return null;
 
@@ -248,7 +294,9 @@ async function createOrUpdateAssetAcquisition(
     extractedData.vendedor?.nif ? `NIF vendedor: ${extractedData.vendedor.nif}` : null,
     extractedData.forma_pago ? `Pago: ${extractedData.forma_pago}` : null,
     extractedData.impuesto_aplicable ? `Impuesto: ${extractedData.impuesto_aplicable}` : null,
-  ].filter(Boolean).join('\n');
+  ]
+    .filter(Boolean)
+    .join('\n');
 
   const refCatastral = extractedData.fincas?.[0]?.referencia_catastral || null;
 
@@ -339,17 +387,24 @@ export async function POST(request: NextRequest) {
     // STEP 1: Extract text
     if (file) {
       const buffer = Buffer.from(await file.arrayBuffer());
-      logger.info(`[Escritura] Procesando: ${file.name} (${(buffer.length / 1024 / 1024).toFixed(1)}MB)`);
+      logger.info(
+        `[Escritura] Procesando: ${file.name} (${(buffer.length / 1024 / 1024).toFixed(1)}MB)`
+      );
 
       const result = await extractTextFromPDF(buffer, 25);
       ocrMethod = result.method;
       pagesProcessed = result.pages;
-      actions.push(`Texto extraído: ${result.method === 'ocr' ? 'OCR Tesseract' : 'texto embebido'} (${result.pages} páginas)`);
+      actions.push(
+        `Texto extraído: ${result.method === 'ocr' ? 'OCR Tesseract' : 'texto embebido'} (${result.pages} páginas)`
+      );
 
       if (result.text.trim().length < 100) {
-        return NextResponse.json({
-          error: 'No se pudo extraer texto del PDF. El archivo puede estar dañado o protegido.',
-        }, { status: 422 });
+        return NextResponse.json(
+          {
+            error: 'No se pudo extraer texto del PDF. El archivo puede estar dañado o protegido.',
+          },
+          { status: 422 }
+        );
       }
 
       // STEP 2: AI extraction
@@ -383,9 +438,15 @@ export async function POST(request: NextRequest) {
 
       // STEP 5: Create/update AssetAcquisition
       if (extractedData.precio_total) {
-        const assetResult = await createOrUpdateAssetAcquisition(companyId, buildingId, extractedData);
+        const assetResult = await createOrUpdateAssetAcquisition(
+          companyId,
+          buildingId,
+          extractedData
+        );
         if (assetResult) {
-          actions.push(`AssetAcquisition ${assetResult.action}: ${assetResult.id} (${extractedData.precio_total.toLocaleString('es-ES')}€)`);
+          actions.push(
+            `AssetAcquisition ${assetResult.action}: ${assetResult.id} (${extractedData.precio_total.toLocaleString('es-ES')}€)`
+          );
         }
       }
     } else if (pastedText) {
@@ -405,8 +466,11 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: any) {
     logger.error('[Process Escritura]:', error);
-    return NextResponse.json({
-      error: error.message || 'Error procesando escritura',
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: error.message || 'Error procesando escritura',
+      },
+      { status: 500 }
+    );
   }
 }

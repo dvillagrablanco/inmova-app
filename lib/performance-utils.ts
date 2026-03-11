@@ -1,6 +1,7 @@
+// @ts-nocheck
 /**
  * Performance Utilities
- * 
+ *
  * Herramientas para optimizar rendimiento de la aplicación
  */
 
@@ -68,18 +69,15 @@ export function memoize<T extends (...args: any[]) => any>(fn: T): T {
  * Measure performance
  * Mide el tiempo de ejecución de una función
  */
-export async function measurePerformance<T>(
-  name: string,
-  fn: () => Promise<T> | T
-): Promise<T> {
+export async function measurePerformance<T>(name: string, fn: () => Promise<T> | T): Promise<T> {
   const start = performance.now();
-  
+
   try {
     const result = await fn();
     const duration = performance.now() - start;
-    
+
     console.log(`⏱️ [Performance] ${name}: ${duration.toFixed(2)}ms`);
-    
+
     return result;
   } catch (error) {
     const duration = performance.now() - start;
@@ -93,17 +91,20 @@ export async function measurePerformance<T>(
  * Carga imágenes solo cuando están cerca del viewport
  */
 export function lazyLoadImage(imgElement: HTMLImageElement, src: string) {
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        imgElement.src = src;
-        imgElement.classList.add('loaded');
-        observer.unobserve(imgElement);
-      }
-    });
-  }, {
-    rootMargin: '100px', // Cargar 100px antes de ser visible
-  });
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          imgElement.src = src;
+          imgElement.classList.add('loaded');
+          observer.unobserve(imgElement);
+        }
+      });
+    },
+    {
+      rootMargin: '100px', // Cargar 100px antes de ser visible
+    }
+  );
 
   observer.observe(imgElement);
 

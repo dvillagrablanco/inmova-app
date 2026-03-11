@@ -1,9 +1,9 @@
 /**
  * POST /api/signatures/download
  * Descarga un documento firmado desde DocuSign y lo guarda en S3
- * 
+ *
  * Body: { signatureId: string }
- * 
+ *
  * Flujo:
  * 1. Busca ContractSignature con status SIGNED
  * 2. Descarga el combined document de DocuSign
@@ -49,7 +49,10 @@ export async function POST(req: NextRequest) {
     }
 
     if (signature.provider !== 'DOCUSIGN' || !signature.externalId) {
-      return NextResponse.json({ error: 'Solo soportado para firmas de DocuSign' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Solo soportado para firmas de DocuSign' },
+        { status: 400 }
+      );
     }
 
     // 2. Download from DocuSign
@@ -65,17 +68,24 @@ export async function POST(req: NextRequest) {
 
     const apiClient = new docusign.ApiClient();
     apiClient.setOAuthBasePath(oAuthHost);
-    
+
     const authResult = await apiClient.requestJWTUserToken(
-      integrationKey, userId, ['signature', 'impersonation'],
-      Buffer.from(privateKey, 'utf8'), 3600
+      integrationKey,
+      userId,
+      ['signature', 'impersonation'],
+      Buffer.from(privateKey, 'utf8'),
+      3600
     );
 
     apiClient.setBasePath(basePath);
     apiClient.addDefaultHeader('Authorization', `Bearer ${authResult.body.access_token}`);
 
     const envelopesApi = new docusign.EnvelopesApi(apiClient);
-    const documentBuffer = await envelopesApi.getDocument(accountId, signature.externalId, 'combined');
+    const documentBuffer = await envelopesApi.getDocument(
+      accountId,
+      signature.externalId,
+      'combined'
+    );
     const pdfBuffer = Buffer.from(documentBuffer);
 
     logger.info('[SignedDoc Download] Downloaded from DocuSign', {
@@ -86,11 +96,11 @@ export async function POST(req: NextRequest) {
     // 3. Upload to S3
     const timestamp = Date.now();
     const s3Key = `contratos/firmados/signed-${signature.contractId}-${timestamp}.pdf`;
-    
+
     try {
       const { uploadFile } = await import('@/lib/s3');
-      await uploadFile(s3Key, pdfBuffer, 'application/pdf');
-      
+      await uploadFile(pdfBuffer, s3Key);
+
       logger.info('[SignedDoc Download] Uploaded to S3', { key: s3Key });
 
       // 4. Update ContractSignature
@@ -129,7 +139,7 @@ export async function POST(req: NextRequest) {
       });
     } catch (s3Error: any) {
       logger.error('[SignedDoc Download] S3 upload failed:', s3Error.message);
-      
+
       // Still return the PDF directly if S3 fails
       return new NextResponse(pdfBuffer, {
         headers: {

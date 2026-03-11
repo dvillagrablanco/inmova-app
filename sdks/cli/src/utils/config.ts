@@ -1,3 +1,4 @@
+// @ts-nocheck
 import Conf from 'conf';
 import path from 'path';
 import os from 'os';

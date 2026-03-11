@@ -1,13 +1,18 @@
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 
 import logger from '@/lib/logger';
 // IDs de usuarios autorizados (socio fundador)
-const SOCIO_FUNDADOR_IDS = process.env.EWOORKER_SOCIO_IDS?.split(",") || [];
+const SOCIO_FUNDADOR_IDS = process.env.EWOORKER_SOCIO_IDS?.split(',') || [];
+
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 type EngagementMetricsRow = {
   total_ofertas: number | string | bigint | null;
@@ -32,13 +37,11 @@ const toNumber = (value: number | string | bigint | null | undefined): number =>
 
 export async function GET(request: NextRequest) {
   try {
+    const prisma = await getPrisma();
     const session = await getServerSession(authOptions);
 
     if (!session || !session.user?.id) {
-      return NextResponse.json(
-        { error: "No autenticado" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const userId = session.user.id;
@@ -46,72 +49,70 @@ export async function GET(request: NextRequest) {
     // Verificar si es el socio fundador o tiene rol autorizado
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { 
+      select: {
         role: true,
-        email: true
-      }
+        email: true,
+      },
     });
 
     const allowedRoles = ['super_admin', 'administrador', 'socio_ewoorker'];
     const userRole = user?.role ?? null;
-    const isSocio = SOCIO_FUNDADOR_IDS.includes(userId) ||
-                    (userRole ? allowedRoles.includes(userRole) : false) ||
-                    user?.email?.includes("@socio-ewoorker.com") ||
-                    user?.email?.includes("@ewoorker.com");
+    const isSocio =
+      SOCIO_FUNDADOR_IDS.includes(userId) ||
+      (userRole ? allowedRoles.includes(userRole) : false) ||
+      user?.email?.includes('@socio-ewoorker.com') ||
+      user?.email?.includes('@ewoorker.com');
 
     if (!isSocio) {
       // Log intento de acceso no autorizado
       await prisma.ewoorkerLogSocio.create({
         data: {
           userId,
-          userName: session.user.name || "Unknown",
-          userEmail: session.user.email || "",
-          accion: "LOGIN",
-          descripcion: "Intento de acceso no autorizado al panel del socio",
-          modulo: "DASHBOARD",
-          ipAddress: request.headers.get("x-forwarded-for") || "unknown",
-          userAgent: request.headers.get("user-agent") || "",
+          userName: session.user.name || 'Unknown',
+          userEmail: session.user.email || '',
+          accion: 'LOGIN',
+          descripcion: 'Intento de acceso no autorizado al panel del socio',
+          modulo: 'DASHBOARD',
+          ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
+          userAgent: request.headers.get('user-agent') || '',
           exitoso: false,
-          error: "Usuario no autorizado"
-        }
+          error: 'Usuario no autorizado',
+        },
       });
 
-      return NextResponse.json(
-        { error: "No autorizado" },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
     }
 
     // Log acceso exitoso
     await prisma.ewoorkerLogSocio.create({
       data: {
         userId,
-        userName: session.user.name || "Socio",
-        userEmail: session.user.email || "",
-        accion: "VER_METRICAS",
-        descripcion: "Acceso al dashboard de métricas",
-        modulo: "DASHBOARD",
-        ipAddress: request.headers.get("x-forwarded-for") || "unknown",
-        userAgent: request.headers.get("user-agent") || "",
-        exitoso: true
-      }
+        userName: session.user.name || 'Socio',
+        userEmail: session.user.email || '',
+        accion: 'VER_METRICAS',
+        descripcion: 'Acceso al dashboard de métricas',
+        modulo: 'DASHBOARD',
+        ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
+        userAgent: request.headers.get('user-agent') || '',
+        exitoso: true,
+      },
     });
 
     // Obtener período solicitado
     const { searchParams } = new URL(request.url);
-    const periodo = searchParams.get("periodo") || "mes";
+    const periodo = searchParams.get('periodo') || 'mes';
 
     const now = new Date();
     let fechaInicio: Date;
 
     switch (periodo) {
-      case "trimestre":
+      case 'trimestre':
         fechaInicio = new Date(now.getFullYear(), now.getMonth() - 3, 1);
         break;
-      case "ano":
+      case 'ano':
         fechaInicio = new Date(now.getFullYear(), 0, 1);
         break;
-      case "mes":
+      case 'mes':
       default:
         fechaInicio = new Date(now.getFullYear(), now.getMonth(), 1);
     }
@@ -130,7 +131,7 @@ export async function GET(request: NextRequest) {
       comisionesPorTipo,
       suscripcionesData,
       planesDistribucion,
-      metricsEngagement
+      metricsEngagement,
     ] = await Promise.all([
       // Total empresas con perfil ewoorker
       prisma.ewoorkerPerfilEmpresa.count(),
@@ -140,109 +141,109 @@ export async function GET(request: NextRequest) {
         where: {
           disponible: true,
           ultimaActividad: {
-            gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-          }
-        }
+            gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+          },
+        },
       }),
 
       // Nuevas empresas este mes
       prisma.ewoorkerPerfilEmpresa.count({
         where: {
           createdAt: {
-            gte: fechaInicio
-          }
-        }
+            gte: fechaInicio,
+          },
+        },
       }),
 
       // Empresas verificadas
       prisma.ewoorkerPerfilEmpresa.count({
-        where: { verificado: true }
+        where: { verificado: true },
       }),
 
       // Obras publicadas en el período
       prisma.ewoorkerObra.count({
         where: {
           fechaPublicacion: {
-            gte: fechaInicio
-          }
-        }
+            gte: fechaInicio,
+          },
+        },
       }),
 
       // Ofertas enviadas
       prisma.ewoorkerOferta.count({
         where: {
           fechaEnvio: {
-            gte: fechaInicio
-          }
-        }
+            gte: fechaInicio,
+          },
+        },
       }),
 
       // Contratos activos
       prisma.ewoorkerContrato.count({
         where: {
           estado: {
-            in: ["ACTIVO", "EN_EJECUCION"]
-          }
-        }
+            in: ['ACTIVO', 'EN_EJECUCION'],
+          },
+        },
       }),
 
       // Contratos completados en el período
       prisma.ewoorkerContrato.count({
         where: {
-          estado: "COMPLETADO",
+          estado: 'COMPLETADO',
           fechaFinalizacion: {
-            gte: fechaInicio
-          }
-        }
+            gte: fechaInicio,
+          },
+        },
       }),
 
       // Datos de pagos (GMV, comisiones, beneficios)
       prisma.ewoorkerPago.aggregate({
         where: {
           fechaSolicitud: {
-            gte: fechaInicio
-          }
+            gte: fechaInicio,
+          },
         },
         _sum: {
-          montoBase: true,          // GMV total en céntimos
-          montoComision: true,       // Comisiones totales
-          beneficioEwoorker: true,   // 50% plataforma
-          beneficioSocio: true       // 50% socio
-        }
+          montoBase: true, // GMV total en céntimos
+          montoComision: true, // Comisiones totales
+          beneficioEwoorker: true, // 50% plataforma
+          beneficioSocio: true, // 50% socio
+        },
       }),
 
       // Comisiones por tipo
       prisma.ewoorkerPago.groupBy({
-        by: ["tipo"],
+        by: ['tipo'],
         where: {
           fechaSolicitud: {
-            gte: fechaInicio
-          }
+            gte: fechaInicio,
+          },
         },
         _sum: {
-          montoComision: true
-        }
+          montoComision: true,
+        },
       }),
 
       // Datos de suscripciones activas (MRR real)
       prisma.ewoorkerSuscripcion.aggregate({
         where: {
-          estado: "ACTIVA"
+          estado: 'ACTIVA',
         },
         _count: {
-          id: true
+          id: true,
         },
         _sum: {
-          precio: true
-        }
+          precio: true,
+        },
       }),
 
       // Distribución por planes
       prisma.ewoorkerPerfilEmpresa.groupBy({
-        by: ["planActual"],
+        by: ['planActual'],
         _count: {
-          id: true
-        }
+          id: true,
+        },
       }),
 
       // Métricas de engagement
@@ -257,7 +258,7 @@ export async function GET(request: NextRequest) {
         LEFT JOIN "ewoorker_contrato" c ON c."obraId" = ob.id
         LEFT JOIN "ewoorker_perfil_empresa" p ON p.id = c."subcontratistaId"
         WHERE ob."fechaPublicacion" >= ${fechaInicio}
-      `
+      `,
     ]);
 
     // Calcular planes
@@ -266,9 +267,9 @@ export async function GET(request: NextRequest) {
       return acc;
     }, {});
 
-    const usuariosObrero = planesMap["OBRERO_FREE"] || 0;
-    const usuariosCapataz = planesMap["CAPATAZ_PRO"] || 0;
-    const usuariosConstructor = planesMap["CONSTRUCTOR_ENTERPRISE"] || 0;
+    const usuariosObrero = planesMap['OBRERO_FREE'] || 0;
+    const usuariosCapataz = planesMap['CAPATAZ_PRO'] || 0;
+    const usuariosConstructor = planesMap['CONSTRUCTOR_ENTERPRISE'] || 0;
 
     // Calcular MRR (Monthly Recurring Revenue) desde suscripciones activas
     const mrrSuscripciones = suscripcionesData._sum.precio ?? 0;
@@ -296,58 +297,57 @@ export async function GET(request: NextRequest) {
       return acc;
     }, {});
 
-    const comisionSuscripciones = comisionesMap["SUSCRIPCION_MENSUAL"] ?? 0;
-    const comisionEscrow = comisionesMap["PAGO_SEGURO_ESCROW"] ?? 0;
-    const comisionUrgentes = comisionesMap["CONTRATACION_URGENTE"] ?? 0;
+    const comisionSuscripciones = comisionesMap['SUSCRIPCION_MENSUAL'] ?? 0;
+    const comisionEscrow = comisionesMap['PAGO_SEGURO_ESCROW'] ?? 0;
+    const comisionUrgentes = comisionesMap['CONTRATACION_URGENTE'] ?? 0;
     const comisionOtros = Object.entries(comisionesMap)
-      .filter(([tipo]) => ![
-        "SUSCRIPCION_MENSUAL",
-        "PAGO_SEGURO_ESCROW",
-        "CONTRATACION_URGENTE",
-      ].includes(tipo))
+      .filter(
+        ([tipo]) =>
+          !['SUSCRIPCION_MENSUAL', 'PAGO_SEGURO_ESCROW', 'CONTRATACION_URGENTE'].includes(tipo)
+      )
       .reduce((sum, [, value]) => sum + value, 0);
 
     const metricas = {
       mes: now.getMonth() + 1,
       ano: now.getFullYear(),
-      
+
       // Usuarios
       totalEmpresas,
       empresasActivas,
       nuevasEmpresasMes,
       empresasVerificadas,
-      
+
       // Actividad
       obrasPublicadas,
       ofertasEnviadas,
       contratosActivos,
       contratosCompletados,
-      
+
       // Financiero (en céntimos)
       gmvTotal,
       comisionesGeneradas,
       beneficioSocio,
       beneficioPlataforma,
-      
+
       // Suscripciones
       suscripcionesActivas: suscripcionesData._count.id ?? 0,
       mrrSuscripciones,
-      
+
       // Por plan
       usuariosObrero,
       usuariosCapataz,
       usuariosConstructor,
-      
+
       // Engagement
       tasaConversion: Number(tasaConversion.toFixed(2)),
       tiempoMedioAdjudicacion: Number(tiempoMedioAdjudicacion.toFixed(1)),
       valoracionMediaPlataforma: Number(valoracionMediaPlataforma.toFixed(2)),
-      
+
       // Desglose comisiones
       comisionSuscripciones,
       comisionEscrow,
       comisionUrgentes,
-      comisionOtros
+      comisionOtros,
     };
 
     // Guardar métricas en BD para histórico
@@ -355,21 +355,17 @@ export async function GET(request: NextRequest) {
       where: {
         mes_ano: {
           mes: now.getMonth() + 1,
-          ano: now.getFullYear()
-        }
+          ano: now.getFullYear(),
+        },
       },
       update: metricas,
-      create: metricas
+      create: metricas,
     });
 
     return NextResponse.json(metricas);
-
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Error desconocido";
-    logger.error("[EWOORKER_ADMIN_SOCIO_METRICAS]", { message });
-    return NextResponse.json(
-      { error: "Error al obtener métricas" },
-      { status: 500 }
-    );
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    logger.error('[EWOORKER_ADMIN_SOCIO_METRICAS]', { message });
+    return NextResponse.json({ error: 'Error al obtener métricas' }, { status: 500 });
   }
 }

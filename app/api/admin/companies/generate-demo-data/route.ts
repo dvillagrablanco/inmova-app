@@ -3,12 +3,12 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { z } from 'zod';
 import logger from '@/lib/logger';
-import { 
-  DEMO_SCENARIOS, 
-  DEMO_TENANT_NAMES, 
+import {
+  DEMO_SCENARIOS,
+  DEMO_TENANT_NAMES,
   DEMO_INCIDENCIAS,
   type DemoScenario,
-  type DemoScenarioConfig 
+  type DemoScenarioConfig,
 } from '@/lib/demo-scenarios';
 
 export const dynamic = 'force-dynamic';
@@ -22,17 +22,19 @@ async function getPrisma() {
 
 const requestSchema = z.object({
   companyId: z.string().min(1),
-  scenario: z.enum([
-    'gestor_residencial',
-    'propietario_particular',
-    'agencia_inmobiliaria',
-    'coliving',
-    'alquiler_turistico',
-    'comercial_oficinas',
-    'comunidad_propietarios',
-    'inversor_inmobiliario',
-    'completo'
-  ]).default('gestor_residencial'),
+  scenario: z
+    .enum([
+      'gestor_residencial',
+      'propietario_particular',
+      'agencia_inmobiliaria',
+      'coliving',
+      'alquiler_turistico',
+      'comercial_oficinas',
+      'comunidad_propietarios',
+      'inversor_inmobiliario',
+      'completo',
+    ])
+    .default('gestor_residencial'),
 });
 
 /**
@@ -87,16 +89,13 @@ export async function POST(request: NextRequest) {
     // Obtener configuración del escenario
     const scenarioConfig = DEMO_SCENARIOS[scenario as DemoScenario];
     if (!scenarioConfig) {
-      return NextResponse.json(
-        { error: 'Escenario no válido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Escenario no válido' }, { status: 400 });
     }
 
-    logger.info(`Generando datos de demo (${scenario}) para empresa: ${company.nombre}`, { 
-      companyId, 
+    logger.info(`Generando datos de demo (${scenario}) para empresa: ${company.nombre}`, {
+      companyId,
       scenario,
-      scenarioName: scenarioConfig.nombre 
+      scenarioName: scenarioConfig.nombre,
     });
 
     // Generar datos según el escenario
@@ -127,32 +126,38 @@ export async function POST(request: NextRequest) {
     }
 
     logger.error('Error generating demo data:', error);
-    return NextResponse.json(
-      { error: 'Error al generar datos de ejemplo' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al generar datos de ejemplo' }, { status: 500 });
   }
 }
 
-async function normalizeBuildingType(tipoPropiedad: string): 'residencial' | 'mixto' | 'comercial' {
-  const prisma = await getPrisma();
+function normalizeBuildingType(tipoPropiedad: string): 'residencial' | 'mixto' | 'comercial' {
   const normalized = tipoPropiedad.trim().toLowerCase();
 
   if (normalized.includes('mixto')) {
     return 'mixto';
   }
 
-  if (normalized.includes('comercial') || normalized.includes('oficina') || normalized.includes('local')) {
+  if (
+    normalized.includes('comercial') ||
+    normalized.includes('oficina') ||
+    normalized.includes('local')
+  ) {
     return 'comercial';
   }
 
   return 'residencial';
 }
 
-async function normalizeUnitType(
+function normalizeUnitType(
   tipo: string
-): 'vivienda' | 'local' | 'garaje' | 'trastero' | 'oficina' | 'nave_industrial' | 'coworking_space' {
-  const prisma = await getPrisma();
+):
+  | 'vivienda'
+  | 'local'
+  | 'garaje'
+  | 'trastero'
+  | 'oficina'
+  | 'nave_industrial'
+  | 'coworking_space' {
   const normalized = tipo.trim().toLowerCase();
 
   if (normalized.includes('garaje')) return 'garaje';
@@ -165,8 +170,7 @@ async function normalizeUnitType(
   return 'vivienda';
 }
 
-async function normalizeMaintenancePriority(prioridad: string): 'baja' | 'media' | 'alta' {
-  const prisma = await getPrisma();
+function normalizeMaintenancePriority(prioridad: string): 'baja' | 'media' | 'alta' {
   const normalized = prioridad.trim().toLowerCase();
 
   if (normalized === 'alta') return 'alta';
@@ -227,8 +231,8 @@ async function generateScenarioData(companyId: string, config: DemoScenarioConfi
       const unit = await prisma.unit.create({
         data: {
           buildingId: building.id,
-          numero: unidadData.tipo.includes('habitacion') 
-            ? `H${String(i + 1).padStart(2, '0')}` 
+          numero: unidadData.tipo.includes('habitacion')
+            ? `H${String(i + 1).padStart(2, '0')}`
             : `${floor}${letter}`,
           tipo: unitType,
           planta: floor,
@@ -266,8 +270,8 @@ async function generateScenarioData(companyId: string, config: DemoScenarioConfi
 
   // 3. Crear contratos activos
   const numContratos = Math.min(
-    config.datos.contratosActivos, 
-    createdTenants.length, 
+    config.datos.contratosActivos,
+    createdTenants.length,
     createdUnits.length
   );
 
@@ -335,11 +339,8 @@ async function generateScenarioData(companyId: string, config: DemoScenarioConfi
   }
 
   // 4. Crear incidencias
-  const numIncidencias = Math.min(
-    config.datos.incidenciasAbiertas, 
-    DEMO_INCIDENCIAS.length
-  );
-  
+  const numIncidencias = Math.min(config.datos.incidenciasAbiertas, DEMO_INCIDENCIAS.length);
+
   for (let i = 0; i < numIncidencias; i++) {
     const incidenciaData = DEMO_INCIDENCIAS[i];
     const unit = createdUnits[Math.floor(Math.random() * createdUnits.length)];
@@ -364,7 +365,7 @@ async function generateScenarioData(companyId: string, config: DemoScenarioConfi
   }
 
   // 5. Datos específicos por escenario
-  
+
   // Leads CRM para agencia inmobiliaria
   if (config.datos.leadsCRM && config.datos.leadsCRM > 0) {
     try {
@@ -375,7 +376,9 @@ async function generateScenarioData(companyId: string, config: DemoScenarioConfi
             nombre: `Lead Demo ${i + 1}`,
             email: `lead${i + 1}@demo.inmova.app`,
             telefono: `+34 6${String(Math.random()).slice(2, 10)}`,
-            estado: ['nuevo', 'contactado', 'cualificado', 'negociacion'][Math.floor(Math.random() * 4)],
+            estado: ['nuevo', 'contactado', 'cualificado', 'negociacion'][
+              Math.floor(Math.random() * 4)
+            ],
             fuente: ['web', 'referido', 'portal', 'redes sociales'][Math.floor(Math.random() * 4)],
             notas: `Lead de demostración generado automáticamente para ${config.nombre}`,
           },

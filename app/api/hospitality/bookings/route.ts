@@ -80,11 +80,11 @@ export async function GET(req: NextRequest) {
       total: bookings.length,
       confirmadas: bookings.filter((b: any) => b.estado === 'confirmada').length,
       pendientes: bookings.filter((b: any) => b.estado === 'pendiente').length,
-      checkinHoy: bookings.filter((b: any) =>
-        b.checkInDate && new Date(b.checkInDate).toISOString().split('T')[0] === today
+      checkinHoy: bookings.filter(
+        (b: any) => b.checkInDate && new Date(b.checkInDate).toISOString().split('T')[0] === today
       ).length,
-      checkoutHoy: bookings.filter((b: any) =>
-        b.checkOutDate && new Date(b.checkOutDate).toISOString().split('T')[0] === today
+      checkoutHoy: bookings.filter(
+        (b: any) => b.checkOutDate && new Date(b.checkOutDate).toISOString().split('T')[0] === today
       ).length,
       ingresosMes: bookings
         .filter((b: any) => new Date(b.checkInDate) >= monthStart)
@@ -143,19 +143,25 @@ export async function POST(req: NextRequest) {
     }
 
     if (!listing) {
-      return NextResponse.json({ error: 'No se pudo asociar la reserva a un listing' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'No se pudo asociar la reserva a un listing' },
+        { status: 400 }
+      );
     }
 
     const checkIn = new Date(body.checkIn);
     const checkOut = new Date(body.checkOut);
-    const numNoches = Math.max(1, Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24)));
-    const precioTotal = body.precioTotal || (numNoches * Number(listing.precioPorNoche));
+    const numNoches = Math.max(
+      1,
+      Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24))
+    );
+    const precioTotal = body.precioTotal || numNoches * Number(listing.precioPorNoche);
 
     const booking = await prisma.sTRBooking.create({
       data: {
         companyId: session.user.companyId,
         listingId: listing.id,
-        canal: 'directo',
+        canal: 'WEB_PROPIA',
         guestNombre: body.guestName,
         guestEmail: body.guestEmail,
         guestTelefono: body.guestPhone || null,
@@ -166,8 +172,7 @@ export async function POST(req: NextRequest) {
         precioTotal,
         tarifaNocturna: Number(listing.precioPorNoche),
         ingresoNeto: precioTotal,
-        estado: 'confirmada',
-        notas: body.notas || null,
+        estado: 'CONFIRMADA',
       },
     });
 

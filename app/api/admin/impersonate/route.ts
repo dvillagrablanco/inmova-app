@@ -6,16 +6,21 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 /**
  * POST /api/admin/impersonate
  * Permite al super_admin "loguearse como" cualquier empresa
- * 
+ *
  * Body: { companyId: string }
  */
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session || !session.user) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
@@ -39,6 +44,8 @@ export async function POST(request: NextRequest) {
 
     // Lazy load Prisma
 
+    const prisma = await getPrisma();
+
     // Verificar que la empresa existe
     const company = await prisma.company.findUnique({
       where: { id: companyId },
@@ -50,10 +57,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!company) {
-      return NextResponse.json(
-        { error: 'Empresa no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Empresa no encontrada' }, { status: 404 });
     }
 
     // Registrar la impersonación para auditoría
@@ -84,10 +88,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     logger.error('Error en impersonation:', error);
-    return NextResponse.json(
-      { error: 'Error al iniciar impersonation' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al iniciar impersonation' }, { status: 500 });
   }
 }
 
@@ -98,16 +99,13 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session || !session.user) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     if (session.user.role !== 'super_admin') {
-      return NextResponse.json(
-        { error: 'Acceso denegado' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
     }
 
     return NextResponse.json({
@@ -116,9 +114,6 @@ export async function DELETE(request: NextRequest) {
     });
   } catch (error) {
     logger.error('Error al finalizar impersonation:', error);
-    return NextResponse.json(
-      { error: 'Error al finalizar impersonation' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al finalizar impersonation' }, { status: 500 });
   }
 }

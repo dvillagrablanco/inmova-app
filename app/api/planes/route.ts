@@ -5,18 +5,23 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 /**
  * GET /api/planes
  * API pública para obtener los planes y add-ons disponibles
  * Se usa en la landing page de precios
- * 
+ *
  * Fuentes de datos (prioridad):
  * 1. Base de datos (subscription_plans, addons)
  * 2. Configuración estática (pricing-config.ts)
  */
 export async function GET(request: NextRequest) {
   try {
-    // Lazy load Prisma
+    const prisma = await getPrisma();
 
     // Intentar obtener de BD
     let planesFromDB: any[] = [];
@@ -59,7 +64,7 @@ export async function GET(request: NextRequest) {
       }));
     } else {
       // Fallback a config
-      addOns = Object.values(ADD_ONS).map(addon => ({
+      addOns = Object.values(ADD_ONS).map((addon) => ({
         id: addon.id,
         codigo: addon.id,
         nombre: addon.name,
@@ -75,7 +80,7 @@ export async function GET(request: NextRequest) {
 
     // Si no hay planes en BD, usar los del config
     if (planesFromDB.length === 0) {
-      const planesFromConfig = Object.values(PRICING_PLANS).map(plan => ({
+      const planesFromConfig = Object.values(PRICING_PLANS).map((plan) => ({
         id: plan.id,
         nombre: plan.name,
         tier: plan.tier.toUpperCase(),
@@ -85,7 +90,7 @@ export async function GET(request: NextRequest) {
         ahorroAnual: plan.annualSavings,
         maxUsuarios: typeof plan.maxUsers === 'number' ? plan.maxUsers : 999,
         maxPropiedades: typeof plan.maxProperties === 'number' ? plan.maxProperties : 9999,
-        features: plan.features.filter(f => f.included).map(f => f.text),
+        features: plan.features.filter((f) => f.included).map((f) => f.text),
         popular: plan.popular || false,
         cta: plan.cta,
         targetAudience: plan.targetAudience,
@@ -124,12 +129,11 @@ export async function GET(request: NextRequest) {
       planes,
       addOns,
     });
-
   } catch (error: any) {
     logger.error('[Planes API Error]:', error);
-    
+
     // Fallback completo a config si falla todo
-    const planesFromConfig = Object.values(PRICING_PLANS).map(plan => ({
+    const planesFromConfig = Object.values(PRICING_PLANS).map((plan) => ({
       id: plan.id,
       nombre: plan.name,
       tier: plan.tier.toUpperCase(),
@@ -139,11 +143,11 @@ export async function GET(request: NextRequest) {
       ahorroAnual: plan.annualSavings,
       maxUsuarios: typeof plan.maxUsers === 'number' ? plan.maxUsers : 999,
       maxPropiedades: typeof plan.maxProperties === 'number' ? plan.maxProperties : 9999,
-      features: plan.features.filter(f => f.included).map(f => f.text),
+      features: plan.features.filter((f) => f.included).map((f) => f.text),
       popular: plan.popular || false,
     }));
 
-    const addOnsFromConfig = Object.values(ADD_ONS).map(addon => ({
+    const addOnsFromConfig = Object.values(ADD_ONS).map((addon) => ({
       id: addon.id,
       codigo: addon.id,
       nombre: addon.name,

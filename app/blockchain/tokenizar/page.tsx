@@ -31,7 +31,7 @@ export default function TokenizarPage() {
   const { data: _session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const propertyId = searchParams.get('property');
+  const propertyId = searchParams?.get('property');
 
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -172,11 +172,7 @@ export default function TokenizarPage() {
                         : 'bg-gray-200 text-gray-500'
                     }`}
                   >
-                    {currentStep > step.id ? (
-                      <CheckCircle className="h-5 w-5" />
-                    ) : (
-                      step.id
-                    )}
+                    {currentStep > step.id ? <CheckCircle className="h-5 w-5" /> : step.id}
                   </div>
                   {index < steps.length - 1 && (
                     <div
@@ -190,9 +186,7 @@ export default function TokenizarPage() {
             </div>
             <div className="text-center">
               <h3 className="font-semibold">{steps[currentStep - 1].title}</h3>
-              <p className="text-sm text-muted-foreground">
-                {steps[currentStep - 1].description}
-              </p>
+              <p className="text-sm text-muted-foreground">{steps[currentStep - 1].description}</p>
             </div>
           </CardContent>
         </Card>
@@ -216,8 +210,7 @@ export default function TokenizarPage() {
                   <SelectContent>
                     {properties.map((property) => (
                       <SelectItem key={property.id} value={property.id}>
-                        {property.building?.nombre} - {property.numero} (
-                        {property.tipo})
+                        {property.building?.nombre} - {property.numero} ({property.tipo})
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -230,9 +223,7 @@ export default function TokenizarPage() {
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="text-muted-foreground">Valor estimado:</span>
-                      <span className="font-medium ml-2">
-                        €{form.totalValue.toLocaleString()}
-                      </span>
+                      <span className="font-medium ml-2">€{form.totalValue.toLocaleString()}</span>
                     </div>
                     <div>
                       <span className="text-muted-foreground">Renta mensual:</span>
@@ -267,9 +258,7 @@ export default function TokenizarPage() {
                       setForm({
                         ...form,
                         totalValue: parseInt(e.target.value) || 0,
-                        tokenPrice: Math.round(
-                          (parseInt(e.target.value) || 0) / form.tokenSupply
-                        ),
+                        tokenPrice: Math.round((parseInt(e.target.value) || 0) / form.tokenSupply),
                       })
                     }
                   />
@@ -279,9 +268,7 @@ export default function TokenizarPage() {
                   <Input
                     type="number"
                     value={form.tokenSupply}
-                    onChange={(e) =>
-                      handleTokenSupplyChange(parseInt(e.target.value) || 1000)
-                    }
+                    onChange={(e) => handleTokenSupplyChange(parseInt(e.target.value) || 1000)}
                   />
                 </div>
               </div>
@@ -432,9 +419,7 @@ export default function TokenizarPage() {
                 </div>
                 <div className="p-4 bg-muted rounded-lg">
                   <p className="text-sm text-muted-foreground">Rentabilidad Objetivo</p>
-                  <p className="text-2xl font-bold text-green-600">
-                    {form.annualYieldTarget}%
-                  </p>
+                  <p className="text-2xl font-bold text-green-600">{form.annualYieldTarget}%</p>
                 </div>
               </div>
 
@@ -451,19 +436,12 @@ export default function TokenizarPage() {
 
         {/* Navigation */}
         <div className="flex justify-between">
-          <Button
-            variant="outline"
-            onClick={handleBack}
-            disabled={currentStep === 1}
-          >
+          <Button variant="outline" onClick={handleBack} disabled={currentStep === 1}>
             Anterior
           </Button>
 
           {currentStep < 4 ? (
-            <Button
-              onClick={handleNext}
-              disabled={currentStep === 1 && !form.propertyId}
-            >
+            <Button onClick={handleNext} disabled={currentStep === 1 && !form.propertyId}>
               Siguiente
             </Button>
           ) : (

@@ -1,6 +1,6 @@
 /**
  * API de Diagnóstico Financiero
- * 
+ *
  * Endpoint para verificar que datos existen y son accesibles para el usuario.
  * Muestra: empresa activa, datos contables, movimientos bancarios, scope.
  */
@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { resolveAccountingScope } from '@/lib/accounting-scope';
+import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -73,7 +74,7 @@ export async function GET(request: NextRequest) {
         where: { userId: user.id, activo: true },
         include: { company: { select: { id: true, nombre: true } } },
       });
-      accessibleCompanies = accessEntries.map(e => ({
+      accessibleCompanies = accessEntries.map((e) => ({
         companyId: e.companyId,
         nombre: e.company?.nombre,
       }));
@@ -131,18 +132,24 @@ export async function GET(request: NextRequest) {
       });
 
       // Contracts, Payments
-      const contractCount = await prisma.contract.count({
-        where: { unit: { building: { companyId: cid } }, estado: 'activo' },
-      }).catch(() => 0);
+      const contractCount = await prisma.contract
+        .count({
+          where: { unit: { building: { companyId: cid } }, estado: 'activo' },
+        })
+        .catch(() => 0);
 
-      const paymentCount = await prisma.payment.count({
-        where: { contract: { unit: { building: { companyId: cid } } } },
-      }).catch(() => 0);
+      const paymentCount = await prisma.payment
+        .count({
+          where: { contract: { unit: { building: { companyId: cid } } } },
+        })
+        .catch(() => 0);
 
       // Buildings/Units
-      const buildingCount = await prisma.building.count({
-        where: { companyId: cid },
-      }).catch(() => 0);
+      const buildingCount = await prisma.building
+        .count({
+          where: { companyId: cid },
+        })
+        .catch(() => 0);
 
       dataPerCompany.push({
         companyId: cid,
@@ -154,7 +161,7 @@ export async function GET(request: NextRequest) {
           lastEntry: accountingLatest || null,
         },
         bank: {
-          connections: bankConnections.map(bc => ({
+          connections: bankConnections.map((bc) => ({
             id: bc.id,
             proveedor: bc.proveedor,
             banco: bc.nombreBanco,

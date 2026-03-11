@@ -5,8 +5,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  Lightbulb, Building2, TrendingUp, Settings, FileText,
-  AlertTriangle, CheckCircle2, X, ChevronRight, Bell,
+  Lightbulb,
+  Building2,
+  TrendingUp,
+  Settings,
+  FileText,
+  AlertTriangle,
+  CheckCircle2,
+  X,
+  ChevronRight,
+  Bell,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -44,7 +52,11 @@ interface SuggestionsWidgetProps {
   compact?: boolean;
 }
 
-export function SuggestionsWidget({ limit = 5, showHeader = true, compact = false }: SuggestionsWidgetProps) {
+export function SuggestionsWidget({
+  limit = 5,
+  showHeader = true,
+  compact = false,
+}: SuggestionsWidgetProps) {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -92,9 +104,11 @@ export function SuggestionsWidget({ limit = 5, showHeader = true, compact = fals
             <span className="flex items-center gap-2">
               <Lightbulb className="h-4 w-4 text-amber-600" />
               Sugerencias de Gestión
-              <Badge variant="secondary" className="text-[10px]">{suggestions.length}</Badge>
+              <Badge variant="secondary" className="text-[10px]">
+                {suggestions.length}
+              </Badge>
             </span>
-            <Link href="/dashboard/sugerencias">
+            <Link href="/admin/sugerencias">
               <Button variant="ghost" size="sm" className="text-xs h-7">
                 Ver todas <ChevronRight className="h-3 w-3 ml-1" />
               </Button>
@@ -114,7 +128,12 @@ export function SuggestionsWidget({ limit = 5, showHeader = true, compact = fals
                 key={s.id}
                 className="flex items-start gap-3 p-2.5 rounded-lg bg-white border border-gray-100 hover:border-gray-200 transition-colors"
               >
-                <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center shrink-0', areaConfig.color.split(' ')[1])}>
+                <div
+                  className={cn(
+                    'w-8 h-8 rounded-lg flex items-center justify-center shrink-0',
+                    areaConfig.color.split(' ')[1]
+                  )}
+                >
                   <Icon className={cn('h-4 w-4', areaConfig.color.split(' ')[0])} />
                 </div>
                 <div className="flex-1 min-w-0">

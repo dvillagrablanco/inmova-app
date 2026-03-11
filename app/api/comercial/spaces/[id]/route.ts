@@ -11,10 +11,7 @@ async function getPrisma() {
   return getPrismaClient();
 }
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
@@ -28,8 +25,11 @@ export async function GET(
         building: { select: { nombre: true, direccion: true } },
         commercialLeases: {
           where: { estado: 'activo' },
-          include: {
-            tenant: { select: { nombreCompleto: true, email: true, telefono: true } },
+          select: {
+            id: true,
+            arrendatarioNombre: true,
+            arrendatarioEmail: true,
+            arrendatarioTelefono: true,
           },
           take: 1,
         },

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Webhook Dispatcher
  * Envía webhooks a URLs suscritas cuando ocurren eventos

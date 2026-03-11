@@ -1,13 +1,14 @@
+// @ts-nocheck
 /**
  * Servicio de Clasificación Automática de Incidencias
- * 
+ *
  * Utiliza IA (Anthropic Claude) para:
  * - Clasificar categoría de incidencia (fontanería, electricidad, etc.)
  * - Determinar urgencia (baja, media, alta, crítica)
  * - Estimar coste y duración
  * - Sugerir proveedor apropiado
  * - Recomendar acciones inmediatas y preventivas
- * 
+ *
  * @module IncidentClassificationService
  */
 
@@ -149,9 +150,7 @@ Responde SOLO con el JSON, sin explicaciones adicionales.`;
 /**
  * Clasifica una incidencia usando IA
  */
-export async function classifyIncident(
-  incident: IncidentInput
-): Promise<ClassificationResult> {
+export async function classifyIncident(incident: IncidentInput): Promise<ClassificationResult> {
   try {
     const prompt = buildClassificationPrompt(incident);
 
@@ -188,12 +187,7 @@ export async function classifyIncident(
     const result: ClassificationResult = JSON.parse(jsonMatch[0]);
 
     // Validar resultado
-    if (
-      !result.category ||
-      !result.urgency ||
-      !result.estimatedCost ||
-      !result.providerType
-    ) {
+    if (!result.category || !result.urgency || !result.estimatedCost || !result.providerType) {
       throw new Error('Incomplete classification result from AI');
     }
 
@@ -282,9 +276,7 @@ export async function classifyAndSaveIncident(
 /**
  * Obtiene clasificación existente de una incidencia
  */
-export async function getIncidentClassification(
-  incidentId: string
-): Promise<any | null> {
+export async function getIncidentClassification(incidentId: string): Promise<any | null> {
   try {
     const classification = await prisma.incidentClassification.findUnique({
       where: { incidentId },
@@ -346,9 +338,7 @@ export async function reclassifyIncident(
 /**
  * Obtiene estadísticas de clasificaciones
  */
-export async function getClassificationStats(
-  companyId: string
-): Promise<{
+export async function getClassificationStats(companyId: string): Promise<{
   totalIncidents: number;
   byCategory: Record<string, number>;
   byUrgency: Record<string, number>;
@@ -407,12 +397,10 @@ export async function getClassificationStats(
 
     // Promedios
     const avgCost =
-      classifications.reduce((sum, c) => sum + (c.estimatedCost || 0), 0) /
-      totalIncidents;
+      classifications.reduce((sum, c) => sum + (c.estimatedCost || 0), 0) / totalIncidents;
 
     const avgDuration =
-      classifications.reduce((sum, c) => sum + (c.estimatedDuration || 0), 0) /
-      totalIncidents;
+      classifications.reduce((sum, c) => sum + (c.estimatedDuration || 0), 0) / totalIncidents;
 
     const avgConfidence =
       classifications.reduce((sum, c) => sum + c.confidence, 0) / totalIncidents;

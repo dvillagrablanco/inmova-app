@@ -8,6 +8,11 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 const designSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -99,6 +104,7 @@ export async function GET(request: NextRequest) {
     if (!companyId) {
       return NextResponse.json({ error: 'CompanyId no disponible' }, { status: 400 });
     }
+    const prisma = await getPrisma();
     const integration = await prisma.integrationConfig.findUnique({
       where: { companyId_provider: { companyId, provider: 'canva' } },
       select: { settings: true },
@@ -118,10 +124,7 @@ export async function GET(request: NextRequest) {
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('[Canva Designs Error]:', { message });
-    return NextResponse.json(
-      { error: 'Error al obtener diseños' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener diseños' }, { status: 500 });
   }
 }
 
@@ -156,6 +159,7 @@ export async function POST(request: NextRequest) {
 
     const body = createSchema.parse(await request.json());
     const { name, templateId, category, dimensions } = body;
+    const prisma = await getPrisma();
 
     const now = new Date();
     const newDesign: CanvaDesign = {
@@ -209,10 +213,7 @@ export async function POST(request: NextRequest) {
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('[Canva Create Design Error]:', { message });
-    return NextResponse.json(
-      { error: 'Error al crear diseño' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear diseño' }, { status: 500 });
   }
 }
 
@@ -244,15 +245,13 @@ export async function DELETE(request: NextRequest) {
     if (!companyId) {
       return NextResponse.json({ error: 'CompanyId no disponible' }, { status: 400 });
     }
+    const prisma = await getPrisma();
 
     const { searchParams } = new URL(request.url);
     const designId = searchParams.get('id');
 
     if (!designId) {
-      return NextResponse.json(
-        { error: 'ID de diseño es requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'ID de diseño es requerido' }, { status: 400 });
     }
     const integration = await prisma.integrationConfig.findUnique({
       where: { companyId_provider: { companyId, provider: 'canva' } },
@@ -263,10 +262,7 @@ export async function DELETE(request: NextRequest) {
     const nextDesigns = existingDesigns.filter((design) => design.id !== designId);
 
     if (existingDesigns.length === nextDesigns.length) {
-      return NextResponse.json(
-        { error: 'Diseño no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Diseño no encontrado' }, { status: 404 });
     }
 
     const baseSettings = toObjectRecord(integration?.settings);
@@ -299,9 +295,6 @@ export async function DELETE(request: NextRequest) {
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error desconocido';
     logger.error('[Canva Delete Design Error]:', { message });
-    return NextResponse.json(
-      { error: 'Error al eliminar diseño' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al eliminar diseño' }, { status: 500 });
   }
 }

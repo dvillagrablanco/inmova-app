@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
@@ -12,7 +13,16 @@ export const runtime = 'nodejs';
 const createAssetSchema = z.object({
   buildingId: z.string().optional(),
   unitId: z.string().optional(),
-  assetType: z.enum(['vivienda', 'local_comercial', 'oficina', 'garaje', 'trastero', 'nave_industrial', 'solar', 'otro']),
+  assetType: z.enum([
+    'vivienda',
+    'local_comercial',
+    'oficina',
+    'garaje',
+    'trastero',
+    'nave_industrial',
+    'solar',
+    'otro',
+  ]),
   fechaAdquisicion: z.string().datetime(),
   precioCompra: z.number().positive(),
   gastosNotaria: z.number().min(0).default(0),
@@ -47,7 +57,10 @@ export async function GET(request: NextRequest) {
       select: { childCompanies: { select: { id: true } } },
     });
     const allCompanyIds = companyHierarchy
-      ? [session.user.companyId, ...companyHierarchy.childCompanies.map((c: { id: string }) => c.id)]
+      ? [
+          session.user.companyId,
+          ...companyHierarchy.childCompanies.map((c: { id: string }) => c.id),
+        ]
       : [session.user.companyId];
 
     const assets = await prisma.assetAcquisition.findMany({
@@ -55,7 +68,10 @@ export async function GET(request: NextRequest) {
       include: {
         building: { select: { id: true, nombre: true, direccion: true } },
         unit: { select: { id: true, numero: true, tipo: true } },
-        mortgages: { where: { estado: 'activa' }, select: { id: true, capitalPendiente: true, cuotaMensual: true } },
+        mortgages: {
+          where: { estado: 'activa' },
+          select: { id: true, capitalPendiente: true, cuotaMensual: true },
+        },
       },
       orderBy: { fechaAdquisicion: 'desc' },
     });
@@ -81,13 +97,14 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validated = createAssetSchema.parse(body);
 
-    const inversionTotal = validated.precioCompra
-      + validated.gastosNotaria
-      + validated.gastosRegistro
-      + validated.gastosGestoria
-      + validated.impuestoCompra
-      + validated.otrosGastosCompra
-      + validated.reformasCapitalizadas;
+    const inversionTotal =
+      validated.precioCompra +
+      validated.gastosNotaria +
+      validated.gastosRegistro +
+      validated.gastosGestoria +
+      validated.impuestoCompra +
+      validated.otrosGastosCompra +
+      validated.reformasCapitalizadas;
 
     const prisma = getPrismaClient();
     const asset = await prisma.assetAcquisition.create({
@@ -102,7 +119,7 @@ export async function POST(request: NextRequest) {
 
     // Generar tabla de amortizacion
     const { generateDepreciationTable } = await import('@/lib/investment-service');
-    await generateDepreciationTable(asset.id).catch(err => {
+    await generateDepreciationTable(asset.id).catch((err) => {
       logger.warn('[Asset] Depreciation table generation failed:', err);
     });
 

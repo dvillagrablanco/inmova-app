@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
     });
 
     const validIds = new Set(payments.map((p) => p.id));
-    let failed = paymentIds.filter((id) => !validIds.has(id)).length;
+    let failed = paymentIds.filter((id: string) => !validIds.has(id)).length;
 
     const toUpdate = payments.filter((p) => p.estado !== 'pagado');
     let updated = 0;
@@ -149,9 +149,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     logger.error('[Payment Batch Mark Paid Error]:', error);
-    return NextResponse.json(
-      { error: 'Error al marcar pagos como cobrados' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al marcar pagos como cobrados' }, { status: 500 });
   }
 }

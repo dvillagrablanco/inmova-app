@@ -1,7 +1,7 @@
 /**
  * API para gestionar un cupón promocional específico
  * Solo accesible para SUPERADMIN
- * 
+ *
  * GET /api/admin/promo-coupons/[id] - Obtener cupón
  * PUT /api/admin/promo-coupons/[id] - Actualizar cupón
  * DELETE /api/admin/promo-coupons/[id] - Eliminar cupón
@@ -16,33 +16,38 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-const updateCouponSchema = z.object({
-  codigo: z.string().min(3).max(20).toUpperCase().optional(),
-  nombre: z.string().min(3).optional(),
-  descripcion: z.string().optional().nullable(),
-  tipo: z.enum(['PERCENTAGE', 'FIXED_AMOUNT', 'FREE_MONTHS', 'TRIAL_EXTENSION']).optional(),
-  valor: z.number().positive().optional(),
-  fechaInicio: z.string().datetime().optional(),
-  fechaExpiracion: z.string().datetime().optional(),
-  usosMaximos: z.number().int().positive().optional().nullable(),
-  usosPorUsuario: z.number().int().positive().optional(),
-  duracionMeses: z.number().int().positive().optional(),
-  planesPermitidos: z.array(z.string()).optional(),
-  estado: z.enum(['DRAFT', 'ACTIVE', 'PAUSED', 'EXPIRED', 'EXHAUSTED']).optional(),
-  activo: z.boolean().optional(),
-  destacado: z.boolean().optional(),
-  notas: z.string().optional().nullable(),
-}).partial();
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+const updateCouponSchema = z
+  .object({
+    codigo: z.string().min(3).max(20).toUpperCase().optional(),
+    nombre: z.string().min(3).optional(),
+    descripcion: z.string().optional().nullable(),
+    tipo: z.enum(['PERCENTAGE', 'FIXED_AMOUNT', 'FREE_MONTHS', 'TRIAL_EXTENSION']).optional(),
+    valor: z.number().positive().optional(),
+    fechaInicio: z.string().datetime().optional(),
+    fechaExpiracion: z.string().datetime().optional(),
+    usosMaximos: z.number().int().positive().optional().nullable(),
+    usosPorUsuario: z.number().int().positive().optional(),
+    duracionMeses: z.number().int().positive().optional(),
+    planesPermitidos: z.array(z.string()).optional(),
+    estado: z.enum(['DRAFT', 'ACTIVE', 'PAUSED', 'EXPIRED', 'EXHAUSTED']).optional(),
+    activo: z.boolean().optional(),
+    destacado: z.boolean().optional(),
+    notas: z.string().optional().nullable(),
+  })
+  .partial();
+
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user || session.user.role !== 'super_admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
+    const prisma = await getPrisma();
 
     const coupon = await prisma.promoCoupon.findUnique({
       where: { id: params.id },
@@ -77,15 +82,13 @@ export async function GET(
   }
 }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user || session.user.role !== 'super_admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
+    const prisma = await getPrisma();
 
     const body = await request.json();
     const validated = updateCouponSchema.parse(body);
@@ -155,15 +158,13 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user || session.user.role !== 'super_admin') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
+    const prisma = await getPrisma();
 
     // Verificar que existe y no tiene usos
     const existing = await prisma.promoCoupon.findUnique({

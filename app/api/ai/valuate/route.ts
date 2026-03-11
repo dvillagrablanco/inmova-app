@@ -23,10 +23,7 @@ import {
   getAggregatedMarketData,
   formatPlatformDataForPrompt,
 } from '@/lib/external-platform-data-service';
-import {
-  analyzeAndValuateProperty,
-  type PropertyForAnalysis,
-} from '@/lib/ai-property-analysis';
+import { analyzeAndValuateProperty, type PropertyForAnalysis } from '@/lib/ai-property-analysis';
 
 import logger from '@/lib/logger';
 import Anthropic from '@anthropic-ai/sdk';
@@ -282,10 +279,20 @@ const valuateSchema = z.object({
   superficie: z.coerce.number().positive(),
 
   // Tipo de activo — determina metodología de valoración, yields, gastos y riesgos
-  tipoActivo: z.enum([
-    'vivienda', 'local_comercial', 'oficina', 'nave_industrial',
-    'garaje', 'trastero', 'terreno', 'edificio', 'coworking',
-  ]).optional().default('vivienda'),
+  tipoActivo: z
+    .enum([
+      'vivienda',
+      'local_comercial',
+      'oficina',
+      'nave_industrial',
+      'garaje',
+      'trastero',
+      'terreno',
+      'edificio',
+      'coworking',
+    ])
+    .optional()
+    .default('vivienda'),
 
   // Campos opcionales básicos
   habitaciones: z.coerce.number().int().nonnegative().optional().default(0),
@@ -496,8 +503,13 @@ export async function POST(request: NextRequest) {
       floor: validated.planta || validated.floor || undefined,
       condition: mapCondition(validated.estadoConservacion || validated.condition),
       yearBuilt: validated.yearBuilt,
-      hasElevator: validated.caracteristicas?.includes('ascensor') || validated.hasElevator || false,
-      hasParking: validated.caracteristicas?.includes('garaje') || validated.caracteristicas?.includes('parking') || validated.hasParking || false,
+      hasElevator:
+        validated.caracteristicas?.includes('ascensor') || validated.hasElevator || false,
+      hasParking:
+        validated.caracteristicas?.includes('garaje') ||
+        validated.caracteristicas?.includes('parking') ||
+        validated.hasParking ||
+        false,
       hasGarden: validated.caracteristicas?.includes('jardin') || validated.hasGarden || false,
       hasPool: validated.caracteristicas?.includes('piscina') || validated.hasPool || false,
       hasTerrace: validated.hasTerrace || validated.caracteristicas?.includes('terraza') || false,
@@ -509,16 +521,19 @@ export async function POST(request: NextRequest) {
       finalidad: validated.finalidad || 'venta',
     };
 
-    const internalComparablesText = comparables.length > 0
-      ? comparables.map((c: any) => `- ${c.address}: ${c.price}€ (${c.squareMeters}m²)`).join('\n')
-      : '';
+    const internalComparablesText =
+      comparables.length > 0
+        ? comparables
+            .map((c: any) => `- ${c.address}: ${c.price}€ (${c.squareMeters}m²)`)
+            .join('\n')
+        : '';
 
     // 8. Valoración IA multi-paso (Fase 1: análisis comparables + Fase 2: valoración experta)
     const valuation = await analyzeAndValuateProperty(
       propertyForAnalysis,
       aggregatedPlatformData || null,
       platformDataText,
-      internalComparablesText,
+      internalComparablesText
     );
 
     // 9. Normalizar resultados para compatibilidad con UI
@@ -539,7 +554,8 @@ export async function POST(request: NextRequest) {
       capRate: valuation.capRate,
     };
 
-    const normalizedTrend = valuation.tendenciaMercado ?? valuation.marketTrend;
+    const normalizedTrend =
+      valuation.tendenciaMercado ?? (valuation as { marketTrend?: string }).marketTrend;
     const marketTrend =
       normalizedTrend === 'alcista'
         ? 'UP'
@@ -567,11 +583,14 @@ export async function POST(request: NextRequest) {
           rooms: habitaciones,
           bathrooms: banos,
           floor: validated.planta || validated.floor || 0,
-          hasElevator: validated.hasElevator || validated.caracteristicas?.includes('ascensor') || false,
-          hasParking: validated.hasParking || validated.caracteristicas?.includes('garaje') || false,
+          hasElevator:
+            validated.hasElevator || validated.caracteristicas?.includes('ascensor') || false,
+          hasParking:
+            validated.hasParking || validated.caracteristicas?.includes('garaje') || false,
           hasGarden: validated.hasGarden || validated.caracteristicas?.includes('jardin') || false,
           hasPool: validated.hasPool || validated.caracteristicas?.includes('piscina') || false,
-          hasTerrace: validated.hasTerrace || validated.caracteristicas?.includes('terraza') || false,
+          hasTerrace:
+            validated.hasTerrace || validated.caracteristicas?.includes('terraza') || false,
           hasGarage: validated.hasParking || validated.caracteristicas?.includes('garaje') || false,
           condition: mapCondition(validated.estadoConservacion || validated.condition),
           yearBuilt: validated.yearBuilt,

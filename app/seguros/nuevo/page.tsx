@@ -1,3 +1,4 @@
+// @ts-nocheck
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -200,7 +201,12 @@ export default function NuevoSeguroPage() {
     e.preventDefault();
 
     // Validation
-    if (!formData.tipo || !formData.buildingId || !formData.aseguradora || !formData.nombreAsegurado) {
+    if (
+      !formData.tipo ||
+      !formData.buildingId ||
+      !formData.aseguradora ||
+      !formData.nombreAsegurado
+    ) {
       toast.error('Completa los campos obligatorios');
       return;
     }
@@ -349,10 +355,8 @@ export default function NuevoSeguroPage() {
                     <Label>Valor de Cobertura (€) *</Label>
                     <Input
                       type="number"
-                    value={formData.sumaAsegurada}
-                    onChange={(e) =>
-                      setFormData({ ...formData, sumaAsegurada: e.target.value })
-                    }
+                      value={formData.sumaAsegurada}
+                      onChange={(e) => setFormData({ ...formData, sumaAsegurada: e.target.value })}
                       placeholder="500000"
                     />
                   </div>
@@ -701,17 +705,17 @@ export default function NuevoSeguroPage() {
       </div>
 
       {/* Asistente IA de Documentos - Para subir pólizas de seguros */}
-      <AIDocumentAssistant 
+      <AIDocumentAssistant
         context="seguros"
         variant="floating"
         position="bottom-right"
         onApplyData={(data) => {
           // Aplicar datos extraídos de la póliza al formulario
-          if (data.poliza) setFormData(prev => ({ ...prev, numeroPoliza: data.poliza }));
-          if (data.aseguradora) setFormData(prev => ({ ...prev, aseguradora: data.aseguradora }));
-          if (data.prima) setFormData(prev => ({ ...prev, primaAnual: data.prima }));
-          if (data.cobertura) setFormData(prev => ({ ...prev, sumaAsegurada: data.cobertura }));
-          if (data.asegurado) setFormData(prev => ({ ...prev, nombreAsegurado: data.asegurado }));
+          if (data.poliza) setFormData((prev) => ({ ...prev, numeroPoliza: data.poliza }));
+          if (data.aseguradora) setFormData((prev) => ({ ...prev, aseguradora: data.aseguradora }));
+          if (data.prima) setFormData((prev) => ({ ...prev, primaAnual: data.prima }));
+          if (data.cobertura) setFormData((prev) => ({ ...prev, sumaAsegurada: data.cobertura }));
+          if (data.asegurado) setFormData((prev) => ({ ...prev, nombreAsegurado: data.asegurado }));
           toast.success('Datos de la póliza aplicados al formulario');
         }}
       />

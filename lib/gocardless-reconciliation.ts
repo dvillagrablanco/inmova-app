@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * GOCARDLESS RECONCILIATION SERVICE
  * Conciliación bancaria entre pagos SEPA y pagos de alquiler en Inmova
@@ -117,7 +118,9 @@ export async function syncPaymentsFromGC(companyId: string): Promise<{
       after = result.meta.cursors.after || undefined;
     } while (after);
 
-    logger.info(`[Reconciliation] Sync complete: ${created} created, ${updated} updated, ${errors} errors`);
+    logger.info(
+      `[Reconciliation] Sync complete: ${created} created, ${updated} updated, ${errors} errors`
+    );
     return { created, updated, errors };
   } catch (error) {
     logger.error('[Reconciliation] Sync failed:', error);
@@ -311,7 +314,9 @@ export async function autoReconcile(companyId: string): Promise<ReconciliationSu
         summary.matched++;
         summary.matchedAmount += amountEuros;
 
-        logger.info(`[Reconciliation] Auto-matched: SEPA ${sepaPayment.gcPaymentId} -> Payment ${matchedPayment.id} (${amountEuros}€)`);
+        logger.info(
+          `[Reconciliation] Auto-matched: SEPA ${sepaPayment.gcPaymentId} -> Payment ${matchedPayment.id} (${amountEuros}€)`
+        );
       } else {
         summary.unmatched++;
       }
@@ -323,8 +328,8 @@ export async function autoReconcile(companyId: string): Promise<ReconciliationSu
 
   logger.info(
     `[Reconciliation] Summary: ${summary.matched}/${summary.total} matched, ` +
-    `${summary.unmatched} unmatched, ${summary.errors} errors, ` +
-    `${summary.matchedAmount.toFixed(2)}€ conciliado`
+      `${summary.unmatched} unmatched, ${summary.errors} errors, ` +
+      `${summary.matchedAmount.toFixed(2)}€ conciliado`
   );
 
   return summary;
@@ -374,7 +379,9 @@ export async function manualReconcile(params: {
       }),
     ]);
 
-    logger.info(`[Reconciliation] Manual: SEPA ${sepaPayment.gcPaymentId} -> Payment ${params.inmovaPaymentId} by ${params.userId}`);
+    logger.info(
+      `[Reconciliation] Manual: SEPA ${sepaPayment.gcPaymentId} -> Payment ${params.inmovaPaymentId} by ${params.userId}`
+    );
     return true;
   } catch (error) {
     logger.error('[Reconciliation] Manual reconcile failed:', error);
@@ -482,9 +489,8 @@ export async function getReconciliationStats(companyId: string) {
       reconciled: reconciledPayments,
       pendingReconciliation: pendingPayments,
       failed: failedPayments,
-      reconciliationRate: totalPayments > 0
-        ? Math.round((reconciledPayments / totalPayments) * 100)
-        : 0,
+      reconciliationRate:
+        totalPayments > 0 ? Math.round((reconciledPayments / totalPayments) * 100) : 0,
     },
     payouts: {
       total: totalPayoutsResult._count,

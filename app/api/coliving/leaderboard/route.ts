@@ -17,8 +17,7 @@ type SessionUser = {
   companyId?: string;
 };
 
-async function parseStringArray(value: unknown): string[] {
-  const prisma = await getPrisma();
+function parseStringArray(value: unknown): string[] {
   if (!Array.isArray(value)) {
     return [];
   }
@@ -59,9 +58,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(leaderboard);
   } catch (error) {
     logger.error('Error fetching coliving leaderboard', error);
-    return NextResponse.json(
-      { error: 'Error al obtener leaderboard' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener leaderboard' }, { status: 500 });
   }
 }

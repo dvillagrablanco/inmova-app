@@ -24,6 +24,11 @@ interface Inspeccion {
   incidencias?: number;
 }
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 const querySchema = z.object({
   tipo: z.enum(['entrada', 'salida', 'periodica']).optional(),
   estado: z.enum(['programada', 'en_proceso', 'completada']).optional(),
@@ -38,21 +43,18 @@ const createSchema = z.object({
   descripcion: z.string().optional(),
 });
 
-async function normalizeTipo(tipo: string): InspeccionTipo {
-  const prisma = await getPrisma();
+function normalizeTipo(tipo: string): InspeccionTipo {
   if (tipo === 'entrada' || tipo === 'salida') return tipo;
   return 'periodica';
 }
 
-async function normalizeEstado(estado: string): InspeccionEstado {
-  const prisma = await getPrisma();
+function normalizeEstado(estado: string): InspeccionEstado {
   if (estado === 'completada') return 'completada';
   if (estado === 'programada') return 'programada';
   return 'en_proceso';
 }
 
-async function getErrorMessage(error: unknown) {
-  const prisma = await getPrisma();
+function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : 'Error desconocido';
 }
 
@@ -66,8 +68,12 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const parsedQuery = querySchema.safeParse({
-      tipo: searchParams.get('tipo') === 'all' ? undefined : searchParams.get('tipo') ?? undefined,
-      estado: searchParams.get('estado') === 'all' ? undefined : searchParams.get('estado') ?? undefined,
+      tipo:
+        searchParams.get('tipo') === 'all' ? undefined : (searchParams.get('tipo') ?? undefined),
+      estado:
+        searchParams.get('estado') === 'all'
+          ? undefined
+          : (searchParams.get('estado') ?? undefined),
     });
 
     if (!parsedQuery.success) {
@@ -90,7 +96,11 @@ export async function GET(request: NextRequest) {
       unitIds.length
         ? prisma.unit.findMany({
             where: { id: { in: unitIds }, building: { companyId: session.user.companyId } },
-            select: { id: true, numero: true, building: { select: { id: true, nombre: true, direccion: true } } },
+            select: {
+              id: true,
+              numero: true,
+              building: { select: { id: true, nombre: true, direccion: true } },
+            },
           })
         : Promise.resolve([]),
       buildingIds.length
@@ -127,7 +137,9 @@ export async function GET(request: NextRequest) {
       inspecciones = inspecciones.filter((inspection) => inspection.tipo === parsedQuery.data.tipo);
     }
     if (parsedQuery.data.estado) {
-      inspecciones = inspecciones.filter((inspection) => inspection.estado === parsedQuery.data.estado);
+      inspecciones = inspecciones.filter(
+        (inspection) => inspection.estado === parsedQuery.data.estado
+      );
     }
 
     // Estadísticas
@@ -137,8 +149,10 @@ export async function GET(request: NextRequest) {
       enProceso: inspecciones.filter((inspection) => inspection.estado === 'en_proceso').length,
       completadas: inspecciones.filter((inspection) => inspection.estado === 'completada').length,
       puntuacionMedia: Math.round(
-        inspecciones.filter((inspection) => inspection.puntuacion).reduce((sum, inspection) => sum + (inspection.puntuacion || 0), 0) /
-        (inspecciones.filter((inspection) => inspection.puntuacion).length || 1)
+        inspecciones
+          .filter((inspection) => inspection.puntuacion)
+          .reduce((sum, inspection) => sum + (inspection.puntuacion || 0), 0) /
+          (inspecciones.filter((inspection) => inspection.puntuacion).length || 1)
       ),
     };
 
@@ -185,7 +199,11 @@ export async function POST(request: NextRequest) {
     if (data.unitId) {
       unit = await prisma.unit.findFirst({
         where: { id: data.unitId, building: { companyId: session.user.companyId } },
-        select: { id: true, numero: true, building: { select: { id: true, nombre: true, direccion: true } } },
+        select: {
+          id: true,
+          numero: true,
+          building: { select: { id: true, nombre: true, direccion: true } },
+        },
       });
       if (!unit) {
         return NextResponse.json({ error: 'Unidad no encontrada' }, { status: 404 });

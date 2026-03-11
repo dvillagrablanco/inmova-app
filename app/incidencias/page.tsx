@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { SmartBreadcrumbs } from '@/components/navigation/smart-breadcrumbs';
 import { ContextualQuickActions } from '@/components/navigation/contextual-quick-actions';
@@ -76,11 +76,36 @@ interface Incidencia {
 }
 
 const KANBAN_COLUMNS = [
-  { id: 'abierta', label: 'Abierta', estados: ['abierta'], headerColor: 'border-l-4 border-l-red-500' },
-  { id: 'asignada', label: 'Asignada', estados: ['asignada'], headerColor: 'border-l-4 border-l-orange-500' },
-  { id: 'en_proceso', label: 'En Progreso', estados: ['en_proceso'], headerColor: 'border-l-4 border-l-amber-500' },
-  { id: 'resuelta', label: 'Resuelta', estados: ['resuelta'], headerColor: 'border-l-4 border-l-green-500' },
-  { id: 'cerrada', label: 'Cerrada', estados: ['cerrada'], headerColor: 'border-l-4 border-l-slate-500' },
+  {
+    id: 'abierta',
+    label: 'Abierta',
+    estados: ['abierta'],
+    headerColor: 'border-l-4 border-l-red-500',
+  },
+  {
+    id: 'asignada',
+    label: 'Asignada',
+    estados: ['asignada'],
+    headerColor: 'border-l-4 border-l-orange-500',
+  },
+  {
+    id: 'en_proceso',
+    label: 'En Progreso',
+    estados: ['en_proceso'],
+    headerColor: 'border-l-4 border-l-amber-500',
+  },
+  {
+    id: 'resuelta',
+    label: 'Resuelta',
+    estados: ['resuelta'],
+    headerColor: 'border-l-4 border-l-green-500',
+  },
+  {
+    id: 'cerrada',
+    label: 'Cerrada',
+    estados: ['cerrada'],
+    headerColor: 'border-l-4 border-l-slate-500',
+  },
 ] as const;
 
 function getNextIncidentEstado(current: string): string | null {
@@ -103,6 +128,7 @@ interface Building {
 export default function IncidenciasPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { canCreate } = usePermissions();
 
   const [incidencias, setIncidencias] = useState<Incidencia[]>([]);
@@ -132,6 +158,18 @@ export default function IncidenciasPage() {
       fetchData();
     }
   }, [status, router]);
+
+  useEffect(() => {
+    const handleOpenDialog = () => setOpenDialog(true);
+    window.addEventListener('open-new-incidencia-dialog', handleOpenDialog);
+    return () => window.removeEventListener('open-new-incidencia-dialog', handleOpenDialog);
+  }, []);
+
+  useEffect(() => {
+    if (searchParams.get('openNew') === '1' && canCreate) {
+      setOpenDialog(true);
+    }
+  }, [searchParams, canCreate]);
 
   const fetchData = async () => {
     try {
@@ -285,7 +323,9 @@ export default function IncidenciasPage() {
 
   // KPIs
   const totalIncidencias = incidencias.length;
-  const abiertas = incidencias.filter((i) => i.estado === 'abierta' || i.estado === 'asignada').length;
+  const abiertas = incidencias.filter(
+    (i) => i.estado === 'abierta' || i.estado === 'asignada'
+  ).length;
   const enProceso = incidencias.filter((i) => i.estado === 'en_proceso').length;
   const resueltas = incidencias.filter(
     (i) => i.estado === 'resuelta' || i.estado === 'cerrada'
@@ -355,180 +395,42 @@ export default function IncidenciasPage() {
 
   return (
     <AuthenticatedLayout>
-          <div className="max-w-7xl mx-auto space-y-6">
-            {/* Smart Breadcrumbs */}
-            <SmartBreadcrumbs
-              totalCount={incidencias.length}
-              showBackButton={true}
-            />
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Smart Breadcrumbs */}
+        <SmartBreadcrumbs totalCount={incidencias.length} showBackButton={true} />
 
-            {/* Header con Quick Actions */}
-            <div className="mb-6 flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold mb-2">Incidencias Vecinales</h1>
-                <p className="text-gray-600">Gestiona reportes y problemas de la comunidad</p>
-              </div>
-              
-              {/* Quick Actions y botón nueva incidencia */}
-              <div className="flex gap-2">
-                {canCreate && (
-                  <ContextualQuickActions
-                    pendingIssues={incidencias.filter(i => i.estado === 'pendiente').length}
-                    criticalIssues={incidencias.filter(i => i.prioridad === 'alta' || i.prioridad === 'critica').length}
-                  />
-                )}
-                {canCreate && (
-                  <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-                  <DialogTrigger asChild>
-                    <Button className="gradient-primary hover:opacity-90 shadow-primary">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Nueva Incidencia
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-2xl">
-                    <DialogHeader>
-                      <DialogTitle>Nueva Incidencia</DialogTitle>
-                      <DialogDescription>
-                        Reporta un problema o situación en la comunidad
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4">
-                      <div>
-                        <Label>Edificio *</Label>
-                        <Select
-                          value={formData.buildingId}
-                          onValueChange={(value) =>
-                            setFormData((prev) => ({ ...prev, buildingId: value }))
-                          }
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecciona edificio" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {buildings.map((b) => (
-                              <SelectItem key={b.id} value={b.id}>
-                                {b.nombre}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label>Título *</Label>
-                        <Input
-                          value={formData.titulo}
-                          onChange={(e) =>
-                            setFormData((prev) => ({ ...prev, titulo: e.target.value }))
-                          }
-                          placeholder="Ej: Fuga de agua en planta 3"
-                        />
-                      </div>
-                      <div>
-                        <Label>Descripción *</Label>
-                        <Textarea
-                          value={formData.descripcion}
-                          onChange={(e) =>
-                            setFormData((prev) => ({ ...prev, descripcion: e.target.value }))
-                          }
-                          rows={3}
-                          placeholder="Describe la situación..."
-                        />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label>Tipo</Label>
-                          <Select
-                            value={formData.tipo}
-                            onValueChange={(value) =>
-                              setFormData((prev) => ({ ...prev, tipo: value }))
-                            }
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="ruido">Ruido</SelectItem>
-                              <SelectItem value="averia_comun">Avería Común</SelectItem>
-                              <SelectItem value="limpieza">Limpieza</SelectItem>
-                              <SelectItem value="seguridad">Seguridad</SelectItem>
-                              <SelectItem value="convivencia">Convivencia</SelectItem>
-                              <SelectItem value="mascota">Mascota</SelectItem>
-                              <SelectItem value="parking">Parking</SelectItem>
-                              <SelectItem value="otro">Otro</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div>
-                          <Label>Prioridad</Label>
-                          <Select
-                            value={formData.prioridad}
-                            onValueChange={(value) =>
-                              setFormData((prev) => ({ ...prev, prioridad: value }))
-                            }
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="baja">Baja</SelectItem>
-                              <SelectItem value="media">Media</SelectItem>
-                              <SelectItem value="alta">Alta</SelectItem>
-                              <SelectItem value="urgente">Urgente</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                      <div>
-                        <Label>Ubicación Específica</Label>
-                        <Input
-                          value={formData.ubicacion}
-                          onChange={(e) =>
-                            setFormData((prev) => ({ ...prev, ubicacion: e.target.value }))
-                          }
-                          placeholder="Ej: Planta 3, Parking B"
-                        />
-                      </div>
-                    </div>
-                    <div className="flex justify-end gap-2">
-                      <Button variant="outline" onClick={() => setOpenDialog(false)}>
-                        Cancelar
-                      </Button>
-                      <Button
-                        onClick={handleCreate}
-                        disabled={!formData.buildingId || !formData.titulo || !formData.descripcion}
-                        className="gradient-primary hover:opacity-90 shadow-primary"
-                      >
-                        Crear Incidencia
-                      </Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              )}
-              </div>
-            </div>
+        {/* Header con Quick Actions */}
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Incidencias Vecinales</h1>
+            <p className="text-gray-600">Gestiona reportes y problemas de la comunidad</p>
+          </div>
 
-            {/* Dialog de Edición */}
-              <Dialog
-                open={openEditDialog}
-                onOpenChange={(open) => {
-                  setOpenEditDialog(open);
-                  if (!open) {
-                    setEditingIncidencia(null);
-                    setFormData({
-                      buildingId: '',
-                      titulo: '',
-                      descripcion: '',
-                      tipo: 'otro',
-                      prioridad: 'media',
-                      ubicacion: '',
-                    });
-                  }
-                }}
-              >
+          {/* Quick Actions y botón nueva incidencia */}
+          <div className="flex gap-2">
+            {canCreate && (
+              <ContextualQuickActions
+                pendingIssues={incidencias.filter((i) => i.estado === 'pendiente').length}
+                criticalIssues={
+                  incidencias.filter((i) => i.prioridad === 'alta' || i.prioridad === 'critica')
+                    .length
+                }
+              />
+            )}
+            {canCreate && (
+              <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+                <DialogTrigger asChild>
+                  <Button className="gradient-primary hover:opacity-90 shadow-primary">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Nueva Incidencia
+                  </Button>
+                </DialogTrigger>
                 <DialogContent className="max-w-2xl">
                   <DialogHeader>
-                    <DialogTitle>Editar Incidencia</DialogTitle>
-                    <DialogDescription>Modifica los detalles de la incidencia</DialogDescription>
+                    <DialogTitle>Nueva Incidencia</DialogTitle>
+                    <DialogDescription>
+                      Reporta un problema o situación en la comunidad
+                    </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4 py-4">
                     <div>
@@ -626,170 +528,300 @@ export default function IncidenciasPage() {
                         placeholder="Ej: Planta 3, Parking B"
                       />
                     </div>
-                    {editingIncidencia && (
-                      <EntityChat
-                        entityType="incidencia"
-                        entityId={editingIncidencia.id}
-                        entityLabel={`Incidencia: ${editingIncidencia.titulo}`}
-                      />
-                    )}
                   </div>
                   <div className="flex justify-end gap-2">
-                    <Button variant="outline" onClick={() => setOpenEditDialog(false)}>
+                    <Button variant="outline" onClick={() => setOpenDialog(false)}>
                       Cancelar
                     </Button>
                     <Button
-                      onClick={handleUpdate}
+                      onClick={handleCreate}
                       disabled={!formData.buildingId || !formData.titulo || !formData.descripcion}
                       className="gradient-primary hover:opacity-90 shadow-primary"
                     >
-                      Actualizar Incidencia
+                      Crear Incidencia
                     </Button>
                   </div>
                 </DialogContent>
               </Dialog>
+            )}
+          </div>
+        </div>
 
-            <Tabs defaultValue="lista" className="space-y-4">
-              <TabsList className="grid w-full max-w-[240px] grid-cols-2">
-                <TabsTrigger value="kanban" className="flex items-center gap-2">
-                  <LayoutGrid className="h-4 w-4" />
-                  Kanban
-                </TabsTrigger>
-                <TabsTrigger value="lista" className="flex items-center gap-2">
-                  <List className="h-4 w-4" />
-                  Lista
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="kanban" className="space-y-4">
-                {/* Kanban KPIs */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Total Abiertas</CardTitle>
-                      <AlertCircle className="h-4 w-4 text-red-500" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{kanbanStats.totalAbiertas}</div>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Urgentes</CardTitle>
-                      <AlertTriangle className="h-4 w-4 text-red-500" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{kanbanStats.urgentes}</div>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Resueltas Este Mes</CardTitle>
-                      <CheckCircle className="h-4 w-4 text-green-500" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{kanbanStats.resueltasEsteMes}</div>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Tiempo Medio Resolución</CardTitle>
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{kanbanStats.tiempoMedio}d</div>
-                      <p className="text-xs text-muted-foreground">días</p>
-                    </CardContent>
-                  </Card>
+        {/* Dialog de Edición */}
+        <Dialog
+          open={openEditDialog}
+          onOpenChange={(open) => {
+            setOpenEditDialog(open);
+            if (!open) {
+              setEditingIncidencia(null);
+              setFormData({
+                buildingId: '',
+                titulo: '',
+                descripcion: '',
+                tipo: 'otro',
+                prioridad: 'media',
+                ubicacion: '',
+              });
+            }
+          }}
+        >
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Editar Incidencia</DialogTitle>
+              <DialogDescription>Modifica los detalles de la incidencia</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Edificio *</Label>
+                <Select
+                  value={formData.buildingId}
+                  onValueChange={(value) => setFormData((prev) => ({ ...prev, buildingId: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona edificio" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {buildings.map((b) => (
+                      <SelectItem key={b.id} value={b.id}>
+                        {b.nombre}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Título *</Label>
+                <Input
+                  value={formData.titulo}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, titulo: e.target.value }))}
+                  placeholder="Ej: Fuga de agua en planta 3"
+                />
+              </div>
+              <div>
+                <Label>Descripción *</Label>
+                <Textarea
+                  value={formData.descripcion}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, descripcion: e.target.value }))
+                  }
+                  rows={3}
+                  placeholder="Describe la situación..."
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Tipo</Label>
+                  <Select
+                    value={formData.tipo}
+                    onValueChange={(value) => setFormData((prev) => ({ ...prev, tipo: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ruido">Ruido</SelectItem>
+                      <SelectItem value="averia_comun">Avería Común</SelectItem>
+                      <SelectItem value="limpieza">Limpieza</SelectItem>
+                      <SelectItem value="seguridad">Seguridad</SelectItem>
+                      <SelectItem value="convivencia">Convivencia</SelectItem>
+                      <SelectItem value="mascota">Mascota</SelectItem>
+                      <SelectItem value="parking">Parking</SelectItem>
+                      <SelectItem value="otro">Otro</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-
-                {/* Kanban Columns */}
-                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 overflow-x-auto pb-4">
-                  {KANBAN_COLUMNS.map((col) => {
-                    const colIncidencias = getIncidenciasForColumn(col.estados);
-                    return (
-                      <div
-                        key={col.id}
-                        className={`rounded-lg border bg-muted/30 p-4 min-h-[400px] min-w-[200px] flex-shrink-0 ${col.headerColor}`}
-                      >
-                        <h3 className="font-medium mb-3 flex items-center gap-2">
-                          <span>{col.label}</span>
-                          <Badge variant="secondary" className="text-xs">
-                            {colIncidencias.length}
-                          </Badge>
-                        </h3>
-                        <div className="space-y-3">
-                          {colIncidencias.map((inc) => {
-                            const nextEstado = getNextIncidentEstado(inc.estado);
-                            const isUpdating = updatingId === inc.id;
-                            const ubicacion = inc.unit
-                              ? `${inc.building.nombre} - Unidad ${inc.unit.numero}`
-                              : inc.building.nombre;
-                            return (
-                              <Card
-                                key={inc.id}
-                                className="cursor-pointer hover:shadow-md transition-shadow"
-                              >
-                                <CardContent className="p-3">
-                                  <div className="flex flex-col gap-2">
-                                    <p className="font-medium text-sm truncate">{inc.titulo}</p>
-                                    <Badge
-                                      variant="outline"
-                                      className={`text-xs w-fit capitalize ${getPrioridadBadgeClass(inc.prioridad)}`}
-                                    >
-                                      {inc.prioridad}
-                                    </Badge>
-                                    <p className="text-xs text-muted-foreground truncate">
-                                      {ubicacion}
-                                    </p>
-                                    <p className="text-xs text-muted-foreground">
-                                      {new Date(inc.createdAt).toLocaleDateString('es-ES', {
-                                        day: '2-digit',
-                                        month: 'short',
-                                      })}
-                                    </p>
-                                    {inc.asignadoA && (
-                                      <p className="text-xs text-muted-foreground">
-                                        Asignado
-                                      </p>
-                                    )}
-                                    {nextEstado && (
-                                      <Button
-                                        size="sm"
-                                        variant="outline"
-                                        className="text-xs h-7 mt-1"
-                                        disabled={!!isUpdating}
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleAdvanceIncidencia(inc.id, nextEstado);
-                                        }}
-                                      >
-                                        {isUpdating ? '...' : (
-                                          <>
-                                            Avanzar
-                                            <ChevronRight className="h-3 w-3 ml-1" />
-                                          </>
-                                        )}
-                                      </Button>
-                                    )}
-                                  </div>
-                                </CardContent>
-                              </Card>
-                            );
-                          })}
-                          {colIncidencias.length === 0 && (
-                            <p className="text-sm text-muted-foreground text-center py-8">
-                              Sin incidencias
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
+                <div>
+                  <Label>Prioridad</Label>
+                  <Select
+                    value={formData.prioridad}
+                    onValueChange={(value) =>
+                      setFormData((prev) => ({ ...prev, prioridad: value }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="baja">Baja</SelectItem>
+                      <SelectItem value="media">Media</SelectItem>
+                      <SelectItem value="alta">Alta</SelectItem>
+                      <SelectItem value="urgente">Urgente</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-              </TabsContent>
+              </div>
+              <div>
+                <Label>Ubicación Específica</Label>
+                <Input
+                  value={formData.ubicacion}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, ubicacion: e.target.value }))}
+                  placeholder="Ej: Planta 3, Parking B"
+                />
+              </div>
+              {editingIncidencia && (
+                <EntityChat
+                  entityType="incidencia"
+                  entityId={editingIncidencia.id}
+                  entityLabel={`Incidencia: ${editingIncidencia.titulo}`}
+                />
+              )}
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setOpenEditDialog(false)}>
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleUpdate}
+                disabled={!formData.buildingId || !formData.titulo || !formData.descripcion}
+                className="gradient-primary hover:opacity-90 shadow-primary"
+              >
+                Actualizar Incidencia
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
 
-              <TabsContent value="lista" className="space-y-6">
+        <Tabs defaultValue="lista" className="space-y-4">
+          <TabsList className="grid w-full max-w-[240px] grid-cols-2">
+            <TabsTrigger value="kanban" className="flex items-center gap-2">
+              <LayoutGrid className="h-4 w-4" />
+              Kanban
+            </TabsTrigger>
+            <TabsTrigger value="lista" className="flex items-center gap-2">
+              <List className="h-4 w-4" />
+              Lista
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="kanban" className="space-y-4">
+            {/* Kanban KPIs */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total Abiertas</CardTitle>
+                  <AlertCircle className="h-4 w-4 text-red-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{kanbanStats.totalAbiertas}</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Urgentes</CardTitle>
+                  <AlertTriangle className="h-4 w-4 text-red-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{kanbanStats.urgentes}</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Resueltas Este Mes</CardTitle>
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{kanbanStats.resueltasEsteMes}</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Tiempo Medio Resolución</CardTitle>
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{kanbanStats.tiempoMedio}d</div>
+                  <p className="text-xs text-muted-foreground">días</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Kanban Columns */}
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 overflow-x-auto pb-4">
+              {KANBAN_COLUMNS.map((col) => {
+                const colIncidencias = getIncidenciasForColumn(col.estados);
+                return (
+                  <div
+                    key={col.id}
+                    className={`rounded-lg border bg-muted/30 p-4 min-h-[400px] min-w-[200px] flex-shrink-0 ${col.headerColor}`}
+                  >
+                    <h3 className="font-medium mb-3 flex items-center gap-2">
+                      <span>{col.label}</span>
+                      <Badge variant="secondary" className="text-xs">
+                        {colIncidencias.length}
+                      </Badge>
+                    </h3>
+                    <div className="space-y-3">
+                      {colIncidencias.map((inc) => {
+                        const nextEstado = getNextIncidentEstado(inc.estado);
+                        const isUpdating = updatingId === inc.id;
+                        const ubicacion = inc.unit
+                          ? `${inc.building.nombre} - Unidad ${inc.unit.numero}`
+                          : inc.building.nombre;
+                        return (
+                          <Card
+                            key={inc.id}
+                            className="cursor-pointer hover:shadow-md transition-shadow"
+                          >
+                            <CardContent className="p-3">
+                              <div className="flex flex-col gap-2">
+                                <p className="font-medium text-sm truncate">{inc.titulo}</p>
+                                <Badge
+                                  variant="outline"
+                                  className={`text-xs w-fit capitalize ${getPrioridadBadgeClass(inc.prioridad)}`}
+                                >
+                                  {inc.prioridad}
+                                </Badge>
+                                <p className="text-xs text-muted-foreground truncate">
+                                  {ubicacion}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {new Date(inc.createdAt).toLocaleDateString('es-ES', {
+                                    day: '2-digit',
+                                    month: 'short',
+                                  })}
+                                </p>
+                                {inc.asignadoA && (
+                                  <p className="text-xs text-muted-foreground">Asignado</p>
+                                )}
+                                {nextEstado && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="text-xs h-7 mt-1"
+                                    disabled={!!isUpdating}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleAdvanceIncidencia(inc.id, nextEstado);
+                                    }}
+                                  >
+                                    {isUpdating ? (
+                                      '...'
+                                    ) : (
+                                      <>
+                                        Avanzar
+                                        <ChevronRight className="h-3 w-3 ml-1" />
+                                      </>
+                                    )}
+                                  </Button>
+                                )}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                      {colIncidencias.length === 0 && (
+                        <p className="text-sm text-muted-foreground text-center py-8">
+                          Sin incidencias
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="lista" className="space-y-6">
             {/* KPIs */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
               <Card>
@@ -968,9 +1000,9 @@ export default function IncidenciasPage() {
                 ))
               )}
             </div>
-              </TabsContent>
-            </Tabs>
-          </div>
-        </AuthenticatedLayout>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </AuthenticatedLayout>
   );
 }

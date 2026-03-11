@@ -46,7 +46,14 @@ export interface MdfPosition {
   name: string;
   isin?: string;
   currency: string;
-  type: 'monetario' | 'renta_fija' | 'renta_variable' | 'commodities' | 'alternativos' | 'tesoreria' | 'pe_fund';
+  type:
+    | 'monetario'
+    | 'renta_fija'
+    | 'renta_variable'
+    | 'commodities'
+    | 'alternativos'
+    | 'tesoreria'
+    | 'pe_fund';
   subcategory?: string;
   custodian?: string; // Inversis, Pictet, Banca March, CACEIS
   quantity?: number;
@@ -125,13 +132,24 @@ function parseEuropeanNumber(str: string): number {
 
 function extractDate(text: string): string {
   const months: Record<string, string> = {
-    enero: '01', febrero: '02', marzo: '03', abril: '04',
-    mayo: '05', junio: '06', julio: '07', agosto: '08',
-    septiembre: '09', octubre: '10', noviembre: '11', diciembre: '12',
+    enero: '01',
+    febrero: '02',
+    marzo: '03',
+    abril: '04',
+    mayo: '05',
+    junio: '06',
+    julio: '07',
+    agosto: '08',
+    septiembre: '09',
+    octubre: '10',
+    noviembre: '11',
+    diciembre: '12',
   };
 
   // "31 enero 2026"
-  const match = text.match(/(\d{1,2})\s+(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)\s+(\d{4})/i);
+  const match = text.match(
+    /(\d{1,2})\s+(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)\s+(\d{4})/i
+  );
   if (match) {
     const day = match[1].padStart(2, '0');
     const month = months[match[2].toLowerCase()];
@@ -170,7 +188,8 @@ function extractPortfolioCode(text: string): string {
 // ---------------------------------------------------------------------------
 
 function parseSummary(text: string, reportDate: string, reportType: string): MdfPortfolioSummary {
-  const code = extractPortfolioCode(text) ||
+  const code =
+    extractPortfolioCode(text) ||
     (reportType === 'AF' ? '1149.01' : reportType === 'AR' ? '1149.03' : '1142.09');
 
   const nameMap: Record<string, string> = {
@@ -201,7 +220,9 @@ function parseSummary(text: string, reportDate: string, reportType: string): Mdf
 
   // Fallback: extract from evolution page "Patrimonio ... 55.046.434 0 0"
   if (totalValue === 0) {
-    const evoMatch = text.match(/Patrimonio\s+[-\d.,\s]+?([\d]{2,3}(?:\.[\d]{3}){1,3}(?:,\d+)?)\s+(?:0|[\d.,]+)\s+(?:0|[\d.,]+)/);
+    const evoMatch = text.match(
+      /Patrimonio\s+[-\d.,\s]+?([\d]{2,3}(?:\.[\d]{3}){1,3}(?:,\d+)?)\s+(?:0|[\d.,]+)\s+(?:0|[\d.,]+)/
+    );
     if (evoMatch) totalValue = parseEuropeanNumber(evoMatch[1]);
   }
 
@@ -287,15 +308,37 @@ function parsePositions(text: string): MdfPosition[] {
     if (!inPositionSection) continue;
 
     // Detect asset type headers
-    if (/^Mercado monetario/i.test(line)) { currentType = 'monetario'; continue; }
-    if (/^Renta fija\b/i.test(line)) { currentType = 'renta_fija'; continue; }
-    if (/^Renta variable\b/i.test(line)) { currentType = 'renta_variable'; continue; }
-    if (/^Commodities/i.test(line)) { currentType = 'commodities'; continue; }
-    if (/^Alternativos/i.test(line)) { currentType = 'alternativos'; continue; }
-    if (/^Tesorería/i.test(line)) { currentType = 'tesoreria'; continue; }
+    if (/^Mercado monetario/i.test(line)) {
+      currentType = 'monetario';
+      continue;
+    }
+    if (/^Renta fija\b/i.test(line)) {
+      currentType = 'renta_fija';
+      continue;
+    }
+    if (/^Renta variable\b/i.test(line)) {
+      currentType = 'renta_variable';
+      continue;
+    }
+    if (/^Commodities/i.test(line)) {
+      currentType = 'commodities';
+      continue;
+    }
+    if (/^Alternativos/i.test(line)) {
+      currentType = 'alternativos';
+      continue;
+    }
+    if (/^Tesorería/i.test(line)) {
+      currentType = 'tesoreria';
+      continue;
+    }
 
     // Detect subcategory headers
-    if (/^(Monetario|Corporativa|Emergente|Gobiernos|High Yield|Global|Europa|Asia|Japón|Norteamérica|Metales|Energia|Long\/Short|Retorno Absoluto)\b/i.test(line)) {
+    if (
+      /^(Monetario|Corporativa|Emergente|Gobiernos|High Yield|Global|Europa|Asia|Japón|Norteamérica|Metales|Energia|Long\/Short|Retorno Absoluto)\b/i.test(
+        line
+      )
+    ) {
       currentSubcategory = line.split(/\s+/)[0];
       continue;
     }
@@ -350,7 +393,8 @@ function parsePEPositions(text: string): MdfPEPosition[] {
   // Only match from the "ACTIVOS EN CRECIMIENTO" section with the TVPI table
   // Pattern: "HELIA III 19 2019 2.500.000 1.516.000 1.916.224 984.000 2.900.224 89.773 1,32x"
   // The 'x' suffix distinguishes the commitment table from the monthly/annual performance tables
-  const pePattern = /^([A-Z][A-Z\s.]+?\d{2}[A-Z]?)\s+(\d{4})\s+([\d.,]+)\s+([\d.,]+)\s+([\d.,]+)\s+([\d.,]+)\s+([\d.,]+)\s+([\d.,]+)\s+([\d.,]+)x/gm;
+  const pePattern =
+    /^([A-Z][A-Z\s.]+?\d{2}[A-Z]?)\s+(\d{4})\s+([\d.,]+)\s+([\d.,]+)\s+([\d.,]+)\s+([\d.,]+)\s+([\d.,]+)\s+([\d.,]+)\s+([\d.,]+)x/gm;
   let match;
 
   while ((match = pePattern.exec(text)) !== null) {
@@ -401,10 +445,15 @@ function parseCustodians(text: string): MdfCustodianBreakdown[] {
     for (const cv of custodianValues) {
       custodians.push({
         custodian: cv.name,
-        monetario: 0, rentaFija: 0, rentaVariable: 0,
-        commodities: 0, alternativos: 0,
+        monetario: 0,
+        rentaFija: 0,
+        rentaVariable: 0,
+        commodities: 0,
+        alternativos: 0,
         total: cv.total,
-        deposits: 0, netPnl: 0, previousValue: 0,
+        deposits: 0,
+        netPnl: 0,
+        previousValue: 0,
       });
     }
   } else {
@@ -418,17 +467,17 @@ function parseCustodians(text: string): MdfCustodianBreakdown[] {
       const prevMatch = text.match(prevPattern);
 
       // "Beneficio Neto 240.611"
-      const pnlPattern = new RegExp(
-        `${name}[\\s\\S]{0,200}?Beneficio Neto\\s+([\\d.,]+)`,
-        'i'
-      );
+      const pnlPattern = new RegExp(`${name}[\\s\\S]{0,200}?Beneficio Neto\\s+([\\d.,]+)`, 'i');
       const pnlMatch = text.match(pnlPattern);
 
       if (prevMatch) {
         custodians.push({
           custodian: name,
-          monetario: 0, rentaFija: 0, rentaVariable: 0,
-          commodities: 0, alternativos: 0,
+          monetario: 0,
+          rentaFija: 0,
+          rentaVariable: 0,
+          commodities: 0,
+          alternativos: 0,
           total: 0,
           deposits: 0,
           netPnl: pnlMatch ? parseEuropeanNumber(pnlMatch[1]) : 0,
@@ -457,7 +506,8 @@ function parseCustodians(text: string): MdfCustodianBreakdown[] {
     custodians[3].netPnl = parseEuropeanNumber(pnlMatch[4]);
   }
 
-  const prevPattern = /Patrimonio a \d{2}\/\d{2}\/\d{4}\s+([\d.,]+)\s+([\d.,]+)\s+([\d.,]+)\s+([\d.,]+)/;
+  const prevPattern =
+    /Patrimonio a \d{2}\/\d{2}\/\d{4}\s+([\d.,]+)\s+([\d.,]+)\s+([\d.,]+)\s+([\d.,]+)/;
   const prevMatchLine = text.match(prevPattern);
   if (prevMatchLine && custodians.length >= 4) {
     custodians[0].previousValue = parseEuropeanNumber(prevMatchLine[1]);
@@ -473,7 +523,8 @@ function parsePerformance(text: string): MdfPerformance[] {
   const performances: MdfPerformance[] = [];
 
   // "BALDOMERO AF GRUPO 3,56% 8,40% 7,98% 2,16% 23,84% 7,51%"
-  const perfPattern = /BALDOMERO\s+([\w\s]+?)\s+(-?[\d.,]+)%\s+(-?[\d.,]+)%\s+(-?[\d.,]+)%\s+(-?[\d.,]+)%\s+(-?[\d.,]+)%\s+(-?[\d.,]+)%/g;
+  const perfPattern =
+    /BALDOMERO\s+([\w\s]+?)\s+(-?[\d.,]+)%\s+(-?[\d.,]+)%\s+(-?[\d.,]+)%\s+(-?[\d.,]+)%\s+(-?[\d.,]+)%\s+(-?[\d.,]+)%/g;
   let match;
 
   while ((match = perfPattern.exec(text)) !== null) {
@@ -497,7 +548,6 @@ function parsePerformance(text: string): MdfPerformance[] {
 
 async function parsePdfBuffer(buffer: Buffer): Promise<{ text: string }> {
   // pdf-parse exports vary across versions/environments
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const mod = require('pdf-parse');
 
   // v1.x: module.exports = function(buffer) { ... }
@@ -511,9 +561,7 @@ async function parsePdfBuffer(buffer: Buffer): Promise<{ text: string }> {
     const parser = new mod.PDFParse(uint8);
     const rawResult = await parser.getText();
     // getText() returns { pages: [{text, num}], text: string, total: number }
-    const text = typeof rawResult === 'string'
-      ? rawResult
-      : (rawResult as any)?.text || '';
+    const text = typeof rawResult === 'string' ? rawResult : (rawResult as any)?.text || '';
     return { text };
   }
 
@@ -567,9 +615,16 @@ function emptyReport(): MdfReportingData {
     portfolioCode: '',
     portfolioName: '',
     summary: {
-      reportDate: '', portfolioCode: '', portfolioName: '',
-      currency: 'EUR', totalValue: 0, previousValue: 0,
-      deposits: 0, withdrawals: 0, netPnl: 0, fees: 0,
+      reportDate: '',
+      portfolioCode: '',
+      portfolioName: '',
+      currency: 'EUR',
+      totalValue: 0,
+      previousValue: 0,
+      deposits: 0,
+      withdrawals: 0,
+      netPnl: 0,
+      fees: 0,
     },
     assetAllocation: [],
     positions: [],
@@ -613,18 +668,24 @@ export async function parseMdfCapitalCall(buffer: Buffer): Promise<MdfCapitalCal
   const isDistribution = /distribu/i.test(text);
 
   // Fund name
-  const fundNameMatch = text.match(/Nombre del Fondo\s+(.+?)(?:\n|$)/i) ||
-    text.match(/(?:SOLICITUD DE DESEMBOLSO|Capital (?:Call|Distribution) Notice)\s*\n\s*(.+?)(?:\n|,)/i);
+  const fundNameMatch =
+    text.match(/Nombre del Fondo\s+(.+?)(?:\n|$)/i) ||
+    text.match(
+      /(?:SOLICITUD DE DESEMBOLSO|Capital (?:Call|Distribution) Notice)\s*\n\s*(.+?)(?:\n|,)/i
+    );
   const fundName = fundNameMatch ? fundNameMatch[1].trim() : '';
 
   // Dates
   const noticeDateMatch = text.match(/Fecha de Notificación\s+(\d{2}\/\d{2}\/\d{4})/i);
-  const paymentDateMatch = text.match(/(?:Fecha para desembolso|fecha límite)\s+(\d{2}\/\d{2}\/\d{4}|\d+ de \w+ del? \d{4})/i);
+  const paymentDateMatch = text.match(
+    /(?:Fecha para desembolso|fecha límite)\s+(\d{2}\/\d{2}\/\d{4}|\d+ de \w+ del? \d{4})/i
+  );
 
   // Amounts for investor
   const commitmentMatch = text.match(/Compromiso del inversor\s+([\d.,]+)/i);
   const participationMatch = text.match(/% de participación del inversor[^0-9]*([\d.,]+)\s*%/i);
-  const calledMatch = text.match(/Cantidad a desembolsar en la presente notificación\s+([\d.,]+)/i) ||
+  const calledMatch =
+    text.match(/Cantidad a desembolsar en la presente notificación\s+([\d.,]+)/i) ||
     text.match(/Cantidad a desembolsar\/distribuir[^0-9]*([\d.,]+)/i);
   const cumulativeCalledMatch = text.match(/Desembolsos.*acumulados.*incluyendo[^0-9]*([\d.,]+)/i);
   const pendingMatch = text.match(/Capital pendiente de desembolsar.*incluyendo[^0-9]*([\d.,]+)/i);
@@ -637,7 +698,9 @@ export async function parseMdfCapitalCall(buffer: Buffer): Promise<MdfCapitalCal
   const beneficiaryMatch = text.match(/Beneficiario:\s*(.+?)(?:\n|$)/i);
 
   // Investor name
-  const investorMatch = text.match(/(?:nivel de|información.*de)\s+(Vidaro[^.]*?S\.L\.?|Vibla[^.]*?S\.C\.R[^.]*)/i);
+  const investorMatch = text.match(
+    /(?:nivel de|información.*de)\s+(Vidaro[^.]*?S\.L\.?|Vibla[^.]*?S\.C\.R[^.]*)/i
+  );
 
   return {
     fundName,
@@ -648,15 +711,19 @@ export async function parseMdfCapitalCall(buffer: Buffer): Promise<MdfCapitalCal
     commitment: commitmentMatch ? parseEuropeanNumber(commitmentMatch[1]) : 0,
     participationPct: participationMatch ? parseEuropeanNumber(participationMatch[1]) : 0,
     calledAmount: calledMatch ? parseEuropeanNumber(calledMatch[1]) : 0,
-    cumulativeCalledAmount: cumulativeCalledMatch ? parseEuropeanNumber(cumulativeCalledMatch[1]) : 0,
+    cumulativeCalledAmount: cumulativeCalledMatch
+      ? parseEuropeanNumber(cumulativeCalledMatch[1])
+      : 0,
     pendingCapital: pendingMatch ? parseEuropeanNumber(pendingMatch[1]) : 0,
     cumulativeDistributions: distribMatch ? parseEuropeanNumber(distribMatch[1]) : 0,
     isDistribution,
-    bankDetails: ibanMatch ? {
-      beneficiary: beneficiaryMatch?.[1]?.trim() || '',
-      bank: bankMatch?.[1]?.trim() || '',
-      iban: ibanMatch[1],
-      bic: bicMatch?.[1] || '',
-    } : undefined,
+    bankDetails: ibanMatch
+      ? {
+          beneficiary: beneficiaryMatch?.[1]?.trim() || '',
+          bank: bankMatch?.[1]?.trim() || '',
+          iban: ibanMatch[1],
+          bic: bicMatch?.[1] || '',
+        }
+      : undefined,
   };
 }

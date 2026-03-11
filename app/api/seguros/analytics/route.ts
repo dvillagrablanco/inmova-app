@@ -34,16 +34,14 @@ interface ClaimsByMonthItem {
   amount: number;
 }
 
-async function getErrorMessage(error: unknown): string {
-  const prisma = await getPrisma();
+function getErrorMessage(error: unknown): string {
   if (error instanceof Error) {
     return error.message;
   }
   return 'Error desconocido';
 }
 
-async function getPeriodStart(period: Period, now: Date): Date | null {
-  const prisma = await getPrisma();
+function getPeriodStart(period: Period, now: Date): Date | null {
   switch (period) {
     case 'month':
       return new Date(now.getFullYear(), now.getMonth(), 1);
@@ -60,8 +58,7 @@ async function getPeriodStart(period: Period, now: Date): Date | null {
   }
 }
 
-async function buildMonthSeries(now: Date): ClaimsByMonthItem[] {
-  const prisma = await getPrisma();
+function buildMonthSeries(now: Date): ClaimsByMonthItem[] {
   const series: ClaimsByMonthItem[] = [];
   for (let i = 11; i >= 0; i -= 1) {
     const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
@@ -164,15 +161,12 @@ export async function GET(request: NextRequest) {
 
     const totalPremium = insurances.reduce((sum, insurance) => {
       const annual =
-        insurance.primaAnual ??
-        (insurance.primaMensual ? insurance.primaMensual * 12 : null) ??
-        0;
+        insurance.primaAnual ?? (insurance.primaMensual ? insurance.primaMensual * 12 : null) ?? 0;
       return sum + annual;
     }, 0);
 
-    const lossRatio = totalPremium > 0
-      ? Math.round((totalClaimsAmount / totalPremium) * 1000) / 10
-      : 0;
+    const lossRatio =
+      totalPremium > 0 ? Math.round((totalClaimsAmount / totalPremium) * 1000) / 10 : 0;
 
     return NextResponse.json({
       success: true,

@@ -35,7 +35,9 @@ export async function GET(request: NextRequest) {
         estado: 'activa',
       },
       include: {
-        building: { select: { nombre: true, companyId: true, company: { select: { nombre: true } } } },
+        building: {
+          select: { nombre: true, companyId: true, company: { select: { nombre: true } } },
+        },
       },
     });
 
@@ -55,7 +57,9 @@ export async function GET(request: NextRequest) {
           fechaInicio: newInicio,
           fechaVencimiento: newVenc,
           fechaRenovacion: newRenovacion,
-          notas: (pol.notas || '') + `\n\n[AUTO-RENOVACIÓN ${now.toISOString().substring(0, 10)}] Póliza renovada automáticamente +1 año. VERIFICAR: comprobar en contabilidad que el recibo de la nueva prima ha sido cargado y el importe correcto (posible subida IPC).`,
+          notas:
+            (pol.notas || '') +
+            `\n\n[AUTO-RENOVACIÓN ${now.toISOString().substring(0, 10)}] Póliza renovada automáticamente +1 año. VERIFICAR: comprobar en contabilidad que el recibo de la nueva prima ha sido cargado y el importe correcto (posible subida IPC).`,
         },
       });
 
@@ -78,11 +82,11 @@ export async function GET(request: NextRequest) {
           for (const admin of admins) {
             await prisma.notification.create({
               data: {
+                companyId: pol.building.companyId,
                 userId: admin.id,
-                tipo: 'alerta',
+                tipo: 'seguro_renovacion',
                 titulo: `Seguro renovado: ${pol.building?.nombre || pol.numeroPoliza}`,
                 mensaje: `La póliza ${pol.numeroPoliza} (${pol.aseguradora}) se ha renovado automáticamente hasta ${newVenc.toISOString().substring(0, 10)}. Verificar en contabilidad que la prima del nuevo periodo ha sido cargada correctamente (posible subida por IPC).`,
-                enlace: `/inversiones`,
               },
             });
           }
@@ -109,7 +113,10 @@ export async function GET(request: NextRequest) {
       const msg = `Póliza ${pol.numeroPoliza} (${pol.building?.nombre || '?'}) vence en ${daysLeft} días (${pol.fechaVencimiento.toISOString().substring(0, 10)}). Pedir cotización de renovación.`;
       actions.push(msg);
 
-      if (pol.building?.companyId && (daysLeft === 60 || daysLeft === 30 || daysLeft === 15 || daysLeft === 7 || daysLeft === 1)) {
+      if (
+        pol.building?.companyId &&
+        (daysLeft === 60 || daysLeft === 30 || daysLeft === 15 || daysLeft === 7 || daysLeft === 1)
+      ) {
         try {
           const admins = await prisma.user.findMany({
             where: {
@@ -123,15 +130,17 @@ export async function GET(request: NextRequest) {
           for (const admin of admins) {
             await prisma.notification.create({
               data: {
+                companyId: pol.building.companyId,
                 userId: admin.id,
-                tipo: 'recordatorio',
+                tipo: 'seguro_renovacion',
                 titulo: `Seguro vence en ${daysLeft} días: ${pol.building?.nombre || pol.numeroPoliza}`,
                 mensaje: `La póliza ${pol.numeroPoliza} (${pol.aseguradora}) vence el ${pol.fechaVencimiento.toISOString().substring(0, 10)}. Contactar mediador: ${pol.agente || ''} ${pol.emailAgente || ''} ${pol.telefonoAgente || ''}. Prima actual: ${pol.primaAnual || 'desconocida'}€/año.`,
-                enlace: `/inversiones`,
               },
             });
           }
-        } catch { /* Notification model might not exist */ }
+        } catch {
+          /* Notification model might not exist */
+        }
       }
     }
 

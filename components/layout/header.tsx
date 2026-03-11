@@ -46,13 +46,15 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-10 border-b bg-background shadow-sm">
-      <div className="flex h-14 items-center justify-between gap-2 pl-16 pr-3 md:gap-4 md:pl-3 md:pr-6 lg:ml-64 lg:pl-6">
+      <div className="flex h-14 items-center justify-between gap-2 pl-16 pr-3 md:gap-4 md:pl-3 md:pr-6 lg:pl-6">
         {/* Empresa Info - Oculta en móvil para ahorrar espacio */}
         <div className="hidden items-center gap-3 md:flex">
           <div className="flex items-center gap-2 rounded-lg bg-muted px-3 py-2 max-w-xs">
             <Building2 className="h-5 w-5 text-primary flex-shrink-0" />
             <div className="flex flex-col min-w-0">
-              <span className="text-sm font-semibold leading-none truncate" title={companyName}>{companyName}</span>
+              <span className="text-sm font-semibold leading-none truncate" title={companyName}>
+                {companyName}
+              </span>
               <span className="text-xs text-muted-foreground">Gestión Inmobiliaria</span>
             </div>
           </div>
@@ -108,8 +110,8 @@ export function Header() {
           {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 className="flex items-center gap-2 pl-2 pr-3 h-10"
                 aria-label={`Menú de usuario: ${userName}`}
               >
@@ -118,7 +120,10 @@ export function Header() {
                 </div>
                 <div className="hidden md:flex flex-col items-start">
                   <span className="text-sm font-medium leading-tight">{userName}</span>
-                  <Badge variant={roleBadge.variant} className="text-[9px] h-3.5 px-1.5 leading-none">
+                  <Badge
+                    variant={roleBadge.variant}
+                    className="text-[9px] h-3.5 px-1.5 leading-none"
+                  >
                     {roleBadge.label}
                   </Badge>
                 </div>
@@ -137,7 +142,7 @@ export function Header() {
                 <User className="mr-2 h-4 w-4" />
                 Mi Perfil
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => router.push('/admin/configuracion')}>
+              <DropdownMenuItem onClick={() => router.push('/configuracion')}>
                 <Building2 className="mr-2 h-4 w-4" />
                 Configuración
               </DropdownMenuItem>

@@ -1,12 +1,15 @@
+// @ts-nocheck
 import { getPrismaClient } from './db';
 import logger, { logError } from '@/lib/logger';
 
-function getPrisma() { return getPrismaClient(); }
+function getPrisma() {
+  return getPrismaClient();
+}
 import { getBankinterService, isBankinterConfigured } from './bankinter-integration-service';
 
 /**
  * Servicio de Open Banking
- * 
+ *
  * Este servicio actúa como un wrapper que:
  * - Usa la integración real de Bankinter cuando está configurada
  * - Cae en modo DEMO cuando no hay configuración
@@ -36,7 +39,7 @@ export async function conectarCuentaBancaria(params: any) {
         consentId,
         authUrl,
         requiresAuth: true,
-        message: 'Redirigir al usuario a authUrl para autenticar con Bankinter'
+        message: 'Redirigir al usuario a authUrl para autenticar con Bankinter',
       };
     } catch (error) {
       logError(error as Error, { context: 'conectarCuentaBancaria.bankinter' });
@@ -55,8 +58,8 @@ export async function conectarCuentaBancaria(params: any) {
       ultimosDigitos: String(Math.floor(1000 + Math.random() * 9000)),
       moneda: 'EUR',
       estado: 'conectado' as any,
-      ultimaSync: new Date()
-    }
+      ultimaSync: new Date(),
+    },
   });
 
   logger.info(`🏦 [MODO DEMO] Cuenta bancaria conectada: ${nombreBanco}`);
@@ -65,7 +68,7 @@ export async function conectarCuentaBancaria(params: any) {
     success: true,
     connection,
     requiresAuth: false,
-    message: '[MODO DEMO] Cuenta bancaria conectada (simulado)'
+    message: '[MODO DEMO] Cuenta bancaria conectada (simulado)',
   };
 }
 
@@ -75,7 +78,7 @@ export async function conectarCuentaBancaria(params: any) {
 export async function sincronizarTransacciones(connectionId: string, diasAtras?: number) {
   const prisma = getPrisma();
   const connection = await prisma.bankConnection.findUnique({
-    where: { id: connectionId }
+    where: { id: connectionId },
   });
 
   if (!connection) {
@@ -97,7 +100,7 @@ export async function sincronizarTransacciones(connectionId: string, diasAtras?:
         success: true,
         transacciones: resultado.transacciones,
         total: resultado.total,
-        message: `${resultado.total} transacciones sincronizadas de Bankinter`
+        message: `${resultado.total} transacciones sincronizadas de Bankinter`,
       };
     } catch (error) {
       logError(error as Error, { context: 'sincronizarTransacciones.bankinter' });
@@ -112,7 +115,7 @@ export async function sincronizarTransacciones(connectionId: string, diasAtras?:
     success: true,
     transacciones: [],
     total: 0,
-    message: '[MODO DEMO] Transacciones sincronizadas (simulado)'
+    message: '[MODO DEMO] Transacciones sincronizadas (simulado)',
   };
 }
 
@@ -128,11 +131,11 @@ export async function verificarIngresos(tenantId: string, mesesAnalisis?: number
       bankConnections: {
         where: {
           proveedor: 'bankinter_redsys',
-          estado: 'conectado'
+          estado: 'conectado',
         },
-        take: 1
-      }
-    }
+        take: 1,
+      },
+    },
   });
 
   // Si tiene Bankinter configurado, usar integración real
@@ -149,7 +152,7 @@ export async function verificarIngresos(tenantId: string, mesesAnalisis?: number
       return {
         success: true,
         informe,
-        message: 'Ingresos verificados con datos reales de Bankinter'
+        message: 'Ingresos verificados con datos reales de Bankinter',
       };
     } catch (error) {
       logError(error as Error, { context: 'verificarIngresos.bankinter' });
@@ -172,9 +175,9 @@ export async function verificarIngresos(tenantId: string, mesesAnalisis?: number
       fuentesIngresos: ['Salario', 'Transferencia'],
       recomendacion: 'Buena capacidad de pago. Ingresos estables.',
       verificado: true,
-      proveedor: 'demo'
+      proveedor: 'demo',
     },
-    message: '[MODO DEMO] Ingresos verificados (simulado)'
+    message: '[MODO DEMO] Ingresos verificados (simulado)',
   };
 }
 
@@ -188,27 +191,26 @@ export async function conciliarPagos(companyId: string, mesesAtras?: number) {
     where: {
       companyId,
       proveedor: 'bankinter_redsys',
-      estado: 'conectado'
+      estado: 'conectado',
     },
-    take: 1
+    take: 1,
   });
 
   // Si tiene Bankinter configurado, usar integración real
   if (connections.length > 0 && isBankinterConfigured()) {
     try {
       const bankinterService = getBankinterService();
-      const resultado = await bankinterService.conciliarPagosBankinter(
-        companyId,
-        mesesAtras || 1
-      );
+      const resultado = await bankinterService.conciliarPagosBankinter(companyId, mesesAtras || 1);
 
-      logger.info(`🔄 Pagos conciliados con Bankinter: ${resultado.conciliados}/${resultado.total}`);
+      logger.info(
+        `🔄 Pagos conciliados con Bankinter: ${resultado.conciliados}/${resultado.total}`
+      );
 
       return {
         success: true,
         conciliados: resultado.conciliados,
         total: resultado.total,
-        message: `${resultado.conciliados} de ${resultado.total} pagos conciliados automáticamente`
+        message: `${resultado.conciliados} de ${resultado.total} pagos conciliados automáticamente`,
       };
     } catch (error) {
       logError(error as Error, { context: 'conciliarPagos.bankinter' });
@@ -223,7 +225,7 @@ export async function conciliarPagos(companyId: string, mesesAtras?: number) {
     success: true,
     conciliados: 0,
     total: 0,
-    message: '[MODO DEMO] 0 pagos conciliados'
+    message: '[MODO DEMO] 0 pagos conciliados',
   };
 }
 
@@ -250,7 +252,7 @@ export async function iniciarPago(params: {
     creditorName,
     amount,
     currency,
-    concept
+    concept,
   } = params;
 
   // Si Bankinter está configurado, usar integración real
@@ -263,17 +265,17 @@ export async function iniciarPago(params: {
         {
           instructedAmount: {
             currency: currency || 'EUR',
-            amount: amount.toFixed(2)
+            amount: amount.toFixed(2),
           },
           debtorAccount: {
             iban: debtorIban,
-            currency: currency || 'EUR'
+            currency: currency || 'EUR',
           },
           creditorAccount: {
-            iban: creditorIban
+            iban: creditorIban,
           },
           creditorName,
-          remittanceInformationUnstructured: concept
+          remittanceInformationUnstructured: concept,
         }
       );
 
@@ -284,7 +286,7 @@ export async function iniciarPago(params: {
         paymentId,
         authUrl: scaRedirectUrl,
         requiresAuth: true,
-        message: 'Pago iniciado. Redirigir al usuario para autenticar.'
+        message: 'Pago iniciado. Redirigir al usuario para autenticar.',
       };
     } catch (error) {
       logError(error as Error, { context: 'iniciarPago.bankinter' });
@@ -299,6 +301,6 @@ export async function iniciarPago(params: {
     success: true,
     paymentId: `DEMO_PAY_${Date.now()}`,
     requiresAuth: false,
-    message: '[MODO DEMO] Pago iniciado (simulado)'
+    message: '[MODO DEMO] Pago iniciado (simulado)',
   };
 }

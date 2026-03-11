@@ -1,9 +1,9 @@
 /**
  * API: Aplicar cupón de descuento
- * 
+ *
  * POST /api/coupons/apply
  * Body: { codigo: string, subscriptionId?: string, checkoutSessionId?: string }
- * 
+ *
  * Aplica un cupón validado a una suscripción o sesión de checkout de Stripe
  */
 
@@ -32,8 +32,7 @@ const applySchema = z.object({
 
 // Singleton de Stripe
 let stripe: Stripe | null = null;
-async function getStripe(): Stripe | null {
-  const prisma = await getPrisma();
+function getStripe(): Stripe | null {
   if (!process.env.STRIPE_SECRET_KEY) return null;
   if (!stripe) {
     stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
@@ -73,10 +72,7 @@ export async function POST(request: NextRequest) {
 
     // 2. Verificar usos máximos
     if (dbCoupon.usosMaximos && dbCoupon.usosActuales >= dbCoupon.usosMaximos) {
-      return NextResponse.json(
-        { success: false, error: 'Cupón agotado' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: 'Cupón agotado' }, { status: 400 });
     }
 
     // 3. Verificar usos por usuario
@@ -138,10 +134,7 @@ export async function POST(request: NextRequest) {
           },
         });
       } catch (stripeError: any) {
-        return NextResponse.json(
-          { success: false, error: stripeError.message },
-          { status: 400 }
-        );
+        return NextResponse.json({ success: false, error: stripeError.message }, { status: 400 });
       }
     }
 
@@ -162,9 +155,9 @@ export async function POST(request: NextRequest) {
       aplicar: {
         // Instrucciones para aplicar en checkout de Stripe
         tipo: 'stripe_checkout',
-        parametro: dbCoupon.stripePromotionCodeId 
+        parametro: dbCoupon.stripePromotionCodeId
           ? { promotion_code: dbCoupon.stripePromotionCodeId }
-          : dbCoupon.stripeCouponId 
+          : dbCoupon.stripeCouponId
             ? { discounts: [{ coupon: dbCoupon.stripeCouponId }] }
             : null,
       },
@@ -178,9 +171,6 @@ export async function POST(request: NextRequest) {
     }
 
     logger.error('[API Apply Coupon] Error:', error);
-    return NextResponse.json(
-      { success: false, error: 'Error aplicando cupón' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: 'Error aplicando cupón' }, { status: 500 });
   }
 }

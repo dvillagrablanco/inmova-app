@@ -22,8 +22,12 @@ export async function GET(request: NextRequest) {
     const connections = await prisma.bankConnection.findMany({
       where: { companyId: session.user.companyId, proveedor: 'nordigen' },
       select: {
-        id: true, nombreBanco: true, estado: true,
-        ultimaSincronizacion: true, createdAt: true, cuentas: true,
+        id: true,
+        nombreBanco: true,
+        estado: true,
+        ultimaSync: true,
+        createdAt: true,
+        accessToken: true,
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -33,17 +37,18 @@ export async function GET(request: NextRequest) {
       where: { companyId: session.user.companyId, connection: { proveedor: 'nordigen' } },
       _count: true,
     });
-    const txMap = Object.fromEntries(txCounts.map(t => [t.connectionId, t._count]));
+    const txMap = Object.fromEntries(txCounts.map((t) => [t.connectionId, t._count]));
 
     return NextResponse.json({
       success: true,
       nordigen: { configured: isNordigenConfigured() },
-      connections: connections.map(c => ({
-        ...c, transactionCount: txMap[c.id] || 0,
+      connections: connections.map((c) => ({
+        ...c,
+        transactionCount: txMap[c.id] || 0,
       })),
       summary: {
         total: connections.length,
-        active: connections.filter(c => c.estado === 'conectado').length,
+        active: connections.filter((c) => c.estado === 'conectado').length,
       },
     });
   } catch (error: any) {

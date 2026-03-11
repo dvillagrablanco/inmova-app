@@ -1,8 +1,8 @@
 /**
  * API Route: Generar PDF de Reporte de Propiedad
- * 
+ *
  * GET /api/v1/reports/property/[id]?period=year
- * 
+ *
  * Genera un reporte PDF completo de una propiedad.
  */
 
@@ -21,10 +21,7 @@ async function getPrisma() {
   return getPrismaClient();
 }
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
@@ -48,7 +45,7 @@ export async function GET(
     }
 
     // Obtener propiedad
-    const property = await prisma.property.findUnique({
+    const property = await prisma.unit.findUnique({
       where: { id: propertyId },
       include: {
         building: true,
@@ -59,37 +56,37 @@ export async function GET(
       return NextResponse.json({ error: 'Propiedad no encontrada' }, { status: 404 });
     }
 
-    if (property.companyId !== session.user.companyId) {
+    if (property.building?.companyId !== session.user.companyId) {
       return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
     }
 
     // Historial de ocupación
     const occupancyHistory = await prisma.contract.findMany({
       where: {
-        propertyId,
-        startDate: { gte: startDate },
+        unitId: propertyId,
+        fechaInicio: { gte: startDate },
       },
       select: {
         id: true,
-        tenant: { select: { name: true } },
-        startDate: true,
-        endDate: true,
-        rentAmount: true,
+        tenant: { select: { nombreCompleto: true } },
+        fechaInicio: true,
+        fechaFin: true,
+        rentaMensual: true,
       },
-      orderBy: { startDate: 'desc' },
+      orderBy: { fechaInicio: 'desc' },
     });
 
     // Historial de mantenimiento
     const maintenanceHistory = await prisma.maintenanceRequest.findMany({
       where: {
-        propertyId,
+        unitId: propertyId,
         createdAt: { gte: startDate },
       },
       select: {
         id: true,
-        description: true,
-        category: true,
-        estimatedCost: true,
+        descripcion: true,
+        prioridad: true,
+        costoEstimado: true,
         createdAt: true,
       },
       orderBy: { createdAt: 'desc' },
@@ -99,25 +96,19 @@ export async function GET(
     const totalIncome = occupancyHistory.reduce((sum, c) => {
       const months = Math.max(
         1,
-        Math.round((c.endDate.getTime() - c.startDate.getTime()) / (1000 * 60 * 60 * 24 * 30))
+        Math.round((c.fechaFin.getTime() - c.fechaInicio.getTime()) / (1000 * 60 * 60 * 24 * 30))
       );
-      return sum + c.rentAmount * months;
+      return sum + c.rentaMensual * months;
     }, 0);
 
-    const totalExpenses = maintenanceHistory.reduce(
-      (sum, m) => sum + (m.estimatedCost || 0),
-      0
-    );
+    const totalExpenses = maintenanceHistory.reduce((sum, m) => sum + (m.costoEstimado || 0), 0);
 
     const netIncome = totalIncome - totalExpenses;
 
-    const totalDays = Math.max(
-      1,
-      (now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
-    );
+    const totalDays = Math.max(1, (now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
     const occupiedDays = occupancyHistory.reduce((sum, c) => {
-      const start = c.startDate > startDate ? c.startDate : startDate;
-      const end = c.endDate < now ? c.endDate : now;
+      const start = c.fechaInicio > startDate ? c.fechaInicio : startDate;
+      const end = c.fechaFin < now ? c.fechaFin : now;
       return sum + (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24);
     }, 0);
     const occupancyRate = Math.round((occupiedDays / totalDays) * 100);
@@ -126,14 +117,14 @@ export async function GET(
     const reportData = {
       property,
       occupancyHistory: occupancyHistory.map((c) => ({
-        tenant: c.tenant.name,
-        startDate: c.startDate,
-        endDate: c.endDate,
+        tenant: c.tenant.nombreCompleto,
+        startDate: c.fechaInicio,
+        endDate: c.fechaFin,
       })),
       maintenanceHistory: maintenanceHistory.map((m) => ({
         date: m.createdAt,
-        description: m.description,
-        cost: m.estimatedCost || 0,
+        description: m.descripcion,
+        cost: m.costoEstimado || 0,
       })),
       financialSummary: {
         totalIncome,
@@ -161,7 +152,6 @@ export async function GET(
         'Content-Length': pdfBuffer.length.toString(),
       },
     });
-
   } catch (error: any) {
     logger.error('❌ Error generando PDF de propiedad:', error);
     return NextResponse.json(

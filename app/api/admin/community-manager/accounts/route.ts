@@ -7,6 +7,11 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 const PLATFORM_MAP: Record<string, 'FACEBOOK' | 'INSTAGRAM' | 'LINKEDIN' | 'TWITTER'> = {
   facebook: 'FACEBOOK',
   instagram: 'INSTAGRAM',
@@ -21,7 +26,7 @@ const PLATFORM_MAP: Record<string, 'FACEBOOK' | 'INSTAGRAM' | 'LINKEDIN' | 'TWIT
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
@@ -40,6 +45,7 @@ export async function GET(request: NextRequest) {
         message: 'No hay empresa asociada para cargar cuentas.',
       });
     }
+    const prisma = await getPrisma();
 
     const accounts = await prisma.socialMediaAccount.findMany({
       where: { companyId },
@@ -57,7 +63,7 @@ export async function GET(request: NextRequest) {
         lastPost: undefined as string | undefined,
       }))
       .filter((account) => Object.keys(PLATFORM_MAP).includes(account.platform));
-    
+
     return NextResponse.json({
       success: true,
       accounts: formatted,
@@ -68,10 +74,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error: unknown) {
     logger.error('[Community Manager Accounts Error]:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener cuentas' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener cuentas' }, { status: 500 });
   }
 }
 
@@ -82,7 +85,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
@@ -128,13 +131,11 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+    const prisma = await getPrisma();
 
     const platformValue = PLATFORM_MAP[platform.toLowerCase()];
     if (!platformValue) {
-      return NextResponse.json(
-        { error: 'Plataforma no soportada' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Plataforma no soportada' }, { status: 400 });
     }
 
     const existing = await prisma.socialMediaAccount.findFirst({
@@ -176,7 +177,7 @@ export async function POST(request: NextRequest) {
             activo: true,
           },
         });
-    
+
     return NextResponse.json({
       success: true,
       message: 'Cuenta conectada correctamente',
@@ -191,9 +192,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: unknown) {
     logger.error('[Community Manager Connect Account Error]:', error);
-    return NextResponse.json(
-      { error: 'Error al conectar cuenta' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al conectar cuenta' }, { status: 500 });
   }
 }

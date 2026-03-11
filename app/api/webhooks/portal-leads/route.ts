@@ -25,7 +25,11 @@ export async function POST(request: NextRequest) {
 
     // Validar secret si está configurado
     const expectedSecret = process.env.PORTAL_WEBHOOK_SECRET;
-    if (expectedSecret && webhookSecret !== expectedSecret) {
+    if (!expectedSecret) {
+      if (process.env.NODE_ENV === 'production') {
+        return NextResponse.json({ error: 'Webhook secret no configurado' }, { status: 503 });
+      }
+    } else if (webhookSecret !== expectedSecret) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -67,29 +71,37 @@ export async function POST(request: NextRequest) {
     // Crear candidato en el sistema
     let candidate = null;
     try {
+      if (!unitId) {
+        throw new Error('No unit linked for candidate creation');
+      }
       candidate = await prisma.candidate.create({
         data: {
-          nombre: candidateName || 'Lead Portal',
-          email: candidateEmail || null,
-          telefono: candidatePhone || null,
-          nacionalidad: candidateNationality || null,
-          ocupacion: candidateOccupation || null,
+          unitId,
+          nombreCompleto: candidateName || 'Lead Portal',
+          dni: `PORTAL-${leadId || Date.now()}`,
+          email: candidateEmail || `lead-${leadId || Date.now()}@inmova.local`,
+          telefono: candidatePhone || '000000000',
+          fechaNacimiento: new Date('1990-01-01'),
           notas: `Lead de ${portalSource}. ${candidateMessage || ''}\n\nFechas: ${requestedCheckIn || 'N/A'} → ${requestedCheckOut || 'N/A'}\nPresupuesto: ${requestedBudget || 'N/A'}€\nLead ID portal: ${leadId || 'N/A'}`,
           estado: 'nuevo',
-          origen: portalSource,
-          ...(unitId && { unitId }),
         },
       });
     } catch (err: any) {
-      // Candidate model might not have all fields — create minimal
-      logger.warn('[Portal Lead] Error creating candidate, trying minimal:', err.message);
+      logger.error('[Portal Lead] Error creating candidate:', err.message);
     }
 
-    logger.info(`[Portal Lead] Nuevo lead de ${portalSource}: ${candidateName} (${candidateEmail})`, {
-      portal: portalSource,
-      leadId,
-      propertyId,
-    });
+    if (!candidate) {
+      return NextResponse.json({ error: 'No se pudo registrar el lead' }, { status: 500 });
+    }
+
+    logger.info(
+      `[Portal Lead] Nuevo lead de ${portalSource}: ${candidateName} (${candidateEmail})`,
+      {
+        portal: portalSource,
+        leadId,
+        propertyId,
+      }
+    );
 
     // Notificar al gestor (si hay email configurado)
     if (process.env.SMTP_HOST) {
@@ -123,13 +135,15 @@ export async function POST(request: NextRequest) {
             `,
           });
         }
-      } catch { /* email failed, continue */ }
+      } catch {
+        /* email failed, continue */
+      }
     }
 
     return NextResponse.json({
       success: true,
       message: 'Lead recibido correctamente',
-      candidateId: candidate?.id || null,
+      candidateId: candidate.id,
       leadId,
     });
   } catch (error: any) {

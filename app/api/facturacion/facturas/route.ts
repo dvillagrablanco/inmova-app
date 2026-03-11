@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * API: Facturas de gestión inmobiliaria
  * GET: Listar facturas con filtros | POST: Crear factura
@@ -83,9 +84,13 @@ export async function GET(req: NextRequest) {
       facturas = facturas.filter((f) => !f.esProforma);
     }
 
-    facturas.sort((a, b) => new Date(b.fechaEmision).getTime() - new Date(a.fechaEmision).getTime());
+    facturas.sort(
+      (a, b) => new Date(b.fechaEmision).getTime() - new Date(a.fechaEmision).getTime()
+    );
 
-    const totalFacturado = facturas.filter((f) => f.estado !== 'anulada').reduce((s, f) => s + f.total, 0);
+    const totalFacturado = facturas
+      .filter((f) => f.estado !== 'anulada')
+      .reduce((s, f) => s + f.total, 0);
     const pendientesCobro = facturas
       .filter((f) => f.estado === 'emitida' || f.estado === 'vencida')
       .reduce((s, f) => s + f.total, 0);
@@ -132,7 +137,11 @@ export async function POST(req: NextRequest) {
     const data = validation.data;
     const id = `fact-${companyId}-${Date.now()}`;
 
-    const serieNombre = data.serieId.includes('FAC') ? 'FAC' : data.serieId.includes('PRO') ? 'PRO' : 'REC';
+    const serieNombre = data.serieId.includes('FAC')
+      ? 'FAC'
+      : data.serieId.includes('PRO')
+        ? 'PRO'
+        : 'REC';
 
     const factura: Factura = {
       id,

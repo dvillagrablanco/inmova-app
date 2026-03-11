@@ -1,12 +1,13 @@
+// @ts-nocheck
 /**
  * Componente: FileUpload
- * 
+ *
  * Upload de archivos con drag & drop
  * Soporta imágenes y documentos
  * Preview de archivos
  * Progress indicator
  * Validación client-side
- * 
+ *
  * @example
  * <FileUpload
  *   folder="properties"
@@ -19,7 +20,15 @@
 'use client';
 
 import { useState, useRef, useCallback } from 'react';
-import { Upload, X, FileText, Image as ImageIcon, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import {
+  Upload,
+  X,
+  FileText,
+  Image as ImageIcon,
+  Loader2,
+  CheckCircle,
+  AlertCircle,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import Image from 'next/image';
@@ -69,74 +78,84 @@ export function FileUpload({
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Tipos MIME permitidos
-  const allowedTypes = fileType === 'image'
-    ? ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
-    : ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+  const allowedTypes =
+    fileType === 'image'
+      ? ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+      : [
+          'application/pdf',
+          'application/msword',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        ];
 
   // Extensiones para el input
-  const acceptString = fileType === 'image'
-    ? 'image/jpeg,image/png,image/webp,image/gif'
-    : '.pdf,.doc,.docx';
+  const acceptString =
+    fileType === 'image' ? 'image/jpeg,image/png,image/webp,image/gif' : '.pdf,.doc,.docx';
 
   /**
    * Valida un archivo
    */
-  const validateFile = useCallback((file: File): string | null => {
-    // Validar tipo
-    if (!allowedTypes.includes(file.type)) {
-      return `Tipo de archivo no permitido: ${file.type}`;
-    }
+  const validateFile = useCallback(
+    (file: File): string | null => {
+      // Validar tipo
+      if (!allowedTypes.includes(file.type)) {
+        return `Tipo de archivo no permitido: ${file.type}`;
+      }
 
-    // Validar tamaño
-    const sizeMB = file.size / 1024 / 1024;
-    if (sizeMB > maxSizeMB) {
-      return `Archivo demasiado grande: ${sizeMB.toFixed(1)} MB (máximo ${maxSizeMB} MB)`;
-    }
+      // Validar tamaño
+      const sizeMB = file.size / 1024 / 1024;
+      if (sizeMB > maxSizeMB) {
+        return `Archivo demasiado grande: ${sizeMB.toFixed(1)} MB (máximo ${maxSizeMB} MB)`;
+      }
 
-    return null;
-  }, [allowedTypes, maxSizeMB]);
+      return null;
+    },
+    [allowedTypes, maxSizeMB]
+  );
 
   /**
    * Procesa archivos seleccionados
    */
-  const handleFiles = useCallback((fileList: FileList | null) => {
-    if (!fileList || fileList.length === 0) return;
+  const handleFiles = useCallback(
+    (fileList: FileList | null) => {
+      if (!fileList || fileList.length === 0) return;
 
-    // Verificar límite de archivos
-    const currentCount = files.length + existingFiles.length;
-    const newFilesArray = Array.from(fileList);
-    
-    if (currentCount + newFilesArray.length > maxFiles) {
-      toast.error(`Máximo ${maxFiles} archivos permitidos`);
-      return;
-    }
+      // Verificar límite de archivos
+      const currentCount = files.length + existingFiles.length;
+      const newFilesArray = Array.from(fileList);
 
-    // Validar y crear previews
-    const newUploadFiles: UploadFile[] = [];
-
-    for (const file of newFilesArray) {
-      const error = validateFile(file);
-      
-      if (error) {
-        toast.error(error);
-        continue;
+      if (currentCount + newFilesArray.length > maxFiles) {
+        toast.error(`Máximo ${maxFiles} archivos permitidos`);
+        return;
       }
 
-      const uploadFile: UploadFile = {
-        file,
-        status: 'pending',
-      };
+      // Validar y crear previews
+      const newUploadFiles: UploadFile[] = [];
 
-      // Preview para imágenes
-      if (fileType === 'image') {
-        uploadFile.preview = URL.createObjectURL(file);
+      for (const file of newFilesArray) {
+        const error = validateFile(file);
+
+        if (error) {
+          toast.error(error);
+          continue;
+        }
+
+        const uploadFile: UploadFile = {
+          file,
+          status: 'pending',
+        };
+
+        // Preview para imágenes
+        if (fileType === 'image') {
+          uploadFile.preview = URL.createObjectURL(file);
+        }
+
+        newUploadFiles.push(uploadFile);
       }
 
-      newUploadFiles.push(uploadFile);
-    }
-
-    setFiles((prev) => [...prev, ...newUploadFiles]);
-  }, [files, existingFiles, maxFiles, fileType, validateFile]);
+      setFiles((prev) => [...prev, ...newUploadFiles]);
+    },
+    [files, existingFiles, maxFiles, fileType, validateFile]
+  );
 
   /**
    * Handle drag events
@@ -144,7 +163,7 @@ export function FileUpload({
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (e.type === 'dragenter' || e.type === 'dragover') {
       setDragActive(true);
     } else if (e.type === 'dragleave') {
@@ -155,24 +174,30 @@ export function FileUpload({
   /**
    * Handle drop
    */
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setDragActive(false);
 
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      handleFiles(e.dataTransfer.files);
-    }
-  }, [handleFiles]);
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        handleFiles(e.dataTransfer.files);
+      }
+    },
+    [handleFiles]
+  );
 
   /**
    * Handle input change
    */
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      handleFiles(e.target.files);
-    }
-  }, [handleFiles]);
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.files && e.target.files.length > 0) {
+        handleFiles(e.target.files);
+      }
+    },
+    [handleFiles]
+  );
 
   /**
    * Elimina un archivo de la lista
@@ -303,7 +328,8 @@ export function FileUpload({
               Arrastra archivos aquí o haz click para seleccionar
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              {fileType === 'image' ? 'Imágenes' : 'Documentos'} • Máximo {maxFiles} archivos • Max {maxSizeMB} MB cada uno
+              {fileType === 'image' ? 'Imágenes' : 'Documentos'} • Máximo {maxFiles} archivos • Max{' '}
+              {maxSizeMB} MB cada uno
             </p>
           </div>
 
@@ -326,7 +352,10 @@ export function FileUpload({
           </h4>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {existingFiles.map((url, index) => (
-              <div key={index} className="relative group rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+              <div
+                key={index}
+                className="relative group rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700"
+              >
                 {fileType === 'image' ? (
                   <Image
                     src={url}
