@@ -466,8 +466,13 @@ function parsePerformance(text: string): MdfPerformance[] {
 // ---------------------------------------------------------------------------
 
 export async function parseMdfReporting(buffer: Buffer): Promise<MdfReportingData> {
-  const pdfParse = (await import('pdf-parse')).default;
-  const data = await pdfParse(buffer);
+  const pdfParseModule = await import('pdf-parse');
+  const pdfParse = typeof pdfParseModule === 'function' ? pdfParseModule : (pdfParseModule as any).default || pdfParseModule;
+  const parseFn = typeof pdfParse === 'function' ? pdfParse : (pdfParse as any).default;
+  if (typeof parseFn !== 'function') {
+    throw new Error(`pdf-parse module not callable. Type: ${typeof pdfParse}, keys: ${Object.keys(pdfParse as any).join(',')}`);
+  }
+  const data = await parseFn(buffer);
   const text = data.text;
 
   if (!text || text.length < 100) {
@@ -547,8 +552,11 @@ export interface MdfCapitalCallData {
 }
 
 export async function parseMdfCapitalCall(buffer: Buffer): Promise<MdfCapitalCallData | null> {
-  const pdfParse = (await import('pdf-parse')).default;
-  const data = await pdfParse(buffer);
+  const pdfParseModule = await import('pdf-parse');
+  const pdfParse = typeof pdfParseModule === 'function' ? pdfParseModule : (pdfParseModule as any).default || pdfParseModule;
+  const parseFn = typeof pdfParse === 'function' ? pdfParse : (pdfParse as any).default;
+  if (typeof parseFn !== 'function') return null;
+  const data = await parseFn(buffer);
   const text = data.text;
 
   if (!text || text.length < 50) return null;
