@@ -91,6 +91,7 @@ export async function GET(
         companyId: buildingCompanyId,
         squareMeters: property.superficie,
         rooms: property.habitaciones || undefined,
+        propertyType: propertyType as any,
       });
       platformDataText = formatPlatformDataForPrompt(aggregatedMarketData);
     } catch (e) {
@@ -116,8 +117,22 @@ export async function GET(
       .map((p: any) => `- ${p.building?.direccion || address}, Unidad ${p.numero}: ${(p.rentaMensual * 12 * 15).toLocaleString()}€ (${p.superficie}m²)`)
       .join('\n');
 
+    // Map UnitType → PropertyType for AI analysis
+    const unitTypeToPropertyType: Record<string, string> = {
+      vivienda: 'vivienda',
+      local: 'local_comercial',
+      garaje: 'garaje',
+      trastero: 'trastero',
+      oficina: 'oficina',
+      nave_industrial: 'nave_industrial',
+      coworking_space: 'coworking',
+      terreno: 'terreno',
+    };
+    const propertyType = unitTypeToPropertyType[(property as any).tipo || 'vivienda'] || 'vivienda';
+
     // 3. Valoración IA multi-paso (Fase 1: análisis comparables + Fase 2: valoración experta)
     const propertyForAI = {
+      propertyType: propertyType as any,
       address,
       city,
       postalCode: '',

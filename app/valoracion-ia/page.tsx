@@ -226,6 +226,14 @@ const CARACTERISTICAS_POR_TIPO: Record<string, Array<{ id: string; label: string
     { id: 'trastero_anejo', label: 'Trastero anejo', icon: Building2 },
     { id: 'preinstalacion_carga', label: 'Pre-inst. carga VE', icon: Zap },
   ],
+  trastero: [
+    { id: 'acceso_directo', label: 'Acceso directo', icon: ArrowUpRight },
+    { id: 'ventilacion', label: 'Ventilación', icon: Zap },
+    { id: 'luz_propia', label: 'Luz propia', icon: Zap },
+    { id: 'puerta_seguridad', label: 'Puerta seguridad', icon: Users },
+    { id: 'antihumedad', label: 'Anti-humedad', icon: Building2 },
+    { id: 'vigilancia', label: 'Vigilancia/Cámaras', icon: Users },
+  ],
   edificio_completo: [
     { id: 'ascensor', label: 'Ascensor', icon: ArrowUpRight },
     { id: 'portero', label: 'Portero/Conserje', icon: Users },
@@ -256,17 +264,18 @@ const CAMPOS_POR_TIPO: Record<string, { habitaciones: boolean; banos: boolean; p
   oficina:           { habitaciones: false, banos: true,  planta: true,  orientacion: true },
   nave_industrial:   { habitaciones: false, banos: false, planta: false, orientacion: false },
   garaje:            { habitaciones: false, banos: false, planta: true,  orientacion: false },
+  trastero:          { habitaciones: false, banos: false, planta: true,  orientacion: false },
   edificio_completo: { habitaciones: true,  banos: true,  planta: false, orientacion: false },
   solar:             { habitaciones: false, banos: false, planta: false, orientacion: false },
 };
 
-// Labels adaptados por tipo
 const LABELS_POR_TIPO: Record<string, Record<string, string>> = {
   vivienda:          { superficie: 'Superficie (m²)', habitaciones: 'Habitaciones', banos: 'Baños', planta: 'Planta' },
   local_comercial:   { superficie: 'Superficie (m²)', planta: 'Planta (0=calle)' },
   oficina:           { superficie: 'Superficie (m²)', banos: 'Aseos', planta: 'Planta' },
   nave_industrial:   { superficie: 'Superficie (m²)' },
-  garaje:            { superficie: 'Superficie (m²)', planta: 'Sótano (-1, -2...)' },
+  garaje:            { superficie: 'Superficie plaza (m²)', planta: 'Sótano (-1, -2...)' },
+  trastero:          { superficie: 'Superficie (m²)', planta: 'Planta / Sótano' },
   edificio_completo: { superficie: 'Superficie total (m²)', habitaciones: 'Nº unidades', banos: 'Nº plantas' },
   solar:             { superficie: 'Superficie parcela (m²)' },
 };
@@ -604,11 +613,19 @@ export default function ValoracionIAPage() {
         return;
       }
 
+      // Map page values to API-compatible property types
+      const tipoActivoMap: Record<string, string> = {
+        edificio_completo: 'edificio',
+        solar: 'terreno',
+      };
+      const tipoActivoApi = tipoActivoMap[formData.tipoActivo] || formData.tipoActivo;
+
       const response = await fetch('/api/ai/valuate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
+          tipoActivo: tipoActivoApi,
           superficie: parseFloat(formData.superficie),
           habitaciones: parseInt(formData.habitaciones) || 0,
           banos: parseInt(formData.banos) || 0,
@@ -1572,9 +1589,10 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                         <SelectItem value="local_comercial">Local comercial</SelectItem>
                         <SelectItem value="oficina">Oficina</SelectItem>
                         <SelectItem value="nave_industrial">Nave industrial</SelectItem>
-                        <SelectItem value="garaje">Garaje</SelectItem>
+                        <SelectItem value="garaje">Garaje / Parking</SelectItem>
+                        <SelectItem value="trastero">Trastero</SelectItem>
                         <SelectItem value="edificio_completo">Edificio completo</SelectItem>
-                        <SelectItem value="solar">Solar</SelectItem>
+                        <SelectItem value="solar">Solar / Terreno</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -1794,24 +1812,34 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                       </div>
                     </div>
 
-                    {/* KPIs */}
+                    {/* KPIs — adaptados al tipo de activo */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t">
                       <div className="text-center p-2 bg-white/60 rounded-lg">
                         <p className="text-lg font-bold">{formatCurrency(resultado.precioM2)}</p>
-                        <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Precio/m²</p>
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-wide">
+                          {formData.tipoActivo === 'garaje' ? '€/plaza' : '€/m²'}
+                        </p>
                       </div>
                       <div className="text-center p-2 bg-white/60 rounded-lg">
                         <p className="text-lg font-bold">{resultado.confianza}%</p>
                         <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Confianza</p>
                       </div>
-                      <div className="text-center p-2 bg-white/60 rounded-lg">
-                        <p className="text-lg font-bold">{resultado.tiempoEstimadoVenta || '-'}</p>
-                        <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Tiempo venta</p>
-                      </div>
+                      {formData.tipoActivo !== 'terreno' && formData.tipoActivo !== 'solar' && (
+                        <div className="text-center p-2 bg-white/60 rounded-lg">
+                          <p className="text-lg font-bold">{resultado.tiempoEstimadoVenta || '-'}</p>
+                          <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Tiempo venta</p>
+                        </div>
+                      )}
                       <div className="text-center p-2 bg-white/60 rounded-lg">
                         <p className="text-lg font-bold">{resultado.comparables?.length || 0}</p>
                         <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Comparables</p>
                       </div>
+                      {resultado.rentabilidadAlquiler > 0 && (
+                        <div className="text-center p-2 bg-white/60 rounded-lg">
+                          <p className="text-lg font-bold text-green-700">{resultado.rentabilidadAlquiler.toFixed(1)}%</p>
+                          <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Yield bruto</p>
+                        </div>
+                      )}
                     </div>
 
                     {/* Barra de confianza */}
@@ -1825,24 +1853,35 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                       <Progress value={resultado.confianza} className="h-2" />
                     </div>
 
-                    {/* Resumen rápido de alquileres — visible sin scroll */}
+                    {/* Resumen de alquileres — adaptado al tipo de activo */}
                     {(resultado.alquilerEstimado > 0 || resultado.alquilerMediaEstancia) && (
                       <div className="pt-4 border-t space-y-3">
                         <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
                           <Euro className="h-3.5 w-3.5" />
-                          Estimación de alquiler
+                          {formData.tipoActivo === 'garaje' ? 'Estimación renta mensual' :
+                           formData.tipoActivo === 'trastero' ? 'Estimación renta mensual' :
+                           formData.tipoActivo === 'nave_industrial' ? 'Estimación renta' :
+                           formData.tipoActivo === 'local_comercial' ? 'Estimación renta local' :
+                           'Estimación de alquiler'}
                         </p>
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className={`grid ${resultado.alquilerMediaEstancia && resultado.alquilerMediaEstancia > 0 && formData.tipoActivo === 'vivienda' ? 'grid-cols-2' : 'grid-cols-1'} gap-3`}>
                           {resultado.alquilerEstimado > 0 && (
                             <div className="p-3 bg-green-50 rounded-lg border border-green-200">
-                              <p className="text-[10px] text-green-600 font-medium uppercase">Larga estancia (12+ meses)</p>
+                              <p className="text-[10px] text-green-600 font-medium uppercase">
+                                {formData.tipoActivo === 'garaje' ? 'Renta plaza parking' :
+                                 formData.tipoActivo === 'trastero' ? 'Renta trastero' :
+                                 formData.tipoActivo === 'nave_industrial' ? 'Renta nave' :
+                                 formData.tipoActivo === 'local_comercial' ? 'Renta local' :
+                                 formData.tipoActivo === 'oficina' ? 'Renta oficina' :
+                                 'Larga estancia (12+ meses)'}
+                              </p>
                               <p className="text-2xl font-bold text-green-800">{formatCurrency(resultado.alquilerEstimado)}<span className="text-sm font-normal">/mes</span></p>
                               {resultado.rentabilidadAlquiler > 0 && (
                                 <p className="text-xs text-green-600 mt-0.5">Rentabilidad: {resultado.rentabilidadAlquiler.toFixed(1)}% bruta</p>
                               )}
                             </div>
                           )}
-                          {resultado.alquilerMediaEstancia && resultado.alquilerMediaEstancia > 0 && (
+                          {resultado.alquilerMediaEstancia && resultado.alquilerMediaEstancia > 0 && formData.tipoActivo === 'vivienda' && (
                             <div className="p-3 bg-orange-50 rounded-lg border border-orange-200">
                               <p className="text-[10px] text-orange-600 font-medium uppercase">Media estancia (1-11 meses)</p>
                               <p className="text-2xl font-bold text-orange-800">{formatCurrency(resultado.alquilerMediaEstancia)}<span className="text-sm font-normal">/mes</span></p>
