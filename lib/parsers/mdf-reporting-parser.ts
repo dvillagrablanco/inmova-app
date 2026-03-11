@@ -465,24 +465,32 @@ function parsePerformance(text: string): MdfPerformance[] {
 // Main parser
 // ---------------------------------------------------------------------------
 
-async function loadPdfParser(): Promise<(buf: Buffer) => Promise<{ text: string }>> {
-  const mod = await import('pdf-parse');
-  // pdf-parse exports vary: sometimes default function, sometimes { PDFParse }, sometimes object
-  if (typeof mod === 'function') return mod;
-  if (typeof (mod as any).default === 'function') return (mod as any).default;
-  if (typeof (mod as any).PDFParse === 'function') return (mod as any).PDFParse;
-  // Last resort: try require
+async function parsePdfBuffer(buffer: Buffer): Promise<{ text: string }> {
+  // pdf-parse exports vary across versions/environments
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const req = require('pdf-parse');
-  if (typeof req === 'function') return req;
-  if (typeof req.default === 'function') return req.default;
-  if (typeof req.PDFParse === 'function') return req.PDFParse;
-  throw new Error(`Cannot find callable pdf-parse. mod keys: ${Object.keys(mod as any)}, req keys: ${Object.keys(req)}`);
+  const mod = require('pdf-parse');
+
+  // v1.x: module.exports = function(buffer) { ... }
+  if (typeof mod === 'function') {
+    return mod(buffer);
+  }
+
+  // v2.x+: exports PDFParse class — use new PDFParse(buffer).getText()
+  if (mod.PDFParse && typeof mod.PDFParse === 'function') {
+    const parser = new mod.PDFParse(buffer);
+    const text = await parser.getText();
+    return { text };
+  }
+
+  if (typeof mod.default === 'function') {
+    return mod.default(buffer);
+  }
+
+  throw new Error(`Cannot use pdf-parse. Keys: ${Object.keys(mod).join(',')}`);
 }
 
 export async function parseMdfReporting(buffer: Buffer): Promise<MdfReportingData> {
-  const pdfParse = await loadPdfParser();
-  const data = await pdfParse(buffer);
+  const data = await parsePdfBuffer(buffer);
   const text = data.text;
 
   if (!text || text.length < 100) {
@@ -562,8 +570,7 @@ export interface MdfCapitalCallData {
 }
 
 export async function parseMdfCapitalCall(buffer: Buffer): Promise<MdfCapitalCallData | null> {
-  const pdfParse = await loadPdfParser();
-  const data = await pdfParse(buffer);
+  const data = await parsePdfBuffer(buffer);
   const text = data.text;
 
   if (!text || text.length < 50) return null;
