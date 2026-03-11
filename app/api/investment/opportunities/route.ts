@@ -121,7 +121,7 @@ export async function GET(request: NextRequest) {
     let marketOpps = null;
     try {
       const { getAllMarketOpportunities } = await import('@/lib/market-opportunities');
-      marketOpps = getAllMarketOpportunities();
+      marketOpps = await getAllMarketOpportunities();
     } catch (err) {
       logger.warn('[Opportunities] Market opportunities error:', err);
     }
