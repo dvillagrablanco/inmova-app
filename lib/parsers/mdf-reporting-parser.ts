@@ -465,14 +465,24 @@ function parsePerformance(text: string): MdfPerformance[] {
 // Main parser
 // ---------------------------------------------------------------------------
 
+async function loadPdfParser(): Promise<(buf: Buffer) => Promise<{ text: string }>> {
+  const mod = await import('pdf-parse');
+  // pdf-parse exports vary: sometimes default function, sometimes { PDFParse }, sometimes object
+  if (typeof mod === 'function') return mod;
+  if (typeof (mod as any).default === 'function') return (mod as any).default;
+  if (typeof (mod as any).PDFParse === 'function') return (mod as any).PDFParse;
+  // Last resort: try require
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const req = require('pdf-parse');
+  if (typeof req === 'function') return req;
+  if (typeof req.default === 'function') return req.default;
+  if (typeof req.PDFParse === 'function') return req.PDFParse;
+  throw new Error(`Cannot find callable pdf-parse. mod keys: ${Object.keys(mod as any)}, req keys: ${Object.keys(req)}`);
+}
+
 export async function parseMdfReporting(buffer: Buffer): Promise<MdfReportingData> {
-  const pdfParseModule = await import('pdf-parse');
-  const pdfParse = typeof pdfParseModule === 'function' ? pdfParseModule : (pdfParseModule as any).default || pdfParseModule;
-  const parseFn = typeof pdfParse === 'function' ? pdfParse : (pdfParse as any).default;
-  if (typeof parseFn !== 'function') {
-    throw new Error(`pdf-parse module not callable. Type: ${typeof pdfParse}, keys: ${Object.keys(pdfParse as any).join(',')}`);
-  }
-  const data = await parseFn(buffer);
+  const pdfParse = await loadPdfParser();
+  const data = await pdfParse(buffer);
   const text = data.text;
 
   if (!text || text.length < 100) {
@@ -552,11 +562,8 @@ export interface MdfCapitalCallData {
 }
 
 export async function parseMdfCapitalCall(buffer: Buffer): Promise<MdfCapitalCallData | null> {
-  const pdfParseModule = await import('pdf-parse');
-  const pdfParse = typeof pdfParseModule === 'function' ? pdfParseModule : (pdfParseModule as any).default || pdfParseModule;
-  const parseFn = typeof pdfParse === 'function' ? pdfParse : (pdfParse as any).default;
-  if (typeof parseFn !== 'function') return null;
-  const data = await parseFn(buffer);
+  const pdfParse = await loadPdfParser();
+  const data = await pdfParse(buffer);
   const text = data.text;
 
   if (!text || text.length < 50) return null;
