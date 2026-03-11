@@ -56,21 +56,23 @@ export async function scrapeAllPortals(
   city: string,
   operation: 'sale' | 'rent' = 'sale',
   postalCode?: string,
+  propertyType?: string,
 ): Promise<AggregatedScrapingResult> {
-  const cacheKey = `aggregated:${city.toLowerCase()}:${operation}${postalCode ? `:${postalCode}` : ''}`;
+  const pType = propertyType || 'vivienda';
+  const cacheKey = `aggregated:${city.toLowerCase()}:${operation}:${pType}${postalCode ? `:${postalCode}` : ''}`;
 
   const cached = await getCachedData<AggregatedScrapingResult>(cacheKey);
   if (cached) {
-    logger.info(`[Scraping] Cache HIT para ${city} (${operation})`);
+    logger.info(`[Scraping] Cache HIT para ${city} (${operation}, ${pType})`);
     return cached;
   }
 
   const startTime = Date.now();
-  logger.info(`[Scraping] Iniciando scraping de ${city} (${operation}) en todos los portales...`);
+  logger.info(`[Scraping] Iniciando scraping de ${city} (${operation}, ${pType}) en todos los portales...`);
 
-  // Lanzar todos los scrapers en paralelo
+  // Idealista soporta todos los tipos; otros portales solo vivienda
   const results = await Promise.allSettled([
-    scrapeIdealista(city, operation, postalCode),
+    scrapeIdealista(city, operation, postalCode, pType),
     scrapeFotocasa(city, operation, postalCode),
     scrapeHabitaclia(city, operation, postalCode),
     scrapePisosCom(city, operation, postalCode),

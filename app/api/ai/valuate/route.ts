@@ -411,6 +411,7 @@ export async function POST(request: NextRequest) {
         companyId: session.user.companyId,
         squareMeters: superficie,
         rooms: habitaciones,
+        propertyType: validated.tipoActivo || 'vivienda',
       });
       platformDataText = formatPlatformDataForPrompt(aggregatedPlatformData);
       logger.info('[AI Valuate] Datos de plataformas obtenidos', {

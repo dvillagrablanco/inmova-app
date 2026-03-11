@@ -49,15 +49,31 @@ function getCitySlug(city: string): string | null {
   return CITY_SLUGS[key] || null;
 }
 
+const PROPERTY_TYPE_SEGMENTS: Record<string, { sale: string; rent: string }> = {
+  vivienda:        { sale: 'venta-viviendas',    rent: 'alquiler-viviendas' },
+  local:           { sale: 'venta-locales',      rent: 'alquiler-locales' },
+  local_comercial: { sale: 'venta-locales',      rent: 'alquiler-locales' },
+  oficina:         { sale: 'venta-oficinas',      rent: 'alquiler-oficinas' },
+  nave_industrial: { sale: 'venta-naves',         rent: 'alquiler-naves' },
+  nave:            { sale: 'venta-naves',         rent: 'alquiler-naves' },
+  garaje:          { sale: 'venta-garajes',       rent: 'alquiler-garajes' },
+  trastero:        { sale: 'venta-trasteros',     rent: 'alquiler-trasteros' },
+  terreno:         { sale: 'venta-terrenos',      rent: 'venta-terrenos' },
+  edificio:        { sale: 'venta-edificios',     rent: 'venta-edificios' },
+  coworking:       { sale: 'venta-oficinas',      rent: 'alquiler-oficinas' },
+};
+
 function buildSearchUrl(
   city: string,
   operation: 'sale' | 'rent',
   postalCode?: string,
+  propertyType?: string,
 ): string | null {
   const slug = getCitySlug(city);
   if (!slug) return null;
 
-  const op = operation === 'sale' ? 'venta-viviendas' : 'alquiler-viviendas';
+  const segments = PROPERTY_TYPE_SEGMENTS[propertyType || 'vivienda'] || PROPERTY_TYPE_SEGMENTS.vivienda;
+  const op = operation === 'sale' ? segments.sale : segments.rent;
 
   if (postalCode) {
     return `${BASE_URL}/${op}/${slug}/?codigoPostal=${postalCode}`;
@@ -129,13 +145,15 @@ export async function scrapeIdealista(
   city: string,
   operation: 'sale' | 'rent' = 'sale',
   postalCode?: string,
+  propertyType?: string,
 ): Promise<ScrapedMarketSummary | null> {
-  const cacheKey = buildCacheKey('idealista', city, operation, postalCode);
+  const pType = propertyType || 'vivienda';
+  const cacheKey = buildCacheKey('idealista', city, `${operation}-${pType}`, postalCode);
 
   const cached = await getCachedData<ScrapedMarketSummary>(cacheKey);
   if (cached) return cached;
 
-  const url = buildSearchUrl(city, operation, postalCode);
+  const url = buildSearchUrl(city, operation, postalCode, pType);
   if (!url) {
     logger.warn(`[Idealista] Ciudad no soportada: ${city}`);
     return null;

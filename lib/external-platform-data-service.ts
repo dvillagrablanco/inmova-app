@@ -119,7 +119,7 @@ interface FetchOptions {
   address?: string;
   squareMeters?: number;
   rooms?: number;
-  propertyType?: 'vivienda' | 'garaje' | 'local' | 'oficina';
+  propertyType?: string;
   companyId?: string;
 }
 
@@ -136,7 +136,7 @@ async function fetchFromScrapedPortals(options: FetchOptions): Promise<PlatformM
   const results: PlatformMarketDataPoint[] = [];
 
   try {
-    const scrapingResult = await scrapeAllPortals(options.city, 'sale', options.postalCode);
+    const scrapingResult = await scrapeAllPortals(options.city, 'sale', options.postalCode, options.propertyType);
 
     for (const portal of scrapingResult.portals) {
       if (!portal.success) continue;
