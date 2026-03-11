@@ -327,11 +327,120 @@ export async function GET(request: NextRequest) {
           total: round2(patrimonioTotal),
         },
         sociedades: view === 'consolidated' ? allCompanyIds.length : 1,
+
+        // --- G1-G9: Monthly snapshot data (if available) ---
+        ...(await getSnapshotData(prisma, companyId)),
       },
     });
   } catch (error: any) {
     logger.error('[Family Office Dashboard]:', error);
     Sentry.captureException(error);
     return NextResponse.json({ error: 'Error generando dashboard' }, { status: 500 });
+  }
+}
+
+/**
+ * Fetch monthly snapshot data for the dashboard enrichment (G1-G9).
+ */
+async function getSnapshotData(prisma: any, companyId: string) {
+  try {
+    const snapshots = await prisma.monthlySnapshot.findMany({
+      where: { companyId },
+      orderBy: { reportDate: 'asc' },
+    });
+
+    if (!snapshots || snapshots.length === 0) {
+      return {};
+    }
+
+    // G1: Evolución patrimonial (agrupado por fecha)
+    const byDate: Record<string, any> = {};
+    for (const s of snapshots) {
+      const dateKey = s.reportDate.toISOString().slice(0, 7); // YYYY-MM
+      if (!byDate[dateKey]) {
+        byDate[dateKey] = { date: dateKey, total: 0, af: 0, pe: 0, ar: 0, amper: 0 };
+      }
+      byDate[dateKey].total += s.totalValue;
+      if (s.portfolioCode === '1149.01') byDate[dateKey].af = s.totalValue;
+      if (s.portfolioCode === '1149.02') byDate[dateKey].pe = s.totalValue;
+      if (s.portfolioCode === '1149.03') byDate[dateKey].ar = s.totalValue;
+      if (s.portfolioCode === '1142.09') byDate[dateKey].amper = s.totalValue;
+    }
+    const patrimonioEvolution = Object.values(byDate).sort((a: any, b: any) =>
+      a.date.localeCompare(b.date)
+    );
+
+    // G2: Performance — latest AF snapshot
+    const latestAF = snapshots
+      .filter((s: any) => s.portfolioCode === '1149.01')
+      .sort((a: any, b: any) => b.reportDate.getTime() - a.reportDate.getTime())[0];
+
+    const performanceByYear = latestAF ? {
+      return2023: latestAF.return2023,
+      return2024: latestAF.return2024,
+      return2025: latestAF.return2025,
+      returnYtd: latestAF.returnYtd,
+      sinceInception: latestAF.returnSinceInception,
+      annualized: latestAF.annualizedReturn,
+      volatility12m: latestAF.volatility12m,
+      sharpeRatio: latestAF.sharpeRatio,
+    } : null;
+
+    // G3: Custodian breakdown
+    const custodianBreakdown = latestAF?.custodianBreakdown || null;
+
+    // G4: Asset allocation with targets
+    const allocationVsTarget = latestAF ? (() => {
+      const total = latestAF.totalValue || 1;
+      return [
+        {
+          name: 'Mercado monetario', value: latestAF.monetario,
+          weight: Math.round((latestAF.monetario / total) * 10000) / 100,
+          target: latestAF.targetMonetario, deviation: null as number | null,
+        },
+        {
+          name: 'Renta fija', value: latestAF.rentaFija,
+          weight: Math.round((latestAF.rentaFija / total) * 10000) / 100,
+          target: latestAF.targetRentaFija, deviation: null as number | null,
+        },
+        {
+          name: 'Renta variable', value: latestAF.rentaVariable,
+          weight: Math.round((latestAF.rentaVariable / total) * 10000) / 100,
+          target: latestAF.targetRentaVariable, deviation: null as number | null,
+        },
+        {
+          name: 'Commodities', value: latestAF.commodities,
+          weight: Math.round((latestAF.commodities / total) * 10000) / 100,
+          target: null, deviation: null as number | null,
+        },
+        {
+          name: 'Alternativos', value: latestAF.alternativos,
+          weight: Math.round((latestAF.alternativos / total) * 10000) / 100,
+          target: null, deviation: null as number | null,
+        },
+      ].map(a => ({
+        ...a,
+        deviation: a.target != null ? Math.round((a.weight - a.target) * 100) / 100 : null,
+      }));
+    })() : null;
+
+    // G7: Fees
+    const feesSummary = latestAF ? {
+      totalFees: latestAF.fees,
+      breakdown: latestAF.feeBreakdown,
+      reportDate: latestAF.reportDate,
+    } : null;
+
+    return {
+      patrimonioEvolution,
+      performanceByYear,
+      custodianBreakdown,
+      allocationVsTarget,
+      feesSummary,
+      snapshotCount: snapshots.length,
+    };
+  } catch (e) {
+    logger.warn('[Dashboard Snapshots] Error loading snapshot data:', e);
+    return {};
   }
 }

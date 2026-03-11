@@ -63,6 +63,42 @@ interface ParticipacionData {
   coste: number;
 }
 
+interface EvolutionPoint {
+  date: string;
+  total: number;
+  af: number;
+  pe: number;
+  ar: number;
+  amper: number;
+}
+
+interface PerformanceByYear {
+  return2023: number | null;
+  return2024: number | null;
+  return2025: number | null;
+  returnYtd: number | null;
+  sinceInception: number | null;
+  annualized: number | null;
+  volatility12m: number | null;
+  sharpeRatio: number | null;
+}
+
+interface CustodianData {
+  custodian: string;
+  total: number;
+  pnl: number;
+  deposits: number;
+  previousValue: number;
+}
+
+interface AllocationVsTarget {
+  name: string;
+  value: number;
+  weight: number;
+  target: number | null;
+  deviation: number | null;
+}
+
 interface DashboardData {
   inmobiliario: { valor: number; renta: number; rentaAnual: number; edificios: EdificioData[] };
   financiero: { valor: number; pnl: number; cuentas: CuentaData[] };
@@ -70,6 +106,12 @@ interface DashboardData {
   tesoreria: { saldo: number; porEntidad: { entidad: string; saldo: number }[] };
   assetAllocation: Record<string, number>;
   patrimonio: { total: number };
+  patrimonioEvolution?: EvolutionPoint[];
+  performanceByYear?: PerformanceByYear;
+  custodianBreakdown?: CustodianData[];
+  allocationVsTarget?: AllocationVsTarget[];
+  feesSummary?: { totalFees: number; breakdown: any; reportDate: string };
+  snapshotCount?: number;
 }
 
 export default function FamilyOfficeDashboardPage() {
@@ -286,6 +328,214 @@ export default function FamilyOfficeDashboardPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* G1: Evolución Patrimonial Real */}
+        {d?.patrimonioEvolution && d.patrimonioEvolution.length > 2 && (
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Evolución Patrimonial</CardTitle>
+              <p className="text-xs text-gray-500">{d.patrimonioEvolution.length} meses de datos reales</p>
+            </CardHeader>
+            <CardContent>
+              <div className="h-64 flex items-end gap-1">
+                {(() => {
+                  const evo = d.patrimonioEvolution!;
+                  const maxVal = Math.max(...evo.map(e => e.total));
+                  const minVal = Math.min(...evo.map(e => e.total)) * 0.95;
+                  const range = maxVal - minVal || 1;
+                  return evo.map((point, i) => {
+                    const height = ((point.total - minVal) / range) * 100;
+                    const isLast = i === evo.length - 1;
+                    return (
+                      <div key={point.date} className="flex-1 flex flex-col items-center gap-1" title={`${point.date}: ${fmt(point.total)}`}>
+                        <div className="w-full flex flex-col justify-end" style={{ height: '220px' }}>
+                          <div
+                            className={`w-full rounded-t ${isLast ? 'bg-indigo-600' : 'bg-indigo-200 hover:bg-indigo-300'} transition-colors`}
+                            style={{ height: `${Math.max(height, 2)}%` }}
+                          />
+                        </div>
+                        {i % Math.ceil(evo.length / 8) === 0 && (
+                          <span className="text-[8px] text-gray-400 -rotate-45 origin-left whitespace-nowrap">
+                            {point.date.slice(2)}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  });
+                })()}
+              </div>
+              <div className="flex justify-between text-xs text-gray-400 mt-2">
+                <span>{d.patrimonioEvolution[0]?.date}</span>
+                <span className="font-medium text-indigo-600">
+                  {fmt(d.patrimonioEvolution[d.patrimonioEvolution.length - 1]?.total ?? 0)}
+                </span>
+                <span>{d.patrimonioEvolution[d.patrimonioEvolution.length - 1]?.date}</span>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* G2 + G3 + G4 row */}
+        <div className="grid md:grid-cols-3 gap-4">
+          {/* G2: Performance por Año */}
+          {d?.performanceByYear && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4 text-green-600" /> Rentabilidad
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2 text-sm">
+                  {[
+                    { label: '2023', value: d.performanceByYear.return2023 },
+                    { label: '2024', value: d.performanceByYear.return2024 },
+                    { label: '2025', value: d.performanceByYear.return2025 },
+                    { label: 'YTD 2026', value: d.performanceByYear.returnYtd },
+                    { label: 'Desde inicio', value: d.performanceByYear.sinceInception },
+                    { label: 'Anualizada', value: d.performanceByYear.annualized },
+                  ].map(row => row.value != null && (
+                    <div key={row.label} className="flex justify-between items-center">
+                      <span className="text-gray-500">{row.label}</span>
+                      <span className={`font-semibold ${(row.value ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {row.value! >= 0 ? '+' : ''}{row.value!.toFixed(2)}%
+                      </span>
+                    </div>
+                  ))}
+                  {d.performanceByYear.volatility12m != null && (
+                    <div className="pt-2 border-t">
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Volatilidad 12M</span>
+                        <span className="font-medium">{d.performanceByYear.volatility12m.toFixed(2)}%</span>
+                      </div>
+                      {d.performanceByYear.sharpeRatio != null && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Sharpe Ratio</span>
+                          <span className="font-medium">{d.performanceByYear.sharpeRatio.toFixed(2)}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* G3: Desglose por Custodio */}
+          {d?.custodianBreakdown && Array.isArray(d.custodianBreakdown) && d.custodianBreakdown.length > 0 && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Building2 className="h-4 w-4 text-blue-600" /> Por Custodio
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {(() => {
+                    const items = d.custodianBreakdown as CustodianData[];
+                    const total = items.reduce((s, c) => s + c.total, 0) || 1;
+                    const colors = ['bg-indigo-500', 'bg-blue-500', 'bg-cyan-500', 'bg-teal-500'];
+                    return (
+                      <>
+                        <div className="flex h-3 rounded-full overflow-hidden">
+                          {items.map((c, i) => (
+                            <div
+                              key={c.custodian}
+                              className={`${colors[i % colors.length]} transition-all`}
+                              style={{ width: `${(c.total / total) * 100}%` }}
+                              title={`${c.custodian}: ${fmt(c.total)}`}
+                            />
+                          ))}
+                        </div>
+                        <div className="space-y-1.5 text-sm">
+                          {items.map((c, i) => (
+                            <div key={c.custodian} className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <div className={`w-2.5 h-2.5 rounded-full ${colors[i % colors.length]}`} />
+                                <span className="text-gray-600">{c.custodian}</span>
+                              </div>
+                              <div className="text-right">
+                                <span className="font-medium">{fmt(c.total)}</span>
+                                <span className="text-gray-400 text-xs ml-1">
+                                  ({((c.total / total) * 100).toFixed(0)}%)
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* G4: Asset Allocation vs Target */}
+          {d?.allocationVsTarget && d.allocationVsTarget.length > 0 && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Briefcase className="h-4 w-4 text-purple-600" /> Allocation vs Objetivo
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2 text-sm">
+                  {d.allocationVsTarget.map(a => (
+                    <div key={a.name}>
+                      <div className="flex justify-between items-center mb-0.5">
+                        <span className="text-gray-600 text-xs">{a.name}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{a.weight.toFixed(1)}%</span>
+                          {a.target != null && (
+                            <Badge
+                              variant="outline"
+                              className={`text-[10px] px-1 ${
+                                Math.abs(a.deviation ?? 0) <= 2
+                                  ? 'border-green-300 text-green-700 bg-green-50'
+                                  : Math.abs(a.deviation ?? 0) <= 5
+                                  ? 'border-yellow-300 text-yellow-700 bg-yellow-50'
+                                  : 'border-red-300 text-red-700 bg-red-50'
+                              }`}
+                            >
+                              {(a.deviation ?? 0) >= 0 ? '+' : ''}{a.deviation?.toFixed(1)}%
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                        <div
+                          className="bg-indigo-500 rounded-full"
+                          style={{ width: `${Math.min(a.weight, 100)}%` }}
+                        />
+                      </div>
+                      {a.target != null && (
+                        <div className="text-[10px] text-gray-400 text-right">
+                          objetivo: {a.target}%
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        {/* G7: Comisiones */}
+        {d?.feesSummary && d.feesSummary.totalFees !== 0 && (
+          <Card className="border-amber-200 bg-amber-50/30">
+            <CardContent className="pt-4 pb-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Wallet className="h-4 w-4 text-amber-600" />
+                  <span className="text-sm font-medium text-gray-700">Comisiones último mes</span>
+                </div>
+                <span className="text-sm font-bold text-amber-700">{fmt(Math.abs(d.feesSummary.totalFees))}</span>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Sugerencias inteligentes */}
         <SuggestionsWidget limit={3} />

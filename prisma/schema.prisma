@@ -2224,6 +2224,7 @@ model Company {
   // 🏦 FAMILY OFFICE ADD-ON
   financialAccounts    FinancialAccount[]
   holdingParticipations Participation[] @relation("HoldingParticipations")
+  monthlySnapshots     MonthlySnapshot[] @relation("CompanyMonthlySnapshots")
 
   // 📊 CRM AVANZADO - Comentado temporalmente
   // crmLeads              CRMLead[]
@@ -16988,6 +16989,23 @@ model FinancialPosition {
   ultimaActualizacion DateTime?
   peso                Float?    // % del total de la cuenta
 
+  // Rentabilidades (G11: return12m, returnYtd por posición)
+  return12m    Float? // Rentabilidad últimos 12 meses (%)
+  returnYtd    Float? // Rentabilidad YTD (%)
+
+  // Detalle bonos (G10: TIR, duración, cupón, vencimiento, rating)
+  maturityDate DateTime? // Fecha vencimiento
+  couponRate   Float?    // Cupón (%)
+  yieldAtCost  Float?    // TIR de compra
+  currentYield Float?    // TIR actual
+  duration     Float?    // Duración modificada
+  rating       String?   // Rating crediticio (Baa1, A3, etc.)
+  nominal      Float?    // Valor nominal
+
+  // Portfolio/custodian tracking (G5: multi-portfolio)
+  portfolioCode String? // "1149.01", "1149.03", "1142.09"
+  custodian     String? // "Inversis", "Pictet", "Banca March", "CACEIS"
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -16996,6 +17014,7 @@ model FinancialPosition {
   @@index([accountId])
   @@index([isin])
   @@index([tipo])
+  @@index([portfolioCode])
   @@map("financial_positions")
 }
 
@@ -17154,4 +17173,90 @@ model Participation {
   @@index([tipo])
   @@index([vehiculoInversor])
   @@map("participations")
+}
+
+// G1: Histórico mensual real — snapshots de cada reporting PDF importado
+model MonthlySnapshot {
+  id        String  @id @default(cuid())
+  companyId String
+  company   Company @relation("CompanyMonthlySnapshots", fields: [companyId], references: [id], onDelete: Cascade)
+
+  portfolioCode String   // "1149.01" (AF), "1149.02" (PE), "1149.03" (AR), "1142.09" (AMPER)
+  portfolioName String   // "BALDOMERO AF GRUPO"
+  reportDate    DateTime // Último día del mes del reporting
+  reportType    String   // "AF", "AR", "AMPER", "MIFID"
+
+  // Resumen patrimonial
+  totalValue    Float    // Patrimonio total a cierre de mes
+  previousValue Float    // Patrimonio mes anterior
+  deposits      Float @default(0) // Aportaciones/retiradas
+  netPnl        Float @default(0) // Beneficio neto
+  fees          Float @default(0) // Comisiones totales (G7)
+
+  // Asset allocation (G4: con targets)
+  monetario       Float @default(0) // Valor en mercado monetario
+  rentaFija       Float @default(0)
+  rentaVariable   Float @default(0)
+  commodities     Float @default(0)
+  alternativos    Float @default(0)
+
+  // Targets (asset allocation objetivo — G4)
+  targetMonetario     Float? // % objetivo mercado monetario
+  targetRentaFija     Float? // % objetivo renta fija
+  targetRentaVariable Float? // % objetivo renta variable
+
+  // Performance (G2)
+  returnYtd            Float? // Rentabilidad YTD (%)
+  returnSinceInception Float? // Desde inicio (%)
+  annualizedReturn     Float? // Anualizada (%)
+  return2023           Float?
+  return2024           Float?
+  return2025           Float?
+
+  // Riesgo (G9)
+  volatility12m Float? // Volatilidad 12 meses (%)
+  sharpeRatio   Float? // Ratio de Sharpe
+
+  // Desglose por custodio (G3) — JSON array: [{custodian, total, pnl, deposits, previousValue}]
+  custodianBreakdown Json?
+
+  // Comisiones desglosadas (G7) — JSON: {gestionMdF, consultoria, depositaria, gastosVarios}
+  feeBreakdown Json?
+
+  // Fuente
+  sourceDocumentId String? // DiliTrust document ID
+  sourceFileName   String?
+
+  createdAt DateTime @default(now())
+
+  @@unique([companyId, portfolioCode, reportDate])
+  @@index([companyId])
+  @@index([reportDate])
+  @@index([portfolioCode])
+  @@map("monthly_snapshots")
+}
+
+// G8: Benchmarks — evolución de índices de referencia
+model PortfolioBenchmark {
+  id        String @id @default(cuid())
+  companyId String
+
+  name   String   // "MSCI World Net TR EUR", "Euro Govt 3-5Yr"
+  ticker String?  // "MSDEWIN Index", "BERPG2 Index"
+  date   DateTime // Fecha del dato
+
+  level Float? // Nivel del índice
+
+  returnMonth Float? // Rentabilidad mes (%)
+  returnYtd   Float? // Rentabilidad YTD (%)
+  return1y    Float? // Rentabilidad 1 año (%)
+  return3y    Float? // Rentabilidad 3 años (%)
+  return5y    Float? // Rentabilidad 5 años (%)
+
+  createdAt DateTime @default(now())
+
+  @@unique([companyId, name, date])
+  @@index([companyId])
+  @@index([date])
+  @@map("portfolio_benchmarks")
 }
