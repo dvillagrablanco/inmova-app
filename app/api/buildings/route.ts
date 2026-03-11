@@ -45,49 +45,48 @@ export async function GET(req: NextRequest) {
       request: req,
     });
 
-    // Obtener parámetros de paginación
-    const { searchParams } = new URL(req.url);
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
-    const skip = (page - 1) * limit;
     if (!scope.activeCompanyId) {
       return NextResponse.json([]);
     }
 
-    // Use scope: if user selected a specific company, show only that company's buildings
-    // If viewing from holding, show holding + subsidiaries
+    const { searchParams } = new URL(req.url);
+    const usePagination = searchParams.has('page') || searchParams.has('limit');
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '50');
+    const skip = (page - 1) * limit;
+
     const whereClause = { companyId: { in: scope.scopeCompanyIds } };
 
-    const { searchParams: sp2 } = new URL(req.url);
-    const usePagination = sp2.has('page') || sp2.has('limit');
-
-    const [buildings, total] = await Promise.all([
-      prisma.building.findMany({
-        where: whereClause,
-        include: {
-          units: {
-            select: {
-              id: true,
-              estado: true,
-              rentaMensual: true,
-              valorMercado: true,
-              precioCompra: true,
-            },
-          },
-          company: {
-            select: {
-              id: true,
-              nombre: true,
-            },
+    const buildingQuery: any = {
+      where: whereClause,
+      include: {
+        units: {
+          select: {
+            id: true,
+            estado: true,
+            rentaMensual: true,
+            valorMercado: true,
+            precioCompra: true,
           },
         },
-        orderBy: { createdAt: 'desc' },
-        skip,
-        take: limit,
-      }),
-      prisma.building.count({
-        where: whereClause,
-      }),
+        company: {
+          select: {
+            id: true,
+            nombre: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    };
+
+    if (usePagination) {
+      buildingQuery.skip = skip;
+      buildingQuery.take = limit;
+    }
+
+    const [buildings, total] = await Promise.all([
+      prisma.building.findMany(buildingQuery),
+      prisma.building.count({ where: whereClause }),
     ]);
 
     // Calcular métricas para cada edificio
