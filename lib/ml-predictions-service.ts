@@ -18,6 +18,10 @@ import { CLAUDE_MODEL_FAST } from './ai-model-config';
 import logger from './logger';
 import { redis } from './redis';
 
+// TODO: AUDIT-2026-03 — This file references prisma.property which no longer exists in the schema.
+// The Property model was removed; properties are now managed via Building + Unit.
+// References to prisma.property will throw at runtime. Migrate to Building/Unit queries.
+
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
