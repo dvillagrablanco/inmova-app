@@ -20,7 +20,8 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json().catch(() => ({}));
     const session = await getServerSession(authOptions);
-    const companyId = body.companyId || session?.user?.companyId;
+    // Security: only use companyId from authenticated session, never from request body
+    const companyId = session?.user?.companyId;
     const result = await autoCreateCleaningTasks(companyId);
     return NextResponse.json({
       success: result.success,
