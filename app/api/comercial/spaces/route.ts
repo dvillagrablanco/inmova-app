@@ -150,7 +150,7 @@ export async function GET(request: NextRequest) {
           ...(estadoFilter === 'ocupada' ? { estado: 'ocupado' } : {}),
         },
         include: {
-          building: { select: { id: true, nombre: true, direccion: true, ciudad: true } },
+          building: { select: { id: true, nombre: true, direccion: true } },
           tenant: { select: { id: true, nombreCompleto: true } },
         },
         orderBy: { createdAt: 'desc' },
@@ -163,7 +163,7 @@ export async function GET(request: NextRequest) {
           referencia: unit.referenciaCatastral || null,
           tipo: unit.tipo,
           direccion: unit.building?.direccion || '',
-          ciudad: unit.building?.ciudad || '',
+          ciudad: '',
           planta: unit.planta,
           superficie: unit.superficie,
           superficieUtil: unit.superficieUtil || unit.superficie * 0.9,
