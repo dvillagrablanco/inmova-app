@@ -47,6 +47,261 @@ const PIPELINE_STAGES: { key: PipelineStage; label: string; icon: string; color:
 // ============================================================================
 // MAIN PAGE
 // ============================================================================
+// ============================================================================
+// PANEL DE BÚSQUEDA DE OPORTUNIDADES (Idealista + BOE)
+// ============================================================================
+
+function SearchOpportunitiesPanel() {
+  const [searching, setSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchMeta, setSearchMeta] = useState<{ totalFound: number; sources: string[] } | null>(null);
+  const [searchFilters, setSearchFilters] = useState({
+    cities: ['Madrid'],
+    propertyTypes: ['vivienda'],
+    maxPrice: '',
+    minSurface: '',
+    minDiscount: '',
+    minYield: '',
+    includeBOE: true,
+    includeIdealista: true,
+  });
+
+  const cityOptions = ['Madrid', 'Barcelona', 'Valencia', 'Sevilla', 'Málaga', 'Bilbao', 'Zaragoza', 'Valladolid', 'Palencia', 'Alicante', 'Marbella', 'Murcia', 'Granada', 'Córdoba', 'Vigo'];
+  const typeOptions = [
+    { value: 'vivienda', label: 'Vivienda' },
+    { value: 'local_comercial', label: 'Local comercial' },
+    { value: 'oficina', label: 'Oficina' },
+    { value: 'nave_industrial', label: 'Nave industrial' },
+    { value: 'garaje', label: 'Garaje' },
+    { value: 'terreno', label: 'Terreno / Solar' },
+    { value: 'trastero', label: 'Trastero' },
+  ];
+
+  const handleSearch = async () => {
+    setSearching(true);
+    setSearchResults([]);
+    setSearchMeta(null);
+    try {
+      const res = await fetch('/api/investment/search-opportunities', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...searchFilters,
+          maxPrice: searchFilters.maxPrice ? Number(searchFilters.maxPrice) : undefined,
+          minSurface: searchFilters.minSurface ? Number(searchFilters.minSurface) : undefined,
+          minDiscount: searchFilters.minDiscount ? Number(searchFilters.minDiscount) : undefined,
+          minYield: searchFilters.minYield ? Number(searchFilters.minYield) : undefined,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setSearchResults(data.results || []);
+        setSearchMeta({ totalFound: data.totalFound || 0, sources: data.sources || [] });
+      }
+    } catch (e: any) {
+      console.error('Search error:', e);
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  const toggleCity = (city: string) => {
+    setSearchFilters(prev => ({
+      ...prev,
+      cities: prev.cities.includes(city) ? prev.cities.filter(c => c !== city) : [...prev.cities, city],
+    }));
+  };
+
+  const toggleType = (type: string) => {
+    setSearchFilters(prev => ({
+      ...prev,
+      propertyTypes: prev.propertyTypes.includes(type) ? prev.propertyTypes.filter(t => t !== type) : [...prev.propertyTypes, type],
+    }));
+  };
+
+  const fmt = (n: number) => n?.toLocaleString('es-ES', { maximumFractionDigits: 0 });
+
+  return (
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Search className="h-5 w-5" />
+            Buscar Oportunidades de Inversión
+          </CardTitle>
+          <CardDescription>
+            Busca activos infravalorados en Idealista y subastas judiciales del BOE.
+            Cada resultado se compara con el precio de mercado de la zona.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Ciudades */}
+          <div className="space-y-2">
+            <Label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Ciudades</Label>
+            <div className="flex flex-wrap gap-1.5">
+              {cityOptions.map(city => (
+                <Button key={city} size="sm" variant={searchFilters.cities.includes(city) ? 'default' : 'outline'}
+                  className="h-7 text-xs" onClick={() => toggleCity(city)}>
+                  {city}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          {/* Tipo de activo */}
+          <div className="space-y-2">
+            <Label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Tipo de activo</Label>
+            <div className="flex flex-wrap gap-1.5">
+              {typeOptions.map(t => (
+                <Button key={t.value} size="sm" variant={searchFilters.propertyTypes.includes(t.value) ? 'default' : 'outline'}
+                  className="h-7 text-xs" onClick={() => toggleType(t.value)}>
+                  {t.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          {/* Filtros numéricos */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="space-y-1">
+              <Label className="text-xs">Precio máximo (€)</Label>
+              <Input type="number" placeholder="500.000" value={searchFilters.maxPrice}
+                onChange={e => setSearchFilters(p => ({ ...p, maxPrice: e.target.value }))} />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Superficie mín (m²)</Label>
+              <Input type="number" placeholder="50" value={searchFilters.minSurface}
+                onChange={e => setSearchFilters(p => ({ ...p, minSurface: e.target.value }))} />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Descuento mín (%)</Label>
+              <Input type="number" placeholder="10" value={searchFilters.minDiscount}
+                onChange={e => setSearchFilters(p => ({ ...p, minDiscount: e.target.value }))} />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Yield mín (%)</Label>
+              <Input type="number" placeholder="5" value={searchFilters.minYield}
+                onChange={e => setSearchFilters(p => ({ ...p, minYield: e.target.value }))} />
+            </div>
+          </div>
+
+          {/* Fuentes */}
+          <div className="flex gap-4">
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={searchFilters.includeIdealista}
+                onChange={e => setSearchFilters(p => ({ ...p, includeIdealista: e.target.checked }))}
+                className="rounded" />
+              Idealista (listings)
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={searchFilters.includeBOE}
+                onChange={e => setSearchFilters(p => ({ ...p, includeBOE: e.target.checked }))}
+                className="rounded" />
+              Subastas BOE
+            </label>
+          </div>
+
+          <Button onClick={handleSearch} disabled={searching} className="w-full">
+            {searching ? (
+              <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Buscando oportunidades...</>
+            ) : (
+              <><Search className="h-4 w-4 mr-2" /> Buscar oportunidades</>
+            )}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Resultados */}
+      {searchMeta && (
+        <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <span>{searchMeta.totalFound} oportunidades encontradas</span>
+          <span>Fuentes: {searchMeta.sources.join(', ')}</span>
+        </div>
+      )}
+
+      {searchResults.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {searchResults.map((r: any) => (
+            <Card key={r.id} className={`overflow-hidden ${r.discountVsMarket > 20 ? 'border-green-300 bg-green-50/30' : r.discountVsMarket > 10 ? 'border-amber-200' : ''}`}>
+              <CardContent className="p-4 space-y-2">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="text-[10px] shrink-0">
+                        {r.source === 'boe' ? '⚖️ BOE' : '🏠 Idealista'}
+                      </Badge>
+                      <Badge variant="secondary" className="text-[10px] shrink-0">
+                        {r.propertyType === 'vivienda' ? 'Vivienda' :
+                         r.propertyType === 'local_comercial' ? 'Local' :
+                         r.propertyType === 'oficina' ? 'Oficina' :
+                         r.propertyType === 'nave_industrial' ? 'Nave' :
+                         r.propertyType === 'garaje' ? 'Garaje' :
+                         r.propertyType === 'terreno' ? 'Terreno' : r.propertyType}
+                      </Badge>
+                    </div>
+                    <p className="font-medium text-sm mt-1 truncate">{r.title}</p>
+                    <p className="text-xs text-muted-foreground">{r.city}{r.surface ? ` — ${r.surface}m²` : ''}{r.rooms ? ` — ${r.rooms} hab.` : ''}</p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="font-bold text-lg">{fmt(r.price)}€</p>
+                    {r.pricePerM2 > 0 && <p className="text-xs text-muted-foreground">{fmt(r.pricePerM2)}€/m²</p>}
+                  </div>
+                </div>
+
+                {/* Métricas de oportunidad */}
+                <div className="grid grid-cols-3 gap-2">
+                  {r.discountVsMarket !== null && (
+                    <div className={`p-2 rounded text-center ${r.discountVsMarket > 15 ? 'bg-green-100' : r.discountVsMarket > 0 ? 'bg-amber-50' : 'bg-red-50'}`}>
+                      <p className="text-[10px] text-muted-foreground uppercase">vs Mercado</p>
+                      <p className={`text-sm font-bold ${r.discountVsMarket > 0 ? 'text-green-700' : 'text-red-700'}`}>
+                        {r.discountVsMarket > 0 ? '-' : '+'}{Math.abs(r.discountVsMarket)}%
+                      </p>
+                    </div>
+                  )}
+                  {r.estimatedYield && (
+                    <div className="p-2 rounded bg-blue-50 text-center">
+                      <p className="text-[10px] text-muted-foreground uppercase">Yield</p>
+                      <p className="text-sm font-bold text-blue-700">{r.estimatedYield}%</p>
+                    </div>
+                  )}
+                  <div className={`p-2 rounded text-center ${r.opportunityScore > 60 ? 'bg-emerald-100' : r.opportunityScore > 40 ? 'bg-amber-50' : 'bg-gray-50'}`}>
+                    <p className="text-[10px] text-muted-foreground uppercase">Score</p>
+                    <p className={`text-sm font-bold ${r.opportunityScore > 60 ? 'text-emerald-700' : 'text-amber-700'}`}>
+                      {r.opportunityScore}/100
+                    </p>
+                  </div>
+                </div>
+
+                {r.marketPricePerM2 && (
+                  <p className="text-xs text-muted-foreground">
+                    Precio mercado zona: {fmt(r.marketPricePerM2)}€/m²
+                    {r.zoneYield ? ` · Yield zona: ${r.zoneYield}%` : ''}
+                  </p>
+                )}
+
+                {r.url && (
+                  <a href={r.url} target="_blank" rel="noopener noreferrer"
+                    className="text-xs text-blue-600 hover:underline flex items-center gap-1">
+                    Ver en {r.source === 'boe' ? 'BOE' : 'Idealista'} →
+                  </a>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {searching && (
+        <div className="text-center py-12 text-muted-foreground">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-3" />
+          <p className="text-sm">Buscando en Idealista y BOE...</p>
+          <p className="text-xs mt-1">Comparando con precios de mercado de Idealista Data</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function OportunidadesPage() {
   const { status } = useSession();
   const router = useRouter();
@@ -402,6 +657,7 @@ export default function OportunidadesPage() {
         <Tabs defaultValue="mercado">
           <TabsList className="w-full sm:w-auto flex-wrap h-auto">
             <TabsTrigger value="mercado">🏪 Mercado</TabsTrigger>
+            <TabsTrigger value="buscar">🔍 Buscar</TabsTrigger>
             <TabsTrigger value="pipeline">📋 Pipeline</TabsTrigger>
             <TabsTrigger value="ia">🤖 IA</TabsTrigger>
             <TabsTrigger value="propuestas">📄 Propuestas</TabsTrigger>
@@ -410,6 +666,11 @@ export default function OportunidadesPage() {
             <TabsTrigger value="historial">📜 Historial</TabsTrigger>
             {showCompare && <TabsTrigger value="comparar">⚖️ Comparar ({compareIds.size})</TabsTrigger>}
           </TabsList>
+
+          {/* ===== BUSCAR TAB — Búsqueda real en Idealista + BOE ===== */}
+          <TabsContent value="buscar" className="space-y-4">
+            <SearchOpportunitiesPanel />
+          </TabsContent>
 
           {/* ===== MERCADO TAB ===== */}
           <TabsContent value="mercado" className="space-y-4">
