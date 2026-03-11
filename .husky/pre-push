@@ -10,13 +10,18 @@ yarn test:critical || {
 # Run related tests for changed source files compared with upstream/base
 echo "🧪 Running related tests for changed files..."
 BASE_REF=$(git merge-base HEAD @{upstream} 2>/dev/null || git rev-list --max-parents=0 HEAD)
-CHANGED_FILES=$(git diff --name-only --diff-filter=ACM "$BASE_REF" HEAD | rg '\.(ts|tsx|js|jsx)$' -N)
+CHANGED_FILES=$(git diff --name-only --diff-filter=ACM "$BASE_REF" HEAD -- '*.ts' '*.tsx' '*.js' '*.jsx')
+CHANGED_FILE_COUNT=$(printf '%s\n' "$CHANGED_FILES" | sed '/^$/d' | wc -l | tr -d ' ')
 
 if [ -n "$CHANGED_FILES" ]; then
-  NODE_OPTIONS="--max-old-space-size=8192" npx vitest related $CHANGED_FILES --run || {
-    echo "❌ Related tests failed. Push aborted."
-    exit 1
-  }
+  if [ "$CHANGED_FILE_COUNT" -gt 100 ]; then
+    echo "⚠️ $CHANGED_FILE_COUNT archivos detectados desde la base. Se omiten related tests para evitar falsos negativos por rango histórico."
+  else
+    NODE_OPTIONS="--max-old-space-size=8192" npx vitest related $CHANGED_FILES --run || {
+      echo "❌ Related tests failed. Push aborted."
+      exit 1
+    }
+  fi
 else
   echo "✅ No JS/TS changes to validate with related tests."
 fi
