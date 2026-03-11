@@ -107,6 +107,9 @@ const nextConfig = {
   // Cache headers for static assets + Security headers
   async headers() {
     // CSP (Content Security Policy) - auditoria V2 2026-02-11
+    // NOTE: 'unsafe-inline' required by Next.js for inline styles and Stripe.js
+    // NOTE: 'unsafe-eval' required by Next.js dev mode and some third-party scripts (Crisp, Sentry)
+    // These should be replaced with nonces when Next.js supports CSP nonces natively
     const cspDirectives = [
       "default-src 'self'",
       "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://js.stripe.com https://www.googletagmanager.com https://client.crisp.chat https://static.cloudflareinsights.com https://*.sentry.io",

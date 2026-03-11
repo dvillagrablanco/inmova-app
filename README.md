@@ -1,10 +1,10 @@
 # 🏠 Inmova App - PropTech Platform
 
 [![CI/CD](https://github.com/inmova/inmova-app/workflows/CI%2FCD%20Pipeline/badge.svg)](https://github.com/inmova/inmova-app/actions)
-[![Coverage](https://img.shields.io/badge/coverage-96%25-brightgreen)](https://codecov.io/gh/inmova/inmova-app)
-[![Tests](https://img.shields.io/badge/tests-745%20passing-brightgreen)](https://github.com/inmova/inmova-app/actions)
+[![Coverage](https://img.shields.io/badge/coverage-80%25-brightgreen)](https://codecov.io/gh/inmova/inmova-app)
+[![Tests](https://img.shields.io/badge/tests-~1050%20passing-brightgreen)](https://github.com/inmova/inmova-app/actions)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.2-blue)](https://www.typescriptlang.org/)
-[![Next.js](https://img.shields.io/badge/Next.js-15.5-black)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-14.2.35-black)](https://nextjs.org/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 **Plataforma PropTech B2B/B2C integral** para gestión inmobiliaria moderna.
@@ -68,8 +68,8 @@
 
 ### Frontend
 
-- **Framework**: Next.js 15.5 (App Router)
-- **UI**: React 19, Shadcn/ui, Radix UI
+- **Framework**: Next.js 14.2.35 (App Router)
+- **UI**: React 18.3, Shadcn/ui, Radix UI
 - **Styling**: Tailwind CSS
 - **State**: React Query, Zustand, Jotai
 - **Forms**: React Hook Form + Zod
