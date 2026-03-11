@@ -308,6 +308,50 @@ async function getIdealistaOpportunities(): Promise<MarketOpportunity[]> {
 }
 
 // ============================================================================
+// 2b. ALERTASUBASTAS.COM — Subastas de múltiples fuentes (BOE, AEAT, SS, Notarial)
+// ============================================================================
+
+async function getAlertaSubastasOpportunities(provinces?: string[]): Promise<MarketOpportunity[]> {
+  try {
+    const { scrapeAlertaSubastas, isAlertaSubastasConfigured } = await import('@/lib/alertasubastas-service');
+    if (!isAlertaSubastasConfigured()) return [];
+
+    const items = await scrapeAlertaSubastas(
+      ['vivienda', 'local_comercial', 'nave_industrial', 'garaje', 'solar'],
+      provinces,
+    );
+
+    return items.map(item => ({
+      id: item.id,
+      source: `AlertaSubastas (${item.auctionSource})`,
+      sourceIcon: item.auctionSource === 'AEAT' ? '🏛️'
+        : item.auctionSource === 'Seguridad Social' ? '🏥'
+        : item.auctionSource === 'Notarial' ? '📜'
+        : '⚖️',
+      category: 'subasta' as const,
+      title: item.title,
+      location: item.province || item.location,
+      propertyType: item.propertyType,
+      price: item.price,
+      marketValue: item.marketValue,
+      discount: item.discount,
+      surface: item.surface || undefined,
+      estimatedYield: item.marketValue > 0 && item.price > 0
+        ? Math.round((item.marketValue * 0.05 / item.price) * 10) / 10
+        : undefined,
+      riskLevel: 'alto' as const,
+      description: item.description,
+      url: item.url,
+      deadline: item.deadline || undefined,
+      tags: item.tags,
+    }));
+  } catch (error: any) {
+    logger.warn('[AlertaSubastas] Error:', error.message);
+    return [];
+  }
+}
+
+// ============================================================================
 // 3. INMUEBLES BANCA — Datos de referencia
 // ============================================================================
 
@@ -468,11 +512,15 @@ export interface OpportunitiesBySource {
 }
 
 export async function getAllMarketOpportunities(provinces?: string[]): Promise<OpportunitiesBySource> {
-  // Ejecutar fuentes en paralelo
-  const [auctions, idealistaOpps] = await Promise.all([
+  // Ejecutar TODAS las fuentes en paralelo (BOE + AlertaSubastas + Idealista)
+  const [boeAuctions, alertaSubastas, idealistaOpps] = await Promise.all([
     getAuctionOpportunities(provinces || []).catch(e => {
       logger.warn('[MarketOpp] BOE error:', e.message);
       return getBOEFallbackAuctions(provinces || ['Madrid', 'Barcelona', 'Valencia', 'Málaga', 'Valladolid']);
+    }),
+    getAlertaSubastasOpportunities(provinces).catch(e => {
+      logger.warn('[MarketOpp] AlertaSubastas error:', e.message);
+      return [] as MarketOpportunity[];
     }),
     getIdealistaOpportunities().catch(e => {
       logger.warn('[MarketOpp] Idealista error:', e.message);
@@ -480,11 +528,15 @@ export async function getAllMarketOpportunities(provinces?: string[]): Promise<O
     }),
   ]);
 
+  // Combinar subastas de BOE + AlertaSubastas (deduplicar por título similar)
+  const seenTitles = new Set(boeAuctions.map(a => a.title.substring(0, 30).toLowerCase()));
+  const uniqueAlerta = alertaSubastas.filter(a => !seenTitles.has(a.title.substring(0, 30).toLowerCase()));
+  const auctions = [...boeAuctions, ...uniqueAlerta];
+
   const bankProperties = getBankPropertyOpportunities();
   const staticTrends = getEmergingTrends();
   const crowdfunding = getCrowdfundingOpportunities();
 
-  // Separar oportunidades de Idealista en divergencias y tendencias
   const divergences = idealistaOpps.filter(o => o.category === 'divergencia');
   const idealistaTrends = idealistaOpps.filter(o => o.category === 'tendencia');
   const trends = [...idealistaTrends, ...staticTrends];

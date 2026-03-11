@@ -130,7 +130,7 @@ function SearchOpportunitiesPanel() {
             Buscar Oportunidades de Inversión
           </CardTitle>
           <CardDescription>
-            Busca activos infravalorados en Idealista y subastas judiciales del BOE.
+            Busca activos infravalorados en Idealista, subastas del BOE y AlertaSubastas (BOE + AEAT + SS + Notarial).
             Cada resultado se compara con el precio de mercado de la zona.
           </CardDescription>
         </CardHeader>
@@ -197,7 +197,7 @@ function SearchOpportunitiesPanel() {
               <input type="checkbox" checked={searchFilters.includeBOE}
                 onChange={e => setSearchFilters(p => ({ ...p, includeBOE: e.target.checked }))}
                 className="rounded" />
-              Subastas BOE
+              Subastas (BOE + AlertaSubastas)
             </label>
           </div>
 
@@ -228,7 +228,7 @@ function SearchOpportunitiesPanel() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <Badge variant="outline" className="text-[10px] shrink-0">
-                        {r.source === 'boe' ? '⚖️ BOE' : '🏠 Idealista'}
+                        {r.source === 'boe' ? '⚖️ BOE' : r.source === 'alertasubastas' ? '🔔 AlertaSub' : '🏠 Idealista'}
                       </Badge>
                       <Badge variant="secondary" className="text-[10px] shrink-0">
                         {r.propertyType === 'vivienda' ? 'Vivienda' :
@@ -282,7 +282,7 @@ function SearchOpportunitiesPanel() {
                 {r.url && (
                   <a href={r.url} target="_blank" rel="noopener noreferrer"
                     className="text-xs text-blue-600 hover:underline flex items-center gap-1">
-                    Ver en {r.source === 'boe' ? 'BOE' : 'Idealista'} →
+                    Ver en {r.source === 'boe' ? 'BOE' : r.source === 'alertasubastas' ? 'AlertaSubastas' : 'Idealista'} →
                   </a>
                 )}
               </CardContent>
@@ -294,7 +294,7 @@ function SearchOpportunitiesPanel() {
       {searching && (
         <div className="text-center py-12 text-muted-foreground">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-3" />
-          <p className="text-sm">Buscando en Idealista y BOE...</p>
+          <p className="text-sm">Buscando en Idealista, BOE y AlertaSubastas...</p>
           <p className="text-xs mt-1">Comparando con precios de mercado de Idealista Data</p>
         </div>
       )}

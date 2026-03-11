@@ -43,7 +43,7 @@ export interface OpportunitySearchFilters {
 
 export interface InvestmentOpportunityResult {
   id: string;
-  source: 'idealista' | 'boe' | 'fotocasa';
+  source: 'idealista' | 'boe' | 'fotocasa' | 'alertasubastas';
   title: string;
   propertyType: string;
   location: string;
@@ -503,6 +503,54 @@ export async function searchInvestmentOpportunities(
     const boeResults = await searchBOEAuctions(filters);
     allResults.push(...boeResults);
     if (boeResults.length > 0) sources.push('Subastas BOE');
+  }
+
+  // AlertaSubastas (BOE + AEAT + SS + Notarial + Ayuntamientos)
+  if (includeBOE) {
+    try {
+      const { scrapeAlertaSubastas, isAlertaSubastasConfigured } = await import('@/lib/alertasubastas-service');
+      if (isAlertaSubastasConfigured()) {
+        const alertaItems = await scrapeAlertaSubastas(types, cities);
+        for (const item of alertaItems) {
+          if (filters.maxPrice && item.price > filters.maxPrice) continue;
+          if (filters.minPrice && item.price < filters.minPrice) continue;
+          if (filters.minDiscount && item.discount < filters.minDiscount) continue;
+
+          const pricePerM2 = item.surface && item.surface > 0 ? Math.round(item.price / item.surface) : 0;
+          const market = marketDataByCity[item.location] || marketDataByCity[cities[0]];
+          let discountVsMarket: number | null = null;
+          if (market && pricePerM2 > 0 && market.avgPricePerM2 > 0) {
+            discountVsMarket = Math.round(((market.avgPricePerM2 - pricePerM2) / market.avgPricePerM2) * 100);
+          }
+
+          allResults.push({
+            id: item.id,
+            source: 'alertasubastas' as any,
+            title: item.title,
+            propertyType: item.propertyType,
+            location: item.location,
+            city: item.province || cities[0],
+            price: item.price,
+            pricePerM2,
+            surface: item.surface,
+            rooms: null,
+            url: item.url,
+            imageUrl: item.imageUrl,
+            marketPricePerM2: market?.avgPricePerM2 || null,
+            discountVsMarket: discountVsMarket ?? item.discount,
+            estimatedRent: null,
+            estimatedYield: item.marketValue > 0 ? Math.round((item.marketValue * 0.05 / item.price) * 10) / 10 : null,
+            zoneYield: market?.yield || null,
+            opportunityScore: Math.min(100, Math.round(item.discount * 1.2 + (market?.yield || 0) * 3 + 10)),
+            description: item.description,
+            tags: [...item.tags, 'alertasubastas'],
+          });
+        }
+        if (alertaItems.length > 0) sources.push('AlertaSubastas');
+      }
+    } catch (e: any) {
+      logger.warn('[OppSearch] AlertaSubastas error:', e.message);
+    }
   }
 
   // Ordenar por score de oportunidad
