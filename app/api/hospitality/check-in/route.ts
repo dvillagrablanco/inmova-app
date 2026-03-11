@@ -43,11 +43,11 @@ export async function GET(req: NextRequest) {
     const bookings = await prisma.sTRBooking.findMany({
       where: {
         companyId,
-        estado: { in: ['confirmada', 'checked_in', 'completada'] },
+        estado: { in: ['CONFIRMADA', 'CHECK_IN', 'CHECK_OUT'] },
         OR: [
           { checkInDate: { gte: weekAgo, lte: weekAhead } },
           { checkOutDate: { gte: weekAgo, lte: weekAhead } },
-          { estado: 'checked_in' },
+          { estado: 'CHECK_IN' },
         ],
       },
       include: {
@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Reserva no encontrada' }, { status: 404 });
     }
 
-    const newEstado = action === 'checkin' ? 'checked_in' : 'completada';
+    const newEstado = action === 'checkin' ? 'CHECK_IN' : 'CHECK_OUT';
 
     const updated = await prisma.sTRBooking.update({
       where: { id: bookingId },

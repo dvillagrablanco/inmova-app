@@ -8,7 +8,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { z } from 'zod';
-import { facturasHommingStore, seedFacturasHomming } from '@/lib/facturacion-homming-store';
+import {
+  facturasHommingStore,
+  seedFacturasHomming,
+  type FacturaItem,
+} from '@/lib/facturacion-homming-store';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';

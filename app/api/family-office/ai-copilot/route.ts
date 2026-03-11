@@ -38,7 +38,20 @@ export async function POST(request: NextRequest) {
     const [contracts, units, accounts, participations, pendingPayments, overdueCount, suggestions, fianzas, expenses2025] = await Promise.all([
       prisma.contract.findMany({ where: { unit: { building: { companyId: { in: groupIds } } }, estado: 'activo' }, select: { rentaMensual: true } }),
       prisma.unit.findMany({ where: { building: { companyId: { in: groupIds }, isDemo: false } }, select: { estado: true, rentaMensual: true, valorMercado: true, precioCompra: true } }),
-      prisma.financialAccount.findMany({ where: { companyId, activa: true }, include: { positions: { select: { nombre: true, valorActual: true, pnlNoRealizado: true, pnlRealizado: true, tipo: true, entidad: true } } } }),
+      prisma.financialAccount.findMany({
+        where: { companyId, activa: true },
+        include: {
+          positions: {
+            select: {
+              nombre: true,
+              valorActual: true,
+              pnlNoRealizado: true,
+              pnlRealizado: true,
+              tipo: true,
+            },
+          },
+        },
+      }),
       prisma.participation.findMany({ where: { companyId, activa: true }, select: { targetCompanyName: true, porcentaje: true, valorContable: true, valorEstimado: true, tipo: true, tvpi: true, capitalPendiente: true, vehiculoInversor: true } }),
       prisma.payment.count({ where: { contract: { unit: { building: { companyId: { in: groupIds } } } }, estado: 'pendiente' } }),
       prisma.payment.count({ where: { contract: { unit: { building: { companyId: { in: groupIds } } } }, estado: 'atrasado' } }),
@@ -50,14 +63,28 @@ export async function POST(request: NextRequest) {
     const rentaTotal = contracts.reduce((s, c) => s + c.rentaMensual, 0);
     const valorInmob = units.reduce((s, u) => s + (u.valorMercado || u.precioCompra || 0), 0);
     const ocupadas = units.filter((u) => u.estado === 'ocupada').length;
-    const valorFin = accounts.reduce((s, a) => s + a.positions.reduce((ps, p) => ps + p.valorActual, 0), 0);
-    const pnlFin = accounts.reduce((s, a) => s + a.positions.reduce((ps, p) => ps + p.pnlNoRealizado + p.pnlRealizado, 0), 0);
+    const valorFin = accounts.reduce(
+      (s, a) => s + a.positions.reduce((ps: number, p: any) => ps + p.valorActual, 0),
+      0
+    );
+    const pnlFin = accounts.reduce(
+      (s, a) =>
+        s +
+        a.positions.reduce(
+          (ps: number, p: any) => ps + p.pnlNoRealizado + p.pnlRealizado,
+          0
+        ),
+      0
+    );
     const saldos = accounts.reduce((s, a) => s + a.saldoActual, 0);
     const valorPE = participations.reduce((s, p) => s + (p.valorEstimado || p.valorContable), 0);
     const patrimonioTotal = valorInmob + valorFin + valorPE + saldos;
 
     // Top posiciones financieras
-    const topPositions = accounts.flatMap((a) => a.positions).sort((a, b) => b.valorActual - a.valorActual).slice(0, 10);
+    const topPositions = accounts
+      .flatMap((a) => a.positions)
+      .sort((a, b) => b.valorActual - a.valorActual)
+      .slice(0, 10);
 
     const context = `DATOS PATRIMONIALES EN TIEMPO REAL (Family Office):
 

@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
       const { uploadFile } = await import('@/lib/s3');
       const timestamp = Date.now();
       s3Key = `financial-statements/${bank}/${timestamp}_${fileName}`;
-      await uploadFile(s3Key, buffer, file.type || 'application/octet-stream');
+      await uploadFile(buffer, s3Key);
     } catch (s3Error: any) {
       logger.warn('[Upload Statement] S3 upload failed, processing from memory:', s3Error.message);
       s3Key = `local:${fileName}`;

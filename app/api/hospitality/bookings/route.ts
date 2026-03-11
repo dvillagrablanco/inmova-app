@@ -155,7 +155,7 @@ export async function POST(req: NextRequest) {
       data: {
         companyId: session.user.companyId,
         listingId: listing.id,
-        canal: 'directo',
+        canal: 'WEB_PROPIA',
         guestNombre: body.guestName,
         guestEmail: body.guestEmail,
         guestTelefono: body.guestPhone || null,
@@ -166,7 +166,7 @@ export async function POST(req: NextRequest) {
         precioTotal,
         tarifaNocturna: Number(listing.precioPorNoche),
         ingresoNeto: precioTotal,
-        estado: 'confirmada',
+        estado: 'CONFIRMADA',
         notas: body.notas || null,
       },
     });

@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
       where: {
         companyId,
         checkOutDate: { gte: today, lte: tomorrow },
-        estado: { in: ['checked_in', 'completada'] },
+        estado: { in: ['CHECK_IN', 'CHECK_OUT'] },
       },
       include: {
         listing: {
@@ -67,7 +67,7 @@ export async function GET(req: NextRequest) {
       where: {
         companyId,
         checkInDate: { gte: today, lte: tomorrow },
-        estado: 'confirmada',
+        estado: 'CONFIRMADA',
       },
       include: {
         listing: {

@@ -191,7 +191,7 @@ export async function GET(request: NextRequest) {
         const prevMonthStart = startOfMonth(subMonths(displayStart, 0));
         const prevMonthEnd = endOfMonth(prevMonthStart);
         const currentPeriodIncome = accountingTransactions
-          .filter(t => t.tipo === 'ingreso' && t.fecha >= prevMonthStart && t.fecha <= prevMonthEnd)
+          .filter(t => t.tipo === 'ingreso')
           .reduce((s, t) => s + t.monto, 0);
         
         // Estimación: ingresos del periodo que aún no han sido cobrados
