@@ -75,10 +75,11 @@ export function EmptyState({
                 'rounded-full bg-gray-100 flex items-center justify-center'
               )}
             >
-              {typeof Icon === 'function' ? (
+              {typeof Icon === 'function' ||
+              (typeof Icon === 'object' && Icon !== null && '$$typeof' in (Icon as any)) ? (
                 <Icon className={cn(sizes.icon, 'text-gray-400')} />
               ) : (
-                <div className={cn(sizes.icon, 'text-gray-400')}>{Icon}</div>
+                <div className={cn(sizes.icon, 'text-gray-400')}>{Icon as any}</div>
               )}
             </div>
           </div>
