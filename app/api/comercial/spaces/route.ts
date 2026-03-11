@@ -54,8 +54,20 @@ export async function GET(request: NextRequest) {
       primaryCompanyId: session.user.companyId,
       request,
     });
-    const companyFilter = scope.scopeCompanyIds.length > 1
-      ? { in: scope.scopeCompanyIds }
+
+    // Include child companies (holdings own commercial assets through SPVs)
+    let allScopeIds = [...scope.scopeCompanyIds];
+    if (allScopeIds.length <= 1) {
+      const parentCompany = await prisma.company.findUnique({
+        where: { id: session.user.companyId },
+        include: { childCompanies: { select: { id: true } } },
+      });
+      if (parentCompany?.childCompanies?.length) {
+        allScopeIds = [session.user.companyId, ...parentCompany.childCompanies.map((c: any) => c.id)];
+      }
+    }
+    const companyFilter = allScopeIds.length > 1
+      ? { in: allScopeIds }
       : scope.activeCompanyId || session.user.companyId;
 
     const spaces = await prisma.commercialSpace.findMany({
