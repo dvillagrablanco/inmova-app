@@ -3,7 +3,7 @@
  * Estados vacíos mejorados con CTAs claros
  */
 
-import { ReactNode } from 'react';
+import { ReactNode, isValidElement } from 'react';
 import { Button } from '@/components/ui/button';
 import { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -75,9 +75,10 @@ export function EmptyState({
                 'rounded-full bg-gray-100 flex items-center justify-center'
               )}
             >
-              {typeof Icon === 'function' ||
-              (typeof Icon === 'object' && Icon !== null && '$$typeof' in (Icon as any)) ? (
+              {typeof Icon === 'function' ? (
                 <Icon className={cn(sizes.icon, 'text-gray-400')} />
+              ) : isValidElement(Icon) ? (
+                Icon
               ) : (
                 <div className={cn(sizes.icon, 'text-gray-400')}>{Icon as any}</div>
               )}

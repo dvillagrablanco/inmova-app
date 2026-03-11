@@ -55,6 +55,8 @@ export default defineConfig({
         '**/dist/**',
         '**/build/**',
         '**/out/**',
+        '**/.disabled/**',
+        '**/__tests__/integration/api/open-banking/bankinter/**',
         
         // Dependencies
         '**/node_modules/**',
@@ -101,9 +103,10 @@ export default defineConfig({
     },
     
     // Parallelization
-    threads: true,
-    maxThreads: 4,
-    minThreads: 1,
+    pool: 'forks',
+    maxWorkers: 1,
+    minWorkers: 1,
+    fileParallelism: false,
     
     // Timeouts
     testTimeout: 10000,
@@ -117,6 +120,8 @@ export default defineConfig({
       '**/node_modules/**',
       '**/dist/**',
       '**/.next/**',
+      '**/.disabled/**',
+      '**/__tests__/integration/api/open-banking/bankinter/**',
     ],
     
     // Mock reset

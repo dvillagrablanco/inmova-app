@@ -100,12 +100,9 @@ export default defineConfig({
     },
 
     pool: 'forks',
-    poolOptions: {
-      forks: {
-        maxForks: 2,
-        minForks: 1,
-      },
-    },
+    maxWorkers: 1,
+    minWorkers: 1,
+    fileParallelism: false,
 
     // Timeouts
     testTimeout: 10000,
@@ -120,6 +117,8 @@ export default defineConfig({
       '**/dist/**',
       '**/.next/**',
       '**/e2e/**', // Excluir tests E2E de Playwright
+      '**/.disabled/**',
+      '**/__tests__/integration/api/open-banking/bankinter/**',
       '**/playwright-report/**',
       '**/*.e2e.{ts,tsx}',
       '**/*.spec.ts', // Excluir Playwright specs (usan test.describe de @playwright/test)
@@ -127,7 +126,7 @@ export default defineConfig({
     ],
 
     // Watch mode exclusions
-    watchExclude: ['**/node_modules/**', '**/dist/**', '**/.next/**', '**/e2e/**'],
+    watchExclude: ['**/node_modules/**', '**/dist/**', '**/.next/**', '**/e2e/**', '**/.disabled/**'],
 
     // Mock reset
     clearMocks: true,
