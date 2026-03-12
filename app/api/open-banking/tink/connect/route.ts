@@ -135,6 +135,7 @@ export async function POST(req: NextRequest) {
 
     const tinkLinkUrl = await generateTinkLink({
       userId: tinkUserId,
+      idHint: tinkExternalUserId,
       market: body.market || 'ES',
       redirectUri: redirectUri.toString(),
     });

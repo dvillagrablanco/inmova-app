@@ -116,7 +116,11 @@ async function getAccessToken(): Promise<string> {
 /**
  * Genera un token de usuario para autorización bancaria
  */
-async function getUserAccessToken(userId: string, scope: string): Promise<string> {
+async function getUserAccessToken(
+  userId: string,
+  scope: string,
+  idHint?: string
+): Promise<string> {
   const clientToken = await getAccessToken();
 
   const response = await fetch(`${BASE_URL}/api/v1/oauth/authorization-grant/delegate`, {
@@ -127,7 +131,7 @@ async function getUserAccessToken(userId: string, scope: string): Promise<string
     },
     body: new URLSearchParams({
       user_id: userId,
-      id_hint: userId,
+      id_hint: idHint || userId,
       actor_client_id: TINK_CLIENT_ID,
       scope,
     }),
@@ -221,6 +225,7 @@ export async function createUser(externalUserId: string, market: string = 'ES', 
  */
 export async function generateTinkLink(params: {
   userId: string;
+  idHint?: string;
   market?: string;
   locale?: string;
   redirectUri: string;
@@ -228,7 +233,8 @@ export async function generateTinkLink(params: {
 }): Promise<string> {
   const authCode = await getUserAccessToken(
     params.userId,
-    'accounts:read,transactions:read,credentials:write'
+    'accounts:read,transactions:read,credentials:write',
+    params.idHint
   );
 
   const tinkLinkUrl = new URL('https://link.tink.com/1.0/transactions/connect-accounts');
