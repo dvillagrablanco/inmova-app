@@ -47,7 +47,7 @@ async function main() {
   log('  INMOVA — DocuSign Setup', COLORS.bold + COLORS.cyan);
   log('══════════════════════════════════════════════════════\n', COLORS.cyan);
 
-  const INTEGRATION_KEY = 'cf89d1eb-8df4-4714-a3a5-15bb98ca873f';
+  const INTEGRATION_KEY = '5cb4a15f-658d-4fa0-ae53-6aabb10749d7';
 
   log(`Integration Key (App ID): ${INTEGRATION_KEY}`, COLORS.green);
   log(`Entorno: DEMO (sandbox)\n`, COLORS.yellow);
@@ -84,7 +84,7 @@ async function main() {
   log('\n─── PASO 2: Subir Public Key a DocuSign ───', COLORS.bold);
   log('\nVe a la consola de DocuSign Developer:', COLORS.cyan);
   log('  https://admindemo.docusign.com/apps-and-keys\n', COLORS.blue);
-  log('1. Busca tu app: cf89d1eb-8df4-4714-a3a5-15bb98ca873f');
+  log('1. Busca tu app: 5cb4a15f-658d-4fa0-ae53-6aabb10749d7');
   log('2. En la sección "Service Integration", click "ADD RSA KEYPAIR"');
   log('3. Pega esta Public Key:\n');
   log('──────── PUBLIC KEY (copiar todo) ────────', COLORS.yellow);

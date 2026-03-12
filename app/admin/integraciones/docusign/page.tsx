@@ -158,7 +158,7 @@ export default function DocuSignConfigPage() {
               Firma digital de contratos para todas las sociedades del grupo
             </p>
             <p className="text-xs text-muted-foreground font-mono mt-0.5">
-              App ID: cf89d1eb-8df4-4714-a3a5-15bb98ca873f
+              Integration Key: 5cb4a15f-658d-4fa0-ae53-6aabb10749d7
             </p>
           </div>
           {!loading && (
