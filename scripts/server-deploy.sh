@@ -17,6 +17,7 @@ NC='\033[0m' # No Color
 APP_DIR="${SERVER_PATH:-/opt/inmova-app}"
 LOG_FILE="/var/log/inmova/deploy-$(date +%Y%m%d_%H%M%S).log"
 BACKUP_DIR="/var/backups/inmova"
+ENV_FILE="$APP_DIR/.env.production"
 
 echo -e "${BLUE}🚀 Iniciando deployment de Inmova App${NC}"
 echo "=================================================="
@@ -38,6 +39,19 @@ error() {
 
 warning() {
     echo -e "${YELLOW}[WARNING]${NC} $1" | tee -a "$LOG_FILE"
+}
+
+load_env() {
+    if [ -f "$ENV_FILE" ]; then
+        log "🔐 Cargando variables desde $ENV_FILE..."
+        set -a
+        # shellcheck disable=SC1090
+        . "$ENV_FILE"
+        set +a
+        log "✅ Variables de entorno cargadas"
+    else
+        warning "No existe $ENV_FILE, continuando con variables del entorno actual"
+    fi
 }
 
 # 1. PRE-DEPLOYMENT CHECKS
@@ -101,6 +115,9 @@ if ! git pull origin main; then
     error "Error al hacer git pull"
 fi
 log "✅ Código actualizado"
+
+# Cargar variables de entorno de producción antes de Prisma/build
+load_env
 
 # 5. INSTALL DEPENDENCIES
 log "📦 Instalando dependencias..."
