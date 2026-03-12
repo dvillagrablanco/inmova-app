@@ -31,6 +31,10 @@ export function buildTinkUserId(companyId: string, userId: string): string {
   return `inmova_${companyId}_${userId}`;
 }
 
+export function buildTinkExternalUserId(companyId: string, userId: string): string {
+  return buildTinkUserId(companyId, userId);
+}
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -330,6 +334,7 @@ export const SPANISH_BANKS = [
 
 export default {
   buildTinkUserId,
+  buildTinkExternalUserId,
   isTinkConfigured,
   testConnection,
   listProviders,

@@ -48,7 +48,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const { isTinkConfigured, createUser, generateTinkLink, buildTinkUserId } = await import(
+    const {
+      isTinkConfigured,
+      createUser,
+      generateTinkLink,
+      buildTinkExternalUserId,
+    } = await import(
       '@/lib/tink-service'
     );
 
@@ -82,13 +87,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Sin acceso a la sociedad solicitada' }, { status: 403 });
     }
 
-    // Create or get Tink user
-    const tinkUserId = buildTinkUserId(targetCompanyId, userId);
-    try {
-      await createUser(tinkUserId, body.market || 'ES');
-    } catch {
-      // User may already exist — that's fine
-    }
+    // Crear SIEMPRE un usuario Tink nuevo por intento de conexión.
+    // Tink exige su user_id interno, no el external_user_id.
+    const tinkExternalUserId = `${buildTinkExternalUserId(targetCompanyId, userId)}_${Date.now()}`;
+    const tinkUserId = await createUser(tinkExternalUserId, body.market || 'ES');
 
     let connection = await prisma.bankConnection.findFirst({
       where: { companyId: targetCompanyId, userId, proveedor: 'tink' },
@@ -104,7 +106,8 @@ export async function POST(req: NextRequest) {
           estado: 'renovacion_requerida',
           errorDetalle: null,
           scope: 'AIS',
-          accessToken: tinkUserId,
+          accessToken: tinkUserId, // user_id interno de Tink
+          refreshToken: tinkExternalUserId, // external_user_id para trazabilidad
         },
       });
     } else {
@@ -117,7 +120,8 @@ export async function POST(req: NextRequest) {
           nombreBanco: body.bankId || body.providerName || 'Tink Open Banking',
           estado: 'renovacion_requerida',
           scope: 'AIS',
-          accessToken: tinkUserId,
+          accessToken: tinkUserId, // user_id interno de Tink
+          refreshToken: tinkExternalUserId, // external_user_id para trazabilidad
         },
       });
     }

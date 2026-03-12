@@ -54,7 +54,6 @@ export async function POST(req: NextRequest) {
         listAccounts,
         listTransactions,
         parseTinkAmount,
-        buildTinkUserId,
       } = await import('@/lib/tink-service');
 
       if (isTinkConfigured()) {
@@ -78,6 +77,7 @@ export async function POST(req: NextRequest) {
               id: true,
               companyId: true,
               userId: true,
+              accessToken: true,
               ultimaSync: true,
             },
           });
@@ -87,12 +87,11 @@ export async function POST(req: NextRequest) {
           let processedTransactions = 0;
 
           for (const connection of tinkConnections) {
-            if (!connection.companyId || !connection.userId) {
+            if (!connection.companyId || !connection.userId || !connection.accessToken) {
               continue;
             }
 
-            const tinkUserId = buildTinkUserId(connection.companyId, connection.userId);
-            const accounts = await listAccounts(tinkUserId);
+            const accounts = await listAccounts(connection.accessToken);
             discoveredAccounts += accounts.length;
 
             const dateFrom = connection.ultimaSync
@@ -106,7 +105,7 @@ export async function POST(req: NextRequest) {
               let pageToken: string | undefined;
 
               do {
-                const txResult = await listTransactions(tinkUserId, {
+                const txResult = await listTransactions(connection.accessToken, {
                   accountId: account.id,
                   dateFrom: dateFromStr,
                   dateTo: dateToStr,

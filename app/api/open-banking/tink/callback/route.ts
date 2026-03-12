@@ -6,7 +6,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getPrismaClient } from '@/lib/db';
 import logger from '@/lib/logger';
-import { buildTinkUserId } from '@/lib/tink-service';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -42,8 +41,6 @@ export async function GET(req: NextRequest) {
     logger.info('[Tink Callback] Success, credentials:', credentialsId);
 
     if (companyId && userId) {
-      const tinkUserId = buildTinkUserId(companyId, userId);
-
       const existingConnection = connectionId
         ? await prisma.bankConnection.findFirst({
             where: { id: connectionId, companyId, userId, proveedor: 'tink' },
@@ -53,34 +50,29 @@ export async function GET(req: NextRequest) {
             orderBy: { createdAt: 'desc' },
           });
 
-      if (existingConnection) {
-        await prisma.bankConnection.update({
-          where: { id: existingConnection.id },
-          data: {
-            provider: 'tink',
-            proveedorItemId: credentialsId,
-            accessToken: tinkUserId,
-            estado: 'conectado',
-            ultimaSync: new Date(),
-            errorDetalle: null,
-          },
+      if (!existingConnection) {
+        logger.warn('[Tink Callback] Conexion pendiente no encontrada', {
+          companyId,
+          userId,
+          connectionId,
+          credentialsId,
         });
-      } else {
-        await prisma.bankConnection.create({
-          data: {
-            companyId,
-            userId,
-            proveedor: 'tink',
-            provider: 'tink',
-            proveedorItemId: credentialsId,
-            accessToken: tinkUserId,
-            nombreBanco: 'Tink Open Banking',
-            estado: 'conectado',
-            scope: 'AIS',
-            ultimaSync: new Date(),
-          },
+        return redirectToOpenBanking({
+          tink: 'error',
+          message: 'pending_connection_not_found_reconnect',
         });
       }
+
+      await prisma.bankConnection.update({
+        where: { id: existingConnection.id },
+        data: {
+          provider: 'tink',
+          proveedorItemId: credentialsId,
+          estado: 'conectado',
+          ultimaSync: new Date(),
+          errorDetalle: null,
+        },
+      });
     }
 
     return redirectToOpenBanking({ tink: 'success', credentials: credentialsId });
