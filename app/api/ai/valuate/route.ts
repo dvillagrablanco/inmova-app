@@ -24,6 +24,7 @@ import {
   formatPlatformDataForPrompt,
 } from '@/lib/external-platform-data-service';
 import { analyzeAndValuateProperty, type PropertyForAnalysis } from '@/lib/ai-property-analysis';
+import { resolveCompanyScope } from '@/lib/company-scope';
 
 import logger from '@/lib/logger';
 import Anthropic from '@anthropic-ai/sdk';
@@ -438,6 +439,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: session.user.role as any,
+      primaryCompanyId: session.user.companyId,
+      request,
+    });
+
     // 2. Verificar límite de IA (estimar ~1000 tokens por valoración)
     const ESTIMATED_TOKENS_PER_VALUATION = 1000;
     const limitCheck = await checkAILimit(session.user.companyId, ESTIMATED_TOKENS_PER_VALUATION);
@@ -486,12 +494,13 @@ export async function POST(request: NextRequest) {
     let hasTerrace =
       validated.hasTerrace || validated.caracteristicas?.includes('terraza') || false;
     let sameAssetComparables: any[] = [];
+    let valuationCompanyId = scope.activeCompanyId || session.user.companyId;
 
     if (validated.unitId) {
       const selectedUnit = await prisma.unit.findFirst({
         where: {
           id: validated.unitId,
-          building: { companyId: session.user.companyId },
+          building: { companyId: { in: scope.scopeCompanyIds } },
         },
         select: {
           id: true,
@@ -511,6 +520,7 @@ export async function POST(request: NextRequest) {
           buildingId: true,
           building: {
             select: {
+              companyId: true,
               direccion: true,
               referenciaCatastral: true,
               anoConstructor: true,
@@ -526,6 +536,7 @@ export async function POST(request: NextRequest) {
       });
 
       if (selectedUnit) {
+        valuationCompanyId = selectedUnit.building?.companyId || valuationCompanyId;
         const inferredLocation = inferLocationFromAddress(selectedUnit.building?.direccion);
 
         direccion = direccion || selectedUnit.building?.direccion || '';
@@ -606,9 +617,10 @@ export async function POST(request: NextRequest) {
       const selectedBuilding = await prisma.building.findFirst({
         where: {
           id: validated.buildingId,
-          companyId: session.user.companyId,
+          companyId: { in: scope.scopeCompanyIds },
         },
         select: {
+          companyId: true,
           direccion: true,
           referenciaCatastral: true,
           anoConstructor: true,
@@ -632,6 +644,7 @@ export async function POST(request: NextRequest) {
       });
 
       if (selectedBuilding) {
+        valuationCompanyId = selectedBuilding.companyId || valuationCompanyId;
         const inferredLocation = inferLocationFromAddress(selectedBuilding.direccion);
         direccion = direccion || selectedBuilding.direccion || '';
         ciudad = ciudad || inferredLocation.city || '';
@@ -681,7 +694,7 @@ export async function POST(request: NextRequest) {
         city: ciudad,
         postalCode: codigoPostal,
         address: direccion,
-        companyId: session.user.companyId,
+        companyId: valuationCompanyId || session.user.companyId,
         squareMeters: superficie,
         rooms: habitaciones,
         propertyType,
@@ -774,7 +787,7 @@ export async function POST(request: NextRequest) {
     if (validated.unitId) {
       await prisma.propertyValuation.create({
         data: {
-          companyId: session.user.companyId,
+          companyId: valuationCompanyId || session.user.companyId,
           unitId: validated.unitId,
           requestedBy: session.user.id,
           ipAddress: request.headers.get('x-forwarded-for') || undefined,
@@ -819,7 +832,7 @@ export async function POST(request: NextRequest) {
     try {
       await prisma.auditLog.create({
         data: {
-          companyId: session.user.companyId,
+          companyId: valuationCompanyId || session.user.companyId,
           userId: session.user.id,
           action: 'CREATE',
           entityType: 'UNIT',
@@ -838,7 +851,7 @@ export async function POST(request: NextRequest) {
 
     // 10. Tracking de uso (Control de costos)
     await trackUsage({
-      companyId: session.user.companyId,
+      companyId: valuationCompanyId || session.user.companyId,
       service: 'claude',
       metric: 'tokens',
       value: ESTIMATED_TOKENS_PER_VALUATION, // Valor real vendría de la API
@@ -964,6 +977,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: session.user.role as any,
+      primaryCompanyId: session.user.companyId,
+      request,
+    });
+
     const { searchParams } = new URL(request.url);
     const unitId = searchParams.get('unitId');
 
@@ -975,7 +995,7 @@ export async function GET(request: NextRequest) {
     const valuations = await prisma.propertyValuation.findMany({
       where: {
         unitId,
-        companyId: session.user.companyId,
+        companyId: { in: scope.scopeCompanyIds },
       },
       orderBy: {
         createdAt: 'desc',

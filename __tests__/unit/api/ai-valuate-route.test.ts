@@ -8,6 +8,7 @@ const {
   mockTrackUsage,
   mockGetAggregatedMarketData,
   mockAnalyzeAndValuateProperty,
+  mockResolveCompanyScope,
   mockPrisma,
 } = vi.hoisted(() => ({
   mockGetServerSession: vi.fn(),
@@ -16,6 +17,7 @@ const {
   mockTrackUsage: vi.fn(),
   mockGetAggregatedMarketData: vi.fn(),
   mockAnalyzeAndValuateProperty: vi.fn(),
+  mockResolveCompanyScope: vi.fn(),
   mockPrisma: {
     unit: {
       findFirst: vi.fn(),
@@ -57,6 +59,10 @@ vi.mock('@/lib/ai-property-analysis', () => ({
   analyzeAndValuateProperty: mockAnalyzeAndValuateProperty,
 }));
 
+vi.mock('@/lib/company-scope', () => ({
+  resolveCompanyScope: mockResolveCompanyScope,
+}));
+
 vi.mock('@/lib/claude-ai-service', () => ({
   isClaudeConfigured: vi.fn(() => true),
 }));
@@ -81,7 +87,14 @@ describe('POST /api/ai/valuate', () => {
       user: {
         id: 'user-1',
         companyId: 'vidaro1',
+        role: 'super_admin',
       },
+    });
+    mockResolveCompanyScope.mockResolvedValue({
+      activeCompanyId: 'vidaro1',
+      accessibleCompanyIds: ['vidaro1', 'rovida1'],
+      scopeCompanyIds: ['vidaro1', 'rovida1'],
+      isConsolidated: true,
     });
 
     mockCheckAILimit.mockResolvedValue({ allowed: true });
@@ -150,6 +163,7 @@ describe('POST /api/ai/valuate', () => {
       terraza: false,
       buildingId: 'building-1',
       building: {
+        companyId: 'rovida1',
         direccion: 'Calle Prado 10, Madrid 28014',
         referenciaCatastral: '0742703VK4704B',
         anoConstructor: 1910,
@@ -195,6 +209,7 @@ describe('POST /api/ai/valuate', () => {
     expect(response.status).toBe(200);
     expect(mockGetAggregatedMarketData).toHaveBeenCalledWith(
       expect.objectContaining({
+        companyId: 'rovida1',
         city: 'Madrid',
         postalCode: '28014',
         address: 'Calle Prado 10, Madrid 28014',
