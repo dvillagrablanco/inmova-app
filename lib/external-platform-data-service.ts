@@ -46,6 +46,8 @@ export interface PlatformMarketDataPoint {
   fetchedAt: string;
   reliability: number; // 0-100 (notariado=95, idealista=80, static=60)
   dataType: 'asking_price' | 'transaction_price' | 'index' | 'estimate';
+  submarketPrecision?: 'exact_address' | 'postal_code' | 'city' | 'regional' | 'national';
+  propertyTypeCoverage?: 'exact' | 'mixed' | 'generic';
 
   pricePerM2Sale?: number;
   pricePerM2Rent?: number;
@@ -193,6 +195,68 @@ function getEstimatedSaleFromRent(monthlyRent: number, propertyType?: string): n
   return capRate > 0 ? Math.round((monthlyRent * 12) / capRate) : 0;
 }
 
+function getAskingPriceDiscount(propertyType?: string): number {
+  switch (normalizeValuationPropertyType(propertyType)) {
+    case 'local_comercial':
+      return 0.18;
+    case 'oficina':
+      return 0.16;
+    case 'nave_industrial':
+      return 0.15;
+    case 'garaje':
+      return 0.1;
+    case 'trastero':
+      return 0.12;
+    case 'terreno':
+      return 0.2;
+    case 'edificio':
+      return 0.15;
+    case 'coworking':
+      return 0.18;
+    case 'vivienda':
+    default:
+      return 0.12;
+  }
+}
+
+function getDataTypeWeight(point: PlatformMarketDataPoint, propertyType?: string): number {
+  if (point.dataType === 'transaction_price') return 1.25;
+  if (point.dataType === 'estimate') return point.source === 'internal_db' ? 0.95 : 0.8;
+  if (point.dataType === 'index')
+    return normalizeValuationPropertyType(propertyType) === 'vivienda' ? 0.55 : 0.35;
+  return normalizeValuationPropertyType(propertyType) === 'vivienda' ? 0.8 : 0.6;
+}
+
+function getSubmarketWeight(point: PlatformMarketDataPoint): number {
+  switch (point.submarketPrecision) {
+    case 'exact_address':
+      return 1.15;
+    case 'postal_code':
+      return 1;
+    case 'city':
+      return 0.82;
+    case 'regional':
+      return 0.7;
+    case 'national':
+      return 0.55;
+    default:
+      return 0.75;
+  }
+}
+
+function getPropertyTypeCoverageWeight(point: PlatformMarketDataPoint): number {
+  switch (point.propertyTypeCoverage) {
+    case 'exact':
+      return 1.1;
+    case 'mixed':
+      return 0.8;
+    case 'generic':
+      return 0.55;
+    default:
+      return 0.7;
+  }
+}
+
 // ============================================================================
 // ADAPTADOR PRINCIPAL: WEB SCRAPING DE PORTALES
 // ============================================================================
@@ -225,6 +289,8 @@ async function fetchFromScrapedPortals(options: FetchOptions): Promise<PlatformM
         fetchedAt: scrapingResult.scrapedAt,
         reliability: portal.listingsCount >= 10 ? 82 : portal.listingsCount >= 3 ? 70 : 55,
         dataType: 'asking_price',
+        submarketPrecision: options.postalCode ? 'postal_code' : 'city',
+        propertyTypeCoverage: options.propertyType ? 'exact' : 'mixed',
         pricePerM2Sale: portal.avgPricePerM2 || undefined,
         sampleSize: portal.listingsCount,
         trend: 'STABLE',
@@ -278,6 +344,9 @@ function getStaticFallbackData(options: FetchOptions): PlatformMarketDataPoint[]
         fetchedAt: new Date().toISOString(),
         reliability: 60,
         dataType: 'asking_price',
+        submarketPrecision: options.postalCode ? 'postal_code' : 'city',
+        propertyTypeCoverage:
+          normalizeValuationPropertyType(options.propertyType) === 'vivienda' ? 'exact' : 'generic',
         pricePerM2Sale: zoneData.askingPriceVentaM2,
         pricePerM2Rent: zoneData.askingPriceAlquilerM2,
         trend:
@@ -296,6 +365,9 @@ function getStaticFallbackData(options: FetchOptions): PlatformMarketDataPoint[]
         fetchedAt: new Date().toISOString(),
         reliability: 55,
         dataType: 'asking_price',
+        submarketPrecision: options.postalCode ? 'postal_code' : 'city',
+        propertyTypeCoverage:
+          normalizeValuationPropertyType(options.propertyType) === 'vivienda' ? 'exact' : 'generic',
         pricePerM2Sale: Math.round(zoneData.askingPriceVentaM2 * 0.97),
         pricePerM2Rent: Math.round(zoneData.askingPriceAlquilerM2 * 0.97 * 100) / 100,
         trend:
@@ -338,6 +410,9 @@ async function fetchFromNotariado(options: FetchOptions): Promise<PlatformMarket
       fetchedAt: new Date().toISOString(),
       reliability: 95,
       dataType: 'transaction_price',
+      submarketPrecision: options.postalCode ? 'postal_code' : 'city',
+      propertyTypeCoverage:
+        normalizeValuationPropertyType(options.propertyType) === 'vivienda' ? 'exact' : 'generic',
       pricePerM2Sale: zoneData.precioRealVentaM2,
       pricePerM2Rent: zoneData.precioRealAlquilerM2,
       trend:
@@ -409,6 +484,8 @@ async function fetchFromINE(options: FetchOptions): Promise<PlatformMarketDataPo
       fetchedAt: new Date().toISOString(),
       reliability: 90,
       dataType: 'index',
+      submarketPrecision: 'city',
+      propertyTypeCoverage: 'generic',
       trend: cityData.trend,
       trendPercentage: cityData.variation,
     };
@@ -587,6 +664,8 @@ async function fetchFromInternalDB(options: FetchOptions): Promise<PlatformMarke
       fetchedAt: new Date().toISOString(),
       reliability,
       dataType: 'estimate',
+      submarketPrecision: options.city ? 'city' : 'regional',
+      propertyTypeCoverage: 'exact',
       pricePerM2Sale: Math.round(estimatedSalePricePerM2),
       pricePerM2Rent: avgRentPerM2 > 0 ? Math.round(avgRentPerM2 * 100) / 100 : undefined,
       sampleSize: allInternalComparables.length,
@@ -666,6 +745,9 @@ async function fetchFromIdealistaData(
       fetchedAt: report.reportDate,
       reliability,
       dataType: 'asking_price',
+      submarketPrecision: options.postalCode ? 'postal_code' : 'city',
+      propertyTypeCoverage:
+        normalizeValuationPropertyType(options.propertyType) === 'vivienda' ? 'exact' : 'mixed',
       pricePerM2Sale: report.salePricePerM2 || undefined,
       pricePerM2Rent: report.rentPricePerM2 || undefined,
       avgPrice: report.salePriceMedian || undefined,
@@ -771,6 +853,8 @@ async function fetchFromPreviousValuations(
       fetchedAt: new Date().toISOString(),
       reliability: 60,
       dataType: 'estimate',
+      submarketPrecision: options.postalCode ? 'postal_code' : 'city',
+      propertyTypeCoverage: targetUnitTypes ? 'exact' : 'mixed',
       pricePerM2Sale: Math.round(avgPricePerM2),
       sampleSize: validValuations.length,
       comparables: validValuations.slice(0, 5).map((v) => ({
@@ -797,7 +881,8 @@ const ASKING_PRICE_DISCOUNT = 0.12;
 
 function calculateWeightedPrice(
   dataPoints: PlatformMarketDataPoint[],
-  field: 'pricePerM2Sale' | 'pricePerM2Rent'
+  field: 'pricePerM2Sale' | 'pricePerM2Rent',
+  propertyType?: string
 ): number | null {
   const valid = dataPoints.filter((d) => d[field] && d[field]! > 0 && d.reliability > 0);
   if (valid.length === 0) return null;
@@ -810,10 +895,16 @@ function calculateWeightedPrice(
 
     // Ajustar asking prices con descuento para estimar precio real
     if (dp.dataType === 'asking_price') {
-      price = price * (1 - ASKING_PRICE_DISCOUNT);
+      price = price * (1 - getAskingPriceDiscount(propertyType));
     }
 
-    const weight = dp.reliability * (dp.sampleSize ? Math.min(dp.sampleSize, 50) / 50 : 0.5);
+    const sampleWeight = dp.sampleSize ? Math.min(dp.sampleSize, 50) / 50 : 0.5;
+    const weight =
+      dp.reliability *
+      sampleWeight *
+      getDataTypeWeight(dp, propertyType) *
+      getSubmarketWeight(dp) *
+      getPropertyTypeCoverageWeight(dp);
     weightedSum += price * weight;
     totalWeight += weight;
   }
@@ -923,8 +1014,16 @@ export async function getAggregatedMarketData(
     .sort((a, b) => b.pricePerM2 - a.pricePerM2);
 
   // Calcular precios ponderados
-  const weightedSalePricePerM2 = calculateWeightedPrice(platformData, 'pricePerM2Sale');
-  const weightedRentPricePerM2 = calculateWeightedPrice(platformData, 'pricePerM2Rent');
+  const weightedSalePricePerM2 = calculateWeightedPrice(
+    platformData,
+    'pricePerM2Sale',
+    options.propertyType
+  );
+  const weightedRentPricePerM2 = calculateWeightedPrice(
+    platformData,
+    'pricePerM2Rent',
+    options.propertyType
+  );
 
   // Consolidar tendencia
   const { trend, percentage } = consolidateTrend(platformData);
