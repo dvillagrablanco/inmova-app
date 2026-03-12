@@ -84,8 +84,23 @@ CREATE INDEX IF NOT EXISTS "expenses_costCenterId_idx" ON "expenses"("costCenter
 CREATE INDEX IF NOT EXISTS "expenses_ejercicio_idx" ON "expenses"("ejercicio");
 
 -- AddForeignKey
-ALTER TABLE "cost_centers" ADD CONSTRAINT "cost_centers_companyId_fkey" FOREIGN KEY ("companyId") REFERENCES "companies"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "cost_centers" ADD CONSTRAINT "cost_centers_companyId_fkey"
+    FOREIGN KEY ("companyId") REFERENCES "companies"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION
+  WHEN duplicate_object THEN null;
+END $$;
 
-ALTER TABLE "property_valuation_history" ADD CONSTRAINT "property_valuation_history_unitId_fkey" FOREIGN KEY ("unitId") REFERENCES "units"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "property_valuation_history" ADD CONSTRAINT "property_valuation_history_unitId_fkey"
+    FOREIGN KEY ("unitId") REFERENCES "units"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION
+  WHEN duplicate_object THEN null;
+END $$;
 
-ALTER TABLE "expenses" ADD CONSTRAINT "expenses_costCenterId_fkey" FOREIGN KEY ("costCenterId") REFERENCES "cost_centers"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "expenses" ADD CONSTRAINT "expenses_costCenterId_fkey"
+    FOREIGN KEY ("costCenterId") REFERENCES "cost_centers"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+EXCEPTION
+  WHEN duplicate_object THEN null;
+END $$;
