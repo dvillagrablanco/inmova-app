@@ -195,6 +195,157 @@ export function calculateFiscalImpact(input: FiscalInput): FiscalResult {
 }
 
 // ============================================================================
+// FISCALIDAD IRPF DETALLADA PARA INVERSORES
+// ============================================================================
+
+export interface DetailedFiscalInput {
+  precioCompra: number;
+  valorConstruccion: number;      // % del precio que es construcción (no suelo), típico 60-70%
+  rentaAnual: number;
+  // Gastos deducibles detallados
+  interesesHipoteca: number;      // anual
+  ibi: number;
+  comunidad: number;              // anual
+  seguroHogar: number;
+  seguroImpago: number;
+  reparaciones: number;           // anual
+  gestionAdministracion: number;  // gestor, administrador
+  gastosJuridicos: number;
+  suministros: number;            // si los paga el propietario
+  amortizacionMuebles: number;    // 10% anual del valor muebles
+  otrosGastos: number;
+  // Tipo contrato y propietario
+  tipoContrato: 'vivienda_habitual' | 'temporada' | 'habitaciones' | 'turistico' | 'local';
+  fechaContrato: 'antes_2024' | 'despues_2024';
+  inquilinoJoven: boolean;        // <35 años
+  zonaTensionada: boolean;
+  bajadaRenta5: boolean;          // si bajó renta >5% respecto al anterior
+  ownerType: 'persona_fisica' | 'sociedad';
+  otrosIngresosBase: number;      // para calcular tramo IRPF real
+}
+
+export interface DetailedFiscalResult {
+  gastosDeducibles: { concepto: string; importe: number }[];
+  totalGastosDeducibles: number;
+  amortizacionInmueble: number;
+  baseImponibleBruta: number;
+  reduccionAplicable: number;       // %
+  motivoReduccion: string;
+  baseImponibleReducida: number;
+  tramoIrpf: string;
+  tipoMarginal: number;
+  irpfAlquiler: number;
+  rentaNetaFiscal: number;
+  tipoEfectivo: number;            // % real sobre ingresos brutos
+  comparativaSociedad: {
+    isBase: number;
+    impuestoSociedad: number;
+    ahorroVsPersonaFisica: number;
+    recomendacion: string;
+  };
+}
+
+export function calculateDetailedFiscal(input: DetailedFiscalInput): DetailedFiscalResult {
+  const amortizacionInmueble = Math.round(input.precioCompra * (input.valorConstruccion / 100) * 0.03);
+
+  const gastosDeducibles = [
+    { concepto: 'Intereses hipoteca', importe: input.interesesHipoteca },
+    { concepto: 'Amortización inmueble (3%)', importe: amortizacionInmueble },
+    { concepto: 'IBI', importe: input.ibi },
+    { concepto: 'Comunidad', importe: input.comunidad },
+    { concepto: 'Seguro hogar', importe: input.seguroHogar },
+    { concepto: 'Seguro impago', importe: input.seguroImpago },
+    { concepto: 'Reparaciones y conservación', importe: input.reparaciones },
+    { concepto: 'Gestión y administración', importe: input.gestionAdministracion },
+    { concepto: 'Gastos jurídicos', importe: input.gastosJuridicos },
+    { concepto: 'Suministros', importe: input.suministros },
+    { concepto: 'Amortización muebles (10%)', importe: input.amortizacionMuebles },
+    { concepto: 'Otros gastos deducibles', importe: input.otrosGastos },
+  ].filter(g => g.importe > 0);
+
+  const totalGastosDeducibles = gastosDeducibles.reduce((s, g) => s + g.importe, 0);
+  const baseImponibleBruta = Math.max(0, input.rentaAnual - totalGastosDeducibles);
+
+  let reduccionAplicable = 0;
+  let motivoReduccion = 'Sin reducción aplicable';
+
+  if (input.ownerType === 'persona_fisica' && input.tipoContrato === 'vivienda_habitual') {
+    if (input.zonaTensionada && input.bajadaRenta5) {
+      reduccionAplicable = 90;
+      motivoReduccion = '90%: zona tensionada con bajada de renta ≥5%';
+    } else if (input.inquilinoJoven) {
+      reduccionAplicable = 70;
+      motivoReduccion = '70%: inquilino menor de 35 años';
+    } else if (input.fechaContrato === 'despues_2024') {
+      reduccionAplicable = 50;
+      motivoReduccion = '50%: contrato posterior a 2024 (nueva ley)';
+    } else {
+      reduccionAplicable = 60;
+      motivoReduccion = '60%: contrato anterior a 2024 (régimen transitorio)';
+    }
+  } else if (input.tipoContrato === 'habitaciones' || input.tipoContrato === 'temporada' || input.tipoContrato === 'turistico') {
+    reduccionAplicable = 0;
+    motivoReduccion = 'Sin reducción: no es vivienda habitual del inquilino';
+  }
+
+  const baseImponibleReducida = baseImponibleBruta * (1 - reduccionAplicable / 100);
+
+  const baseTotal = input.otrosIngresosBase + baseImponibleReducida;
+  let tipoMarginal = 19;
+  let tramoIrpf = '0-12.450€ (19%)';
+
+  if (input.ownerType === 'sociedad') {
+    tipoMarginal = 25;
+    tramoIrpf = 'IS 25%';
+  } else {
+    if (baseTotal > 300000) { tipoMarginal = 47; tramoIrpf = '>300.000€ (47%)'; }
+    else if (baseTotal > 60000) { tipoMarginal = 45; tramoIrpf = '60.000-300.000€ (45%)'; }
+    else if (baseTotal > 35200) { tipoMarginal = 37; tramoIrpf = '35.200-60.000€ (37%)'; }
+    else if (baseTotal > 20200) { tipoMarginal = 30; tramoIrpf = '20.200-35.200€ (30%)'; }
+    else if (baseTotal > 12450) { tipoMarginal = 24; tramoIrpf = '12.450-20.200€ (24%)'; }
+  }
+
+  const irpfAlquiler = Math.round(baseImponibleReducida * (tipoMarginal / 100));
+  const rentaNetaFiscal = input.rentaAnual - totalGastosDeducibles - irpfAlquiler;
+  const tipoEfectivo = input.rentaAnual > 0 ? (irpfAlquiler / input.rentaAnual) * 100 : 0;
+
+  const isBase = baseImponibleBruta;
+  const impuestoSociedad = Math.round(isBase * 0.25);
+  const ahorroVsPersonaFisica = irpfAlquiler - impuestoSociedad;
+  let recomendacion = 'Persona física es más eficiente';
+  if (ahorroVsPersonaFisica > 2000) {
+    recomendacion = `Sociedad ahorra ${fmt(ahorroVsPersonaFisica)} €/año. Considerar constituir SL si tienes >3 inmuebles.`;
+  } else if (ahorroVsPersonaFisica > 0) {
+    recomendacion = `Sociedad ahorra ${fmt(ahorroVsPersonaFisica)} €/año, pero el coste de gestión de la SL (~1500-3000€/año) puede no compensar.`;
+  }
+
+  return {
+    gastosDeducibles,
+    totalGastosDeducibles: Math.round(totalGastosDeducibles),
+    amortizacionInmueble,
+    baseImponibleBruta: Math.round(baseImponibleBruta),
+    reduccionAplicable,
+    motivoReduccion,
+    baseImponibleReducida: Math.round(baseImponibleReducida),
+    tramoIrpf,
+    tipoMarginal,
+    irpfAlquiler,
+    rentaNetaFiscal: Math.round(rentaNetaFiscal),
+    tipoEfectivo: parseFloat(tipoEfectivo.toFixed(1)),
+    comparativaSociedad: {
+      isBase: Math.round(isBase),
+      impuestoSociedad,
+      ahorroVsPersonaFisica,
+      recomendacion,
+    },
+  };
+}
+
+function fmt(n: number): string {
+  return new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(n);
+}
+
+// ============================================================================
 // DUE DILIGENCE CHECKLIST
 // ============================================================================
 
@@ -245,6 +396,596 @@ export function getDueDiligenceChecklist(propertyType: string, category: string)
   }
 
   return base;
+}
+
+// ============================================================================
+// CALCULADORA ALQUILER TRADICIONAL
+// ============================================================================
+
+export interface TraditionalRentalInput {
+  precioCompra: number;
+  gastosCompra: number;        // ITP, notaría, registro, gestoría (puede venir de calculateFiscalImpact)
+  reformaInicial: number;
+  rentaMensual: number;
+  gastosComAnnual: number;     // comunidad anual
+  ibiAnual: number;
+  seguroHogar: number;         // anual
+  seguroImpago: number;        // anual (3-5% renta anual)
+  derramaAnual: number;
+  mesesVacioAnuales: number;   // 0.5-1 típico
+  gastosMantenimiento: number; // anual (regla 1-2% valor inmueble)
+  gastosGestion: number;       // anual, 0 si autogestión, 8-12% renta si gestor
+  hipotecaMensual: number;     // 0 si compra al contado
+  incrementoIpcAnual: number;  // ej: 3 (%)
+}
+
+export interface TraditionalRentalResult {
+  inversionTotal: number;
+  ingresosAnuales: number;
+  gastosAnuales: number;
+  detalleGastos: { concepto: string; importe: number }[];
+  cashFlowAnualBruto: number;
+  cashFlowAnualNeto: number;
+  cashFlowMensualNeto: number;
+  rentBruta: number;
+  rentNeta: number;
+  rentNetaSobreCapital: number;  // ROE: sobre dinero realmente invertido
+  paybackAnos: number;
+  proyeccion5anos: { ano: number; renta: number; gastos: number; cashFlow: number; acumulado: number }[];
+}
+
+export function calculateTraditionalRental(input: TraditionalRentalInput): TraditionalRentalResult {
+  const inversionTotal = input.precioCompra + input.gastosCompra + input.reformaInicial;
+  const mesesOcupados = 12 - input.mesesVacioAnuales;
+  const ingresosAnuales = input.rentaMensual * mesesOcupados;
+
+  const detalleGastos = [
+    { concepto: 'Comunidad', importe: input.gastosComAnnual },
+    { concepto: 'IBI', importe: input.ibiAnual },
+    { concepto: 'Seguro hogar', importe: input.seguroHogar },
+    { concepto: 'Seguro impago', importe: input.seguroImpago },
+    { concepto: 'Derramas', importe: input.derramaAnual },
+    { concepto: 'Mantenimiento', importe: input.gastosMantenimiento },
+    { concepto: 'Gestión', importe: input.gastosGestion },
+  ].filter(g => g.importe > 0);
+
+  const gastosAnualesSinHipoteca = detalleGastos.reduce((s, g) => s + g.importe, 0);
+  const hipotecaAnual = input.hipotecaMensual * 12;
+  const gastosAnuales = gastosAnualesSinHipoteca + hipotecaAnual;
+
+  if (hipotecaAnual > 0) {
+    detalleGastos.push({ concepto: 'Hipoteca', importe: hipotecaAnual });
+  }
+
+  const cashFlowAnualBruto = ingresosAnuales - gastosAnualesSinHipoteca;
+  const cashFlowAnualNeto = ingresosAnuales - gastosAnuales;
+  const cashFlowMensualNeto = cashFlowAnualNeto / 12;
+
+  const rentBruta = inversionTotal > 0 ? (input.rentaMensual * 12 / inversionTotal) * 100 : 0;
+  const rentNeta = inversionTotal > 0 ? (cashFlowAnualBruto / inversionTotal) * 100 : 0;
+
+  const capitalPropio = inversionTotal - (input.hipotecaMensual > 0 ? input.precioCompra * 0.8 : 0);
+  const rentNetaSobreCapital = capitalPropio > 0 ? (cashFlowAnualNeto / capitalPropio) * 100 : 0;
+
+  const paybackAnos = cashFlowAnualNeto > 0 ? inversionTotal / cashFlowAnualNeto : 0;
+
+  const ipc = input.incrementoIpcAnual / 100;
+  const proyeccion5anos: TraditionalRentalResult['proyeccion5anos'] = [];
+  let acumulado = 0;
+  for (let i = 1; i <= 5; i++) {
+    const rentaAno = ingresosAnuales * Math.pow(1 + ipc, i - 1);
+    const gastosAno = gastosAnuales * Math.pow(1 + ipc * 0.5, i - 1);
+    const cf = rentaAno - gastosAno;
+    acumulado += cf;
+    proyeccion5anos.push({
+      ano: i,
+      renta: Math.round(rentaAno),
+      gastos: Math.round(gastosAno),
+      cashFlow: Math.round(cf),
+      acumulado: Math.round(acumulado),
+    });
+  }
+
+  return {
+    inversionTotal: Math.round(inversionTotal),
+    ingresosAnuales: Math.round(ingresosAnuales),
+    gastosAnuales: Math.round(gastosAnuales),
+    detalleGastos,
+    cashFlowAnualBruto: Math.round(cashFlowAnualBruto),
+    cashFlowAnualNeto: Math.round(cashFlowAnualNeto),
+    cashFlowMensualNeto: Math.round(cashFlowMensualNeto),
+    rentBruta: parseFloat(rentBruta.toFixed(2)),
+    rentNeta: parseFloat(rentNeta.toFixed(2)),
+    rentNetaSobreCapital: parseFloat(rentNetaSobreCapital.toFixed(2)),
+    paybackAnos: parseFloat(paybackAnos.toFixed(1)),
+    proyeccion5anos,
+  };
+}
+
+// ============================================================================
+// CALCULADORA ALQUILER POR HABITACIONES
+// ============================================================================
+
+export interface RoomRentalInput {
+  precioCompra: number;
+  gastosCompra: number;
+  reformaInicial: number;
+  amueblamiento: number;           // inversión en muebles total
+  habitaciones: { renta: number }[];  // renta por habitación
+  ocupacionMedia: number;           // 0-100 (%)
+  suministrosMensuales: number;     // electricidad, agua, internet
+  limpiezaMensual: number;
+  gastosComAnnual: number;
+  ibiAnual: number;
+  seguroHogar: number;
+  seguroImpago: number;
+  mantenimientoAnual: number;
+  gastosGestionAnual: number;
+  hipotecaMensual: number;
+  rotacionAnual: number;            // nº cambios inquilino/año estimados
+  costeRotacionPorCambio: number;   // limpieza profunda, pequeñas reparaciones
+}
+
+export interface RoomRentalResult {
+  inversionTotal: number;
+  numHabitaciones: number;
+  rentaTotalMensual: number;
+  rentaEfectivaMensual: number;    // ajustada por ocupación
+  ingresosAnuales: number;
+  gastosAnuales: number;
+  detalleGastos: { concepto: string; importe: number }[];
+  cashFlowAnualNeto: number;
+  cashFlowMensualNeto: number;
+  cashFlowPorHabitacion: number;
+  rentBruta: number;
+  rentNeta: number;
+  rentNetaSobreCapital: number;
+  paybackAnos: number;
+  comparativaVsTradicional: {
+    rentaTradicionalEstimada: number;
+    diferenciaAnual: number;
+    premiumHabitaciones: number;    // % más que alquiler tradicional
+  };
+}
+
+export function calculateRoomRental(input: RoomRentalInput): RoomRentalResult {
+  const inversionTotal = input.precioCompra + input.gastosCompra + input.reformaInicial + input.amueblamiento;
+  const numHabitaciones = input.habitaciones.length;
+  const rentaTotalMensual = input.habitaciones.reduce((s, h) => s + h.renta, 0);
+  const ocupacion = input.ocupacionMedia / 100;
+  const rentaEfectivaMensual = rentaTotalMensual * ocupacion;
+  const ingresosAnuales = rentaEfectivaMensual * 12;
+
+  const costeRotacion = input.rotacionAnual * input.costeRotacionPorCambio;
+
+  const detalleGastos = [
+    { concepto: 'Comunidad', importe: input.gastosComAnnual },
+    { concepto: 'IBI', importe: input.ibiAnual },
+    { concepto: 'Seguro hogar', importe: input.seguroHogar },
+    { concepto: 'Seguro impago', importe: input.seguroImpago },
+    { concepto: 'Suministros', importe: input.suministrosMensuales * 12 },
+    { concepto: 'Limpieza', importe: input.limpiezaMensual * 12 },
+    { concepto: 'Mantenimiento', importe: input.mantenimientoAnual },
+    { concepto: 'Gestión', importe: input.gastosGestionAnual },
+    { concepto: 'Rotación inquilinos', importe: costeRotacion },
+  ].filter(g => g.importe > 0);
+
+  const gastosAnualesSinHipoteca = detalleGastos.reduce((s, g) => s + g.importe, 0);
+  const hipotecaAnual = input.hipotecaMensual * 12;
+  const gastosAnuales = gastosAnualesSinHipoteca + hipotecaAnual;
+
+  if (hipotecaAnual > 0) {
+    detalleGastos.push({ concepto: 'Hipoteca', importe: hipotecaAnual });
+  }
+
+  const cashFlowAnualNeto = ingresosAnuales - gastosAnuales;
+  const cashFlowMensualNeto = cashFlowAnualNeto / 12;
+  const cashFlowPorHabitacion = numHabitaciones > 0 ? cashFlowMensualNeto / numHabitaciones : 0;
+
+  const rentBruta = inversionTotal > 0 ? (rentaTotalMensual * 12 / inversionTotal) * 100 : 0;
+  const rentNeta = inversionTotal > 0 ? ((ingresosAnuales - gastosAnualesSinHipoteca) / inversionTotal) * 100 : 0;
+  const capitalPropio = inversionTotal - (input.hipotecaMensual > 0 ? input.precioCompra * 0.8 : 0);
+  const rentNetaSobreCapital = capitalPropio > 0 ? (cashFlowAnualNeto / capitalPropio) * 100 : 0;
+  const paybackAnos = cashFlowAnualNeto > 0 ? inversionTotal / cashFlowAnualNeto : 0;
+
+  const rentaTradicionalEstimada = rentaTotalMensual * 0.6;
+  const diferenciaAnual = (rentaEfectivaMensual - rentaTradicionalEstimada) * 12;
+  const premiumHabitaciones = rentaTradicionalEstimada > 0
+    ? ((rentaEfectivaMensual - rentaTradicionalEstimada) / rentaTradicionalEstimada) * 100
+    : 0;
+
+  return {
+    inversionTotal: Math.round(inversionTotal),
+    numHabitaciones,
+    rentaTotalMensual: Math.round(rentaTotalMensual),
+    rentaEfectivaMensual: Math.round(rentaEfectivaMensual),
+    ingresosAnuales: Math.round(ingresosAnuales),
+    gastosAnuales: Math.round(gastosAnuales),
+    detalleGastos,
+    cashFlowAnualNeto: Math.round(cashFlowAnualNeto),
+    cashFlowMensualNeto: Math.round(cashFlowMensualNeto),
+    cashFlowPorHabitacion: Math.round(cashFlowPorHabitacion),
+    rentBruta: parseFloat(rentBruta.toFixed(2)),
+    rentNeta: parseFloat(rentNeta.toFixed(2)),
+    rentNetaSobreCapital: parseFloat(rentNetaSobreCapital.toFixed(2)),
+    paybackAnos: parseFloat(paybackAnos.toFixed(1)),
+    comparativaVsTradicional: {
+      rentaTradicionalEstimada: Math.round(rentaTradicionalEstimada),
+      diferenciaAnual: Math.round(diferenciaAnual),
+      premiumHabitaciones: parseFloat(premiumHabitaciones.toFixed(1)),
+    },
+  };
+}
+
+// ============================================================================
+// CALCULADORA ALQUILER TURÍSTICO
+// ============================================================================
+
+export interface TouristRentalInput {
+  precioCompra: number;
+  gastosCompra: number;
+  reformaInicial: number;
+  amueblamiento: number;
+  licenciaTuristica: number;         // coste obtención
+  fotografiaProfesional: number;
+  tarifaAltaNoche: number;
+  tarifaMediaNoche: number;
+  tarifaBajaNoche: number;
+  ocupacionAlta: number;             // % (ej: julio-agosto-sept)
+  ocupacionMedia: number;            // % (ej: primavera, navidad)
+  ocupacionBaja: number;             // % (ej: nov-feb)
+  mesesAlta: number;                 // ej: 3
+  mesesMedia: number;                // ej: 5
+  mesesBaja: number;                 // ej: 4
+  comisionPlataforma: number;        // % (Airbnb 3%, Booking 15%)
+  limpiezaPorEstancia: number;       // coste
+  estanciaMediaNoches: number;       // noches por reserva
+  amenitiesMensual: number;          // consumibles, sábanas, etc.
+  channelManagerMensual: number;
+  gastosComAnnual: number;
+  ibiAnual: number;
+  seguroHogar: number;
+  mantenimientoAnual: number;
+  hipotecaMensual: number;
+}
+
+export interface TouristRentalResult {
+  inversionTotal: number;
+  ingresosAnualesBrutos: number;
+  comisionesPlataforma: number;
+  ingresosAnualesNetos: number;
+  gastosAnuales: number;
+  detalleGastos: { concepto: string; importe: number }[];
+  cashFlowAnualNeto: number;
+  cashFlowMensualNeto: number;
+  revPAR: number;                   // Revenue Per Available Room (noche)
+  adr: number;                      // Average Daily Rate
+  ocupacionMediaAnual: number;      // % ponderado
+  nochesOcupadasAnuales: number;
+  numEstanciasAnuales: number;
+  costeTotal360: number;            // coste total anual incluyendo limpieza
+  rentBruta: number;
+  rentNeta: number;
+  desgloseMensual: { mes: string; ingresos: number; gastos: number; cashFlow: number }[];
+}
+
+export function calculateTouristRental(input: TouristRentalInput): TouristRentalResult {
+  const inversionTotal = input.precioCompra + input.gastosCompra + input.reformaInicial
+    + input.amueblamiento + input.licenciaTuristica + input.fotografiaProfesional;
+
+  const nochesAlta = input.mesesAlta * 30 * (input.ocupacionAlta / 100);
+  const nochesMedia = input.mesesMedia * 30 * (input.ocupacionMedia / 100);
+  const nochesBaja = input.mesesBaja * 30 * (input.ocupacionBaja / 100);
+  const nochesOcupadasAnuales = nochesAlta + nochesMedia + nochesBaja;
+
+  const ingresosAlta = nochesAlta * input.tarifaAltaNoche;
+  const ingresosMedia = nochesMedia * input.tarifaMediaNoche;
+  const ingresosBaja = nochesBaja * input.tarifaBajaNoche;
+  const ingresosAnualesBrutos = ingresosAlta + ingresosMedia + ingresosBaja;
+
+  const comisionesPlataforma = ingresosAnualesBrutos * (input.comisionPlataforma / 100);
+  const ingresosAnualesNetos = ingresosAnualesBrutos - comisionesPlataforma;
+
+  const numEstancias = input.estanciaMediaNoches > 0 ? nochesOcupadasAnuales / input.estanciaMediaNoches : 0;
+  const limpiezaAnual = numEstancias * input.limpiezaPorEstancia;
+
+  const detalleGastos = [
+    { concepto: 'Comunidad', importe: input.gastosComAnnual },
+    { concepto: 'IBI', importe: input.ibiAnual },
+    { concepto: 'Seguro hogar', importe: input.seguroHogar },
+    { concepto: 'Mantenimiento', importe: input.mantenimientoAnual },
+    { concepto: 'Limpieza estancias', importe: Math.round(limpiezaAnual) },
+    { concepto: 'Amenities/consumibles', importe: input.amenitiesMensual * 12 },
+    { concepto: 'Channel Manager', importe: input.channelManagerMensual * 12 },
+  ].filter(g => g.importe > 0);
+
+  const gastosAnualesSinHipoteca = detalleGastos.reduce((s, g) => s + g.importe, 0);
+  const hipotecaAnual = input.hipotecaMensual * 12;
+  const gastosAnuales = gastosAnualesSinHipoteca + hipotecaAnual;
+
+  if (hipotecaAnual > 0) {
+    detalleGastos.push({ concepto: 'Hipoteca', importe: hipotecaAnual });
+  }
+
+  const cashFlowAnualNeto = ingresosAnualesNetos - gastosAnuales;
+  const nochesTotales = 365;
+  const revPAR = nochesTotales > 0 ? ingresosAnualesNetos / nochesTotales : 0;
+  const adr = nochesOcupadasAnuales > 0 ? ingresosAnualesBrutos / nochesOcupadasAnuales : 0;
+  const ocupacionMediaAnual = (nochesOcupadasAnuales / nochesTotales) * 100;
+
+  const rentBruta = inversionTotal > 0 ? (ingresosAnualesBrutos / inversionTotal) * 100 : 0;
+  const rentNeta = inversionTotal > 0 ? (cashFlowAnualNeto / inversionTotal) * 100 : 0;
+
+  const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+  const temporadaPorMes = [
+    'baja', 'baja', 'media', 'media', 'media', 'alta',
+    'alta', 'alta', 'media', 'media', 'baja', 'baja',
+  ];
+  const desgloseMensual = meses.map((mes, i) => {
+    const temp = temporadaPorMes[i];
+    const tarifa = temp === 'alta' ? input.tarifaAltaNoche : temp === 'media' ? input.tarifaMediaNoche : input.tarifaBajaNoche;
+    const ocup = temp === 'alta' ? input.ocupacionAlta : temp === 'media' ? input.ocupacionMedia : input.ocupacionBaja;
+    const nochesOcup = 30 * (ocup / 100);
+    const ingMes = nochesOcup * tarifa * (1 - input.comisionPlataforma / 100);
+    const gastosMes = gastosAnuales / 12;
+    return { mes, ingresos: Math.round(ingMes), gastos: Math.round(gastosMes), cashFlow: Math.round(ingMes - gastosMes) };
+  });
+
+  return {
+    inversionTotal: Math.round(inversionTotal),
+    ingresosAnualesBrutos: Math.round(ingresosAnualesBrutos),
+    comisionesPlataforma: Math.round(comisionesPlataforma),
+    ingresosAnualesNetos: Math.round(ingresosAnualesNetos),
+    gastosAnuales: Math.round(gastosAnuales),
+    detalleGastos,
+    cashFlowAnualNeto: Math.round(cashFlowAnualNeto),
+    cashFlowMensualNeto: Math.round(cashFlowAnualNeto / 12),
+    revPAR: parseFloat(revPAR.toFixed(2)),
+    adr: parseFloat(adr.toFixed(2)),
+    ocupacionMediaAnual: parseFloat(ocupacionMediaAnual.toFixed(1)),
+    nochesOcupadasAnuales: Math.round(nochesOcupadasAnuales),
+    numEstanciasAnuales: Math.round(numEstancias),
+    costeTotal360: Math.round(gastosAnuales + comisionesPlataforma),
+    rentBruta: parseFloat(rentBruta.toFixed(2)),
+    rentNeta: parseFloat(rentNeta.toFixed(2)),
+    desgloseMensual,
+  };
+}
+
+// ============================================================================
+// CALCULADORA CRV (COMPRAR, REFORMAR, VENDER)
+// ============================================================================
+
+export interface FlipInput {
+  precioCompra: number;
+  gastosCompra: number;           // ITP/IVA + notaría + registro + gestoría
+  costeReforma: number;
+  tiempoReformaMeses: number;
+  costeTenenciaMensual: number;   // IBI prorrateado + comunidad + suministros mínimos
+  costeFincMensual: number;       // intereses préstamo durante reforma (si hay)
+  precioVenta: number;
+  tiempoVentaMeses: number;       // estimado
+  comisionInmobiliaria: number;   // % sobre precio venta (3-5%)
+  plusvaliaMunicipal: number;      // estimado
+  irpfGanancia: number;           // % sobre beneficio (19-23% persona física)
+}
+
+export interface FlipResult {
+  inversionTotal: number;
+  detalleInversion: { concepto: string; importe: number }[];
+  precioVentaBruto: number;
+  gastosVenta: number;
+  detalleGastosVenta: { concepto: string; importe: number }[];
+  beneficioAntesTax: number;
+  impuestos: number;
+  beneficioNeto: number;
+  roiSobreCapital: number;        // % beneficio / inversión total
+  duracionTotalMeses: number;
+  roiAnualizado: number;          // ROI ajustado a 12 meses
+  margenSobreVenta: number;       // % beneficio / precio venta
+  precioMinVentaBreakEven: number;
+}
+
+export function calculateFlip(input: FlipInput): FlipResult {
+  const duracionTotal = input.tiempoReformaMeses + input.tiempoVentaMeses;
+  const costeTenenciaTotal = input.costeTenenciaMensual * duracionTotal;
+  const costeFinancieroTotal = input.costeFincMensual * duracionTotal;
+
+  const inversionTotal = input.precioCompra + input.gastosCompra + input.costeReforma
+    + costeTenenciaTotal + costeFinancieroTotal;
+
+  const detalleInversion = [
+    { concepto: 'Precio compra', importe: input.precioCompra },
+    { concepto: 'Gastos compra (ITP, notaría, etc.)', importe: input.gastosCompra },
+    { concepto: 'Reforma', importe: input.costeReforma },
+    { concepto: `Tenencia (${duracionTotal} meses)`, importe: Math.round(costeTenenciaTotal) },
+    { concepto: `Financiación (${duracionTotal} meses)`, importe: Math.round(costeFinancieroTotal) },
+  ];
+
+  const comision = input.precioVenta * (input.comisionInmobiliaria / 100);
+  const detalleGastosVenta = [
+    { concepto: `Comisión inmobiliaria (${input.comisionInmobiliaria}%)`, importe: Math.round(comision) },
+    { concepto: 'Plusvalía municipal', importe: input.plusvaliaMunicipal },
+  ];
+  const gastosVenta = detalleGastosVenta.reduce((s, g) => s + g.importe, 0);
+
+  const beneficioAntesTax = input.precioVenta - inversionTotal - gastosVenta;
+  const impuestos = beneficioAntesTax > 0 ? Math.round(beneficioAntesTax * (input.irpfGanancia / 100)) : 0;
+  const beneficioNeto = beneficioAntesTax - impuestos;
+
+  if (impuestos > 0) {
+    detalleGastosVenta.push({ concepto: `IRPF ganancia (${input.irpfGanancia}%)`, importe: impuestos });
+  }
+
+  const roiSobreCapital = inversionTotal > 0 ? (beneficioNeto / inversionTotal) * 100 : 0;
+  const roiAnualizado = duracionTotal > 0 ? roiSobreCapital * (12 / duracionTotal) : 0;
+  const margenSobreVenta = input.precioVenta > 0 ? (beneficioNeto / input.precioVenta) * 100 : 0;
+
+  const precioMinVentaBreakEven = inversionTotal + gastosVenta;
+
+  return {
+    inversionTotal: Math.round(inversionTotal),
+    detalleInversion,
+    precioVentaBruto: input.precioVenta,
+    gastosVenta: Math.round(gastosVenta + impuestos),
+    detalleGastosVenta,
+    beneficioAntesTax: Math.round(beneficioAntesTax),
+    impuestos,
+    beneficioNeto: Math.round(beneficioNeto),
+    roiSobreCapital: parseFloat(roiSobreCapital.toFixed(2)),
+    duracionTotalMeses: duracionTotal,
+    roiAnualizado: parseFloat(roiAnualizado.toFixed(2)),
+    margenSobreVenta: parseFloat(margenSobreVenta.toFixed(2)),
+    precioMinVentaBreakEven: Math.round(precioMinVentaBreakEven),
+  };
+}
+
+// ============================================================================
+// P&L POR INMUEBLE (CUENTA DE RESULTADOS)
+// ============================================================================
+
+export interface PropertyPnLInput {
+  periodoMeses: number;            // 12 para anual
+  ingresos: {
+    rentaMensual: number;
+    mesesOcupado: number;
+    otrosIngresos: number;         // garaje, trastero, etc.
+  };
+  gastosFijos: {
+    hipoteca: number;              // mensual
+    comunidad: number;             // mensual
+    ibi: number;                   // anual
+    seguroHogar: number;           // anual
+    seguroImpago: number;          // anual
+  };
+  gastosVariables: {
+    reparaciones: number;          // en el periodo
+    gestion: number;               // en el periodo
+    suministros: number;           // en el periodo (si los paga propietario)
+    derramas: number;              // en el periodo
+    otros: number;
+  };
+}
+
+export interface PropertyPnLResult {
+  totalIngresos: number;
+  totalGastosFijos: number;
+  totalGastosVariables: number;
+  totalGastos: number;
+  ebitda: number;                  // antes de hipoteca
+  cashFlowNeto: number;            // después de hipoteca
+  margenOperativo: number;         // % ebitda/ingresos
+  detalleIngresos: { concepto: string; importe: number }[];
+  detalleGastos: { concepto: string; importe: number; tipo: 'fijo' | 'variable' }[];
+}
+
+export function calculatePropertyPnL(input: PropertyPnLInput): PropertyPnLResult {
+  const totalRenta = input.ingresos.rentaMensual * input.ingresos.mesesOcupado;
+  const totalIngresos = totalRenta + input.ingresos.otrosIngresos;
+
+  const detalleIngresos = [
+    { concepto: `Renta (${input.ingresos.mesesOcupado} meses)`, importe: totalRenta },
+  ];
+  if (input.ingresos.otrosIngresos > 0) {
+    detalleIngresos.push({ concepto: 'Otros ingresos', importe: input.ingresos.otrosIngresos });
+  }
+
+  const gastosFijosAnualizados = [
+    { concepto: 'Comunidad', importe: input.gastosFijos.comunidad * input.periodoMeses, tipo: 'fijo' as const },
+    { concepto: 'IBI', importe: input.gastosFijos.ibi, tipo: 'fijo' as const },
+    { concepto: 'Seguro hogar', importe: input.gastosFijos.seguroHogar, tipo: 'fijo' as const },
+    { concepto: 'Seguro impago', importe: input.gastosFijos.seguroImpago, tipo: 'fijo' as const },
+  ].filter(g => g.importe > 0);
+
+  const gastosVariablesList = [
+    { concepto: 'Reparaciones', importe: input.gastosVariables.reparaciones, tipo: 'variable' as const },
+    { concepto: 'Gestión', importe: input.gastosVariables.gestion, tipo: 'variable' as const },
+    { concepto: 'Suministros', importe: input.gastosVariables.suministros, tipo: 'variable' as const },
+    { concepto: 'Derramas', importe: input.gastosVariables.derramas, tipo: 'variable' as const },
+    { concepto: 'Otros', importe: input.gastosVariables.otros, tipo: 'variable' as const },
+  ].filter(g => g.importe > 0);
+
+  const totalGastosFijos = gastosFijosAnualizados.reduce((s, g) => s + g.importe, 0);
+  const totalGastosVariables = gastosVariablesList.reduce((s, g) => s + g.importe, 0);
+  const hipotecaTotal = input.gastosFijos.hipoteca * input.periodoMeses;
+
+  const detalleGastos = [
+    ...gastosFijosAnualizados,
+    ...gastosVariablesList,
+  ];
+
+  if (hipotecaTotal > 0) {
+    detalleGastos.push({ concepto: 'Hipoteca', importe: hipotecaTotal, tipo: 'fijo' as const });
+  }
+
+  const totalGastos = totalGastosFijos + totalGastosVariables + hipotecaTotal;
+  const ebitda = totalIngresos - totalGastosFijos - totalGastosVariables;
+  const cashFlowNeto = totalIngresos - totalGastos;
+  const margenOperativo = totalIngresos > 0 ? (ebitda / totalIngresos) * 100 : 0;
+
+  return {
+    totalIngresos: Math.round(totalIngresos),
+    totalGastosFijos: Math.round(totalGastosFijos),
+    totalGastosVariables: Math.round(totalGastosVariables),
+    totalGastos: Math.round(totalGastos),
+    ebitda: Math.round(ebitda),
+    cashFlowNeto: Math.round(cashFlowNeto),
+    margenOperativo: parseFloat(margenOperativo.toFixed(1)),
+    detalleIngresos,
+    detalleGastos,
+  };
+}
+
+// ============================================================================
+// CHECKLIST DE VISITA DE INMUEBLE
+// ============================================================================
+
+export interface InspectionItem {
+  id: string;
+  text: string;
+  category: string;
+  critical: boolean;
+  hint?: string;
+}
+
+export function getPropertyInspectionChecklist(): InspectionItem[] {
+  return [
+    // Estructura del edificio
+    { id: 'fachada', text: 'Estado de la fachada (grietas, humedades, desconchones)', category: 'Edificio', critical: true },
+    { id: 'bajantes', text: 'Bajantes visibles (material, estado, manchas)', category: 'Edificio', critical: false },
+    { id: 'cubierta', text: 'Cubierta/tejado (filtraciones)', category: 'Edificio', critical: true },
+    { id: 'portal', text: 'Estado del portal y zonas comunes', category: 'Edificio', critical: false },
+    { id: 'ascensor', text: 'Ascensor (año, última revisión)', category: 'Edificio', critical: false },
+    { id: 'ite', text: 'ITE del edificio (si >50 años)', category: 'Edificio', critical: true, hint: 'Pedir informe al administrador' },
+
+    // Interior
+    { id: 'electrica', text: 'Instalación eléctrica (cuadro, tomas de tierra, boletín)', category: 'Interior', critical: true, hint: 'Si no hay boletín actualizado: ~800-1500€' },
+    { id: 'fontaneria', text: 'Fontanería (material tuberías, presión agua)', category: 'Interior', critical: true, hint: 'Plomo = reforma obligatoria. Cobre/PVC = OK' },
+    { id: 'humedades', text: 'Humedades (paredes, techos, bajo ventanas, baños)', category: 'Interior', critical: true },
+    { id: 'carpinteria', text: 'Carpintería exterior (ventanas, aislamiento)', category: 'Interior', critical: false, hint: 'Aluminio sin RPT = mal aislamiento' },
+    { id: 'suelos', text: 'Suelos (material, estado, nivelación)', category: 'Interior', critical: false },
+    { id: 'cocina', text: 'Cocina (estado muebles, electrodomésticos)', category: 'Interior', critical: false },
+    { id: 'banos', text: 'Baños (grifería, sanitarios, impermeabilización)', category: 'Interior', critical: false },
+    { id: 'caldera', text: 'Caldera/Termo (tipo, año, última revisión)', category: 'Interior', critical: false },
+    { id: 'aislamiento', text: 'Aislamiento térmico y acústico', category: 'Interior', critical: false },
+
+    // Documentación
+    { id: 'doc-nota', text: 'Nota simple actualizada (cargas, titularidad)', category: 'Documentación', critical: true },
+    { id: 'doc-catastro', text: 'Referencia catastral (superficie catastral vs real)', category: 'Documentación', critical: true },
+    { id: 'doc-ibi', text: 'Último recibo IBI (importe, valor catastral)', category: 'Documentación', critical: true },
+    { id: 'doc-cee', text: 'Certificado Energético en vigor', category: 'Documentación', critical: true },
+    { id: 'doc-acta', text: 'Última acta de comunidad (derramas aprobadas)', category: 'Documentación', critical: true, hint: 'Pedir últimas 3 actas' },
+    { id: 'doc-deuda', text: 'Certificado deuda cero con comunidad', category: 'Documentación', critical: true },
+    { id: 'doc-recibos', text: 'Recibos comunidad últimos 12 meses', category: 'Documentación', critical: false },
+    { id: 'doc-cedula', text: 'Cédula de habitabilidad / licencia primera ocupación', category: 'Documentación', critical: false },
+
+    // Entorno
+    { id: 'entorno-transp', text: 'Transporte público cercano', category: 'Entorno', critical: false },
+    { id: 'entorno-serv', text: 'Servicios (supermercados, colegios, sanidad)', category: 'Entorno', critical: false },
+    { id: 'entorno-zona', text: 'Tendencia de precios del barrio', category: 'Entorno', critical: true, hint: 'Consultar Idealista data o Catastro' },
+    { id: 'entorno-comp', text: 'Competencia: inmuebles similares en alquiler/venta', category: 'Entorno', critical: true },
+    { id: 'entorno-reg', text: 'Regulación local (zona tensionada, licencia turística)', category: 'Entorno', critical: true },
+  ];
 }
 
 // ============================================================================
