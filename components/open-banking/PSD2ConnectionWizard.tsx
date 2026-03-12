@@ -30,6 +30,19 @@ const BANKS = [
   { id: 'sabadell', name: 'Sabadell', color: 'bg-[#00529b]' },
 ];
 
+const PSD2_PROVIDERS = [
+  {
+    id: 'tink',
+    name: 'Tink',
+    description: 'Recomendado. Operativo con bancos espanoles compatibles.',
+  },
+  {
+    id: 'nordigen',
+    name: 'GoCardless Bank Account Data',
+    description: 'Alternativa PSD2 basada en Nordigen.',
+  },
+];
+
 interface PSD2ConnectionWizardProps {
   onComplete?: () => void;
 }
@@ -41,6 +54,7 @@ interface AvailableCompany {
 
 export function PSD2ConnectionWizard({ onComplete }: PSD2ConnectionWizardProps) {
   const [step, setStep] = useState(1);
+  const [selectedProvider, setSelectedProvider] = useState<string>('tink');
   const [selectedBank, setSelectedBank] = useState<string>('');
   const [selectedCompany, setSelectedCompany] = useState<string>('');
   const [availableCompanies, setAvailableCompanies] = useState<AvailableCompany[]>([]);
@@ -100,21 +114,34 @@ export function PSD2ConnectionWizard({ onComplete }: PSD2ConnectionWizardProps) 
       toast.error('Seleccione banco y empresa');
       return;
     }
-    const institutionId = BANK_CODES[selectedBank];
-    if (!institutionId) {
-      toast.error('Banco no válido');
-      return;
-    }
 
     setConnecting(true);
     try {
-      const res = await fetch('/api/open-banking/nordigen/connect', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      let endpoint = '/api/open-banking/tink/connect';
+      let payload: Record<string, unknown> = {
+        companyId: selectedCompany,
+        market: 'ES',
+        bankId: selectedBank,
+        providerName: BANKS.find((bank) => bank.id === selectedBank)?.name,
+      };
+
+      if (selectedProvider === 'nordigen') {
+        const institutionId = BANK_CODES[selectedBank];
+        if (!institutionId) {
+          throw new Error('Banco no válido');
+        }
+
+        endpoint = '/api/open-banking/nordigen/connect';
+        payload = {
           institutionId,
           companyId: selectedCompany,
-        }),
+        };
+      }
+
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
@@ -123,7 +150,7 @@ export function PSD2ConnectionWizard({ onComplete }: PSD2ConnectionWizardProps) 
         throw new Error(data.error || 'Error al conectar');
       }
 
-      const redirectUrl = data.redirectUrl || data.link;
+      const redirectUrl = data.tinkLinkUrl || data.redirectUrl || data.link;
       if (redirectUrl) {
         window.location.href = redirectUrl;
         return;
@@ -154,23 +181,44 @@ export function PSD2ConnectionWizard({ onComplete }: PSD2ConnectionWizardProps) 
       <CardContent className="space-y-6">
         {/* Step 1: Select bank */}
         {step >= 1 && (
-          <div className="space-y-2">
-            <p className="text-sm font-medium">Paso 1: Seleccione su banco</p>
-            <Select value={selectedBank} onValueChange={setSelectedBank}>
-              <SelectTrigger>
-                <SelectValue placeholder="Seleccione un banco" />
-              </SelectTrigger>
-              <SelectContent>
-                {BANKS.map((bank) => (
-                  <SelectItem key={bank.id} value={bank.id}>
-                    <span className="flex items-center gap-2">
-                      <span className={`inline-block h-3 w-3 rounded-full ${bank.color}`} />
-                      {bank.name}
-                    </span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Paso 1: Seleccione el proveedor PSD2</p>
+              <Select value={selectedProvider} onValueChange={setSelectedProvider}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccione proveedor" />
+                </SelectTrigger>
+                <SelectContent>
+                  {PSD2_PROVIDERS.map((provider) => (
+                    <SelectItem key={provider.id} value={provider.id}>
+                      {provider.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                {PSD2_PROVIDERS.find((provider) => provider.id === selectedProvider)?.description}
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Paso 1: Seleccione su banco</p>
+              <Select value={selectedBank} onValueChange={setSelectedBank}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccione un banco" />
+                </SelectTrigger>
+                <SelectContent>
+                  {BANKS.map((bank) => (
+                    <SelectItem key={bank.id} value={bank.id}>
+                      <span className="flex items-center gap-2">
+                        <span className={`inline-block h-3 w-3 rounded-full ${bank.color}`} />
+                        {bank.name}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         )}
 
@@ -209,7 +257,11 @@ export function PSD2ConnectionWizard({ onComplete }: PSD2ConnectionWizardProps) 
                 <p className="text-sm font-medium">Autorización en el banco</p>
                 <p className="text-sm text-muted-foreground">
                   Será redirigido a la página de su banco para autorizar el acceso de forma segura.
-                  Solo podremos leer los movimientos de la cuenta.
+                  Solo podremos leer los movimientos de la cuenta. Proveedor actual:{' '}
+                  <span className="font-medium">
+                    {PSD2_PROVIDERS.find((provider) => provider.id === selectedProvider)?.name}
+                  </span>
+                  .
                 </p>
               </div>
             </div>

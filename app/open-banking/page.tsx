@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -79,6 +79,7 @@ interface Stats {
 export default function OpenBankingPage() {
   const { data: _session, status } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [accounts, setAccounts] = useState<BankAccount[]>([]);
   const [companies, setCompanies] = useState<CompanyBanking[]>([]);
@@ -135,6 +136,24 @@ export default function OpenBankingPage() {
     if (status === 'unauthenticated') router.push('/login');
     else if (status === 'authenticated') loadData();
   }, [status, router, loadData]);
+
+  useEffect(() => {
+    const tinkStatus = searchParams.get('tink');
+    const bankinterStatus = searchParams.get('bankinter');
+    const message = searchParams.get('message');
+
+    if (tinkStatus === 'success') {
+      toast.success('Conexion Tink autorizada correctamente');
+    } else if (tinkStatus === 'error') {
+      toast.error(message || 'Error al autorizar la conexion Tink');
+    }
+
+    if (bankinterStatus === 'success') {
+      toast.success('Conexion Bankinter autorizada correctamente');
+    } else if (bankinterStatus === 'error') {
+      toast.error(message || 'Error al autorizar la conexion Bankinter');
+    }
+  }, [searchParams]);
 
   const handleSync = async () => {
     setIsSyncing(true);
