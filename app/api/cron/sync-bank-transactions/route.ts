@@ -48,15 +48,137 @@ export async function POST(req: NextRequest) {
 
     // Source 1: Tink (if configured)
     try {
-      const { isTinkConfigured, testConnection } = await import('@/lib/tink-service');
+      const {
+        isTinkConfigured,
+        testConnection,
+        listAccounts,
+        listTransactions,
+        parseTinkAmount,
+        buildTinkUserId,
+      } = await import('@/lib/tink-service');
+
       if (isTinkConfigured()) {
         const test = await testConnection();
-        results.sources.tink = {
-          configured: true,
-          connected: test.ok,
-          message: test.message,
-          // TODO: Auto-sync transactions from Tink for connected accounts
-        };
+
+        if (!test.ok) {
+          results.sources.tink = {
+            configured: true,
+            connected: false,
+            message: test.message,
+          };
+        } else {
+          const tinkConnections = await prisma.bankConnection.findMany({
+            where: {
+              proveedor: 'tink',
+              estado: 'conectado',
+              companyId: { not: null },
+              userId: { not: null },
+            },
+            select: {
+              id: true,
+              companyId: true,
+              userId: true,
+              ultimaSync: true,
+            },
+          });
+
+          let syncedConnections = 0;
+          let discoveredAccounts = 0;
+          let processedTransactions = 0;
+
+          for (const connection of tinkConnections) {
+            if (!connection.companyId || !connection.userId) {
+              continue;
+            }
+
+            const tinkUserId = buildTinkUserId(connection.companyId, connection.userId);
+            const accounts = await listAccounts(tinkUserId);
+            discoveredAccounts += accounts.length;
+
+            const dateFrom = connection.ultimaSync
+              ? new Date(connection.ultimaSync.getTime() - 2 * 24 * 60 * 60 * 1000)
+              : new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
+
+            const dateFromStr = dateFrom.toISOString().split('T')[0];
+            const dateToStr = new Date().toISOString().split('T')[0];
+
+            for (const account of accounts) {
+              let pageToken: string | undefined;
+
+              do {
+                const txResult = await listTransactions(tinkUserId, {
+                  accountId: account.id,
+                  dateFrom: dateFromStr,
+                  dateTo: dateToStr,
+                  pageSize: 100,
+                  pageToken,
+                });
+
+                for (const tx of txResult.transactions) {
+                  const bookedDate = tx.dates.booked || tx.dates.value;
+                  if (!bookedDate) {
+                    continue;
+                  }
+
+                  const description =
+                    tx.descriptions.display ||
+                    tx.descriptions.original ||
+                    tx.merchantInformation?.merchantName ||
+                    tx.reference ||
+                    'Sin descripción';
+
+                  await prisma.bankTransaction.upsert({
+                    where: { proveedorTxId: `tink_${tx.id}` },
+                    update: {
+                      descripcion: description,
+                      monto: parseTinkAmount(tx.amount),
+                      referencia: tx.reference || tx.identifiers?.providerTransactionId || null,
+                      categoria: tx.types?.type || null,
+                      rawData: tx,
+                    },
+                    create: {
+                      companyId: connection.companyId,
+                      connectionId: connection.id,
+                      proveedorTxId: `tink_${tx.id}`,
+                      fecha: new Date(bookedDate),
+                      fechaContable: tx.dates.value ? new Date(tx.dates.value) : null,
+                      descripcion: description,
+                      monto: parseTinkAmount(tx.amount),
+                      moneda: tx.amount.currencyCode || 'EUR',
+                      categoria: tx.types?.type || null,
+                      referencia: tx.reference || tx.identifiers?.providerTransactionId || null,
+                      tipoTransaccion: tx.status || null,
+                      rawData: tx,
+                      estado: 'pendiente_revision',
+                    },
+                  });
+
+                  processedTransactions++;
+                }
+
+                pageToken = txResult.nextPageToken;
+              } while (pageToken);
+            }
+
+            await prisma.bankConnection.update({
+              where: { id: connection.id },
+              data: { ultimaSync: new Date(), errorDetalle: null },
+            });
+
+            syncedConnections++;
+          }
+
+          results.sources.tink = {
+            configured: true,
+            connected: true,
+            message: test.message,
+            synced: true,
+            connections: tinkConnections.length,
+            syncedConnections,
+            accounts: discoveredAccounts,
+            transactions: processedTransactions,
+          };
+        }
       } else {
         results.sources.tink = { configured: false };
       }

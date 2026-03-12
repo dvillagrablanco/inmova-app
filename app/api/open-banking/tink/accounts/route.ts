@@ -18,14 +18,18 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const { isTinkConfigured, listAccounts } = await import('@/lib/tink-service');
+    const { isTinkConfigured, listAccounts, buildTinkUserId } = await import('@/lib/tink-service');
     if (!isTinkConfigured()) {
       return NextResponse.json({ error: 'Tink no configurado' }, { status: 503 });
     }
 
     const companyId = (session.user as any).companyId;
     const userId = (session.user as any).id;
-    const tinkUserId = `inmova_${companyId}_${userId}`;
+    if (!companyId || !userId) {
+      return NextResponse.json({ error: 'Sesión inválida' }, { status: 400 });
+    }
+
+    const tinkUserId = buildTinkUserId(companyId, userId);
 
     const accounts = await listAccounts(tinkUserId);
 

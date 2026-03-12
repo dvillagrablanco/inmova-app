@@ -26,7 +26,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const { isTinkConfigured, createUser, generateTinkLink } = await import('@/lib/tink-service');
+    const { isTinkConfigured, createUser, generateTinkLink, buildTinkUserId } = await import(
+      '@/lib/tink-service'
+    );
 
     if (!isTinkConfigured()) {
       return NextResponse.json({ error: 'Tink no configurado' }, { status: 503 });
@@ -34,30 +36,73 @@ export async function POST(req: NextRequest) {
 
     const companyId = (session.user as any).companyId;
     const userId = (session.user as any).id;
+    if (!companyId || !userId) {
+      return NextResponse.json({ error: 'Sesión inválida' }, { status: 400 });
+    }
+
     const body = await req.json().catch(() => ({}));
+    const prisma = await getPrisma();
 
     // Create or get Tink user
-    const tinkUserId = `inmova_${companyId}_${userId}`;
+    const tinkUserId = buildTinkUserId(companyId, userId);
     try {
       await createUser(tinkUserId, body.market || 'ES');
     } catch {
       // User may already exist — that's fine
     }
 
+    let connection = await prisma.bankConnection.findFirst({
+      where: { companyId, userId, proveedor: 'tink' },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (connection) {
+      connection = await prisma.bankConnection.update({
+        where: { id: connection.id },
+        data: {
+          provider: 'tink',
+          nombreBanco: body.bankId || body.providerName || 'Tink Open Banking',
+          estado: 'renovacion_requerida',
+          errorDetalle: null,
+          scope: 'AIS',
+          accessToken: tinkUserId,
+        },
+      });
+    } else {
+      connection = await prisma.bankConnection.create({
+        data: {
+          companyId,
+          userId,
+          proveedor: 'tink',
+          provider: 'tink',
+          nombreBanco: body.bankId || body.providerName || 'Tink Open Banking',
+          estado: 'renovacion_requerida',
+          scope: 'AIS',
+          accessToken: tinkUserId,
+        },
+      });
+    }
+
     // Generate Tink Link
-    const redirectUri = `${process.env.NEXTAUTH_URL || 'https://inmovaapp.com'}/api/open-banking/tink/callback`;
+    const appUrl = process.env.NEXTAUTH_URL || 'https://inmovaapp.com';
+    const redirectUri = new URL('/api/open-banking/tink/callback', appUrl);
+    redirectUri.searchParams.set('companyId', companyId);
+    redirectUri.searchParams.set('userId', userId);
+    redirectUri.searchParams.set('connectionId', connection.id);
+
     const tinkLinkUrl = await generateTinkLink({
       userId: tinkUserId,
       market: body.market || 'ES',
-      redirectUri,
+      redirectUri: redirectUri.toString(),
     });
 
-    logger.info('[Tink] Connect link generated', { companyId, tinkUserId });
+    logger.info('[Tink] Connect link generated', { companyId, tinkUserId, connectionId: connection.id });
 
     return NextResponse.json({
       success: true,
       tinkLinkUrl,
       tinkUserId,
+      connectionId: connection.id,
     });
   } catch (error: any) {
     logger.error('[Tink Connect]:', error);

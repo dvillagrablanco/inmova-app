@@ -27,6 +27,10 @@ const TINK_ENV = process.env.TINK_ENVIRONMENT || 'production';
 
 const BASE_URL = 'https://api.tink.com';
 
+export function buildTinkUserId(companyId: string, userId: string): string {
+  return `inmova_${companyId}_${userId}`;
+}
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -120,6 +124,7 @@ async function getUserAccessToken(userId: string, scope: string): Promise<string
     body: new URLSearchParams({
       user_id: userId,
       id_hint: userId,
+      actor_client_id: TINK_CLIENT_ID,
       scope,
     }),
   });
@@ -324,6 +329,7 @@ export const SPANISH_BANKS = [
 ];
 
 export default {
+  buildTinkUserId,
   isTinkConfigured,
   testConnection,
   listProviders,
