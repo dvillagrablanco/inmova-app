@@ -38,9 +38,22 @@ interface CatastroResult {
   inmuebles: CatastroUnit[];
 }
 
+function normalizeReferenciaCatastral(value: string): string {
+  return String(value || '')
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, '');
+}
+
 async function consultaPorRC(rc: string): Promise<CatastroResult | null> {
-  const rc1 = rc.substring(0, 7);
-  const rc2 = rc.substring(7, 14);
+  const normalizedRc = normalizeReferenciaCatastral(rc);
+
+  if (normalizedRc.length < 14) {
+    return null;
+  }
+
+  const baseRc = normalizedRc.substring(0, 14);
+  const rc1 = baseRc.substring(0, 7);
+  const rc2 = baseRc.substring(7, 14);
 
   const url = `http://ovc.catastro.meh.es/ovcservweb/OVCSWLocalizacionRC/OVCCallejero.asmx/Consulta_DNPRC?Provincia=&Municipio=&RC=${rc1}${rc2}`;
 
@@ -103,7 +116,7 @@ async function consultaPorRC(rc: string): Promise<CatastroResult | null> {
   }
 
   return {
-    referenciaCatastral: rc,
+    referenciaCatastral: normalizedRc,
     direccion,
     municipio,
     provincia,
@@ -115,45 +128,56 @@ async function consultaPorRC(rc: string): Promise<CatastroResult | null> {
   };
 }
 
-async function consultaPorDireccion(provincia: string, municipio: string, tipoVia: string, via: string, numero: string): Promise<any> {
+async function consultaPorDireccion(
+  provincia: string,
+  municipio: string,
+  tipoVia: string,
+  via: string,
+  numero: string
+): Promise<any> {
   const url = `http://ovc.catastro.meh.es/ovcservweb/OVCSWLocalizacionRC/OVCCallejero.asmx/ConsultaNumero?Provincia=${encodeURIComponent(provincia)}&Municipio=${encodeURIComponent(municipio)}&TipoVia=${encodeURIComponent(tipoVia)}&NomVia=${encodeURIComponent(via)}&Numero=${encodeURIComponent(numero)}`;
-  
+
   const resp = await fetch(url, { signal: AbortSignal.timeout(10000) });
   if (!resp.ok) return null;
-  
+
   const text = await resp.text();
-  
+
   // Extract reference catastral
   const pc1 = text.match(/<pc1>([^<]+)<\/pc1>/)?.[1] || '';
   const pc2 = text.match(/<pc2>([^<]+)<\/pc2>/)?.[1] || '';
-  
+
   if (!pc1 || !pc2) return null;
-  
+
   const rc = `${pc1}${pc2}`;
-  
+
   // Now get full details
   return consultaPorRC(rc);
 }
 
-function parseDireccionLibre(q: string): { provincia: string; municipio: string; tipoVia: string; via: string; numero: string } | null {
+function parseDireccionLibre(
+  q: string
+): { provincia: string; municipio: string; tipoVia: string; via: string; numero: string } | null {
   const ciudades: Record<string, { provincia: string; municipio: string }> = {
-    'madrid': { provincia: 'MADRID', municipio: 'MADRID' },
-    'barcelona': { provincia: 'BARCELONA', municipio: 'BARCELONA' },
-    'valencia': { provincia: 'VALENCIA', municipio: 'VALENCIA' },
-    'sevilla': { provincia: 'SEVILLA', municipio: 'SEVILLA' },
-    'malaga': { provincia: 'MALAGA', municipio: 'MALAGA' },
-    'marbella': { provincia: 'MALAGA', municipio: 'MARBELLA' },
-    'bilbao': { provincia: 'VIZCAYA', municipio: 'BILBAO' },
-    'alicante': { provincia: 'ALICANTE', municipio: 'ALICANTE' },
-    'benidorm': { provincia: 'ALICANTE', municipio: 'BENIDORM' },
-    'palencia': { provincia: 'PALENCIA', municipio: 'PALENCIA' },
-    'valladolid': { provincia: 'VALLADOLID', municipio: 'VALLADOLID' },
-    'zaragoza': { provincia: 'ZARAGOZA', municipio: 'ZARAGOZA' },
+    madrid: { provincia: 'MADRID', municipio: 'MADRID' },
+    barcelona: { provincia: 'BARCELONA', municipio: 'BARCELONA' },
+    valencia: { provincia: 'VALENCIA', municipio: 'VALENCIA' },
+    sevilla: { provincia: 'SEVILLA', municipio: 'SEVILLA' },
+    malaga: { provincia: 'MALAGA', municipio: 'MALAGA' },
+    marbella: { provincia: 'MALAGA', municipio: 'MARBELLA' },
+    bilbao: { provincia: 'VIZCAYA', municipio: 'BILBAO' },
+    alicante: { provincia: 'ALICANTE', municipio: 'ALICANTE' },
+    benidorm: { provincia: 'ALICANTE', municipio: 'BENIDORM' },
+    palencia: { provincia: 'PALENCIA', municipio: 'PALENCIA' },
+    valladolid: { provincia: 'VALLADOLID', municipio: 'VALLADOLID' },
+    zaragoza: { provincia: 'ZARAGOZA', municipio: 'ZARAGOZA' },
     'san sebastian': { provincia: 'GUIPUZCOA', municipio: 'SAN SEBASTIAN' },
-    'donostia': { provincia: 'GUIPUZCOA', municipio: 'SAN SEBASTIAN' },
+    donostia: { provincia: 'GUIPUZCOA', municipio: 'SAN SEBASTIAN' },
   };
 
-  const normalized = q.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const normalized = q
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
   let provincia = '';
   let municipio = '';
 
@@ -168,11 +192,20 @@ function parseDireccionLibre(q: string): { provincia: string; municipio: string;
 
   let tipoVia = 'CL';
   const tipoViaMap: Record<string, string> = {
-    'calle': 'CL', 'c/': 'CL', 'cl': 'CL',
-    'avenida': 'AV', 'avda': 'AV', 'av': 'AV',
-    'plaza': 'PZ', 'pl': 'PZ', 'pz': 'PZ',
-    'paseo': 'PS', 'pg': 'PS',
-    'ronda': 'RD', 'travesia': 'TR', 'camino': 'CM',
+    calle: 'CL',
+    'c/': 'CL',
+    cl: 'CL',
+    avenida: 'AV',
+    avda: 'AV',
+    av: 'AV',
+    plaza: 'PZ',
+    pl: 'PZ',
+    pz: 'PZ',
+    paseo: 'PS',
+    pg: 'PS',
+    ronda: 'RD',
+    travesia: 'TR',
+    camino: 'CM',
   };
 
   for (const [prefix, code] of Object.entries(tipoViaMap)) {
@@ -183,13 +216,16 @@ function parseDireccionLibre(q: string): { provincia: string; municipio: string;
     }
   }
 
-  const calleMatch = q.match(/(?:C\/|Calle|Avda?\.?|Avenida|Paseo|Plaza|Ronda|Trav[eé]s[ií]a|Camino)\s+([^,\d]+)/i)
-    || q.match(/^([^,\d]+)/i);
+  const calleMatch =
+    q.match(
+      /(?:C\/|Calle|Avda?\.?|Avenida|Paseo|Plaza|Ronda|Trav[eé]s[ií]a|Camino)\s+([^,\d]+)/i
+    ) || q.match(/^([^,\d]+)/i);
   const numMatch = q.match(/[\s,]+(\d+)/);
 
   if (!calleMatch) return null;
 
-  let via = calleMatch[1].trim()
+  let via = calleMatch[1]
+    .trim()
     .replace(/,\s*$/, '')
     .replace(new RegExp(`\\b(${Object.keys(ciudades).join('|')})\\b`, 'gi'), '')
     .trim();
@@ -203,7 +239,13 @@ function parseDireccionLibre(q: string): { provincia: string; municipio: string;
 
 async function normalizarDireccionConIA(
   direccionOriginal: string
-): Promise<{ provincia: string; municipio: string; tipoVia: string; via: string; numero: string } | null> {
+): Promise<{
+  provincia: string;
+  municipio: string;
+  tipoVia: string;
+  via: string;
+  numero: string;
+} | null> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return null;
 
@@ -218,9 +260,10 @@ async function normalizarDireccionConIA(
       body: JSON.stringify({
         model: 'claude-3-5-haiku-20241022',
         max_tokens: 200,
-        messages: [{
-          role: 'user',
-          content: `Eres un experto en el Catastro español. Necesito normalizar esta dirección para buscar en la API del Catastro (OVCCallejero ConsultaNumero).
+        messages: [
+          {
+            role: 'user',
+            content: `Eres un experto en el Catastro español. Necesito normalizar esta dirección para buscar en la API del Catastro (OVCCallejero ConsultaNumero).
 
 Dirección del usuario: "${direccionOriginal}"
 
@@ -238,8 +281,9 @@ Reglas:
 - Si hay varios números (3, 5, 7) usa el primero
 - Si no hay número, pon "1"
 - Sin acentos (MALAGA no MÁLAGA)
-- Solo el JSON, sin explicaciones`
-        }],
+- Solo el JSON, sin explicaciones`,
+          },
+        ],
       }),
       signal: AbortSignal.timeout(8000),
     });
@@ -285,13 +329,21 @@ export async function GET(req: NextRequest) {
 
     let result: CatastroResult | null = null;
 
-    if (rc && rc.length >= 14) {
-      result = await consultaPorRC(rc);
+    const normalizedRc = rc ? normalizeReferenciaCatastral(rc) : null;
+
+    if (normalizedRc && normalizedRc.length >= 14) {
+      result = await consultaPorRC(normalizedRc);
     } else if (q && q.trim().length >= 5) {
       // Paso 1: Parser local
       const parsed = parseDireccionLibre(q);
       if (parsed) {
-        result = await consultaPorDireccion(parsed.provincia, parsed.municipio, parsed.tipoVia, parsed.via, parsed.numero);
+        result = await consultaPorDireccion(
+          parsed.provincia,
+          parsed.municipio,
+          parsed.tipoVia,
+          parsed.via,
+          parsed.numero
+        );
       }
 
       // Paso 2: Si parser local falla o Catastro no encuentra → IA normaliza
@@ -299,34 +351,53 @@ export async function GET(req: NextRequest) {
         logger.info('[Catastro] Parser local no encontró resultado, intentando con IA...');
         const iaParsed = await normalizarDireccionConIA(q);
         if (iaParsed) {
-          logger.info(`[Catastro] IA normalizó: ${iaParsed.tipoVia} ${iaParsed.via} ${iaParsed.numero}, ${iaParsed.municipio}`);
-          result = await consultaPorDireccion(iaParsed.provincia, iaParsed.municipio, iaParsed.tipoVia, iaParsed.via, iaParsed.numero);
+          logger.info(
+            `[Catastro] IA normalizó: ${iaParsed.tipoVia} ${iaParsed.via} ${iaParsed.numero}, ${iaParsed.municipio}`
+          );
+          result = await consultaPorDireccion(
+            iaParsed.provincia,
+            iaParsed.municipio,
+            iaParsed.tipoVia,
+            iaParsed.via,
+            iaParsed.numero
+          );
         }
       }
 
       if (!result) {
         const hint = parsed ? `"${parsed.via} ${parsed.numero}" en ${parsed.municipio}` : q;
         return NextResponse.json(
-          { error: `No se encontró ${hint} en el Catastro. Prueba con el nombre oficial completo de la vía o la referencia catastral.` },
+          {
+            error: `No se encontró ${hint} en el Catastro. Prueba con el nombre oficial completo de la vía o la referencia catastral.`,
+          },
           { status: 404 }
         );
       }
     } else if (provincia && municipio && via && numero) {
-      result = await consultaPorDireccion(provincia.toUpperCase(), municipio.toUpperCase(), tipoVia, via.toUpperCase(), numero);
+      result = await consultaPorDireccion(
+        provincia.toUpperCase(),
+        municipio.toUpperCase(),
+        tipoVia,
+        via.toUpperCase(),
+        numero
+      );
     } else {
       return NextResponse.json(
-        { error: 'Proporciona referencia catastral (rc), dirección libre (q) o campos (provincia, municipio, via, numero)' },
+        {
+          error:
+            'Proporciona referencia catastral (rc), dirección libre (q) o campos (provincia, municipio, via, numero)',
+        },
         { status: 400 }
       );
     }
-    
+
     if (!result) {
       return NextResponse.json(
         { error: 'No se encontraron datos catastrales para la referencia proporcionada' },
         { status: 404 }
       );
     }
-    
+
     return NextResponse.json(result);
   } catch (error: any) {
     logger.error('[Catastro API]', error);
