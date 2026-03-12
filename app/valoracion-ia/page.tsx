@@ -758,7 +758,7 @@ export default function ValoracionIAPage() {
         buildingId = selectedAsset;
       }
 
-      const response = await fetch('/api/valoraciones', {
+      const response = await fetch('/api/valuations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

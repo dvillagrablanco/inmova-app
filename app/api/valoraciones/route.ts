@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
+import { createUnifiedValuation } from '@/lib/unified-valuation-service';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -18,53 +17,57 @@ async function getPrisma() {
 export async function POST(req: NextRequest) {
   const prisma = await getPrisma();
   try {
+    const { getServerSession } = await import('next-auth');
+    const { authOptions } = await import('@/lib/auth-options');
     const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    if (!session?.user?.id || !session.user.companyId) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = session.user.companyId;
-    if (!companyId) {
-      return NextResponse.json({ error: 'Empresa no definida' }, { status: 400 });
-    }
-
     const body = await req.json();
+    const resultado = body.resultado || body;
 
-    const valoracion = await prisma.valoracionPropiedad.create({
-      data: {
-        companyId,
-        unitId: body.unitId || null,
-        buildingId: body.buildingId || null,
-        direccion: body.direccion || 'Sin dirección',
-        municipio: body.ciudad || body.municipio || 'Madrid',
-        provincia: body.provincia || 'Madrid',
-        codigoPostal: body.codigoPostal || null,
-        metrosCuadrados: body.superficie || 0,
-        habitaciones: body.habitaciones || null,
-        banos: body.banos || null,
-        ascensor: body.caracteristicas?.includes('ascensor') || false,
-        terraza: body.caracteristicas?.includes('terraza') || false,
-        jardin: body.caracteristicas?.includes('jardin') || false,
-        piscina: body.caracteristicas?.includes('piscina') || false,
-        anosConstruccion: body.antiguedad || null,
-        estadoConservacion: body.estadoConservacion || null,
-        orientacion: body.orientacion || null,
-        metodo: 'comparables',
-        finalidad: body.finalidad === 'ambos' ? 'venta' : (body.finalidad || 'venta'),
-        valorEstimado: body.resultado.valorEstimado,
-        valorMinimo: body.resultado.valorMinimo,
-        valorMaximo: body.resultado.valorMaximo,
-        precioM2: body.resultado.precioM2,
-        confianzaValoracion: body.resultado.confianza,
-        numComparables: body.resultado.comparables?.length || 0,
-        comparablesData: body.resultado.comparables || [],
-        factoresPositivos: body.resultado.factoresPositivos || [],
-        factoresNegativos: body.resultado.factoresNegativos || [],
-        recomendacionPrecio: body.resultado.recomendaciones?.join('\n') || null,
-        precioMedioZona: body.resultado.precioM2 || null,
-        generadoPor: session.user.id as string,
-        notas: body.resultado.analisisMercado || null,
-      },
+    const valoracion = await createUnifiedValuation(prisma as any, {
+      companyId: session.user.companyId,
+      requestedBy: session.user.id as string,
+      unitId: body.unitId || null,
+      buildingId: body.buildingId || null,
+      address: body.direccion || body.address || 'Sin dirección',
+      city: body.ciudad || body.city || body.municipio || '',
+      postalCode: body.codigoPostal || body.postalCode || '',
+      province: body.provincia || body.province || '',
+      neighborhood: body.neighborhood || '',
+      squareMeters: Number(body.superficie || body.squareMeters || 0),
+      rooms: Number(body.habitaciones || body.rooms || 0),
+      bathrooms: Number(body.banos || body.bathrooms || 0),
+      floor: Number(body.planta || body.floor || 0),
+      hasElevator: body.caracteristicas?.includes('ascensor') || body.hasElevator,
+      hasParking: body.caracteristicas?.includes('garaje') || body.hasParking,
+      hasGarden: body.caracteristicas?.includes('jardin') || body.hasGarden,
+      hasPool: body.caracteristicas?.includes('piscina') || body.hasPool,
+      hasTerrace: body.caracteristicas?.includes('terraza') || body.hasTerrace,
+      hasGarage: body.caracteristicas?.includes('garaje') || body.hasGarage,
+      condition: body.estadoConservacion || body.condition,
+      yearBuilt: body.yearBuilt || null,
+      estimatedValue: Number(resultado.valorEstimado || resultado.estimatedValue || 0),
+      minValue: Number(resultado.valorMinimo || resultado.minValue || 0),
+      maxValue: Number(resultado.valorMaximo || resultado.maxValue || 0),
+      pricePerM2: Number(resultado.precioM2 || resultado.pricePerM2 || 0),
+      confidenceScore: Number(resultado.confianza || resultado.confidenceScore || 70),
+      model: resultado.model || 'valoraciones_legacy_proxy',
+      reasoning: resultado.reasoning || resultado.analisisMercado || '',
+      keyFactors: resultado.keyFactors || resultado.factoresPositivos || [],
+      recommendations: resultado.recommendations || resultado.recomendaciones || [],
+      estimatedRent: Number(resultado.alquilerEstimado || resultado.estimatedRent || 0),
+      estimatedROI: Number(resultado.rentabilidadAlquiler || resultado.estimatedROI || 0),
+      capRate: Number(resultado.capRate || 0),
+      avgPricePerM2: Number(
+        resultado.platformSources?.weightedSalePricePerM2 || resultado.precioM2 || 0
+      ),
+      marketTrend: resultado.tendenciaMercado || resultado.marketTrend || '',
+      comparables: resultado.comparables || [],
+      ipAddress: req.headers.get('x-forwarded-for'),
+      userAgent: req.headers.get('user-agent'),
     });
 
     logger.info(`Valoración guardada: ${valoracion.id}`, { userId: session.user.id });

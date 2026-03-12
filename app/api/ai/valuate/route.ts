@@ -25,6 +25,7 @@ import {
 } from '@/lib/external-platform-data-service';
 import { analyzeAndValuateProperty, type PropertyForAnalysis } from '@/lib/ai-property-analysis';
 import { resolveCompanyScope } from '@/lib/company-scope';
+import { createUnifiedValuation } from '@/lib/unified-valuation-service';
 
 import logger from '@/lib/logger';
 import Anthropic from '@anthropic-ai/sdk';
@@ -783,50 +784,47 @@ export async function POST(request: NextRequest) {
             ? 'STABLE'
             : validated.marketTrend;
 
-    // 8. Guardar valoración en BD
-    if (validated.unitId) {
-      await prisma.propertyValuation.create({
-        data: {
-          companyId: valuationCompanyId || session.user.companyId,
-          unitId: validated.unitId,
-          requestedBy: session.user.id,
-          ipAddress: request.headers.get('x-forwarded-for') || undefined,
-          userAgent: request.headers.get('user-agent') || undefined,
-          address: direccion,
-          postalCode: codigoPostal,
-          city: ciudad,
-          province: validated.province,
-          neighborhood: validated.neighborhood,
-          squareMeters: superficie,
-          rooms: habitaciones,
-          bathrooms: banos,
-          floor: planta || 0,
-          hasElevator,
-          hasParking,
-          hasGarden,
-          hasPool,
-          hasTerrace,
-          hasGarage: hasParking,
-          condition: mapCondition(validated.estadoConservacion || validated.condition),
-          yearBuilt,
-          avgPricePerM2: validated.avgPricePerM2 ?? normalizedValuation.pricePerM2,
-          marketTrend: marketTrend,
-          comparables: comparables,
-          estimatedValue: normalizedValuation.estimatedValue,
-          minValue: normalizedValuation.minValue,
-          maxValue: normalizedValuation.maxValue,
-          confidenceScore: normalizedValuation.confidenceScore,
-          pricePerM2: normalizedValuation.pricePerM2,
-          reasoning: normalizedValuation.reasoning,
-          keyFactors: normalizedValuation.keyFactors,
-          recommendations: normalizedValuation.recommendations,
-          estimatedRent: normalizedValuation.estimatedRent,
-          estimatedROI: normalizedValuation.estimatedROI,
-          capRate: normalizedValuation.capRate,
-          model: process.env.ANTHROPIC_MODEL || CLAUDE_MODEL_PRIMARY,
-        },
-      });
-    }
+    // 8. Guardar valoración unificada en BD para historial consistente
+    await createUnifiedValuation(prisma as any, {
+      companyId: valuationCompanyId || session.user.companyId,
+      requestedBy: session.user.id as string,
+      unitId: validated.unitId || null,
+      buildingId: validated.buildingId || null,
+      address: direccion,
+      city: ciudad,
+      postalCode: codigoPostal,
+      province: validated.province,
+      neighborhood: validated.neighborhood,
+      squareMeters: superficie,
+      rooms: habitaciones,
+      bathrooms: banos,
+      floor: planta || 0,
+      hasElevator,
+      hasParking,
+      hasGarden,
+      hasPool,
+      hasTerrace,
+      hasGarage: hasParking,
+      condition: mapCondition(validated.estadoConservacion || validated.condition),
+      yearBuilt,
+      estimatedValue: normalizedValuation.estimatedValue,
+      minValue: normalizedValuation.minValue,
+      maxValue: normalizedValuation.maxValue,
+      pricePerM2: normalizedValuation.pricePerM2,
+      confidenceScore: normalizedValuation.confidenceScore,
+      model: process.env.ANTHROPIC_MODEL || CLAUDE_MODEL_PRIMARY,
+      reasoning: normalizedValuation.reasoning,
+      keyFactors: normalizedValuation.keyFactors,
+      recommendations: normalizedValuation.recommendations,
+      estimatedRent: normalizedValuation.estimatedRent,
+      estimatedROI: normalizedValuation.estimatedROI,
+      capRate: normalizedValuation.capRate,
+      avgPricePerM2: validated.avgPricePerM2 ?? normalizedValuation.pricePerM2,
+      marketTrend: marketTrend,
+      comparables: comparables,
+      ipAddress: request.headers.get('x-forwarded-for'),
+      userAgent: request.headers.get('user-agent'),
+    });
 
     // 9. Log de auditoría
     try {

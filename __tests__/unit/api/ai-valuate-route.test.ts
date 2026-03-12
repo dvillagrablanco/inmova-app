@@ -9,6 +9,7 @@ const {
   mockGetAggregatedMarketData,
   mockAnalyzeAndValuateProperty,
   mockResolveCompanyScope,
+  mockCreateUnifiedValuation,
   mockPrisma,
 } = vi.hoisted(() => ({
   mockGetServerSession: vi.fn(),
@@ -18,6 +19,7 @@ const {
   mockGetAggregatedMarketData: vi.fn(),
   mockAnalyzeAndValuateProperty: vi.fn(),
   mockResolveCompanyScope: vi.fn(),
+  mockCreateUnifiedValuation: vi.fn(),
   mockPrisma: {
     unit: {
       findFirst: vi.fn(),
@@ -65,6 +67,10 @@ vi.mock('@/lib/company-scope', () => ({
 
 vi.mock('@/lib/claude-ai-service', () => ({
   isClaudeConfigured: vi.fn(() => true),
+}));
+
+vi.mock('@/lib/unified-valuation-service', () => ({
+  createUnifiedValuation: mockCreateUnifiedValuation,
 }));
 
 vi.mock('@/lib/db', () => ({
@@ -141,6 +147,7 @@ describe('POST /api/ai/valuate', () => {
       sourcesUsed: ['internal_db', 'claude_ai'],
     });
     mockTrackUsage.mockResolvedValue(undefined);
+    mockCreateUnifiedValuation.mockResolvedValue({ id: 'valuation-1' });
     mockPrisma.propertyValuation.create.mockResolvedValue(undefined);
     mockPrisma.auditLog.create.mockResolvedValue(undefined);
   });
