@@ -41,6 +41,14 @@ function resolveUserRole(role: unknown): UserRole | null {
   return ROLE_ALLOWLIST.includes(role as UserRole) ? (role as UserRole) : null;
 }
 
+const TINK_PROVIDER_IDS: Record<string, string> = {
+  bankinter: 'es-bankinter-ob',
+  santander: 'es-santander-ob',
+  bbva: 'es-bbva-ob',
+  caixabank: 'es-caixabank-ob',
+  sabadell: 'es-sabadell-ob',
+};
+
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -136,6 +144,9 @@ export async function POST(req: NextRequest) {
     const tinkLinkUrl = await generateTinkLink({
       userId: tinkUserId,
       idHint: tinkExternalUserId,
+      state: tinkUserId,
+      inputProvider:
+        typeof body.bankId === 'string' ? TINK_PROVIDER_IDS[body.bankId] || body.bankId : undefined,
       market: body.market || 'ES',
       redirectUri: redirectUri.toString(),
     });

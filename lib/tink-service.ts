@@ -226,6 +226,8 @@ export async function createUser(externalUserId: string, market: string = 'ES', 
 export async function generateTinkLink(params: {
   userId: string;
   idHint?: string;
+  state?: string;
+  inputProvider?: string;
   market?: string;
   locale?: string;
   redirectUri: string;
@@ -243,6 +245,16 @@ export async function generateTinkLink(params: {
   tinkLinkUrl.searchParams.set('market', params.market || 'ES');
   tinkLinkUrl.searchParams.set('locale', params.locale || 'es_ES');
   tinkLinkUrl.searchParams.set('authorization_code', authCode);
+  tinkLinkUrl.searchParams.set(
+    'refreshable_items',
+    'CHECKING_ACCOUNTS,CHECKING_TRANSACTIONS'
+  );
+  if (params.state) {
+    tinkLinkUrl.searchParams.set('state', params.state);
+  }
+  if (params.inputProvider) {
+    tinkLinkUrl.searchParams.set('input_provider', params.inputProvider);
+  }
   if (params.test) {
     tinkLinkUrl.searchParams.set('test', 'true');
   }
