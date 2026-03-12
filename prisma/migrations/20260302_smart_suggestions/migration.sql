@@ -35,5 +35,9 @@ CREATE INDEX IF NOT EXISTS "smart_suggestions_companyId_area_idx" ON "smart_sugg
 CREATE INDEX IF NOT EXISTS "smart_suggestions_prioridad_estado_idx" ON "smart_suggestions"("prioridad", "estado");
 CREATE INDEX IF NOT EXISTS "smart_suggestions_createdAt_idx" ON "smart_suggestions"("createdAt");
 
-ALTER TABLE "smart_suggestions" ADD CONSTRAINT "smart_suggestions_companyId_fkey"
-    FOREIGN KEY ("companyId") REFERENCES "company"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "smart_suggestions" ADD CONSTRAINT "smart_suggestions_companyId_fkey"
+      FOREIGN KEY ("companyId") REFERENCES "company"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION
+  WHEN duplicate_object THEN null;
+END $$;
