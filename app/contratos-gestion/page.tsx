@@ -82,10 +82,9 @@ export default function ContratosGestionPage() {
         const res = await fetch('/api/contratos-gestion');
         if (res.ok) {
           const data = await res.json();
-          setContratos(data);
-          setFilteredContratos(data);
-        } else {
-          toast.error('Error al cargar contratos');
+          const items = Array.isArray(data) ? data : Array.isArray(data.data) ? data.data : [];
+          setContratos(items);
+          setFilteredContratos(items);
         }
       } catch {
         toast.error('Error de conexión');

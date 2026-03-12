@@ -13,14 +13,14 @@ const intlMiddleware = createMiddleware({
 
 export default function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  
+
   // LISTA BLANCA: Solo estas rutas usan i18n
   const i18nRoutes = [
     '/admin/settings/localization',
-    '/dashboard/settings/language',
+    '/configuracion/idioma',
     // Agregar aquí más rutas que realmente necesiten i18n
   ];
-  
+
   // LISTA NEGRA: Excluir estas rutas SIEMPRE
   const excludedRoutes = [
     '/api',
@@ -33,22 +33,22 @@ export default function middleware(request: NextRequest) {
     '/unauthorized',
     '/health',
   ];
-  
+
   // Excluir archivos estáticos (con extensión)
   if (pathname.includes('.')) {
     return NextResponse.next();
   }
-  
+
   // Excluir rutas en lista negra
   for (const route of excludedRoutes) {
     if (pathname.startsWith(route)) {
       return NextResponse.next();
     }
   }
-  
+
   // Solo aplicar i18n a rutas específicas que lo necesiten
-  const needsI18n = i18nRoutes.some(route => pathname.startsWith(route));
-  
+  const needsI18n = i18nRoutes.some((route) => pathname.startsWith(route));
+
   if (needsI18n) {
     try {
       // Aplicar middleware de next-intl solo si la ruta lo necesita
@@ -59,7 +59,7 @@ export default function middleware(request: NextRequest) {
       return NextResponse.next();
     }
   }
-  
+
   // Para todas las demás rutas, pasar sin i18n
   return NextResponse.next();
 }

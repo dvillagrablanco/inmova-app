@@ -1,12 +1,12 @@
 /**
  * CONFIGURACIÓN DE PLANES DE SUSCRIPCIÓN Y PERFILES DE CLIENTE
- * 
+ *
  * Este archivo define:
  * 1. Perfiles de cliente de Inmova (tipos de empresas/usuarios)
  * 2. Planes de suscripción con módulos incluidos
  * 3. Configuración de onboarding personalizado
  * 4. Reglas de acceso a páginas y funcionalidades
- * 
+ *
  * Siguiendo las cursorrules:
  * - Simplicidad sobre complejidad
  * - Código auto-documentado
@@ -17,16 +17,16 @@
 // 1. PERFILES DE CLIENTE - Tipos de empresas que usan Inmova
 // ============================================================================
 
-export type ClientProfile = 
-  | 'propietario_individual'      // 1-5 propiedades, gestión propia
-  | 'inversor_pequeno'            // 5-20 propiedades, semi-profesional
-  | 'gestor_profesional'          // API, gestión para terceros
-  | 'agencia_inmobiliaria'        // CRM + ventas + alquiler
-  | 'administrador_fincas'        // Comunidades + administración
-  | 'promotor_inmobiliario'       // Construcción + obra nueva
-  | 'empresa_coliving'            // Espacios compartidos
-  | 'empresa_str'                 // Short-term rental (Airbnb)
-  | 'fondo_inversion';            // Gran cartera, múltiples gestores
+export type ClientProfile =
+  | 'propietario_individual' // 1-5 propiedades, gestión propia
+  | 'inversor_pequeno' // 5-20 propiedades, semi-profesional
+  | 'gestor_profesional' // API, gestión para terceros
+  | 'agencia_inmobiliaria' // CRM + ventas + alquiler
+  | 'administrador_fincas' // Comunidades + administración
+  | 'promotor_inmobiliario' // Construcción + obra nueva
+  | 'empresa_coliving' // Espacios compartidos
+  | 'empresa_str' // Short-term rental (Airbnb)
+  | 'fondo_inversion'; // Gran cartera, múltiples gestores
 
 export interface ClientProfileConfig {
   id: ClientProfile;
@@ -87,8 +87,15 @@ export const CLIENT_PROFILES: Record<ClientProfile, ClientProfileConfig> = {
     ],
     recommendedPlans: ['professional', 'business'],
     criticalModules: [
-      'dashboard', 'propiedades', 'inquilinos', 'contratos', 'pagos',
-      'reportes', 'gastos', 'analytics', 'herramientas',
+      'dashboard',
+      'propiedades',
+      'inquilinos',
+      'contratos',
+      'pagos',
+      'reportes',
+      'gastos',
+      'analytics',
+      'herramientas',
     ],
     keyFeatures: [
       'Calculadora de rentabilidad',
@@ -114,9 +121,18 @@ export const CLIENT_PROFILES: Record<ClientProfile, ClientProfileConfig> = {
     ],
     recommendedPlans: ['business', 'enterprise'],
     criticalModules: [
-      'dashboard', 'propiedades', 'inquilinos', 'contratos', 'pagos',
-      'reportes', 'gastos', 'facturacion', 'analytics', 'crm',
-      'api_access', 'multi_empresa',
+      'dashboard',
+      'propiedades',
+      'inquilinos',
+      'contratos',
+      'pagos',
+      'reportes',
+      'gastos',
+      'facturacion',
+      'analytics',
+      'crm',
+      'api_access',
+      'multi_empresa',
     ],
     keyFeatures: [
       'Multi-empresa',
@@ -143,8 +159,16 @@ export const CLIENT_PROFILES: Record<ClientProfile, ClientProfileConfig> = {
     ],
     recommendedPlans: ['professional', 'business'],
     criticalModules: [
-      'dashboard', 'propiedades', 'inquilinos', 'contratos', 'pagos',
-      'crm', 'leads', 'marketing', 'portales', 'comisiones',
+      'dashboard',
+      'propiedades',
+      'inquilinos',
+      'contratos',
+      'pagos',
+      'crm',
+      'leads',
+      'marketing',
+      'portales',
+      'comisiones',
     ],
     keyFeatures: [
       'CRM inmobiliario integrado',
@@ -171,8 +195,14 @@ export const CLIENT_PROFILES: Record<ClientProfile, ClientProfileConfig> = {
     ],
     recommendedPlans: ['professional', 'business'],
     criticalModules: [
-      'dashboard', 'comunidades', 'cuotas', 'juntas', 'votaciones',
-      'contabilidad_comunidad', 'portal_vecinos', 'incidencias',
+      'dashboard',
+      'comunidades',
+      'cuotas',
+      'juntas',
+      'votaciones',
+      'contabilidad_comunidad',
+      'portal_vecinos',
+      'incidencias',
     ],
     keyFeatures: [
       'Gestión de comunidades',
@@ -199,8 +229,14 @@ export const CLIENT_PROFILES: Record<ClientProfile, ClientProfileConfig> = {
     ],
     recommendedPlans: ['business', 'enterprise'],
     criticalModules: [
-      'dashboard', 'construccion', 'proyectos', 'costes', 'gantt',
-      'subcontratistas', 'entregas', 'post_venta',
+      'dashboard',
+      'construccion',
+      'proyectos',
+      'costes',
+      'gantt',
+      'subcontratistas',
+      'entregas',
+      'post_venta',
     ],
     keyFeatures: [
       'Diagrama de Gantt',
@@ -227,8 +263,16 @@ export const CLIENT_PROFILES: Record<ClientProfile, ClientProfileConfig> = {
     ],
     recommendedPlans: ['professional', 'business'],
     criticalModules: [
-      'dashboard', 'habitaciones', 'inquilinos', 'contratos', 'pagos',
-      'matching', 'eventos', 'comunidad', 'servicios', 'paquetes',
+      'dashboard',
+      'habitaciones',
+      'inquilinos',
+      'contratos',
+      'pagos',
+      'matching',
+      'eventos',
+      'comunidad',
+      'servicios',
+      'paquetes',
     ],
     keyFeatures: [
       'Gestión por habitación',
@@ -255,8 +299,15 @@ export const CLIENT_PROFILES: Record<ClientProfile, ClientProfileConfig> = {
     ],
     recommendedPlans: ['professional', 'business', 'enterprise'],
     criticalModules: [
-      'dashboard', 'propiedades', 'reservas', 'channel_manager',
-      'pricing', 'checkin', 'limpieza', 'reviews', 'housekeeping',
+      'dashboard',
+      'propiedades',
+      'reservas',
+      'channel_manager',
+      'pricing',
+      'checkin',
+      'limpieza',
+      'reviews',
+      'housekeeping',
     ],
     keyFeatures: [
       'Channel Manager (Airbnb, Booking)',
@@ -283,9 +334,19 @@ export const CLIENT_PROFILES: Record<ClientProfile, ClientProfileConfig> = {
     ],
     recommendedPlans: ['enterprise'],
     criticalModules: [
-      'dashboard', 'propiedades', 'inquilinos', 'contratos', 'pagos',
-      'reportes', 'analytics', 'bi', 'compliance', 'api_access',
-      'multi_empresa', 'audit_log', 'sso',
+      'dashboard',
+      'propiedades',
+      'inquilinos',
+      'contratos',
+      'pagos',
+      'reportes',
+      'analytics',
+      'bi',
+      'compliance',
+      'api_access',
+      'multi_empresa',
+      'audit_log',
+      'sso',
     ],
     keyFeatures: [
       'Business Intelligence',
@@ -302,7 +363,7 @@ export const CLIENT_PROFILES: Record<ClientProfile, ClientProfileConfig> = {
 // 2. PLANES DE SUSCRIPCIÓN - Módulos y límites por plan
 // ============================================================================
 
-export type SubscriptionPlanId = 
+export type SubscriptionPlanId =
   | 'free'
   | 'starter'
   | 'basic'
@@ -324,7 +385,7 @@ export interface SubscriptionPlan {
     maxBuildings: number;
     maxUsers: number;
     maxTenants: number;
-    maxDocuments: number;  // GB
+    maxDocuments: number; // GB
     apiCallsPerMonth: number;
   };
   /** Módulos incluidos */
@@ -362,13 +423,7 @@ export const SUBSCRIPTION_PLANS: Record<SubscriptionPlanId, SubscriptionPlan> = 
       maxDocuments: 0.1, // 100MB
       apiCallsPerMonth: 0,
     },
-    includedModules: [
-      'dashboard',
-      'propiedades',
-      'inquilinos',
-      'contratos',
-      'pagos',
-    ],
+    includedModules: ['dashboard', 'propiedades', 'inquilinos', 'contratos', 'pagos'],
     features: {
       portalInquilino: false,
       portalPropietario: false,
@@ -583,9 +638,19 @@ export const SUBSCRIPTION_PLANS: Record<SubscriptionPlanId, SubscriptionPlan> = 
       whiteLabel: false,
       soportePrioritario: true,
       integraciones: [
-        'email', 'stripe', 'gmail', 'calendar', 'contasimple',
-        'holded', 'alegra', 'docusign', 'signaturit', 'twilio',
-        'airbnb', 'booking', 'vrbo',
+        'email',
+        'stripe',
+        'gmail',
+        'calendar',
+        'contasimple',
+        'holded',
+        'alegra',
+        'docusign',
+        'signaturit',
+        'twilio',
+        'airbnb',
+        'booking',
+        'vrbo',
       ],
     },
     badgeColor: 'amber',
@@ -631,13 +696,7 @@ export const SUBSCRIPTION_PLANS: Record<SubscriptionPlanId, SubscriptionPlan> = 
 // ============================================================================
 
 export const MODULES_BY_PLAN: Record<SubscriptionPlanId, string[]> = {
-  free: [
-    'dashboard',
-    'propiedades',
-    'inquilinos',
-    'contratos',
-    'pagos',
-  ],
+  free: ['dashboard', 'propiedades', 'inquilinos', 'contratos', 'pagos'],
   starter: [
     'dashboard',
     'propiedades',
@@ -773,44 +832,44 @@ export const ROUTES_BY_MODULE: Record<string, string[]> = {
   unidades: ['/unidades', '/unidades/*', '/garajes-trasteros'],
   inquilinos: ['/inquilinos', '/inquilinos/*'],
   contratos: ['/contratos', '/contratos/*'],
-  pagos: ['/pagos', '/pagos/*', '/dashboard/payments'],
-  
+  pagos: ['/pagos', '/pagos/*'],
+
   // Gestión
   documentos: ['/documentos', '/documentos/*', '/dashboard/documents'],
   mantenimiento: ['/mantenimiento', '/mantenimiento/*', '/dashboard/maintenance'],
   calendario: ['/calendario'],
   gastos: ['/gastos', '/gastos/*'],
   proveedores: ['/proveedores', '/proveedores/*'],
-  
+
   // Financiero
   reportes_basicos: ['/reportes/basicos'],
   reportes: ['/reportes', '/reportes/*'],
   analytics: ['/analytics', '/analytics/*', '/dashboard/analytics'],
   facturacion: ['/facturacion', '/facturacion/*'],
-  
+
   // CRM
   crm: ['/crm', '/crm/*'],
   visitas: ['/visitas', '/visitas/*'],
   chat: ['/chat', '/chat/*', '/dashboard/messages'],
-  
+
   // Herramientas
   herramientas: ['/dashboard/herramientas', '/dashboard/herramientas/*'],
-  
+
   // Verticales STR
   str_basico: ['/str', '/str/reservas'],
   str_completo: ['/str', '/str/*', '/housekeeping'],
-  
+
   // Verticales Coliving
   coliving_basico: ['/coliving', '/coliving/habitaciones'],
   coliving_completo: ['/coliving', '/coliving/*'],
-  
+
   // Verticales Comunidades
   comunidades_basico: ['/comunidades'],
   comunidades_completo: ['/comunidades', '/comunidades/*'],
-  
+
   // Construcción
   construccion: ['/construccion', '/construccion/*', '/ewoorker/*'],
-  
+
   // Avanzados
   automatizaciones: ['/automatizaciones', '/automatizaciones/*'],
   ia_asistente: ['/asistente-ia', '/ia/*'],
@@ -819,10 +878,10 @@ export const ROUTES_BY_MODULE: Record<string, string[]> = {
   api_completa: ['/admin/api-keys', '/api-docs'],
   audit_log: ['/admin/audit'],
   multi_empresa: ['/admin/empresas', '/admin/clientes'],
-  
+
   // Portal inquilino (siempre accesible para inquilinos)
   portal_inquilino: ['/portal', '/portal/*'],
-  
+
   // Portal propietario
   portal_propietario: ['/propietario', '/propietario/*'],
 
@@ -858,10 +917,10 @@ export const ROUTES_BY_MODULE: Record<string, string[]> = {
 export function planIncludesModule(planId: SubscriptionPlanId, moduleId: string): boolean {
   const planModules = MODULES_BY_PLAN[planId];
   if (!planModules) return false;
-  
+
   // Enterprise tiene todo
   if (planModules.includes('*')) return true;
-  
+
   return planModules.includes(moduleId);
 }
 
@@ -871,19 +930,19 @@ export function planIncludesModule(planId: SubscriptionPlanId, moduleId: string)
 export function planAllowsRoute(planId: SubscriptionPlanId, route: string): boolean {
   const planModules = MODULES_BY_PLAN[planId];
   if (!planModules) return false;
-  
+
   // Enterprise tiene todo
   if (planModules.includes('*')) return true;
-  
+
   // Buscar si algún módulo del plan incluye esta ruta
   for (const moduleId of planModules) {
     const moduleRoutes = ROUTES_BY_MODULE[moduleId];
     if (!moduleRoutes) continue;
-    
+
     for (const moduleRoute of moduleRoutes) {
       // Coincidencia exacta
       if (moduleRoute === route) return true;
-      
+
       // Wildcard
       if (moduleRoute.endsWith('/*')) {
         const baseRoute = moduleRoute.slice(0, -2);
@@ -891,7 +950,7 @@ export function planAllowsRoute(planId: SubscriptionPlanId, route: string): bool
       }
     }
   }
-  
+
   return false;
 }
 
@@ -901,12 +960,12 @@ export function planAllowsRoute(planId: SubscriptionPlanId, route: string): bool
 export function getModulesForPlan(planId: SubscriptionPlanId): string[] {
   const modules = MODULES_BY_PLAN[planId];
   if (!modules) return [];
-  
+
   // Si es Enterprise, devolver todos los módulos conocidos
   if (modules.includes('*')) {
     return Object.keys(ROUTES_BY_MODULE);
   }
-  
+
   return modules;
 }
 
@@ -916,7 +975,7 @@ export function getModulesForPlan(planId: SubscriptionPlanId): string[] {
 export function getRecommendedPlan(profileId: ClientProfile): SubscriptionPlanId {
   const profile = CLIENT_PROFILES[profileId];
   if (!profile) return 'starter';
-  
+
   return profile.recommendedPlans[0] || 'starter';
 }
 
@@ -924,7 +983,7 @@ export function getRecommendedPlan(profileId: ClientProfile): SubscriptionPlanId
  * Compara dos planes y devuelve las diferencias
  */
 export function comparePlans(
-  planA: SubscriptionPlanId, 
+  planA: SubscriptionPlanId,
   planB: SubscriptionPlanId
 ): {
   addedModules: string[];
@@ -933,21 +992,24 @@ export function comparePlans(
 } {
   const a = SUBSCRIPTION_PLANS[planA];
   const b = SUBSCRIPTION_PLANS[planB];
-  
+
   const modulesA = new Set(MODULES_BY_PLAN[planA]);
   const modulesB = new Set(MODULES_BY_PLAN[planB]);
-  
-  const addedModules = [...modulesB].filter(m => !modulesA.has(m) && m !== '*');
-  
+
+  const addedModules = [...modulesB].filter((m) => !modulesA.has(m) && m !== '*');
+
   const addedFeatures: string[] = [];
-  if (!a.features.portalInquilino && b.features.portalInquilino) addedFeatures.push('Portal de Inquilino');
-  if (!a.features.portalPropietario && b.features.portalPropietario) addedFeatures.push('Portal de Propietario');
+  if (!a.features.portalInquilino && b.features.portalInquilino)
+    addedFeatures.push('Portal de Inquilino');
+  if (!a.features.portalPropietario && b.features.portalPropietario)
+    addedFeatures.push('Portal de Propietario');
   if (!a.features.firmaDigital && b.features.firmaDigital) addedFeatures.push('Firma Digital');
-  if (!a.features.reportesAvanzados && b.features.reportesAvanzados) addedFeatures.push('Reportes Avanzados');
+  if (!a.features.reportesAvanzados && b.features.reportesAvanzados)
+    addedFeatures.push('Reportes Avanzados');
   if (!a.features.apiAccess && b.features.apiAccess) addedFeatures.push('Acceso API');
   if (!a.features.multiEmpresa && b.features.multiEmpresa) addedFeatures.push('Multi-Empresa');
   if (!a.features.whiteLabel && b.features.whiteLabel) addedFeatures.push('White Label');
-  
+
   const limitUpgrades: Record<string, { from: number; to: number }> = {};
   if (b.limits.maxProperties > a.limits.maxProperties) {
     limitUpgrades.propiedades = { from: a.limits.maxProperties, to: b.limits.maxProperties };
@@ -955,6 +1017,6 @@ export function comparePlans(
   if (b.limits.maxUsers > a.limits.maxUsers) {
     limitUpgrades.usuarios = { from: a.limits.maxUsers, to: b.limits.maxUsers };
   }
-  
+
   return { addedModules, addedFeatures, limitUpgrades };
 }

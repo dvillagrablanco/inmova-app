@@ -12,20 +12,21 @@ import { AgentConfig, AgentFunction, VAPI_CONFIG, ELEVENLABS_VOICE_CONFIG } from
 const SHARED_FUNCTIONS: AgentFunction[] = [
   {
     name: 'transfer_to_human',
-    description: 'Transferir la llamada a un agente humano cuando el cliente lo solicite o cuando la consulta sea demasiado compleja',
+    description:
+      'Transferir la llamada a un agente humano cuando el cliente lo solicite o cuando la consulta sea demasiado compleja',
     parameters: {
       type: 'object',
       properties: {
         reason: { type: 'string', description: 'Motivo de la transferencia' },
-        department: { 
-          type: 'string', 
+        department: {
+          type: 'string',
           enum: ['ventas', 'soporte', 'administracion', 'legal'],
-          description: 'Departamento al que transferir' 
+          description: 'Departamento al que transferir',
         },
         priority: {
           type: 'string',
           enum: ['baja', 'media', 'alta', 'urgente'],
-          description: 'Prioridad de la transferencia'
+          description: 'Prioridad de la transferencia',
         },
       },
       required: ['reason', 'department'],
@@ -52,10 +53,10 @@ const SHARED_FUNCTIONS: AgentFunction[] = [
       properties: {
         channel: { type: 'string', enum: ['email', 'whatsapp', 'sms'] },
         destination: { type: 'string', description: 'Email o número de teléfono' },
-        contentType: { 
-          type: 'string', 
+        contentType: {
+          type: 'string',
           enum: ['property_details', 'contract', 'valuation', 'brochure', 'pricing'],
-          description: 'Tipo de información a enviar'
+          description: 'Tipo de información a enviar',
         },
         propertyId: { type: 'string', description: 'ID de la propiedad si aplica' },
       },
@@ -73,7 +74,7 @@ export const SALES_AGENT: AgentConfig = {
   name: 'Elena - Asesora Comercial',
   type: 'sales',
   description: 'Experta en ventas inmobiliarias con amplio conocimiento del mercado español',
-  
+
   systemPrompt: `Eres Elena, asesora comercial senior de Inmova, una plataforma PropTech líder en España.
 
 ## TU PERSONALIDAD
@@ -121,8 +122,9 @@ export const SALES_AGENT: AgentConfig = {
 - Si el cliente no está interesado, agradece su tiempo elegantemente
 - En temas legales o fiscales, recomienda consultar con un profesional`,
 
-  firstMessage: '¡Hola! Soy Elena, asesora comercial de Inmova. Es un placer atenderte. ¿Estás buscando comprar, vender o alquilar una propiedad?',
-  
+  firstMessage:
+    '¡Hola! Soy Elena, asesora comercial de Inmova. Es un placer atenderte. ¿Estás buscando comprar, vender o alquilar una propiedad?',
+
   functions: [
     ...SHARED_FUNCTIONS,
     {
@@ -131,7 +133,10 @@ export const SALES_AGENT: AgentConfig = {
       parameters: {
         type: 'object',
         properties: {
-          type: { type: 'string', enum: ['piso', 'casa', 'local', 'oficina', 'parking', 'trastero'] },
+          type: {
+            type: 'string',
+            enum: ['piso', 'casa', 'local', 'oficina', 'parking', 'trastero'],
+          },
           operation: { type: 'string', enum: ['alquiler', 'venta'] },
           city: { type: 'string' },
           neighborhood: { type: 'string' },
@@ -192,7 +197,7 @@ export const SALES_AGENT: AgentConfig = {
       },
     },
   ],
-  
+
   metadata: {
     department: 'comercial',
     priority: 'high',
@@ -210,7 +215,7 @@ export const CUSTOMER_SERVICE_AGENT: AgentConfig = {
   name: 'María - Atención al Cliente',
   type: 'customer_service',
   description: 'Especialista en atención al cliente y soporte a inquilinos',
-  
+
   systemPrompt: `Eres María, especialista en atención al cliente de Inmova.
 
 ## TU PERSONALIDAD
@@ -260,8 +265,9 @@ export const CUSTOMER_SERVICE_AGENT: AgentConfig = {
 - Ofrece alternativas, no solo negativas
 - Escala a supervisor si es necesario`,
 
-  firstMessage: '¡Hola! Soy María, del equipo de atención al cliente de Inmova. ¿En qué puedo ayudarte hoy?',
-  
+  firstMessage:
+    '¡Hola! Soy María, del equipo de atención al cliente de Inmova. ¿En qué puedo ayudarte hoy?',
+
   functions: [
     ...SHARED_FUNCTIONS,
     {
@@ -285,9 +291,16 @@ export const CUSTOMER_SERVICE_AGENT: AgentConfig = {
         properties: {
           propertyId: { type: 'string' },
           tenantId: { type: 'string' },
-          category: { 
-            type: 'string', 
-            enum: ['fontaneria', 'electricidad', 'climatizacion', 'cerrajeria', 'electrodomesticos', 'otros'] 
+          category: {
+            type: 'string',
+            enum: [
+              'fontaneria',
+              'electricidad',
+              'climatizacion',
+              'cerrajeria',
+              'electrodomesticos',
+              'otros',
+            ],
           },
           description: { type: 'string' },
           urgency: { type: 'string', enum: ['baja', 'media', 'alta', 'urgente'] },
@@ -338,7 +351,7 @@ export const CUSTOMER_SERVICE_AGENT: AgentConfig = {
       },
     },
   ],
-  
+
   metadata: {
     department: 'soporte',
     priority: 'medium',
@@ -356,7 +369,7 @@ export const INCIDENTS_AGENT: AgentConfig = {
   name: 'Carlos - Técnico de Incidencias',
   type: 'incidents',
   description: 'Especialista técnico en gestión y resolución de incidencias',
-  
+
   systemPrompt: `Eres Carlos, técnico especialista en gestión de incidencias de Inmova.
 
 ## TU PERSONALIDAD
@@ -423,8 +436,9 @@ export const INCIDENTS_AGENT: AgentConfig = {
 - Informa al propietario en incidencias importantes
 - Si hay riesgo para personas, actúa inmediatamente`,
 
-  firstMessage: '¡Hola! Soy Carlos, del departamento técnico de Inmova. ¿Tienes alguna incidencia que reportar?',
-  
+  firstMessage:
+    '¡Hola! Soy Carlos, del departamento técnico de Inmova. ¿Tienes alguna incidencia que reportar?',
+
   functions: [
     ...SHARED_FUNCTIONS,
     {
@@ -435,9 +449,18 @@ export const INCIDENTS_AGENT: AgentConfig = {
         properties: {
           propertyId: { type: 'string' },
           tenantId: { type: 'string' },
-          category: { 
-            type: 'string', 
-            enum: ['fontaneria', 'electricidad', 'climatizacion', 'cerrajeria', 'ascensor', 'electrodomesticos', 'estructural', 'otros'] 
+          category: {
+            type: 'string',
+            enum: [
+              'fontaneria',
+              'electricidad',
+              'climatizacion',
+              'cerrajeria',
+              'ascensor',
+              'electrodomesticos',
+              'estructural',
+              'otros',
+            ],
           },
           subcategory: { type: 'string' },
           description: { type: 'string' },
@@ -496,7 +519,10 @@ export const INCIDENTS_AGENT: AgentConfig = {
         type: 'object',
         properties: {
           propertyId: { type: 'string' },
-          emergencyType: { type: 'string', enum: ['agua', 'electricidad', 'gas', 'seguridad', 'ascensor'] },
+          emergencyType: {
+            type: 'string',
+            enum: ['agua', 'electricidad', 'gas', 'seguridad', 'ascensor'],
+          },
           description: { type: 'string' },
           contactPhone: { type: 'string' },
         },
@@ -504,7 +530,7 @@ export const INCIDENTS_AGENT: AgentConfig = {
       },
     },
   ],
-  
+
   metadata: {
     department: 'tecnico',
     priority: 'high',
@@ -522,7 +548,7 @@ export const VALUATIONS_AGENT: AgentConfig = {
   name: 'Patricia - Tasadora Inmobiliaria',
   type: 'valuations',
   description: 'Experta en valoraciones y análisis del mercado inmobiliario',
-  
+
   systemPrompt: `Eres Patricia, tasadora inmobiliaria certificada de Inmova.
 
 ## TU PERSONALIDAD
@@ -582,8 +608,9 @@ export const VALUATIONS_AGENT: AgentConfig = {
 - Recomienda tasación oficial si es para hipoteca
 - Menciona que los valores son orientativos`,
 
-  firstMessage: '¡Hola! Soy Patricia, tasadora inmobiliaria de Inmova. ¿Te gustaría conocer el valor de mercado de tu propiedad?',
-  
+  firstMessage:
+    '¡Hola! Soy Patricia, tasadora inmobiliaria de Inmova. ¿Te gustaría conocer el valor de mercado de tu propiedad?',
+
   functions: [
     ...SHARED_FUNCTIONS,
     {
@@ -603,13 +630,19 @@ export const VALUATIONS_AGENT: AgentConfig = {
           hasElevator: { type: 'boolean' },
           hasParking: { type: 'boolean' },
           hasTerrace: { type: 'boolean' },
-          condition: { type: 'string', enum: ['nuevo', 'reformado', 'buen_estado', 'necesita_reforma'] },
+          condition: {
+            type: 'string',
+            enum: ['nuevo', 'reformado', 'buen_estado', 'necesita_reforma'],
+          },
           yearBuilt: { type: 'number' },
           energyRating: { type: 'string' },
           ownerName: { type: 'string' },
           ownerPhone: { type: 'string' },
           ownerEmail: { type: 'string' },
-          purpose: { type: 'string', enum: ['venta', 'alquiler', 'hipoteca', 'herencia', 'curiosidad'] },
+          purpose: {
+            type: 'string',
+            enum: ['venta', 'alquiler', 'hipoteca', 'herencia', 'curiosidad'],
+          },
         },
         required: ['address', 'city', 'propertyType', 'squareMeters'],
       },
@@ -672,7 +705,7 @@ export const VALUATIONS_AGENT: AgentConfig = {
       },
     },
   ],
-  
+
   metadata: {
     department: 'valoraciones',
     priority: 'medium',
@@ -690,7 +723,7 @@ export const ACQUISITION_AGENT: AgentConfig = {
   name: 'Roberto - Captador de Propiedades',
   type: 'acquisition',
   description: 'Especialista en captación de propiedades para venta y alquiler',
-  
+
   systemPrompt: `Eres Roberto, captador de propiedades de Inmova.
 
 ## TU PERSONALIDAD
@@ -744,8 +777,9 @@ export const ACQUISITION_AGENT: AgentConfig = {
 - Documenta toda la información de la propiedad
 - Confirma que el propietario puede vender/alquilar legalmente`,
 
-  firstMessage: '¡Hola! Soy Roberto, del equipo de captación de Inmova. ¿Estás pensando en vender o alquilar tu propiedad?',
-  
+  firstMessage:
+    '¡Hola! Soy Roberto, del equipo de captación de Inmova. ¿Estás pensando en vender o alquilar tu propiedad?',
+
   functions: [
     ...SHARED_FUNCTIONS,
     {
@@ -782,7 +816,10 @@ export const ACQUISITION_AGENT: AgentConfig = {
           ownerPhone: { type: 'string' },
           preferredDate: { type: 'string' },
           preferredTime: { type: 'string' },
-          visitPurpose: { type: 'string', enum: ['valoracion', 'fotos', 'tour_virtual', 'completa'] },
+          visitPurpose: {
+            type: 'string',
+            enum: ['valoracion', 'fotos', 'tour_virtual', 'completa'],
+          },
         },
         required: ['propertyAddress', 'ownerName', 'ownerPhone'],
       },
@@ -816,7 +853,7 @@ export const ACQUISITION_AGENT: AgentConfig = {
       },
     },
   ],
-  
+
   metadata: {
     department: 'captacion',
     priority: 'high',
@@ -834,7 +871,7 @@ export const COLIVING_AGENT: AgentConfig = {
   name: 'Laura - Especialista Coliving',
   type: 'coliving',
   description: 'Experta en espacios de coliving y comunidades residenciales',
-  
+
   systemPrompt: `Eres Laura, especialista en coliving de Inmova.
 
 ## TU PERSONALIDAD
@@ -894,8 +931,9 @@ export const COLIVING_AGENT: AgentConfig = {
 - Ofrece siempre visita virtual si no puede presencial
 - Pregunta por sus hobbies e intereses para el matching`,
 
-  firstMessage: '¡Hola! Soy Laura, del equipo de coliving de Inmova. ¿Estás buscando algo más que un piso, una comunidad donde vivir y crecer?',
-  
+  firstMessage:
+    '¡Hola! Soy Laura, del equipo de coliving de Inmova. ¿Estás buscando algo más que un piso, una comunidad donde vivir y crecer?',
+
   functions: [
     ...SHARED_FUNCTIONS,
     {
@@ -909,7 +947,10 @@ export const COLIVING_AGENT: AgentConfig = {
           minBudget: { type: 'number' },
           maxBudget: { type: 'number' },
           moveInDate: { type: 'string' },
-          stayDuration: { type: 'string', enum: ['1-3_meses', '3-6_meses', '6-12_meses', '+12_meses'] },
+          stayDuration: {
+            type: 'string',
+            enum: ['1-3_meses', '3-6_meses', '6-12_meses', '+12_meses'],
+          },
           roomType: { type: 'string', enum: ['individual', 'doble', 'suite'] },
           amenities: { type: 'array', items: { type: 'string' } },
         },
@@ -947,7 +988,10 @@ export const COLIVING_AGENT: AgentConfig = {
         properties: {
           colivingId: { type: 'string' },
           month: { type: 'string' },
-          eventType: { type: 'string', enum: ['networking', 'social', 'deportivo', 'cultural', 'todos'] },
+          eventType: {
+            type: 'string',
+            enum: ['networking', 'social', 'deportivo', 'cultural', 'todos'],
+          },
         },
         required: ['colivingId'],
       },
@@ -968,7 +1012,7 @@ export const COLIVING_AGENT: AgentConfig = {
       },
     },
   ],
-  
+
   metadata: {
     department: 'coliving',
     priority: 'medium',
@@ -986,7 +1030,7 @@ export const COMMUNITIES_AGENT: AgentConfig = {
   name: 'Antonio - Administrador de Fincas',
   type: 'communities',
   description: 'Experto en administración de comunidades de propietarios',
-  
+
   systemPrompt: `Eres Antonio, administrador de fincas de Inmova.
 
 ## TU PERSONALIDAD
@@ -1046,8 +1090,9 @@ export const COMMUNITIES_AGENT: AgentConfig = {
 - Documenta todas las comunicaciones
 - Sé claro con los plazos y procedimientos`,
 
-  firstMessage: '¡Hola! Soy Antonio, administrador de fincas de Inmova. ¿En qué puedo ayudarle con su comunidad de propietarios?',
-  
+  firstMessage:
+    '¡Hola! Soy Antonio, administrador de fincas de Inmova. ¿En qué puedo ayudarle con su comunidad de propietarios?',
+
   functions: [
     ...SHARED_FUNCTIONS,
     {
@@ -1096,7 +1141,10 @@ export const COMMUNITIES_AGENT: AgentConfig = {
         properties: {
           communityId: { type: 'string' },
           propertyNumber: { type: 'string' },
-          certificateType: { type: 'string', enum: ['deuda', 'acuerdos', 'cuotas', 'representacion'] },
+          certificateType: {
+            type: 'string',
+            enum: ['deuda', 'acuerdos', 'cuotas', 'representacion'],
+          },
           purpose: { type: 'string' },
           ownerEmail: { type: 'string' },
         },
@@ -1112,7 +1160,10 @@ export const COMMUNITIES_AGENT: AgentConfig = {
           communityId: { type: 'string' },
           reporterName: { type: 'string' },
           reporterProperty: { type: 'string' },
-          issueType: { type: 'string', enum: ['mantenimiento', 'limpieza', 'vecinos', 'seguridad', 'otros'] },
+          issueType: {
+            type: 'string',
+            enum: ['mantenimiento', 'limpieza', 'vecinos', 'seguridad', 'otros'],
+          },
           description: { type: 'string' },
           location: { type: 'string' },
           urgency: { type: 'string', enum: ['baja', 'media', 'alta', 'urgente'] },
@@ -1148,7 +1199,7 @@ export const COMMUNITIES_AGENT: AgentConfig = {
       },
     },
   ],
-  
+
   metadata: {
     department: 'comunidades',
     priority: 'medium',
@@ -1194,7 +1245,7 @@ export function getAgentByType(type: string): AgentConfig | undefined {
 }
 
 export function getAgentById(id: string): AgentConfig | undefined {
-  return ALL_AGENTS.find(agent => agent.id === id);
+  return ALL_AGENTS.find((agent) => agent.id === id);
 }
 
 // ============================================================================
@@ -1207,31 +1258,34 @@ export function getAgentById(id: string): AgentConfig | undefined {
 export const AGENT_BY_SECTION: Record<string, string> = {
   // Dashboard principal
   '/dashboard': 'receptionist',
-  
+
   // Ventas y propiedades
   '/dashboard/properties': 'sales',
   '/dashboard/properties/new': 'acquisition',
-  
+  '/edificios': 'sales',
+
   // Inquilinos y contratos
   '/dashboard/tenants': 'customer_service',
+  '/inquilinos': 'customer_service',
   '/dashboard/contracts': 'customer_service',
   '/dashboard/payments': 'customer_service',
+  '/pagos': 'customer_service',
   '/dashboard/messages': 'customer_service',
-  
+
   // Incidencias y mantenimiento
   '/dashboard/maintenance': 'incidents',
-  
+
   // Valoraciones
   '/dashboard/herramientas': 'valuations',
   '/dashboard/analytics': 'valuations',
-  
+
   // Propietarios
   '/(dashboard)/dashboard-propietarios': 'acquisition',
-  
+
   // Coliving y media estancia
   '/(dashboard)/coliving': 'coliving',
   '/(dashboard)/media-estancia': 'coliving',
-  
+
   // Comunidades y administración de fincas
   '/dashboard/community': 'communities',
   '/(dashboard)/admin-fincas': 'communities',
@@ -1246,14 +1300,14 @@ export function getAgentForRoute(pathname: string): AgentConfig {
   if (AGENT_BY_SECTION[pathname]) {
     return AGENTS_BY_TYPE[AGENT_BY_SECTION[pathname]];
   }
-  
+
   // Buscar coincidencia parcial
   for (const [route, agentType] of Object.entries(AGENT_BY_SECTION)) {
     if (pathname.startsWith(route)) {
       return AGENTS_BY_TYPE[agentType];
     }
   }
-  
+
   // Por defecto, devolver el recepcionista
   return RECEPTIONIST_AGENT;
 }

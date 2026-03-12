@@ -337,7 +337,7 @@ export async function notifyPaymentDue(
       title: '💰 Pago Próximo',
       body: `Tienes un pago de €${amount} en ${daysUntilDue} días`,
       icon: '/icons/payment-icon.png',
-      url: '/dashboard/payments',
+      url: '/pagos',
       actions: [
         { action: 'pay', title: 'Pagar Ahora' },
         { action: 'remind', title: 'Recordar Después' },

@@ -1969,8 +1969,9 @@ model Company {
   buildings     Building[]
   tenants       Tenant[]
   providers     Provider[]
-  tasks         Task[]
-  auditLogs     AuditLog[]
+  tasks                Task[]
+  managementContracts  ManagementContract[]
+  auditLogs            AuditLog[]
   notifications Notification[]
 
   // Prioridades Medias
@@ -2327,6 +2328,44 @@ enum TaskStatus {
   en_progreso
   completada
   cancelada
+}
+
+enum ManagementContractType {
+  integral
+  parcial
+  subarriendo
+}
+
+enum ManagementContractStatus {
+  borrador
+  pendiente
+  activo
+  vencido
+  cancelado
+}
+
+model ManagementContract {
+  id                   String                   @id @default(cuid())
+  companyId            String
+  propietario          String
+  inmuebles            String[]
+  tipo                 ManagementContractType   @default(integral)
+  honorarios           Float?
+  honorariosPorcentaje Float?
+  fechaInicio          DateTime
+  fechaFin             DateTime
+  estado               ManagementContractStatus @default(borrador)
+  condiciones          String?                  @db.Text
+  notas                String?                  @db.Text
+  createdAt            DateTime                 @default(now())
+  updatedAt            DateTime                 @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([estado])
+  @@index([propietario])
+  @@map("management_contracts")
 }
 
 model Task {

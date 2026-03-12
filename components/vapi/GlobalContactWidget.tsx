@@ -20,11 +20,15 @@ const WHATSAPP_NUMBER = (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '').trim();
 const ROUTE_TO_AGENT: Record<string, AgentType> = {
   '/dashboard': 'receptionist',
   '/dashboard/properties': 'sales',
+  '/edificios': 'sales',
   '/dashboard/tenants': 'customer_service',
+  '/inquilinos': 'customer_service',
   '/dashboard/contracts': 'customer_service',
   '/dashboard/payments': 'customer_service',
+  '/pagos': 'customer_service',
   '/dashboard/messages': 'customer_service',
   '/dashboard/maintenance': 'incidents',
+  '/incidencias': 'incidents',
   '/dashboard/herramientas': 'valuations',
   '/dashboard/analytics': 'valuations',
   '/dashboard/community': 'communities',
@@ -62,14 +66,14 @@ export function GlobalContactWidget({ className }: GlobalContactWidgetProps) {
     if (ROUTE_TO_AGENT[pathname]) {
       return ROUTE_TO_AGENT[pathname];
     }
-    
+
     // Buscar coincidencia por inicio de ruta
     for (const [route, agent] of Object.entries(ROUTE_TO_AGENT)) {
       if (pathname.startsWith(route)) {
         return agent;
       }
     }
-    
+
     // Default: recepcionista
     return 'receptionist';
   };
@@ -204,9 +208,7 @@ export function GlobalContactWidget({ className }: GlobalContactWidgetProps) {
         ) : (
           <>
             <Headphones className="h-6 w-6" />
-            <span className="font-medium">
-              ¿Ayuda? Habla con {agentInfo.name}
-            </span>
+            <span className="font-medium">¿Ayuda? Habla con {agentInfo.name}</span>
           </>
         )}
       </button>

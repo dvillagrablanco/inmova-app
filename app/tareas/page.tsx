@@ -67,9 +67,18 @@ interface Task {
   descripcion?: string;
   estado: string;
   prioridad: string;
+  fechaLimite?: string;
   fechaVencimiento?: string;
-  asignadoA?: {
+  asignadoA?: string;
+  asignadoUser?: {
+    id: string;
     name: string;
+    email: string;
+  };
+  creadorUser?: {
+    id: string;
+    name: string;
+    email: string;
   };
   building?: {
     nombre: string;
@@ -78,16 +87,16 @@ interface Task {
 }
 
 const priorities = [
-  { value: 'BAJA', label: 'Baja', color: 'bg-blue-500' },
-  { value: 'MEDIA', label: 'Media', color: 'bg-yellow-500' },
-  { value: 'ALTA', label: 'Alta', color: 'bg-orange-500' },
-  { value: 'URGENTE', label: 'Urgente', color: 'bg-red-500' },
+  { value: 'baja', label: 'Baja', color: 'bg-blue-500' },
+  { value: 'media', label: 'Media', color: 'bg-yellow-500' },
+  { value: 'alta', label: 'Alta', color: 'bg-orange-500' },
+  { value: 'urgente', label: 'Urgente', color: 'bg-red-500' },
 ];
 
 const statuses = [
-  { value: 'PENDIENTE', label: 'Pendiente', icon: Clock },
-  { value: 'EN_PROGRESO', label: 'En Progreso', icon: AlertCircle },
-  { value: 'COMPLETADA', label: 'Completada', icon: CheckCircle2 },
+  { value: 'pendiente', label: 'Pendiente', icon: Clock },
+  { value: 'en_progreso', label: 'En Progreso', icon: AlertCircle },
+  { value: 'completada', label: 'Completada', icon: CheckCircle2 },
 ];
 
 export default function TareasPage() {
@@ -113,8 +122,8 @@ export default function TareasPage() {
   const [formData, setFormData] = useState({
     titulo: '',
     descripcion: '',
-    prioridad: 'MEDIA',
-    estado: 'PENDIENTE',
+    prioridad: 'media',
+    estado: 'pendiente',
     fechaVencimiento: '',
   });
 
@@ -139,8 +148,9 @@ export default function TareasPage() {
       setIsLoading(true);
       const response = await fetch('/api/tasks');
       if (!response.ok) throw new Error();
-      const data = await response.json();
-      setTasks(data);
+      const json = await response.json();
+      const items = Array.isArray(json) ? json : Array.isArray(json.data) ? json.data : [];
+      setTasks(items);
     } catch (error) {
       console.error('Error fetching tasks:', error);
       toast.error('Error al cargar tareas');
@@ -174,10 +184,17 @@ export default function TareasPage() {
     e.preventDefault();
     setIsSaving(true);
     try {
+      const payload = {
+        titulo: formData.titulo,
+        descripcion: formData.descripcion,
+        prioridad: formData.prioridad,
+        estado: formData.estado,
+        fechaLimite: formData.fechaVencimiento || undefined,
+      };
       const response = await fetch('/api/tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) throw new Error();
@@ -187,8 +204,8 @@ export default function TareasPage() {
       setFormData({
         titulo: '',
         descripcion: '',
-        prioridad: 'MEDIA',
-        estado: 'PENDIENTE',
+        prioridad: 'media',
+        estado: 'pendiente',
         fechaVencimiento: '',
       });
       fetchTasks();
@@ -423,7 +440,7 @@ export default function TareasPage() {
                               descripcion: task.descripcion || '',
                               prioridad: task.prioridad,
                               estado: task.estado,
-                              fechaVencimiento: task.fechaVencimiento || '',
+                              fechaVencimiento: task.fechaLimite || task.fechaVencimiento || '',
                             });
                             setEditDialogOpen(true);
                           }}
@@ -452,17 +469,22 @@ export default function TareasPage() {
                     {getPriorityBadge(task.prioridad)}
                   </div>
 
-                  {task.fechaVencimiento && (
+                  {(task.fechaLimite || task.fechaVencimiento) && (
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Calendar className="h-4 w-4" />
-                      {format(new Date(task.fechaVencimiento), "dd 'de' MMM, yyyy", { locale: es })}
+                      {format(
+                        new Date(task.fechaLimite || task.fechaVencimiento!),
+                        "dd 'de' MMM, yyyy",
+                        { locale: es }
+                      )}
                     </div>
                   )}
 
-                  {task.asignadoA && (
+                  {(task.asignadoUser || task.asignadoA) && (
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <User className="h-4 w-4" />
-                      {task.asignadoA.name}
+                      {task.asignadoUser?.name ||
+                        (typeof task.asignadoA === 'object' ? (task.asignadoA as any)?.name : '')}
                     </div>
                   )}
                 </CardContent>

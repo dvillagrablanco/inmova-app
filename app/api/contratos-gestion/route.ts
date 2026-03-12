@@ -6,6 +6,11 @@ import { z } from 'zod';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
+
 const createSchema = z.object({
   propietario: z.string().min(1),
   inmuebles: z.array(z.string()).min(1),
@@ -15,47 +20,53 @@ const createSchema = z.object({
   fechaInicio: z.string(),
   fechaFin: z.string(),
   condiciones: z.string().optional(),
+  notas: z.string().optional(),
 });
-
-type ContratoGestion = {
-  id: string;
-  propietario: string;
-  inmuebles: string[];
-  tipo: string;
-  honorarios?: number;
-  honorariosPorcentaje?: number;
-  fechaInicio: string;
-  fechaFin: string;
-  estado: string;
-  condiciones?: string;
-  createdAt: string;
-};
-
-// In-memory storage (no Prisma model yet — to be migrated to DB)
-let mockContracts: ContratoGestion[] = [];
 
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
-    if (!session) {
+    if (!session?.user?.email) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    return NextResponse.json(mockContracts);
+    const prisma = await getPrisma();
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { companyId: true },
+    });
+
+    if (!user?.companyId) {
+      return NextResponse.json([]);
+    }
+
+    const contracts = await prisma.managementContract.findMany({
+      where: { companyId: user.companyId },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return NextResponse.json(contracts);
   } catch (error) {
     console.error('[ContratosGestion API] Error:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener contratos de gestión' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener contratos de gestión' }, { status: 500 });
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session) {
+    if (!session?.user?.email) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    const prisma = await getPrisma();
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { companyId: true },
+    });
+
+    if (!user?.companyId) {
+      return NextResponse.json({ error: 'Sin empresa asociada' }, { status: 400 });
     }
 
     const body = await req.json();
@@ -68,23 +79,23 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const nuevoContrato: ContratoGestion = {
-      id: `cg-${Date.now()}`,
-      propietario: validated.propietario,
-      inmuebles: validated.inmuebles,
-      tipo: validated.tipo,
-      honorarios: validated.honorarios,
-      honorariosPorcentaje: validated.honorariosPorcentaje,
-      fechaInicio: validated.fechaInicio,
-      fechaFin: validated.fechaFin,
-      estado: 'pendiente',
-      condiciones: validated.condiciones,
-      createdAt: new Date().toISOString(),
-    };
+    const contract = await prisma.managementContract.create({
+      data: {
+        companyId: user.companyId,
+        propietario: validated.propietario,
+        inmuebles: validated.inmuebles,
+        tipo: validated.tipo as any,
+        honorarios: validated.honorarios,
+        honorariosPorcentaje: validated.honorariosPorcentaje,
+        fechaInicio: new Date(validated.fechaInicio),
+        fechaFin: new Date(validated.fechaFin),
+        estado: 'borrador',
+        condiciones: validated.condiciones,
+        notas: validated.notas,
+      },
+    });
 
-    mockContracts.push(nuevoContrato);
-
-    return NextResponse.json(nuevoContrato, { status: 201 });
+    return NextResponse.json(contract, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -93,9 +104,6 @@ export async function POST(req: NextRequest) {
       );
     }
     console.error('[ContratosGestion API] Error:', error);
-    return NextResponse.json(
-      { error: 'Error al crear contrato de gestión' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al crear contrato de gestión' }, { status: 500 });
   }
 }

@@ -247,7 +247,10 @@ const validateFutureDate = (data: { fechaVencimiento?: string | Date }) => {
   if (!data.fechaVencimiento) return true;
   const maxDate = new Date();
   maxDate.setFullYear(maxDate.getFullYear() + 5);
-  const fecha = typeof data.fechaVencimiento === 'string' ? new Date(data.fechaVencimiento) : data.fechaVencimiento;
+  const fecha =
+    typeof data.fechaVencimiento === 'string'
+      ? new Date(data.fechaVencimiento)
+      : data.fechaVencimiento;
   return fecha <= maxDate;
 };
 
@@ -256,10 +259,13 @@ export const paymentCreateSchema = paymentBaseSchema.refine(validateFutureDate, 
   path: ['fechaVencimiento'],
 });
 
-export const paymentUpdateSchema = paymentBaseSchema.partial().omit({ contractId: true }).refine(validateFutureDate, {
-  message: 'La fecha de vencimiento no puede ser más de 5 años en el futuro',
-  path: ['fechaVencimiento'],
-});
+export const paymentUpdateSchema = paymentBaseSchema
+  .partial()
+  .omit({ contractId: true })
+  .refine(validateFutureDate, {
+    message: 'La fecha de vencimiento no puede ser más de 5 años en el futuro',
+    path: ['fechaVencimiento'],
+  });
 
 // ====================================
 // MANTENIMIENTO (MAINTENANCE)
@@ -431,12 +437,12 @@ export const taskCreateSchema = z.object({
     .trim(),
   descripcion: z.string().max(5000, 'La descripción no puede exceder 5000 caracteres').optional(),
   estado: z
-    .enum(['pendiente', 'en_progreso', 'completado', 'cancelado'])
+    .enum(['pendiente', 'en_progreso', 'completada', 'cancelada'])
     .optional()
     .default('pendiente'),
   prioridad: z.enum(['baja', 'media', 'alta', 'urgente']).optional().default('media'),
-  fechaLimite: z.string().datetime({ message: 'Fecha límite inválida' }).or(z.date()).optional(),
-  fechaInicio: z.string().datetime({ message: 'Fecha de inicio inválida' }).or(z.date()).optional(),
+  fechaLimite: z.string().optional(),
+  fechaInicio: z.string().optional(),
   asignadoA: z.string().uuid('ID de usuario asignado inválido').optional(),
   notas: z.string().max(5000, 'Las notas no pueden exceder 5000 caracteres').optional(),
 });
