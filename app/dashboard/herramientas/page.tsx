@@ -19,9 +19,19 @@ import Link from 'next/link';
 
 const tools = [
   {
+    id: 'calculadoras-inversion',
+    name: 'Calculadoras de Inversión',
+    description: 'Alquiler tradicional, habitaciones, turístico y flipping (CRV)',
+    icon: Calculator,
+    href: '/dashboard/herramientas/calculadoras',
+    color: 'text-blue-600',
+    bgColor: 'bg-blue-50',
+    badge: 'Nuevo',
+  },
+  {
     id: 'calculadora-rentabilidad',
-    name: 'Calculadora de Rentabilidad',
-    description: 'Calcula el ROI y rentabilidad de tus inversiones inmobiliarias',
+    name: 'Calculadora ROI General',
+    description: 'Calcula el ROI y rentabilidad básica de tus inversiones',
     icon: Calculator,
     href: '/landing/calculadora-roi',
     color: 'text-blue-600',
