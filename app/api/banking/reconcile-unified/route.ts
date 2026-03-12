@@ -12,6 +12,12 @@ import logger from '@/lib/logger';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+type ScopedUser = {
+  companyId?: string | null;
+  role?: string | null;
+  id?: string | null;
+};
+
 /**
  * GET /api/banking/reconcile-unified
  * Estado bancario de las sociedades (Viroda, Rovida)
@@ -23,15 +29,21 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
+    const { resolveAccountingScope } = await import('@/lib/accounting-scope');
+    const scope = await resolveAccountingScope(request, session.user as ScopedUser);
+    if (!scope) {
+      return NextResponse.json({ error: 'Sin acceso a sociedades' }, { status: 403 });
+    }
+
     const { searchParams } = new URL(request.url);
     const all = searchParams.get('all') === 'true';
 
     if (all) {
-      const statuses = await getAllCompanyBankingStatus();
+      const statuses = await getAllCompanyBankingStatus(scope.companyIds);
       return NextResponse.json({ success: true, companies: statuses });
     }
 
-    const status = await getCompanyBankingStatus(session.user.companyId);
+    const status = await getCompanyBankingStatus(scope.activeCompanyId);
     return NextResponse.json({ success: true, company: status });
   } catch (error: any) {
     logger.error('[Banking Unified GET]:', error);
@@ -61,8 +73,16 @@ export async function POST(request: NextRequest) {
 
     // Resolver scope de empresa
     const { resolveAccountingScope } = await import('@/lib/accounting-scope');
-    const scope = await resolveAccountingScope(request, session.user as any);
-    const companyId = targetCompanyId || scope?.activeCompanyId || (session.user as any).companyId;
+    const scope = await resolveAccountingScope(request, session.user as ScopedUser);
+    if (!scope) {
+      return NextResponse.json({ error: 'Sin acceso a sociedades' }, { status: 403 });
+    }
+
+    if (targetCompanyId && !scope.companyIds.includes(targetCompanyId)) {
+      return NextResponse.json({ error: 'Sin acceso a la sociedad solicitada' }, { status: 403 });
+    }
+
+    const companyId = targetCompanyId || scope.activeCompanyId;
 
     switch (action) {
       case 'reconcile': {

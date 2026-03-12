@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,14 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Building2,
-  ArrowRight,
-  CheckCircle2,
-  Loader2,
-  ExternalLink,
-  Shield,
-} from 'lucide-react';
+import { Building2, ArrowRight, CheckCircle2, Loader2, ExternalLink, Shield } from 'lucide-react';
 import { toast } from 'sonner';
 
 const BANK_CODES: Record<string, string> = {
@@ -37,23 +30,70 @@ const BANKS = [
   { id: 'sabadell', name: 'Sabadell', color: 'bg-[#00529b]' },
 ];
 
-const COMPANIES = [
-  { id: 'vidaro', name: 'Vidaro' },
-  { id: 'rovida', name: 'Rovida' },
-  { id: 'viroda', name: 'Viroda' },
-  { id: 'vibla', name: 'VIBLA SCR' },
-];
-
 interface PSD2ConnectionWizardProps {
   onComplete?: () => void;
+}
+
+interface AvailableCompany {
+  id: string;
+  nombre: string;
 }
 
 export function PSD2ConnectionWizard({ onComplete }: PSD2ConnectionWizardProps) {
   const [step, setStep] = useState(1);
   const [selectedBank, setSelectedBank] = useState<string>('');
   const [selectedCompany, setSelectedCompany] = useState<string>('');
+  const [availableCompanies, setAvailableCompanies] = useState<AvailableCompany[]>([]);
+  const [loadingCompanies, setLoadingCompanies] = useState(true);
   const [connecting, setConnecting] = useState(false);
   const [connected, setConnected] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadCompanies = async () => {
+      try {
+        setLoadingCompanies(true);
+        const res = await fetch('/api/user/companies');
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'No se pudieron cargar las sociedades');
+        }
+
+        const companies = Array.isArray(data.companies)
+          ? data.companies
+              .filter((company: { id?: string; nombre?: string }) => company.id && company.nombre)
+              .map((company: { id: string; nombre: string }) => ({
+                id: company.id,
+                nombre: company.nombre,
+              }))
+          : [];
+
+        if (!cancelled) {
+          setAvailableCompanies(companies);
+          setSelectedCompany(
+            (currentCompanyId) =>
+              currentCompanyId || data.currentCompanyId || companies[0]?.id || ''
+          );
+        }
+      } catch (error) {
+        if (!cancelled) {
+          toast.error(error instanceof Error ? error.message : 'Error cargando sociedades');
+        }
+      } finally {
+        if (!cancelled) {
+          setLoadingCompanies(false);
+        }
+      }
+    };
+
+    void loadCompanies();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleConnect = async () => {
     if (!selectedBank || !selectedCompany) {
@@ -83,8 +123,9 @@ export function PSD2ConnectionWizard({ onComplete }: PSD2ConnectionWizardProps) 
         throw new Error(data.error || 'Error al conectar');
       }
 
-      if (data.redirectUrl) {
-        window.location.href = data.redirectUrl;
+      const redirectUrl = data.redirectUrl || data.link;
+      if (redirectUrl) {
+        window.location.href = redirectUrl;
         return;
       }
 
@@ -123,9 +164,7 @@ export function PSD2ConnectionWizard({ onComplete }: PSD2ConnectionWizardProps) 
                 {BANKS.map((bank) => (
                   <SelectItem key={bank.id} value={bank.id}>
                     <span className="flex items-center gap-2">
-                      <span
-                        className={`inline-block h-3 w-3 rounded-full ${bank.color}`}
-                      />
+                      <span className={`inline-block h-3 w-3 rounded-full ${bank.color}`} />
                       {bank.name}
                     </span>
                   </SelectItem>
@@ -141,16 +180,23 @@ export function PSD2ConnectionWizard({ onComplete }: PSD2ConnectionWizardProps) 
             <p className="text-sm font-medium">Paso 2: ¿Para qué empresa es esta cuenta?</p>
             <Select value={selectedCompany} onValueChange={setSelectedCompany}>
               <SelectTrigger>
-                <SelectValue placeholder="Seleccione empresa" />
+                <SelectValue
+                  placeholder={loadingCompanies ? 'Cargando sociedades...' : 'Seleccione empresa'}
+                />
               </SelectTrigger>
               <SelectContent>
-                {COMPANIES.map((c) => (
+                {availableCompanies.map((c) => (
                   <SelectItem key={c.id} value={c.id}>
-                    {c.name}
+                    {c.nombre}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+            {!loadingCompanies && availableCompanies.length === 0 && (
+              <p className="text-sm text-muted-foreground">
+                No hay sociedades accesibles para conectar cuentas bancarias.
+              </p>
+            )}
           </div>
         )}
 
@@ -162,37 +208,31 @@ export function PSD2ConnectionWizard({ onComplete }: PSD2ConnectionWizardProps) 
               <div>
                 <p className="text-sm font-medium">Autorización en el banco</p>
                 <p className="text-sm text-muted-foreground">
-                  Será redirigido a la página de su banco para autorizar el acceso de forma
-                  segura. Solo podremos leer los movimientos de la cuenta.
+                  Será redirigido a la página de su banco para autorizar el acceso de forma segura.
+                  Solo podremos leer los movimientos de la cuenta.
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-            <Button
-              onClick={handleConnect}
-              disabled={connecting || !selectedBank || !selectedCompany}
-            >
-              {connecting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Conectando...
-                </>
-              ) : (
-                <>
-                  Conectar con{' '}
-                  {BANKS.find((b) => b.id === selectedBank)?.name || 'banco'}
-                  <ExternalLink className="ml-2 h-4 w-4" />
-                </>
-              )}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setStep(2)}
-              disabled={connecting}
-            >
-              Atrás
-            </Button>
+              <Button
+                onClick={handleConnect}
+                disabled={connecting || !selectedBank || !selectedCompany}
+              >
+                {connecting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Conectando...
+                  </>
+                ) : (
+                  <>
+                    Conectar con {BANKS.find((b) => b.id === selectedBank)?.name || 'banco'}
+                    <ExternalLink className="ml-2 h-4 w-4" />
+                  </>
+                )}
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => setStep(2)} disabled={connecting}>
+                Atrás
+              </Button>
             </div>
           </div>
         )}
@@ -225,7 +265,8 @@ export function PSD2ConnectionWizard({ onComplete }: PSD2ConnectionWizardProps) 
             <Button
               onClick={() => setStep((s) => Math.min(4, s + 1))}
               disabled={
-                (step === 1 && !selectedBank) || (step === 2 && !selectedCompany)
+                (step === 1 && !selectedBank) ||
+                (step === 2 && (!selectedCompany || loadingCompanies))
               }
             >
               Siguiente
@@ -237,11 +278,7 @@ export function PSD2ConnectionWizard({ onComplete }: PSD2ConnectionWizardProps) 
         {step < 3 && !connected && (
           <div className="flex gap-2">
             {[1, 2, 3].map((s) => (
-              <Badge
-                key={s}
-                variant={s <= step ? 'default' : 'secondary'}
-                className="text-xs"
-              >
+              <Badge key={s} variant={s <= step ? 'default' : 'secondary'} className="text-xs">
                 {s}
               </Badge>
             ))}

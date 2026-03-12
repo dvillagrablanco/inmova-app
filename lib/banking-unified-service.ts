@@ -37,7 +37,7 @@ export const SOCIEDADES = {
   },
   VIRODA: {
     nombre: 'VIRODA INVERSIONES S.L.',
-    searchNames: ['VIRODA', 'VIRODA INVERSIONES', 'VIDARO', 'VIRODA INVERSIONES SL'],
+    searchNames: ['VIRODA', 'VIRODA INVERSIONES', 'VIRODA INVERSIONES SL'],
     iban: 'ES8801280250590100081826',
     banco: 'Bankinter',
     bic: 'BKBKESMMXXX',
@@ -136,18 +136,25 @@ export async function getCompanyBankingStatus(
 /**
  * Obtener status de ambas sociedades
  */
-export async function getAllCompanyBankingStatus(): Promise<CompanyBankingConfig[]> {
+export async function getAllCompanyBankingStatus(
+  companyIds?: string[]
+): Promise<CompanyBankingConfig[]> {
   const prisma = getPrismaClient();
 
   const companies = await prisma.company.findMany({
     where: {
-      OR: [
-        { nombre: { contains: 'Rovida', mode: 'insensitive' } },
-        { nombre: { contains: 'Viroda', mode: 'insensitive' } },
-        { nombre: { contains: 'Vidaro', mode: 'insensitive' } },
-      ],
+      ...(companyIds && companyIds.length > 0
+        ? { id: { in: companyIds } }
+        : {
+            OR: [
+              { nombre: { contains: 'Rovida', mode: 'insensitive' } },
+              { nombre: { contains: 'Viroda', mode: 'insensitive' } },
+              { nombre: { contains: 'Vidaro', mode: 'insensitive' } },
+            ],
+          }),
     },
-    select: { id: true },
+    select: { id: true, nombre: true },
+    orderBy: { nombre: 'asc' },
   });
 
   const results: CompanyBankingConfig[] = [];

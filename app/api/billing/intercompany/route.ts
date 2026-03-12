@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-options';
 import logger from '@/lib/logger';
 import * as Sentry from '@sentry/nextjs';
 import { z } from 'zod';
+import { resolveCompanyScope } from '@/lib/company-scope';
+import type { UserRole } from '@/types/prisma-types';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -11,6 +13,42 @@ export const runtime = 'nodejs';
 async function getPrisma() {
   const { getPrismaClient } = await import('@/lib/db');
   return getPrismaClient();
+}
+
+const ROLE_ALLOWLIST: UserRole[] = [
+  'super_admin',
+  'administrador',
+  'gestor',
+  'operador',
+  'soporte',
+  'community_manager',
+  'socio_ewoorker',
+  'contratista_ewoorker',
+  'subcontratista_ewoorker',
+];
+
+function resolveUserRole(role: unknown): UserRole | null {
+  if (typeof role !== 'string') {
+    return null;
+  }
+
+  return ROLE_ALLOWLIST.includes(role as UserRole) ? (role as UserRole) : null;
+}
+
+async function getRootCompanyId(
+  prismaClient: Awaited<ReturnType<typeof getPrisma>>,
+  companyId: string
+) {
+  const company = await prismaClient.company.findUnique({
+    where: { id: companyId },
+    select: { id: true, parentCompanyId: true },
+  });
+
+  if (!company) {
+    return null;
+  }
+
+  return company.parentCompanyId || company.id;
 }
 
 const createIntercompanySchema = z.object({
@@ -35,21 +73,31 @@ export async function GET(request: NextRequest) {
   const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.companyId) {
+    if (!session?.user?.id || !session.user.companyId) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    // Consolidated: include child companies for group view
-    const companyHierarchy = await prisma.company.findUnique({
-      where: { id: session.user.companyId },
-      select: { childCompanies: { select: { id: true } } },
+    const role = resolveUserRole(session.user.role);
+    if (!role) {
+      return NextResponse.json({ error: 'Rol inválido' }, { status: 403 });
+    }
+
+    const scope = await resolveCompanyScope({
+      userId: session.user.id,
+      role,
+      primaryCompanyId: session.user.companyId,
+      request,
     });
-    const allCompanyIds = companyHierarchy
-      ? [
-          session.user.companyId,
-          ...companyHierarchy.childCompanies.map((c: { id: string }) => c.id),
-        ]
-      : [session.user.companyId];
+    const allCompanyIds =
+      scope.scopeCompanyIds.length > 0
+        ? scope.scopeCompanyIds
+        : scope.activeCompanyId
+          ? [scope.activeCompanyId]
+          : [];
+
+    if (allCompanyIds.length === 0) {
+      return NextResponse.json({ error: 'Sin acceso a sociedades' }, { status: 403 });
+    }
 
     // Buscar facturas B2B entre empresas del grupo
     const invoices = await prisma.b2BInvoice.findMany({
@@ -95,12 +143,42 @@ export async function POST(request: NextRequest) {
   const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.companyId) {
+    if (!session?.user?.id || !session.user.companyId) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+    }
+
+    const role = resolveUserRole(session.user.role);
+    if (!role) {
+      return NextResponse.json({ error: 'Rol inválido' }, { status: 403 });
     }
 
     const body = await request.json();
     const validated = createIntercompanySchema.parse(body);
+
+    if (validated.fromCompanyId === validated.toCompanyId) {
+      return NextResponse.json(
+        { error: 'Las sociedades emisora y receptora deben ser diferentes' },
+        { status: 400 }
+      );
+    }
+
+    const scope = await resolveCompanyScope({
+      userId: session.user.id,
+      role,
+      primaryCompanyId: session.user.companyId,
+      request,
+    });
+
+    const accessibleCompanyIds = new Set(scope.accessibleCompanyIds);
+    if (
+      !accessibleCompanyIds.has(validated.fromCompanyId) ||
+      !accessibleCompanyIds.has(validated.toCompanyId)
+    ) {
+      return NextResponse.json(
+        { error: 'Sin acceso a una o ambas sociedades indicadas' },
+        { status: 403 }
+      );
+    }
 
     // Verificar que ambas empresas existen y son del mismo grupo
     const [fromCompany, toCompany] = await Promise.all([
@@ -116,6 +194,18 @@ export async function POST(request: NextRequest) {
 
     if (!fromCompany || !toCompany) {
       return NextResponse.json({ error: 'Empresa no encontrada' }, { status: 404 });
+    }
+
+    const [fromRootCompanyId, toRootCompanyId] = await Promise.all([
+      getRootCompanyId(prisma, validated.fromCompanyId),
+      getRootCompanyId(prisma, validated.toCompanyId),
+    ]);
+
+    if (!fromRootCompanyId || !toRootCompanyId || fromRootCompanyId !== toRootCompanyId) {
+      return NextResponse.json(
+        { error: 'Las sociedades deben pertenecer al mismo grupo' },
+        { status: 400 }
+      );
     }
 
     // Calcular totales

@@ -14,7 +14,13 @@ import logger from '@/lib/logger';
 
 export interface FiscalAlert {
   id: string;
-  tipo: 'modelo_202' | 'modelo_200' | 'modelo_303' | 'modelo_347' | 'revision_hipoteca' | 'deposito_fianza';
+  tipo:
+    | 'modelo_202'
+    | 'modelo_200'
+    | 'modelo_303'
+    | 'modelo_347'
+    | 'revision_hipoteca'
+    | 'deposito_fianza';
   titulo: string;
   descripcion: string;
   fechaLimite: Date;
@@ -36,18 +42,81 @@ const CALENDAR_FISCAL: Array<{
   descripcion: string;
 }> = [
   // Modelo 202 - Pagos fraccionados IS
-  { modelo: '202', tipo: 'modelo_202', mes: 3, diaLimite: 20, titulo: 'Modelo 202 - 1P', descripcion: 'Pago fraccionado IS (abril)' },
-  { modelo: '202', tipo: 'modelo_202', mes: 9, diaLimite: 20, titulo: 'Modelo 202 - 2P', descripcion: 'Pago fraccionado IS (octubre)' },
-  { modelo: '202', tipo: 'modelo_202', mes: 11, diaLimite: 20, titulo: 'Modelo 202 - 3P', descripcion: 'Pago fraccionado IS (diciembre)' },
+  {
+    modelo: '202',
+    tipo: 'modelo_202',
+    mes: 3,
+    diaLimite: 20,
+    titulo: 'Modelo 202 - 1P',
+    descripcion: 'Pago fraccionado IS (abril)',
+  },
+  {
+    modelo: '202',
+    tipo: 'modelo_202',
+    mes: 9,
+    diaLimite: 20,
+    titulo: 'Modelo 202 - 2P',
+    descripcion: 'Pago fraccionado IS (octubre)',
+  },
+  {
+    modelo: '202',
+    tipo: 'modelo_202',
+    mes: 11,
+    diaLimite: 20,
+    titulo: 'Modelo 202 - 3P',
+    descripcion: 'Pago fraccionado IS (diciembre)',
+  },
   // Modelo 200 - Declaración anual IS
-  { modelo: '200', tipo: 'modelo_200', mes: 6, diaLimite: 25, titulo: 'Modelo 200', descripcion: 'Declaración anual Impuesto de Sociedades' },
+  {
+    modelo: '200',
+    tipo: 'modelo_200',
+    mes: 6,
+    diaLimite: 25,
+    titulo: 'Modelo 200',
+    descripcion: 'Declaración anual Impuesto de Sociedades',
+  },
   // Modelo 303 - IVA trimestral
-  { modelo: '303', tipo: 'modelo_303', mes: 3, diaLimite: 20, titulo: 'Modelo 303 - T1', descripcion: 'IVA trimestral (1er trimestre)' },
-  { modelo: '303', tipo: 'modelo_303', mes: 6, diaLimite: 20, titulo: 'Modelo 303 - T2', descripcion: 'IVA trimestral (2o trimestre)' },
-  { modelo: '303', tipo: 'modelo_303', mes: 9, diaLimite: 20, titulo: 'Modelo 303 - T3', descripcion: 'IVA trimestral (3er trimestre)' },
-  { modelo: '303', tipo: 'modelo_303', mes: 0, diaLimite: 30, titulo: 'Modelo 303 - T4', descripcion: 'IVA trimestral (4o trimestre)' },
+  {
+    modelo: '303',
+    tipo: 'modelo_303',
+    mes: 3,
+    diaLimite: 20,
+    titulo: 'Modelo 303 - T1',
+    descripcion: 'IVA trimestral (1er trimestre)',
+  },
+  {
+    modelo: '303',
+    tipo: 'modelo_303',
+    mes: 6,
+    diaLimite: 20,
+    titulo: 'Modelo 303 - T2',
+    descripcion: 'IVA trimestral (2o trimestre)',
+  },
+  {
+    modelo: '303',
+    tipo: 'modelo_303',
+    mes: 9,
+    diaLimite: 20,
+    titulo: 'Modelo 303 - T3',
+    descripcion: 'IVA trimestral (3er trimestre)',
+  },
+  {
+    modelo: '303',
+    tipo: 'modelo_303',
+    mes: 0,
+    diaLimite: 30,
+    titulo: 'Modelo 303 - T4',
+    descripcion: 'IVA trimestral (4o trimestre)',
+  },
   // Modelo 347 - Operaciones con terceros
-  { modelo: '347', tipo: 'modelo_347', mes: 1, diaLimite: 28, titulo: 'Modelo 347', descripcion: 'Declaración anual operaciones con terceros' },
+  {
+    modelo: '347',
+    tipo: 'modelo_347',
+    mes: 1,
+    diaLimite: 28,
+    titulo: 'Modelo 347',
+    descripcion: 'Declaración anual operaciones con terceros',
+  },
 ];
 
 /**
@@ -57,17 +126,34 @@ export async function getFiscalAlerts(companyId: string): Promise<FiscalAlert[]>
   const { getPrismaClient } = await import('@/lib/db');
   const prisma = getPrismaClient();
 
-  // Obtener empresa + filiales
-  const company = await prisma.company.findUnique({
+  const selectedCompany = await prisma.company.findUnique({
     where: { id: companyId },
-    include: { childCompanies: { select: { id: true, nombre: true } } },
+    select: {
+      id: true,
+      nombre: true,
+      parentCompanyId: true,
+      childCompanies: { select: { id: true, nombre: true } },
+    },
   });
 
-  if (!company) return [];
+  if (!selectedCompany) return [];
+
+  const rootCompany = selectedCompany.parentCompanyId
+    ? await prisma.company.findUnique({
+        where: { id: selectedCompany.parentCompanyId },
+        select: {
+          id: true,
+          nombre: true,
+          childCompanies: { select: { id: true, nombre: true } },
+        },
+      })
+    : selectedCompany;
+
+  if (!rootCompany) return [];
 
   const allCompanies = [
-    { id: company.id, nombre: company.nombre },
-    ...company.childCompanies,
+    { id: rootCompany.id, nombre: rootCompany.nombre },
+    ...rootCompany.childCompanies,
   ];
 
   const today = new Date();
@@ -84,14 +170,20 @@ export async function getFiscalAlerts(companyId: string): Promise<FiscalAlert[]>
         fechaLimite.setFullYear(year + 1);
       }
 
-      const diasRestantes = Math.ceil((fechaLimite.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      const diasRestantes = Math.ceil(
+        (fechaLimite.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+      );
 
       // Solo alertar si faltan <= 30 días
       if (diasRestantes <= 30) {
         const urgencia: FiscalAlert['urgencia'] =
-          diasRestantes <= 3 ? 'critica' :
-          diasRestantes <= 7 ? 'alta' :
-          diasRestantes <= 15 ? 'media' : 'baja';
+          diasRestantes <= 3
+            ? 'critica'
+            : diasRestantes <= 7
+              ? 'alta'
+              : diasRestantes <= 15
+                ? 'media'
+                : 'baja';
 
         alerts.push({
           id: `${plazo.modelo}-${co.id}-${fechaLimite.toISOString().slice(0, 10)}`,
@@ -119,7 +211,9 @@ export async function getFiscalAlerts(companyId: string): Promise<FiscalAlert[]>
 
     for (const m of mortgages) {
       if (!m.fechaRevision) continue;
-      const diasRestantes = Math.ceil((m.fechaRevision.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      const diasRestantes = Math.ceil(
+        (m.fechaRevision.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+      );
 
       if (diasRestantes > 0 && diasRestantes <= 60) {
         alerts.push({
@@ -139,7 +233,10 @@ export async function getFiscalAlerts(companyId: string): Promise<FiscalAlert[]>
 
   // Ordenar por urgencia y días restantes
   const urgenciaOrder = { critica: 0, alta: 1, media: 2, baja: 3 };
-  alerts.sort((a, b) => urgenciaOrder[a.urgencia] - urgenciaOrder[b.urgencia] || a.diasRestantes - b.diasRestantes);
+  alerts.sort(
+    (a, b) =>
+      urgenciaOrder[a.urgencia] - urgenciaOrder[b.urgencia] || a.diasRestantes - b.diasRestantes
+  );
 
   return alerts;
 }

@@ -3,10 +3,32 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { createRequisition, isNordigenConfigured } from '@/lib/nordigen-service';
 import { getPrismaClient } from '@/lib/db';
+import { canAccessCompany } from '@/lib/company-scope';
 import logger from '@/lib/logger';
+import type { UserRole } from '@/types/prisma-types';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+const ROLE_ALLOWLIST: UserRole[] = [
+  'super_admin',
+  'administrador',
+  'gestor',
+  'operador',
+  'soporte',
+  'community_manager',
+  'socio_ewoorker',
+  'contratista_ewoorker',
+  'subcontratista_ewoorker',
+];
+
+function resolveUserRole(role: unknown): UserRole | null {
+  if (typeof role !== 'string') {
+    return null;
+  }
+
+  return ROLE_ALLOWLIST.includes(role as UserRole) ? (role as UserRole) : null;
+}
 
 /**
  * POST /api/open-banking/nordigen/connect
@@ -24,14 +46,31 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Nordigen no configurado' }, { status: 503 });
     }
 
-    const { institutionId, institutionName } = await request.json();
+    const { institutionId, institutionName, companyId } = await request.json();
     if (!institutionId) {
       return NextResponse.json({ error: 'institutionId requerido' }, { status: 400 });
     }
 
+    const role = resolveUserRole(session.user.role);
+    if (!role) {
+      return NextResponse.json({ error: 'Rol inválido' }, { status: 403 });
+    }
+
+    const targetCompanyId = companyId || session.user.companyId;
+    const hasAccess = await canAccessCompany({
+      userId: session.user.id,
+      role,
+      primaryCompanyId: session.user.companyId,
+      companyId: targetCompanyId,
+    });
+
+    if (!hasAccess) {
+      return NextResponse.json({ error: 'Sin acceso a la sociedad solicitada' }, { status: 403 });
+    }
+
     const result = await createRequisition({
       institutionId,
-      companyId: session.user.companyId,
+      companyId: targetCompanyId,
       userId: session.user.id,
     });
 
@@ -43,7 +82,7 @@ export async function POST(request: NextRequest) {
     const prisma = getPrismaClient();
     await prisma.bankConnection.create({
       data: {
-        companyId: session.user.companyId,
+        companyId: targetCompanyId,
         userId: session.user.id,
         proveedor: 'nordigen',
         provider: 'nordigen',
@@ -60,6 +99,8 @@ export async function POST(request: NextRequest) {
       success: true,
       requisitionId: result.requisitionId,
       link: result.link,
+      redirectUrl: result.link,
+      companyId: targetCompanyId,
       message: 'Redirigir al usuario al link para autorizar acceso bancario',
     });
   } catch (error: any) {
