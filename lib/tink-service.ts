@@ -24,6 +24,8 @@ import logger from '@/lib/logger';
 const TINK_CLIENT_ID = process.env.TINK_CLIENT_ID || '';
 const TINK_CLIENT_SECRET = process.env.TINK_CLIENT_SECRET || '';
 const TINK_ENV = process.env.TINK_ENVIRONMENT || 'production';
+const TINK_LINK_ACTOR_CLIENT_ID =
+  process.env.TINK_LINK_ACTOR_CLIENT_ID || 'df05e4b379934cd09963197cc855bfe9';
 
 const BASE_URL = 'https://api.tink.com';
 
@@ -132,7 +134,7 @@ async function getUserAccessToken(
     body: new URLSearchParams({
       user_id: userId,
       id_hint: idHint || userId,
-      actor_client_id: TINK_CLIENT_ID,
+      actor_client_id: TINK_LINK_ACTOR_CLIENT_ID,
       scope,
     }),
   });
@@ -226,8 +228,6 @@ export async function createUser(externalUserId: string, market: string = 'ES', 
 export async function generateTinkLink(params: {
   userId: string;
   idHint?: string;
-  state?: string;
-  inputProvider?: string;
   market?: string;
   locale?: string;
   redirectUri: string;
@@ -235,7 +235,7 @@ export async function generateTinkLink(params: {
 }): Promise<string> {
   const authCode = await getUserAccessToken(
     params.userId,
-    'accounts:read,transactions:read,credentials:write',
+    'authorization:read,authorization:grant,credentials:refresh,credentials:read,credentials:write,providers:read,user:read',
     params.idHint
   );
 
@@ -245,16 +245,6 @@ export async function generateTinkLink(params: {
   tinkLinkUrl.searchParams.set('market', params.market || 'ES');
   tinkLinkUrl.searchParams.set('locale', params.locale || 'es_ES');
   tinkLinkUrl.searchParams.set('authorization_code', authCode);
-  tinkLinkUrl.searchParams.set(
-    'refreshable_items',
-    'CHECKING_ACCOUNTS,CHECKING_TRANSACTIONS'
-  );
-  if (params.state) {
-    tinkLinkUrl.searchParams.set('state', params.state);
-  }
-  if (params.inputProvider) {
-    tinkLinkUrl.searchParams.set('input_provider', params.inputProvider);
-  }
   if (params.test) {
     tinkLinkUrl.searchParams.set('test', 'true');
   }
