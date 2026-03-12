@@ -78,6 +78,14 @@ Responde SIEMPRE en formato JSON con esta estructura exacta:
     "anoConstruccion": 1975,
     "estadoConservacion": "bueno|reformado|necesita reforma"
   },
+  "datosQueFaltan": [
+    {
+      "dato": "campo_faltante",
+      "importancia": "critica|importante|deseable",
+      "porQue": "por qué este dato cambia la decisión"
+    }
+  ],
+  "preguntasParaBroker": ["pregunta 1", "pregunta 2"],
   "analisisCritico": {
     "flags": [{ "categoria": "string", "nivel": "verde|amarillo|rojo", "detalle": "string" }],
     "rentasInfladas": false,
@@ -115,6 +123,35 @@ Responde SIEMPRE en formato JSON con esta estructura exacta:
   }
 }`;
 
+export function buildUserDataContext(
+  userData: Record<string, string> | null,
+  additionalNotes?: string | null
+) {
+  const entries = Object.entries(userData || {}).filter(([, value]) => String(value || '').trim());
+  const notes = String(additionalNotes || '').trim();
+
+  if (entries.length === 0 && !notes) {
+    return '';
+  }
+
+  const lines = [
+    '',
+    '## DATOS ADICIONALES APORTADOS POR EL USUARIO (TRATAR COMO FIABLES)',
+    'El usuario conoce estos datos y debes incorporarlos al análisis para completar la propuesta del broker.',
+    'Si contradicen al broker, prioriza el dato del usuario y explica cómo cambia el veredicto.',
+  ];
+
+  for (const [key, value] of entries) {
+    lines.push(`- ${key}: ${value}`);
+  }
+
+  if (notes) {
+    lines.push(`- Notas adicionales del usuario: ${notes}`);
+  }
+
+  return lines.join('\n');
+}
+
 // ============================================================================
 // HELPERS: Market data (metodología profesional de tasación)
 // ============================================================================
@@ -123,31 +160,72 @@ async function getMarketDataSafe(address: string): Promise<any> {
   try {
     const { getMarketDataByAddress } = await import('@/lib/market-data-service');
     return getMarketDataByAddress(address);
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 }
 
-async function getPlatformDataSafe(city: string, postalCode?: string, address?: string): Promise<any> {
+async function getPlatformDataSafe(
+  city: string,
+  postalCode?: string,
+  address?: string
+): Promise<any> {
   try {
-    const { getAggregatedMarketData, formatPlatformDataForPrompt } = await import('@/lib/external-platform-data-service');
+    const { getAggregatedMarketData, formatPlatformDataForPrompt } =
+      await import('@/lib/external-platform-data-service');
     const data = await getAggregatedMarketData({ city, postalCode, address });
     return { raw: data, promptText: formatPlatformDataForPrompt(data) };
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 }
 
 async function getIdealistaDataSafe(city: string): Promise<any> {
   try {
     const { getIdealistaDataReport } = await import('@/lib/idealista-data-service');
     return await getIdealistaDataReport(city);
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 }
 
 function extractCityFromText(text: string): string {
   const cities = [
-    'Madrid', 'Barcelona', 'Valencia', 'Sevilla', 'Málaga', 'Malaga', 'Bilbao',
-    'Zaragoza', 'Palencia', 'Valladolid', 'Alicante', 'Marbella', 'Benidorm',
-    'Palma', 'Córdoba', 'Cordoba', 'Granada', 'Murcia', 'Vigo', 'Gijón', 'Gijon',
-    'Santander', 'San Sebastián', 'San Sebastian', 'Toledo', 'Burgos', 'Salamanca',
-    'León', 'Leon', 'Cádiz', 'Cadiz', 'Huelva', 'Tarragona', 'Girona', 'Lleida',
+    'Madrid',
+    'Barcelona',
+    'Valencia',
+    'Sevilla',
+    'Málaga',
+    'Malaga',
+    'Bilbao',
+    'Zaragoza',
+    'Palencia',
+    'Valladolid',
+    'Alicante',
+    'Marbella',
+    'Benidorm',
+    'Palma',
+    'Córdoba',
+    'Cordoba',
+    'Granada',
+    'Murcia',
+    'Vigo',
+    'Gijón',
+    'Gijon',
+    'Santander',
+    'San Sebastián',
+    'San Sebastian',
+    'Toledo',
+    'Burgos',
+    'Salamanca',
+    'León',
+    'Leon',
+    'Cádiz',
+    'Cadiz',
+    'Huelva',
+    'Tarragona',
+    'Girona',
+    'Lleida',
   ];
   const textLower = text.toLowerCase();
   for (const city of cities) {
@@ -194,7 +272,7 @@ DATOS DE ZONA — ${marketData.zona}:
   // Datos enriquecidos de Idealista Data si están en platformData
   if (platformData?.raw?.platformData) {
     const idealistaData = platformData.raw.platformData.find(
-      (pd: any) => pd.source === 'idealista_data',
+      (pd: any) => pd.source === 'idealista_data'
     );
     if (idealistaData?.rawData) {
       const raw = idealistaData.rawData;
@@ -207,16 +285,24 @@ DATOS DE ZONA — ${marketData.zona}:
       if (raw.subZones?.length > 0) {
         parts.push(`\nPRECIOS POR SUBZONA/DISTRITO (Idealista Data):`);
         for (const zone of raw.subZones.slice(0, 8)) {
-          parts.push(`- ${zone.location}: ${zone.pricePerM2}€/m²${zone.annualVariation ? ` (${zone.annualVariation > 0 ? '+' : ''}${zone.annualVariation}% anual)` : ''}`);
+          parts.push(
+            `- ${zone.location}: ${zone.pricePerM2}€/m²${zone.annualVariation ? ` (${zone.annualVariation > 0 ? '+' : ''}${zone.annualVariation}% anual)` : ''}`
+          );
         }
-        parts.push(`USA la subzona más cercana al activo para comparar €/m² del broker vs mercado.`);
+        parts.push(
+          `USA la subzona más cercana al activo para comparar €/m² del broker vs mercado.`
+        );
       }
       if (raw.priceEvolution?.length > 0) {
         parts.push(`\nEVOLUCIÓN PRECIOS (Idealista Data, últimos periodos):`);
         for (const p of raw.priceEvolution) {
-          parts.push(`- ${p.period}: ${p.pricePerM2}€/m²${p.variation ? ` (${p.variation > 0 ? '+' : ''}${p.variation}%)` : ''}`);
+          parts.push(
+            `- ${p.period}: ${p.pricePerM2}€/m²${p.variation ? ` (${p.variation > 0 ? '+' : ''}${p.variation}%)` : ''}`
+          );
         }
-        parts.push(`USA esta evolución para validar si la tendencia declarada por el broker es coherente.`);
+        parts.push(
+          `USA esta evolución para validar si la tendencia declarada por el broker es coherente.`
+        );
       }
     }
   }
@@ -249,25 +335,27 @@ INSTRUCCIONES CRÍTICAS:
 
 function buildMarketContextResponse(marketData: any, platformData: any, parsedAnalysis: any) {
   // Market context from public sources
-  const marketContext = marketData ? {
-    precioM2ZonaReal: marketData.precioRealVentaM2,
-    precioM2ZonaAsking: marketData.askingPriceVentaM2,
-    alquilerM2ZonaReal: marketData.precioRealAlquilerM2,
-    alquilerM2ZonaAsking: marketData.askingPriceAlquilerM2,
-    precioGarajeVenta: marketData.precioGarajeVenta,
-    precioGarajeAlquiler: marketData.precioGarajeAlquiler,
-    zona: marketData.zona,
-    tendenciaZona: marketData.tendencia,
-    demandaZona: marketData.demanda,
-    fuentePrecioReal: marketData.fuenteNotarial || 'Notariado',
-    fuenteAsking: marketData.fuente || 'Idealista/Fotocasa',
-  } : null;
+  const marketContext = marketData
+    ? {
+        precioM2ZonaReal: marketData.precioRealVentaM2,
+        precioM2ZonaAsking: marketData.askingPriceVentaM2,
+        alquilerM2ZonaReal: marketData.precioRealAlquilerM2,
+        alquilerM2ZonaAsking: marketData.askingPriceAlquilerM2,
+        precioGarajeVenta: marketData.precioGarajeVenta,
+        precioGarajeAlquiler: marketData.precioGarajeAlquiler,
+        zona: marketData.zona,
+        tendenciaZona: marketData.tendencia,
+        demandaZona: marketData.demanda,
+        fuentePrecioReal: marketData.fuenteNotarial || 'Notariado',
+        fuenteAsking: marketData.fuente || 'Idealista/Fotocasa',
+      }
+    : null;
 
   // Idealista Data enrichment
   let idealistaDataEnrichment = null;
   if (platformData?.raw?.platformData) {
     const idealistaSource = platformData.raw.platformData.find(
-      (pd: any) => pd.source === 'idealista_data',
+      (pd: any) => pd.source === 'idealista_data'
     );
     if (idealistaSource?.rawData) {
       idealistaDataEnrichment = {
@@ -285,33 +373,44 @@ function buildMarketContextResponse(marketData: any, platformData: any, parsedAn
   }
 
   // Platform data summary
-  const platformSummary = platformData?.raw ? {
-    weightedSalePricePerM2: platformData.raw.weightedSalePricePerM2,
-    weightedRentPricePerM2: platformData.raw.weightedRentPricePerM2,
-    sourcesUsed: platformData.raw.sourcesUsed,
-    overallReliability: platformData.raw.overallReliability,
-    comparablesCount: platformData.raw.allComparables?.length || 0,
-    trend: platformData.raw.marketTrend,
-    trendPercentage: platformData.raw.trendPercentage,
-    demandLevel: platformData.raw.demandLevel,
-    idealistaData: idealistaDataEnrichment,
-  } : null;
+  const platformSummary = platformData?.raw
+    ? {
+        weightedSalePricePerM2: platformData.raw.weightedSalePricePerM2,
+        weightedRentPricePerM2: platformData.raw.weightedRentPricePerM2,
+        sourcesUsed: platformData.raw.sourcesUsed,
+        overallReliability: platformData.raw.overallReliability,
+        comparablesCount: platformData.raw.allComparables?.length || 0,
+        trend: platformData.raw.marketTrend,
+        trendPercentage: platformData.raw.trendPercentage,
+        demandLevel: platformData.raw.demandLevel,
+        idealistaData: idealistaDataEnrichment,
+      }
+    : null;
 
   // Precio vs broker — basado en datos de mercado público
-  const brokerPrecioM2 = parsedAnalysis?.analisisIndependiente?.precioM2Compra
-    || (parsedAnalysis?.datosActivo?.askingPrice && parsedAnalysis?.datosActivo?.superficieTotal
-      ? (parsedAnalysis.datosActivo.askingPrice / parsedAnalysis.datosActivo.superficieTotal)
+  const brokerPrecioM2 =
+    parsedAnalysis?.analisisIndependiente?.precioM2Compra ||
+    (parsedAnalysis?.datosActivo?.askingPrice && parsedAnalysis?.datosActivo?.superficieTotal
+      ? parsedAnalysis.datosActivo.askingPrice / parsedAnalysis.datosActivo.superficieTotal
       : null);
 
   let precioVsBroker = null;
   if (brokerPrecioM2 && marketData?.precioRealVentaM2) {
-    const diff = ((brokerPrecioM2 - marketData.precioRealVentaM2) / marketData.precioRealVentaM2) * 100;
+    const diff =
+      ((brokerPrecioM2 - marketData.precioRealVentaM2) / marketData.precioRealVentaM2) * 100;
     precioVsBroker = {
       precioM2Broker: Math.round(brokerPrecioM2),
       precioM2Mercado: marketData.precioRealVentaM2,
       precioM2Asking: marketData.askingPriceVentaM2,
       diferenciaPercent: Number(diff.toFixed(1)),
-      estado: diff > 15 ? 'sobrevalorado' : diff > 5 ? 'ligeramente_alto' : diff > -5 ? 'en_linea' : 'infravalorado',
+      estado:
+        diff > 15
+          ? 'sobrevalorado'
+          : diff > 5
+            ? 'ligeramente_alto'
+            : diff > -5
+              ? 'en_linea'
+              : 'infravalorado',
     };
   }
 
@@ -333,9 +432,28 @@ export async function POST(request: NextRequest) {
     const file = formData.get('file') as File | null;
     const text = formData.get('text') as string | null;
     const additionalContext = formData.get('context') as string | null;
+    const additionalNotes = formData.get('additionalNotes') as string | null;
+    const userDataRaw = formData.get('userData') as string | null;
+
+    let userData: Record<string, string> | null = null;
+    if (userDataRaw) {
+      try {
+        const parsed = JSON.parse(userDataRaw);
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+          userData = Object.fromEntries(
+            Object.entries(parsed).map(([key, value]) => [key, String(value ?? '')])
+          );
+        }
+      } catch {
+        userData = null;
+      }
+    }
 
     if (!file && !text) {
-      return NextResponse.json({ error: 'Se requiere un archivo o texto con la propuesta del broker' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Se requiere un archivo o texto con la propuesta del broker' },
+        { status: 400 }
+      );
     }
 
     let documentContent = text || '';
@@ -364,18 +482,25 @@ export async function POST(request: NextRequest) {
 
       // Wait for market data
       const [marketData, platformData] = await Promise.all([
-        marketDataPromise, platformDataPromise,
+        marketDataPromise,
+        platformDataPromise,
       ]);
       const marketPrompt = buildMarketContextPrompt(marketData, platformData);
+      const userDataContext = buildUserDataContext(userData, additionalNotes);
 
       const Anthropic = (await import('@anthropic-ai/sdk')).default;
       const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-      const mediaType = file.type === 'application/pdf' ? 'application/pdf' as const
-        : file.type.includes('png') ? 'image/png' as const
-        : file.type.includes('gif') ? 'image/gif' as const
-        : file.type.includes('webp') ? 'image/webp' as const
-        : 'image/jpeg' as const;
+      const mediaType =
+        file.type === 'application/pdf'
+          ? ('application/pdf' as const)
+          : file.type.includes('png')
+            ? ('image/png' as const)
+            : file.type.includes('gif')
+              ? ('image/gif' as const)
+              : file.type.includes('webp')
+                ? ('image/webp' as const)
+                : ('image/jpeg' as const);
 
       const userContent: any[] = [
         {
@@ -384,7 +509,7 @@ export async function POST(request: NextRequest) {
         },
         {
           type: 'text',
-          text: `Analiza esta propuesta de broker/inmobiliario. ${additionalContext || ''}\n\nEl documento es: ${fileName}\n${marketPrompt}\n\nExtrae el rent roll, cuestiona los datos, CONTRASTA con los datos de mercado independientes y genera tu análisis independiente. Responde SOLO con JSON válido.`,
+          text: `Analiza esta propuesta de broker/inmobiliario. ${additionalContext || ''}\n\nEl documento es: ${fileName}\n${marketPrompt}\n${userDataContext}\n\nExtrae el rent roll, cuestiona los datos, CONTRASTA con los datos de mercado independientes y genera tu análisis independiente. Si el usuario aporta datos faltantes, intégralos y vuelve a emitir el veredicto. Responde SOLO con JSON válido.`,
         },
       ];
 
@@ -398,14 +523,13 @@ export async function POST(request: NextRequest) {
       const textContent = response.content.find((c: any) => c.type === 'text') as any;
       const rawAnalysis = textContent?.text || '';
 
-      return parseAndReturnResult(rawAnalysis, marketData, platformData);
+      return parseAndReturnResult(rawAnalysis, marketData, platformData, userData);
     }
 
     // ── Handle text-based analysis ──
-    const [marketData, platformData] = await Promise.all([
-      marketDataPromise, platformDataPromise,
-    ]);
+    const [marketData, platformData] = await Promise.all([marketDataPromise, platformDataPromise]);
     const marketPrompt = buildMarketContextPrompt(marketData, platformData);
+    const userDataContext = buildUserDataContext(userData, additionalNotes);
 
     const Anthropic = (await import('@anthropic-ai/sdk')).default;
     const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
@@ -414,16 +538,18 @@ export async function POST(request: NextRequest) {
       model: 'claude-sonnet-4-20250514',
       max_tokens: 8000,
       system: ANALYSIS_SYSTEM_PROMPT,
-      messages: [{
-        role: 'user',
-        content: `Analiza esta propuesta de broker/inmobiliario. ${additionalContext || ''}\n\nContenido:\n${documentContent.substring(0, 20000)}\n${marketPrompt}\n\nExtrae el rent roll, cuestiona los datos, CONTRASTA con los datos de mercado independientes y genera tu análisis independiente. Responde SOLO con JSON válido.`,
-      }],
+      messages: [
+        {
+          role: 'user',
+          content: `Analiza esta propuesta de broker/inmobiliario. ${additionalContext || ''}\n\nContenido:\n${documentContent.substring(0, 20000)}\n${marketPrompt}\n${userDataContext}\n\nExtrae el rent roll, cuestiona los datos, CONTRASTA con los datos de mercado independientes y genera tu análisis independiente. Si el usuario aporta datos faltantes, intégralos y vuelve a emitir el veredicto. Responde SOLO con JSON válido.`,
+        },
+      ],
     });
 
     const textContent = response.content.find((c: any) => c.type === 'text') as any;
     const rawAnalysis = textContent?.text || '';
 
-    return parseAndReturnResult(rawAnalysis, marketData, platformData);
+    return parseAndReturnResult(rawAnalysis, marketData, platformData, userData);
   } catch (error: any) {
     logger.error('[AI Analyze Proposal]:', error);
     Sentry.captureException(error);
@@ -435,6 +561,7 @@ function parseAndReturnResult(
   rawAnalysis: string,
   marketData?: any,
   platformData?: any,
+  userData?: Record<string, string> | null
 ) {
   let parsed: any = {};
   try {
@@ -448,11 +575,7 @@ function parseAndReturnResult(
   }
 
   // Build market context for response
-  const contextData = buildMarketContextResponse(
-    marketData || null,
-    platformData || null,
-    parsed
-  );
+  const contextData = buildMarketContextResponse(marketData || null, platformData || null, parsed);
 
   return NextResponse.json({
     success: true,
@@ -470,6 +593,9 @@ function parseAndReturnResult(
         inquilino: u.inquilino || '',
       })),
       datosActivo: parsed.datosActivo || {},
+      datosQueFaltan: parsed.datosQueFaltan || [],
+      preguntasParaBroker: parsed.preguntasParaBroker || [],
+      datosUsuarioIncorporados: userData || {},
       analisisCritico: parsed.analisisCritico || null,
       analisisIndependiente: parsed.analisisIndependiente || null,
       rawAnalysis,

@@ -54,47 +54,93 @@ import dynamic from 'next/dynamic';
 
 // Lazy load recharts (heavy library)
 const RechartsBarChart = dynamic(
-  () => import('recharts').then((mod) => {
-    const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Legend } = mod;
-    return function BrokerBarChart({ data }: { data: { name: string; valor: number; color: string }[] }) {
-      return (
-        <ResponsiveContainer width="100%" height={220}>
-          <BarChart data={data} layout="vertical" margin={{ left: 10, right: 30, top: 5, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-            <XAxis type="number" tickFormatter={(v: number) => `${(v / 1000).toFixed(0)}K`} fontSize={11} />
-            <YAxis type="category" dataKey="name" width={130} fontSize={11} />
-            <Tooltip formatter={(v: number) => [`${v.toLocaleString('es-ES')}€`, 'Valor']} />
-            <Bar dataKey="valor" radius={[0, 6, 6, 0]} barSize={28}>
-              {data.map((entry, idx) => (
-                <Cell key={idx} fill={entry.color} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
-      );
-    };
-  }),
-  { ssr: false, loading: () => <div className="h-[220px] flex items-center justify-center text-gray-300">Cargando gráfico...</div> }
+  () =>
+    import('recharts').then((mod) => {
+      const {
+        BarChart,
+        Bar,
+        XAxis,
+        YAxis,
+        CartesianGrid,
+        Tooltip,
+        ResponsiveContainer,
+        Cell,
+        Legend,
+      } = mod;
+      return function BrokerBarChart({
+        data,
+      }: {
+        data: { name: string; valor: number; color: string }[];
+      }) {
+        return (
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart
+              data={data}
+              layout="vertical"
+              margin={{ left: 10, right: 30, top: 5, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+              <XAxis
+                type="number"
+                tickFormatter={(v: number) => `${(v / 1000).toFixed(0)}K`}
+                fontSize={11}
+              />
+              <YAxis type="category" dataKey="name" width={130} fontSize={11} />
+              <Tooltip formatter={(v: number) => [`${v.toLocaleString('es-ES')}€`, 'Valor']} />
+              <Bar dataKey="valor" radius={[0, 6, 6, 0]} barSize={28}>
+                {data.map((entry, idx) => (
+                  <Cell key={idx} fill={entry.color} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        );
+      };
+    }),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-[220px] flex items-center justify-center text-gray-300">
+        Cargando gráfico...
+      </div>
+    ),
+  }
 );
 
 const RechartsPieChart = dynamic(
-  () => import('recharts').then((mod) => {
-    const { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } = mod;
-    return function BrokerPieChart({ data }: { data: { name: string; value: number; color: string }[] }) {
-      return (
-        <ResponsiveContainer width="100%" height={200}>
-          <PieChart>
-            <Pie data={data} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" paddingAngle={3} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false} fontSize={11}>
-              {data.map((entry, idx) => (
-                <Cell key={idx} fill={entry.color} />
-              ))}
-            </Pie>
-            <Tooltip formatter={(v: number) => [v, 'Flags']} />
-          </PieChart>
-        </ResponsiveContainer>
-      );
-    };
-  }),
+  () =>
+    import('recharts').then((mod) => {
+      const { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } = mod;
+      return function BrokerPieChart({
+        data,
+      }: {
+        data: { name: string; value: number; color: string }[];
+      }) {
+        return (
+          <ResponsiveContainer width="100%" height={200}>
+            <PieChart>
+              <Pie
+                data={data}
+                cx="50%"
+                cy="50%"
+                innerRadius={50}
+                outerRadius={80}
+                dataKey="value"
+                paddingAngle={3}
+                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                labelLine={false}
+                fontSize={11}
+              >
+                {data.map((entry, idx) => (
+                  <Cell key={idx} fill={entry.color} />
+                ))}
+              </Pie>
+              <Tooltip formatter={(v: number) => [v, 'Flags']} />
+            </PieChart>
+          </ResponsiveContainer>
+        );
+      };
+    }),
   { ssr: false, loading: () => <div className="h-[200px]" /> }
 );
 
@@ -147,6 +193,9 @@ export default function AnalisisInversionPage() {
   // Análisis crítico de propuesta de broker
   const [brokerAnalysis, setBrokerAnalysis] = useState<any>(null);
   const [brokerLoading, setBrokerLoading] = useState(false);
+  const [brokerFile, setBrokerFile] = useState<File | null>(null);
+  const [brokerMissingInputs, setBrokerMissingInputs] = useState<Record<string, string>>({});
+  const [brokerAdditionalNotes, setBrokerAdditionalNotes] = useState('');
 
   // Datos de contraste de mercado (metodología profesional de tasación)
   const [marketContext, setMarketContext] = useState<any>(null);
@@ -443,15 +492,20 @@ export default function AnalisisInversionPage() {
   };
 
   const handleBrokerAnalysis = async (file?: File) => {
+    const fileToUse = file || brokerFile;
     setBrokerLoading(true);
     try {
       const formData = new FormData();
-      if (file) formData.append('file', file);
+      if (fileToUse) formData.append('file', fileToUse);
       if (aiText) formData.append('text', aiText);
       formData.append(
         'context',
         'Propuesta de broker para grupo patrimonial familiar. Analizar críticamente.'
       );
+      formData.append('userData', JSON.stringify(brokerMissingInputs));
+      if (brokerAdditionalNotes.trim()) {
+        formData.append('additionalNotes', brokerAdditionalNotes.trim());
+      }
 
       const res = await fetch('/api/investment/analysis/ai-analyze-proposal', {
         method: 'POST',
@@ -467,6 +521,24 @@ export default function AnalisisInversionPage() {
       const data = await res.json();
       const extracted = data.data;
       setBrokerAnalysis(extracted);
+      if (file) {
+        setBrokerFile(file);
+      }
+      if (Array.isArray(extracted.datosQueFaltan)) {
+        setBrokerMissingInputs((prev) => {
+          const next = { ...prev };
+          for (const item of extracted.datosQueFaltan) {
+            const key = String(item?.dato || '').trim();
+            if (!key) continue;
+            if (!next[key] && extracted.datosActivo?.[key] != null) {
+              next[key] = String(extracted.datosActivo[key]);
+            } else if (!next[key]) {
+              next[key] = '';
+            }
+          }
+          return next;
+        });
+      }
 
       // Store market context data from parallel analysis (public market data only)
       if (data.marketContext) setMarketContext(data.marketContext);
@@ -492,6 +564,32 @@ export default function AnalisisInversionPage() {
       setBrokerLoading(false);
     }
   };
+
+  const updateBrokerMissingInput = (key: string, value: string) => {
+    setBrokerMissingInputs((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const getBrokerFieldLabel = (raw: string) =>
+    raw
+      .replace(/[_-]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .replace(/^\w/, (char) => char.toUpperCase());
+
+  const getImportanceClasses = (level?: string) => {
+    switch (level) {
+      case 'critica':
+        return 'bg-red-100 text-red-700 border-red-200';
+      case 'importante':
+        return 'bg-amber-100 text-amber-700 border-amber-200';
+      default:
+        return 'bg-blue-100 text-blue-700 border-blue-200';
+    }
+  };
+
+  const hasBrokerSupplementalData =
+    Object.values(brokerMissingInputs).some((value) => String(value || '').trim()) ||
+    brokerAdditionalNotes.trim().length > 0;
 
   const handleChatSend = async () => {
     if (!chatInput.trim() || chatLoading) return;
@@ -1287,7 +1385,10 @@ export default function AnalisisInversionPage() {
                         id="broker-file-upload"
                         onChange={(e) => {
                           const file = e.target.files?.[0];
-                          if (file) handleBrokerAnalysis(file);
+                          if (file) {
+                            setBrokerFile(file);
+                            handleBrokerAnalysis(file);
+                          }
                         }}
                         disabled={brokerLoading}
                       />
@@ -1350,7 +1451,7 @@ Estado: Reformado 2018"
                   />
                   <Button
                     className="w-full bg-amber-600 hover:bg-amber-700"
-                    disabled={brokerLoading || !aiText.trim()}
+                    disabled={brokerLoading || (!aiText.trim() && !brokerFile)}
                     onClick={() => handleBrokerAnalysis()}
                   >
                     {brokerLoading ? (
@@ -1426,46 +1527,97 @@ Estado: Reformado 2018"
                     {/* ── Gráficos visuales del análisis ── */}
                     <div className="grid md:grid-cols-2 gap-4">
                       {/* Gráfico de barras: Comparación de precios */}
-                      {(brokerAnalysis.datosActivo?.askingPrice || brokerAnalysis.analisisIndependiente?.precioMaximoRecomendado) && (
+                      {(brokerAnalysis.datosActivo?.askingPrice ||
+                        brokerAnalysis.analisisIndependiente?.precioMaximoRecomendado) && (
                         <div className="bg-white rounded-xl border p-4">
                           <h4 className="font-medium text-sm mb-3 flex items-center gap-2">
                             <BarChart3 className="h-4 w-4 text-blue-500" />
                             Comparación de Precios
                           </h4>
-                          <RechartsBarChart data={[
-                            brokerAnalysis.datosActivo?.askingPrice ? { name: 'Precio Broker', valor: brokerAnalysis.datosActivo.askingPrice, color: '#ef4444' } : null,
-                            brokerAnalysis.analisisIndependiente?.precioMaximoRecomendado ? { name: 'Precio Máx Recomendado', valor: brokerAnalysis.analisisIndependiente.precioMaximoRecomendado, color: '#22c55e' } : null,
-                            brokerAnalysis.analisisIndependiente?.escenarios?.conservador?.precio ? { name: 'Escenario Conservador', valor: brokerAnalysis.analisisIndependiente.escenarios.conservador.precio, color: '#3b82f6' } : null,
-                            brokerAnalysis.analisisIndependiente?.escenarios?.base?.precio ? { name: 'Escenario Base', valor: brokerAnalysis.analisisIndependiente.escenarios.base.precio, color: '#8b5cf6' } : null,
-                          ].filter(Boolean) as any} />
+                          <RechartsBarChart
+                            data={
+                              [
+                                brokerAnalysis.datosActivo?.askingPrice
+                                  ? {
+                                      name: 'Precio Broker',
+                                      valor: brokerAnalysis.datosActivo.askingPrice,
+                                      color: '#ef4444',
+                                    }
+                                  : null,
+                                brokerAnalysis.analisisIndependiente?.precioMaximoRecomendado
+                                  ? {
+                                      name: 'Precio Máx Recomendado',
+                                      valor:
+                                        brokerAnalysis.analisisIndependiente
+                                          .precioMaximoRecomendado,
+                                      color: '#22c55e',
+                                    }
+                                  : null,
+                                brokerAnalysis.analisisIndependiente?.escenarios?.conservador
+                                  ?.precio
+                                  ? {
+                                      name: 'Escenario Conservador',
+                                      valor:
+                                        brokerAnalysis.analisisIndependiente.escenarios.conservador
+                                          .precio,
+                                      color: '#3b82f6',
+                                    }
+                                  : null,
+                                brokerAnalysis.analisisIndependiente?.escenarios?.base?.precio
+                                  ? {
+                                      name: 'Escenario Base',
+                                      valor:
+                                        brokerAnalysis.analisisIndependiente.escenarios.base.precio,
+                                      color: '#8b5cf6',
+                                    }
+                                  : null,
+                              ].filter(Boolean) as any
+                            }
+                          />
                         </div>
                       )}
 
                       {/* Donut: Distribución de flags */}
-                      {brokerAnalysis.analisisCritico?.flags && brokerAnalysis.analisisCritico.flags.length > 0 && (
-                        <div className="bg-white rounded-xl border p-4">
-                          <h4 className="font-medium text-sm mb-3 flex items-center gap-2">
-                            <Shield className="h-4 w-4 text-purple-500" />
-                            Análisis de Riesgos
-                          </h4>
-                          <RechartsPieChart data={(() => {
-                            const flags = brokerAnalysis.analisisCritico.flags;
-                            const green = flags.filter((f: any) => f.nivel === 'verde').length;
-                            const yellow = flags.filter((f: any) => f.nivel === 'amarillo').length;
-                            const red = flags.filter((f: any) => f.nivel === 'rojo').length;
-                            return [
-                              green > 0 ? { name: 'OK', value: green, color: '#22c55e' } : null,
-                              yellow > 0 ? { name: 'Atención', value: yellow, color: '#f59e0b' } : null,
-                              red > 0 ? { name: 'Riesgo', value: red, color: '#ef4444' } : null,
-                            ].filter(Boolean) as any;
-                          })()} />
-                          <div className="flex justify-center gap-4 mt-2 text-xs">
-                            <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-green-500 inline-block" /> OK</span>
-                            <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-amber-500 inline-block" /> Atención</span>
-                            <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-red-500 inline-block" /> Riesgo</span>
+                      {brokerAnalysis.analisisCritico?.flags &&
+                        brokerAnalysis.analisisCritico.flags.length > 0 && (
+                          <div className="bg-white rounded-xl border p-4">
+                            <h4 className="font-medium text-sm mb-3 flex items-center gap-2">
+                              <Shield className="h-4 w-4 text-purple-500" />
+                              Análisis de Riesgos
+                            </h4>
+                            <RechartsPieChart
+                              data={(() => {
+                                const flags = brokerAnalysis.analisisCritico.flags;
+                                const green = flags.filter((f: any) => f.nivel === 'verde').length;
+                                const yellow = flags.filter(
+                                  (f: any) => f.nivel === 'amarillo'
+                                ).length;
+                                const red = flags.filter((f: any) => f.nivel === 'rojo').length;
+                                return [
+                                  green > 0 ? { name: 'OK', value: green, color: '#22c55e' } : null,
+                                  yellow > 0
+                                    ? { name: 'Atención', value: yellow, color: '#f59e0b' }
+                                    : null,
+                                  red > 0 ? { name: 'Riesgo', value: red, color: '#ef4444' } : null,
+                                ].filter(Boolean) as any;
+                              })()}
+                            />
+                            <div className="flex justify-center gap-4 mt-2 text-xs">
+                              <span className="flex items-center gap-1">
+                                <span className="h-2.5 w-2.5 rounded-full bg-green-500 inline-block" />{' '}
+                                OK
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <span className="h-2.5 w-2.5 rounded-full bg-amber-500 inline-block" />{' '}
+                                Atención
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <span className="h-2.5 w-2.5 rounded-full bg-red-500 inline-block" />{' '}
+                                Riesgo
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
                     </div>
 
                     {/* Gauge visual: Score de confianza */}
@@ -1474,25 +1626,102 @@ Estado: Reformado 2018"
                         <h4 className="font-medium text-sm mb-3">Métricas Clave del Activo</h4>
                         <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
                           {[
-                            { label: 'Yield Bruto', value: brokerAnalysis.analisisIndependiente.yieldBrutoReal, suffix: '%', target: 6, color: 'blue' },
-                            { label: 'Yield Neto', value: brokerAnalysis.analisisIndependiente.yieldNetoEstimado, suffix: '%', target: 4.5, color: 'green' },
-                            { label: 'TIR 10 años', value: brokerAnalysis.analisisIndependiente.tirEstimada10anos, suffix: '%', target: 8, color: 'purple' },
-                            { label: 'Descuento', value: brokerAnalysis.analisisIndependiente.descuentoSugerido, suffix: '%', target: 0, color: 'amber' },
-                            { label: '€/m² Compra', value: brokerAnalysis.analisisIndependiente.precioM2Compra, suffix: '€', target: null, color: 'gray' },
-                            { label: '€/m² Zona', value: brokerAnalysis.analisisIndependiente.precioM2Zona, suffix: '€', target: null, color: 'gray' },
+                            {
+                              label: 'Yield Bruto',
+                              value: brokerAnalysis.analisisIndependiente.yieldBrutoReal,
+                              suffix: '%',
+                              target: 6,
+                              color: 'blue',
+                            },
+                            {
+                              label: 'Yield Neto',
+                              value: brokerAnalysis.analisisIndependiente.yieldNetoEstimado,
+                              suffix: '%',
+                              target: 4.5,
+                              color: 'green',
+                            },
+                            {
+                              label: 'TIR 10 años',
+                              value: brokerAnalysis.analisisIndependiente.tirEstimada10anos,
+                              suffix: '%',
+                              target: 8,
+                              color: 'purple',
+                            },
+                            {
+                              label: 'Descuento',
+                              value: brokerAnalysis.analisisIndependiente.descuentoSugerido,
+                              suffix: '%',
+                              target: 0,
+                              color: 'amber',
+                            },
+                            {
+                              label: '€/m² Compra',
+                              value: brokerAnalysis.analisisIndependiente.precioM2Compra,
+                              suffix: '€',
+                              target: null,
+                              color: 'gray',
+                            },
+                            {
+                              label: '€/m² Zona',
+                              value: brokerAnalysis.analisisIndependiente.precioM2Zona,
+                              suffix: '€',
+                              target: null,
+                              color: 'gray',
+                            },
                           ].map((metric, i) => {
                             if (metric.value == null) return null;
-                            const pct = metric.target ? Math.min((metric.value / metric.target) * 100, 150) : 100;
-                            const barColor = metric.color === 'blue' ? 'bg-blue-500' : metric.color === 'green' ? 'bg-green-500' : metric.color === 'purple' ? 'bg-purple-500' : metric.color === 'amber' ? 'bg-amber-500' : 'bg-gray-400';
+                            const pct = metric.target
+                              ? Math.min((metric.value / metric.target) * 100, 150)
+                              : 100;
+                            const barColor =
+                              metric.color === 'blue'
+                                ? 'bg-blue-500'
+                                : metric.color === 'green'
+                                  ? 'bg-green-500'
+                                  : metric.color === 'purple'
+                                    ? 'bg-purple-500'
+                                    : metric.color === 'amber'
+                                      ? 'bg-amber-500'
+                                      : 'bg-gray-400';
                             return (
                               <div key={i} className="text-center">
                                 <div className="relative w-16 h-16 mx-auto mb-1">
                                   <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-                                    <circle cx="18" cy="18" r="14" fill="none" stroke="#e5e7eb" strokeWidth="3" />
-                                    <circle cx="18" cy="18" r="14" fill="none" stroke={metric.color === 'blue' ? '#3b82f6' : metric.color === 'green' ? '#22c55e' : metric.color === 'purple' ? '#8b5cf6' : metric.color === 'amber' ? '#f59e0b' : '#9ca3af'} strokeWidth="3" strokeDasharray={`${Math.min(pct, 100) * 0.88} 88`} strokeLinecap="round" />
+                                    <circle
+                                      cx="18"
+                                      cy="18"
+                                      r="14"
+                                      fill="none"
+                                      stroke="#e5e7eb"
+                                      strokeWidth="3"
+                                    />
+                                    <circle
+                                      cx="18"
+                                      cy="18"
+                                      r="14"
+                                      fill="none"
+                                      stroke={
+                                        metric.color === 'blue'
+                                          ? '#3b82f6'
+                                          : metric.color === 'green'
+                                            ? '#22c55e'
+                                            : metric.color === 'purple'
+                                              ? '#8b5cf6'
+                                              : metric.color === 'amber'
+                                                ? '#f59e0b'
+                                                : '#9ca3af'
+                                      }
+                                      strokeWidth="3"
+                                      strokeDasharray={`${Math.min(pct, 100) * 0.88} 88`}
+                                      strokeLinecap="round"
+                                    />
                                   </svg>
                                   <div className="absolute inset-0 flex items-center justify-center">
-                                    <span className="text-xs font-bold">{typeof metric.value === 'number' ? metric.value.toLocaleString('es-ES') : metric.value}</span>
+                                    <span className="text-xs font-bold">
+                                      {typeof metric.value === 'number'
+                                        ? metric.value.toLocaleString('es-ES')
+                                        : metric.value}
+                                    </span>
                                   </div>
                                 </div>
                                 <div className="text-[10px] text-gray-500">{metric.label}</div>
@@ -1535,6 +1764,121 @@ Estado: Reformado 2018"
                 </Card>
               )}
 
+              {(brokerAnalysis?.datosQueFaltan?.length > 0 ||
+                brokerAnalysis?.preguntasParaBroker?.length > 0) && (
+                <Card className="border-blue-200 bg-blue-50/30">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <Sparkles className="h-5 w-5 text-blue-600" />
+                      Completar datos y reanalizar con IA
+                    </CardTitle>
+                    <CardDescription>
+                      Si conoces datos que faltan en la propuesta, añádelos aquí. La IA volverá a
+                      analizar la operación usando esos datos como fuente fiable.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {brokerAnalysis?.datosQueFaltan?.length > 0 && (
+                      <div className="space-y-3">
+                        <div className="space-y-2">
+                          {brokerAnalysis.datosQueFaltan.map((item: any, index: number) => {
+                            const fieldKey = String(item?.dato || `campo_${index}`);
+                            return (
+                              <div
+                                key={`${fieldKey}-${index}`}
+                                className="rounded-lg border bg-white p-3"
+                              >
+                                <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+                                  <div className="space-y-1">
+                                    <div className="flex items-center gap-2">
+                                      <p className="text-sm font-medium">
+                                        {getBrokerFieldLabel(fieldKey)}
+                                      </p>
+                                      <Badge
+                                        variant="outline"
+                                        className={getImportanceClasses(item?.importancia)}
+                                      >
+                                        {item?.importancia || 'deseable'}
+                                      </Badge>
+                                    </div>
+                                    {item?.porQue && (
+                                      <p className="text-xs text-muted-foreground">{item.porQue}</p>
+                                    )}
+                                  </div>
+                                </div>
+                                <Input
+                                  className="mt-3"
+                                  placeholder={`Introduce ${getBrokerFieldLabel(fieldKey).toLowerCase()}`}
+                                  value={brokerMissingInputs[fieldKey] || ''}
+                                  onChange={(e) =>
+                                    updateBrokerMissingInput(fieldKey, e.target.value)
+                                  }
+                                />
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {brokerAnalysis?.preguntasParaBroker?.length > 0 && (
+                      <div className="rounded-lg border bg-white p-3">
+                        <p className="mb-2 text-sm font-medium">
+                          Preguntas clave para resolver dudas
+                        </p>
+                        <ul className="space-y-1 text-sm text-muted-foreground">
+                          {brokerAnalysis.preguntasParaBroker.map(
+                            (question: string, index: number) => (
+                              <li key={index}>• {question}</li>
+                            )
+                          )}
+                        </ul>
+                      </div>
+                    )}
+
+                    <div className="rounded-lg border bg-white p-3">
+                      <Label className="text-sm font-medium">Notas adicionales del usuario</Label>
+                      <Textarea
+                        className="mt-2"
+                        rows={4}
+                        placeholder="Ej: El broker me ha confirmado que el IBI real son 6.200€/año, hay 2 locales vacíos, y la cubierta se reformó en 2022..."
+                        value={brokerAdditionalNotes}
+                        onChange={(e) => setBrokerAdditionalNotes(e.target.value)}
+                      />
+                    </div>
+
+                    {Object.keys(brokerAnalysis?.datosUsuarioIncorporados || {}).length > 0 && (
+                      <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-700">
+                        La IA ya está incorporando datos adicionales proporcionados por el usuario
+                        en este análisis.
+                      </div>
+                    )}
+
+                    <Button
+                      className="w-full bg-blue-600 hover:bg-blue-700"
+                      disabled={
+                        brokerLoading ||
+                        !hasBrokerSupplementalData ||
+                        (!aiText.trim() && !brokerFile)
+                      }
+                      onClick={() => handleBrokerAnalysis()}
+                    >
+                      {brokerLoading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Reanalizando con IA...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="mr-2 h-4 w-4" />
+                          Reanalizar con mis datos
+                        </>
+                      )}
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+
               {/* ── CONTRASTE DE MERCADO — Metodología Profesional de Tasación ── */}
               {(marketContext || precioVsBroker) && (
                 <Card className="border-2 border-blue-200 bg-blue-50/20">
@@ -1544,44 +1888,74 @@ Estado: Reformado 2018"
                       Valoración Independiente de Mercado
                     </CardTitle>
                     <CardDescription>
-                      Datos reales de transacciones (Notariado) + ofertas actuales (portales) — Metodología ECO/805/2003
+                      Datos reales de transacciones (Notariado) + ofertas actuales (portales) —
+                      Metodología ECO/805/2003
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {/* Badge de valoración vs mercado */}
                     {precioVsBroker && (
-                      <div className={`flex items-center gap-3 p-4 rounded-lg border-2 ${
-                        precioVsBroker.estado === 'sobrevalorado' ? 'border-red-300 bg-red-50' :
-                        precioVsBroker.estado === 'ligeramente_alto' ? 'border-amber-300 bg-amber-50' :
-                        precioVsBroker.estado === 'en_linea' ? 'border-green-300 bg-green-50' :
-                        'border-blue-300 bg-blue-50'
-                      }`}>
+                      <div
+                        className={`flex items-center gap-3 p-4 rounded-lg border-2 ${
+                          precioVsBroker.estado === 'sobrevalorado'
+                            ? 'border-red-300 bg-red-50'
+                            : precioVsBroker.estado === 'ligeramente_alto'
+                              ? 'border-amber-300 bg-amber-50'
+                              : precioVsBroker.estado === 'en_linea'
+                                ? 'border-green-300 bg-green-50'
+                                : 'border-blue-300 bg-blue-50'
+                        }`}
+                      >
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
-                            {precioVsBroker.estado === 'sobrevalorado' && <AlertTriangle className="h-5 w-5 text-red-600" />}
-                            {precioVsBroker.estado === 'ligeramente_alto' && <AlertTriangle className="h-5 w-5 text-amber-600" />}
-                            {precioVsBroker.estado === 'en_linea' && <CheckCircle2 className="h-5 w-5 text-green-600" />}
-                            {precioVsBroker.estado === 'infravalorado' && <TrendingUp className="h-5 w-5 text-blue-600" />}
+                            {precioVsBroker.estado === 'sobrevalorado' && (
+                              <AlertTriangle className="h-5 w-5 text-red-600" />
+                            )}
+                            {precioVsBroker.estado === 'ligeramente_alto' && (
+                              <AlertTriangle className="h-5 w-5 text-amber-600" />
+                            )}
+                            {precioVsBroker.estado === 'en_linea' && (
+                              <CheckCircle2 className="h-5 w-5 text-green-600" />
+                            )}
+                            {precioVsBroker.estado === 'infravalorado' && (
+                              <TrendingUp className="h-5 w-5 text-blue-600" />
+                            )}
                             <span className="font-bold text-base">
-                              {precioVsBroker.estado === 'sobrevalorado' ? 'Precio Sobrevalorado' :
-                               precioVsBroker.estado === 'ligeramente_alto' ? 'Precio Ligeramente Alto' :
-                               precioVsBroker.estado === 'en_linea' ? 'Precio en Línea con Mercado' :
-                               'Precio Infravalorado (Oportunidad)'}
+                              {precioVsBroker.estado === 'sobrevalorado'
+                                ? 'Precio Sobrevalorado'
+                                : precioVsBroker.estado === 'ligeramente_alto'
+                                  ? 'Precio Ligeramente Alto'
+                                  : precioVsBroker.estado === 'en_linea'
+                                    ? 'Precio en Línea con Mercado'
+                                    : 'Precio Infravalorado (Oportunidad)'}
                             </span>
                           </div>
                           <p className="text-sm text-gray-600">
-                            Broker: <strong>{precioVsBroker.precioM2Broker?.toLocaleString('es-ES')}€/m²</strong> vs
-                            Mercado real: <strong>{precioVsBroker.precioM2Mercado?.toLocaleString('es-ES')}€/m²</strong>
-                            {' '}({precioVsBroker.diferenciaPercent > 0 ? '+' : ''}{precioVsBroker.diferenciaPercent}%)
+                            Broker:{' '}
+                            <strong>
+                              {precioVsBroker.precioM2Broker?.toLocaleString('es-ES')}€/m²
+                            </strong>{' '}
+                            vs Mercado real:{' '}
+                            <strong>
+                              {precioVsBroker.precioM2Mercado?.toLocaleString('es-ES')}€/m²
+                            </strong>{' '}
+                            ({precioVsBroker.diferenciaPercent > 0 ? '+' : ''}
+                            {precioVsBroker.diferenciaPercent}%)
                           </p>
                         </div>
-                        <Badge className={`text-lg px-4 py-1 ${
-                          precioVsBroker.estado === 'sobrevalorado' ? 'bg-red-500' :
-                          precioVsBroker.estado === 'ligeramente_alto' ? 'bg-amber-500' :
-                          precioVsBroker.estado === 'en_linea' ? 'bg-green-500' :
-                          'bg-blue-500'
-                        }`}>
-                          {precioVsBroker.diferenciaPercent > 0 ? '+' : ''}{precioVsBroker.diferenciaPercent}%
+                        <Badge
+                          className={`text-lg px-4 py-1 ${
+                            precioVsBroker.estado === 'sobrevalorado'
+                              ? 'bg-red-500'
+                              : precioVsBroker.estado === 'ligeramente_alto'
+                                ? 'bg-amber-500'
+                                : precioVsBroker.estado === 'en_linea'
+                                  ? 'bg-green-500'
+                                  : 'bg-blue-500'
+                          }`}
+                        >
+                          {precioVsBroker.diferenciaPercent > 0 ? '+' : ''}
+                          {precioVsBroker.diferenciaPercent}%
                         </Badge>
                       </div>
                     )}
@@ -1601,32 +1975,53 @@ Estado: Reformado 2018"
                                 <div>
                                   <div className="flex justify-between text-xs mb-0.5">
                                     <span>Precio Broker</span>
-                                    <span className="font-bold">{brokerP.toLocaleString('es-ES')}€/m²</span>
+                                    <span className="font-bold">
+                                      {brokerP.toLocaleString('es-ES')}€/m²
+                                    </span>
                                   </div>
                                   <div className="h-5 bg-gray-100 rounded-full overflow-hidden">
-                                    <div className="h-full bg-red-400 rounded-full" style={{ width: `${(brokerP / maxP) * 100}%` }} />
+                                    <div
+                                      className="h-full bg-red-400 rounded-full"
+                                      style={{ width: `${(brokerP / maxP) * 100}%` }}
+                                    />
                                   </div>
                                 </div>
                               )}
                               {askingP > 0 && (
                                 <div>
                                   <div className="flex justify-between text-xs mb-0.5">
-                                    <span>Asking Price Portales <span className="text-gray-400">(Idealista/Fotocasa)</span></span>
-                                    <span className="font-bold">{askingP.toLocaleString('es-ES')}€/m²</span>
+                                    <span>
+                                      Asking Price Portales{' '}
+                                      <span className="text-gray-400">(Idealista/Fotocasa)</span>
+                                    </span>
+                                    <span className="font-bold">
+                                      {askingP.toLocaleString('es-ES')}€/m²
+                                    </span>
                                   </div>
                                   <div className="h-5 bg-gray-100 rounded-full overflow-hidden">
-                                    <div className="h-full bg-amber-400 rounded-full" style={{ width: `${(askingP / maxP) * 100}%` }} />
+                                    <div
+                                      className="h-full bg-amber-400 rounded-full"
+                                      style={{ width: `${(askingP / maxP) * 100}%` }}
+                                    />
                                   </div>
                                 </div>
                               )}
                               {realP > 0 && (
                                 <div>
                                   <div className="flex justify-between text-xs mb-0.5">
-                                    <span>Precio Real Escriturado <span className="text-gray-400">(Notariado)</span></span>
-                                    <span className="font-bold">{realP.toLocaleString('es-ES')}€/m²</span>
+                                    <span>
+                                      Precio Real Escriturado{' '}
+                                      <span className="text-gray-400">(Notariado)</span>
+                                    </span>
+                                    <span className="font-bold">
+                                      {realP.toLocaleString('es-ES')}€/m²
+                                    </span>
                                   </div>
                                   <div className="h-5 bg-gray-100 rounded-full overflow-hidden">
-                                    <div className="h-full bg-green-500 rounded-full" style={{ width: `${(realP / maxP) * 100}%` }} />
+                                    <div
+                                      className="h-full bg-green-500 rounded-full"
+                                      style={{ width: `${(realP / maxP) * 100}%` }}
+                                    />
                                   </div>
                                 </div>
                               )}
@@ -1642,21 +2037,28 @@ Estado: Reformado 2018"
                           </div>
                           <div className="bg-white rounded-lg p-3 border">
                             <div className="text-xs text-gray-500">Tendencia</div>
-                            <div className="text-sm font-bold capitalize">{marketContext.tendenciaZona || '-'}</div>
+                            <div className="text-sm font-bold capitalize">
+                              {marketContext.tendenciaZona || '-'}
+                            </div>
                           </div>
                           <div className="bg-white rounded-lg p-3 border">
                             <div className="text-xs text-gray-500">Demanda</div>
-                            <div className="text-sm font-bold capitalize">{marketContext.demandaZona || '-'}</div>
+                            <div className="text-sm font-bold capitalize">
+                              {marketContext.demandaZona || '-'}
+                            </div>
                           </div>
                           <div className="bg-white rounded-lg p-3 border">
                             <div className="text-xs text-gray-500">Alquiler €/m²/mes</div>
                             <div className="text-sm font-bold">
-                              {marketContext.alquilerM2ZonaReal ? `${marketContext.alquilerM2ZonaReal}€` : '-'}
+                              {marketContext.alquilerM2ZonaReal
+                                ? `${marketContext.alquilerM2ZonaReal}€`
+                                : '-'}
                             </div>
                           </div>
                         </div>
                         <p className="text-xs text-gray-400 mt-1">
-                          Fuentes: {marketContext.fuentePrecioReal || 'Notariado'}, {marketContext.fuenteAsking || 'Idealista/Fotocasa'}
+                          Fuentes: {marketContext.fuentePrecioReal || 'Notariado'},{' '}
+                          {marketContext.fuenteAsking || 'Idealista/Fotocasa'}
                         </p>
                       </div>
                     )}
@@ -1671,38 +2073,59 @@ Estado: Reformado 2018"
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                           {platformSummary.idealistaData.grossYield > 0 && (
                             <div className="bg-white rounded p-2 border">
-                              <div className="text-[10px] text-gray-500 uppercase">Yield mercado</div>
-                              <div className="text-sm font-bold text-emerald-700">{platformSummary.idealistaData.grossYield}%</div>
+                              <div className="text-[10px] text-gray-500 uppercase">
+                                Yield mercado
+                              </div>
+                              <div className="text-sm font-bold text-emerald-700">
+                                {platformSummary.idealistaData.grossYield}%
+                              </div>
                             </div>
                           )}
                           {platformSummary.idealistaData.salePricePerM2 && (
                             <div className="bg-white rounded p-2 border">
-                              <div className="text-[10px] text-gray-500 uppercase">Precio venta</div>
-                              <div className="text-sm font-bold">{platformSummary.idealistaData.salePricePerM2?.toLocaleString('es-ES')}€/m²</div>
+                              <div className="text-[10px] text-gray-500 uppercase">
+                                Precio venta
+                              </div>
+                              <div className="text-sm font-bold">
+                                {platformSummary.idealistaData.salePricePerM2?.toLocaleString(
+                                  'es-ES'
+                                )}
+                                €/m²
+                              </div>
                             </div>
                           )}
                           {platformSummary.idealistaData.rentPricePerM2 && (
                             <div className="bg-white rounded p-2 border">
                               <div className="text-[10px] text-gray-500 uppercase">Alquiler</div>
-                              <div className="text-sm font-bold">{platformSummary.idealistaData.rentPricePerM2}€/m²</div>
+                              <div className="text-sm font-bold">
+                                {platformSummary.idealistaData.rentPricePerM2}€/m²
+                              </div>
                             </div>
                           )}
                           {platformSummary.idealistaData.avgDaysOnMarket && (
                             <div className="bg-white rounded p-2 border">
-                              <div className="text-[10px] text-gray-500 uppercase">D&iacute;as en mercado</div>
-                              <div className="text-sm font-bold">{platformSummary.idealistaData.avgDaysOnMarket}</div>
+                              <div className="text-[10px] text-gray-500 uppercase">
+                                D&iacute;as en mercado
+                              </div>
+                              <div className="text-sm font-bold">
+                                {platformSummary.idealistaData.avgDaysOnMarket}
+                              </div>
                             </div>
                           )}
                         </div>
                         {platformSummary.idealistaData.subZones?.length > 0 && (
                           <div className="text-xs text-gray-600 space-y-0.5">
                             <span className="font-medium">Precios por distrito:</span>
-                            {platformSummary.idealistaData.subZones.slice(0, 5).map((z: any, i: number) => (
-                              <span key={i} className="block ml-2">
-                                {z.location}: {z.pricePerM2?.toLocaleString('es-ES')}€/m²
-                                {z.annualVariation ? ` (${z.annualVariation > 0 ? '+' : ''}${z.annualVariation}%)` : ''}
-                              </span>
-                            ))}
+                            {platformSummary.idealistaData.subZones
+                              .slice(0, 5)
+                              .map((z: any, i: number) => (
+                                <span key={i} className="block ml-2">
+                                  {z.location}: {z.pricePerM2?.toLocaleString('es-ES')}€/m²
+                                  {z.annualVariation
+                                    ? ` (${z.annualVariation > 0 ? '+' : ''}${z.annualVariation}%)`
+                                    : ''}
+                                </span>
+                              ))}
                           </div>
                         )}
                       </div>
@@ -1711,14 +2134,26 @@ Estado: Reformado 2018"
                     {/* Platform summary */}
                     {platformSummary && (
                       <div className="flex flex-wrap gap-2 text-xs text-gray-500 pt-2 border-t">
-                        <span>Fuentes: {platformSummary.sourcesUsed?.map((s: string) =>
-                          s === 'idealista_data' ? 'Idealista Data' :
-                          s === 'idealista' ? 'Idealista' :
-                          s === 'fotocasa' ? 'Fotocasa' :
-                          s === 'notariado' ? 'Notariado' :
-                          s === 'ine' ? 'INE' :
-                          s === 'internal_db' ? 'BD Interna' : s
-                        ).join(', ')}</span>
+                        <span>
+                          Fuentes:{' '}
+                          {platformSummary.sourcesUsed
+                            ?.map((s: string) =>
+                              s === 'idealista_data'
+                                ? 'Idealista Data'
+                                : s === 'idealista'
+                                  ? 'Idealista'
+                                  : s === 'fotocasa'
+                                    ? 'Fotocasa'
+                                    : s === 'notariado'
+                                      ? 'Notariado'
+                                      : s === 'ine'
+                                        ? 'INE'
+                                        : s === 'internal_db'
+                                          ? 'BD Interna'
+                                          : s
+                            )
+                            .join(', ')}
+                        </span>
                         <span>&bull;</span>
                         <span>Fiabilidad: {platformSummary.overallReliability}%</span>
                         {platformSummary.comparablesCount > 0 && (
