@@ -1,9 +1,9 @@
 /**
  * API: Document Data Review
- * 
+ *
  * POST /api/onboarding/documents/review
  * Permite revisar, aprobar o rechazar datos extraídos de documentos
- * 
+ *
  * @module app/api/onboarding/documents/review/route
  */
 
@@ -27,7 +27,7 @@ async function getPrisma() {
 // ============================================================================
 
 const reviewActionSchema = z.object({
-  action: z.enum(['approve', 'reject', 'correct']),
+  action: z.enum(['approve', 'reject', 'correct', 'reprocess']),
   documentId: z.string().optional(),
   dataId: z.string().optional(),
   correctedValue: z.string().optional(),
@@ -49,10 +49,7 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id || !session?.user?.companyId) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const body = await request.json();
@@ -68,7 +65,6 @@ export async function POST(request: NextRequest) {
       const data = reviewActionSchema.parse(body);
       return handleIndividualReview(data, session.user.id, session.user.companyId);
     }
-
   } catch (error: any) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -77,10 +73,7 @@ export async function POST(request: NextRequest) {
       );
     }
     logger.error('Error en revisión:', error);
-    return NextResponse.json(
-      { error: 'Error al procesar la revisión' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al procesar la revisión' }, { status: 500 });
   }
 }
 
@@ -112,10 +105,7 @@ async function handleIndividualReview(
     });
 
     if (!extractedData) {
-      return NextResponse.json(
-        { error: 'Dato no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Dato no encontrado' }, { status: 404 });
     }
 
     if (data.action === 'approve') {
@@ -149,7 +139,6 @@ async function handleIndividualReview(
       success: true,
       message: `Dato ${data.action === 'approve' ? 'aprobado' : data.action === 'reject' ? 'rechazado' : 'corregido'}`,
     });
-
   } else if (data.documentId) {
     // Revisar un documento completo
     const document = await prisma.documentImport.findFirst({
@@ -160,10 +149,7 @@ async function handleIndividualReview(
     });
 
     if (!document) {
-      return NextResponse.json(
-        { error: 'Documento no encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Documento no encontrado' }, { status: 404 });
     }
 
     if (data.action === 'approve') {
@@ -187,6 +173,53 @@ async function handleIndividualReview(
         where: { id: data.documentId },
         data: { status: 'rejected' },
       });
+    } else if (data.action === 'reprocess') {
+      await prisma.$transaction([
+        prisma.extractedDocumentData.deleteMany({
+          where: { documentId: data.documentId },
+        }),
+        prisma.aIDocumentAnalysis.deleteMany({
+          where: { documentId: data.documentId },
+        }),
+        prisma.documentImport.update({
+          where: { id: data.documentId },
+          data: {
+            status: 'pending',
+            processingStage: 'uploaded',
+            errorMessage: null,
+            detectedCategory: null,
+            categoryConfidence: null,
+            processedAt: null,
+          },
+        }),
+      ]);
+
+      const batch = await prisma.documentImportBatch.findFirst({
+        where: { id: document.batchId },
+        include: { company: { select: { id: true, nombre: true, cif: true, direccion: true } } },
+      });
+
+      if (batch?.company) {
+        const { default: uploadRoute } =
+          await import('@/app/api/onboarding/documents/upload/route');
+        try {
+          const mod = await import('@/app/api/onboarding/documents/upload/route');
+          if ('processDocumentsAsync' in mod) {
+            (mod as any)
+              .processDocumentsAsync(document.batchId, batch.company)
+              .catch((err: any) => {
+                logger.error('Error reprocesando documento:', err);
+              });
+          }
+        } catch {
+          logger.warn('No se pudo iniciar reprocesamiento automático');
+        }
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: 'Documento puesto en cola para reprocesamiento',
+      });
     }
 
     return NextResponse.json({
@@ -195,10 +228,7 @@ async function handleIndividualReview(
     });
   }
 
-  return NextResponse.json(
-    { error: 'Debe proporcionar documentId o dataId' },
-    { status: 400 }
-  );
+  return NextResponse.json({ error: 'Debe proporcionar documentId o dataId' }, { status: 400 });
 }
 
 /**
@@ -226,10 +256,7 @@ async function handleBulkReview(
   });
 
   if (!batch) {
-    return NextResponse.json(
-      { error: 'Batch no encontrado' },
-      { status: 404 }
-    );
+    return NextResponse.json({ error: 'Batch no encontrado' }, { status: 404 });
   }
 
   let updatedCount = 0;
@@ -257,13 +284,12 @@ async function handleBulkReview(
       }),
     ]);
     updatedCount = result[0].count;
-
   } else if (data.action === 'approve_high_confidence') {
     // Aprobar solo datos con alta confianza
-    const highConfidenceDataIds = batch.documents.flatMap(doc =>
+    const highConfidenceDataIds = batch.documents.flatMap((doc) =>
       doc.extractedData
-        .filter(d => d.confidence >= data.confidenceThreshold && !d.isValidated)
-        .map(d => d.id)
+        .filter((d) => d.confidence >= data.confidenceThreshold && !d.isValidated)
+        .map((d) => d.id)
     );
 
     if (highConfidenceDataIds.length > 0) {
@@ -296,7 +322,6 @@ async function handleBulkReview(
         }
       }
     }
-
   } else if (data.action === 'reject_all') {
     // Rechazar todos los documentos
     const result = await prisma.documentImport.updateMany({
@@ -316,7 +341,7 @@ async function handleBulkReview(
     _count: true,
   });
 
-  const allApproved = stats.every(s => s.status !== 'awaiting_review');
+  const allApproved = stats.every((s) => s.status !== 'awaiting_review');
   if (allApproved) {
     await prisma.documentImportBatch.update({
       where: { id: data.batchId },

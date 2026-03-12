@@ -2,17 +2,24 @@
 
 /**
  * Document Review Page
- * 
+ *
  * Página para revisar y aprobar los datos extraídos de los documentos
  * antes de aplicarlos al sistema.
- * 
+ *
  * @module app/onboarding/review/page
  */
 
 import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -159,7 +166,7 @@ export default function DocumentReviewPage() {
       if (!response.ok) throw new Error('Error al cargar datos');
       const data = await response.json();
       setBatchData(data);
-      
+
       // Auto-select first document
       if (data.documents.length > 0 && !selectedDocId) {
         setSelectedDocId(data.documents[0].id);
@@ -281,10 +288,10 @@ export default function DocumentReviewPage() {
       });
       if (!response.ok) throw new Error('Error al aplicar cambios');
       const data = await response.json();
-      
+
       toast.success(data.message);
       setShowConfirmDialog(false);
-      
+
       // Redirect to dashboard
       setTimeout(() => {
         router.push('/dashboard?onboarding=complete');
@@ -297,7 +304,7 @@ export default function DocumentReviewPage() {
   };
 
   // Get selected document
-  const selectedDoc = batchData?.documents.find(d => d.id === selectedDocId);
+  const selectedDoc = batchData?.documents.find((d) => d.id === selectedDocId);
 
   if (loading) {
     return (
@@ -321,9 +328,7 @@ export default function DocumentReviewPage() {
               <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
               <h2 className="text-xl font-semibold mb-2">Error</h2>
               <p className="text-gray-600 mb-4">No se pudieron cargar los datos</p>
-              <Button onClick={() => router.push('/onboarding/documents')}>
-                Volver
-              </Button>
+              <Button onClick={() => router.push('/onboarding/documents')}>Volver</Button>
             </CardContent>
           </Card>
         </div>
@@ -334,366 +339,398 @@ export default function DocumentReviewPage() {
   return (
     <AuthenticatedLayout>
       <div className="bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" size="sm" onClick={() => router.back()}>
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Volver
-              </Button>
-              <div>
-                <h1 className="text-xl font-semibold text-gray-900">
-                  Revisar datos extraídos
-                </h1>
-                <p className="text-sm text-gray-500">{batchData.batch.name}</p>
+        {/* Header */}
+        <div className="bg-white border-b sticky top-0 z-10">
+          <div className="max-w-7xl mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <Button variant="ghost" size="sm" onClick={() => router.back()}>
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Volver
+                </Button>
+                <div>
+                  <h1 className="text-xl font-semibold text-gray-900">Revisar datos extraídos</h1>
+                  <p className="text-sm text-gray-500">{batchData.batch.name}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Button variant="outline" onClick={fetchBatchData}>
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Actualizar
+                </Button>
+                <Button variant="outline" onClick={approveHighConfidence}>
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Auto-aprobar (+80%)
+                </Button>
+                <Button onClick={getPreview} className="bg-indigo-600 hover:bg-indigo-700">
+                  <CheckCircle2 className="w-4 h-4 mr-2" />
+                  Aplicar cambios
+                </Button>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <Button variant="outline" onClick={fetchBatchData}>
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Actualizar
-              </Button>
-              <Button variant="outline" onClick={approveHighConfidence}>
-                <Sparkles className="w-4 h-4 mr-2" />
-                Auto-aprobar (+80%)
+          </div>
+        </div>
+
+        {/* Stats bar */}
+        <div className="bg-white border-b">
+          <div className="max-w-7xl mx-auto px-4 py-3">
+            <div className="flex items-center gap-6">
+              <StatBadge
+                icon={<FileText className="w-4 h-4" />}
+                label="Documentos"
+                value={batchData.stats.totalFiles}
+              />
+              <StatBadge
+                icon={<Building2 className="w-4 h-4" />}
+                label="Propiedades"
+                value={batchData.stats.entitiesFound.properties}
+                color="blue"
+              />
+              <StatBadge
+                icon={<Users className="w-4 h-4" />}
+                label="Inquilinos"
+                value={batchData.stats.entitiesFound.tenants}
+                color="green"
+              />
+              <StatBadge
+                icon={<FileSignature className="w-4 h-4" />}
+                label="Contratos"
+                value={batchData.stats.entitiesFound.contracts}
+                color="purple"
+              />
+              <div className="flex-1" />
+              <Badge variant={batchData.stats.dataAwaitingReview > 0 ? 'destructive' : 'default'}>
+                {batchData.stats.dataAwaitingReview} campos pendientes
+              </Badge>
+            </div>
+          </div>
+        </div>
+
+        {/* Main content */}
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          <div className="grid grid-cols-12 gap-6">
+            {/* Document list */}
+            <div className="col-span-4">
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">Documentos</CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="max-h-[calc(100vh-300px)] overflow-y-auto">
+                    {batchData.documents.map((doc) => (
+                      <DocumentListItem
+                        key={doc.id}
+                        document={doc}
+                        isSelected={doc.id === selectedDocId}
+                        onClick={() => setSelectedDocId(doc.id)}
+                      />
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Document details */}
+            <div className="col-span-8">
+              {selectedDoc ? (
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <CardTitle className="flex items-center gap-2">
+                          <FileText className="w-5 h-5" />
+                          {selectedDoc.originalFilename}
+                        </CardTitle>
+                        <CardDescription className="mt-1">
+                          {getCategoryLabel(selectedDoc.detectedCategory)} •{' '}
+                          {(selectedDoc.fileSize / 1024).toFixed(1)} KB
+                        </CardDescription>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {selectedDoc.ownershipValidated && (
+                          <Badge variant="outline" className="bg-green-50 text-green-700">
+                            <Shield className="w-3 h-3 mr-1" />
+                            Verificado
+                          </Badge>
+                        )}
+                        <StatusBadge status={selectedDoc.status} />
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {/* Analysis summary */}
+                    {selectedDoc.analyses[0] && (
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <h4 className="font-medium text-sm text-gray-700 mb-2 flex items-center gap-2">
+                          <Sparkles className="w-4 h-4 text-indigo-600" />
+                          Resumen del análisis
+                        </h4>
+                        <p className="text-sm text-gray-600">{selectedDoc.analyses[0].summary}</p>
+                        {selectedDoc.analyses[0].hasWarnings && (
+                          <Alert className="mt-3" variant="destructive">
+                            <AlertTriangle className="h-4 w-4" />
+                            <AlertTitle>Advertencias</AlertTitle>
+                            <AlertDescription>
+                              {JSON.stringify(selectedDoc.analyses[0].warnings)}
+                            </AlertDescription>
+                          </Alert>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Error message for failed documents */}
+                    {selectedDoc.status === 'failed' && selectedDoc.errorMessage && (
+                      <Alert variant="destructive">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertTitle>Error en procesamiento</AlertTitle>
+                        <AlertDescription className="flex items-center justify-between">
+                          <span>{selectedDoc.errorMessage}</span>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="ml-4 shrink-0"
+                            onClick={async () => {
+                              try {
+                                const res = await fetch('/api/onboarding/documents/review', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({
+                                    action: 'reprocess',
+                                    documentId: selectedDoc.id,
+                                  }),
+                                });
+                                if (res.ok) {
+                                  toast.success('Documento puesto en cola para reprocesamiento');
+                                  fetchBatchData();
+                                } else {
+                                  toast.error('Error al reprocesar');
+                                }
+                              } catch {
+                                toast.error('Error de conexión');
+                              }
+                            }}
+                          >
+                            <RefreshCw className="w-3 h-3 mr-1" />
+                            Reprocesar
+                          </Button>
+                        </AlertDescription>
+                      </Alert>
+                    )}
+
+                    {/* Extracted data table */}
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-medium text-sm text-gray-700">
+                          Datos extraídos ({selectedDoc.extractedData.length})
+                        </h4>
+                        {selectedDoc.status === 'awaiting_review' && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => approveDocument(selectedDoc.id)}
+                          >
+                            <Check className="w-3 h-3 mr-1" />
+                            Aprobar todo
+                          </Button>
+                        )}
+                      </div>
+
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Campo</TableHead>
+                            <TableHead>Valor</TableHead>
+                            <TableHead className="w-24">Confianza</TableHead>
+                            <TableHead className="w-32">Acciones</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {selectedDoc.extractedData.map((data) => (
+                            <TableRow key={data.id}>
+                              <TableCell>
+                                <div>
+                                  <span className="font-medium">
+                                    {formatFieldName(data.fieldName)}
+                                  </span>
+                                  {data.targetEntity && (
+                                    <Badge variant="outline" className="ml-2 text-xs">
+                                      {data.targetEntity}
+                                    </Badge>
+                                  )}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                {editingField?.id === data.id ? (
+                                  <div className="flex items-center gap-2">
+                                    <Input
+                                      value={editingField.value}
+                                      onChange={(e) =>
+                                        setEditingField({ ...editingField, value: e.target.value })
+                                      }
+                                      className="h-8"
+                                    />
+                                    <Button
+                                      size="sm"
+                                      onClick={() => correctField(data.id, editingField.value)}
+                                    >
+                                      <Check className="w-3 h-3" />
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => setEditingField(null)}
+                                    >
+                                      <X className="w-3 h-3" />
+                                    </Button>
+                                  </div>
+                                ) : (
+                                  <span className="text-gray-700">{data.fieldValue}</span>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                <ConfidenceBadge confidence={data.confidence} />
+                              </TableCell>
+                              <TableCell>
+                                {data.isValidated ? (
+                                  <Badge variant="outline" className="bg-green-50">
+                                    <Check className="w-3 h-3 mr-1" />
+                                    Aprobado
+                                  </Badge>
+                                ) : data.wasApplied ? (
+                                  <Badge variant="outline">Aplicado</Badge>
+                                ) : (
+                                  <div className="flex items-center gap-1">
+                                    <Button
+                                      size="icon"
+                                      variant="ghost"
+                                      className="h-7 w-7"
+                                      onClick={() => approveField(data.id)}
+                                    >
+                                      <Check className="w-4 h-4 text-green-600" />
+                                    </Button>
+                                    <Button
+                                      size="icon"
+                                      variant="ghost"
+                                      className="h-7 w-7"
+                                      onClick={() =>
+                                        setEditingField({ id: data.id, value: data.fieldValue })
+                                      }
+                                    >
+                                      <Edit2 className="w-4 h-4 text-blue-600" />
+                                    </Button>
+                                    <Button
+                                      size="icon"
+                                      variant="ghost"
+                                      className="h-7 w-7"
+                                      onClick={() => rejectField(data.id)}
+                                    >
+                                      <X className="w-4 h-4 text-red-600" />
+                                    </Button>
+                                  </div>
+                                )}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card>
+                  <CardContent className="py-12 text-center">
+                    <FileText className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                    <p className="text-gray-500">Selecciona un documento para ver sus datos</p>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Confirmation Dialog */}
+        <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Confirmar parametrización</DialogTitle>
+              <DialogDescription>
+                Se aplicarán los siguientes cambios a tu sistema
+              </DialogDescription>
+            </DialogHeader>
+
+            {previewData && (
+              <div className="space-y-4 max-h-96 overflow-y-auto">
+                {previewData.willCreate.length > 0 && (
+                  <div>
+                    <h4 className="font-medium text-green-700 mb-2 flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4" />
+                      Se crearán ({previewData.willCreate.length})
+                    </h4>
+                    <div className="space-y-2">
+                      {previewData.willCreate.map((item: any, index: number) => (
+                        <div key={index} className="bg-green-50 p-3 rounded text-sm">
+                          <span className="font-medium">{item.type}:</span>{' '}
+                          {JSON.stringify(item.data).substring(0, 100)}...
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {previewData.willUpdate.length > 0 && (
+                  <div>
+                    <h4 className="font-medium text-blue-700 mb-2 flex items-center gap-2">
+                      <RefreshCw className="w-4 h-4" />
+                      Se actualizarán ({previewData.willUpdate.length})
+                    </h4>
+                    <div className="space-y-2">
+                      {previewData.willUpdate.map((item: any, index: number) => (
+                        <div key={index} className="bg-blue-50 p-3 rounded text-sm">
+                          <span className="font-medium">{item.type}</span> (ID: {item.id})
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {previewData.conflicts.length > 0 && (
+                  <Alert variant="destructive">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertTitle>Conflictos detectados</AlertTitle>
+                    <AlertDescription>
+                      {previewData.conflicts.map((c: any, i: number) => (
+                        <div key={i}>{c.issue}</div>
+                      ))}
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </div>
+            )}
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>
+                Cancelar
               </Button>
               <Button
-                onClick={getPreview}
+                onClick={applyParametrization}
+                disabled={isApplying}
                 className="bg-indigo-600 hover:bg-indigo-700"
               >
-                <CheckCircle2 className="w-4 h-4 mr-2" />
-                Aplicar cambios
+                {isApplying ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Aplicando...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-4 h-4 mr-2" />
+                    Confirmar y aplicar
+                  </>
+                )}
               </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Stats bar */}
-      <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 py-3">
-          <div className="flex items-center gap-6">
-            <StatBadge
-              icon={<FileText className="w-4 h-4" />}
-              label="Documentos"
-              value={batchData.stats.totalFiles}
-            />
-            <StatBadge
-              icon={<Building2 className="w-4 h-4" />}
-              label="Propiedades"
-              value={batchData.stats.entitiesFound.properties}
-              color="blue"
-            />
-            <StatBadge
-              icon={<Users className="w-4 h-4" />}
-              label="Inquilinos"
-              value={batchData.stats.entitiesFound.tenants}
-              color="green"
-            />
-            <StatBadge
-              icon={<FileSignature className="w-4 h-4" />}
-              label="Contratos"
-              value={batchData.stats.entitiesFound.contracts}
-              color="purple"
-            />
-            <div className="flex-1" />
-            <Badge variant={batchData.stats.dataAwaitingReview > 0 ? 'destructive' : 'default'}>
-              {batchData.stats.dataAwaitingReview} campos pendientes
-            </Badge>
-          </div>
-        </div>
-      </div>
-
-      {/* Main content */}
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="grid grid-cols-12 gap-6">
-          {/* Document list */}
-          <div className="col-span-4">
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base">Documentos</CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="max-h-[calc(100vh-300px)] overflow-y-auto">
-                  {batchData.documents.map((doc) => (
-                    <DocumentListItem
-                      key={doc.id}
-                      document={doc}
-                      isSelected={doc.id === selectedDocId}
-                      onClick={() => setSelectedDocId(doc.id)}
-                    />
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Document details */}
-          <div className="col-span-8">
-            {selectedDoc ? (
-              <Card>
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="flex items-center gap-2">
-                        <FileText className="w-5 h-5" />
-                        {selectedDoc.originalFilename}
-                      </CardTitle>
-                      <CardDescription className="mt-1">
-                        {getCategoryLabel(selectedDoc.detectedCategory)} •{' '}
-                        {(selectedDoc.fileSize / 1024).toFixed(1)} KB
-                      </CardDescription>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {selectedDoc.ownershipValidated && (
-                        <Badge variant="outline" className="bg-green-50 text-green-700">
-                          <Shield className="w-3 h-3 mr-1" />
-                          Verificado
-                        </Badge>
-                      )}
-                      <StatusBadge status={selectedDoc.status} />
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  {/* Analysis summary */}
-                  {selectedDoc.analyses[0] && (
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <h4 className="font-medium text-sm text-gray-700 mb-2 flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 text-indigo-600" />
-                        Resumen del análisis
-                      </h4>
-                      <p className="text-sm text-gray-600">
-                        {selectedDoc.analyses[0].summary}
-                      </p>
-                      {selectedDoc.analyses[0].hasWarnings && (
-                        <Alert className="mt-3" variant="destructive">
-                          <AlertTriangle className="h-4 w-4" />
-                          <AlertTitle>Advertencias</AlertTitle>
-                          <AlertDescription>
-                            {JSON.stringify(selectedDoc.analyses[0].warnings)}
-                          </AlertDescription>
-                        </Alert>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Extracted data table */}
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <h4 className="font-medium text-sm text-gray-700">
-                        Datos extraídos ({selectedDoc.extractedData.length})
-                      </h4>
-                      {selectedDoc.status === 'awaiting_review' && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => approveDocument(selectedDoc.id)}
-                        >
-                          <Check className="w-3 h-3 mr-1" />
-                          Aprobar todo
-                        </Button>
-                      )}
-                    </div>
-
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Campo</TableHead>
-                          <TableHead>Valor</TableHead>
-                          <TableHead className="w-24">Confianza</TableHead>
-                          <TableHead className="w-32">Acciones</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {selectedDoc.extractedData.map((data) => (
-                          <TableRow key={data.id}>
-                            <TableCell>
-                              <div>
-                                <span className="font-medium">
-                                  {formatFieldName(data.fieldName)}
-                                </span>
-                                {data.targetEntity && (
-                                  <Badge variant="outline" className="ml-2 text-xs">
-                                    {data.targetEntity}
-                                  </Badge>
-                                )}
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              {editingField?.id === data.id ? (
-                                <div className="flex items-center gap-2">
-                                  <Input
-                                    value={editingField.value}
-                                    onChange={(e) =>
-                                      setEditingField({ ...editingField, value: e.target.value })
-                                    }
-                                    className="h-8"
-                                  />
-                                  <Button
-                                    size="sm"
-                                    onClick={() => correctField(data.id, editingField.value)}
-                                  >
-                                    <Check className="w-3 h-3" />
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() => setEditingField(null)}
-                                  >
-                                    <X className="w-3 h-3" />
-                                  </Button>
-                                </div>
-                              ) : (
-                                <span className="text-gray-700">{data.fieldValue}</span>
-                              )}
-                            </TableCell>
-                            <TableCell>
-                              <ConfidenceBadge confidence={data.confidence} />
-                            </TableCell>
-                            <TableCell>
-                              {data.isValidated ? (
-                                <Badge variant="outline" className="bg-green-50">
-                                  <Check className="w-3 h-3 mr-1" />
-                                  Aprobado
-                                </Badge>
-                              ) : data.wasApplied ? (
-                                <Badge variant="outline">Aplicado</Badge>
-                              ) : (
-                                <div className="flex items-center gap-1">
-                                  <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    className="h-7 w-7"
-                                    onClick={() => approveField(data.id)}
-                                  >
-                                    <Check className="w-4 h-4 text-green-600" />
-                                  </Button>
-                                  <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    className="h-7 w-7"
-                                    onClick={() =>
-                                      setEditingField({ id: data.id, value: data.fieldValue })
-                                    }
-                                  >
-                                    <Edit2 className="w-4 h-4 text-blue-600" />
-                                  </Button>
-                                  <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    className="h-7 w-7"
-                                    onClick={() => rejectField(data.id)}
-                                  >
-                                    <X className="w-4 h-4 text-red-600" />
-                                  </Button>
-                                </div>
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <Card>
-                <CardContent className="py-12 text-center">
-                  <FileText className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-500">Selecciona un documento para ver sus datos</p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Confirmation Dialog */}
-      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Confirmar parametrización</DialogTitle>
-            <DialogDescription>
-              Se aplicarán los siguientes cambios a tu sistema
-            </DialogDescription>
-          </DialogHeader>
-
-          {previewData && (
-            <div className="space-y-4 max-h-96 overflow-y-auto">
-              {previewData.willCreate.length > 0 && (
-                <div>
-                  <h4 className="font-medium text-green-700 mb-2 flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4" />
-                    Se crearán ({previewData.willCreate.length})
-                  </h4>
-                  <div className="space-y-2">
-                    {previewData.willCreate.map((item: any, index: number) => (
-                      <div key={index} className="bg-green-50 p-3 rounded text-sm">
-                        <span className="font-medium">{item.type}:</span>{' '}
-                        {JSON.stringify(item.data).substring(0, 100)}...
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {previewData.willUpdate.length > 0 && (
-                <div>
-                  <h4 className="font-medium text-blue-700 mb-2 flex items-center gap-2">
-                    <RefreshCw className="w-4 h-4" />
-                    Se actualizarán ({previewData.willUpdate.length})
-                  </h4>
-                  <div className="space-y-2">
-                    {previewData.willUpdate.map((item: any, index: number) => (
-                      <div key={index} className="bg-blue-50 p-3 rounded text-sm">
-                        <span className="font-medium">{item.type}</span> (ID: {item.id})
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {previewData.conflicts.length > 0 && (
-                <Alert variant="destructive">
-                  <AlertTriangle className="h-4 w-4" />
-                  <AlertTitle>Conflictos detectados</AlertTitle>
-                  <AlertDescription>
-                    {previewData.conflicts.map((c: any, i: number) => (
-                      <div key={i}>{c.issue}</div>
-                    ))}
-                  </AlertDescription>
-                </Alert>
-              )}
-            </div>
-          )}
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>
-              Cancelar
-            </Button>
-            <Button
-              onClick={applyParametrization}
-              disabled={isApplying}
-              className="bg-indigo-600 hover:bg-indigo-700"
-            >
-              {isApplying ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Aplicando...
-                </>
-              ) : (
-                <>
-                  <CheckCircle2 className="w-4 h-4 mr-2" />
-                  Confirmar y aplicar
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </AuthenticatedLayout>
   );
@@ -739,7 +776,7 @@ function DocumentListItem({
   isSelected: boolean;
   onClick: () => void;
 }) {
-  const pendingCount = document.extractedData.filter(d => !d.isValidated && !d.wasApplied).length;
+  const pendingCount = document.extractedData.filter((d) => !d.isValidated && !d.wasApplied).length;
 
   return (
     <button
@@ -751,9 +788,7 @@ function DocumentListItem({
     >
       <div className="flex items-start justify-between">
         <div className="flex-1 min-w-0">
-          <p className="font-medium text-sm text-gray-900 truncate">
-            {document.originalFilename}
-          </p>
+          <p className="font-medium text-sm text-gray-900 truncate">{document.originalFilename}</p>
           <p className="text-xs text-gray-500 mt-0.5">
             {getCategoryLabel(document.detectedCategory)}
           </p>
@@ -761,9 +796,7 @@ function DocumentListItem({
         <div className="flex flex-col items-end gap-1">
           <StatusBadge status={document.status} size="sm" />
           {pendingCount > 0 && (
-            <span className="text-xs text-orange-600">
-              {pendingCount} pendientes
-            </span>
+            <span className="text-xs text-orange-600">{pendingCount} pendientes</span>
           )}
         </div>
       </div>
@@ -794,18 +827,14 @@ function StatusBadge({ status, size = 'md' }: { status: string; size?: 'sm' | 'm
 function ConfidenceBadge({ confidence }: { confidence: number }) {
   const percent = Math.round(confidence * 100);
   let color = 'bg-red-100 text-red-700';
-  
+
   if (percent >= 80) {
     color = 'bg-green-100 text-green-700';
   } else if (percent >= 60) {
     color = 'bg-yellow-100 text-yellow-700';
   }
 
-  return (
-    <span className={`text-xs px-2 py-0.5 rounded-full ${color}`}>
-      {percent}%
-    </span>
-  );
+  return <span className={`text-xs px-2 py-0.5 rounded-full ${color}`}>{percent}%</span>;
 }
 
 // ============================================================================
@@ -835,9 +864,7 @@ function getCategoryLabel(category: string): string {
 }
 
 function formatFieldName(fieldName: string): string {
-  return fieldName
-    .replace(/_/g, ' ')
-    .replace(/\b\w/g, (l) => l.toUpperCase());
+  return fieldName.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
 }
 
 // Clock component for pending status

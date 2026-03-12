@@ -1,11 +1,11 @@
 /**
  * API: Onboarding Document Upload
- * 
+ *
  * POST /api/onboarding/documents/upload
- * 
+ *
  * Permite subir documentos (individuales o ZIP) para el proceso de onboarding
  * con análisis automático de IA.
- * 
+ *
  * @module app/api/onboarding/documents/upload/route
  */
 
@@ -16,12 +16,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { uploadDocument } from '@/lib/document-service';
-import { 
-  processFile, 
-  processZipFile, 
+import {
+  processFile,
+  processZipFile,
   isZipFile,
   isArchiveFile,
-  calculateChecksum 
+  calculateChecksum,
 } from '@/lib/document-import-processor-service';
 import logger from '@/lib/logger';
 import { z } from 'zod';
@@ -65,10 +65,7 @@ export async function POST(request: NextRequest) {
     // 1. Verificar autenticación
     const session = await getServerSession(authOptions);
     if (!session?.user?.id || !session?.user?.companyId) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
     const userId = session.user.id;
@@ -86,17 +83,14 @@ export async function POST(request: NextRequest) {
     });
 
     if (!company) {
-      return NextResponse.json(
-        { error: 'Empresa no encontrada' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Empresa no encontrada' }, { status: 404 });
     }
 
     // 3. Parsear FormData
     const formData = await request.formData();
     const files = formData.getAll('files') as File[];
     const optionsJson = formData.get('options') as string;
-    
+
     let options: UploadOptions = { autoApprove: false, confidenceThreshold: 0.8 };
     if (optionsJson) {
       try {
@@ -109,10 +103,7 @@ export async function POST(request: NextRequest) {
 
     // 4. Validar archivos
     if (!files || files.length === 0) {
-      return NextResponse.json(
-        { error: 'No se proporcionaron archivos' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No se proporcionaron archivos' }, { status: 400 });
     }
 
     if (files.length > MAX_FILES_PER_BATCH) {
@@ -181,7 +172,7 @@ export async function POST(request: NextRequest) {
         // Si es ZIP, procesar contenidos
         if (isArchiveFile(file.type, file.name)) {
           const zipContents = await processZipFile(buffer, file.name);
-          
+
           // Crear DocumentImport para cada archivo del ZIP
           for (const zipFile of zipContents.files) {
             try {
@@ -222,7 +213,7 @@ export async function POST(request: NextRequest) {
         } else {
           // Archivo individual
           const checksum = calculateChecksum(buffer);
-          
+
           const docImport = await createDocumentImport(
             batch.id,
             companyId,
@@ -251,8 +242,8 @@ export async function POST(request: NextRequest) {
     }
 
     // 7. Actualizar estadísticas del batch
-    const successCount = results.filter(r => r.status === 'success').length;
-    const failedCount = results.filter(r => r.status === 'error').length;
+    const successCount = results.filter((r) => r.status === 'success').length;
+    const failedCount = results.filter((r) => r.status === 'error').length;
 
     await prisma.documentImportBatch.update({
       where: { id: batch.id },
@@ -262,10 +253,12 @@ export async function POST(request: NextRequest) {
         successfulFiles: successCount,
         failedFiles: failedCount,
         status: successCount > 0 ? 'analyzing' : 'failed',
-        errors: results.filter(r => r.error).map(r => ({
-          filename: r.originalFilename,
-          error: r.error,
-        })),
+        errors: results
+          .filter((r) => r.error)
+          .map((r) => ({
+            filename: r.originalFilename,
+            error: r.error,
+          })),
       },
     });
 
@@ -273,7 +266,7 @@ export async function POST(request: NextRequest) {
     if (successCount > 0) {
       // En un entorno real, esto se haría con una cola (BullMQ)
       // Por ahora, usamos un setTimeout para no bloquear la respuesta
-      processDocumentsAsync(batch.id, company).catch(err => {
+      processDocumentsAsync(batch.id, company).catch((err) => {
         logger.error('Error en procesamiento async:', err);
       });
     }
@@ -288,22 +281,25 @@ export async function POST(request: NextRequest) {
       processingTimeMs: processingTime,
     });
 
-    return NextResponse.json({
-      success: true,
-      batchId: batch.id,
-      totalFiles: results.length,
-      successfulFiles: successCount,
-      failedFiles: failedCount,
-      results,
-      message: successCount > 0 
-        ? 'Archivos subidos. El análisis de IA comenzará en breve.'
-        : 'No se pudieron procesar los archivos.',
-    }, { status: successCount > 0 ? 200 : 400 });
-
+    return NextResponse.json(
+      {
+        success: true,
+        batchId: batch.id,
+        totalFiles: results.length,
+        successfulFiles: successCount,
+        failedFiles: failedCount,
+        results,
+        message:
+          successCount > 0
+            ? 'Archivos subidos. El análisis de IA comenzará en breve.'
+            : 'No se pudieron procesar los archivos.',
+      },
+      { status: successCount > 0 ? 200 : 400 }
+    );
   } catch (error: any) {
     logger.error('❌ Error en upload de documentos:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Error al procesar la subida de documentos',
         message: error.message,
       },
@@ -338,7 +334,7 @@ async function createDocumentImport(
   // Subir a S3 (usando el servicio existente)
   try {
     const { S3Client, PutObjectCommand } = await import('@aws-sdk/client-s3');
-    
+
     const s3Client = new S3Client({
       region: process.env.AWS_REGION!,
       credentials: {
@@ -385,7 +381,7 @@ async function createDocumentImport(
 /**
  * Procesa documentos con IA de forma asíncrona
  */
-async function processDocumentsAsync(
+export async function processDocumentsAsync(
   batchId: string,
   company: { id: string; nombre: string; cif: string | null; direccion: string | null }
 ) {
@@ -400,7 +396,7 @@ async function processDocumentsAsync(
       logger.warn('⚠️ IA no configurada, saltando análisis');
       await prisma.documentImportBatch.update({
         where: { id: batchId },
-        data: { 
+        data: {
           status: 'awaiting_review',
           progress: 100,
         },
@@ -410,46 +406,52 @@ async function processDocumentsAsync(
 
     // Obtener documentos pendientes
     const documents = await prisma.documentImport.findMany({
-      where: { 
+      where: {
         batchId,
         status: 'pending',
       },
     });
 
-    logger.info('🤖 Iniciando análisis de IA', { 
-      batchId, 
-      documentCount: documents.length 
+    logger.info('🤖 Iniciando análisis de IA', {
+      batchId,
+      documentCount: documents.length,
     });
 
     let processed = 0;
-    
+
     for (const doc of documents) {
       try {
         // Actualizar estado
         await prisma.documentImport.update({
           where: { id: doc.id },
-          data: { 
+          data: {
             status: 'processing',
             processingStage: 'downloading',
           },
         });
 
-        // Descargar de S3 (o leer localmente en dev)
         let buffer: Buffer;
         try {
+          const region = process.env.AWS_REGION;
+          const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
+          const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+          const bucket = process.env.AWS_S3_BUCKET;
+
+          if (!region || !accessKeyId || !secretAccessKey || !bucket) {
+            throw new Error(
+              `AWS config missing: region=${!!region} key=${!!accessKeyId} secret=${!!secretAccessKey} bucket=${!!bucket}`
+            );
+          }
+
           const s3Client = new S3Client({
-            region: process.env.AWS_REGION!,
-            credentials: {
-              accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-              secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-            },
+            region,
+            credentials: { accessKeyId, secretAccessKey },
           });
 
+          logger.info('📥 Descargando de S3', { bucket, key: doc.s3Key });
+
           const response = await s3Client.send(
-            new GetObjectCommand({
-              Bucket: process.env.AWS_S3_BUCKET!,
-              Key: doc.s3Key,
-            })
+            new GetObjectCommand({ Bucket: bucket, Key: doc.s3Key })
           );
 
           const chunks: Uint8Array[] = [];
@@ -457,13 +459,20 @@ async function processDocumentsAsync(
             chunks.push(chunk);
           }
           buffer = Buffer.concat(chunks);
-        } catch (s3Error) {
-          logger.warn('No se pudo descargar de S3, saltando documento');
+          logger.info('📥 Descarga OK', { size: buffer.length });
+        } catch (s3Error: any) {
+          const errMsg = s3Error?.message || String(s3Error);
+          logger.error('❌ Error descargando de S3', {
+            docId: doc.id,
+            s3Key: doc.s3Key,
+            error: errMsg,
+            bucket: process.env.AWS_S3_BUCKET,
+          });
           await prisma.documentImport.update({
             where: { id: doc.id },
-            data: { 
+            data: {
               status: 'failed',
-              errorMessage: 'No se pudo descargar el archivo',
+              errorMessage: `Error S3: ${errMsg.substring(0, 200)}`,
             },
           });
           continue;
@@ -476,7 +485,7 @@ async function processDocumentsAsync(
         });
 
         const processedFile = await processFile(buffer, doc.originalFilename, doc.mimeType);
-        
+
         if (processedFile.error) {
           throw new Error(processedFile.error);
         }
@@ -549,7 +558,8 @@ async function processDocumentsAsync(
         await prisma.documentImport.update({
           where: { id: doc.id },
           data: {
-            status: analysis.classification.confidence >= 0.8 ? 'awaiting_review' : 'awaiting_review',
+            status:
+              analysis.classification.confidence >= 0.8 ? 'awaiting_review' : 'awaiting_review',
             detectedCategory: analysis.classification.category,
             categoryConfidence: analysis.classification.confidence,
             ownershipValidated: analysis.ownershipValidation.isOwned,
@@ -562,7 +572,7 @@ async function processDocumentsAsync(
         });
 
         processed++;
-        
+
         // Actualizar progreso del batch
         const progress = Math.round((processed / documents.length) * 100);
         await prisma.documentImportBatch.update({
@@ -573,13 +583,12 @@ async function processDocumentsAsync(
             pendingReview: processed,
           },
         });
-
       } catch (docError: any) {
-        logger.error('Error procesando documento:', { 
-          docId: doc.id, 
-          error: docError.message 
+        logger.error('Error procesando documento:', {
+          docId: doc.id,
+          error: docError.message,
         });
-        
+
         await prisma.documentImport.update({
           where: { id: doc.id },
           data: {
@@ -601,15 +610,14 @@ async function processDocumentsAsync(
       },
     });
 
-    logger.info('✅ Análisis de IA completado', { 
-      batchId, 
+    logger.info('✅ Análisis de IA completado', {
+      batchId,
       processed,
       total: documents.length,
     });
-
   } catch (error: any) {
     logger.error('❌ Error en procesamiento async:', error);
-    
+
     await prisma.documentImportBatch.update({
       where: { id: batchId },
       data: {
