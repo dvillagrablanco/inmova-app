@@ -56,6 +56,72 @@ function mapCondition(estado?: string): 'NEW' | 'GOOD' | 'NEEDS_RENOVATION' {
   }
 }
 
+function normalizeValuationPropertyType(value?: string): PropertyForAnalysis['propertyType'] {
+  switch (value) {
+    case 'local':
+      return 'local_comercial';
+    case 'coworking_space':
+      return 'coworking';
+    case 'edificio_completo':
+      return 'edificio';
+    case 'solar':
+      return 'terreno';
+    default:
+      return (value as PropertyForAnalysis['propertyType']) || 'vivienda';
+  }
+}
+
+function mapUnitTypeToValuationType(value?: string): PropertyForAnalysis['propertyType'] {
+  switch (value) {
+    case 'local':
+      return 'local_comercial';
+    case 'coworking_space':
+      return 'coworking';
+    default:
+      return normalizeValuationPropertyType(value);
+  }
+}
+
+function estimateSalePriceFromRent(monthlyRent: number, propertyType?: string): number {
+  const capRates: Record<string, number> = {
+    vivienda: 0.045,
+    local_comercial: 0.065,
+    oficina: 0.055,
+    nave_industrial: 0.07,
+    garaje: 0.05,
+    trastero: 0.085,
+    terreno: 0.02,
+    edificio: 0.05,
+    coworking: 0.06,
+  };
+  const normalizedType = normalizeValuationPropertyType(propertyType);
+  const capRate = capRates[normalizedType] || capRates.vivienda;
+
+  return capRate > 0 ? Math.round((monthlyRent * 12) / capRate) : 0;
+}
+
+function inferLocationFromAddress(address?: string | null): { city?: string; postalCode?: string } {
+  const value = String(address || '').trim();
+  if (!value) return {};
+
+  const postalCode = value.match(/\b(\d{5})\b/)?.[1];
+  const segments = value
+    .split(',')
+    .map((segment) => segment.trim())
+    .filter(Boolean);
+
+  const citySegment = segments.length > 1 ? segments[segments.length - 1] : '';
+  const city = citySegment
+    .replace(/\b\d{5}\b/g, '')
+    .replace(/\([^)]*\)/g, '')
+    .trim();
+
+  return {
+    city: city || undefined,
+    postalCode,
+  };
+}
+
 // Función mejorada de valoración con Claude
 async function valuatePropertyEnhanced(
   property: PropertyData,
@@ -317,6 +383,7 @@ const valuateSchema = z.object({
 
   // IDs opcionales
   unitId: z.string().optional(),
+  buildingId: z.string().optional(),
   propertyId: z.string().optional(),
 
   // Compatibilidad con esquema antiguo (alias)
@@ -398,27 +465,226 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validated = valuateSchema.parse(body);
 
-    // 4. Obtener datos de múltiples plataformas externas
-    const ciudad = validated.ciudad || validated.city || '';
-    const direccion = validated.direccion || validated.address || '';
-    const superficie = validated.superficie || validated.squareMeters || 80;
+    let ciudad = validated.ciudad || validated.city || '';
+    let direccion = validated.direccion || validated.address || '';
+    let codigoPostal = validated.codigoPostal || validated.postalCode || '';
+    let superficie = validated.superficie || validated.squareMeters || 80;
+    let habitaciones = validated.habitaciones || validated.rooms || 0;
+    let banos = validated.banos || validated.bathrooms || 0;
+    let planta = validated.planta || validated.floor || 0;
+    let propertyType = normalizeValuationPropertyType(validated.tipoActivo);
+    let yearBuilt = validated.yearBuilt;
+    let hasElevator =
+      validated.caracteristicas?.includes('ascensor') || validated.hasElevator || false;
+    let hasParking =
+      validated.caracteristicas?.includes('garaje') ||
+      validated.caracteristicas?.includes('parking') ||
+      validated.hasParking ||
+      false;
+    let hasGarden = validated.caracteristicas?.includes('jardin') || validated.hasGarden || false;
+    let hasPool = validated.caracteristicas?.includes('piscina') || validated.hasPool || false;
+    let hasTerrace =
+      validated.hasTerrace || validated.caracteristicas?.includes('terraza') || false;
+    let sameAssetComparables: any[] = [];
+
+    if (validated.unitId) {
+      const selectedUnit = await prisma.unit.findFirst({
+        where: {
+          id: validated.unitId,
+          building: { companyId: session.user.companyId },
+        },
+        select: {
+          id: true,
+          tipo: true,
+          superficie: true,
+          habitaciones: true,
+          banos: true,
+          planta: true,
+          orientacion: true,
+          referenciaCatastral: true,
+          precioCompra: true,
+          valorMercado: true,
+          rentaMensual: true,
+          aireAcondicionado: true,
+          calefaccion: true,
+          terraza: true,
+          buildingId: true,
+          building: {
+            select: {
+              direccion: true,
+              referenciaCatastral: true,
+              anoConstructor: true,
+              ascensor: true,
+              garaje: true,
+              trastero: true,
+              piscina: true,
+              jardin: true,
+              tipo: true,
+            },
+          },
+        },
+      });
+
+      if (selectedUnit) {
+        const inferredLocation = inferLocationFromAddress(selectedUnit.building?.direccion);
+
+        direccion = direccion || selectedUnit.building?.direccion || '';
+        ciudad = ciudad || inferredLocation.city || '';
+        codigoPostal = codigoPostal || inferredLocation.postalCode || '';
+        superficie = superficie || selectedUnit.superficie || 0;
+        habitaciones = habitaciones || selectedUnit.habitaciones || 0;
+        banos = banos || selectedUnit.banos || 0;
+        planta = planta || selectedUnit.planta || 0;
+        propertyType = mapUnitTypeToValuationType(selectedUnit.tipo);
+        yearBuilt = yearBuilt || selectedUnit.building?.anoConstructor || undefined;
+        hasElevator = hasElevator || !!selectedUnit.building?.ascensor;
+        hasParking = hasParking || !!selectedUnit.building?.garaje;
+        hasGarden = hasGarden || !!selectedUnit.building?.jardin;
+        hasPool = hasPool || !!selectedUnit.building?.piscina;
+        hasTerrace = hasTerrace || !!selectedUnit.terraza;
+
+        const similarUnits = await prisma.unit.findMany({
+          where: {
+            buildingId: selectedUnit.buildingId,
+            tipo: selectedUnit.tipo,
+            superficie: {
+              gte: superficie * 0.8,
+              lte: superficie * 1.2,
+            },
+            ...(habitaciones && propertyType === 'vivienda'
+              ? { habitaciones: { gte: Math.max(0, habitaciones - 1), lte: habitaciones + 1 } }
+              : {}),
+            NOT: {
+              id: validated.unitId,
+            },
+          },
+          select: {
+            id: true,
+            numero: true,
+            superficie: true,
+            rentaMensual: true,
+            precioCompra: true,
+            valorMercado: true,
+            habitaciones: true,
+            banos: true,
+            building: {
+              select: {
+                direccion: true,
+              },
+            },
+          },
+          take: 6,
+          orderBy: {
+            createdAt: 'desc',
+          },
+        });
+
+        sameAssetComparables = similarUnits
+          .map((unit) => {
+            const explicitValue = Number(unit.valorMercado || unit.precioCompra || 0);
+            const estimatedValue =
+              explicitValue > 0
+                ? explicitValue
+                : estimateSalePriceFromRent(Number(unit.rentaMensual || 0), propertyType);
+            const surface = Number(unit.superficie || superficie);
+
+            if (estimatedValue <= 0 || surface <= 0) {
+              return null;
+            }
+
+            return {
+              address: `${unit.building?.direccion || direccion} - Unidad ${unit.numero}`,
+              price: estimatedValue,
+              squareMeters: surface,
+              rooms: unit.habitaciones || undefined,
+              bathrooms: unit.banos || undefined,
+            };
+          })
+          .filter(Boolean);
+      }
+    } else if (validated.buildingId) {
+      const selectedBuilding = await prisma.building.findFirst({
+        where: {
+          id: validated.buildingId,
+          companyId: session.user.companyId,
+        },
+        select: {
+          direccion: true,
+          referenciaCatastral: true,
+          anoConstructor: true,
+          tipo: true,
+          ascensor: true,
+          garaje: true,
+          trastero: true,
+          piscina: true,
+          jardin: true,
+          units: {
+            select: {
+              superficie: true,
+              habitaciones: true,
+              banos: true,
+              planta: true,
+              rentaMensual: true,
+            },
+            take: 5,
+          },
+        },
+      });
+
+      if (selectedBuilding) {
+        const inferredLocation = inferLocationFromAddress(selectedBuilding.direccion);
+        direccion = direccion || selectedBuilding.direccion || '';
+        ciudad = ciudad || inferredLocation.city || '';
+        codigoPostal = codigoPostal || inferredLocation.postalCode || '';
+        yearBuilt = yearBuilt || selectedBuilding.anoConstructor || undefined;
+        hasElevator = hasElevator || !!selectedBuilding.ascensor;
+        hasParking = hasParking || !!selectedBuilding.garaje;
+        hasGarden = hasGarden || !!selectedBuilding.jardin;
+        hasPool = hasPool || !!selectedBuilding.piscina;
+        propertyType = propertyType || 'edificio';
+
+        if (selectedBuilding.units.length > 0) {
+          const surfaces = selectedBuilding.units
+            .map((unit) => Number(unit.superficie || 0))
+            .filter(Boolean);
+          const avgSurface =
+            surfaces.length > 0 ? surfaces.reduce((a, b) => a + b, 0) / surfaces.length : 0;
+          superficie = superficie || avgSurface;
+          habitaciones =
+            habitaciones ||
+            Math.round(
+              selectedBuilding.units.reduce(
+                (sum, unit) => sum + Number(unit.habitaciones || 0),
+                0
+              ) / selectedBuilding.units.length
+            ) ||
+            0;
+          banos =
+            banos ||
+            Math.round(
+              selectedBuilding.units.reduce((sum, unit) => sum + Number(unit.banos || 0), 0) /
+                selectedBuilding.units.length
+            ) ||
+            0;
+        }
+      }
+    }
 
     if (!ciudad) {
       return NextResponse.json({ error: 'Ciudad requerida para la valoración' }, { status: 400 });
     }
-    const habitaciones = validated.habitaciones || validated.rooms || 2;
 
     let aggregatedPlatformData;
     let platformDataText = '';
     try {
       aggregatedPlatformData = await getAggregatedMarketData({
         city: ciudad,
-        postalCode: validated.codigoPostal || validated.postalCode || '',
+        postalCode: codigoPostal,
         address: direccion,
         companyId: session.user.companyId,
         squareMeters: superficie,
         rooms: habitaciones,
-        propertyType: validated.tipoActivo || 'vivienda',
+        propertyType,
       });
       platformDataText = formatPlatformDataForPrompt(aggregatedPlatformData);
       logger.info('[AI Valuate] Datos de plataformas obtenidos', {
@@ -433,87 +699,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 5. Si hay unitId, enriquecer con datos comparables de BD
-    let comparables: any[] = [];
-
-    // 6. Preparar datos para IA - mapear nuevos campos al formato esperado
-    const banos = validated.banos || validated.bathrooms || 1;
-
-    if (validated.unitId) {
-      const selectedUnit = await prisma.unit.findFirst({
-        where: {
-          id: validated.unitId,
-          building: { companyId: session.user.companyId },
-        },
-        select: {
-          buildingId: true,
-          building: { select: { direccion: true } },
-        },
-      });
-
-      if (selectedUnit?.buildingId) {
-        const similarUnits = await prisma.unit.findMany({
-          where: {
-            buildingId: selectedUnit.buildingId,
-            superficie: {
-              gte: superficie * 0.8,
-              lte: superficie * 1.2,
-            },
-            ...(habitaciones ? { habitaciones } : {}),
-            NOT: {
-              id: validated.unitId,
-            },
-          },
-          select: {
-            id: true,
-            numero: true,
-            superficie: true,
-            rentaMensual: true,
-            building: {
-              select: {
-                direccion: true,
-              },
-            },
-          },
-          take: 5,
-          orderBy: {
-            createdAt: 'desc',
-          },
-        });
-
-        comparables = similarUnits
-          .filter((u) => u.rentaMensual)
-          .map((u) => ({
-            address: `${u.building?.direccion || selectedUnit.building?.direccion || ''} - Unidad ${u.numero}`,
-            price: (u.rentaMensual || 0) * 12 * 15,
-            squareMeters: u.superficie || superficie,
-          }));
-      }
-    }
+    const comparables = sameAssetComparables;
 
     // 7. Preparar datos para IA multi-paso
     const propertyForAnalysis: PropertyForAnalysis = {
-      propertyType: validated.tipoActivo || 'vivienda',
+      propertyType,
       address: direccion,
       city: ciudad,
-      postalCode: validated.codigoPostal || validated.postalCode || '',
+      postalCode: codigoPostal,
       squareMeters: superficie,
       rooms: habitaciones,
       bathrooms: banos,
-      floor: validated.planta || validated.floor || undefined,
+      floor: planta || undefined,
       condition: mapCondition(validated.estadoConservacion || validated.condition),
-      yearBuilt: validated.yearBuilt,
-      hasElevator:
-        validated.caracteristicas?.includes('ascensor') || validated.hasElevator || false,
-      hasParking:
-        validated.caracteristicas?.includes('garaje') ||
-        validated.caracteristicas?.includes('parking') ||
-        validated.hasParking ||
-        false,
-      hasGarden: validated.caracteristicas?.includes('jardin') || validated.hasGarden || false,
-      hasPool: validated.caracteristicas?.includes('piscina') || validated.hasPool || false,
-      hasTerrace: validated.hasTerrace || validated.caracteristicas?.includes('terraza') || false,
-      hasGarage: validated.caracteristicas?.includes('garaje') || false,
+      yearBuilt,
+      hasElevator,
+      hasParking,
+      hasGarden,
+      hasPool,
+      hasTerrace,
+      hasGarage: hasParking,
       neighborhood: validated.neighborhood || undefined,
       orientacion: validated.orientacion || 'sur',
       caracteristicas: validated.caracteristicas || [],
@@ -575,25 +780,22 @@ export async function POST(request: NextRequest) {
           ipAddress: request.headers.get('x-forwarded-for') || undefined,
           userAgent: request.headers.get('user-agent') || undefined,
           address: direccion,
-          postalCode: validated.codigoPostal || validated.postalCode || '',
+          postalCode: codigoPostal,
           city: ciudad,
           province: validated.province,
           neighborhood: validated.neighborhood,
           squareMeters: superficie,
           rooms: habitaciones,
           bathrooms: banos,
-          floor: validated.planta || validated.floor || 0,
-          hasElevator:
-            validated.hasElevator || validated.caracteristicas?.includes('ascensor') || false,
-          hasParking:
-            validated.hasParking || validated.caracteristicas?.includes('garaje') || false,
-          hasGarden: validated.hasGarden || validated.caracteristicas?.includes('jardin') || false,
-          hasPool: validated.hasPool || validated.caracteristicas?.includes('piscina') || false,
-          hasTerrace:
-            validated.hasTerrace || validated.caracteristicas?.includes('terraza') || false,
-          hasGarage: validated.hasParking || validated.caracteristicas?.includes('garaje') || false,
+          floor: planta || 0,
+          hasElevator,
+          hasParking,
+          hasGarden,
+          hasPool,
+          hasTerrace,
+          hasGarage: hasParking,
           condition: mapCondition(validated.estadoConservacion || validated.condition),
-          yearBuilt: validated.yearBuilt,
+          yearBuilt,
           avgPricePerM2: validated.avgPricePerM2 ?? normalizedValuation.pricePerM2,
           marketTrend: marketTrend,
           comparables: comparables,

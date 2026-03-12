@@ -29,6 +29,13 @@ export const selectBuildingMinimal = {
   nombre: true,
   direccion: true,
   tipo: true,
+  referenciaCatastral: true,
+  anoConstructor: true,
+  ascensor: true,
+  garaje: true,
+  trastero: true,
+  piscina: true,
+  jardin: true,
   numeroUnidades: true,
 } satisfies Prisma.BuildingSelect;
 

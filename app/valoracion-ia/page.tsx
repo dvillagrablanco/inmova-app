@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
 import { Button } from '@/components/ui/button';
@@ -258,26 +258,38 @@ const CARACTERISTICAS_POR_TIPO: Record<string, Array<{ id: string; label: string
 };
 
 // Campos del formulario que aplican según tipo
-const CAMPOS_POR_TIPO: Record<string, { habitaciones: boolean; banos: boolean; planta: boolean; orientacion: boolean }> = {
-  vivienda:          { habitaciones: true,  banos: true,  planta: true,  orientacion: true },
-  local_comercial:   { habitaciones: false, banos: false, planta: true,  orientacion: false },
-  oficina:           { habitaciones: false, banos: true,  planta: true,  orientacion: true },
-  nave_industrial:   { habitaciones: false, banos: false, planta: false, orientacion: false },
-  garaje:            { habitaciones: false, banos: false, planta: true,  orientacion: false },
-  trastero:          { habitaciones: false, banos: false, planta: true,  orientacion: false },
-  edificio_completo: { habitaciones: true,  banos: true,  planta: false, orientacion: false },
-  solar:             { habitaciones: false, banos: false, planta: false, orientacion: false },
+const CAMPOS_POR_TIPO: Record<
+  string,
+  { habitaciones: boolean; banos: boolean; planta: boolean; orientacion: boolean }
+> = {
+  vivienda: { habitaciones: true, banos: true, planta: true, orientacion: true },
+  local_comercial: { habitaciones: false, banos: false, planta: true, orientacion: false },
+  oficina: { habitaciones: false, banos: true, planta: true, orientacion: true },
+  nave_industrial: { habitaciones: false, banos: false, planta: false, orientacion: false },
+  garaje: { habitaciones: false, banos: false, planta: true, orientacion: false },
+  trastero: { habitaciones: false, banos: false, planta: true, orientacion: false },
+  edificio_completo: { habitaciones: true, banos: true, planta: false, orientacion: false },
+  solar: { habitaciones: false, banos: false, planta: false, orientacion: false },
 };
 
 const LABELS_POR_TIPO: Record<string, Record<string, string>> = {
-  vivienda:          { superficie: 'Superficie (m²)', habitaciones: 'Habitaciones', banos: 'Baños', planta: 'Planta' },
-  local_comercial:   { superficie: 'Superficie (m²)', planta: 'Planta (0=calle)' },
-  oficina:           { superficie: 'Superficie (m²)', banos: 'Aseos', planta: 'Planta' },
-  nave_industrial:   { superficie: 'Superficie (m²)' },
-  garaje:            { superficie: 'Superficie plaza (m²)', planta: 'Sótano (-1, -2...)' },
-  trastero:          { superficie: 'Superficie (m²)', planta: 'Planta / Sótano' },
-  edificio_completo: { superficie: 'Superficie total (m²)', habitaciones: 'Nº unidades', banos: 'Nº plantas' },
-  solar:             { superficie: 'Superficie parcela (m²)' },
+  vivienda: {
+    superficie: 'Superficie (m²)',
+    habitaciones: 'Habitaciones',
+    banos: 'Baños',
+    planta: 'Planta',
+  },
+  local_comercial: { superficie: 'Superficie (m²)', planta: 'Planta (0=calle)' },
+  oficina: { superficie: 'Superficie (m²)', banos: 'Aseos', planta: 'Planta' },
+  nave_industrial: { superficie: 'Superficie (m²)' },
+  garaje: { superficie: 'Superficie plaza (m²)', planta: 'Sótano (-1, -2...)' },
+  trastero: { superficie: 'Superficie (m²)', planta: 'Planta / Sótano' },
+  edificio_completo: {
+    superficie: 'Superficie total (m²)',
+    habitaciones: 'Nº unidades',
+    banos: 'Nº plantas',
+  },
+  solar: { superficie: 'Superficie parcela (m²)' },
 };
 
 // Pasos del proceso de valoración
@@ -293,6 +305,7 @@ const VALUATION_STEPS = [
 export default function ValoracionIAPage() {
   const { data: _session, status } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   // Estados
   const [loading, setLoading] = useState(true);
@@ -349,6 +362,45 @@ export default function ValoracionIAPage() {
       fetchAssets();
     }
   }, [status, router]);
+
+  useEffect(() => {
+    if (status !== 'authenticated') return;
+    if (units.length === 0 && buildings.length === 0) return;
+
+    const unitId = searchParams.get('unitId');
+    const city = searchParams.get('ciudad');
+    const surface = searchParams.get('superficie');
+
+    if (unitId && units.some((unit) => unit.id === unitId)) {
+      const unit = units.find((item) => item.id === unitId);
+      if (assetType !== 'unit') {
+        setAssetType('unit');
+      }
+
+      if (unit?.building?.id) {
+        setSelectedBuildingFilter(unit.building.id);
+      }
+
+      setSelectedAsset(unitId);
+      setFormData((prev) => ({
+        ...prev,
+        superficie: unit?.superficie?.toString() || prev.superficie,
+        habitaciones: unit?.habitaciones?.toString() || prev.habitaciones,
+        banos: unit?.banos?.toString() || prev.banos,
+        direccionManual: unit?.building?.direccion || prev.direccionManual,
+      }));
+      return;
+    }
+
+    if (city || surface) {
+      setActiveTab('mercado');
+      setFormData((prev) => ({
+        ...prev,
+        ciudadManual: city || prev.ciudadManual,
+        superficie: surface || prev.superficie,
+      }));
+    }
+  }, [status, units, buildings, searchParams, assetType]);
 
   const fetchAssets = async () => {
     try {
@@ -583,6 +635,7 @@ export default function ValoracionIAPage() {
       let ciudad = formData.ciudadManual || '';
       let codigoPostal = formData.codigoPostalManual || '';
       let unitId: string | undefined;
+      let buildingId: string | undefined;
 
       if (activeTab === 'mercado' && catastroData) {
         direccion = direccion || catastroData.direccion || '';
@@ -597,11 +650,15 @@ export default function ValoracionIAPage() {
         const building = buildings.find((b) => b.id === selectedAsset);
         direccion = direccion || building?.direccion || '';
         ciudad = ciudad || building?.ciudad || '';
+        buildingId = selectedAsset;
       }
 
       // Intentar extraer ciudad de la dirección si no se proporcionó
       if (!ciudad && direccion) {
-        const parts = direccion.split(',').map((p: string) => p.trim()).filter(Boolean);
+        const parts = direccion
+          .split(',')
+          .map((p: string) => p.trim())
+          .filter(Boolean);
         if (parts.length >= 2) {
           ciudad = parts[parts.length - 1]; // Última parte suele ser la ciudad
         }
@@ -635,6 +692,7 @@ export default function ValoracionIAPage() {
           ciudad,
           codigoPostal,
           unitId: activeTab === 'mis-activos' ? unitId : undefined,
+          buildingId: activeTab === 'mis-activos' ? buildingId : undefined,
         }),
       });
 
@@ -736,7 +794,11 @@ export default function ValoracionIAPage() {
   const handleDescargarInforme = () => {
     if (!resultado) return;
 
-    const fecha = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' });
+    const fecha = new Date().toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+    });
     const hora = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
 
     const lines = [
@@ -762,7 +824,9 @@ export default function ValoracionIAPage() {
       `Eficiencia energética: ${formData.eficienciaEnergetica || 'Sin certificar'}`,
       `Tipo de activo: ${formData.tipoActivo}`,
       `Finalidad: ${formData.finalidad}`,
-      formData.caracteristicas.length > 0 ? `Equipamiento: ${formData.caracteristicas.join(', ')}` : '',
+      formData.caracteristicas.length > 0
+        ? `Equipamiento: ${formData.caracteristicas.join(', ')}`
+        : '',
       formData.descripcionAdicional ? `Info adicional: ${formData.descripcionAdicional}` : '',
       '',
       '── VALORACIÓN ESTIMADA ────────────────────────────────────────',
@@ -795,16 +859,24 @@ export default function ValoracionIAPage() {
           : '',
         `Premium vs larga estancia:  ${resultado.alquilerEstimado ? '+' + Math.round(((resultado.alquilerMediaEstancia - resultado.alquilerEstimado) / resultado.alquilerEstimado) * 100) + '%' : 'N/A'}`,
         `Perfil inquilino:           ${resultado.perfilInquilinoMediaEstancia || 'N/A'}`,
-        '',
+        ''
       );
     }
 
     if (resultado.metodologiaUsada) {
-      lines.push('── METODOLOGÍA ────────────────────────────────────────────', resultado.metodologiaUsada, '');
+      lines.push(
+        '── METODOLOGÍA ────────────────────────────────────────────',
+        resultado.metodologiaUsada,
+        ''
+      );
     }
 
     if (resultado.reasoning) {
-      lines.push('── RAZONAMIENTO DEL TASADOR IA ────────────────────────────', resultado.reasoning, '');
+      lines.push(
+        '── RAZONAMIENTO DEL TASADOR IA ────────────────────────────',
+        resultado.reasoning,
+        ''
+      );
     }
 
     if (resultado.factoresPositivos?.length > 0) {
@@ -829,17 +901,27 @@ export default function ValoracionIAPage() {
       lines.push('── PROPIEDADES COMPARABLES (analizadas por IA) ───────────');
       resultado.comparables.forEach((c, i) => {
         lines.push(`  ${i + 1}. ${c.direccion}${c.fuente ? ` [${c.fuente}]` : ''}`);
-        lines.push(`     ${formatCurrency(c.precio)} | ${c.superficie}m² | ${formatCurrency(c.precioM2)}/m² | Similitud: ${Math.round(c.similitud * 100)}%`);
+        lines.push(
+          `     ${formatCurrency(c.precio)} | ${c.superficie}m² | ${formatCurrency(c.precioM2)}/m² | Similitud: ${Math.round(c.similitud * 100)}%`
+        );
       });
       lines.push('');
     }
 
     if (resultado.analisisMercado) {
-      lines.push('── ANÁLISIS DE MERCADO ────────────────────────────────────', resultado.analisisMercado, '');
+      lines.push(
+        '── ANÁLISIS DE MERCADO ────────────────────────────────────',
+        resultado.analisisMercado,
+        ''
+      );
     }
 
     if (resultado.phase1Summary) {
-      lines.push('── PRE-ANÁLISIS DE COMPARABLES (Fase 1 IA) ───────────────', resultado.phase1Summary, '');
+      lines.push(
+        '── PRE-ANÁLISIS DE COMPARABLES (Fase 1 IA) ───────────────',
+        resultado.phase1Summary,
+        ''
+      );
     }
 
     if (resultado.platformSources?.sourcesUsed?.length) {
@@ -847,7 +929,9 @@ export default function ValoracionIAPage() {
       lines.push(`  Plataformas: ${resultado.platformSources.sourcesUsed.join(', ')}`);
       lines.push(`  Fiabilidad global: ${resultado.platformSources.overallReliability}%`);
       if (resultado.platformSources.weightedSalePricePerM2) {
-        lines.push(`  Precio ponderado: ${formatCurrency(resultado.platformSources.weightedSalePricePerM2)}/m²`);
+        lines.push(
+          `  Precio ponderado: ${formatCurrency(resultado.platformSources.weightedSalePricePerM2)}/m²`
+        );
       }
       lines.push('');
     }
@@ -864,7 +948,7 @@ export default function ValoracionIAPage() {
     lines.push('Generado por Inmova App — https://inmovaapp.com');
 
     // Generate professional PDF via HTML print
-    const content = lines.filter(l => l !== undefined).join('\n');
+    const content = lines.filter((l) => l !== undefined).join('\n');
     const htmlContent = `<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -930,44 +1014,68 @@ export default function ValoracionIAPage() {
   <div class="data-row"><span class="label">Tendencia</span><span class="value">${resultado.tendenciaMercado} (${resultado.porcentajeTendencia}%)</span></div>
 </div>
 
-${resultado.alquilerEstimado ? `<div class="section">
+${
+  resultado.alquilerEstimado
+    ? `<div class="section">
   <h2>Análisis de Inversión</h2>
   <div class="data-row"><span class="label">Alquiler mensual estimado</span><span class="value">${formatCurrency(resultado.alquilerEstimado)}/mes</span></div>
   <div class="data-row"><span class="label">Renta anual</span><span class="value">${formatCurrency(resultado.alquilerEstimado * 12)}/año</span></div>
   <div class="data-row"><span class="label">Rentabilidad bruta</span><span class="value">${resultado.rentabilidadAlquiler?.toFixed(2) || '—'}%</span></div>
   <div class="data-row"><span class="label">Tiempo estimado venta</span><span class="value">${resultado.tiempoEstimadoVenta || '—'}</span></div>
-</div>` : ''}
+</div>`
+    : ''
+}
 
-${resultado.reasoning ? `<div class="section">
+${
+  resultado.reasoning
+    ? `<div class="section">
   <h2>Razonamiento del Tasador IA</h2>
   <p>${resultado.reasoning}</p>
-</div>` : ''}
+</div>`
+    : ''
+}
 
-${resultado.factoresPositivos?.length || resultado.factoresNegativos?.length ? `<div class="section">
+${
+  resultado.factoresPositivos?.length || resultado.factoresNegativos?.length
+    ? `<div class="section">
   <h2>Factores Clave</h2>
   <div class="factors">
     <div class="factor-list">${resultado.factoresPositivos?.map((f: string) => `<p class="positive">✓ ${f}</p>`).join('') || ''}</div>
     <div class="factor-list">${resultado.factoresNegativos?.map((f: string) => `<p class="negative">✗ ${f}</p>`).join('') || ''}</div>
   </div>
-</div>` : ''}
+</div>`
+    : ''
+}
 
-${resultado.comparables?.length ? `<div class="section">
+${
+  resultado.comparables?.length
+    ? `<div class="section">
   <h2>Propiedades Comparables</h2>
   <table class="comparables">
     <thead><tr><th>Dirección</th><th>Precio</th><th>Superficie</th><th>€/m²</th><th>Similitud</th></tr></thead>
     <tbody>${resultado.comparables.map((c: any) => `<tr><td>${c.direccion}</td><td>${formatCurrency(c.precio)}</td><td>${c.superficie}m²</td><td>${formatCurrency(c.precioM2)}</td><td>${Math.round(c.similitud * 100)}%</td></tr>`).join('')}</tbody>
   </table>
-</div>` : ''}
+</div>`
+    : ''
+}
 
-${resultado.analisisMercado ? `<div class="section">
+${
+  resultado.analisisMercado
+    ? `<div class="section">
   <h2>Análisis de Mercado</h2>
   <p>${resultado.analisisMercado}</p>
-</div>` : ''}
+</div>`
+    : ''
+}
 
-${resultado.recomendaciones?.length ? `<div class="section">
+${
+  resultado.recomendaciones?.length
+    ? `<div class="section">
   <h2>Recomendaciones</h2>
   <ul>${resultado.recomendaciones.map((r: string) => `<li>${r}</li>`).join('')}</ul>
-</div>` : ''}
+</div>`
+    : ''
+}
 
 <div class="footer">
   <p><strong>INMOVA</strong> — Plataforma PropTech de Gestión Inmobiliaria</p>
@@ -1075,7 +1183,13 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                   <MapPin className="h-4 w-4" />
                   Valoración de Mercado
                 </TabsTrigger>
-                <TabsTrigger value="historial" className="gap-2" onClick={() => { if (historial.length === 0) fetchHistorial(); }}>
+                <TabsTrigger
+                  value="historial"
+                  className="gap-2"
+                  onClick={() => {
+                    if (historial.length === 0) fetchHistorial();
+                  }}
+                >
                   <Clock className="h-4 w-4" />
                   Historial
                 </TabsTrigger>
@@ -1131,9 +1245,11 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                                 if (building) {
                                   setFormData((prev) => ({
                                     ...prev,
-                                    direccionManual: (building as any).direccion || prev.direccionManual,
+                                    direccionManual:
+                                      (building as any).direccion || prev.direccionManual,
                                     ciudadManual: (building as any).ciudad || prev.ciudadManual,
-                                    codigoPostalManual: (building as any).codigoPostal || prev.codigoPostalManual,
+                                    codigoPostalManual:
+                                      (building as any).codigoPostal || prev.codigoPostalManual,
                                   }));
                                 }
                               }
@@ -1146,7 +1262,9 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                               {buildings.map((building) => (
                                 <SelectItem key={building.id} value={building.id}>
                                   {building.nombre || (building as any).direccion || 'Sin nombre'}
-                                  {building.numeroUnidades ? ` (${building.numeroUnidades} uds)` : ''}
+                                  {building.numeroUnidades
+                                    ? ` (${building.numeroUnidades} uds)`
+                                    : ''}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -1161,7 +1279,9 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                                 <SelectValue placeholder="Selecciona una unidad del edificio..." />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="manual">-- Introducir datos manualmente --</SelectItem>
+                                <SelectItem value="manual">
+                                  -- Introducir datos manualmente --
+                                </SelectItem>
                                 {units
                                   .filter((u) => u.building?.id === selectedBuildingFilter)
                                   .map((unit) => (
@@ -1176,7 +1296,11 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                               </SelectContent>
                             </Select>
                             <p className="text-xs text-muted-foreground">
-                              {units.filter((u) => u.building?.id === selectedBuildingFilter).length} unidades en este edificio
+                              {
+                                units.filter((u) => u.building?.id === selectedBuildingFilter)
+                                  .length
+                              }{' '}
+                              unidades en este edificio
                             </p>
                           </div>
                         )}
@@ -1198,11 +1322,15 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                             <SelectValue placeholder="Selecciona un edificio de tu cartera..." />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="manual">-- Introducir datos manualmente --</SelectItem>
+                            <SelectItem value="manual">
+                              -- Introducir datos manualmente --
+                            </SelectItem>
                             {buildings.map((building) => (
                               <SelectItem key={building.id} value={building.id}>
                                 {building.nombre || (building as any).direccion || 'Sin dirección'}
-                                {building.numeroUnidades ? ` (${building.numeroUnidades} unidades)` : ''}
+                                {building.numeroUnidades
+                                  ? ` (${building.numeroUnidades} unidades)`
+                                  : ''}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -1274,7 +1402,8 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                         </Button>
                       </div>
                       <p className="text-[10px] text-muted-foreground">
-                        Formato: tipo vía + nombre + número + ciudad. Se consulta la API pública del Catastro.
+                        Formato: tipo vía + nombre + número + ciudad. Se consulta la API pública del
+                        Catastro.
                       </p>
                     </div>
                   </CardContent>
@@ -1307,7 +1436,6 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                     </CardContent>
                   </Card>
                 )}
-
               </TabsContent>
 
               {/* Tab: Historial de Valoraciones */}
@@ -1318,9 +1446,7 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                       <Clock className="h-5 w-5" />
                       Historial de Valoraciones
                     </CardTitle>
-                    <CardDescription>
-                      Valoraciones realizadas anteriormente
-                    </CardDescription>
+                    <CardDescription>Valoraciones realizadas anteriormente</CardDescription>
                   </CardHeader>
                   <CardContent>
                     {loadingHistorial ? (
@@ -1331,7 +1457,12 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                       <div className="text-center py-8 text-muted-foreground">
                         <FileText className="h-10 w-10 mx-auto mb-3 opacity-30" />
                         <p>No hay valoraciones anteriores</p>
-                        <Button variant="outline" size="sm" className="mt-3" onClick={fetchHistorial}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="mt-3"
+                          onClick={fetchHistorial}
+                        >
                           <RefreshCw className="h-3 w-3 mr-1" />
                           Recargar
                         </Button>
@@ -1350,7 +1481,12 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                                   valorMaximo: v.maxValue,
                                   precioM2: v.pricePerM2 || 0,
                                   confianza: v.confidenceScore || 70,
-                                  tendenciaMercado: v.marketTrend === 'UP' ? 'alcista' : v.marketTrend === 'DOWN' ? 'bajista' : 'estable',
+                                  tendenciaMercado:
+                                    v.marketTrend === 'UP'
+                                      ? 'alcista'
+                                      : v.marketTrend === 'DOWN'
+                                        ? 'bajista'
+                                        : 'estable',
                                   porcentajeTendencia: 0,
                                   comparables: [],
                                   factoresPositivos: v.keyFactors || [],
@@ -1368,13 +1504,18 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                             >
                               <div className="flex items-center justify-between">
                                 <div>
-                                  <p className="font-medium text-sm">{v.address || 'Sin dirección'}, {v.city}</p>
+                                  <p className="font-medium text-sm">
+                                    {v.address || 'Sin dirección'}, {v.city}
+                                  </p>
                                   <p className="text-xs text-muted-foreground">
-                                    {v.squareMeters}m² | {v.rooms} hab. | {new Date(v.createdAt).toLocaleDateString('es-ES')}
+                                    {v.squareMeters}m² | {v.rooms} hab. |{' '}
+                                    {new Date(v.createdAt).toLocaleDateString('es-ES')}
                                   </p>
                                 </div>
                                 <div className="text-right">
-                                  <p className="font-bold text-violet-700">{formatCurrency(v.estimatedValue)}</p>
+                                  <p className="font-bold text-violet-700">
+                                    {formatCurrency(v.estimatedValue)}
+                                  </p>
                                   <Badge variant="outline" className="text-[10px]">
                                     {v.confidenceScore || 0}% confianza
                                   </Badge>
@@ -1406,18 +1547,34 @@ ${resultado.recomendaciones?.length ? `<div class="section">
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="superficie">{(LABELS_POR_TIPO[formData.tipoActivo] || LABELS_POR_TIPO.vivienda).superficie || 'Superficie (m²)'} *</Label>
+                    <Label htmlFor="superficie">
+                      {(LABELS_POR_TIPO[formData.tipoActivo] || LABELS_POR_TIPO.vivienda)
+                        .superficie || 'Superficie (m²)'}{' '}
+                      *
+                    </Label>
                     <Input
                       id="superficie"
                       type="number"
-                      placeholder={formData.tipoActivo === 'nave_industrial' ? '500' : formData.tipoActivo === 'garaje' ? '12' : formData.tipoActivo === 'solar' ? '1000' : '85'}
+                      placeholder={
+                        formData.tipoActivo === 'nave_industrial'
+                          ? '500'
+                          : formData.tipoActivo === 'garaje'
+                            ? '12'
+                            : formData.tipoActivo === 'solar'
+                              ? '1000'
+                              : '85'
+                      }
                       value={formData.superficie}
                       onChange={(e) => setFormData({ ...formData, superficie: e.target.value })}
                     />
                   </div>
-                  {(CAMPOS_POR_TIPO[formData.tipoActivo] || CAMPOS_POR_TIPO.vivienda).habitaciones && (
+                  {(CAMPOS_POR_TIPO[formData.tipoActivo] || CAMPOS_POR_TIPO.vivienda)
+                    .habitaciones && (
                     <div className="space-y-2">
-                      <Label htmlFor="habitaciones">{(LABELS_POR_TIPO[formData.tipoActivo] || LABELS_POR_TIPO.vivienda).habitaciones || 'Habitaciones'}</Label>
+                      <Label htmlFor="habitaciones">
+                        {(LABELS_POR_TIPO[formData.tipoActivo] || LABELS_POR_TIPO.vivienda)
+                          .habitaciones || 'Habitaciones'}
+                      </Label>
                       <Input
                         id="habitaciones"
                         type="number"
@@ -1429,7 +1586,10 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                   )}
                   {(CAMPOS_POR_TIPO[formData.tipoActivo] || CAMPOS_POR_TIPO.vivienda).banos && (
                     <div className="space-y-2">
-                      <Label htmlFor="banos">{(LABELS_POR_TIPO[formData.tipoActivo] || LABELS_POR_TIPO.vivienda).banos || 'Baños'}</Label>
+                      <Label htmlFor="banos">
+                        {(LABELS_POR_TIPO[formData.tipoActivo] || LABELS_POR_TIPO.vivienda).banos ||
+                          'Baños'}
+                      </Label>
                       <Input
                         id="banos"
                         type="number"
@@ -1451,11 +1611,20 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                   </div>
                   {(CAMPOS_POR_TIPO[formData.tipoActivo] || CAMPOS_POR_TIPO.vivienda).planta && (
                     <div className="space-y-2">
-                      <Label htmlFor="planta">{(LABELS_POR_TIPO[formData.tipoActivo] || LABELS_POR_TIPO.vivienda).planta || 'Planta'}</Label>
+                      <Label htmlFor="planta">
+                        {(LABELS_POR_TIPO[formData.tipoActivo] || LABELS_POR_TIPO.vivienda)
+                          .planta || 'Planta'}
+                      </Label>
                       <Input
                         id="planta"
                         type="number"
-                        placeholder={formData.tipoActivo === 'garaje' ? '-1' : formData.tipoActivo === 'local_comercial' ? '0' : '3'}
+                        placeholder={
+                          formData.tipoActivo === 'garaje'
+                            ? '-1'
+                            : formData.tipoActivo === 'local_comercial'
+                              ? '0'
+                              : '3'
+                        }
                         value={formData.planta}
                         onChange={(e) => setFormData({ ...formData, planta: e.target.value })}
                       />
@@ -1482,7 +1651,8 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  {(CAMPOS_POR_TIPO[formData.tipoActivo] || CAMPOS_POR_TIPO.vivienda).orientacion && (
+                  {(CAMPOS_POR_TIPO[formData.tipoActivo] || CAMPOS_POR_TIPO.vivienda)
+                    .orientacion && (
                     <div className="space-y-2">
                       <Label>Orientación</Label>
                       <Select
@@ -1524,15 +1694,19 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                   <Label className="flex items-center gap-2">
                     <MapPin className="h-4 w-4" />
                     Ubicación
-                    {(activeTab === 'mercado' && catastroData) || (selectedAsset !== 'manual') ? (
-                      <Badge variant="outline" className="text-[10px]">Auto-rellenada</Badge>
+                    {(activeTab === 'mercado' && catastroData) || selectedAsset !== 'manual' ? (
+                      <Badge variant="outline" className="text-[10px]">
+                        Auto-rellenada
+                      </Badge>
                     ) : null}
                   </Label>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <Input
                       placeholder="Dirección (calle, n.°)"
                       value={formData.direccionManual}
-                      onChange={(e) => setFormData({ ...formData, direccionManual: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, direccionManual: e.target.value })
+                      }
                     />
                     <Input
                       placeholder="Ciudad"
@@ -1542,11 +1716,14 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                     <Input
                       placeholder="Código Postal"
                       value={formData.codigoPostalManual}
-                      onChange={(e) => setFormData({ ...formData, codigoPostalManual: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, codigoPostalManual: e.target.value })
+                      }
                     />
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Si se selecciona un activo o catastro, se usará esa dirección. Estos campos permiten sobreescribirla.
+                    Si se selecciona un activo o catastro, se usará esa dirección. Estos campos
+                    permiten sobreescribirla.
                   </p>
                 </div>
 
@@ -1579,7 +1756,9 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                     <Label>Tipo de activo</Label>
                     <Select
                       value={formData.tipoActivo}
-                      onValueChange={(v) => setFormData({ ...formData, tipoActivo: v, caracteristicas: [] })}
+                      onValueChange={(v) =>
+                        setFormData({ ...formData, tipoActivo: v, caracteristicas: [] })
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -1602,17 +1781,29 @@ ${resultado.recomendaciones?.length ? `<div class="section">
 
                 {/* Características adaptadas al tipo de activo */}
                 <div className="space-y-2">
-                  <Label>Equipamiento y extras — {
-                    formData.tipoActivo === 'vivienda' ? 'Vivienda' :
-                    formData.tipoActivo === 'local_comercial' ? 'Local comercial' :
-                    formData.tipoActivo === 'oficina' ? 'Oficina' :
-                    formData.tipoActivo === 'nave_industrial' ? 'Nave industrial' :
-                    formData.tipoActivo === 'garaje' ? 'Garaje' :
-                    formData.tipoActivo === 'edificio_completo' ? 'Edificio' :
-                    formData.tipoActivo === 'solar' ? 'Solar' : 'General'
-                  }</Label>
+                  <Label>
+                    Equipamiento y extras —{' '}
+                    {formData.tipoActivo === 'vivienda'
+                      ? 'Vivienda'
+                      : formData.tipoActivo === 'local_comercial'
+                        ? 'Local comercial'
+                        : formData.tipoActivo === 'oficina'
+                          ? 'Oficina'
+                          : formData.tipoActivo === 'nave_industrial'
+                            ? 'Nave industrial'
+                            : formData.tipoActivo === 'garaje'
+                              ? 'Garaje'
+                              : formData.tipoActivo === 'edificio_completo'
+                                ? 'Edificio'
+                                : formData.tipoActivo === 'solar'
+                                  ? 'Solar'
+                                  : 'General'}
+                  </Label>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {(CARACTERISTICAS_POR_TIPO[formData.tipoActivo] || CARACTERISTICAS_POR_TIPO.vivienda).map((car) => {
+                    {(
+                      CARACTERISTICAS_POR_TIPO[formData.tipoActivo] ||
+                      CARACTERISTICAS_POR_TIPO.vivienda
+                    ).map((car) => {
                       const Icon = car.icon;
                       const isSelected = formData.caracteristicas.includes(car.id);
                       return (
@@ -1677,7 +1868,9 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                   <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-violet-100 to-purple-100 flex items-center justify-center mx-auto mb-6">
                     <Brain className="h-10 w-10 text-violet-500" />
                   </div>
-                  <h3 className="text-xl font-semibold mb-2">Valoración Inteligente Multi-Plataforma</h3>
+                  <h3 className="text-xl font-semibold mb-2">
+                    Valoración Inteligente Multi-Plataforma
+                  </h3>
                   <p className="text-muted-foreground max-w-md mx-auto mb-6 text-sm leading-relaxed">
                     Obtiene datos en tiempo real de Idealista, Fotocasa, Habitaclia y Pisos.com
                     mediante scraping, los cruza con datos oficiales del Notariado e INE, y aplica
@@ -1686,17 +1879,20 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                   <div className="grid grid-cols-2 gap-2 max-w-sm mx-auto mb-6">
                     <div className="p-2 bg-muted/50 rounded-lg text-left">
                       <p className="text-xs font-medium">Fase 1 — IA rápida</p>
-                      <p className="text-[10px] text-muted-foreground">Filtra y puntúa comparables de portales</p>
+                      <p className="text-[10px] text-muted-foreground">
+                        Filtra y puntúa comparables de portales
+                      </p>
                     </div>
                     <div className="p-2 bg-muted/50 rounded-lg text-left">
                       <p className="text-xs font-medium">Fase 2 — IA experta</p>
-                      <p className="text-[10px] text-muted-foreground">Valoración por comparables + capitalización</p>
+                      <p className="text-[10px] text-muted-foreground">
+                        Valoración por comparables + capitalización
+                      </p>
                     </div>
                   </div>
                   <div className="flex flex-wrap justify-center gap-2">
                     <Badge variant="secondary" className="text-xs">
-                      <Target className="h-3 w-3 mr-1" />
-                      4 portales
+                      <Target className="h-3 w-3 mr-1" />4 portales
                     </Badge>
                     <Badge variant="secondary" className="text-xs">
                       <BarChart3 className="h-3 w-3 mr-1" />
@@ -1729,7 +1925,10 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                   </p>
 
                   <div className="mb-4">
-                    <Progress value={((currentStep + 1) / VALUATION_STEPS.length) * 100} className="h-2" />
+                    <Progress
+                      value={((currentStep + 1) / VALUATION_STEPS.length) * 100}
+                      className="h-2"
+                    />
                     <p className="text-xs text-muted-foreground mt-1">
                       Paso {currentStep + 1} de {VALUATION_STEPS.length}
                     </p>
@@ -1775,7 +1974,11 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                       <Badge className={getTrendColor(resultado.tendenciaMercado)}>
                         {getTrendIcon(resultado.tendenciaMercado)}
                         <span className="ml-1">
-                          {resultado.tendenciaMercado === 'alcista' ? '+' : resultado.tendenciaMercado === 'bajista' ? '-' : ''}
+                          {resultado.tendenciaMercado === 'alcista'
+                            ? '+'
+                            : resultado.tendenciaMercado === 'bajista'
+                              ? '-'
+                              : ''}
                           {resultado.porcentajeTendencia}%
                         </span>
                       </Badge>
@@ -1807,7 +2010,9 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                       </div>
                       <div className="flex justify-between text-xs text-muted-foreground mt-1">
                         <span>{formatCurrency(resultado.valorMinimo)}</span>
-                        <span className="font-medium text-violet-700">{formatCurrency(resultado.valorEstimado)}</span>
+                        <span className="font-medium text-violet-700">
+                          {formatCurrency(resultado.valorEstimado)}
+                        </span>
                         <span>{formatCurrency(resultado.valorMaximo)}</span>
                       </div>
                     </div>
@@ -1822,22 +2027,34 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                       </div>
                       <div className="text-center p-2 bg-white/60 rounded-lg">
                         <p className="text-lg font-bold">{resultado.confianza}%</p>
-                        <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Confianza</p>
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-wide">
+                          Confianza
+                        </p>
                       </div>
                       {formData.tipoActivo !== 'terreno' && formData.tipoActivo !== 'solar' && (
                         <div className="text-center p-2 bg-white/60 rounded-lg">
-                          <p className="text-lg font-bold">{resultado.tiempoEstimadoVenta || '-'}</p>
-                          <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Tiempo venta</p>
+                          <p className="text-lg font-bold">
+                            {resultado.tiempoEstimadoVenta || '-'}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground uppercase tracking-wide">
+                            Tiempo venta
+                          </p>
                         </div>
                       )}
                       <div className="text-center p-2 bg-white/60 rounded-lg">
                         <p className="text-lg font-bold">{resultado.comparables?.length || 0}</p>
-                        <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Comparables</p>
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-wide">
+                          Comparables
+                        </p>
                       </div>
                       {resultado.rentabilidadAlquiler > 0 && (
                         <div className="text-center p-2 bg-white/60 rounded-lg">
-                          <p className="text-lg font-bold text-green-700">{resultado.rentabilidadAlquiler.toFixed(1)}%</p>
-                          <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Yield bruto</p>
+                          <p className="text-lg font-bold text-green-700">
+                            {resultado.rentabilidadAlquiler.toFixed(1)}%
+                          </p>
+                          <p className="text-[10px] text-muted-foreground uppercase tracking-wide">
+                            Yield bruto
+                          </p>
                         </div>
                       )}
                     </div>
@@ -1846,8 +2063,14 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                     <div>
                       <div className="flex justify-between text-xs mb-1">
                         <span className="text-muted-foreground">Fiabilidad del análisis</span>
-                        <span className={`font-semibold ${resultado.confianza >= 75 ? 'text-green-600' : resultado.confianza >= 60 ? 'text-yellow-600' : 'text-red-600'}`}>
-                          {resultado.confianza >= 75 ? 'Alta' : resultado.confianza >= 60 ? 'Media' : 'Baja'}
+                        <span
+                          className={`font-semibold ${resultado.confianza >= 75 ? 'text-green-600' : resultado.confianza >= 60 ? 'text-yellow-600' : 'text-red-600'}`}
+                        >
+                          {resultado.confianza >= 75
+                            ? 'Alta'
+                            : resultado.confianza >= 60
+                              ? 'Media'
+                              : 'Baja'}
                         </span>
                       </div>
                       <Progress value={resultado.confianza} className="h-2" />
@@ -1858,45 +2081,78 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                       <div className="pt-4 border-t space-y-3">
                         <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
                           <Euro className="h-3.5 w-3.5" />
-                          {formData.tipoActivo === 'garaje' ? 'Estimación renta mensual' :
-                           formData.tipoActivo === 'trastero' ? 'Estimación renta mensual' :
-                           formData.tipoActivo === 'nave_industrial' ? 'Estimación renta' :
-                           formData.tipoActivo === 'local_comercial' ? 'Estimación renta local' :
-                           'Estimación de alquiler'}
+                          {formData.tipoActivo === 'garaje'
+                            ? 'Estimación renta mensual'
+                            : formData.tipoActivo === 'trastero'
+                              ? 'Estimación renta mensual'
+                              : formData.tipoActivo === 'nave_industrial'
+                                ? 'Estimación renta'
+                                : formData.tipoActivo === 'local_comercial'
+                                  ? 'Estimación renta local'
+                                  : 'Estimación de alquiler'}
                         </p>
-                        <div className={`grid ${resultado.alquilerMediaEstancia && resultado.alquilerMediaEstancia > 0 && formData.tipoActivo === 'vivienda' ? 'grid-cols-2' : 'grid-cols-1'} gap-3`}>
+                        <div
+                          className={`grid ${resultado.alquilerMediaEstancia && resultado.alquilerMediaEstancia > 0 && formData.tipoActivo === 'vivienda' ? 'grid-cols-2' : 'grid-cols-1'} gap-3`}
+                        >
                           {resultado.alquilerEstimado > 0 && (
                             <div className="p-3 bg-green-50 rounded-lg border border-green-200">
                               <p className="text-[10px] text-green-600 font-medium uppercase">
-                                {formData.tipoActivo === 'garaje' ? 'Renta plaza parking' :
-                                 formData.tipoActivo === 'trastero' ? 'Renta trastero' :
-                                 formData.tipoActivo === 'nave_industrial' ? 'Renta nave' :
-                                 formData.tipoActivo === 'local_comercial' ? 'Renta local' :
-                                 formData.tipoActivo === 'oficina' ? 'Renta oficina' :
-                                 'Larga estancia (12+ meses)'}
+                                {formData.tipoActivo === 'garaje'
+                                  ? 'Renta plaza parking'
+                                  : formData.tipoActivo === 'trastero'
+                                    ? 'Renta trastero'
+                                    : formData.tipoActivo === 'nave_industrial'
+                                      ? 'Renta nave'
+                                      : formData.tipoActivo === 'local_comercial'
+                                        ? 'Renta local'
+                                        : formData.tipoActivo === 'oficina'
+                                          ? 'Renta oficina'
+                                          : 'Larga estancia (12+ meses)'}
                               </p>
-                              <p className="text-2xl font-bold text-green-800">{formatCurrency(resultado.alquilerEstimado)}<span className="text-sm font-normal">/mes</span></p>
+                              <p className="text-2xl font-bold text-green-800">
+                                {formatCurrency(resultado.alquilerEstimado)}
+                                <span className="text-sm font-normal">/mes</span>
+                              </p>
                               {resultado.rentabilidadAlquiler > 0 && (
-                                <p className="text-xs text-green-600 mt-0.5">Rentabilidad: {resultado.rentabilidadAlquiler.toFixed(1)}% bruta</p>
-                              )}
-                            </div>
-                          )}
-                          {resultado.alquilerMediaEstancia && resultado.alquilerMediaEstancia > 0 && formData.tipoActivo === 'vivienda' && (
-                            <div className="p-3 bg-orange-50 rounded-lg border border-orange-200">
-                              <p className="text-[10px] text-orange-600 font-medium uppercase">Media estancia (1-11 meses)</p>
-                              <p className="text-2xl font-bold text-orange-800">{formatCurrency(resultado.alquilerMediaEstancia)}<span className="text-sm font-normal">/mes</span></p>
-                              {resultado.alquilerEstimado > 0 && (
-                                <p className="text-xs text-orange-600 mt-0.5">
-                                  +{Math.round(((resultado.alquilerMediaEstancia - resultado.alquilerEstimado) / resultado.alquilerEstimado) * 100)}% vs larga
-                                  {resultado.ocupacionEstimadaMediaEstancia ? ` · ${resultado.ocupacionEstimadaMediaEstancia}% ocupación` : ''}
+                                <p className="text-xs text-green-600 mt-0.5">
+                                  Rentabilidad: {resultado.rentabilidadAlquiler.toFixed(1)}% bruta
                                 </p>
                               )}
                             </div>
                           )}
+                          {resultado.alquilerMediaEstancia &&
+                            resultado.alquilerMediaEstancia > 0 &&
+                            formData.tipoActivo === 'vivienda' && (
+                              <div className="p-3 bg-orange-50 rounded-lg border border-orange-200">
+                                <p className="text-[10px] text-orange-600 font-medium uppercase">
+                                  Media estancia (1-11 meses)
+                                </p>
+                                <p className="text-2xl font-bold text-orange-800">
+                                  {formatCurrency(resultado.alquilerMediaEstancia)}
+                                  <span className="text-sm font-normal">/mes</span>
+                                </p>
+                                {resultado.alquilerEstimado > 0 && (
+                                  <p className="text-xs text-orange-600 mt-0.5">
+                                    +
+                                    {Math.round(
+                                      ((resultado.alquilerMediaEstancia -
+                                        resultado.alquilerEstimado) /
+                                        resultado.alquilerEstimado) *
+                                        100
+                                    )}
+                                    % vs larga
+                                    {resultado.ocupacionEstimadaMediaEstancia
+                                      ? ` · ${resultado.ocupacionEstimadaMediaEstancia}% ocupación`
+                                      : ''}
+                                  </p>
+                                )}
+                              </div>
+                            )}
                         </div>
                         {resultado.perfilInquilinoMediaEstancia && (
                           <p className="text-xs text-muted-foreground">
-                            <span className="font-medium">Perfil media estancia:</span> {resultado.perfilInquilinoMediaEstancia}
+                            <span className="font-medium">Perfil media estancia:</span>{' '}
+                            {resultado.perfilInquilinoMediaEstancia}
                           </p>
                         )}
                       </div>
@@ -1923,27 +2179,43 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                       </div>
                       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                         <div className="p-3 bg-green-50 rounded-lg border border-green-100">
-                          <p className="text-[10px] text-green-600 uppercase tracking-wide font-medium">Alquiler/mes</p>
+                          <p className="text-[10px] text-green-600 uppercase tracking-wide font-medium">
+                            Alquiler/mes
+                          </p>
                           <p className="text-xl font-bold text-green-800">
-                            {resultado.alquilerEstimado ? `${formatCurrency(resultado.alquilerEstimado)}` : '-'}
+                            {resultado.alquilerEstimado
+                              ? `${formatCurrency(resultado.alquilerEstimado)}`
+                              : '-'}
                           </p>
                         </div>
                         <div className="p-3 bg-green-50 rounded-lg border border-green-100">
-                          <p className="text-[10px] text-green-600 uppercase tracking-wide font-medium">Renta anual</p>
+                          <p className="text-[10px] text-green-600 uppercase tracking-wide font-medium">
+                            Renta anual
+                          </p>
                           <p className="text-xl font-bold text-green-800">
-                            {resultado.alquilerEstimado ? formatCurrency(resultado.alquilerEstimado * 12) : '-'}
+                            {resultado.alquilerEstimado
+                              ? formatCurrency(resultado.alquilerEstimado * 12)
+                              : '-'}
                           </p>
                         </div>
                         <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
-                          <p className="text-[10px] text-blue-600 uppercase tracking-wide font-medium">Rentabilidad bruta</p>
+                          <p className="text-[10px] text-blue-600 uppercase tracking-wide font-medium">
+                            Rentabilidad bruta
+                          </p>
                           <p className="text-xl font-bold text-blue-800">
-                            {resultado.rentabilidadAlquiler ? `${resultado.rentabilidadAlquiler.toFixed(2)}%` : '-'}
+                            {resultado.rentabilidadAlquiler
+                              ? `${resultado.rentabilidadAlquiler.toFixed(2)}%`
+                              : '-'}
                           </p>
                         </div>
                         <div className="p-3 bg-amber-50 rounded-lg border border-amber-100">
-                          <p className="text-[10px] text-amber-600 uppercase tracking-wide font-medium">Cap Rate</p>
+                          <p className="text-[10px] text-amber-600 uppercase tracking-wide font-medium">
+                            Cap Rate
+                          </p>
                           <p className="text-xl font-bold text-amber-800">
-                            {(resultado as any).capRate ? `${(resultado as any).capRate.toFixed(2)}%` : '-'}
+                            {(resultado as any).capRate
+                              ? `${(resultado as any).capRate.toFixed(2)}%`
+                              : '-'}
                           </p>
                         </div>
                       </div>
@@ -1966,21 +2238,33 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                         </div>
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                           <div className="p-3 bg-orange-50 rounded-lg border border-orange-100">
-                            <p className="text-[10px] text-orange-600 uppercase tracking-wide font-medium">Alquiler/mes</p>
+                            <p className="text-[10px] text-orange-600 uppercase tracking-wide font-medium">
+                              Alquiler/mes
+                            </p>
                             <p className="text-xl font-bold text-orange-800">
                               {formatCurrency(resultado.alquilerMediaEstancia)}
                             </p>
-                            {resultado.alquilerMediaEstanciaMin && resultado.alquilerMediaEstanciaMax && (
-                              <p className="text-[10px] text-orange-500 mt-0.5">
-                                {formatCurrency(resultado.alquilerMediaEstanciaMin)} – {formatCurrency(resultado.alquilerMediaEstanciaMax)}
-                              </p>
-                            )}
+                            {resultado.alquilerMediaEstanciaMin &&
+                              resultado.alquilerMediaEstanciaMax && (
+                                <p className="text-[10px] text-orange-500 mt-0.5">
+                                  {formatCurrency(resultado.alquilerMediaEstanciaMin)} –{' '}
+                                  {formatCurrency(resultado.alquilerMediaEstanciaMax)}
+                                </p>
+                              )}
                           </div>
                           <div className="p-3 bg-orange-50 rounded-lg border border-orange-100">
-                            <p className="text-[10px] text-orange-600 uppercase tracking-wide font-medium">Renta anual estimada</p>
+                            <p className="text-[10px] text-orange-600 uppercase tracking-wide font-medium">
+                              Renta anual estimada
+                            </p>
                             <p className="text-xl font-bold text-orange-800">
                               {resultado.ocupacionEstimadaMediaEstancia
-                                ? formatCurrency(Math.round(resultado.alquilerMediaEstancia * 12 * (resultado.ocupacionEstimadaMediaEstancia / 100)))
+                                ? formatCurrency(
+                                    Math.round(
+                                      resultado.alquilerMediaEstancia *
+                                        12 *
+                                        (resultado.ocupacionEstimadaMediaEstancia / 100)
+                                    )
+                                  )
                                 : formatCurrency(resultado.alquilerMediaEstancia * 12)}
                             </p>
                             {resultado.ocupacionEstimadaMediaEstancia && (
@@ -1990,13 +2274,19 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                             )}
                           </div>
                           <div className="p-3 bg-indigo-50 rounded-lg border border-indigo-100">
-                            <p className="text-[10px] text-indigo-600 uppercase tracking-wide font-medium">Rentabilidad bruta</p>
+                            <p className="text-[10px] text-indigo-600 uppercase tracking-wide font-medium">
+                              Rentabilidad bruta
+                            </p>
                             <p className="text-xl font-bold text-indigo-800">
-                              {resultado.rentabilidadMediaEstancia ? `${resultado.rentabilidadMediaEstancia.toFixed(2)}%` : '-'}
+                              {resultado.rentabilidadMediaEstancia
+                                ? `${resultado.rentabilidadMediaEstancia.toFixed(2)}%`
+                                : '-'}
                             </p>
                           </div>
                           <div className="p-3 bg-indigo-50 rounded-lg border border-indigo-100">
-                            <p className="text-[10px] text-indigo-600 uppercase tracking-wide font-medium">Premium vs larga</p>
+                            <p className="text-[10px] text-indigo-600 uppercase tracking-wide font-medium">
+                              Premium vs larga
+                            </p>
                             <p className="text-xl font-bold text-indigo-800">
                               {resultado.alquilerEstimado && resultado.alquilerMediaEstancia
                                 ? `+${Math.round(((resultado.alquilerMediaEstancia - resultado.alquilerEstimado) / resultado.alquilerEstimado) * 100)}%`
@@ -2010,16 +2300,22 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                     {/* Comparativa visual */}
                     {resultado.alquilerEstimado > 0 && resultado.alquilerMediaEstancia ? (
                       <div className="p-3 bg-muted/30 rounded-lg">
-                        <p className="text-xs font-medium text-muted-foreground mb-2">Comparativa mensual</p>
+                        <p className="text-xs font-medium text-muted-foreground mb-2">
+                          Comparativa mensual
+                        </p>
                         <div className="space-y-2">
                           <div className="flex items-center gap-3">
                             <span className="text-xs w-28 shrink-0 text-right">Larga estancia</span>
                             <div className="flex-1 bg-muted rounded-full h-4 overflow-hidden">
                               <div
                                 className="h-full bg-green-500 rounded-full flex items-center justify-end pr-2"
-                                style={{ width: `${Math.min(100, (resultado.alquilerEstimado / (resultado.alquilerMediaEstanciaMax || resultado.alquilerMediaEstancia)) * 100)}%` }}
+                                style={{
+                                  width: `${Math.min(100, (resultado.alquilerEstimado / (resultado.alquilerMediaEstanciaMax || resultado.alquilerMediaEstancia)) * 100)}%`,
+                                }}
                               >
-                                <span className="text-[10px] text-white font-medium">{formatCurrency(resultado.alquilerEstimado)}</span>
+                                <span className="text-[10px] text-white font-medium">
+                                  {formatCurrency(resultado.alquilerEstimado)}
+                                </span>
                               </div>
                             </div>
                           </div>
@@ -2030,7 +2326,9 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                                 className="h-full bg-orange-500 rounded-full flex items-center justify-end pr-2"
                                 style={{ width: '100%' }}
                               >
-                                <span className="text-[10px] text-white font-medium">{formatCurrency(resultado.alquilerMediaEstancia)}</span>
+                                <span className="text-[10px] text-white font-medium">
+                                  {formatCurrency(resultado.alquilerMediaEstancia)}
+                                </span>
                               </div>
                             </div>
                           </div>
@@ -2041,7 +2339,9 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                 </Card>
 
                 {/* Metodología y Análisis de Mercado — siempre visible */}
-                {(resultado.metodologiaUsada || resultado.analisisMercado || resultado.reasoning) && (
+                {(resultado.metodologiaUsada ||
+                  resultado.analisisMercado ||
+                  resultado.reasoning) && (
                   <Card>
                     <CardHeader className="pb-3">
                       <CardTitle className="text-base flex items-center gap-2">
@@ -2055,9 +2355,7 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                           <p className="text-xs font-medium text-violet-700 uppercase tracking-wide mb-1">
                             Metodología aplicada
                           </p>
-                          <p className="text-sm text-violet-900">
-                            {resultado.metodologiaUsada}
-                          </p>
+                          <p className="text-sm text-violet-900">{resultado.metodologiaUsada}</p>
                         </div>
                       )}
 
@@ -2072,14 +2370,23 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                           {resultado.platformSources && (
                             <div className="flex flex-wrap gap-2 mt-2">
                               {resultado.platformSources.marketTrend && (
-                                <Badge variant="outline" className={`text-xs ${
-                                  resultado.platformSources.marketTrend === 'UP' ? 'border-green-300 text-green-700 bg-green-50' :
-                                  resultado.platformSources.marketTrend === 'DOWN' ? 'border-red-300 text-red-700 bg-red-50' :
-                                  'border-gray-300 text-gray-700 bg-gray-50'
-                                }`}>
-                                  {resultado.platformSources.marketTrend === 'UP' ? 'Alcista' :
-                                   resultado.platformSources.marketTrend === 'DOWN' ? 'Bajista' : 'Estable'}
-                                  {resultado.platformSources.trendPercentage > 0 && ` (${resultado.platformSources.trendPercentage}%)`}
+                                <Badge
+                                  variant="outline"
+                                  className={`text-xs ${
+                                    resultado.platformSources.marketTrend === 'UP'
+                                      ? 'border-green-300 text-green-700 bg-green-50'
+                                      : resultado.platformSources.marketTrend === 'DOWN'
+                                        ? 'border-red-300 text-red-700 bg-red-50'
+                                        : 'border-gray-300 text-gray-700 bg-gray-50'
+                                  }`}
+                                >
+                                  {resultado.platformSources.marketTrend === 'UP'
+                                    ? 'Alcista'
+                                    : resultado.platformSources.marketTrend === 'DOWN'
+                                      ? 'Bajista'
+                                      : 'Estable'}
+                                  {resultado.platformSources.trendPercentage > 0 &&
+                                    ` (${resultado.platformSources.trendPercentage}%)`}
                                 </Badge>
                               )}
                               {resultado.platformSources.demandLevel && (
@@ -2114,24 +2421,30 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
                             Pre-an&aacute;lisis de comparables (Fase 1)
                           </p>
-                          <p className="text-sm text-muted-foreground">
-                            {resultado.phase1Summary}
-                          </p>
+                          <p className="text-sm text-muted-foreground">{resultado.phase1Summary}</p>
                         </div>
                       )}
 
                       {resultado.aiSourcesUsed && resultado.aiSourcesUsed.length > 0 && (
                         <div className="flex flex-wrap gap-1">
-                          <span className="text-xs text-muted-foreground mr-1">Fuentes utilizadas:</span>
+                          <span className="text-xs text-muted-foreground mr-1">
+                            Fuentes utilizadas:
+                          </span>
                           {resultado.aiSourcesUsed.map((source, i) => (
                             <Badge key={i} variant="secondary" className="text-xs">
-                              {source === 'claude_ai' ? 'Claude AI' :
-                               source === 'idealista_data' ? 'Idealista Data' :
-                               source === 'idealista' ? 'Idealista' :
-                               source === 'fotocasa' ? 'Fotocasa' :
-                               source === 'notariado' ? 'Notariado' :
-                               source === 'ine' ? 'INE' :
-                               source}
+                              {source === 'claude_ai'
+                                ? 'Claude AI'
+                                : source === 'idealista_data'
+                                  ? 'Idealista Data'
+                                  : source === 'idealista'
+                                    ? 'Idealista'
+                                    : source === 'fotocasa'
+                                      ? 'Fotocasa'
+                                      : source === 'notariado'
+                                        ? 'Notariado'
+                                        : source === 'ine'
+                                          ? 'INE'
+                                          : source}
                             </Badge>
                           ))}
                         </div>
@@ -2141,7 +2454,8 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                 )}
 
                 {/* Factores positivos y negativos — siempre visible */}
-                {(resultado.factoresPositivos?.length > 0 || resultado.factoresNegativos?.length > 0) && (
+                {(resultado.factoresPositivos?.length > 0 ||
+                  resultado.factoresNegativos?.length > 0) && (
                   <Card>
                     <CardHeader className="pb-3">
                       <CardTitle className="text-base flex items-center gap-2">
@@ -2159,7 +2473,10 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                             </p>
                             <ul className="space-y-1">
                               {resultado.factoresPositivos.map((f, i) => (
-                                <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
+                                <li
+                                  key={i}
+                                  className="text-sm text-muted-foreground flex items-start gap-2"
+                                >
                                   <span className="text-green-500 mt-1 shrink-0">+</span>
                                   {f}
                                 </li>
@@ -2175,7 +2492,10 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                             </p>
                             <ul className="space-y-1">
                               {resultado.factoresNegativos.map((f, i) => (
-                                <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
+                                <li
+                                  key={i}
+                                  className="text-sm text-muted-foreground flex items-start gap-2"
+                                >
                                   <span className="text-red-500 mt-1 shrink-0">-</span>
                                   {f}
                                 </li>
@@ -2379,14 +2699,20 @@ ${resultado.recomendaciones?.length ? `<div class="section">
                                 const raw = (pd as any).rawData;
                                 if (!raw) return null;
                                 return (
-                                  <div key={`idealist-enriched-${idx}`} className="mt-3 p-3 bg-blue-50/50 rounded-lg border border-blue-100 space-y-2">
+                                  <div
+                                    key={`idealist-enriched-${idx}`}
+                                    className="mt-3 p-3 bg-blue-50/50 rounded-lg border border-blue-100 space-y-2"
+                                  >
                                     <p className="text-xs font-medium text-blue-700 uppercase tracking-wide flex items-center gap-1">
                                       <TrendingUp className="h-3 w-3" />
                                       Datos enriquecidos Idealista
                                     </p>
                                     {raw.grossYield > 0 && (
                                       <div className="flex items-center gap-2">
-                                        <Badge variant="outline" className="border-emerald-300 text-emerald-700 bg-emerald-50 text-xs">
+                                        <Badge
+                                          variant="outline"
+                                          className="border-emerald-300 text-emerald-700 bg-emerald-50 text-xs"
+                                        >
                                           Rentabilidad bruta: {raw.grossYield}%
                                         </Badge>
                                       </div>

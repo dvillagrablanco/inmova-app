@@ -84,7 +84,14 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
             id: true,
             nombre: true,
             direccion: true,
+            tipo: true,
             referenciaCatastral: true,
+            anoConstructor: true,
+            ascensor: true,
+            garaje: true,
+            trastero: true,
+            piscina: true,
+            jardin: true,
             latitud: true,
             longitud: true,
           },
@@ -192,21 +199,34 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
         });
         if (building?.referenciaCatastral) {
           const { consultarEdificioPorRC } = await import('@/lib/catastro-service');
-          const catastro = await consultarEdificioPorRC(building.referenciaCatastral.substring(0, 14));
+          const catastro = await consultarEdificioPorRC(
+            building.referenciaCatastral.substring(0, 14)
+          );
           if (catastro?.fincas?.length) {
-            const unitPlanta = updateData.planta ?? (await prisma.unit.findUnique({ where: { id: existing.id }, select: { planta: true, numero: true, tipo: true, superficie: true } }));
+            const unitPlanta =
+              updateData.planta ??
+              (await prisma.unit.findUnique({
+                where: { id: existing.id },
+                select: { planta: true, numero: true, tipo: true, superficie: true },
+              }));
             const unitInfo = unitPlanta || {};
             for (const finca of catastro.fincas) {
               const fPlanta = parseInt(finca.planta) || 0;
               const norm = (s: string) => s.replace(/[ºª°\s]/g, '').toUpperCase();
-              if ((unitInfo as any).planta === fPlanta && finca.puerta && norm((unitInfo as any).numero || '').includes(norm(finca.puerta))) {
+              if (
+                (unitInfo as any).planta === fPlanta &&
+                finca.puerta &&
+                norm((unitInfo as any).numero || '').includes(norm(finca.puerta))
+              ) {
                 updateData.referenciaCatastral = finca.referenciaCatastral;
                 break;
               }
             }
           }
         }
-      } catch { /* Catastro lookup is best-effort */ }
+      } catch {
+        /* Catastro lookup is best-effort */
+      }
     }
 
     const updatedUnit = await prisma.unit.update({

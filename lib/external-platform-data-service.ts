@@ -69,6 +69,7 @@ export interface PlatformComparable {
   price: number;
   pricePerM2: number;
   squareMeters: number;
+  propertyType?: string;
   rooms?: number;
   bathrooms?: number;
   floor?: number;
@@ -122,6 +123,74 @@ interface FetchOptions {
   rooms?: number;
   propertyType?: string;
   companyId?: string;
+}
+
+const INTERNAL_CAP_RATE_BY_PROPERTY_TYPE: Record<string, number> = {
+  vivienda: 0.045,
+  local_comercial: 0.065,
+  oficina: 0.055,
+  nave_industrial: 0.07,
+  garaje: 0.05,
+  trastero: 0.085,
+  terreno: 0.02,
+  edificio: 0.05,
+  coworking: 0.06,
+};
+
+function normalizeValuationPropertyType(propertyType?: string): string {
+  switch (propertyType) {
+    case 'local':
+      return 'local_comercial';
+    case 'coworking_space':
+      return 'coworking';
+    default:
+      return propertyType || 'vivienda';
+  }
+}
+
+function getUnitTypesForPropertyType(propertyType?: string): string[] | null {
+  switch (normalizeValuationPropertyType(propertyType)) {
+    case 'vivienda':
+      return ['vivienda'];
+    case 'local_comercial':
+      return ['local'];
+    case 'oficina':
+      return ['oficina'];
+    case 'nave_industrial':
+      return ['nave_industrial'];
+    case 'garaje':
+      return ['garaje'];
+    case 'trastero':
+      return ['trastero'];
+    case 'terreno':
+      return ['terreno'];
+    default:
+      return null;
+  }
+}
+
+function getCommercialSpaceTypesForPropertyType(propertyType?: string): string[] | null {
+  switch (normalizeValuationPropertyType(propertyType)) {
+    case 'local_comercial':
+      return ['local_comercial', 'local_centro_comercial', 'showroom'];
+    case 'oficina':
+      return ['oficina_privada', 'oficina_abierta'];
+    case 'nave_industrial':
+      return ['nave_industrial', 'almacen', 'taller'];
+    case 'coworking':
+      return ['coworking_hot_desk', 'coworking_dedicated', 'coworking_office'];
+    default:
+      return null;
+  }
+}
+
+function getEstimatedSaleFromRent(monthlyRent: number, propertyType?: string): number {
+  const normalizedType = normalizeValuationPropertyType(propertyType);
+  const capRate =
+    INTERNAL_CAP_RATE_BY_PROPERTY_TYPE[normalizedType] ||
+    INTERNAL_CAP_RATE_BY_PROPERTY_TYPE.vivienda;
+
+  return capRate > 0 ? Math.round((monthlyRent * 12) / capRate) : 0;
 }
 
 // ============================================================================
@@ -358,27 +427,42 @@ async function fetchFromInternalDB(options: FetchOptions): Promise<PlatformMarke
     const { getPrismaClient } = await import('@/lib/db');
     const prisma = getPrismaClient();
 
+    const unitTypes = getUnitTypesForPropertyType(options.propertyType);
+    const commercialTypes = getCommercialSpaceTypesForPropertyType(options.propertyType);
+
     const units = await prisma.unit.findMany({
       where: {
         building: {
           companyId: options.companyId,
           ...(options.city && { ciudad: { contains: options.city, mode: 'insensitive' as const } }),
         },
+        ...(unitTypes ? { tipo: { in: unitTypes as any } } : {}),
         superficie: options.squareMeters
           ? {
               gte: options.squareMeters * 0.7,
               lte: options.squareMeters * 1.3,
             }
           : undefined,
+        ...(options.rooms && unitTypes?.includes('vivienda')
+          ? {
+              habitaciones: {
+                gte: Math.max(0, options.rooms - 1),
+                lte: options.rooms + 1,
+              },
+            }
+          : {}),
         rentaMensual: { not: null, gt: 0 },
       },
       select: {
         id: true,
         numero: true,
+        tipo: true,
         superficie: true,
         habitaciones: true,
         banos: true,
         rentaMensual: true,
+        precioCompra: true,
+        valorMercado: true,
         building: {
           select: { direccion: true, ciudad: true },
         },
@@ -387,34 +471,136 @@ async function fetchFromInternalDB(options: FetchOptions): Promise<PlatformMarke
       orderBy: { updatedAt: 'desc' },
     });
 
-    if (units.length === 0) return null;
+    const commercialSpaces = commercialTypes
+      ? await prisma.commercialSpace.findMany({
+          where: {
+            companyId: options.companyId,
+            ...(options.city && {
+              ciudad: { contains: options.city, mode: 'insensitive' as const },
+            }),
+            tipo: { in: commercialTypes as any },
+            superficieUtil: options.squareMeters
+              ? {
+                  gte: options.squareMeters * 0.7,
+                  lte: options.squareMeters * 1.3,
+                }
+              : undefined,
+            rentaMensualBase: { gt: 0 },
+          },
+          select: {
+            id: true,
+            nombre: true,
+            tipo: true,
+            direccion: true,
+            ciudad: true,
+            superficieUtil: true,
+            rentaMensualBase: true,
+            precioM2Mensual: true,
+            planta: true,
+          },
+          take: 15,
+          orderBy: { updatedAt: 'desc' },
+        })
+      : [];
 
-    const validUnits = units.filter((u) => u.superficie && u.rentaMensual && u.superficie > 0);
-    if (validUnits.length === 0) return null;
+    const unitComparables = units
+      .filter((u) => u.superficie && u.superficie > 0)
+      .map((u) => {
+        const surface = Number(u.superficie);
+        const explicitValue = Number(u.valorMercado || u.precioCompra || 0);
+        const estimatedValue =
+          explicitValue > 0
+            ? explicitValue
+            : getEstimatedSaleFromRent(Number(u.rentaMensual || 0), options.propertyType);
 
-    const rentPricesPerM2 = validUnits.map((u) => Number(u.rentaMensual) / Number(u.superficie));
-    const avgRentPerM2 = rentPricesPerM2.reduce((a, b) => a + b, 0) / rentPricesPerM2.length;
+        return {
+          source: 'internal_db' as PlatformSource,
+          propertyType: normalizeValuationPropertyType(options.propertyType),
+          address: `${u.building.direccion} - Unidad ${u.numero}`,
+          price: estimatedValue,
+          pricePerM2: surface > 0 ? Math.round(estimatedValue / surface) : 0,
+          squareMeters: surface,
+          rooms: u.habitaciones || undefined,
+          bathrooms: u.banos || undefined,
+          floor: undefined,
+          condition: undefined,
+          rentPricePerM2:
+            Number(u.rentaMensual || 0) > 0 ? Number(u.rentaMensual || 0) / surface : 0,
+          hasExplicitValue: explicitValue > 0,
+        };
+      })
+      .filter((comparable) => comparable.price > 0 && comparable.pricePerM2 > 0);
 
-    // Estimar precio venta a partir de renta (PER ~20 para España)
-    const estimatedSalePricePerM2 = avgRentPerM2 * 12 * 20;
+    const commercialComparables = commercialSpaces
+      .filter((space) => Number(space.superficieUtil || 0) > 0)
+      .map((space) => {
+        const surface = Number(space.superficieUtil || 0);
+        const monthlyRent = Number(space.rentaMensualBase || 0);
+        const estimatedValue = getEstimatedSaleFromRent(monthlyRent, options.propertyType);
+
+        return {
+          source: 'internal_db' as PlatformSource,
+          propertyType: normalizeValuationPropertyType(options.propertyType),
+          address: space.direccion,
+          price: estimatedValue,
+          pricePerM2: surface > 0 ? Math.round(estimatedValue / surface) : 0,
+          squareMeters: surface,
+          floor: space.planta || undefined,
+          condition: undefined,
+          rentPricePerM2:
+            Number(space.precioM2Mensual || 0) > 0
+              ? Number(space.precioM2Mensual || 0)
+              : monthlyRent > 0
+                ? monthlyRent / surface
+                : 0,
+          hasExplicitValue: false,
+        };
+      })
+      .filter((comparable) => comparable.price > 0 && comparable.pricePerM2 > 0);
+
+    const allInternalComparables = [...unitComparables, ...commercialComparables];
+    if (allInternalComparables.length === 0) return null;
+
+    const rentPricesPerM2 = allInternalComparables
+      .map((c) => c.rentPricePerM2)
+      .filter((value) => value > 0);
+    const avgRentPerM2 =
+      rentPricesPerM2.length > 0
+        ? rentPricesPerM2.reduce((a, b) => a + b, 0) / rentPricesPerM2.length
+        : 0;
+
+    const salePricesPerM2 = allInternalComparables
+      .map((c) => c.pricePerM2)
+      .filter((value) => value > 0);
+    const estimatedSalePricePerM2 =
+      salePricesPerM2.length > 0
+        ? salePricesPerM2.reduce((a, b) => a + b, 0) / salePricesPerM2.length
+        : 0;
+    const explicitValueComparables = allInternalComparables.filter(
+      (c) => c.hasExplicitValue
+    ).length;
+    const reliability = explicitValueComparables > 0 ? 72 : 58;
 
     return {
       source: 'internal_db',
-      sourceLabel: `Base interna Inmova (${validUnits.length} propiedades)`,
+      sourceLabel: `Base interna Inmova (${allInternalComparables.length} comparables del portfolio)`,
       fetchedAt: new Date().toISOString(),
-      reliability: 65,
+      reliability,
       dataType: 'estimate',
       pricePerM2Sale: Math.round(estimatedSalePricePerM2),
-      pricePerM2Rent: Math.round(avgRentPerM2 * 100) / 100,
-      sampleSize: validUnits.length,
-      comparables: validUnits.slice(0, 5).map((u) => ({
-        source: 'internal_db' as PlatformSource,
-        address: `${u.building.direccion} - Unidad ${u.numero}`,
-        price: Number(u.rentaMensual) * 12 * 20,
-        pricePerM2: Math.round((Number(u.rentaMensual) * 12 * 20) / Number(u.superficie)),
-        squareMeters: Number(u.superficie),
-        rooms: u.habitaciones || undefined,
-        bathrooms: u.banos || undefined,
+      pricePerM2Rent: avgRentPerM2 > 0 ? Math.round(avgRentPerM2 * 100) / 100 : undefined,
+      sampleSize: allInternalComparables.length,
+      comparables: allInternalComparables.slice(0, 8).map((c) => ({
+        source: c.source,
+        propertyType: c.propertyType,
+        address: c.address,
+        price: c.price,
+        pricePerM2: c.pricePerM2,
+        squareMeters: c.squareMeters,
+        rooms: c.rooms,
+        bathrooms: c.bathrooms,
+        floor: c.floor,
+        condition: c.condition,
       })),
     };
   } catch (error) {
@@ -525,6 +711,22 @@ async function fetchFromPreviousValuations(
       where: {
         city: { contains: options.city, mode: 'insensitive' as const },
         ...(options.postalCode && { postalCode: options.postalCode }),
+        ...(options.squareMeters
+          ? {
+              squareMeters: {
+                gte: options.squareMeters * 0.7,
+                lte: options.squareMeters * 1.3,
+              },
+            }
+          : {}),
+        ...(options.rooms
+          ? {
+              rooms: {
+                gte: Math.max(0, options.rooms - 1),
+                lte: options.rooms + 1,
+              },
+            }
+          : {}),
         createdAt: { gte: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000) }, // últimos 6 meses
       },
       select: {
@@ -535,6 +737,11 @@ async function fetchFromPreviousValuations(
         address: true,
         confidenceScore: true,
         createdAt: true,
+        unit: {
+          select: {
+            tipo: true,
+          },
+        },
       },
       orderBy: { createdAt: 'desc' },
       take: 10,
@@ -542,7 +749,17 @@ async function fetchFromPreviousValuations(
 
     if (recentValuations.length === 0) return null;
 
-    const validValuations = recentValuations.filter((v) => v.pricePerM2 && v.pricePerM2 > 0);
+    const targetUnitTypes = getUnitTypesForPropertyType(options.propertyType);
+
+    const filteredValuations = recentValuations.filter((valuation) => {
+      if (!valuation.unit?.tipo) {
+        return false;
+      }
+
+      return targetUnitTypes ? targetUnitTypes.includes(valuation.unit.tipo) : true;
+    });
+
+    const validValuations = filteredValuations.filter((v) => v.pricePerM2 && v.pricePerM2 > 0);
     if (validValuations.length === 0) return null;
 
     const avgPricePerM2 =
@@ -558,6 +775,7 @@ async function fetchFromPreviousValuations(
       sampleSize: validValuations.length,
       comparables: validValuations.slice(0, 5).map((v) => ({
         source: 'internal_db' as PlatformSource,
+        propertyType: options.propertyType,
         address: v.address,
         price: v.estimatedValue,
         pricePerM2: Math.round(v.pricePerM2 || 0),

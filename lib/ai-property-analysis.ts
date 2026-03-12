@@ -249,7 +249,7 @@ export interface AIValuationResult {
 async function runPhase1Analysis(
   property: PropertyForAnalysis,
   allComparables: PlatformComparable[],
-  platformSummary: string,
+  platformSummary: string
 ): Promise<Phase1Result> {
   if (allComparables.length === 0) {
     return {
@@ -272,7 +272,7 @@ async function runPhase1Analysis(
     .slice(0, 30) // Limitar para no exceder tokens
     .map(
       (c, i) =>
-        `${i + 1}. [${c.source}] ${c.address} — ${c.price}€ (${c.squareMeters}m², ${c.pricePerM2}€/m²)${c.rooms ? ` ${c.rooms}hab` : ''}${c.bathrooms ? ` ${c.bathrooms}baños` : ''}`,
+        `${i + 1}. [${c.source}] ${c.address} — ${c.price}€ (${c.squareMeters}m², ${c.pricePerM2}€/m²)${c.rooms ? ` ${c.rooms}hab` : ''}${c.bathrooms ? ` ${c.bathrooms}baños` : ''}`
     )
     .join('\n');
 
@@ -368,9 +368,7 @@ Responde SOLO con JSON:
 
     const pricesPerM2 = allComparables.map((c) => c.pricePerM2).sort((a, b) => a - b);
     const medianPrice = pricesPerM2[Math.floor(pricesPerM2.length / 2)] || 0;
-    const outliers = pricesPerM2.filter(
-      (p) => Math.abs(p - medianPrice) / medianPrice > 0.3,
-    );
+    const outliers = pricesPerM2.filter((p) => Math.abs(p - medianPrice) / medianPrice > 0.3);
 
     return {
       analyzedComparables: analyzedComparables.slice(0, 8),
@@ -438,6 +436,7 @@ async function runPhase2Valuation(
   phase1: Phase1Result,
   platformDataText: string,
   internalComparables: string,
+  aggregatedMarketData: AggregatedMarketData | null
 ): Promise<AIValuationResult> {
   const analyzedCompsText =
     phase1.analyzedComparables.length > 0
@@ -446,7 +445,7 @@ async function runPhase2Valuation(
             (c, i) =>
               `${i + 1}. [${c.source}] ${c.address}: ${c.price}€ (${c.squareMeters}m², ${c.pricePerM2}€/m²)` +
               `\n   Similitud IA: ${c.similarityScore}% — ${c.similarityReason}` +
-              `\n   Precio ajustado: ${c.priceAdjusted}€`,
+              `\n   Precio ajustado: ${c.priceAdjusted}€`
           )
           .join('\n')
       : 'No hay comparables analizados.';
@@ -523,35 +522,42 @@ PASO 1 — MÉTODO DE COMPARACIÓN (peso: 50-60%):
 - NO mezclar tipos: un local NO es comparable con una vivienda, una oficina NO es comparable con una nave
 - Usa SOLO comparables con similitud >60% de la Fase 1
 - Ajusta el precio por diferencias:
-${pType === 'vivienda' ? `  · Superficie (±1.5% por cada 5m² de diferencia)
+${
+  pType === 'vivienda'
+    ? `  · Superficie (±1.5% por cada 5m² de diferencia)
   · Estado/calidad (reforma: -15-25%, obra nueva: +10-15%)
   · Planta (bajo: -5-8%, planta alta con ascensor: +3-5%, ático: +8-12%)
   · Equipamiento (garaje: +8-12%, terraza: +5-8%, piscina: +3-5%, ascensor: +3-5%)
-  · Orientación (sur: +2-3%, norte: -2%)` :
-pType === 'local_comercial' ? `  · Superficie (±1% por cada 10m² de diferencia)
+  · Orientación (sur: +2-3%, norte: -2%)`
+    : pType === 'local_comercial'
+      ? `  · Superficie (±1% por cada 10m² de diferencia)
   · Fachada y escaparate (con fachada: +10-20%, esquina: +15-25%)
   · Planta (a pie de calle: referencia, sótano: -30-50%, primera planta: -15-25%)
   · Altura libre (>3.5m: +5%, <2.5m: -10%)
   · Estado (a reformar: -20-30% según nivel)
-  · Licencia de actividad vigente (+5-10%)` :
-pType === 'oficina' ? `  · Superficie (±1% por cada 15m² de diferencia)
+  · Licencia de actividad vigente (+5-10%)`
+      : pType === 'oficina'
+        ? `  · Superficie (±1% por cada 15m² de diferencia)
   · Planta (baja: -10%, plantas altas con vistas: +5-10%)
   · Diáfana vs compartimentada (diáfana: +5%)
   · Climatización central (+5-8%)
   · Eficiencia energética (A/B: +5-10%, F/G: -5-10%)
-  · Fibra óptica y cableado (+3-5%)` :
-pType === 'nave_industrial' ? `  · Superficie (±1% por cada 100m² de diferencia)
+  · Fibra óptica y cableado (+3-5%)`
+        : pType === 'nave_industrial'
+          ? `  · Superficie (±1% por cada 100m² de diferencia)
   · Altura libre (>8m: +10%, <5m: -10%)
   · Muelles de carga (+10-15%)
   · Resistencia suelo (>3T/m²: +5%)
-  · Acceso autopista/circunvalación (+5-10%)` :
-pType === 'garaje' ? `  · Tipo de plaza (normal: referencia, doble: +60-80%, moto: -50-60%)
+  · Acceso autopista/circunvalación (+5-10%)`
+          : pType === 'garaje'
+            ? `  · Tipo de plaza (normal: referencia, doble: +60-80%, moto: -50-60%)
   · Accesibilidad (rampa ancha: +5%, difícil maniobra: -10-15%)
   · Punto carga eléctrica (+5-10%)
-  · Planta (más superficial: +5%, sótanos profundos: -5-10%)` :
-`  · Superficie (ajustar según tipo)
+  · Planta (más superficial: +5%, sótanos profundos: -5-10%)`
+            : `  · Superficie (ajustar según tipo)
   · Estado/calidad
-  · Ubicación y accesibilidad`}
+  · Ubicación y accesibilidad`
+}
 - CRÍTICO: Los asking prices de portales están INFLADOS un 10-15%. APLICA SIEMPRE descuento.
 - Los precios del Notariado son precios REALES escriturados — máxima fiabilidad.
 - Idealista Data Platform: datos profesionales agregados — descuento ~8-10%.
@@ -563,15 +569,24 @@ PASO 2 — MÉTODO DE CAPITALIZACIÓN DE RENTAS (peso: 20-30%):
   · Comparables de alquiler similares DEL MISMO TIPO
 - Calcula: Valor = (Renta mensual × 12) / Cap Rate para ${pTypeLabel}
   · Usar Cap Rate del tipo de activo indicado arriba, NO cap rate genérico
-  · ${pType === 'vivienda' ? 'Residencial: Madrid centro 3.5-4.2%, BCN 3.8-4.5%, medias 4.5-5.5%' :
-     pType === 'local_comercial' ? 'Local: prime 4-5.5%, secundario 5.5-8%, periferia 7-10%' :
-     pType === 'oficina' ? 'Oficina: CBD 4-5%, business 5-6.5%, periferia 6-8%' :
-     pType === 'nave_industrial' ? 'Nave: logística prime 5-6%, secundario 6-8%, rural 7.5-10%' :
-     pType === 'garaje' ? 'Garaje: centro 4-5.5%, periferia 5-7%' :
-     'Usar cap rate específico del tipo de activo'}
+  · ${
+    pType === 'vivienda'
+      ? 'Residencial: Madrid centro 3.5-4.2%, BCN 3.8-4.5%, medias 4.5-5.5%'
+      : pType === 'local_comercial'
+        ? 'Local: prime 4-5.5%, secundario 5.5-8%, periferia 7-10%'
+        : pType === 'oficina'
+          ? 'Oficina: CBD 4-5%, business 5-6.5%, periferia 6-8%'
+          : pType === 'nave_industrial'
+            ? 'Nave: logística prime 5-6%, secundario 6-8%, rural 7.5-10%'
+            : pType === 'garaje'
+              ? 'Garaje: centro 4-5.5%, periferia 5-7%'
+              : 'Usar cap rate específico del tipo de activo'
+  }
 - El resultado sirve como validación cruzada del método de comparables
 
-${pType === 'vivienda' || pType === 'edificio' ? `PASO 3 — ANÁLISIS DE INVERSIÓN (MEDIA ESTANCIA 1-11 meses):
+${
+  pType === 'vivienda' || pType === 'edificio'
+    ? `PASO 3 — ANÁLISIS DE INVERSIÓN (MEDIA ESTANCIA 1-11 meses):
 - Aplica SOLO a vivienda y edificio residencial
 - Estima renta media estancia (contratos temporales) con premium sobre larga estancia:
   · Madrid/Barcelona premium: +40-60%
@@ -579,19 +594,21 @@ ${pType === 'vivienda' || pType === 'edificio' ? `PASO 3 — ANÁLISIS DE INVERS
   · Ciudades medias: +25-40%
 - Estima ocupación REALISTA anual (no 100%): típico 75-90% según zona
 - Calcula rentabilidad bruta = (renta × meses ocupados) / valor inmueble
-- Perfil de inquilino típico` :
-pType === 'oficina' || pType === 'coworking' ? `PASO 3 — ANÁLISIS DE FLEXIBILIDAD (contratos cortos):
+- Perfil de inquilino típico`
+    : pType === 'oficina' || pType === 'coworking'
+      ? `PASO 3 — ANÁLISIS DE FLEXIBILIDAD (contratos cortos):
 - Para oficinas/coworking, analiza el potencial de contratos flexibles
 - Premium por flexibilidad: +20-40% sobre contrato largo fijo
 - Ocupación media coworking: 70-85%. Oficina flexible: 80-90%
-- Riesgo de obsolescencia por teletrabajo` :
-`PASO 3 — ANÁLISIS ESPECÍFICO DEL TIPO DE ACTIVO (${pTypeLabel}):
+- Riesgo de obsolescencia por teletrabajo`
+      : `PASO 3 — ANÁLISIS ESPECÍFICO DEL TIPO DE ACTIVO (${pTypeLabel}):
 - Analiza riesgos y oportunidades específicos de ${pTypeLabel}
 - Para locales: analizar zona comercial, tránsito peatonal, competencia
 - Para naves: analizar acceso logístico, demanda de la zona, crecimiento e-commerce
 - Para garajes: analizar impacto ZBE, demanda parking en la zona, vehículo eléctrico
 - Para trasteros: analizar demanda local, competencia self-storage
-- NO calcular media estancia si no aplica a este tipo de activo`}
+- NO calcular media estancia si no aplica a este tipo de activo`
+}
 
 PASO 4 — VALIDACIÓN CRUZADA Y COHERENCIA:
 - Compara el valor obtenido por comparables vs capitalización
@@ -615,27 +632,34 @@ PASO 5 — DETERMINACIÓN FINAL Y CONFIANZA:
 REGLAS DE REALISMO PARA ${pTypeLabel.toUpperCase()}:
 - NO inflar el valor. El activo vale lo que indica el mercado para su tipo.
 - Usar yields, cap rates y gastos ESPECÍFICOS del tipo ${pTypeLabel} (ver sección TIPO DE ACTIVO arriba).
-${pType === 'vivienda' ? `- Reforma necesaria: -15% parcial, -25% integral.
+${
+  pType === 'vivienda'
+    ? `- Reforma necesaria: -15% parcial, -25% integral.
 - Sin ascensor planta >2: -5% a -10%.
 - Antigüedad >40 años sin reforma: -5%.
-- Sin garaje en zona con problema parking: -3-5%.` :
-pType === 'local_comercial' ? `- Local sin fachada/escaparate: descuento -20-30%.
+- Sin garaje en zona con problema parking: -3-5%.`
+    : pType === 'local_comercial'
+      ? `- Local sin fachada/escaparate: descuento -20-30%.
 - Sótano o primera planta (no pie de calle): -25-50%.
 - Sin licencia de actividad: -5-10%.
-- Vacío actual: considerar 6-12 meses para encontrar inquilino.` :
-pType === 'oficina' ? `- Oficina sin climatización central: -10-15%.
+- Vacío actual: considerar 6-12 meses para encontrar inquilino.`
+      : pType === 'oficina'
+        ? `- Oficina sin climatización central: -10-15%.
 - Sin eficiencia energética (F/G): -5-10%.
 - Compartimentada rígida (no adaptable): -5%.
-- Impacto teletrabajo: aplicar prima de riesgo +0.5-1% en cap rate.` :
-pType === 'nave_industrial' ? `- Sin muelles de carga: -10-15% para logística.
+- Impacto teletrabajo: aplicar prima de riesgo +0.5-1% en cap rate.`
+        : pType === 'nave_industrial'
+          ? `- Sin muelles de carga: -10-15% para logística.
 - Altura libre <5m: -10%.
 - Sin acceso rodado pesado: -15-20%.
-- Posible contaminación suelo: requiere estudio ambiental.` :
-pType === 'garaje' ? `- Valorar POR PLAZA, no por m².
+- Posible contaminación suelo: requiere estudio ambiental.`
+          : pType === 'garaje'
+            ? `- Valorar POR PLAZA, no por m².
 - Difícil maniobra: -10-15%.
 - Sótanos profundos (>2): -5-10%.
-- Sin punto carga eléctrica: penalización creciente.` :
-`- Aplicar criterios específicos del tipo de activo.`}
+- Sin punto carga eléctrica: penalización creciente.`
+            : `- Aplicar criterios específicos del tipo de activo.`
+}
 
 Responde SOLO con JSON exacto (sin texto adicional antes o después):
 {
@@ -658,18 +682,21 @@ Responde SOLO con JSON exacto (sin texto adicional antes o después):
   "rentabilidadLargaEstancia": <número, % bruto anual para ${pTypeLabel}>,
   "capRate": <número, % — ESPECÍFICO para ${pTypeLabel}>,
 
-${pType === 'vivienda' || pType === 'edificio' ? `  "alquilerMediaEstancia": <entero, €/mes, contrato 1-11 meses>,
+${
+  pType === 'vivienda' || pType === 'edificio'
+    ? `  "alquilerMediaEstancia": <entero, €/mes, contrato 1-11 meses>,
   "alquilerMediaEstanciaMin": <entero, €/mes, temporada baja>,
   "alquilerMediaEstanciaMax": <entero, €/mes, temporada alta>,
   "rentabilidadMediaEstancia": <número, % bruto anual ajustado por ocupación>,
   "ocupacionEstimadaMediaEstancia": <número, % anual realista>,
-  "perfilInquilinoMediaEstancia": "<perfiles concretos>",` :
-`  "alquilerMediaEstancia": null,
+  "perfilInquilinoMediaEstancia": "<perfiles concretos>",`
+    : `  "alquilerMediaEstancia": null,
   "alquilerMediaEstanciaMin": null,
   "alquilerMediaEstanciaMax": null,
   "rentabilidadMediaEstancia": null,
   "ocupacionEstimadaMediaEstancia": null,
-  "perfilInquilinoMediaEstancia": null,`}
+  "perfilInquilinoMediaEstancia": null,`
+}
 
   "factoresPositivos": ["<factor1 con impacto estimado>", "<factor2>", "<factor3>"],
   "factoresNegativos": ["<factor1 con impacto estimado>", "<factor2>"],
@@ -718,13 +745,9 @@ ${pType === 'vivienda' || pType === 'edificio' ? `  "alquilerMediaEstancia": <en
     }
   }
 
-  const sourcesUsed: string[] = [];
-  if (phase1.analyzedComparables.some((c) => c.source === 'idealista')) sourcesUsed.push('idealista');
-  if (phase1.analyzedComparables.some((c) => c.source === 'fotocasa')) sourcesUsed.push('fotocasa');
-  if (phase1.analyzedComparables.some((c) => c.source === 'habitaclia')) sourcesUsed.push('habitaclia');
-  if (phase1.analyzedComparables.some((c) => c.source === 'pisos_com')) sourcesUsed.push('pisos_com');
-  if (platformDataText.includes('Idealista Data')) sourcesUsed.push('idealista_data');
-  sourcesUsed.push('notariado', 'ine', 'claude_ai');
+  const sourcesUsed = Array.from(
+    new Set([...(aggregatedMarketData?.sourcesUsed || []), 'claude_ai'])
+  );
 
   const estimatedValue = raw.estimatedValue || raw.valorEstimado || 0;
 
@@ -775,7 +798,7 @@ function computeRentalEstimates(
   raw: any,
   estimatedValue: number,
   idealistaYield?: number | null,
-  propertyType?: PropertyType,
+  propertyType?: PropertyType
 ) {
   const pType = propertyType || 'vivienda';
 
@@ -793,9 +816,9 @@ function computeRentalEstimates(
   };
 
   const MEDIA_ESTANCIA_PREMIUM: Record<string, number> = {
-    vivienda: 1.40,
+    vivienda: 1.4,
     oficina: 1.25,
-    coworking: 1.10,
+    coworking: 1.1,
   };
 
   const OCUPACION_POR_TIPO: Record<string, number> = {
@@ -812,9 +835,8 @@ function computeRentalEstimates(
   const YIELD_MEDIA_PREMIUM = MEDIA_ESTANCIA_PREMIUM[pType] || 1.0;
   const OCUPACION_MEDIA = OCUPACION_POR_TIPO[pType] || 85;
 
-  const yieldBase = idealistaYield && idealistaYield > 0
-    ? idealistaYield / 100
-    : DEFAULT_YIELDS[pType] || 0.045;
+  const yieldBase =
+    idealistaYield && idealistaYield > 0 ? idealistaYield / 100 : DEFAULT_YIELDS[pType] || 0.045;
 
   // Larga estancia: priorizar IA, luego calcular con yield real
   let alquilerEstimado = Number(raw.alquilerLargaEstancia || raw.alquilerEstimado || 0);
@@ -840,7 +862,12 @@ function computeRentalEstimates(
   const supportsMediaEstancia = ['vivienda', 'edificio', 'oficina', 'coworking'].includes(pType);
 
   let alquilerMediaEstancia = Number(raw.alquilerMediaEstancia || 0);
-  if (alquilerMediaEstancia <= 0 && alquilerEstimado > 0 && supportsMediaEstancia && YIELD_MEDIA_PREMIUM > 1) {
+  if (
+    alquilerMediaEstancia <= 0 &&
+    alquilerEstimado > 0 &&
+    supportsMediaEstancia &&
+    YIELD_MEDIA_PREMIUM > 1
+  ) {
     alquilerMediaEstancia = Math.round(alquilerEstimado * YIELD_MEDIA_PREMIUM);
   }
 
@@ -856,10 +883,13 @@ function computeRentalEstimates(
 
   let rentabilidadMediaEstancia = Number(raw.rentabilidadMediaEstancia || 0);
   if (rentabilidadMediaEstancia <= 0 && estimatedValue > 0 && alquilerMediaEstancia > 0) {
-    rentabilidadMediaEstancia = Math.round(((alquilerMediaEstancia * 12 * (OCUPACION_MEDIA / 100)) / estimatedValue) * 1000) / 10;
+    rentabilidadMediaEstancia =
+      Math.round(((alquilerMediaEstancia * 12 * (OCUPACION_MEDIA / 100)) / estimatedValue) * 1000) /
+      10;
   }
 
-  const ocupacionEstimadaMediaEstancia = Number(raw.ocupacionEstimadaMediaEstancia || 0) || OCUPACION_MEDIA;
+  const ocupacionEstimadaMediaEstancia =
+    Number(raw.ocupacionEstimadaMediaEstancia || 0) || OCUPACION_MEDIA;
 
   const perfilInquilinoMediaEstancia =
     raw.perfilInquilinoMediaEstancia ||
@@ -886,7 +916,7 @@ export async function analyzeAndValuateProperty(
   property: PropertyForAnalysis,
   aggregatedMarketData: AggregatedMarketData | null,
   platformDataText: string,
-  internalComparables?: string,
+  internalComparables?: string
 ): Promise<AIValuationResult> {
   const startTime = Date.now();
 
@@ -901,7 +931,7 @@ export async function analyzeAndValuateProperty(
   const phase1 = await runPhase1Analysis(
     property,
     aggregatedMarketData?.allComparables || [],
-    platformDataText,
+    platformDataText
   );
 
   logger.info('[AI Analysis] Fase 1 completada', {
@@ -917,6 +947,7 @@ export async function analyzeAndValuateProperty(
     phase1,
     platformDataText,
     internalComparables || '',
+    aggregatedMarketData
   );
 
   const duration = Date.now() - startTime;
