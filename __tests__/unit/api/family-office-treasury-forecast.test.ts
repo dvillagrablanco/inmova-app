@@ -8,6 +8,9 @@ const { mockGetServerSession, mockResolveFamilyOfficeScope, mockPrisma } = vi.ho
     financialAccount: {
       findMany: vi.fn(),
     },
+    financialTransaction: {
+      findMany: vi.fn(),
+    },
     contract: {
       findMany: vi.fn(),
     },
@@ -71,6 +74,7 @@ describe('GET /api/family-office/treasury-forecast', () => {
     });
 
     mockPrisma.contract.findMany.mockResolvedValue([{ rentaMensual: 1000 }]);
+    mockPrisma.financialTransaction.findMany.mockResolvedValue([]);
     mockPrisma.expense.findMany.mockResolvedValue([{ monto: 300 }]);
     mockPrisma.mortgage.findMany.mockResolvedValue([{ cuotaMensual: 200 }]);
   });
@@ -102,5 +106,34 @@ describe('GET /api/family-office/treasury-forecast', () => {
     expect(payload.porEntidad).toEqual([{ entidad: 'Banco Operativo', saldo: 25000 }]);
     expect(payload.flujosMensuales.netoMensual).toBe(750);
     expect(payload.forecast[0].saldoProyectado).toBe(25750);
+  });
+
+  it('incorpora dividendos, cupones e intereses al forecast mensual', async () => {
+    mockPrisma.financialAccount.findMany.mockResolvedValue([
+      {
+        saldoActual: 50000,
+        entidad: 'Banco Operativo',
+        alias: 'Cuenta corriente',
+        positions: [],
+      },
+    ]);
+    mockPrisma.financialTransaction.findMany.mockResolvedValue([
+      { importe: 1200 },
+      { importe: 2400 },
+    ]);
+
+    const { GET } = await import('@/app/api/family-office/treasury-forecast/route');
+    const response = await GET(
+      new NextRequest('http://localhost:3000/api/family-office/treasury-forecast')
+    );
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.flujosMensuales.ingresosFinancieros).toBe(300);
+    expect(payload.flujosMensuales.cobros).toBe(1300);
+    expect(payload.flujosMensuales.netoMensual).toBe(1050);
+    expect(payload.forecast[0].ingresosFinancieros).toBe(300);
+    expect(payload.forecast[0].cobros).toBe(1300);
+    expect(payload.forecast[0].saldoProyectado).toBe(51050);
   });
 });

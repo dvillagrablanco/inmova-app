@@ -9,6 +9,8 @@ import { getAccountLiquidBalance, resolveFamilyOfficeScope } from '@/lib/family-
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+const FINANCIAL_INCOME_TYPES = ['dividendo', 'cupon', 'interes'] as const;
+
 async function getPrisma() {
   const { getPrismaClient } = await import('@/lib/db');
   return getPrismaClient();
@@ -58,6 +60,25 @@ export async function GET(request: NextRequest) {
     });
     const rentaMensual = contracts.reduce((s, c) => s + c.rentaMensual, 0);
 
+    // Ingresos financieros (dividendos, cupones, intereses)
+    // Se prorratean con media móvil de 12 meses para que el forecast los incorpore
+    // automáticamente cuando comiencen a cargarse en FinancialTransaction.
+    const twelveMonthsAgo = new Date(today.getTime() - 365 * 24 * 60 * 60 * 1000);
+    const financialIncomeTransactions = await prisma.financialTransaction.findMany({
+      where: {
+        account: { companyId: { in: groupIds } },
+        tipo: { in: [...FINANCIAL_INCOME_TYPES] },
+        fecha: { gte: twelveMonthsAgo },
+        importe: { gt: 0 },
+      },
+      select: { importe: true },
+    });
+    const totalFinancialIncome = financialIncomeTransactions.reduce(
+      (sum, transaction) => sum + Number(transaction.importe || 0),
+      0
+    );
+    const ingresosFinancierosMensuales = totalFinancialIncome > 0 ? totalFinancialIncome / 12 : 0;
+
     // Gastos mensuales estimados (últimos 6 meses → media mensual)
     const sixMonthsAgo = new Date(today.getTime() - 180 * 24 * 60 * 60 * 1000);
     const recentExpenses = await prisma.expense.findMany({
@@ -84,7 +105,7 @@ export async function GET(request: NextRequest) {
 
     for (let i = 0; i < 6; i++) {
       const month = addMonths(today, i);
-      const cobros = rentaMensual;
+      const cobros = rentaMensual + ingresosFinancierosMensuales;
       const pagos = gastosMensualesEstimados + hipotecaMensual;
       const neto = cobros - pagos;
       saldoProyectado += neto;
@@ -101,6 +122,7 @@ export async function GET(request: NextRequest) {
         mes: format(month, 'MMM yyyy', { locale: es }),
         mesNum: format(month, 'yyyy-MM'),
         cobros: Math.round(cobros),
+        ingresosFinancieros: Math.round(ingresosFinancierosMensuales),
         gastos: Math.round(gastosMensualesEstimados),
         hipotecas: Math.round(hipotecaMensual),
         pagoIS: Math.round(pagoIS),
@@ -139,10 +161,13 @@ export async function GET(request: NextRequest) {
       sociedades: groupIds.length,
       porEntidad: desglose,
       flujosMensuales: {
-        cobros: Math.round(rentaMensual),
+        cobros: Math.round(rentaMensual + ingresosFinancierosMensuales),
+        ingresosFinancieros: Math.round(ingresosFinancierosMensuales),
         gastos: Math.round(gastosMensualesEstimados),
         hipotecas: Math.round(hipotecaMensual),
-        netoMensual: Math.round(rentaMensual - gastosMensualesEstimados - hipotecaMensual),
+        netoMensual: Math.round(
+          rentaMensual + ingresosFinancierosMensuales - gastosMensualesEstimados - hipotecaMensual
+        ),
       },
       forecast,
       alertas,

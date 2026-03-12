@@ -24,6 +24,7 @@ interface ForecastRow {
   mes: string;
   mesNum: string;
   cobros: number;
+  ingresosFinancieros?: number;
   gastos: number;
   hipotecas: number;
   pagoIS: number;
@@ -35,6 +36,7 @@ interface TreasuryData {
   saldoActual: number;
   flujosMensuales: {
     cobros: number;
+    ingresosFinancieros?: number;
     gastos: number;
     hipotecas: number;
     netoMensual: number;
@@ -148,10 +150,16 @@ export default function TesoreriaPage() {
             <CardTitle className="text-base">Flujos mensuales</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
               <div>
                 <div className="text-gray-500">Cobros</div>
                 <div className="font-bold text-green-600">{fmt(flujos.cobros || 0)}</div>
+              </div>
+              <div>
+                <div className="text-gray-500">Ingresos financieros</div>
+                <div className="font-bold text-green-600">
+                  {fmt(flujos.ingresosFinancieros || 0)}
+                </div>
               </div>
               <div>
                 <div className="text-gray-500">Gastos</div>
@@ -203,6 +211,7 @@ export default function TesoreriaPage() {
                   <tr className="border-b">
                     <th className="text-left py-2 font-medium">Mes</th>
                     <th className="text-right py-2 font-medium">Cobros</th>
+                    <th className="text-right py-2 font-medium">Financieros</th>
                     <th className="text-right py-2 font-medium">Gastos</th>
                     <th className="text-right py-2 font-medium">Hipotecas</th>
                     <th className="text-right py-2 font-medium">IS</th>
@@ -215,6 +224,9 @@ export default function TesoreriaPage() {
                     <tr key={f.mesNum} className="border-b last:border-0">
                       <td className="py-2">{f.mes}</td>
                       <td className="text-right py-2 text-green-600">{fmt(f.cobros)}</td>
+                      <td className="text-right py-2 text-green-600">
+                        {fmt(f.ingresosFinancieros || 0)}
+                      </td>
                       <td className="text-right py-2 text-red-600">{fmt(f.gastos)}</td>
                       <td className="text-right py-2 text-red-600">{fmt(f.hipotecas)}</td>
                       <td className="text-right py-2 text-red-600">{fmt(f.pagoIS)}</td>
