@@ -97,3 +97,6 @@ data/dilitrust-inventory.json
 scripts/dilitrust-all-findings.json
 scripts/dilitrust-documents.json
 data/dilitrust-doc-urls.json
+scraping-results/
+scripts/scrape-zona3*.py
+scripts/process-zona3-html.py
