@@ -43,12 +43,26 @@ warning() {
 
 load_env() {
     if [ -f "$ENV_FILE" ]; then
-        log "🔐 Cargando variables desde $ENV_FILE..."
-        set -a
-        # shellcheck disable=SC1090
-        . "$ENV_FILE"
-        set +a
-        log "✅ Variables de entorno cargadas"
+        log "🔐 Cargando variables críticas desde $ENV_FILE..."
+
+        DATABASE_URL=$(grep '^DATABASE_URL=' "$ENV_FILE" | head -n 1 | cut -d= -f2- | sed 's/^"//; s/"$//')
+        NEXTAUTH_URL=$(grep '^NEXTAUTH_URL=' "$ENV_FILE" | head -n 1 | cut -d= -f2- | sed 's/^"//; s/"$//')
+        NEXTAUTH_SECRET=$(grep '^NEXTAUTH_SECRET=' "$ENV_FILE" | head -n 1 | cut -d= -f2- | sed 's/^"//; s/"$//')
+
+        if [ -n "$DATABASE_URL" ]; then
+            export DATABASE_URL
+            log "✅ DATABASE_URL cargada"
+        else
+            warning "DATABASE_URL no encontrada en $ENV_FILE"
+        fi
+
+        if [ -n "$NEXTAUTH_URL" ]; then
+            export NEXTAUTH_URL
+        fi
+
+        if [ -n "$NEXTAUTH_SECRET" ]; then
+            export NEXTAUTH_SECRET
+        fi
     else
         warning "No existe $ENV_FILE, continuando con variables del entorno actual"
     fi
