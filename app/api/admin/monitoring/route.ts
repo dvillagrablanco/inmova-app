@@ -13,7 +13,8 @@ export const runtime = 'nodejs';
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || (session.user as any).role !== 'SUPERADMIN') {
+    const userRole = (session.user as any).role;
+    if (!session || (userRole !== 'super_admin' && userRole !== 'administrador')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
