@@ -195,6 +195,157 @@ export function calculateFiscalImpact(input: FiscalInput): FiscalResult {
 }
 
 // ============================================================================
+// FISCALIDAD IRPF DETALLADA PARA INVERSORES
+// ============================================================================
+
+export interface DetailedFiscalInput {
+  precioCompra: number;
+  valorConstruccion: number;      // % del precio que es construcción (no suelo), típico 60-70%
+  rentaAnual: number;
+  // Gastos deducibles detallados
+  interesesHipoteca: number;      // anual
+  ibi: number;
+  comunidad: number;              // anual
+  seguroHogar: number;
+  seguroImpago: number;
+  reparaciones: number;           // anual
+  gestionAdministracion: number;  // gestor, administrador
+  gastosJuridicos: number;
+  suministros: number;            // si los paga el propietario
+  amortizacionMuebles: number;    // 10% anual del valor muebles
+  otrosGastos: number;
+  // Tipo contrato y propietario
+  tipoContrato: 'vivienda_habitual' | 'temporada' | 'habitaciones' | 'turistico' | 'local';
+  fechaContrato: 'antes_2024' | 'despues_2024';
+  inquilinoJoven: boolean;        // <35 años
+  zonaTensionada: boolean;
+  bajadaRenta5: boolean;          // si bajó renta >5% respecto al anterior
+  ownerType: 'persona_fisica' | 'sociedad';
+  otrosIngresosBase: number;      // para calcular tramo IRPF real
+}
+
+export interface DetailedFiscalResult {
+  gastosDeducibles: { concepto: string; importe: number }[];
+  totalGastosDeducibles: number;
+  amortizacionInmueble: number;
+  baseImponibleBruta: number;
+  reduccionAplicable: number;       // %
+  motivoReduccion: string;
+  baseImponibleReducida: number;
+  tramoIrpf: string;
+  tipoMarginal: number;
+  irpfAlquiler: number;
+  rentaNetaFiscal: number;
+  tipoEfectivo: number;            // % real sobre ingresos brutos
+  comparativaSociedad: {
+    isBase: number;
+    impuestoSociedad: number;
+    ahorroVsPersonaFisica: number;
+    recomendacion: string;
+  };
+}
+
+export function calculateDetailedFiscal(input: DetailedFiscalInput): DetailedFiscalResult {
+  const amortizacionInmueble = Math.round(input.precioCompra * (input.valorConstruccion / 100) * 0.03);
+
+  const gastosDeducibles = [
+    { concepto: 'Intereses hipoteca', importe: input.interesesHipoteca },
+    { concepto: 'Amortización inmueble (3%)', importe: amortizacionInmueble },
+    { concepto: 'IBI', importe: input.ibi },
+    { concepto: 'Comunidad', importe: input.comunidad },
+    { concepto: 'Seguro hogar', importe: input.seguroHogar },
+    { concepto: 'Seguro impago', importe: input.seguroImpago },
+    { concepto: 'Reparaciones y conservación', importe: input.reparaciones },
+    { concepto: 'Gestión y administración', importe: input.gestionAdministracion },
+    { concepto: 'Gastos jurídicos', importe: input.gastosJuridicos },
+    { concepto: 'Suministros', importe: input.suministros },
+    { concepto: 'Amortización muebles (10%)', importe: input.amortizacionMuebles },
+    { concepto: 'Otros gastos deducibles', importe: input.otrosGastos },
+  ].filter(g => g.importe > 0);
+
+  const totalGastosDeducibles = gastosDeducibles.reduce((s, g) => s + g.importe, 0);
+  const baseImponibleBruta = Math.max(0, input.rentaAnual - totalGastosDeducibles);
+
+  let reduccionAplicable = 0;
+  let motivoReduccion = 'Sin reducción aplicable';
+
+  if (input.ownerType === 'persona_fisica' && input.tipoContrato === 'vivienda_habitual') {
+    if (input.zonaTensionada && input.bajadaRenta5) {
+      reduccionAplicable = 90;
+      motivoReduccion = '90%: zona tensionada con bajada de renta ≥5%';
+    } else if (input.inquilinoJoven) {
+      reduccionAplicable = 70;
+      motivoReduccion = '70%: inquilino menor de 35 años';
+    } else if (input.fechaContrato === 'despues_2024') {
+      reduccionAplicable = 50;
+      motivoReduccion = '50%: contrato posterior a 2024 (nueva ley)';
+    } else {
+      reduccionAplicable = 60;
+      motivoReduccion = '60%: contrato anterior a 2024 (régimen transitorio)';
+    }
+  } else if (input.tipoContrato === 'habitaciones' || input.tipoContrato === 'temporada' || input.tipoContrato === 'turistico') {
+    reduccionAplicable = 0;
+    motivoReduccion = 'Sin reducción: no es vivienda habitual del inquilino';
+  }
+
+  const baseImponibleReducida = baseImponibleBruta * (1 - reduccionAplicable / 100);
+
+  const baseTotal = input.otrosIngresosBase + baseImponibleReducida;
+  let tipoMarginal = 19;
+  let tramoIrpf = '0-12.450€ (19%)';
+
+  if (input.ownerType === 'sociedad') {
+    tipoMarginal = 25;
+    tramoIrpf = 'IS 25%';
+  } else {
+    if (baseTotal > 300000) { tipoMarginal = 47; tramoIrpf = '>300.000€ (47%)'; }
+    else if (baseTotal > 60000) { tipoMarginal = 45; tramoIrpf = '60.000-300.000€ (45%)'; }
+    else if (baseTotal > 35200) { tipoMarginal = 37; tramoIrpf = '35.200-60.000€ (37%)'; }
+    else if (baseTotal > 20200) { tipoMarginal = 30; tramoIrpf = '20.200-35.200€ (30%)'; }
+    else if (baseTotal > 12450) { tipoMarginal = 24; tramoIrpf = '12.450-20.200€ (24%)'; }
+  }
+
+  const irpfAlquiler = Math.round(baseImponibleReducida * (tipoMarginal / 100));
+  const rentaNetaFiscal = input.rentaAnual - totalGastosDeducibles - irpfAlquiler;
+  const tipoEfectivo = input.rentaAnual > 0 ? (irpfAlquiler / input.rentaAnual) * 100 : 0;
+
+  const isBase = baseImponibleBruta;
+  const impuestoSociedad = Math.round(isBase * 0.25);
+  const ahorroVsPersonaFisica = irpfAlquiler - impuestoSociedad;
+  let recomendacion = 'Persona física es más eficiente';
+  if (ahorroVsPersonaFisica > 2000) {
+    recomendacion = `Sociedad ahorra ${fmt(ahorroVsPersonaFisica)} €/año. Considerar constituir SL si tienes >3 inmuebles.`;
+  } else if (ahorroVsPersonaFisica > 0) {
+    recomendacion = `Sociedad ahorra ${fmt(ahorroVsPersonaFisica)} €/año, pero el coste de gestión de la SL (~1500-3000€/año) puede no compensar.`;
+  }
+
+  return {
+    gastosDeducibles,
+    totalGastosDeducibles: Math.round(totalGastosDeducibles),
+    amortizacionInmueble,
+    baseImponibleBruta: Math.round(baseImponibleBruta),
+    reduccionAplicable,
+    motivoReduccion,
+    baseImponibleReducida: Math.round(baseImponibleReducida),
+    tramoIrpf,
+    tipoMarginal,
+    irpfAlquiler,
+    rentaNetaFiscal: Math.round(rentaNetaFiscal),
+    tipoEfectivo: parseFloat(tipoEfectivo.toFixed(1)),
+    comparativaSociedad: {
+      isBase: Math.round(isBase),
+      impuestoSociedad,
+      ahorroVsPersonaFisica,
+      recomendacion,
+    },
+  };
+}
+
+function fmt(n: number): string {
+  return new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(n);
+}
+
+// ============================================================================
 // DUE DILIGENCE CHECKLIST
 // ============================================================================
 
