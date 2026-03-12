@@ -38,7 +38,14 @@ export async function GET(request: NextRequest) {
     // Saldo actual en cuentas (TODO el grupo)
     const accounts = await prisma.financialAccount.findMany({
       where: { companyId: { in: groupIds }, activa: true },
-      select: { saldoActual: true, entidad: true, alias: true },
+      select: {
+        saldoActual: true,
+        entidad: true,
+        alias: true,
+        positions: {
+          select: { valorActual: true },
+        },
+      },
     });
     const saldoActual = accounts.reduce(
       (sum, account) => sum + getAccountLiquidBalance(account),
