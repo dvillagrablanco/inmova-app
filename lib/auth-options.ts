@@ -4,15 +4,21 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import bcrypt from 'bcryptjs';
 
+import { getPrismaClient as getSharedPrismaClient } from '@/lib/db';
 import logger from '@/lib/logger';
 // Lazy load de Prisma para evitar problemas en build
 function getPrismaClient() {
-  if (process.env.SKIP_PRISMA === 'true' || process.env.SKIP_API_ANALYSIS === '1') {
+  if (
+    process.env.SKIP_PRISMA === 'true' ||
+    process.env.SKIP_API_ANALYSIS === '1' ||
+    process.env.NEXT_PHASE === 'phase-production-build' ||
+    process.env.NODE_ENV === 'test'
+  ) {
     return null;
   }
+
   try {
-    const { prisma } = require('./db');
-    return prisma;
+    return getSharedPrismaClient();
   } catch (error) {
     logger.error('[NextAuth] Failed to load Prisma:', error);
     return null;
@@ -22,9 +28,10 @@ function getPrismaClient() {
 // Crear adapter solo si Prisma está disponible
 function getAdapter() {
   const prisma = getPrismaClient();
-  if (!prisma) {
+  if (!prisma || typeof prisma.user?.findUnique !== 'function') {
     return undefined;
   }
+
   try {
     return PrismaAdapter(prisma);
   } catch (error) {
@@ -68,7 +75,9 @@ export const authOptions: NextAuthOptions = {
             const lockStatus = isAccountLocked(credentials.email);
             if (lockStatus.locked) {
               await addConstantDelay();
-              throw new Error(`Cuenta bloqueada temporalmente. Intenta en ${Math.ceil(lockStatus.remainingSeconds / 60)} minutos.`);
+              throw new Error(
+                `Cuenta bloqueada temporalmente. Intenta en ${Math.ceil(lockStatus.remainingSeconds / 60)} minutos.`
+              );
             }
           } catch (lockErr: any) {
             if (lockErr.message?.includes('bloqueada')) throw lockErr;
@@ -114,7 +123,8 @@ export const authOptions: NextAuthOptions = {
                   throw new Error(`Demasiados intentos. Cuenta bloqueada 15 minutos.`);
                 }
               } catch (lockErr: any) {
-                if (lockErr.message?.includes('bloqueada') || lockErr.message?.includes('intentos')) throw lockErr;
+                if (lockErr.message?.includes('bloqueada') || lockErr.message?.includes('intentos'))
+                  throw lockErr;
               }
               await addConstantDelay();
               throw new Error('Email o contraseña incorrectos');
@@ -124,7 +134,7 @@ export const authOptions: NextAuthOptions = {
               await addConstantDelay();
               throw new Error('Cuenta inactiva. Contacte al administrador.');
             }
-            
+
             // Obtener nombre de la empresa si existe
             let companyName = 'Sin Empresa';
             if (user.companyId) {
@@ -140,9 +150,12 @@ export const authOptions: NextAuthOptions = {
                 logger.warn('[NextAuth] No se pudo obtener nombre de empresa');
               }
             }
-            
+
             // Clear lockout on successful login
-            try { const { clearLockout } = require('./account-lockout'); clearLockout(credentials.email); } catch {}
+            try {
+              const { clearLockout } = require('./account-lockout');
+              clearLockout(credentials.email);
+            } catch {}
 
             await addConstantDelay();
             return {
@@ -195,7 +208,10 @@ export const authOptions: NextAuthOptions = {
           };
         } catch (error) {
           // Asegurar delay constante incluso en errores
-          logger.error('[NextAuth] Error en authorize():', error instanceof Error ? error.message : error);
+          logger.error(
+            '[NextAuth] Error en authorize():',
+            error instanceof Error ? error.message : error
+          );
           await addConstantDelay();
           throw error;
         }
