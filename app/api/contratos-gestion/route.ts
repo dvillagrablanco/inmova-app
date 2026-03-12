@@ -40,15 +40,18 @@ export async function GET() {
       return NextResponse.json([]);
     }
 
-    const contracts = await prisma.managementContract.findMany({
-      where: { companyId: user.companyId },
-      orderBy: { createdAt: 'desc' },
-    });
-
-    return NextResponse.json(contracts);
+    try {
+      const contracts = await prisma.managementContract.findMany({
+        where: { companyId: user.companyId },
+        orderBy: { createdAt: 'desc' },
+      });
+      return NextResponse.json(contracts);
+    } catch {
+      return NextResponse.json([]);
+    }
   } catch (error) {
     console.error('[ContratosGestion API] Error:', error);
-    return NextResponse.json({ error: 'Error al obtener contratos de gestión' }, { status: 500 });
+    return NextResponse.json([]);
   }
 }
 

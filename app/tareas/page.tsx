@@ -257,9 +257,9 @@ export default function TareasPage() {
 
   const stats = {
     total: tasks.length,
-    pendientes: tasks.filter((t) => t.estado === 'PENDIENTE').length,
-    enProgreso: tasks.filter((t) => t.estado === 'EN_PROGRESO').length,
-    completadas: tasks.filter((t) => t.estado === 'COMPLETADA').length,
+    pendientes: tasks.filter((t) => t.estado === 'pendiente').length,
+    enProgreso: tasks.filter((t) => t.estado === 'en_progreso').length,
+    completadas: tasks.filter((t) => t.estado === 'completada').length,
   };
 
   if (isLoading) {

@@ -45,10 +45,13 @@ export async function GET(request: NextRequest) {
     const endDate = searchParams.get('endDate');
     const confirmed = searchParams.get('confirmed');
 
-    // Construir filtro
     const where: any = {
       candidate: {
-        companyId: companyId,
+        unit: {
+          building: {
+            companyId: companyId,
+          },
+        },
       },
     };
 
@@ -76,8 +79,7 @@ export async function GET(request: NextRequest) {
         candidate: {
           select: {
             id: true,
-            nombre: true,
-            apellidos: true,
+            nombreCompleto: true,
             email: true,
             telefono: true,
             unit: {
@@ -103,7 +105,7 @@ export async function GET(request: NextRequest) {
     const transformedVisits = visits.map((visit) => ({
       id: visit.id,
       candidateId: visit.candidateId,
-      visitorName: `${visit.candidate.nombre} ${visit.candidate.apellidos || ''}`.trim(),
+      visitorName: visit.candidate.nombreCompleto,
       visitorEmail: visit.candidate.email,
       visitorPhone: visit.candidate.telefono,
       propertyAddress: visit.candidate.unit?.building?.direccion || '',
@@ -160,12 +162,11 @@ export async function POST(request: NextRequest) {
     const candidate = await prisma.candidate.findFirst({
       where: {
         id: candidateId,
-        companyId: session.user.companyId,
+        unit: { building: { companyId: session.user.companyId } },
       },
       select: {
         id: true,
-        nombre: true,
-        apellidos: true,
+        nombreCompleto: true,
       },
     });
 
@@ -185,8 +186,7 @@ export async function POST(request: NextRequest) {
         candidate: {
           select: {
             id: true,
-            nombre: true,
-            apellidos: true,
+            nombreCompleto: true,
             email: true,
             telefono: true,
           },
@@ -200,7 +200,7 @@ export async function POST(request: NextRequest) {
       {
         id: visit.id,
         candidateId: visit.candidateId,
-        visitorName: `${visit.candidate.nombre} ${visit.candidate.apellidos || ''}`.trim(),
+        visitorName: visit.candidate.nombreCompleto,
         visitorEmail: visit.candidate.email,
         visitorPhone: visit.candidate.telefono,
         scheduledDate: visit.fechaVisita.toISOString().split('T')[0],
@@ -239,7 +239,7 @@ export async function PUT(request: NextRequest) {
       where: {
         id,
         candidate: {
-          companyId: session.user.companyId,
+          unit: { building: { companyId: session.user.companyId } },
         },
       },
     });
@@ -261,8 +261,7 @@ export async function PUT(request: NextRequest) {
         candidate: {
           select: {
             id: true,
-            nombre: true,
-            apellidos: true,
+            nombreCompleto: true,
           },
         },
       },
@@ -273,7 +272,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({
       id: visit.id,
       candidateId: visit.candidateId,
-      visitorName: `${visit.candidate.nombre} ${visit.candidate.apellidos || ''}`.trim(),
+      visitorName: visit.candidate.nombreCompleto,
       status:
         visit.asistio === true
           ? 'completed'
