@@ -121,7 +121,11 @@ export default function DocumentosPage() {
       const res = await fetch(`/api/documents${query}`);
       if (res.ok) {
         const data = await res.json();
-        setDocuments(data);
+        setDocuments(Array.isArray(data) ? data : []);
+      } else {
+        const errorData = await res.json().catch(() => ({ error: 'Error desconocido' }));
+        logger.error('Error fetching documents:', { status: res.status, error: errorData });
+        toast.error(errorData?.error || `Error al cargar documentos (${res.status})`);
       }
     } catch (error) {
       logger.error('Error fetching documents:', error);

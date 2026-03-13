@@ -64,6 +64,9 @@ export async function GET(req: NextRequest) {
     if (folderId) whereFilters.folderId = folderId;
     if (tipo) whereFilters.tipo = tipo;
 
+    // Build company scope filter — each OR branch checks a different relation.
+    // Documents without any relation (orphan) should still be accessible if
+    // they belong to a folder owned by the company.
     const companyScope = {
       OR: [
         { building: { companyId: companyIdFilter } },
@@ -71,6 +74,17 @@ export async function GET(req: NextRequest) {
         { tenant: { companyId: companyIdFilter } },
         { contract: { unit: { building: { companyId: companyIdFilter } } } },
         { folder: { companyId: companyIdFilter } },
+        // Fallback: documentos sin relación explícita pero con carpeta 'General'
+        // que fue creada para la empresa
+        {
+          AND: [
+            { buildingId: null },
+            { unitId: null },
+            { tenantId: null },
+            { contractId: null },
+            { folder: { companyId: companyIdFilter } },
+          ],
+        },
       ],
     };
 
