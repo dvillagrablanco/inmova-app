@@ -126,7 +126,11 @@ export default function InversionesPage() {
   const p = consolidated?.consolidated || null;
 
   const formatCurrency = (n: number) =>
-    new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n || 0);
+    new Intl.NumberFormat('es-ES', {
+      style: 'currency',
+      currency: 'EUR',
+      maximumFractionDigits: 0,
+    }).format(n || 0);
 
   return (
     <AuthenticatedLayout>
@@ -137,7 +141,8 @@ export default function InversionesPage() {
             <h1 className="text-2xl font-bold text-gray-900">Portfolio de Inversiones</h1>
             <p className="text-gray-500">
               Vista consolidada del grupo societario
-              {consolidated && consolidated.companies.length > 1 &&
+              {consolidated &&
+                consolidated.companies.length > 1 &&
                 ` (${consolidated.companies.length} sociedades)`}
             </p>
           </div>
@@ -167,7 +172,13 @@ export default function InversionesPage() {
                 <div key={alert.id} className="flex items-center justify-between text-sm">
                   <div className="flex items-center gap-2">
                     <Badge
-                      variant={alert.urgencia === 'critica' ? 'destructive' : alert.urgencia === 'alta' ? 'destructive' : 'secondary'}
+                      variant={
+                        alert.urgencia === 'critica'
+                          ? 'destructive'
+                          : alert.urgencia === 'alta'
+                            ? 'destructive'
+                            : 'secondary'
+                      }
                       className="text-xs"
                     >
                       {alert.urgencia}
@@ -178,7 +189,12 @@ export default function InversionesPage() {
                 </div>
               ))}
               {fiscalAlerts.length > 5 && (
-                <Button variant="ghost" size="sm" className="w-full text-xs" onClick={() => router.push('/inversiones/fiscal/modelos')}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full text-xs"
+                  onClick={() => router.push('/inversiones/fiscal/modelos')}
+                >
                   Ver todas ({fiscalAlerts.length})
                 </Button>
               )}
@@ -187,63 +203,76 @@ export default function InversionesPage() {
         )}
 
         {/* KPIs principales */}
-        {p && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Card className="border-2 border-blue-200">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
-                  <PieChart className="h-4 w-4" />
-                  Patrimonio Total
-                </div>
-                <div className="text-2xl font-bold text-blue-700">{formatCurrency(p.patrimonioTotal || p.totalEquity)}</div>
-                <div className="text-xs text-gray-400">
-                  Inmobiliario + Financiero + PE + Tesorería
-                </div>
-              </CardContent>
-            </Card>
+        {p &&
+          (() => {
+            const hasFinancialData =
+              (p.totalTesoreria || 0) > 0 || (p.totalFinanciero || 0) > 0 || (p.totalPE || 0) > 0;
+            return (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <Card className={hasFinancialData ? 'border-2 border-blue-200' : ''}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
+                      {hasFinancialData ? (
+                        <PieChart className="h-4 w-4" />
+                      ) : (
+                        <Wallet className="h-4 w-4" />
+                      )}
+                      {hasFinancialData ? 'Patrimonio Total' : 'Patrimonio Neto'}
+                    </div>
+                    <div
+                      className={`text-2xl font-bold ${hasFinancialData ? 'text-blue-700' : 'text-gray-900'}`}
+                    >
+                      {formatCurrency(
+                        hasFinancialData ? p.patrimonioTotal || p.totalEquity : p.totalEquity
+                      )}
+                    </div>
+                    <div className="text-xs text-gray-400">
+                      {hasFinancialData
+                        ? 'Inmobiliario + Financiero + PE + Tesorería'
+                        : 'Valor mercado - Deuda hipotecaria'}
+                    </div>
+                  </CardContent>
+                </Card>
 
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
-                  <Euro className="h-4 w-4" />
-                  Cash-Flow Mensual
-                </div>
-                <div className={`text-2xl font-bold ${p.monthlyCashFlow >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {formatCurrency(p.monthlyCashFlow)}
-                </div>
-                <div className="text-xs text-gray-400">
-                  Ingresos - Gastos - Hipotecas
-                </div>
-              </CardContent>
-            </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
+                      <Euro className="h-4 w-4" />
+                      Cash-Flow Mensual
+                    </div>
+                    <div
+                      className={`text-2xl font-bold ${p.monthlyCashFlow >= 0 ? 'text-green-600' : 'text-red-600'}`}
+                    >
+                      {formatCurrency(p.monthlyCashFlow)}
+                    </div>
+                    <div className="text-xs text-gray-400">Ingresos - Gastos - Hipotecas</div>
+                  </CardContent>
+                </Card>
 
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
-                  <TrendingUp className="h-4 w-4" />
-                  Rentabilidad Neta
-                </div>
-                <div className="text-2xl font-bold text-blue-600">{p.netYield}%</div>
-                <div className="text-xs text-gray-400">
-                  Bruta: {p.grossYield}%
-                </div>
-              </CardContent>
-            </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
+                      <TrendingUp className="h-4 w-4" />
+                      Rentabilidad Neta
+                    </div>
+                    <div className="text-2xl font-bold text-blue-600">{p.netYield}%</div>
+                    <div className="text-xs text-gray-400">Bruta: {p.grossYield}%</div>
+                  </CardContent>
+                </Card>
 
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
-                  <Percent className="h-4 w-4" />
-                  Ocupación / LTV
-                </div>
-                <div className="text-2xl font-bold text-gray-900">{p.averageOccupancy}%</div>
-                <div className="text-xs text-gray-400">
-                  LTV: {p.ltv}%
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
+                      <Percent className="h-4 w-4" />
+                      Ocupación / LTV
+                    </div>
+                    <div className="text-2xl font-bold text-gray-900">{p.averageOccupancy}%</div>
+                    <div className="text-xs text-gray-400">LTV: {p.ltv}%</div>
+                  </CardContent>
+                </Card>
+              </div>
+            );
+          })()}
 
         {/* Revalorización patrimonial */}
         {p && p.totalPrecioCompra > 0 && (
@@ -257,35 +286,54 @@ export default function InversionesPage() {
             <Card>
               <CardContent className="p-4">
                 <div className="text-xs text-gray-500 mb-1">Valor mercado estimado</div>
-                <div className="text-lg font-bold text-blue-600">{formatCurrency(p.totalValorMercadoUnidades)}</div>
+                <div className="text-lg font-bold text-blue-600">
+                  {formatCurrency(p.totalValorMercadoUnidades)}
+                </div>
               </CardContent>
             </Card>
             <Card className={p.revalorizacion >= 0 ? 'border-green-200' : 'border-red-200'}>
               <CardContent className="p-4">
                 <div className="text-xs text-gray-500 mb-1">Revalorización</div>
-                <div className={`text-lg font-bold ${p.revalorizacion >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {p.revalorizacion >= 0 ? '+' : ''}{formatCurrency(p.revalorizacion)}
+                <div
+                  className={`text-lg font-bold ${p.revalorizacion >= 0 ? 'text-green-600' : 'text-red-600'}`}
+                >
+                  {p.revalorizacion >= 0 ? '+' : ''}
+                  {formatCurrency(p.revalorizacion)}
                 </div>
-                <div className={`text-xs ${p.revalorizacionPct >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                  {p.revalorizacionPct >= 0 ? '+' : ''}{p.revalorizacionPct}%
+                <div
+                  className={`text-xs ${p.revalorizacionPct >= 0 ? 'text-green-500' : 'text-red-500'}`}
+                >
+                  {p.revalorizacionPct >= 0 ? '+' : ''}
+                  {p.revalorizacionPct}%
                 </div>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-4">
                 <div className="text-xs text-gray-500 mb-1">Renta mensual</div>
-                <div className="text-lg font-bold text-green-600">{formatCurrency(p.totalMonthlyIncome)}</div>
-                <div className="text-xs text-gray-400">{formatCurrency(p.totalMonthlyIncome * 12)}/ano</div>
+                <div className="text-lg font-bold text-green-600">
+                  {formatCurrency(p.totalMonthlyIncome)}
+                </div>
+                <div className="text-xs text-gray-400">
+                  {formatCurrency(p.totalMonthlyIncome * 12)}/ano
+                </div>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-4">
                 <div className="text-xs text-gray-500 mb-1">Yield s/compra</div>
                 <div className="text-lg font-bold text-purple-600">
-                  {p.totalPrecioCompra > 0 ? ((p.totalMonthlyIncome * 12 / p.totalPrecioCompra) * 100).toFixed(1) : '0'}%
+                  {p.totalPrecioCompra > 0
+                    ? (((p.totalMonthlyIncome * 12) / p.totalPrecioCompra) * 100).toFixed(1)
+                    : '0'}
+                  %
                 </div>
                 <div className="text-xs text-gray-400">
-                  PER {p.totalMonthlyIncome > 0 ? (p.totalPrecioCompra / (p.totalMonthlyIncome * 12)).toFixed(1) : 'N/A'}x
+                  PER{' '}
+                  {p.totalMonthlyIncome > 0
+                    ? (p.totalPrecioCompra / (p.totalMonthlyIncome * 12)).toFixed(1)
+                    : 'N/A'}
+                  x
                 </div>
               </CardContent>
             </Card>
@@ -293,78 +341,83 @@ export default function InversionesPage() {
         )}
 
         {/* Desglose Patrimonial (si hay datos financieros/PE) */}
-        {p && ((p.totalTesoreria || 0) > 0 || (p.totalFinanciero || 0) > 0 || (p.totalPE || 0) > 0) && (
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
-                <PieChart className="h-4 w-4 text-blue-600" />
-                Desglose Patrimonial
-              </CardTitle>
-              <CardDescription>Patrimonio total del grupo: inmobiliario + financiero + PE + tesorería</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
-                  <div className="flex items-center gap-1.5 text-xs text-blue-600 mb-1">
-                    <Building2 className="h-3.5 w-3.5" />
-                    Inmobiliario
+        {p &&
+          ((p.totalTesoreria || 0) > 0 || (p.totalFinanciero || 0) > 0 || (p.totalPE || 0) > 0) && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <PieChart className="h-4 w-4 text-blue-600" />
+                  Desglose Patrimonial
+                </CardTitle>
+                <CardDescription>
+                  Patrimonio total del grupo: inmobiliario + financiero + PE + tesorería
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
+                    <div className="flex items-center gap-1.5 text-xs text-blue-600 mb-1">
+                      <Building2 className="h-3.5 w-3.5" />
+                      Inmobiliario
+                    </div>
+                    <div className="text-lg font-bold text-blue-800">
+                      {formatCurrency(p.totalEquity)}
+                    </div>
+                    <div className="text-[10px] text-blue-500">Valor mercado - Deuda</div>
                   </div>
-                  <div className="text-lg font-bold text-blue-800">{formatCurrency(p.totalEquity)}</div>
-                  <div className="text-[10px] text-blue-500">Valor mercado - Deuda</div>
+                  <div className="p-3 bg-green-50 rounded-lg border border-green-100">
+                    <div className="flex items-center gap-1.5 text-xs text-green-600 mb-1">
+                      <BanknoteIcon className="h-3.5 w-3.5" />
+                      Tesorería
+                    </div>
+                    <div className="text-lg font-bold text-green-800">
+                      {formatCurrency(p.totalTesoreria || 0)}
+                    </div>
+                    <div className="text-[10px] text-green-500">Saldos bancarios</div>
+                  </div>
+                  <div className="p-3 bg-purple-50 rounded-lg border border-purple-100">
+                    <div className="flex items-center gap-1.5 text-xs text-purple-600 mb-1">
+                      <BarChart3 className="h-3.5 w-3.5" />
+                      Financiero
+                    </div>
+                    <div className="text-lg font-bold text-purple-800">
+                      {formatCurrency(p.totalFinanciero || 0)}
+                    </div>
+                    <div
+                      className={`text-[10px] ${(p.pnlFinanciero || 0) >= 0 ? 'text-green-500' : 'text-red-500'}`}
+                    >
+                      P&L: {(p.pnlFinanciero || 0) >= 0 ? '+' : ''}
+                      {formatCurrency(p.pnlFinanciero || 0)}
+                    </div>
+                  </div>
+                  <div className="p-3 bg-amber-50 rounded-lg border border-amber-100">
+                    <div className="flex items-center gap-1.5 text-xs text-amber-600 mb-1">
+                      <Briefcase className="h-3.5 w-3.5" />
+                      Private Equity
+                    </div>
+                    <div className="text-lg font-bold text-amber-800">
+                      {formatCurrency(p.totalPE || 0)}
+                    </div>
+                    <div className="text-[10px] text-amber-500">
+                      {(p.totalCapitalPendientePE || 0) > 0
+                        ? `Pendiente: ${formatCurrency(p.totalCapitalPendientePE || 0)}`
+                        : `Coste: ${formatCurrency(p.totalCostePE || 0)}`}
+                    </div>
+                  </div>
+                  <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="flex items-center gap-1.5 text-xs text-gray-600 mb-1">
+                      <PieChart className="h-3.5 w-3.5" />
+                      TOTAL
+                    </div>
+                    <div className="text-lg font-bold text-gray-900">
+                      {formatCurrency(p.patrimonioTotal || p.totalEquity)}
+                    </div>
+                    <div className="text-[10px] text-gray-500">Patrimonio neto total</div>
+                  </div>
                 </div>
-                <div className="p-3 bg-green-50 rounded-lg border border-green-100">
-                  <div className="flex items-center gap-1.5 text-xs text-green-600 mb-1">
-                    <BanknoteIcon className="h-3.5 w-3.5" />
-                    Tesorería
-                  </div>
-                  <div className="text-lg font-bold text-green-800">{formatCurrency(p.totalTesoreria || 0)}</div>
-                  <div className="text-[10px] text-green-500">Saldos bancarios</div>
-                </div>
-                <div className="p-3 bg-purple-50 rounded-lg border border-purple-100">
-                  <div className="flex items-center gap-1.5 text-xs text-purple-600 mb-1">
-                    <BarChart3 className="h-3.5 w-3.5" />
-                    Financiero
-                  </div>
-                  <div className="text-lg font-bold text-purple-800">{formatCurrency(p.totalFinanciero || 0)}</div>
-                  <div className={`text-[10px] ${(p.pnlFinanciero || 0) >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                    P&L: {(p.pnlFinanciero || 0) >= 0 ? '+' : ''}{formatCurrency(p.pnlFinanciero || 0)}
-                  </div>
-                </div>
-                <div className="p-3 bg-amber-50 rounded-lg border border-amber-100">
-                  <div className="flex items-center gap-1.5 text-xs text-amber-600 mb-1">
-                    <Briefcase className="h-3.5 w-3.5" />
-                    Private Equity
-                  </div>
-                  <div className="text-lg font-bold text-amber-800">{formatCurrency(p.totalPE || 0)}</div>
-                  <div className="text-[10px] text-amber-500">
-                    {(p.totalCapitalPendientePE || 0) > 0
-                      ? `Pendiente: ${formatCurrency(p.totalCapitalPendientePE || 0)}`
-                      : `Coste: ${formatCurrency(p.totalCostePE || 0)}`}
-                  </div>
-                </div>
-                <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                  <div className="flex items-center gap-1.5 text-xs text-gray-600 mb-1">
-                    <PieChart className="h-3.5 w-3.5" />
-                    TOTAL
-                  </div>
-                  <div className="text-lg font-bold text-gray-900">{formatCurrency(p.patrimonioTotal || p.totalEquity)}</div>
-                  <div className="text-[10px] text-gray-500">Patrimonio neto total</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Si NO hay datos financieros, mostrar nota informativa */}
-        {p && (p.totalTesoreria || 0) === 0 && (p.totalFinanciero || 0) === 0 && (p.totalPE || 0) === 0 && (
-          <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg flex items-center gap-2">
-            <Wallet className="h-4 w-4 shrink-0" />
-            <span>
-              Solo se muestra patrimonio inmobiliario. Para incluir tesorería, posiciones financieras y Private Equity, 
-              configura las cuentas en <button className="underline font-medium" onClick={() => router.push('/family-office/cuentas')}>Family Office → Cuentas</button>.
-            </span>
-          </div>
-        )}
+              </CardContent>
+            </Card>
+          )}
 
         <Tabs defaultValue="consolidado" className="space-y-4">
           <TabsList>
@@ -383,7 +436,9 @@ export default function InversionesPage() {
                   </CardHeader>
                   <CardContent className="space-y-3">
                     {/* Patrimonio inmobiliario */}
-                    <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Inmobiliario</div>
+                    <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                      Inmobiliario
+                    </div>
                     <div className="flex justify-between">
                       <span className="text-gray-500">Inversión total</span>
                       <span className="font-medium">{formatCurrency(p.totalInvestment)}</span>
@@ -394,7 +449,11 @@ export default function InversionesPage() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-500">Deuda hipotecaria</span>
-                      <span className="font-medium text-red-600">{p.totalMortgageDebt > 0 ? `-${formatCurrency(p.totalMortgageDebt)}` : formatCurrency(0)}</span>
+                      <span className="font-medium text-red-600">
+                        {p.totalMortgageDebt > 0
+                          ? `-${formatCurrency(p.totalMortgageDebt)}`
+                          : formatCurrency(0)}
+                      </span>
                     </div>
                     <div className="border-t pt-2 flex justify-between font-bold">
                       <span>Neto inmobiliario</span>
@@ -402,30 +461,42 @@ export default function InversionesPage() {
                     </div>
 
                     {/* Otros patrimonios */}
-                    {((p.totalTesoreria || 0) > 0 || (p.totalFinanciero || 0) > 0 || (p.totalPE || 0) > 0) && (
+                    {((p.totalTesoreria || 0) > 0 ||
+                      (p.totalFinanciero || 0) > 0 ||
+                      (p.totalPE || 0) > 0) && (
                       <>
-                        <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide mt-3">Financiero y PE</div>
+                        <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide mt-3">
+                          Financiero y PE
+                        </div>
                         {(p.totalTesoreria || 0) > 0 && (
                           <div className="flex justify-between">
                             <span className="text-gray-500">Tesorería (saldos bancarios)</span>
-                            <span className="font-medium text-green-600">+{formatCurrency(p.totalTesoreria || 0)}</span>
+                            <span className="font-medium text-green-600">
+                              +{formatCurrency(p.totalTesoreria || 0)}
+                            </span>
                           </div>
                         )}
                         {(p.totalFinanciero || 0) > 0 && (
                           <div className="flex justify-between">
                             <span className="text-gray-500">Posiciones financieras</span>
-                            <span className="font-medium text-purple-600">+{formatCurrency(p.totalFinanciero || 0)}</span>
+                            <span className="font-medium text-purple-600">
+                              +{formatCurrency(p.totalFinanciero || 0)}
+                            </span>
                           </div>
                         )}
                         {(p.totalPE || 0) > 0 && (
                           <div className="flex justify-between">
                             <span className="text-gray-500">Private Equity / Participaciones</span>
-                            <span className="font-medium text-amber-600">+{formatCurrency(p.totalPE || 0)}</span>
+                            <span className="font-medium text-amber-600">
+                              +{formatCurrency(p.totalPE || 0)}
+                            </span>
                           </div>
                         )}
                         <div className="border-t pt-2 flex justify-between font-bold text-lg">
                           <span>PATRIMONIO TOTAL</span>
-                          <span className="text-blue-700">{formatCurrency(p.patrimonioTotal || p.totalEquity)}</span>
+                          <span className="text-blue-700">
+                            {formatCurrency(p.patrimonioTotal || p.totalEquity)}
+                          </span>
                         </div>
                       </>
                     )}
@@ -441,23 +512,33 @@ export default function InversionesPage() {
                       <span className="text-gray-500 flex items-center gap-1">
                         <ArrowUpRight className="h-3 w-3 text-green-500" /> Ingresos alquiler
                       </span>
-                      <span className="font-medium text-green-600">+{formatCurrency(p.totalMonthlyIncome)}</span>
+                      <span className="font-medium text-green-600">
+                        +{formatCurrency(p.totalMonthlyIncome)}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-500 flex items-center gap-1">
                         <ArrowDownRight className="h-3 w-3 text-red-500" /> Gastos operativos
                       </span>
-                      <span className="font-medium text-red-600">-{formatCurrency(p.totalMonthlyExpenses)}</span>
+                      <span className="font-medium text-red-600">
+                        -{formatCurrency(p.totalMonthlyExpenses)}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-500 flex items-center gap-1">
                         <Landmark className="h-3 w-3 text-orange-500" /> Cuotas hipotecas
                       </span>
-                      <span className="font-medium text-orange-600">{p.totalMortgagePayments > 0 ? `-${formatCurrency(p.totalMortgagePayments)}` : formatCurrency(0)}</span>
+                      <span className="font-medium text-orange-600">
+                        {p.totalMortgagePayments > 0
+                          ? `-${formatCurrency(p.totalMortgagePayments)}`
+                          : formatCurrency(0)}
+                      </span>
                     </div>
                     <div className="border-t pt-2 flex justify-between font-bold gap-2">
                       <span className="shrink-0">Cash-flow neto</span>
-                      <span className={`whitespace-nowrap ${p.monthlyCashFlow >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      <span
+                        className={`whitespace-nowrap ${p.monthlyCashFlow >= 0 ? 'text-green-600' : 'text-red-600'}`}
+                      >
                         {formatCurrency(p.monthlyCashFlow)}
                       </span>
                     </div>
@@ -485,27 +566,46 @@ export default function InversionesPage() {
                     <div className="grid grid-cols-2 md:grid-cols-6 gap-4 text-sm">
                       <div>
                         <span className="text-gray-500">Precio compra</span>
-                        <div className="font-medium">{formatCurrency(company.portfolio.totalPrecioCompra || 0)}</div>
+                        <div className="font-medium">
+                          {formatCurrency(company.portfolio.totalPrecioCompra || 0)}
+                        </div>
                       </div>
                       <div>
                         <span className="text-gray-500">Valor mercado</span>
-                        <div className="font-medium text-blue-600">{formatCurrency(company.portfolio.totalValorMercadoUnidades || 0)}</div>
+                        <div className="font-medium text-blue-600">
+                          {formatCurrency(company.portfolio.totalValorMercadoUnidades || 0)}
+                        </div>
                       </div>
                       <div>
                         <span className="text-gray-500">Revalorización</span>
-                        <div className={`font-medium ${(company.portfolio.revalorizacion || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          {(company.portfolio.revalorizacion || 0) >= 0 ? '+' : ''}{formatCurrency(company.portfolio.revalorizacion || 0)}
-                          <span className="text-xs ml-1">({(company.portfolio.revalorizacionPct || 0) >= 0 ? '+' : ''}{company.portfolio.revalorizacionPct || 0}%)</span>
+                        <div
+                          className={`font-medium ${(company.portfolio.revalorizacion || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}
+                        >
+                          {(company.portfolio.revalorizacion || 0) >= 0 ? '+' : ''}
+                          {formatCurrency(company.portfolio.revalorizacion || 0)}
+                          <span className="text-xs ml-1">
+                            ({(company.portfolio.revalorizacionPct || 0) >= 0 ? '+' : ''}
+                            {company.portfolio.revalorizacionPct || 0}%)
+                          </span>
                         </div>
                       </div>
                       <div>
                         <span className="text-gray-500">Renta mensual</span>
-                        <div className="font-medium text-green-600">{formatCurrency(company.portfolio.totalMonthlyIncome)}</div>
+                        <div className="font-medium text-green-600">
+                          {formatCurrency(company.portfolio.totalMonthlyIncome)}
+                        </div>
                       </div>
                       <div>
                         <span className="text-gray-500">Yield s/compra</span>
                         <div className="font-medium text-purple-600">
-                          {company.portfolio.totalPrecioCompra > 0 ? ((company.portfolio.totalMonthlyIncome * 12 / company.portfolio.totalPrecioCompra) * 100).toFixed(1) : '0'}%
+                          {company.portfolio.totalPrecioCompra > 0
+                            ? (
+                                ((company.portfolio.totalMonthlyIncome * 12) /
+                                  company.portfolio.totalPrecioCompra) *
+                                100
+                              ).toFixed(1)
+                            : '0'}
+                          %
                         </div>
                       </div>
                       <div>
@@ -519,7 +619,8 @@ export default function InversionesPage() {
               {(!consolidated?.companies || consolidated.companies.length === 0) && (
                 <Card>
                   <CardContent className="p-8 text-center text-gray-500">
-                    No hay sociedades configuradas. Configura el grupo en Configuración &gt; Empresas.
+                    No hay sociedades configuradas. Configura el grupo en Configuración &gt;
+                    Empresas.
                   </CardContent>
                 </Card>
               )}
@@ -544,15 +645,21 @@ export default function InversionesPage() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-500">(-) Gastos deducibles</span>
-                    <span className="font-medium text-red-600">-{formatCurrency(fiscal.gastosDeducibles)}</span>
+                    <span className="font-medium text-red-600">
+                      -{formatCurrency(fiscal.gastosDeducibles)}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-500">(-) Amortizaciones</span>
-                    <span className="font-medium text-red-600">-{formatCurrency(fiscal.amortizaciones)}</span>
+                    <span className="font-medium text-red-600">
+                      -{formatCurrency(fiscal.amortizaciones)}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-500">(-) Intereses hipoteca</span>
-                    <span className="font-medium text-red-600">-{formatCurrency(fiscal.interesesHipoteca)}</span>
+                    <span className="font-medium text-red-600">
+                      -{formatCurrency(fiscal.interesesHipoteca)}
+                    </span>
                   </div>
                   <div className="border-t pt-2 flex justify-between font-bold">
                     <span>Base imponible</span>
@@ -574,7 +681,11 @@ export default function InversionesPage() {
                         {fiscal.pagosFraccionados.map((pf: any) => (
                           <div key={pf.trimestre} className="flex justify-between text-sm">
                             <span className="text-gray-500">
-                              {pf.trimestre === 1 ? 'Abril' : pf.trimestre === 2 ? 'Octubre' : 'Diciembre'}
+                              {pf.trimestre === 1
+                                ? 'Abril'
+                                : pf.trimestre === 2
+                                  ? 'Octubre'
+                                  : 'Diciembre'}
                             </span>
                             <span>{formatCurrency(pf.importe)}</span>
                           </div>
