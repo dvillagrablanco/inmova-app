@@ -320,6 +320,7 @@ export default function ValoracionIAPage() {
   // Feedback para refinar valoración
   const [feedbackText, setFeedbackText] = useState('');
   const [refinando, setRefinando] = useState(false);
+  const [refinamientosCount, setRefinamientosCount] = useState(0);
 
   // Valoración de Mercado
   const [activeTab, setActiveTab] = useState<'mis-activos' | 'mercado'>('mis-activos');
@@ -761,6 +762,7 @@ export default function ValoracionIAPage() {
       const data = await response.json();
       setResultado(data);
       setFeedbackText('');
+      setRefinamientosCount((prev) => prev + 1);
       toast.success('Valoración ajustada según tus comentarios');
     } catch (error: any) {
       console.error('Error refinando valoración:', error);
@@ -2788,7 +2790,8 @@ ${
                       Ajustar Valoración
                     </CardTitle>
                     <CardDescription>
-                      Indica tus observaciones sobre el mercado local y la IA recalculará la valoración
+                      Indica tus observaciones sobre el mercado local y la IA recalculará la
+                      valoración
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-3">
@@ -2801,7 +2804,9 @@ ${
                     />
                     <div className="flex items-center justify-between">
                       <p className="text-xs text-muted-foreground">
-                        Tu conocimiento del mercado local ayuda a ajustar la valoración automática
+                        {refinamientosCount > 0
+                          ? `${refinamientosCount} ajuste${refinamientosCount > 1 ? 's' : ''} realizado${refinamientosCount > 1 ? 's' : ''} · Modelo rápido (bajo coste)`
+                          : 'Tu conocimiento del mercado local ayuda a ajustar la valoración'}
                       </p>
                       <Button
                         onClick={handleRefinar}
@@ -2826,7 +2831,15 @@ ${
 
                 {/* Acciones */}
                 <div className="flex gap-2">
-                  <Button variant="outline" className="flex-1" onClick={() => { setResultado(null); setFeedbackText(''); }}>
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => {
+                      setResultado(null);
+                      setFeedbackText('');
+                      setRefinamientosCount(0);
+                    }}
+                  >
                     <RefreshCw className="h-4 w-4 mr-2" />
                     Nueva Valoración
                   </Button>

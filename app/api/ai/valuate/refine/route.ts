@@ -12,7 +12,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { CLAUDE_MODEL_PRIMARY } from '@/lib/ai-model-config';
+import { CLAUDE_MODEL_PRIMARY, CLAUDE_MODEL_FAST } from '@/lib/ai-model-config';
 import { z } from 'zod';
 import { checkAILimit, createLimitExceededResponse, logUsageWarning } from '@/lib/usage-limits';
 import { trackUsage } from '@/lib/usage-tracking-service';
@@ -79,8 +79,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. AI limit check
-    const ESTIMATED_TOKENS = 1500;
+    // 2. AI limit check (refinement uses fast model = fewer tokens)
+    const ESTIMATED_TOKENS = 800;
     const limitCheck = await checkAILimit(session.user.companyId, ESTIMATED_TOKENS);
     if (!limitCheck.allowed) {
       return createLimitExceededResponse(limitCheck);
@@ -110,100 +110,33 @@ export async function POST(request: NextRequest) {
     const direccion = propertyData.direccionManual || '';
     const ciudad = propertyData.ciudadManual || '';
 
-    // 5. Build refinement prompt
+    // 5. Build compact refinement prompt (optimized for fewer tokens)
     const comparablesText = previousValuation.comparables?.length
       ? previousValuation.comparables
-          .map(
-            (c: any) =>
-              `- ${c.direccion}: ${c.precio}€ (${c.superficie}m², ${c.precioM2}€/m², similitud ${Math.round((c.similitud || 0) * 100)}%)`
-          )
+          .slice(0, 5)
+          .map((c: any) => `${c.direccion}: ${c.precio}€ (${c.superficie}m², ${c.precioM2}€/m²)`)
           .join('\n')
-      : 'Sin comparables previos';
+      : '';
 
-    const prompt = `Eres un tasador inmobiliario certificado con 20 años de experiencia en el mercado español.
-Has realizado una valoración previa que el propietario/inversor quiere AJUSTAR en base a su conocimiento del mercado local.
+    const prompt = `Tasador inmobiliario: ajusta esta valoración según el feedback del propietario.
 
-═══ DATOS DEL INMUEBLE ═══
-- Tipo: ${propertyData.tipoActivo || 'vivienda'}
-- Ubicación: ${direccion}, ${ciudad} ${propertyData.codigoPostalManual || ''}
-- Superficie: ${superficie}m²
-- Habitaciones: ${habitaciones} | Baños: ${banos}
-- Antigüedad: ${propertyData.antiguedad || 'N/A'} años
-- Estado: ${propertyData.estadoConservacion || 'bueno'}
-- Orientación: ${propertyData.orientacion || 'N/A'}
-- Eficiencia energética: ${propertyData.eficienciaEnergetica || 'Sin certificar'}
-- Características: ${propertyData.caracteristicas?.join(', ') || 'Ninguna'}
-${propertyData.descripcionAdicional ? `- Info adicional: ${propertyData.descripcionAdicional}` : ''}
+INMUEBLE: ${propertyData.tipoActivo || 'vivienda'} en ${direccion}, ${ciudad}. ${superficie}m², ${habitaciones}hab, ${banos}baños. Estado: ${propertyData.estadoConservacion || 'bueno'}.
 
-═══ VALORACIÓN PREVIA ═══
-- Valor estimado: ${previousValuation.valorEstimado}€
-- Rango: ${previousValuation.valorMinimo || '?'}€ — ${previousValuation.valorMaximo || '?'}€
-- Precio/m²: ${previousValuation.precioM2 || '?'}€
-- Confianza: ${previousValuation.confianza || '?'}%
-- Tendencia: ${previousValuation.tendenciaMercado || '?'}
-- Alquiler estimado: ${previousValuation.alquilerEstimado || 0}€/mes
-- Rentabilidad: ${previousValuation.rentabilidadAlquiler || 0}%
-- Metodología: ${previousValuation.metodologiaUsada || 'Comparables + Capitalización'}
-- Razonamiento: ${previousValuation.reasoning || 'N/A'}
+VALORACIÓN PREVIA: ${previousValuation.valorEstimado}€ (${previousValuation.precioM2 || '?'}€/m²). Rango: ${previousValuation.valorMinimo || '?'}-${previousValuation.valorMaximo || '?'}€. Confianza: ${previousValuation.confianza || '?'}%. Alquiler: ${previousValuation.alquilerEstimado || 0}€/mes. Yield: ${previousValuation.rentabilidadAlquiler || 0}%.
+${comparablesText ? `Comparables:\n${comparablesText}` : ''}
 
-Comparables usados:
-${comparablesText}
+FEEDBACK: "${userFeedback}"
 
-Factores positivos: ${previousValuation.factoresPositivos?.join('; ') || 'N/A'}
-Factores negativos: ${previousValuation.factoresNegativos?.join('; ') || 'N/A'}
+PONDERACIÓN: comparables reales 65% + experto+feedback 20% + capitalización 15% (solo validación).
+Si capitalización difiere >20% de comparables, prioriza comparables. Precio escrituras > asking price portales.
 
-═══ FEEDBACK DEL PROPIETARIO/INVERSOR ═══
-"${userFeedback}"
+Responde SOLO JSON:
+{"valorEstimado":<int>,"valorMinimo":<int>,"valorMaximo":<int>,"precioM2":<int>,"confianza":<50-98>,"tendenciaMercado":"alcista|bajista|estable","porcentajeTendencia":<num>,"comparables":[{"direccion":"<str>","precio":<int>,"superficie":<int>,"precioM2":<int>,"similitud":<0.7-0.95>}],"factoresPositivos":["<str>"],"factoresNegativos":["<str>"],"recomendaciones":["<str>"],"analisisMercado":"<str>","tiempoEstimadoVenta":"<str>","rentabilidadAlquiler":<num>,"alquilerEstimado":<int>,"reasoning":"<2-3 párrafos: qué cambió, por qué, conclusión>","metodologiaUsada":"<str>"}`;
 
-═══ INSTRUCCIONES DE AJUSTE ═══
-
-1. ANALIZA el feedback del propietario/inversor cuidadosamente. Su conocimiento del mercado local es valioso.
-
-2. PRIORIDAD DE MÉTODOS (ajustada):
-   - Comparables de mercado REALES (transacciones escrituradas): 65% del peso
-   - Criterio experto + feedback del propietario: 20% del peso
-   - Capitalización de rentas: 15% del peso (SOLO como validación cruzada)
-
-3. Si el feedback indica que:
-   - El precio de mercado real es diferente → AJUSTA el valor hacia lo que indica el mercado real
-   - La capitalización pesa demasiado → REDUCE el peso de capitalización y PRIORIZA comparables
-   - Conoce transacciones recientes en la zona → USA esos datos como referencia principal
-   - El alquiler está inflado/deflactado → AJUSTA la rentabilidad pero NO dejes que distorsione el valor de venta
-
-4. El precio de cierre de ESCRITURAS debe ser la referencia, NO el asking price de portales (que suele ser 10-15% superior).
-
-5. Proporciona REASONING detallado explicando:
-   - Qué cambió respecto a la valoración anterior
-   - Por qué se ajustó en base al feedback
-   - Qué datos nuevos se incorporaron
-
-Responde SOLO con JSON válido (sin texto adicional):
-{
-  "valorEstimado": <entero en euros>,
-  "valorMinimo": <entero>,
-  "valorMaximo": <entero>,
-  "precioM2": <entero>,
-  "confianza": <50-98>,
-  "tendenciaMercado": "<alcista|bajista|estable>",
-  "porcentajeTendencia": <0.5-12>,
-  "comparables": [
-    {"direccion": "<zona similar>", "precio": <número>, "superficie": <número>, "precioM2": <número>, "similitud": <0.7-0.95>}
-  ],
-  "factoresPositivos": ["<factor>"],
-  "factoresNegativos": ["<factor>"],
-  "recomendaciones": ["<recomendación>"],
-  "analisisMercado": "<análisis actualizado del mercado>",
-  "tiempoEstimadoVenta": "<ej: 2-3 meses>",
-  "rentabilidadAlquiler": <% bruto anual>,
-  "alquilerEstimado": <entero mensual>,
-  "reasoning": "<4-6 párrafos: 1) Qué indicó el propietario, 2) Cómo se ajustó la valoración, 3) Qué datos se priorizaron, 4) Nueva ponderación aplicada, 5) Conclusión>",
-  "metodologiaUsada": "<Métodos aplicados con ajuste por feedback del propietario>"
-}`;
-
-    // 6. Call Claude
+    // 6. Call Claude (use fast model for refinements — lower cost, sufficient quality)
     const message = await anthropic.messages.create({
-      model: process.env.ANTHROPIC_MODEL || CLAUDE_MODEL_PRIMARY,
-      max_tokens: 2048,
+      model: CLAUDE_MODEL_FAST,
+      max_tokens: 1500,
       messages: [{ role: 'user', content: prompt }],
     });
 
@@ -237,7 +170,7 @@ Responde SOLO con JSON válido (sin texto adicional):
         previousValuation.perfilInquilinoMediaEstancia;
     }
 
-    // 8. Track usage
+    // 8. Track usage (fast model = lower cost)
     await trackUsage({
       companyId: session.user.companyId,
       service: 'claude',
@@ -245,6 +178,7 @@ Responde SOLO con JSON válido (sin texto adicional):
       value: ESTIMATED_TOKENS,
       metadata: {
         action: 'valuation_refine',
+        model: CLAUDE_MODEL_FAST,
         address: direccion,
         previousValue: previousValuation.valorEstimado,
         refinedValue: refinedValuation.valorEstimado,
