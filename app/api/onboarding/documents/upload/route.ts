@@ -345,7 +345,7 @@ async function createDocumentImport(
 
     await s3Client.send(
       new PutObjectCommand({
-        Bucket: process.env.AWS_S3_BUCKET!,
+        Bucket: process.env.AWS_BUCKET || process.env.AWS_S3_BUCKET!,
         Key: s3Key,
         Body: buffer,
         ContentType: mimeType,
@@ -435,7 +435,7 @@ export async function processDocumentsAsync(
           const region = process.env.AWS_REGION;
           const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
           const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
-          const bucket = process.env.AWS_S3_BUCKET;
+          const bucket = process.env.AWS_BUCKET || process.env.AWS_S3_BUCKET;
 
           if (!region || !accessKeyId || !secretAccessKey || !bucket) {
             throw new Error(
@@ -466,7 +466,7 @@ export async function processDocumentsAsync(
             docId: doc.id,
             s3Key: doc.s3Key,
             error: errMsg,
-            bucket: process.env.AWS_S3_BUCKET,
+            bucket: process.env.AWS_BUCKET || process.env.AWS_S3_BUCKET,
           });
           await prisma.documentImport.update({
             where: { id: doc.id },
