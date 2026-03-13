@@ -317,6 +317,10 @@ export default function ValoracionIAPage() {
   const [assetType, setAssetType] = useState<'unit' | 'building'>('unit');
   const [resultado, setResultado] = useState<ValoracionResult | null>(null);
 
+  // Feedback para refinar valoración
+  const [feedbackText, setFeedbackText] = useState('');
+  const [refinando, setRefinando] = useState(false);
+
   // Valoración de Mercado
   const [activeTab, setActiveTab] = useState<'mis-activos' | 'mercado'>('mis-activos');
   const [refCatastral, setRefCatastral] = useState('');
@@ -730,6 +734,39 @@ export default function ValoracionIAPage() {
         return <TrendingDown className="h-5 w-5 text-red-500" />;
       default:
         return <Minus className="h-5 w-5 text-yellow-500" />;
+    }
+  };
+
+  // Refinar valoración con feedback del usuario
+  const handleRefinar = async () => {
+    if (!resultado || !feedbackText.trim()) return;
+
+    setRefinando(true);
+    try {
+      const response = await fetch('/api/ai/valuate/refine', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          previousValuation: resultado,
+          propertyData: formData,
+          userFeedback: feedbackText.trim(),
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Error al refinar la valoración');
+      }
+
+      const data = await response.json();
+      setResultado(data);
+      setFeedbackText('');
+      toast.success('Valoración ajustada según tus comentarios');
+    } catch (error: any) {
+      console.error('Error refinando valoración:', error);
+      toast.error(error.message || 'Error al refinar la valoración con IA');
+    } finally {
+      setRefinando(false);
     }
   };
 
@@ -2743,9 +2780,53 @@ ${
                     )}
                 </Accordion>
 
+                {/* Ajustar Valoración con Feedback */}
+                <Card className="border-2 border-amber-200 bg-amber-50/30">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Lightbulb className="h-4 w-4 text-amber-600" />
+                      Ajustar Valoración
+                    </CardTitle>
+                    <CardDescription>
+                      Indica tus observaciones sobre el mercado local y la IA recalculará la valoración
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <Textarea
+                      placeholder="Ej: El precio de mercado en esta zona está más cerca de 3.500€/m² según ventas recientes que conozco. La capitalización de rentas da un valor demasiado alto porque los alquileres están inflados temporalmente. He visto pisos similares venderse por 280.000€ en los últimos meses..."
+                      value={feedbackText}
+                      onChange={(e) => setFeedbackText(e.target.value)}
+                      rows={4}
+                      className="resize-none"
+                    />
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs text-muted-foreground">
+                        Tu conocimiento del mercado local ayuda a ajustar la valoración automática
+                      </p>
+                      <Button
+                        onClick={handleRefinar}
+                        disabled={refinando || !feedbackText.trim()}
+                        className="bg-amber-600 hover:bg-amber-700 text-white"
+                      >
+                        {refinando ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Recalculando...
+                          </>
+                        ) : (
+                          <>
+                            <RefreshCw className="h-4 w-4 mr-2" />
+                            Recalcular con Comentarios
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
                 {/* Acciones */}
                 <div className="flex gap-2">
-                  <Button variant="outline" className="flex-1" onClick={() => setResultado(null)}>
+                  <Button variant="outline" className="flex-1" onClick={() => { setResultado(null); setFeedbackText(''); }}>
                     <RefreshCw className="h-4 w-4 mr-2" />
                     Nueva Valoración
                   </Button>
