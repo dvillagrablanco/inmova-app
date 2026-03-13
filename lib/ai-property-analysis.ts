@@ -613,14 +613,18 @@ ${
 PASO 4 — VALIDACIÓN CRUZADA Y COHERENCIA:
 - Compara el valor obtenido por comparables vs capitalización
   · Si difieren >15%, analiza por qué y ajusta
-  · Prioriza comparables si hay suficientes (≥3 con similitud >70%)
-  · Prioriza capitalización si los comparables son escasos o poco similares
+  · SIEMPRE prioriza comparables de mercado (transacciones reales) sobre capitalización
+  · Solo usa capitalización como método principal si hay <2 comparables con similitud >60%
+  · Si capitalización difiere >20% de comparables, el resultado DEBE basarse en comparables
 - Verifica coherencia: el precio/m² resultante debe estar dentro del rango de la zona
 - Si hay evolución histórica de precios, verifica que la tendencia es coherente
 - Si hay datos de subzonas/distritos, usa la subzona más cercana como referencia primaria
 
 PASO 5 — DETERMINACIÓN FINAL Y CONFIANZA:
-- Pondera: comparables (55%) + capitalización (25%) + criterio experto (20%)
+- Pondera: comparables de mercado (65%) + criterio experto (20%) + capitalización de rentas (15%)
+- IMPORTANTE: La capitalización de rentas es un método de VALIDACIÓN CRUZADA, NO el principal.
+  El precio de mercado real (transacciones escrituradas y comparables) debe ser la referencia primaria.
+  La capitalización solo debe usarse como check de coherencia o cuando no hay suficientes comparables.
 - Ajuste final por factores macro: tendencia del mercado, tipos de interés, estacionalidad
 - Confianza (50-98):
   · >85 = datos Notariado + comparables reales escriturados + ≥5 comparables similares
