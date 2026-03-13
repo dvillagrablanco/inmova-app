@@ -112,4 +112,62 @@ describe('investment-service consolidated report', () => {
       'rovida1',
     ]);
   });
+
+  it('consolida datos financieros, PE y tesorería en patrimonioTotal', async () => {
+    // Vidaro tiene cuentas financieras y participaciones PE
+    mockPrisma.financialAccount.findMany.mockImplementation(async ({ where }: any) => {
+      const companyIds = where?.companyId?.in || [where?.companyId];
+      if (companyIds.includes('vidaro1')) {
+        return [{ saldoActual: 500000, valorMercado: 2000000 }];
+      }
+      return [];
+    });
+
+    mockPrisma.financialPosition.findMany.mockImplementation(async ({ where }: any) => {
+      // Positions linked to Vidaro's accounts
+      const companyIds = where?.account?.companyId?.in || [where?.account?.companyId];
+      if (companyIds.includes('vidaro1')) {
+        return [
+          { valorActual: 1200000, costeTotal: 1000000, pnlNoRealizado: 200000 },
+          { valorActual: 800000, costeTotal: 750000, pnlNoRealizado: 50000 },
+        ];
+      }
+      return [];
+    });
+
+    mockPrisma.participation.findMany.mockImplementation(async ({ where }: any) => {
+      const companyIds = where?.companyId?.in || [where?.companyId];
+      if (companyIds.includes('vidaro1')) {
+        return [
+          {
+            costeAdquisicion: 300000,
+            valorEstimado: 450000,
+            compromisoTotal: 500000,
+            capitalLlamado: 300000,
+            capitalPendiente: 200000,
+          },
+        ];
+      }
+      return [];
+    });
+
+    const { getConsolidatedReport } = await import('@/lib/investment-service');
+    const report = await getConsolidatedReport('vidaro1');
+
+    // Vidaro's portfolio should have financial data
+    const vidaro = report.companies.find((c) => c.companyId === 'vidaro1');
+    expect(vidaro).toBeDefined();
+    expect(vidaro!.portfolio.totalTesoreria).toBe(500000);
+    expect(vidaro!.portfolio.totalFinanciero).toBe(2000000); // 1.2M + 800K
+    expect(vidaro!.portfolio.pnlFinanciero).toBe(250000); // 200K + 50K
+    expect(vidaro!.portfolio.totalPE).toBe(450000); // valorEstimado
+    expect(vidaro!.portfolio.totalCapitalPendientePE).toBe(200000);
+
+    // Consolidated should aggregate correctly
+    expect(report.consolidated.totalTesoreria).toBe(500000);
+    expect(report.consolidated.totalFinanciero).toBe(2000000);
+    expect(report.consolidated.totalPE).toBe(450000);
+    // patrimonioTotal = equity(0) + tesoreria(500K) + financiero(2M) + PE(450K)
+    expect(report.consolidated.patrimonioTotal).toBe(2950000);
+  });
 });
