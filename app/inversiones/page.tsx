@@ -22,6 +22,9 @@ import {
   Euro,
   Percent,
   Home,
+  Briefcase,
+  BanknoteIcon,
+  PieChart,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -43,6 +46,16 @@ interface PortfolioData {
   totalValorMercadoUnidades: number;
   revalorizacion: number;
   revalorizacionPct: number;
+  // Patrimonio financiero
+  totalTesoreria?: number;
+  totalFinanciero?: number;
+  totalCosteFinanciero?: number;
+  pnlFinanciero?: number;
+  totalPE?: number;
+  totalCostePE?: number;
+  totalCompromisosPE?: number;
+  totalCapitalPendientePE?: number;
+  patrimonioTotal?: number;
 }
 
 interface ConsolidatedData {
@@ -176,15 +189,15 @@ export default function InversionesPage() {
         {/* KPIs principales */}
         {p && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Card>
+            <Card className="border-2 border-blue-200">
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
-                  <Wallet className="h-4 w-4" />
-                  Patrimonio Neto
+                  <PieChart className="h-4 w-4" />
+                  Patrimonio Total
                 </div>
-                <div className="text-2xl font-bold text-gray-900">{formatCurrency(p.totalEquity)}</div>
+                <div className="text-2xl font-bold text-blue-700">{formatCurrency(p.patrimonioTotal || p.totalEquity)}</div>
                 <div className="text-xs text-gray-400">
-                  Valor mercado - Deuda hipotecaria
+                  Inmobiliario + Financiero + PE + Tesorería
                 </div>
               </CardContent>
             </Card>
@@ -279,6 +292,80 @@ export default function InversionesPage() {
           </div>
         )}
 
+        {/* Desglose Patrimonial (si hay datos financieros/PE) */}
+        {p && ((p.totalTesoreria || 0) > 0 || (p.totalFinanciero || 0) > 0 || (p.totalPE || 0) > 0) && (
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base flex items-center gap-2">
+                <PieChart className="h-4 w-4 text-blue-600" />
+                Desglose Patrimonial
+              </CardTitle>
+              <CardDescription>Patrimonio total del grupo: inmobiliario + financiero + PE + tesorería</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
+                  <div className="flex items-center gap-1.5 text-xs text-blue-600 mb-1">
+                    <Building2 className="h-3.5 w-3.5" />
+                    Inmobiliario
+                  </div>
+                  <div className="text-lg font-bold text-blue-800">{formatCurrency(p.totalEquity)}</div>
+                  <div className="text-[10px] text-blue-500">Valor mercado - Deuda</div>
+                </div>
+                <div className="p-3 bg-green-50 rounded-lg border border-green-100">
+                  <div className="flex items-center gap-1.5 text-xs text-green-600 mb-1">
+                    <BanknoteIcon className="h-3.5 w-3.5" />
+                    Tesorería
+                  </div>
+                  <div className="text-lg font-bold text-green-800">{formatCurrency(p.totalTesoreria || 0)}</div>
+                  <div className="text-[10px] text-green-500">Saldos bancarios</div>
+                </div>
+                <div className="p-3 bg-purple-50 rounded-lg border border-purple-100">
+                  <div className="flex items-center gap-1.5 text-xs text-purple-600 mb-1">
+                    <BarChart3 className="h-3.5 w-3.5" />
+                    Financiero
+                  </div>
+                  <div className="text-lg font-bold text-purple-800">{formatCurrency(p.totalFinanciero || 0)}</div>
+                  <div className={`text-[10px] ${(p.pnlFinanciero || 0) >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    P&L: {(p.pnlFinanciero || 0) >= 0 ? '+' : ''}{formatCurrency(p.pnlFinanciero || 0)}
+                  </div>
+                </div>
+                <div className="p-3 bg-amber-50 rounded-lg border border-amber-100">
+                  <div className="flex items-center gap-1.5 text-xs text-amber-600 mb-1">
+                    <Briefcase className="h-3.5 w-3.5" />
+                    Private Equity
+                  </div>
+                  <div className="text-lg font-bold text-amber-800">{formatCurrency(p.totalPE || 0)}</div>
+                  <div className="text-[10px] text-amber-500">
+                    {(p.totalCapitalPendientePE || 0) > 0
+                      ? `Pendiente: ${formatCurrency(p.totalCapitalPendientePE || 0)}`
+                      : `Coste: ${formatCurrency(p.totalCostePE || 0)}`}
+                  </div>
+                </div>
+                <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <div className="flex items-center gap-1.5 text-xs text-gray-600 mb-1">
+                    <PieChart className="h-3.5 w-3.5" />
+                    TOTAL
+                  </div>
+                  <div className="text-lg font-bold text-gray-900">{formatCurrency(p.patrimonioTotal || p.totalEquity)}</div>
+                  <div className="text-[10px] text-gray-500">Patrimonio neto total</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Si NO hay datos financieros, mostrar nota informativa */}
+        {p && (p.totalTesoreria || 0) === 0 && (p.totalFinanciero || 0) === 0 && (p.totalPE || 0) === 0 && (
+          <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg flex items-center gap-2">
+            <Wallet className="h-4 w-4 shrink-0" />
+            <span>
+              Solo se muestra patrimonio inmobiliario. Para incluir tesorería, posiciones financieras y Private Equity, 
+              configura las cuentas en <button className="underline font-medium" onClick={() => router.push('/family-office/cuentas')}>Family Office → Cuentas</button>.
+            </span>
+          </div>
+        )}
+
         <Tabs defaultValue="consolidado" className="space-y-4">
           <TabsList>
             <TabsTrigger value="consolidado">Consolidado</TabsTrigger>
@@ -295,6 +382,8 @@ export default function InversionesPage() {
                     <CardTitle className="text-lg">Patrimonio</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
+                    {/* Patrimonio inmobiliario */}
+                    <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Inmobiliario</div>
                     <div className="flex justify-between">
                       <span className="text-gray-500">Inversión total</span>
                       <span className="font-medium">{formatCurrency(p.totalInvestment)}</span>
@@ -308,9 +397,38 @@ export default function InversionesPage() {
                       <span className="font-medium text-red-600">{p.totalMortgageDebt > 0 ? `-${formatCurrency(p.totalMortgageDebt)}` : formatCurrency(0)}</span>
                     </div>
                     <div className="border-t pt-2 flex justify-between font-bold">
-                      <span>Patrimonio neto</span>
+                      <span>Neto inmobiliario</span>
                       <span className="text-green-600">{formatCurrency(p.totalEquity)}</span>
                     </div>
+
+                    {/* Otros patrimonios */}
+                    {((p.totalTesoreria || 0) > 0 || (p.totalFinanciero || 0) > 0 || (p.totalPE || 0) > 0) && (
+                      <>
+                        <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide mt-3">Financiero y PE</div>
+                        {(p.totalTesoreria || 0) > 0 && (
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">Tesorería (saldos bancarios)</span>
+                            <span className="font-medium text-green-600">+{formatCurrency(p.totalTesoreria || 0)}</span>
+                          </div>
+                        )}
+                        {(p.totalFinanciero || 0) > 0 && (
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">Posiciones financieras</span>
+                            <span className="font-medium text-purple-600">+{formatCurrency(p.totalFinanciero || 0)}</span>
+                          </div>
+                        )}
+                        {(p.totalPE || 0) > 0 && (
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">Private Equity / Participaciones</span>
+                            <span className="font-medium text-amber-600">+{formatCurrency(p.totalPE || 0)}</span>
+                          </div>
+                        )}
+                        <div className="border-t pt-2 flex justify-between font-bold text-lg">
+                          <span>PATRIMONIO TOTAL</span>
+                          <span className="text-blue-700">{formatCurrency(p.patrimonioTotal || p.totalEquity)}</span>
+                        </div>
+                      </>
+                    )}
                   </CardContent>
                 </Card>
 
