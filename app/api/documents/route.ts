@@ -38,7 +38,8 @@ export async function GET(req: NextRequest) {
   }
 
   // Filtro de company: si hay múltiples IDs, usar { in: [...] }, si no, el activo
-  const companyIdFilter = companyIds.length > 1 ? { in: companyIds } : (scope.activeCompanyId || companyIds[0]);
+  const companyIdFilter =
+    companyIds.length > 1 ? { in: companyIds } : scope.activeCompanyId || companyIds[0];
 
   const tenantId = searchParams.get('tenantId');
   const unitId = searchParams.get('unitId');
@@ -54,9 +55,6 @@ export async function GET(req: NextRequest) {
     if (buildingId) {
       whereFilters.buildingId = buildingId;
       if (!unitId) {
-        // Cuando se piden documentos del edificio (sin especificar unidad),
-        // excluir los que pertenecen a una unidad concreta — esos se
-        // muestran en la página de la propiedad, no en la del edificio.
         whereFilters.unitId = null;
       }
     }
@@ -64,34 +62,68 @@ export async function GET(req: NextRequest) {
     if (folderId) whereFilters.folderId = folderId;
     if (tipo) whereFilters.tipo = tipo;
 
-    // Build company scope filter — each OR branch checks a different relation.
-    // Documents without any relation (orphan) should still be accessible if
-    // they belong to a folder owned by the company.
-    const companyScope = {
-      OR: [
-        { building: { companyId: companyIdFilter } },
-        { unit: { building: { companyId: companyIdFilter } } },
-        { tenant: { companyId: companyIdFilter } },
-        { contract: { unit: { building: { companyId: companyIdFilter } } } },
-        { folder: { companyId: companyIdFilter } },
-        // Fallback: documentos sin relación explícita pero con carpeta 'General'
-        // que fue creada para la empresa
-        {
-          AND: [
-            { buildingId: null },
-            { unitId: null },
-            { tenantId: null },
-            { contractId: null },
-            { folder: { companyId: companyIdFilter } },
-          ],
-        },
-      ],
-    };
+    // Estrategia simplificada: buscar IDs de las relaciones de la empresa primero,
+    // luego filtrar documentos por esos IDs.
+    // Esto evita queries anidadas complejas que pueden fallar en ciertos edge cases.
+    const companyIdArray = Array.isArray(companyIdFilter?.in)
+      ? companyIdFilter.in
+      : [companyIdFilter];
+
+    const [companyBuildings, companyTenants, companyFolders] = await Promise.all([
+      prisma.building.findMany({
+        where: { companyId: { in: companyIdArray }, isDemo: false },
+        select: { id: true },
+      }),
+      prisma.tenant.findMany({
+        where: { companyId: { in: companyIdArray } },
+        select: { id: true },
+      }),
+      prisma.documentFolder.findMany({
+        where: { companyId: { in: companyIdArray } },
+        select: { id: true },
+      }),
+    ]);
+
+    const buildingIds = companyBuildings.map((b) => b.id);
+    const tenantIds = companyTenants.map((t) => t.id);
+    const folderIds = companyFolders.map((f) => f.id);
+
+    // Obtener IDs de unidades y contratos de esos edificios
+    const [companyUnits, companyContracts] = await Promise.all([
+      buildingIds.length > 0
+        ? prisma.unit.findMany({
+            where: { buildingId: { in: buildingIds } },
+            select: { id: true },
+          })
+        : Promise.resolve([]),
+      buildingIds.length > 0
+        ? prisma.contract.findMany({
+            where: { unit: { buildingId: { in: buildingIds } } },
+            select: { id: true },
+          })
+        : Promise.resolve([]),
+    ]);
+
+    const unitIds = companyUnits.map((u) => u.id);
+    const contractIds = companyContracts.map((c) => c.id);
+
+    // Construir filtro de scope con IDs directos (sin queries anidadas)
+    const scopeConditions: any[] = [];
+    if (buildingIds.length > 0) scopeConditions.push({ buildingId: { in: buildingIds } });
+    if (unitIds.length > 0) scopeConditions.push({ unitId: { in: unitIds } });
+    if (tenantIds.length > 0) scopeConditions.push({ tenantId: { in: tenantIds } });
+    if (contractIds.length > 0) scopeConditions.push({ contractId: { in: contractIds } });
+    if (folderIds.length > 0) scopeConditions.push({ folderId: { in: folderIds } });
+
+    // Si la empresa no tiene NINGUNA relación, retornar vacío
+    if (scopeConditions.length === 0) {
+      return NextResponse.json([]);
+    }
+
+    const companyScope = { OR: scopeConditions };
 
     const where =
-      Object.keys(whereFilters).length > 0
-        ? { AND: [companyScope, whereFilters] }
-        : companyScope;
+      Object.keys(whereFilters).length > 0 ? { AND: [companyScope, whereFilters] } : companyScope;
 
     const documents = await prisma.document.findMany({
       where,
@@ -112,9 +144,18 @@ export async function GET(req: NextRequest) {
     });
 
     return NextResponse.json(documents);
-  } catch (error) {
-    logger.error('Error fetching documents:', error);
-    return NextResponse.json({ error: 'Error al obtener documentos' }, { status: 500 });
+  } catch (error: any) {
+    const errorMsg = error?.message || 'Unknown error';
+    const errorCode = error?.code || '';
+    logger.error('Error fetching documents:', {
+      message: errorMsg,
+      code: errorCode,
+      stack: error?.stack?.substring(0, 500),
+    });
+    return NextResponse.json(
+      { error: 'Error al obtener documentos', detail: errorMsg, code: errorCode },
+      { status: 500 }
+    );
   }
 }
 
