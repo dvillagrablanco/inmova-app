@@ -343,9 +343,12 @@ async function createDocumentImport(
       },
     });
 
+    const { getBucketConfig: getBucket } = await import('@/lib/aws-config');
+    const { bucketName: uploadBucketName } = getBucket();
+
     await s3Client.send(
       new PutObjectCommand({
-        Bucket: process.env.AWS_BUCKET || process.env.AWS_S3_BUCKET!,
+        Bucket: uploadBucketName,
         Key: s3Key,
         Body: buffer,
         ContentType: mimeType,
@@ -432,14 +435,15 @@ export async function processDocumentsAsync(
 
         let buffer: Buffer;
         try {
+          const { getBucketConfig: getS3Bucket } = await import('@/lib/aws-config');
+          const { bucketName: s3BucketName } = getS3Bucket();
           const region = process.env.AWS_REGION;
           const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
           const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
-          const bucket = process.env.AWS_BUCKET || process.env.AWS_S3_BUCKET;
 
-          if (!region || !accessKeyId || !secretAccessKey || !bucket) {
+          if (!region || !accessKeyId || !secretAccessKey || !s3BucketName) {
             throw new Error(
-              `AWS config missing: region=${!!region} key=${!!accessKeyId} secret=${!!secretAccessKey} bucket=${!!bucket}`
+              `AWS config missing: region=${!!region} key=${!!accessKeyId} secret=${!!secretAccessKey} bucket=${!!s3BucketName} (AWS_BUCKET_NAME=${process.env.AWS_BUCKET_NAME || 'unset'})`
             );
           }
 
@@ -448,10 +452,10 @@ export async function processDocumentsAsync(
             credentials: { accessKeyId, secretAccessKey },
           });
 
-          logger.info('📥 Descargando de S3', { bucket, key: doc.s3Key });
+          logger.info('📥 Descargando de S3', { bucket: s3BucketName, key: doc.s3Key });
 
           const response = await s3Client.send(
-            new GetObjectCommand({ Bucket: bucket, Key: doc.s3Key })
+            new GetObjectCommand({ Bucket: s3BucketName, Key: doc.s3Key })
           );
 
           const chunks: Uint8Array[] = [];
@@ -466,7 +470,7 @@ export async function processDocumentsAsync(
             docId: doc.id,
             s3Key: doc.s3Key,
             error: errMsg,
-            bucket: process.env.AWS_BUCKET || process.env.AWS_S3_BUCKET,
+            bucket: s3BucketName,
           });
           await prisma.documentImport.update({
             where: { id: doc.id },
