@@ -31,6 +31,21 @@ export interface PortfolioSummary {
   totalValorMercadoUnidades: number;
   revalorizacion: number;
   revalorizacionPct: number;
+
+  // Patrimonio financiero (FinancialAccount + FinancialPosition)
+  totalTesoreria: number;          // Saldos bancarios (cuentas corrientes)
+  totalFinanciero: number;         // Valor de mercado de posiciones financieras
+  totalCosteFinanciero: number;    // Coste de adquisición de posiciones
+  pnlFinanciero: number;           // P&L no realizado (valorActual - costeTotal)
+
+  // Private Equity / Participaciones (Participation)
+  totalPE: number;                 // Valor estimado de participaciones/PE
+  totalCostePE: number;            // Coste de adquisición PE
+  totalCompromisosPE: number;      // Compromisos totales PE (capital llamado + pendiente)
+  totalCapitalPendientePE: number; // Capital pendiente de desembolsar
+
+  // Patrimonio total (inmobiliario + financiero + PE + tesorería - deuda)
+  patrimonioTotal: number;
 }
 
 export interface AssetPerformance {
@@ -116,7 +131,10 @@ export async function getCompanyPortfolio(
 
   const scopeFilter = { in: scopeIds };
 
-  const [assets, buildings, units, contracts, payments, expenses, mortgages] = await Promise.all([
+  const [
+    assets, buildings, units, contracts, payments, expenses, mortgages,
+    financialAccounts, financialPositions, participations,
+  ] = await Promise.all([
     prisma.assetAcquisition.findMany({
       where: { companyId: scopeFilter },
       include: { mortgages: true },
@@ -152,6 +170,27 @@ export async function getCompanyPortfolio(
     }),
     prisma.mortgage.findMany({
       where: { companyId: scopeFilter, estado: 'activa' },
+    }),
+    // Patrimonio financiero: cuentas bancarias (tesorería)
+    prisma.financialAccount.findMany({
+      where: { companyId: scopeFilter, activa: true },
+      select: { saldoActual: true, valorMercado: true },
+    }),
+    // Posiciones financieras (fondos, bonos, acciones, PE)
+    prisma.financialPosition.findMany({
+      where: { account: { companyId: scopeFilter, activa: true } },
+      select: { valorActual: true, costeTotal: true, pnlNoRealizado: true },
+    }),
+    // Participaciones societarias / Private Equity
+    prisma.participation.findMany({
+      where: { companyId: scopeFilter, activa: true },
+      select: {
+        costeAdquisicion: true,
+        valorEstimado: true,
+        compromisoTotal: true,
+        capitalLlamado: true,
+        capitalPendiente: true,
+      },
     }),
   ]);
 
@@ -218,6 +257,29 @@ export async function getCompanyPortfolio(
   const revalorizacion = totalValorMercadoUnidades - totalPrecioCompra;
   const revalorizacionPct = totalPrecioCompra > 0 ? (revalorizacion / totalPrecioCompra) * 100 : 0;
 
+  // Patrimonio financiero: tesorería (saldos bancarios)
+  const totalTesoreria = financialAccounts.reduce((s, a) => s + (a.saldoActual || 0), 0);
+
+  // Posiciones financieras (fondos, bonos, acciones, etc.)
+  const totalFinanciero = financialPositions.reduce((s, p) => s + (p.valorActual || 0), 0);
+  const totalCosteFinanciero = financialPositions.reduce((s, p) => s + (p.costeTotal || 0), 0);
+  const pnlFinanciero = financialPositions.reduce((s, p) => s + (p.pnlNoRealizado || 0), 0);
+
+  // Participaciones / Private Equity
+  const totalPE = participations.reduce(
+    (s, p) => s + (p.valorEstimado || p.costeAdquisicion || 0),
+    0
+  );
+  const totalCostePE = participations.reduce((s, p) => s + (p.costeAdquisicion || 0), 0);
+  const totalCompromisosPE = participations.reduce((s, p) => s + (p.compromisoTotal || 0), 0);
+  const totalCapitalPendientePE = participations.reduce(
+    (s, p) => s + (p.capitalPendiente || 0),
+    0
+  );
+
+  // Patrimonio total: inmobiliario (equity) + financiero + PE + tesorería
+  const patrimonioTotal = totalEquity + totalTesoreria + totalFinanciero + totalPE;
+
   return {
     totalAssets: buildings.length,
     totalInvestment: Math.round(totalInvestment * 100) / 100,
@@ -236,6 +298,16 @@ export async function getCompanyPortfolio(
     totalValorMercadoUnidades: Math.round(totalValorMercadoUnidades),
     revalorizacion: Math.round(revalorizacion),
     revalorizacionPct: Math.round(revalorizacionPct * 100) / 100,
+    // Financial patrimony
+    totalTesoreria: Math.round(totalTesoreria * 100) / 100,
+    totalFinanciero: Math.round(totalFinanciero * 100) / 100,
+    totalCosteFinanciero: Math.round(totalCosteFinanciero * 100) / 100,
+    pnlFinanciero: Math.round(pnlFinanciero * 100) / 100,
+    totalPE: Math.round(totalPE * 100) / 100,
+    totalCostePE: Math.round(totalCostePE * 100) / 100,
+    totalCompromisosPE: Math.round(totalCompromisosPE * 100) / 100,
+    totalCapitalPendientePE: Math.round(totalCapitalPendientePE * 100) / 100,
+    patrimonioTotal: Math.round(patrimonioTotal * 100) / 100,
   };
 }
 
@@ -500,6 +572,16 @@ export async function getConsolidatedReport(parentCompanyId: string): Promise<Co
     ),
     revalorizacion: companies.reduce((s, c) => s + (c.portfolio.revalorizacion || 0), 0),
     revalorizacionPct: 0,
+    // Financial patrimony consolidation
+    totalTesoreria: companies.reduce((s, c) => s + (c.portfolio.totalTesoreria || 0), 0),
+    totalFinanciero: companies.reduce((s, c) => s + (c.portfolio.totalFinanciero || 0), 0),
+    totalCosteFinanciero: companies.reduce((s, c) => s + (c.portfolio.totalCosteFinanciero || 0), 0),
+    pnlFinanciero: companies.reduce((s, c) => s + (c.portfolio.pnlFinanciero || 0), 0),
+    totalPE: companies.reduce((s, c) => s + (c.portfolio.totalPE || 0), 0),
+    totalCostePE: companies.reduce((s, c) => s + (c.portfolio.totalCostePE || 0), 0),
+    totalCompromisosPE: companies.reduce((s, c) => s + (c.portfolio.totalCompromisosPE || 0), 0),
+    totalCapitalPendientePE: companies.reduce((s, c) => s + (c.portfolio.totalCapitalPendientePE || 0), 0),
+    patrimonioTotal: 0, // Calculated below
   };
 
   // Recalcular ratios consolidados
@@ -529,6 +611,14 @@ export async function getConsolidatedReport(parentCompanyId: string): Promise<Co
     consolidated.totalPrecioCompra > 0
       ? Math.round((consolidated.revalorizacion / consolidated.totalPrecioCompra) * 10000) / 100
       : 0;
+
+  // Patrimonio total consolidado: inmobiliario (equity) + tesorería + financiero + PE
+  consolidated.patrimonioTotal = Math.round(
+    (consolidated.totalEquity +
+      consolidated.totalTesoreria +
+      consolidated.totalFinanciero +
+      consolidated.totalPE) * 100
+  ) / 100;
 
   return {
     companies,
