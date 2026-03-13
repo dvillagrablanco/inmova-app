@@ -25,6 +25,15 @@ const mockPrisma = {
   mortgage: {
     findMany: vi.fn(),
   },
+  financialAccount: {
+    findMany: vi.fn(),
+  },
+  financialPosition: {
+    findMany: vi.fn(),
+  },
+  participation: {
+    findMany: vi.fn(),
+  },
 };
 
 vi.mock('@/lib/db', () => ({
@@ -87,6 +96,9 @@ describe('investment-service consolidated report', () => {
     mockPrisma.payment.findMany.mockResolvedValue([]);
     mockPrisma.expense.findMany.mockResolvedValue([]);
     mockPrisma.mortgage.findMany.mockResolvedValue([]);
+    mockPrisma.financialAccount.findMany.mockResolvedValue([]);
+    mockPrisma.financialPosition.findMany.mockResolvedValue([]);
+    mockPrisma.participation.findMany.mockResolvedValue([]);
   });
 
   it('si recibe una filial, consolida usando la matriz del grupo', async () => {
