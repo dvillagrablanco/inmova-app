@@ -328,7 +328,16 @@ INSTRUCCIONES CRÍTICAS:
 - Analiza la propuesta del broker contra DATOS DE MERCADO PÚBLICO, no contra otros activos del comprador.
 - Señala si el broker infla rentas, omite gastos o maquilla yields.
 - Calcula precio justo con CADA método y muestra la horquilla resultante.
-- El veredicto debe basarse en la intersección de los 3 métodos.`);
+
+PONDERACIÓN DE MÉTODOS PARA PRECIO JUSTO:
+- Comparables de mercado (transacciones reales escrituradas): 65% del peso
+- Criterio experto y ajuste por características: 20% del peso
+- Capitalización de rentas (Income Approach): 15% del peso — SOLO como validación cruzada
+- IMPORTANTE: La capitalización de rentas NO debe ser el método principal. El precio de mercado real
+  basado en transacciones escrituradas debe ser SIEMPRE la referencia primaria.
+  La capitalización tiende a sobrevalorar cuando las rentas están infladas temporalmente.
+  Si capitalización difiere >20% de comparables reales, prioriza comparables.
+- El veredicto debe basarse en esta ponderación, NO en la intersección igualitaria de los 3 métodos.`);
 
   return parts.join('\n');
 }

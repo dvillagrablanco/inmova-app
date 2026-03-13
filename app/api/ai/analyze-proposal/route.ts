@@ -220,6 +220,13 @@ INSTRUCCIONES DE ANÁLISIS
 4. IDENTIFICA qué datos faltan y qué preguntas hacer al broker
 5. DA UN VEREDICTO basado en hechos, no en las proyecciones del broker
 
+PONDERACIÓN PARA PRECIO JUSTO:
+- Comparables de mercado reales (transacciones escrituradas): 65% del peso
+- Criterio experto y características del activo: 20% del peso
+- Capitalización de rentas: 15% del peso — SOLO como validación cruzada, NO como método principal
+- Si capitalización da un valor >20% superior a comparables reales, el precio justo debe basarse en comparables
+- La capitalización tiende a sobrevalorar cuando las rentas están infladas o el mercado sobrecalentado
+
 REGLAS:
 - Asking prices de portales: -10-15% para precio real de cierre
 - Si hay rentabilidad de mercado de Idealista: usarla como referencia de yield zona
