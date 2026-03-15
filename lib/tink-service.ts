@@ -24,8 +24,18 @@ import logger from '@/lib/logger';
 const TINK_CLIENT_ID = process.env.TINK_CLIENT_ID || '';
 const TINK_CLIENT_SECRET = process.env.TINK_CLIENT_SECRET || '';
 const TINK_ENV = process.env.TINK_ENVIRONMENT || 'production';
+const TINK_LINK_ACTOR_CLIENT_ID =
+  process.env.TINK_LINK_ACTOR_CLIENT_ID || 'df05e4b379934cd09963197cc855bfe9';
 
 const BASE_URL = 'https://api.tink.com';
+
+export function buildTinkUserId(companyId: string, userId: string): string {
+  return `inmova_${companyId}_${userId}`;
+}
+
+export function buildTinkExternalUserId(companyId: string, userId: string): string {
+  return buildTinkUserId(companyId, userId);
+}
 
 // ============================================================================
 // TYPES
@@ -108,7 +118,11 @@ async function getAccessToken(): Promise<string> {
 /**
  * Genera un token de usuario para autorización bancaria
  */
-async function getUserAccessToken(userId: string, scope: string): Promise<string> {
+async function getUserAccessToken(
+  userId: string,
+  scope: string,
+  idHint?: string
+): Promise<string> {
   const clientToken = await getAccessToken();
 
   const response = await fetch(`${BASE_URL}/api/v1/oauth/authorization-grant/delegate`, {
@@ -119,7 +133,8 @@ async function getUserAccessToken(userId: string, scope: string): Promise<string
     },
     body: new URLSearchParams({
       user_id: userId,
-      id_hint: userId,
+      id_hint: idHint || userId,
+      actor_client_id: TINK_LINK_ACTOR_CLIENT_ID,
       scope,
     }),
   });
@@ -212,6 +227,7 @@ export async function createUser(externalUserId: string, market: string = 'ES', 
  */
 export async function generateTinkLink(params: {
   userId: string;
+  idHint?: string;
   market?: string;
   locale?: string;
   redirectUri: string;
@@ -219,7 +235,8 @@ export async function generateTinkLink(params: {
 }): Promise<string> {
   const authCode = await getUserAccessToken(
     params.userId,
-    'accounts:read,transactions:read,credentials:write'
+    'authorization:read,authorization:grant,credentials:refresh,credentials:read,credentials:write,providers:read,user:read',
+    params.idHint
   );
 
   const tinkLinkUrl = new URL('https://link.tink.com/1.0/transactions/connect-accounts');
@@ -324,6 +341,8 @@ export const SPANISH_BANKS = [
 ];
 
 export default {
+  buildTinkUserId,
+  buildTinkExternalUserId,
   isTinkConfigured,
   testConnection,
   listProviders,

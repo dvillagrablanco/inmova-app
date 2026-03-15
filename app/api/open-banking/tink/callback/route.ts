@@ -4,6 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { getPrismaClient } from '@/lib/db';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -13,20 +14,69 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const credentialsId = searchParams.get('credentials_id');
   const error = searchParams.get('error');
+  const companyId = searchParams.get('companyId');
+  const userId = searchParams.get('userId');
+  const connectionId = searchParams.get('connectionId');
+  const appUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || req.nextUrl.origin;
+  const prisma = getPrismaClient();
+
+  const redirectToOpenBanking = (params: Record<string, string>) => {
+    const url = new URL('/open-banking', appUrl);
+    Object.entries(params).forEach(([key, value]) => url.searchParams.set(key, value));
+    return NextResponse.redirect(url);
+  };
 
   if (error) {
     logger.warn('[Tink Callback] Error:', error);
-    return NextResponse.redirect(
-      new URL(`/dashboard/banca?tink=error&message=${encodeURIComponent(error)}`, req.url)
-    );
+    if (connectionId) {
+      await prisma.bankConnection.updateMany({
+        where: { id: connectionId, proveedor: 'tink' },
+        data: { estado: 'error', errorDetalle: error },
+      });
+    }
+    return redirectToOpenBanking({ tink: 'error', message: error });
   }
 
   if (credentialsId) {
     logger.info('[Tink Callback] Success, credentials:', credentialsId);
-    return NextResponse.redirect(
-      new URL(`/dashboard/banca?tink=success&credentials=${credentialsId}`, req.url)
-    );
+
+    if (companyId && userId) {
+      const existingConnection = connectionId
+        ? await prisma.bankConnection.findFirst({
+            where: { id: connectionId, companyId, userId, proveedor: 'tink' },
+          })
+        : await prisma.bankConnection.findFirst({
+            where: { companyId, userId, proveedor: 'tink' },
+            orderBy: { createdAt: 'desc' },
+          });
+
+      if (!existingConnection) {
+        logger.warn('[Tink Callback] Conexion pendiente no encontrada', {
+          companyId,
+          userId,
+          connectionId,
+          credentialsId,
+        });
+        return redirectToOpenBanking({
+          tink: 'error',
+          message: 'pending_connection_not_found_reconnect',
+        });
+      }
+
+      await prisma.bankConnection.update({
+        where: { id: existingConnection.id },
+        data: {
+          provider: 'tink',
+          proveedorItemId: credentialsId,
+          estado: 'conectado',
+          ultimaSync: new Date(),
+          errorDetalle: null,
+        },
+      });
+    }
+
+    return redirectToOpenBanking({ tink: 'success', credentials: credentialsId });
   }
 
-  return NextResponse.redirect(new URL('/dashboard/banca?tink=unknown', req.url));
+  return redirectToOpenBanking({ tink: 'unknown' });
 }
