@@ -171,15 +171,28 @@ export async function getCompanyPortfolio(
     prisma.mortgage.findMany({
       where: { companyId: scopeFilter, estado: 'activa' },
     }),
-    // Patrimonio financiero: cuentas bancarias (tesorería)
+    // Patrimonio financiero: cuentas bancarias (tesorería + posiciones)
     prisma.financialAccount.findMany({
       where: { companyId: scopeFilter, activa: true },
-      select: { saldoActual: true, valorMercado: true },
+      select: {
+        id: true,
+        saldoActual: true,
+        valorMercado: true,
+        positions: {
+          select: { valorActual: true },
+        },
+      },
     }),
-    // Posiciones financieras (fondos, bonos, acciones, PE)
+    // Posiciones financieras (fondos, bonos, acciones, PE) — con ISIN para deduplicación
     prisma.financialPosition.findMany({
       where: { account: { companyId: scopeFilter, activa: true } },
-      select: { valorActual: true, costeTotal: true, pnlNoRealizado: true },
+      select: {
+        isin: true,
+        nombre: true,
+        valorActual: true,
+        costeTotal: true,
+        pnlNoRealizado: true,
+      },
     }),
     // Participaciones societarias / Private Equity
     prisma.participation.findMany({
@@ -257,13 +270,74 @@ export async function getCompanyPortfolio(
   const revalorizacion = totalValorMercadoUnidades - totalPrecioCompra;
   const revalorizacionPct = totalPrecioCompra > 0 ? (revalorizacion / totalPrecioCompra) * 100 : 0;
 
-  // Patrimonio financiero: tesorería (saldos bancarios)
-  const totalTesoreria = financialAccounts.reduce((s, a) => s + (a.saldoActual || 0), 0);
+  // ── PATRIMONIO FINANCIERO (con deduplicación) ──
+  //
+  // Problema: el mismo fondo puede aparecer en múltiples cuentas (custodios diferentes)
+  // con el mismo ISIN. Sumar todo duplicaría el valor real.
+  //
+  // Solución: deduplicar por ISIN — solo contar el MAYOR valor por ISIN.
+  // Para posiciones sin ISIN, sumar individualmente.
+  //
+  // Tesorería: si saldoActual ≈ sum(posiciones), el saldo ES el NAV de las posiciones,
+  // no liquidez adicional. Solo contar como tesorería la diferencia.
 
-  // Posiciones financieras (fondos, bonos, acciones, etc.)
-  const totalFinanciero = financialPositions.reduce((s, p) => s + (p.valorActual || 0), 0);
-  const totalCosteFinanciero = financialPositions.reduce((s, p) => s + (p.costeTotal || 0), 0);
-  const pnlFinanciero = financialPositions.reduce((s, p) => s + (p.pnlNoRealizado || 0), 0);
+  // 1. Deduplicar posiciones por ISIN (max value wins)
+  const isinMaxValue: Record<string, { valor: number; coste: number; pnl: number }> = {};
+  let noIsinTotal = 0;
+  let noIsinCoste = 0;
+  let noIsinPnl = 0;
+
+  for (const pos of financialPositions) {
+    const val = pos.valorActual || 0;
+    const coste = pos.costeTotal || 0;
+    const pnl = pos.pnlNoRealizado || 0;
+
+    if (pos.isin) {
+      const current = isinMaxValue[pos.isin];
+      if (!current || val > current.valor) {
+        isinMaxValue[pos.isin] = { valor: val, coste, pnl };
+      }
+    } else {
+      noIsinTotal += val;
+      noIsinCoste += coste;
+      noIsinPnl += pnl;
+    }
+  }
+
+  const dedupedValues = Object.values(isinMaxValue);
+  const totalFinanciero =
+    dedupedValues.reduce((s, p) => s + p.valor, 0) + noIsinTotal;
+  const totalCosteFinanciero =
+    dedupedValues.reduce((s, p) => s + p.coste, 0) + noIsinCoste;
+  const pnlFinanciero =
+    dedupedValues.reduce((s, p) => s + p.pnl, 0) + noIsinPnl;
+
+  // 2. Tesorería: solo liquidez real, no NAV de posiciones
+  // Si saldoActual ≈ sum(posiciones.valorActual) → la cuenta solo tiene inversiones, 0 liquidez
+  // Si saldoActual > sum(posiciones) → la diferencia es liquidez real
+  let totalTesoreria = 0;
+  for (const acc of financialAccounts) {
+    const saldo = acc.saldoActual || 0;
+    const sumPosiciones = (acc.positions || []).reduce(
+      (s: number, p: { valorActual: number }) => s + (p.valorActual || 0),
+      0
+    );
+
+    if (sumPosiciones > 0) {
+      // La cuenta tiene posiciones — solo contar liquidez excedente
+      const ratio = sumPosiciones > 0 ? saldo / sumPosiciones : 0;
+      if (ratio > 0.9 && ratio < 1.1) {
+        // saldoActual ≈ sum(posiciones) → es el NAV, no liquidez adicional
+        continue;
+      }
+      // saldo > posiciones → hay liquidez real adicional
+      const liquidez = Math.max(0, saldo - sumPosiciones);
+      totalTesoreria += liquidez;
+    } else if (saldo > 0) {
+      // Cuenta sin posiciones → saldo es liquidez pura
+      totalTesoreria += saldo;
+    }
+  }
 
   // Participaciones / Private Equity
   const totalPE = participations.reduce(

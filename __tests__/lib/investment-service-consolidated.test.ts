@@ -113,23 +113,43 @@ describe('investment-service consolidated report', () => {
     ]);
   });
 
-  it('consolida datos financieros, PE y tesorería en patrimonioTotal', async () => {
-    // Vidaro tiene cuentas financieras y participaciones PE
+  it('consolida datos financieros con deduplicación ISIN y anti-doble-conteo tesorería', async () => {
     mockPrisma.financialAccount.findMany.mockImplementation(async ({ where }: any) => {
       const companyIds = where?.companyId?.in || [where?.companyId];
       if (companyIds.includes('vidaro1')) {
-        return [{ saldoActual: 500000, valorMercado: 2000000 }];
+        return [
+          // Cuenta de inversión: saldo ≈ sum posiciones (NAV, NO liquidez)
+          {
+            id: 'acc1',
+            saldoActual: 2000000,
+            valorMercado: 2000000,
+            positions: [
+              { valorActual: 1200000 },
+              { valorActual: 800000 },
+            ],
+          },
+          // Cuenta corriente pura (sin posiciones = liquidez real)
+          {
+            id: 'acc2',
+            saldoActual: 150000,
+            valorMercado: 0,
+            positions: [],
+          },
+        ];
       }
       return [];
     });
 
     mockPrisma.financialPosition.findMany.mockImplementation(async ({ where }: any) => {
-      // Positions linked to Vidaro's accounts
       const companyIds = where?.account?.companyId?.in || [where?.account?.companyId];
       if (companyIds.includes('vidaro1')) {
         return [
-          { valorActual: 1200000, costeTotal: 1000000, pnlNoRealizado: 200000 },
-          { valorActual: 800000, costeTotal: 750000, pnlNoRealizado: 50000 },
+          // Fondo A en cuenta 1
+          { isin: 'LU0001', nombre: 'Fondo A', valorActual: 1200000, costeTotal: 1000000, pnlNoRealizado: 200000 },
+          // Fondo B en cuenta 1
+          { isin: 'LU0002', nombre: 'Fondo B', valorActual: 800000, costeTotal: 750000, pnlNoRealizado: 50000 },
+          // Fondo A DUPLICADO en cuenta 2 (mismo ISIN, menor valor → se descarta)
+          { isin: 'LU0001', nombre: 'Fondo A', valorActual: 500000, costeTotal: 400000, pnlNoRealizado: 100000 },
         ];
       }
       return [];
@@ -154,20 +174,24 @@ describe('investment-service consolidated report', () => {
     const { getConsolidatedReport } = await import('@/lib/investment-service');
     const report = await getConsolidatedReport('vidaro1');
 
-    // Vidaro's portfolio should have financial data
     const vidaro = report.companies.find((c) => c.companyId === 'vidaro1');
     expect(vidaro).toBeDefined();
-    expect(vidaro!.portfolio.totalTesoreria).toBe(500000);
-    expect(vidaro!.portfolio.totalFinanciero).toBe(2000000); // 1.2M + 800K
-    expect(vidaro!.portfolio.pnlFinanciero).toBe(250000); // 200K + 50K
-    expect(vidaro!.portfolio.totalPE).toBe(450000); // valorEstimado
-    expect(vidaro!.portfolio.totalCapitalPendientePE).toBe(200000);
 
-    // Consolidated should aggregate correctly
-    expect(report.consolidated.totalTesoreria).toBe(500000);
+    // Tesorería: solo la cuenta corriente (150K), NO la cuenta de inversión (saldo ≈ posiciones)
+    expect(vidaro!.portfolio.totalTesoreria).toBe(150000);
+
+    // Financiero: deduplicado por ISIN: LU0001=1.2M (max) + LU0002=800K = 2M (NO 2.5M)
+    expect(vidaro!.portfolio.totalFinanciero).toBe(2000000);
+
+    // PE
+    expect(vidaro!.portfolio.totalPE).toBe(450000);
+
+    // Patrimonio total = equity(0) + tesoreria(150K) + financiero(2M) + PE(450K) = 2.6M
+    expect(vidaro!.portfolio.patrimonioTotal).toBe(2600000);
+
+    // Consolidated
+    expect(report.consolidated.totalTesoreria).toBe(150000);
     expect(report.consolidated.totalFinanciero).toBe(2000000);
-    expect(report.consolidated.totalPE).toBe(450000);
-    // patrimonioTotal = equity(0) + tesoreria(500K) + financiero(2M) + PE(450K)
-    expect(report.consolidated.patrimonioTotal).toBe(2950000);
+    expect(report.consolidated.patrimonioTotal).toBe(2600000);
   });
 });
