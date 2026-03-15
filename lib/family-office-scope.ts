@@ -66,18 +66,41 @@ export function normalizeInvestmentVehicleName(value: string | null | undefined)
   return normalized || 'DIRECTO';
 }
 
+/**
+ * Calcula la liquidez REAL de una cuenta financiera.
+ *
+ * Reglas:
+ * 1. saldo ≈ posiciones (±10%): el saldo ES el NAV → liquidez = 0
+ * 2. posiciones >> saldo (>2x): posiciones duplicadas de otros custodios, saldo es NAV → liquidez = 0
+ * 3. saldo > posiciones (diferencia > 10%): liquidez = saldo - posiciones (efectivo excedente)
+ * 4. Sin posiciones: saldo es liquidez pura
+ */
 export function getAccountLiquidBalance(account: {
   saldoActual?: number | null;
   positions?: Array<{ valorActual?: number | null }>;
 }): number {
   const saldo = account.saldoActual || 0;
+  if (saldo <= 0) return 0;
+
   const positions = account.positions || [];
   const positionsValue = positions.reduce((sum, position) => sum + (position.valorActual || 0), 0);
 
-  const isDuplicatedNav =
-    positionsValue > 1000 &&
-    saldo > 1000 &&
-    Math.abs(saldo - positionsValue) / positionsValue < 0.1;
+  // Sin posiciones → saldo es liquidez pura (cuenta corriente)
+  if (positionsValue <= 0) return saldo;
 
-  return isDuplicatedNav ? 0 : saldo;
+  // Caso 1: saldo ≈ posiciones (±10%) → saldo ES el NAV, no hay liquidez extra
+  const ratio = Math.abs(saldo - positionsValue) / positionsValue;
+  if (ratio < 0.1) return 0;
+
+  // Caso 2: posiciones >> saldo (más del doble) → posiciones son de múltiples custodios,
+  // el saldo representa el NAV real de la cuenta → no es liquidez adicional
+  if (positionsValue > saldo * 2) return 0;
+
+  // Caso 3: saldo > posiciones → hay efectivo excedente más allá de las posiciones
+  if (saldo > positionsValue) {
+    return Math.max(0, saldo - positionsValue);
+  }
+
+  // Caso por defecto: saldo < posiciones pero no es duplicado extremo
+  return 0;
 }
