@@ -36,15 +36,20 @@ export async function POST(req: NextRequest) {
     const userId = (session.user as any).id;
     const body = await req.json().catch(() => ({}));
 
-    // Create or get Tink user
-    const tinkUserId = `inmova_${companyId}_${userId}`;
+    // Create or get Tink user — use real Tink user_id (not external_user_id)
+    const externalUserId = `inmova_${companyId}_${userId}_${Date.now()}`;
+    let tinkUserId: string;
     try {
-      await createUser(tinkUserId, body.market || 'ES');
-    } catch {
-      // User may already exist — that's fine
+      tinkUserId = await createUser(externalUserId, body.market || 'ES');
+      logger.info('[Tink] User created', { externalUserId, tinkUserId });
+    } catch (createErr: any) {
+      // User may already exist — create a new one with unique ID
+      logger.warn('[Tink] Create user failed, retrying with fresh ID:', createErr.message?.substring(0, 100));
+      const freshId = `inmova_${companyId}_${Date.now()}`;
+      tinkUserId = await createUser(freshId, body.market || 'ES');
     }
 
-    // Generate Tink Link
+    // Generate Tink Link using the real Tink user_id
     const redirectUri = `${process.env.NEXTAUTH_URL || 'https://inmovaapp.com'}/api/open-banking/tink/callback`;
     const tinkLinkUrl = await generateTinkLink({
       userId: tinkUserId,

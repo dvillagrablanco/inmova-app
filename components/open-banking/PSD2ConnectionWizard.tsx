@@ -108,22 +108,37 @@ export function PSD2ConnectionWizard({ onComplete }: PSD2ConnectionWizardProps) 
 
     setConnecting(true);
     try {
-      const res = await fetch('/api/open-banking/nordigen/connect', {
+      // Try Tink first (configured), fallback to Nordigen
+      let res = await fetch('/api/open-banking/tink/connect', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          institutionId,
+          market: 'ES',
+          bankId: institutionId,
           companyId: selectedCompany,
         }),
       });
 
-      const data = await res.json();
+      let data = await res.json();
+
+      // If Tink fails, try Nordigen
+      if (!res.ok && res.status === 503) {
+        res = await fetch('/api/open-banking/nordigen/connect', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            institutionId,
+            companyId: selectedCompany,
+          }),
+        });
+        data = await res.json();
+      }
 
       if (!res.ok) {
         throw new Error(data.error || 'Error al conectar');
       }
 
-      const redirectUrl = data.redirectUrl || data.link;
+      const redirectUrl = data.tinkLinkUrl || data.redirectUrl || data.link;
       if (redirectUrl) {
         window.location.href = redirectUrl;
         return;

@@ -120,6 +120,7 @@ async function getUserAccessToken(userId: string, scope: string): Promise<string
     body: new URLSearchParams({
       user_id: userId,
       id_hint: userId,
+      actor_client_id: TINK_CLIENT_ID,
       scope,
     }),
   });
