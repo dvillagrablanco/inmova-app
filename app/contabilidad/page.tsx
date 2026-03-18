@@ -366,6 +366,57 @@ export default function ContabilidadPage() {
     }
   };
 
+  const handleSyncZucchettiSql = async () => {
+    try {
+      if (!zucchettiStatus?.sqlServer?.configured) {
+        toast.error(
+          'Conexión SQL Server de Zucchetti no configurada. Contacta con el administrador.',
+          { duration: 6000 }
+        );
+        return;
+      }
+
+      setLoading(true);
+      toast.info('Probando conexión con SQL Server de Zucchetti...');
+      const res = await fetch('/api/accounting/zucchetti/test-connection', { method: 'POST' });
+
+      if (res.ok) {
+        const data = await res.json();
+        const results = data.sqlServer?.results || {};
+        const connected = Object.values(results).filter((r: any) => r.connected).length;
+        const total = Object.keys(results).length;
+
+        if (connected > 0) {
+          toast.success(
+            `Conexión SQL Server OK: ${connected}/${total} sociedades conectadas`,
+            { duration: 5000 }
+          );
+          // Mostrar detalle
+          for (const [key, result] of Object.entries(results) as any[]) {
+            if (result.connected) {
+              toast.info(`${key}: BD ${result.database} (${result.latencyMs}ms)`, { duration: 4000 });
+            } else {
+              toast.error(`${key}: ${result.error}`, { duration: 4000 });
+            }
+          }
+        } else {
+          toast.error(
+            'No se pudo conectar al SQL Server. Verifica que la IP del servidor esté autorizada.',
+            { duration: 6000 }
+          );
+        }
+      } else {
+        const err = await res.json().catch(() => ({}));
+        toast.error(err.error || 'Error al probar conexión SQL Server');
+      }
+    } catch (error) {
+      logger.error('Error al probar SQL Server de Zucchetti:', error);
+      toast.error('Error al probar conexión SQL Server');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSyncCustomers = async () => {
     try {
       setLoading(true);
@@ -624,6 +675,12 @@ export default function ContabilidadPage() {
               <Button onClick={handleSyncZucchetti} variant="outline" disabled={loading}>
                 <FileText className="h-4 w-4 mr-2" />
                 Sincronizar con Altai
+              </Button>
+            )}
+            {zucchettiStatus?.sqlServer?.configured && (
+              <Button onClick={handleSyncZucchettiSql} variant="outline" disabled={loading}>
+                <Download className="h-4 w-4 mr-2" />
+                SQL Server Zucchetti
               </Button>
             )}
             <Button onClick={loadFinancialData} variant="outline" disabled={loading}>
@@ -924,14 +981,39 @@ export default function ContabilidadPage() {
                         </Button>
                       </div>
 
-                      {!zucchettiStatus.configured && (
+                      {/* SQL Server Connection Status */}
+                      {zucchettiStatus.sqlServer?.configured && (
+                        <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-md p-4">
+                          <p className="text-sm text-green-800 dark:text-green-200">
+                            <strong>SQL Server Configurado:</strong> Conexión directa a contabilidad Zucchetti disponible.
+                          </p>
+                          <p className="text-xs text-green-700 dark:text-green-300 mt-1">
+                            Sociedades: {zucchettiStatus.sqlServer.configuredKeys?.join(', ')}
+                            {zucchettiStatus.sqlServer.companyKey && (
+                              <> · Esta empresa: <strong>{zucchettiStatus.sqlServer.companyKey}</strong></>
+                            )}
+                          </p>
+                          <Button
+                            onClick={handleSyncZucchettiSql}
+                            variant="outline"
+                            size="sm"
+                            className="mt-2"
+                            disabled={loading}
+                          >
+                            <Download className="h-4 w-4 mr-2" />
+                            Probar Conexión SQL Server
+                          </Button>
+                        </div>
+                      )}
+
+                      {!zucchettiStatus.configured && !zucchettiStatus.sqlServer?.configured && (
                         <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-md p-4">
                           <p className="text-sm text-blue-800 dark:text-blue-200">
                             <strong>Modo Demo:</strong> {zucchettiStatus.message}
                           </p>
                           <p className="text-xs text-blue-700 dark:text-blue-300 mt-2">
                             Para activar la integración real, configura las variables de entorno
-                            ZUCCHETTI_CLIENT_ID, ZUCCHETTI_CLIENT_SECRET y ZUCCHETTI_API_KEY
+                            de Zucchetti (API Altai o SQL Server directo)
                           </p>
                         </div>
                       )}
