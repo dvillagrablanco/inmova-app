@@ -1509,7 +1509,7 @@ const finanzasNavItems = [
     name: 'Cobros SEPA',
     href: '/pagos/sepa',
     icon: Banknote,
-    roles: ['super_admin', 'administrador', 'gestor'],
+    roles: ['super_admin', 'administrador'],
   },
   {
     name: 'Previsión 12 meses',
@@ -1533,7 +1533,7 @@ const finanzasNavItems = [
     name: 'Liquidaciones',
     href: '/liquidaciones',
     icon: Receipt,
-    roles: ['super_admin', 'administrador', 'gestor'],
+    roles: ['super_admin', 'administrador'],
   },
   {
     name: 'Fianzas',
@@ -1931,7 +1931,7 @@ const holdingGrupoNavItems = [
     name: 'Fianzas',
     href: '/inversiones/fianzas',
     icon: Shield,
-    roles: ['super_admin', 'administrador', 'gestor'],
+    roles: ['super_admin', 'administrador'],
   },
   {
     name: 'Export Gestoria',
@@ -1948,7 +1948,7 @@ const herramientasInversionNavItems = [
     name: 'Herramientas',
     href: '/dashboard/herramientas',
     icon: Calculator,
-    roles: ['super_admin', 'administrador', 'gestor', 'propietario'],
+    roles: ['super_admin', 'administrador'],
     badge: 'Nuevo',
     subItems: [
       {
