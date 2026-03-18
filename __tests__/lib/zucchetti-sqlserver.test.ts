@@ -126,15 +126,30 @@ describe('zucchetti-sqlserver', () => {
   });
 
   describe('getTableNames', () => {
-    it('retorna nombres de tabla por defecto', async () => {
+    it('retorna nombres reales de tablas de Zucchetti', async () => {
       const { getTableNames } = await import('@/lib/zucchetti-sqlserver');
       const tables = getTableNames();
-      expect(tables.asientos).toBe('Asientos');
       expect(tables.apuntes).toBe('Apuntes');
       expect(tables.subcuentas).toBe('Subcuentas');
       expect(tables.ejercicios).toBe('Ejercicios');
       expect(tables.terceros).toBe('Terceros');
-      expect(tables.diario).toBe('Diario');
+    });
+  });
+
+  describe('getZucchettiDatabase', () => {
+    it('mapea RSQ a CONT_RSQ', async () => {
+      const { getZucchettiDatabase } = await import('@/lib/zucchetti-sqlserver');
+      expect(getZucchettiDatabase('RSQ')).toBe('CONT_RSQ');
+    });
+
+    it('mapea VID a CONT_VID', async () => {
+      const { getZucchettiDatabase } = await import('@/lib/zucchetti-sqlserver');
+      expect(getZucchettiDatabase('VID')).toBe('CONT_VID');
+    });
+
+    it('mapea VIR a DAT_VIR (diferente patrón)', async () => {
+      const { getZucchettiDatabase } = await import('@/lib/zucchetti-sqlserver');
+      expect(getZucchettiDatabase('VIR')).toBe('DAT_VIR');
     });
   });
 });

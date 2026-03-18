@@ -306,14 +306,20 @@ export interface ZucchettiTableNames {
   diario: string;
 }
 
-/** Nombres por defecto — se actualizarán con el discovery */
+/**
+ * Nombres reales de tablas — confirmados vía discovery 18 Mar 2026.
+ * SQL Server 2019, server.avannubo.com:33680
+ *
+ * BDs: CONT_RSQ (Rovida), CONT_VID (Vidaro), DAT_VIR (Viroda)
+ * Schema: cont_vid / cont_rsq / dat_vir (coincide con nombre BD en minúsculas)
+ */
 const DEFAULT_TABLE_NAMES: ZucchettiTableNames = {
-  asientos: 'Asientos',
-  apuntes: 'Apuntes',
-  subcuentas: 'Subcuentas',
-  ejercicios: 'Ejercicios',
-  terceros: 'Terceros',
-  diario: 'Diario',
+  asientos: 'Apuntes',       // Columnas: Codigo, Fecha, CodEjercicio, Asiento, Apunte, Subcuenta, Debe, Haber, ConceptoTexto, Factura, Documento...
+  apuntes: 'Apuntes',        // Misma tabla (en Zucchetti, asientos y apuntes son lo mismo)
+  subcuentas: 'Subcuentas',  // Columnas: Codigo, Titulo, SaldoHabitual, CodigoTercero...
+  ejercicios: 'Ejercicios',  // Columnas: CodigoEjercicio, FechaInicio, FechaFin...
+  terceros: 'Terceros',      // Columnas: Codigo, Nombre, NIF, Direccion...
+  diario: 'Apuntes',         // Zucchetti no tiene tabla Diario separada, usa Apuntes
 };
 
 /**
@@ -392,41 +398,45 @@ export async function getAccountingEntries(
   const pool = await getZucchettiPool(companyKey, database);
   const tables = getTableNames();
 
-  // Intentar query genérica — se ajustará tras discovery
-  // Patrón típico Zucchetti: tabla de apuntes/movimientos con fecha, subcuenta, debe, haber
   try {
     const result = await pool
       .request()
       .input('fromDate', sql.Date, fromDate)
       .input('toDate', sql.Date, toDate)
       .query(`
-        SELECT TOP ${limit} *
-        FROM [dbo].[${tables.apuntes}]
-        WHERE Fecha >= @fromDate AND Fecha <= @toDate
-        ORDER BY Fecha, NumAsiento
+        SELECT TOP ${limit}
+          a.Codigo, a.Fecha, a.CodEjercicio, a.Asiento, a.Apunte,
+          a.Subcuenta, a.Contrapartida, a.ConceptoTexto,
+          a.Debe, a.Haber, a.Documento, a.Factura, a.Referencia,
+          a.CentroDeCoste, a.FechaValor, a.Vencimiento,
+          s.Titulo AS NombreSubcuenta
+        FROM [${tables.apuntes}] a
+        LEFT JOIN [Subcuentas] s ON a.Subcuenta = s.Codigo
+        WHERE a.Fecha >= @fromDate AND a.Fecha <= @toDate
+        ORDER BY a.Fecha, a.Asiento, a.Apunte
       `);
 
     // Agrupar por número de asiento
     const grouped = new Map<string, ZucchettiAsiento>();
     for (const row of result.recordset) {
-      const key = String(row.NumAsiento || row.Numero || row.Id);
+      const key = `${row.CodEjercicio}-${row.Asiento}`;
       if (!grouped.has(key)) {
         grouped.set(key, {
-          numero: key,
-          fecha: row.Fecha || row.FechaAsiento,
-          descripcion: row.Descripcion || row.Concepto || '',
-          referencia: row.Referencia || row.Documento || undefined,
+          numero: row.Asiento,
+          fecha: row.Fecha,
+          descripcion: row.ConceptoTexto || '',
+          referencia: row.Factura || row.Documento || undefined,
           lineas: [],
           raw: row,
         });
       }
       const asiento = grouped.get(key)!;
       asiento.lineas.push({
-        subcuenta: String(row.Subcuenta || row.CuentaContable || row.Cuenta || ''),
-        nombreSubcuenta: row.NombreSubcuenta || row.NombreCuenta || undefined,
-        debe: parseFloat(row.Debe || row.ImporteDebe || 0),
-        haber: parseFloat(row.Haber || row.ImporteHaber || 0),
-        concepto: row.Concepto || row.ConceptoLinea || undefined,
+        subcuenta: String(row.Subcuenta || '').trim(),
+        nombreSubcuenta: row.NombreSubcuenta || undefined,
+        debe: parseFloat(row.Debe || 0),
+        haber: parseFloat(row.Haber || 0),
+        concepto: row.ConceptoTexto || undefined,
         raw: row,
       });
     }
@@ -434,7 +444,6 @@ export async function getAccountingEntries(
     return Array.from(grouped.values());
   } catch (err: any) {
     logger.warn(`[Zucchetti SQL] Query asientos falló en ${database}: ${err.message}`);
-    logger.warn('[Zucchetti SQL] Ejecuta el discovery para conocer los nombres reales de tablas');
     return [];
   }
 }
@@ -451,16 +460,16 @@ export async function getChartOfAccounts(
 
   try {
     const result = await pool.request().query(`
-      SELECT *
-      FROM [dbo].[${tables.subcuentas}]
+      SELECT Codigo, Titulo, SaldoHabitual, CodigoTercero, Grupo, Bloqueada
+      FROM [Subcuentas]
       ORDER BY Codigo
     `);
 
     return result.recordset.map((row: any) => ({
-      codigo: String(row.Codigo || row.Subcuenta || row.CuentaContable || ''),
-      nombre: row.Nombre || row.Titulo || row.Descripcion || '',
-      saldoDebe: parseFloat(row.SaldoDebe || row.Debe || 0),
-      saldoHaber: parseFloat(row.SaldoHaber || row.Haber || 0),
+      codigo: String(row.Codigo || '').trim(),
+      nombre: (row.Titulo || '').trim(),
+      saldoDebe: 0,
+      saldoHaber: 0,
       raw: row,
     }));
   } catch (err: any) {
@@ -486,19 +495,21 @@ export async function getAccountBalances(
       .input('asOfDate', sql.Date, asOfDate)
       .query(`
         SELECT
-          Subcuenta,
-          SUM(ISNULL(Debe, 0)) AS TotalDebe,
-          SUM(ISNULL(Haber, 0)) AS TotalHaber,
-          SUM(ISNULL(Debe, 0)) - SUM(ISNULL(Haber, 0)) AS Saldo
-        FROM [dbo].[${tables.apuntes}]
-        WHERE Fecha <= @asOfDate
-        GROUP BY Subcuenta
-        ORDER BY Subcuenta
+          a.Subcuenta,
+          s.Titulo AS Nombre,
+          SUM(ISNULL(a.Debe, 0)) AS TotalDebe,
+          SUM(ISNULL(a.Haber, 0)) AS TotalHaber,
+          SUM(ISNULL(a.Debe, 0)) - SUM(ISNULL(a.Haber, 0)) AS Saldo
+        FROM [Apuntes] a
+        LEFT JOIN [Subcuentas] s ON a.Subcuenta = s.Codigo
+        WHERE a.Fecha <= @asOfDate
+        GROUP BY a.Subcuenta, s.Titulo
+        ORDER BY a.Subcuenta
       `);
 
     return result.recordset.map((row: any) => ({
-      subcuenta: String(row.Subcuenta || ''),
-      nombre: '',
+      subcuenta: String(row.Subcuenta || '').trim(),
+      nombre: (row.Nombre || '').trim(),
       debe: parseFloat(row.TotalDebe || 0),
       haber: parseFloat(row.TotalHaber || 0),
       saldo: parseFloat(row.Saldo || 0),
@@ -541,6 +552,19 @@ export function getConfiguredCompanyKeys(): ZucchettiCompanyKey[] {
   return (['RSQ', 'VID', 'VIR'] as ZucchettiCompanyKey[]).filter((key) =>
     isZucchettiSqlConfigured(key)
   );
+}
+
+/**
+ * Mapeo de companyKey a nombre de base de datos en SQL Server.
+ * Confirmado vía discovery 18 Mar 2026.
+ */
+export function getZucchettiDatabase(companyKey: ZucchettiCompanyKey): string {
+  const mapping: Record<ZucchettiCompanyKey, string> = {
+    RSQ: 'CONT_RSQ',
+    VID: 'CONT_VID',
+    VIR: 'DAT_VIR',
+  };
+  return mapping[companyKey];
 }
 
 /**

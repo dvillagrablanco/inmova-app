@@ -21,6 +21,7 @@ import { authorizeCronRequest } from '@/lib/cron-auth';
 import {
   getConfiguredCompanyKeys,
   getAccountingEntries,
+  getZucchettiDatabase,
   mapCompanyKeyToInmovaId,
   isZucchettiSqlConfigured,
   closeAllPools,
@@ -120,8 +121,8 @@ export async function GET(request: NextRequest) {
           : '2025-01-01';
         const toDate = new Date().toISOString().split('T')[0];
 
-        // Nombre de BD — se ajustará tras discovery
-        const database = `CONT_${key}`;
+        // Nombre de BD (confirmado vía discovery)
+        const database = getZucchettiDatabase(key);
 
         const asientos = await getAccountingEntries(key, database, fromDate, toDate);
 

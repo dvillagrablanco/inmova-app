@@ -30,6 +30,7 @@ import {
   getConfiguredCompanyKeys,
   getAccountingEntries,
   mapCompanyKeyToInmovaId,
+  getZucchettiDatabase,
   isZucchettiSqlConfigured,
   closeAllPools,
   type ZucchettiCompanyKey,
@@ -289,9 +290,8 @@ async function main() {
       }
     }
 
-    // Determinar nombre de BD
-    // NOTA: Esto se actualizará tras el discovery con los nombres reales
-    const dbName = database || `CONT_${key}`;
+    // Nombre de BD (confirmado vía discovery)
+    const dbName = database || getZucchettiDatabase(key);
 
     try {
       const result = await syncCompany(key, effectiveFrom, toDate, dryRun, dbName);
