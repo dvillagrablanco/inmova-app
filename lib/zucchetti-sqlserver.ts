@@ -575,10 +575,11 @@ export function getZucchettiDatabase(companyKey: ZucchettiCompanyKey): string {
  * VIR = Viroda Inversiones S.L.U.
  */
 export function mapCompanyKeyToInmovaId(companyKey: ZucchettiCompanyKey): string | null {
+  // Production DB company IDs (verified 18 Mar 2026)
   const mapping: Record<ZucchettiCompanyKey, string | null> = {
-    RSQ: 'rovida-sl',
-    VID: 'vidaro-inversiones',
-    VIR: 'viroda-inversiones',
+    RSQ: 'cef19f55f7b6ce0637d5ffb53',   // Rovida S.L.
+    VID: 'c65159283deeaf6815f8eda95',    // Vidaro Inversiones S.L.
+    VIR: 'cmkctneuh0001nokn7nvhuweq',    // Viroda Inversiones S.L.
   };
   return mapping[companyKey] ?? null;
 }
@@ -588,9 +589,9 @@ export function mapCompanyKeyToInmovaId(companyKey: ZucchettiCompanyKey): string
  */
 export function mapInmovaIdToCompanyKey(companyId: string): ZucchettiCompanyKey | null {
   const mapping: Record<string, ZucchettiCompanyKey> = {
-    'rovida-sl': 'RSQ',
-    'vidaro-inversiones': 'VID',
-    'viroda-inversiones': 'VIR',
+    'cef19f55f7b6ce0637d5ffb53': 'RSQ',   // Rovida S.L.
+    'c65159283deeaf6815f8eda95': 'VID',    // Vidaro Inversiones S.L.
+    'cmkctneuh0001nokn7nvhuweq': 'VIR',    // Viroda Inversiones S.L.
   };
   return mapping[companyId] ?? null;
 }

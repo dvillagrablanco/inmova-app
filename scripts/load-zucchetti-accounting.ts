@@ -32,10 +32,11 @@ const prisma = new PrismaClient();
 // CONFIG
 // ============================================================================
 
+// Company IDs in production DB (verified 18 Mar 2026)
 const DBS: Record<string, { db: string; user: string; pass: string; companyId: string; label: string }> = {
-  RSQ: { db: 'CONT_RSQ', user: process.env.ZUCCHETTI_RSQ_USER || '', pass: process.env.ZUCCHETTI_RSQ_PASS || '', companyId: 'rovida-sl', label: 'Rovida' },
-  VID: { db: 'CONT_VID', user: process.env.ZUCCHETTI_VID_USER || '', pass: process.env.ZUCCHETTI_VID_PASS || '', companyId: 'vidaro-inversiones', label: 'Vidaro' },
-  VIR: { db: 'DAT_VIR', user: process.env.ZUCCHETTI_VIR_USER || '', pass: process.env.ZUCCHETTI_VIR_PASS || '', companyId: 'viroda-inversiones', label: 'Viroda' },
+  RSQ: { db: 'CONT_RSQ', user: process.env.ZUCCHETTI_RSQ_USER || '', pass: process.env.ZUCCHETTI_RSQ_PASS || '', companyId: 'cef19f55f7b6ce0637d5ffb53', label: 'Rovida' },
+  VID: { db: 'CONT_VID', user: process.env.ZUCCHETTI_VID_USER || '', pass: process.env.ZUCCHETTI_VID_PASS || '', companyId: 'c65159283deeaf6815f8eda95', label: 'Vidaro' },
+  VIR: { db: 'DAT_VIR', user: process.env.ZUCCHETTI_VIR_USER || '', pass: process.env.ZUCCHETTI_VIR_PASS || '', companyId: 'cmkctneuh0001nokn7nvhuweq', label: 'Viroda' },
 };
 
 const SERVER = process.env.ZUCCHETTI_SERVER || 'server.avannubo.com';

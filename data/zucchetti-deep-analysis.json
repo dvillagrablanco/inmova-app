@@ -1,0 +1,4951 @@
+{
+  "VID": {
+    "stats": {
+      "total": 38518,
+      "minF": "2010-01-28T00:00:00.000Z",
+      "maxF": "2026-03-15T00:00:00.000Z",
+      "tDebe": 579176033623,
+      "tHaber": 604313326121,
+      "asientos": 1416,
+      "subctas": 1742
+    },
+    "monthly": [
+      {
+        "y": 2025,
+        "m": 1,
+        "n": 882,
+        "asientos": 90,
+        "d": 12777040287,
+        "h": 24353315760
+      },
+      {
+        "y": 2025,
+        "m": 2,
+        "n": 379,
+        "asientos": 105,
+        "d": 1219874661,
+        "h": 1174737777
+      },
+      {
+        "y": 2025,
+        "m": 3,
+        "n": 483,
+        "asientos": 120,
+        "d": 2609271733,
+        "h": 2158878476
+      },
+      {
+        "y": 2025,
+        "m": 4,
+        "n": 436,
+        "asientos": 109,
+        "d": 995774856,
+        "h": 1587695206
+      },
+      {
+        "y": 2025,
+        "m": 5,
+        "n": 377,
+        "asientos": 102,
+        "d": 413910033,
+        "h": 396004352
+      },
+      {
+        "y": 2025,
+        "m": 6,
+        "n": 331,
+        "asientos": 94,
+        "d": 627122917,
+        "h": 631245085
+      },
+      {
+        "y": 2025,
+        "m": 7,
+        "n": 354,
+        "asientos": 98,
+        "d": 774312348,
+        "h": 612621120
+      },
+      {
+        "y": 2025,
+        "m": 8,
+        "n": 246,
+        "asientos": 70,
+        "d": 341432430,
+        "h": 326793310
+      },
+      {
+        "y": 2025,
+        "m": 9,
+        "n": 283,
+        "asientos": 77,
+        "d": 1393973903,
+        "h": 1510929998
+      },
+      {
+        "y": 2025,
+        "m": 10,
+        "n": 466,
+        "asientos": 122,
+        "d": 1749797193,
+        "h": 1894347303
+      },
+      {
+        "y": 2025,
+        "m": 11,
+        "n": 474,
+        "asientos": 119,
+        "d": 1627932760,
+        "h": 2684276277
+      },
+      {
+        "y": 2025,
+        "m": 12,
+        "n": 1113,
+        "asientos": 156,
+        "d": 3119643216,
+        "h": 4945378183
+      },
+      {
+        "y": 2026,
+        "m": 1,
+        "n": 366,
+        "asientos": 97,
+        "d": 1717622470,
+        "h": 3622807798
+      },
+      {
+        "y": 2026,
+        "m": 2,
+        "n": 674,
+        "asientos": 159,
+        "d": 2397730401,
+        "h": 2689877968
+      },
+      {
+        "y": 2026,
+        "m": 3,
+        "n": 61,
+        "asientos": 15,
+        "d": 4914553,
+        "h": 4914555
+      }
+    ],
+    "topOperativas": [
+      {
+        "Subcuenta": "7663000025",
+        "Titulo": "Benef. en partic. y valores repres. deuda a L/P - CACEIS",
+        "d": 0,
+        "h": 210905969,
+        "n": 52
+      },
+      {
+        "Subcuenta": "7613000003",
+        "Titulo": "Ingresos Valores representativos de deuda (BANKINTER CUENTA GESTIONADA)",
+        "d": 0,
+        "h": 189410319,
+        "n": 35
+      },
+      {
+        "Subcuenta": "7663000005",
+        "Titulo": "Benef. en partic. y valores repres. deuda a L/P -INVERSIS",
+        "d": 0,
+        "h": 170017499,
+        "n": 94
+      },
+      {
+        "Subcuenta": "7663000004",
+        "Titulo": "Benef. en partic. y valores repres. deuda a L/P -PICTET",
+        "d": 0,
+        "h": 143713545,
+        "n": 40
+      },
+      {
+        "Subcuenta": "6663000055",
+        "Titulo": "Pérdidas en Accs AMPER S.A. (Bkt)",
+        "d": 123689003,
+        "h": 0,
+        "n": 5
+      },
+      {
+        "Subcuenta": "7663000020",
+        "Titulo": "Benef. en partic. y valores repres. deuda a L/P - BANKINTER CUENTA GESTIONADA",
+        "d": 0,
+        "h": 51164564,
+        "n": 7
+      },
+      {
+        "Subcuenta": "6300000000",
+        "Titulo": "Impuesto sobre Sociedades (Corriente)",
+        "d": 43024215,
+        "h": 0,
+        "n": 1
+      },
+      {
+        "Subcuenta": "7663000003",
+        "Titulo": "Benef. en partic. y valores repres. deuda a L/P - BANCA MARCH",
+        "d": 0,
+        "h": 30113414,
+        "n": 45
+      },
+      {
+        "Subcuenta": "6230000025",
+        "Titulo": "Servicios Profesionales Asesoramiento Family Office",
+        "d": 24745729,
+        "h": 0,
+        "n": 44
+      },
+      {
+        "Subcuenta": "6294003004",
+        "Titulo": "Asignación Consejero Vicente Facundo Villagrá",
+        "d": 24074386,
+        "h": 0,
+        "n": 14
+      },
+      {
+        "Subcuenta": "6294003005",
+        "Titulo": "Asignación Consejero David Villagrá",
+        "d": 24074386,
+        "h": 0,
+        "n": 14
+      },
+      {
+        "Subcuenta": "6294003003",
+        "Titulo": "Asignación Consejera Rosa Elena Villagrá",
+        "d": 24074386,
+        "h": 0,
+        "n": 14
+      },
+      {
+        "Subcuenta": "7663100048",
+        "Titulo": "Beneficios en participaciones y VRD L/P Portobello Partnerships Estructurados Fondo I SCR",
+        "d": 0,
+        "h": 21005129,
+        "n": 1
+      },
+      {
+        "Subcuenta": "6230000014",
+        "Titulo": "Serv.Prof. Asesoría Jurídica Consultoría",
+        "d": 14605926,
+        "h": 0,
+        "n": 21
+      },
+      {
+        "Subcuenta": "6400000000",
+        "Titulo": "Sueldos y salarios",
+        "d": 13849692,
+        "h": 0,
+        "n": 14
+      },
+      {
+        "Subcuenta": "6260001021",
+        "Titulo": "Serv. bancarios Comis. Ctas gestionadas PICTET",
+        "d": 13166097,
+        "h": 0,
+        "n": 12
+      },
+      {
+        "Subcuenta": "6806000001",
+        "Titulo": "Dotación amortización Licencias SAP R3",
+        "d": 13112740,
+        "h": 0,
+        "n": 12
+      },
+      {
+        "Subcuenta": "6691000048",
+        "Titulo": "Gastos Fros x comisiones (gestión, ecualización, suscripción, etc.) Portobello Partnerships Estructurados Fondo I SCR",
+        "d": 12519741,
+        "h": 0,
+        "n": 7
+      },
+      {
+        "Subcuenta": "6319000001",
+        "Titulo": "Multas y Sanciones no deducibles",
+        "d": 11604264,
+        "h": 0,
+        "n": 2
+      },
+      {
+        "Subcuenta": "7613000019",
+        "Titulo": "Ingresos Valores represent. deuda, otras empresas (INVERSIS)",
+        "d": 0,
+        "h": 10241406,
+        "n": 5
+      },
+      {
+        "Subcuenta": "6663000005",
+        "Titulo": "Pérdidas en partic. y valores repres. deuda a L/P - INVERSIS",
+        "d": 9174068,
+        "h": 0,
+        "n": 10
+      },
+      {
+        "Subcuenta": "6663000025",
+        "Titulo": "Pérdidas en partic. y valores repres. deuda a L/P - CACEIS",
+        "d": 8343246,
+        "h": 0,
+        "n": 6
+      },
+      {
+        "Subcuenta": "6663000003",
+        "Titulo": "Pérdidas en partic. y valores repres. deuda a L/P - BANCA MARCH",
+        "d": 6395946,
+        "h": 0,
+        "n": 12
+      },
+      {
+        "Subcuenta": "6230000005",
+        "Titulo": "Servicios Profes. Asesoría Mercantil - Contable",
+        "d": 6322014,
+        "h": 0,
+        "n": 8
+      },
+      {
+        "Subcuenta": "7613000025",
+        "Titulo": "Ingresos Valores represent. deuda, otras empresas (CACEIS)",
+        "d": 0,
+        "h": 6139643,
+        "n": 2
+      },
+      {
+        "Subcuenta": "6260001003",
+        "Titulo": "Serv. bancarios comisiones Cuentas gestionadas BANKINTER",
+        "d": 5540872,
+        "h": 0,
+        "n": 4
+      },
+      {
+        "Subcuenta": "6663000020",
+        "Titulo": "Pérdidas en partic. y valores repres. deuda a L/P - BANKINTER CARTERA ASESORADA",
+        "d": 5201902,
+        "h": 0,
+        "n": 4
+      },
+      {
+        "Subcuenta": "6260001012",
+        "Titulo": "Serv. bancarios comisiones Cuentas gestionadas BANCA MARCH",
+        "d": 5152640,
+        "h": 0,
+        "n": 5
+      },
+      {
+        "Subcuenta": "6230000022",
+        "Titulo": "Servicio asesoramiento CEA Consultores",
+        "d": 4191430,
+        "h": 0,
+        "n": 1
+      },
+      {
+        "Subcuenta": "6690000002",
+        "Titulo": "Otros gastos financieros - Intereses Actas Inspección",
+        "d": 3987689,
+        "h": 0,
+        "n": 2
+      }
+    ],
+    "bancos": [
+      {
+        "Subcuenta": "5720000019",
+        "Titulo": "Inversis ES4102320543510038870971",
+        "entradas": 1706060429,
+        "salidas": 2528077635,
+        "movs": 168
+      },
+      {
+        "Subcuenta": "5720000023",
+        "Titulo": "Inversis ES6502320543500039016185",
+        "entradas": 3132075215,
+        "salidas": 429928350,
+        "movs": 32
+      },
+      {
+        "Subcuenta": "5720000025",
+        "Titulo": "Caceis ES2800385777190016147134",
+        "entradas": 1594446611,
+        "salidas": 1197375385,
+        "movs": 233
+      },
+      {
+        "Subcuenta": "5720000021",
+        "Titulo": "Bank Pictet & Cie (Europe) AG IBAN: LU631980017392000100 Cuenta 173920.001.00.EUR",
+        "entradas": 1281920975,
+        "salidas": 1186157937,
+        "movs": 91
+      },
+      {
+        "Subcuenta": "5720000022",
+        "Titulo": "Banca March Cta Inversión ES1700610377860104020113",
+        "entradas": 862210033,
+        "salidas": 879072936,
+        "movs": 108
+      },
+      {
+        "Subcuenta": "5720000012",
+        "Titulo": "Banca March ES06 0061 0377 8100 8877 0119",
+        "entradas": 885704192,
+        "salidas": 218298,
+        "movs": 6
+      },
+      {
+        "Subcuenta": "5720000026",
+        "Titulo": "Bankinter iban: ES07 0128 0250 5205 000 8031 Vinculada a la póliza de crédito",
+        "entradas": 433187664,
+        "salidas": 433187664,
+        "movs": 9
+      },
+      {
+        "Subcuenta": "5720000024",
+        "Titulo": "Inversis ES1602320543500043715359",
+        "entradas": 342703191,
+        "salidas": 296931742,
+        "movs": 12
+      },
+      {
+        "Subcuenta": "5720000010",
+        "Titulo": "SANTANDER: ES4500496740612416120184",
+        "entradas": 594662930,
+        "salidas": 482519,
+        "movs": 2
+      },
+      {
+        "Subcuenta": "5730000007",
+        "Titulo": "Bank Pictet & Cie (Europe) AG IBAN: LU631980017392000100 Cuenta 173920.001.00.USD",
+        "entradas": 278166976,
+        "salidas": 266739243,
+        "movs": 33
+      },
+      {
+        "Subcuenta": "5730000009",
+        "Titulo": "Inversis Cuenta USD 0232 0543 51 0039007121",
+        "entradas": 78781513,
+        "salidas": 111780619,
+        "movs": 20
+      },
+      {
+        "Subcuenta": "5720000013",
+        "Titulo": "AndBank ES89 1544 1202 4366 5018 3570",
+        "entradas": 93275992,
+        "salidas": 71179931,
+        "movs": 3
+      },
+      {
+        "Subcuenta": "5730000011",
+        "Titulo": "Cuenta USD CACEIS: 57770016147151",
+        "entradas": 99196718,
+        "salidas": 54755884,
+        "movs": 14
+      },
+      {
+        "Subcuenta": "5730000008",
+        "Titulo": "Inversis Cuenta GBP 0232 0543 50 0039007100",
+        "entradas": 76188770,
+        "salidas": 4324715,
+        "movs": 11
+      },
+      {
+        "Subcuenta": "5730000012",
+        "Titulo": "Cuenta GBP CACEIS: 57770016147169",
+        "entradas": 16685478,
+        "salidas": 16685478,
+        "movs": 2
+      },
+      {
+        "Subcuenta": "5720000000",
+        "Titulo": "BBVA: ES4501820496610201685315",
+        "entradas": 4950201,
+        "salidas": 6161762,
+        "movs": 131
+      },
+      {
+        "Subcuenta": "5720000001",
+        "Titulo": "Banco Santander (ES98 0075 0142 5606 0067 9446)",
+        "entradas": -200411578,
+        "salidas": 32170628,
+        "movs": 55
+      },
+      {
+        "Subcuenta": "5720000008",
+        "Titulo": "BBVA: ES1101826462710201514692",
+        "entradas": -302615182,
+        "salidas": 119797920,
+        "movs": 4
+      },
+      {
+        "Subcuenta": "5720000020",
+        "Titulo": "Bankinter - Cuenta asesorada 01280250510100088644",
+        "entradas": -6005575890,
+        "salidas": 5658580148,
+        "movs": 63
+      },
+      {
+        "Subcuenta": "5720000003",
+        "Titulo": "Bankinter (ES53 0128 0250 5001 0007 0675)",
+        "entradas": -4116673124,
+        "salidas": 1850436559,
+        "movs": 394
+      },
+      {
+        "Subcuenta": "5720000017",
+        "Titulo": "UBS IBAN: CH71 0020 6206 5506 1160 B",
+        "entradas": -5128322451,
+        "salidas": 0,
+        "movs": 1
+      }
+    ],
+    "iva": [
+      {
+        "Subcuenta": "4700000000",
+        "Titulo": "Hacienda Pública, deudora por IVA.",
+        "d": 41442644,
+        "h": 0
+      },
+      {
+        "Subcuenta": "4720000400",
+        "Titulo": "Hacienda Pública, IVA soportado AL 4%",
+        "d": 536,
+        "h": 536
+      },
+      {
+        "Subcuenta": "4720001000",
+        "Titulo": "Hda Pública, IVA soportado al 10%",
+        "d": 9233,
+        "h": 9233
+      },
+      {
+        "Subcuenta": "4720002100",
+        "Titulo": "HP IVA soportado al 21% (Desde 01-09-12)",
+        "d": 17391655,
+        "h": 16243944
+      },
+      {
+        "Subcuenta": "4720002101",
+        "Titulo": "Hda Pública, IVA soportado Adq. Intracomunitaria de Servicios",
+        "d": 39316,
+        "h": 34013
+      },
+      {
+        "Subcuenta": "4730000000",
+        "Titulo": "Hda Pública, Pagos a cuenta Impto Sdades",
+        "d": 22270254,
+        "h": 22270254
+      },
+      {
+        "Subcuenta": "4730000001",
+        "Titulo": "Hda Pbca, retenc. soport. Intereses ccc",
+        "d": 574478,
+        "h": 522287
+      },
+      {
+        "Subcuenta": "4730000003",
+        "Titulo": "Hda Pbca, Retenc. Soport. Venta Fondos Inversión",
+        "d": 77550027,
+        "h": 51198604
+      },
+      {
+        "Subcuenta": "4740000050",
+        "Titulo": "Activos por diferencias temporarias deducibles Accs Stonehenge Hotels SCR, SA (CIF A02768406) ISIN:ES0176348003",
+        "d": 11123986,
+        "h": 0
+      },
+      {
+        "Subcuenta": "4740000055",
+        "Titulo": "Activos por diferencias temporarias deducibles Accs Amper S.A. ISIN: ES0109260531",
+        "d": 43450963,
+        "h": 43450963
+      },
+      {
+        "Subcuenta": "4740000104",
+        "Titulo": "Activos por diferencias temporarias deducibles Shs iShares PLC - iShares Core S&P 500UCITS ETF USD (Dist) Shs USD ISIN: IE0031442068",
+        "d": 3953408,
+        "h": 0
+      },
+      {
+        "Subcuenta": "4740000151",
+        "Titulo": "Activos por diferencias temporarias deducibles Green Transition Strategies I SCR ISIN: ES0143279000 CIF: A09989864",
+        "d": 1662819,
+        "h": 0
+      },
+      {
+        "Subcuenta": "4740000181",
+        "Titulo": "Activos por diferencias temporarias imponibles AC TITAN INV EN INFRAESTRUCTURAS II CLASE A Isin: ES0150102004",
+        "d": 881846,
+        "h": 0
+      },
+      {
+        "Subcuenta": "4740000215",
+        "Titulo": "Activos por diferencias temporarias deducibles ROBECO GLB CR SHORT MATURITY IH ACC EUR ISIN: LU1648456215",
+        "d": 32557,
+        "h": 32557
+      },
+      {
+        "Subcuenta": "4740000243",
+        "Titulo": "Activos por Dif. Tempor. deducibles GLOBALREACH MS-GRAHA.MACRO I-AF EUR ISIN: IE00044SJSK2",
+        "d": 115387,
+        "h": 0
+      },
+      {
+        "Subcuenta": "4740000273",
+        "Titulo": "Activos por diferencias temporarias deducibles Andurand A EUR Hdg Acc Isin: IE00BYXQB101 -INVERSIS-",
+        "d": 260883,
+        "h": 260884
+      },
+      {
+        "Subcuenta": "4740000288",
+        "Titulo": "Activos por diferencias temporarias deducibles AIGI IM - ETF INDUST MTLS DJ UBSCISM ISIN: GB00B15KYG56",
+        "d": 58355,
+        "h": 58355
+      },
+      {
+        "Subcuenta": "4740000309",
+        "Titulo": "Activos por diferencias temporarias deducibles AB INTERNATIONAL HEALTH CARE I ACC EUR ISIN: LU0251855366",
+        "d": 9980,
+        "h": 9980
+      },
+      {
+        "Subcuenta": "4740000320",
+        "Titulo": "Activos por diferencias temporarias deducibles FINNISH GOVT 4 040725 DEUDA PUBLICA ESTADO FINES VTO 04-07-2025 ISIN: FI4000006176",
+        "d": 225245,
+        "h": 225245
+      },
+      {
+        "Subcuenta": "4740000327",
+        "Titulo": "Activos por diferencias temporarias deducibles  MONTL.-C.CR.P.N.A.L./S EQ.INS.PO.EUR ISIN: IE00BG08P667",
+        "d": 1229251,
+        "h": 0
+      },
+      {
+        "Subcuenta": "4740000328",
+        "Titulo": "Activos por diferencias temporarias deducibles BON REPUBLICA  AUSTRIA 4,85% 15-03-2026 ISIN: AT0000A0DXC2",
+        "d": 1210781,
+        "h": 0
+      },
+      {
+        "Subcuenta": "4740000330",
+        "Titulo": "Activos por diferencias temporarias deducibles BON UBS GROUP 4,625% 17-03-2028 ISIN: CH1255915006",
+        "d": 65185,
+        "h": 0
+      },
+      {
+        "Subcuenta": "4740000334",
+        "Titulo": "Activos por diferencias temporarias deducibles BON ESTADO FRANCES 3-5% 25-04-2026 ISIN: FR0010916924",
+        "d": 425900,
+        "h": 0
+      },
+      {
+        "Subcuenta": "4740000335",
+        "Titulo": "Activos por diferencias temporarias deducibles BON RCI BANQUE SA 4,62 10-26 ISIN: FR001400KXW4",
+        "d": 193181,
+        "h": 0
+      },
+      {
+        "Subcuenta": "4740000344",
+        "Titulo": "Activos por diferencias temporarias deducibles BONOS ARCELOR 4,875 VTO 26-09-2026 ISIN: XS2537060746",
+        "d": 279775,
+        "h": 0
+      },
+      {
+        "Subcuenta": "4740000347",
+        "Titulo": "Activos por diferencias temporarias deducibles BONOS BBVA (EUR3M+100) VTO 26-11-2025 ISIN: XS2485259670",
+        "d": 84138,
+        "h": 84138
+      },
+      {
+        "Subcuenta": "4740000353",
+        "Titulo": "Activos por diferencias temporarias deducibles POLAR CAPITAL GLBL TECHNOLOGY I ACC EUR ISIN: IE00BM95B514",
+        "d": 81968,
+        "h": 21475
+      },
+      {
+        "Subcuenta": "4740000357",
+        "Titulo": "Activos por diferencias temporarias deducibles GIS EURO BOND BX ACC EUR ISIN: LU0145476148",
+        "d": 10537,
+        "h": 10537
+      },
+      {
+        "Subcuenta": "4740000363",
+        "Titulo": "Activos por diferencias temporarias deducibles BON BANCO SANTANDER S 4,62 10-27 ISIN: XS2705604077",
+        "d": 159564,
+        "h": 0
+      },
+      {
+        "Subcuenta": "4740000364",
+        "Titulo": "Activos por diferencias temporarias deducibles BON EDP FINANCE BV 1,50 11-27 ISIN: XS1721051495",
+        "d": 138937,
+        "h": 138937
+      },
+      {
+        "Subcuenta": "4740000365",
+        "Titulo": "Activos por diferencias temporarias deducibles BON AIB GROUP PLC 0,50 11-27 ISIN: XS2343340852",
+        "d": 9785,
+        "h": 9785
+      },
+      {
+        "Subcuenta": "4740000369",
+        "Titulo": "Activos por diferencias temporarias deducibles BON CAIXABANK SA 4,62 05-27 ISIN: XS2623501181",
+        "d": 149806,
+        "h": 0
+      },
+      {
+        "Subcuenta": "4740000370",
+        "Titulo": "Activos por diferencias temporarias deducibles BON SANDOZ FINANCE BV 3,97 04-27 ISIN: XS2715297672",
+        "d": 33876,
+        "h": 0
+      },
+      {
+        "Subcuenta": "4740000373",
+        "Titulo": "Activos por diferencias temporarias deducibles PIMCO-GIS-GIG CRED. INST. HED. EUR-CAP ISIN: IE0032876397",
+        "d": 115508,
+        "h": 115508
+      },
+      {
+        "Subcuenta": "4740000374",
+        "Titulo": "Activos por diferencias temporarias deducibles MC SICAV AZ VALOR INTERNAT I ISIN: LU1333146287 -INVERSIS-",
+        "d": 264659,
+        "h": 264659
+      },
+      {
+        "Subcuenta": "4740000385",
+        "Titulo": "Activos por diferencias temporarias deducibles MULTIPART KONWAVE GOLD EQ C EU ISIN: LU1425270227 -INVERSIS-",
+        "d": 390451,
+        "h": 390451
+      },
+      {
+        "Subcuenta": "4740000387",
+        "Titulo": "Activos por diferencias temporarias deducibles BLUEBOX GLB TECH FND I ACC USD ISIN: LU1793346666 -CACEIS-",
+        "d": 1827060,
+        "h": 1652599
+      },
+      {
+        "Subcuenta": "4740000408",
+        "Titulo": "Activos por diferencias temporarias deducibles X S&P 500 EQUAL WEIGHT ISIN: IE00BLNMYC90 (INVERSIS)",
+        "d": 587805,
+        "h": 331622
+      },
+      {
+        "Subcuenta": "4740000409",
+        "Titulo": "Activos por diferencias temporarias deducibles MC SICAV AZ VALOR INTERNAT I ISIN: LU1333146287 -CACEIS-",
+        "d": 418228,
+        "h": 418228
+      },
+      {
+        "Subcuenta": "4740000412",
+        "Titulo": "Activos por diferencias temporarias deducibles AMUNDI INDEX MSCI EUROPE I E ACC EUR ISIN: LU0389811539 -BANCA MARCH-",
+        "d": 459227,
+        "h": 459227
+      },
+      {
+        "Subcuenta": "4740000413",
+        "Titulo": "Activos por diferencias temporarias deducibles ROBECO US PREMIUM EQUITIES IH ACC EUR ISIN: LU0320897043 -BANCA MARCH-",
+        "d": 166040,
+        "h": 166040
+      },
+      {
+        "Subcuenta": "4740000414",
+        "Titulo": "Activos por diferencias temporarias deducibles VANGUARD EURO GOVERMENT BOND EUR ISIN: IE0007472990 -BANCA MARCH-",
+        "d": 42204,
+        "h": 42204
+      },
+      {
+        "Subcuenta": "4740000415",
+        "Titulo": "Activos por diferencias temporarias deducibles FO. S S P 500 EQUAL WEIGHT ETF ISIN: IE00BLNMYC90 -CACEIS-",
+        "d": 814376,
+        "h": 376289
+      },
+      {
+        "Subcuenta": "4740000416",
+        "Titulo": "Activos por diferencias temporarias deducibles FO.LAVL GAVEK LA LC DB EX.OPEN-END FUND ISIN: LU2751661898 -CACEIS-",
+        "d": 183562,
+        "h": 183562
+      },
+      {
+        "Subcuenta": "4740000417",
+        "Titulo": "Activos por diferencias temporarias deducibles Andurand A EUR Hdg Acc Isin: IE00BYXQB101 -CACEIS-",
+        "d": 152024,
+        "h": 152024
+      },
+      {
+        "Subcuenta": "4740000428",
+        "Titulo": "Activos por diferencias temporarias deducibles SILVER 8 PARTNERS LP (MASTER) ISIN: US8272951067 -DIRECTO-",
+        "d": 4585666,
+        "h": 0
+      },
+      {
+        "Subcuenta": "4740000448",
+        "Titulo": "Activos por diferencias temporarias deducibles SVELLAND GLOBAL TRADING PARTNERES LP Isin (FIJI): BBG01B21T711 -CACEIS+INVERSIS-",
+        "d": 46939,
+        "h": 0
+      },
+      {
+        "Subcuenta": "4740000453",
+        "Titulo": "Activos por diferencias temporarias deducibles VANGUARD US GOVERMENT BD INDEX EUR ISIN: IE0007471471 -BANCA MARCH-",
+        "d": 27339,
+        "h": 3418
+      },
+      {
+        "Subcuenta": "4740000454",
+        "Titulo": "Activos por diferencias temporarias deducibles WELLINGTON ENDURING ASSETS S ACC EUR ISIN: IE00BJ7HNK78 -BANCA MARCH-",
+        "d": 29655,
+        "h": 221
+      },
+      {
+        "Subcuenta": "4740000456",
+        "Titulo": "Activos por diferencias temporarias deducibles ABRDN II-EUR C.BD S&R INV-D EUR-ACC ISIN: LU0767911984 -PICTET-",
+        "d": 11028,
+        "h": 0
+      },
+      {
+        "Subcuenta": "4745002023",
+        "Titulo": "Crédito por pérdidas a compensar ejercicio 2023",
+        "d": 2984501,
+        "h": 331612
+      },
+      {
+        "Subcuenta": "4750000001",
+        "Titulo": "Hacienda Pública, acreedora Actas Inspecciones IVA",
+        "d": 582660,
+        "h": 582660
+      },
+      {
+        "Subcuenta": "4750001000",
+        "Titulo": "H. Pública, acreedora IRPF Nóminas",
+        "d": 3932042,
+        "h": 4484852
+      },
+      {
+        "Subcuenta": "4751000015",
+        "Titulo": "Hda Pbca, acreedora Retenciones al 15%",
+        "d": 919,
+        "h": 1425
+      },
+      {
+        "Subcuenta": "4751005003",
+        "Titulo": "HP Acreed. Ret. Asign. Consejo Rosa Elena Villagrá",
+        "d": 8678195,
+        "h": 9881919
+      },
+      {
+        "Subcuenta": "4751005004",
+        "Titulo": "HP Acreed. Ret. Asign. Consejo Vicente Facundo Villagrá",
+        "d": 7367905,
+        "h": 8571631
+      },
+      {
+        "Subcuenta": "4751005005",
+        "Titulo": "HP Acreed. Ret. Asign. Consejo David Villagrá",
+        "d": 8678195,
+        "h": 9881919
+      },
+      {
+        "Subcuenta": "4752000000",
+        "Titulo": "Hacienda Pública, acreedora por impuesto sobre sociedades",
+        "d": 15652448,
+        "h": 29226025
+      },
+      {
+        "Subcuenta": "4752000001",
+        "Titulo": "Hacienda Pública, acreedora Actas Inspecciones impuesto sobre sociedades",
+        "d": 87396386,
+        "h": 87396386
+      },
+      {
+        "Subcuenta": "4760000000",
+        "Titulo": "Organismos Seguridad Social, acreedores",
+        "d": 4430317,
+        "h": 9530005
+      },
+      {
+        "Subcuenta": "4770002100",
+        "Titulo": "H.P. IVA Repercutido al 21%",
+        "d": 1048592,
+        "h": 1223362
+      },
+      {
+        "Subcuenta": "4770002101",
+        "Titulo": "Hda Pública, IVA repercutido Adq. Intracomunitaria de Servicios",
+        "d": 34013,
+        "h": 39316
+      },
+      {
+        "Subcuenta": "4790000001",
+        "Titulo": "Pasivos por Dif. Tempor. deducibles HELIA ENERG RENOV III SCR SA",
+        "d": 0,
+        "h": 37825343
+      },
+      {
+        "Subcuenta": "4790000002",
+        "Titulo": "Pasivos por Dif. Tempor. imponibles Fondo Residencias Estudiantes Glogal FIL ISIN: ES0173545023",
+        "d": 0,
+        "h": 1034292
+      },
+      {
+        "Subcuenta": "4790000047",
+        "Titulo": "Pasivos por Dif. Tempor. imponibles PANGAEA ONCOLOGY",
+        "d": 4177076,
+        "h": 42738475
+      },
+      {
+        "Subcuenta": "4790000048",
+        "Titulo": "Pasivos por Dif. Tempor. imponibles Portobello Partnerships Estructurados Fondo I SCR",
+        "d": 0,
+        "h": 131954538
+      },
+      {
+        "Subcuenta": "4790000049",
+        "Titulo": "Pasivos por diferencias temporarias imponibles Sabadell ASABYS Health Innovation Investments SCR, SA (NIF: A67293829) ISIN:  ES0174313009",
+        "d": 0,
+        "h": 9986445
+      },
+      {
+        "Subcuenta": "4790000055",
+        "Titulo": "Pasivos por diferencias temporarias imponibles Part. AMPER",
+        "d": 0,
+        "h": 7666548
+      },
+      {
+        "Subcuenta": "4790000070",
+        "Titulo": "Pasivos por diferencias temporarias imponibles PART. SHORT MATURITY EURO BOND \"Z\" ACC ISIN: LU0360478795",
+        "d": 139100,
+        "h": 139100
+      },
+      {
+        "Subcuenta": "4790000074",
+        "Titulo": "Pasivos por diferencias temporarias imponibles PART. PIMCO INCOME \"I\" (EURHDG) ACC ISIN: IE00B80G9288",
+        "d": 772657,
+        "h": 1769645
+      },
+      {
+        "Subcuenta": "4790000092",
+        "Titulo": "Pasivos por diferencias temporarias imponibles ROBECO BP US PREMIUM EQ \"I\" (EUR) A ISIN: LU0454739615",
+        "d": 9807,
+        "h": 344174
+      },
+      {
+        "Subcuenta": "4790000104",
+        "Titulo": "Pasivos por diferencias temporarias imponibles Shs iShares PLC - iShares Core S&P 500UCITS ETF USD (Dist) Shs USD ISIN: IE0031442068",
+        "d": 7574285,
+        "h": 7574285
+      },
+      {
+        "Subcuenta": "4790000185",
+        "Titulo": "Pasivos por diferencias temporarias imponibles PART BNP PAR SUS ENH BD 1 ISIN: LU1819949089",
+        "d": 1393579,
+        "h": 1869546
+      },
+      {
+        "Subcuenta": "4790000186",
+        "Titulo": "Pasivos por diferencias temporarias imponibles PART BKT AHORRO RENTA FIJA ISIN: ES0110053008",
+        "d": 2968777,
+        "h": 3949509
+      },
+      {
+        "Subcuenta": "4790000221",
+        "Titulo": "Pasivos por diferencias temporarias imponibles MARCH RENTA FIJA CORTO PLAZO C EUR ACC ISIN: ES0161032000",
+        "d": 319372,
+        "h": 319373
+      },
+      {
+        "Subcuenta": "4790000222",
+        "Titulo": "Pasivos por diferencias temporarias imponibles MUZNCH GLB SHRT DURTN INVT GRD H ACC EUR ISIN: IE00BJCXFM61",
+        "d": 1459435,
+        "h": 5731557
+      },
+      {
+        "Subcuenta": "4790000223",
+        "Titulo": "Pasivos por diferencias temporarias imponibles ELEVA EUROPEAN SELECTION R EUR ACC ISIN: LU1111643711",
+        "d": 4211311,
+        "h": 11651978
+      },
+      {
+        "Subcuenta": "4790000224",
+        "Titulo": "Pasivos por diferencias temporarias imponibles GROUPAMA ENTREPISES R ACC EUR ISIN: FR0013278702",
+        "d": 33029,
+        "h": 452565
+      },
+      {
+        "Subcuenta": "4790000227",
+        "Titulo": "Pasivos por diferencias temporarias imponibles DNCA INVEST ALPHA BONDS N ACC EUR ISIN: LU1694789709",
+        "d": 427446,
+        "h": 427446
+      },
+      {
+        "Subcuenta": "4790000229",
+        "Titulo": "Pasivos por diferencias temporarias imponibles PARVEST BOND EURO MEDIUM TERM PF ACC EUR ISIN: LU0111463849",
+        "d": 77328,
+        "h": 989626
+      },
+      {
+        "Subcuenta": "4790000230",
+        "Titulo": "Pasivos por diferencias temporarias imponibles PICTET-ST MONEY MARKET EUR-I ISIN: LU0128494944",
+        "d": 480651,
+        "h": 736527
+      },
+      {
+        "Subcuenta": "4790000235",
+        "Titulo": "Pasivos por diferencias temporarias imponibles PICTET-EM CORP BDS-HI EUR ISIN: LU0844698075",
+        "d": 0,
+        "h": 1221638
+      },
+      {
+        "Subcuenta": "4790000238",
+        "Titulo": "Pasivos por diferencias temporarias imponibles BDL CONVICTIONS PART.I EUR-ACC ISIN: FR0013289535",
+        "d": 172770,
+        "h": 5182595
+      },
+      {
+        "Subcuenta": "4790000240",
+        "Titulo": "Pasivos por diferencias temporarias imponibles SSGA-GL.TR.1-10 BD IDX I EUR H-ACC ISIN: LU2014365915",
+        "d": 2071335,
+        "h": 2071335
+      },
+      {
+        "Subcuenta": "4790000241",
+        "Titulo": "Pasivos por diferencias temporarias imponibles JPMF-MM ALTERNATIVES S2 EUR H-ACC.- ISIN: LU2050537195",
+        "d": 0,
+        "h": 508876
+      },
+      {
+        "Subcuenta": "4790000243",
+        "Titulo": "Pasivos por diferencias temporarias imponibles GLOBALREACH MS-GRAHA.MACRO I-AF EUR ISIN: IE00044SJSK2",
+        "d": 89283,
+        "h": 89282
+      },
+      {
+        "Subcuenta": "4790000251",
+        "Titulo": "Pasivos por diferencias temporarias imponibles PICTET-CLEAN ENERGY TR.-HI EUR ISIN: LU0474968459",
+        "d": 956380,
+        "h": 956380
+      },
+      {
+        "Subcuenta": "4790000252",
+        "Titulo": "Pasivos por diferencias temporarias imponibles KEMPEN IF-GBL SMALL-CAP I EUR-ACC.- ISIN: LU1078159883",
+        "d": 2452079,
+        "h": 2452079
+      },
+      {
+        "Subcuenta": "4790000253",
+        "Titulo": "Pasivos por diferencias temporarias imponibles LAZARD GIF-EM LOC.DEBT P USD-ACC.- ISIN: IE00BD904R66",
+        "d": 0,
+        "h": 838152
+      },
+      {
+        "Subcuenta": "4790000255",
+        "Titulo": "Pasivos por diferencias temporarias imponibles XTRACKERS-MSCI EUROPE 1C -ACC- ISIN: LU0274209237",
+        "d": 129994,
+        "h": 11345507
+      },
+      {
+        "Subcuenta": "4790000258",
+        "Titulo": "Pasivos por diferencias temporarias imponibles LETRAS DEL TESORO ESTADO DE ESPAÑA. VTO 31-05-2026 ISIN: ES0000012L29 -INVERSIS-",
+        "d": 158368,
+        "h": 922210
+      },
+      {
+        "Subcuenta": "4790000259",
+        "Titulo": "Pasivos por diferencias temporarias imponibles SISF-ASIAN TOTAL RETURN C USD-ACC.- ISIN: LU0326949186 -INVERSIS-",
+        "d": 718388,
+        "h": 2722665
+      },
+      {
+        "Subcuenta": "4790000261",
+        "Titulo": "Pasivos por diferencias temporarias imponibles SSGA-GL.ESG SCREE.ENH.EQU.I USD-ACC ISIN: LU1159225991",
+        "d": 4274027,
+        "h": 10351485
+      },
+      {
+        "Subcuenta": "4790000262",
+        "Titulo": "Pasivos por diferencias temporarias imponibles FEDERAT.HERMES IF-GL.EM.M.EQ.L USD ISIN: IE00BZ4C8803",
+        "d": 1195072,
+        "h": 1195073
+      },
+      {
+        "Subcuenta": "4790000264",
+        "Titulo": "Pasivos por diferencias temporarias imponibles ZGLDHE SW - ETF ZKB GOLD H-EUR ISIN: CH0103326762",
+        "d": 2458190,
+        "h": 10348993
+      },
+      {
+        "Subcuenta": "4790000267",
+        "Titulo": "Pasivos por diferencias temporarias imponibles GUARDCAP GLOBAL EQUITY I AC EU ISIN: IE00BZ036616 -INVERSIS-",
+        "d": 839216,
+        "h": 839216
+      },
+      {
+        "Subcuenta": "4790000270",
+        "Titulo": "Pasivos por diferencias temporarias imponibles GUINNESS GLB EQ INC Y ACC EUR ISIN: IE00BVYPNZ31 -INVERSIS-",
+        "d": 546972,
+        "h": 1890888
+      },
+      {
+        "Subcuenta": "4790000271",
+        "Titulo": "Pasivos por diferencias temporarias imponibles BNPP INSTIC EUR I SH TM VNAV A ISIN: LU0094219127 -INVERSIS-",
+        "d": 1582116,
+        "h": 1832846
+      },
+      {
+        "Subcuenta": "4790000272",
+        "Titulo": "Pasivos por diferencias temporarias imponibles VERITAS GLOBAL FOCUS C ACC EUR ISIN: IE00B3W2QP15 -INVERSIS-",
+        "d": 1104954,
+        "h": 2041454
+      },
+      {
+        "Subcuenta": "4790000275",
+        "Titulo": "Pasivos por diferencias temporarias imponibles ETF ISHARES MSCI WORLD ACC ISIN: IE00B4L5Y983",
+        "d": 114715,
+        "h": 114715
+      },
+      {
+        "Subcuenta": "4790000277",
+        "Titulo": "Pasivos por diferencias temporarias imponibles SISF EURO CORP BOND C ACC EUR ISIN: LU0113258742",
+        "d": 2212728,
+        "h": 8209052
+      },
+      {
+        "Subcuenta": "4790000278",
+        "Titulo": "Pasivos por diferencias temporarias imponibles COMGEST GROWTH EUROPE I AC EUR ISIN: IE00B5WN3467 -INVERSIS-",
+        "d": 774208,
+        "h": 774207
+      },
+      {
+        "Subcuenta": "4790000279",
+        "Titulo": "Pasivos por diferencias temporarias imponibles HERMES ASIA EXJAPN EQ F AC EUR ISIN: IE00B83XD802 -INVERSIS-",
+        "d": 185411,
+        "h": 1812887
+      },
+      {
+        "Subcuenta": "4790000280",
+        "Titulo": "Pasivos por diferencias temporarias imponibles MAGALLANES EUROPEAN EQUITY I ISIN: LU1330191385 -INVERSIS-",
+        "d": 310187,
+        "h": 2137851
+      },
+      {
+        "Subcuenta": "4790000283",
+        "Titulo": "Pasivos por diferencias temporarias imponibles MAN GLG ASIA CREDIT OPPOR IF H ISIN: IE0006UIVA78 -INVERSIS-",
+        "d": 588925,
+        "h": 1976996
+      },
+      {
+        "Subcuenta": "4790000285",
+        "Titulo": "Pasivos por diferencias temporarias imponibles EDR FUND BIG DATA P ACC EUR ISIN: LU2225826366 -INVERSIS-",
+        "d": 190792,
+        "h": 2560128
+      },
+      {
+        "Subcuenta": "4790000286",
+        "Titulo": "Pasivos por diferencias temporarias imponibles REDWHEEL GBL EQ INCO S ACC EUR ISIN: LU2264081188 -INVERSIS-",
+        "d": 157286,
+        "h": 1606863
+      },
+      {
+        "Subcuenta": "4790000288",
+        "Titulo": "Pasivos por diferencias temporarias imponibles AIGI IM - ETF INDUST MTLS DJ UBSCISM ISIN: GB00B15KYG56",
+        "d": 898108,
+        "h": 898108
+      },
+      {
+        "Subcuenta": "4790000289",
+        "Titulo": "Pasivos por diferencias temporarias imponibles MS EURO CORP BOND Z ACC EUR ISIN: LU0360483100",
+        "d": 2290031,
+        "h": 6283910
+      },
+      {
+        "Subcuenta": "4790000291",
+        "Titulo": "Pasivos por diferencias temporarias imponibles NXT GNRT EMRG MRK EQ B ACC EUR ISIN: LU1965309831 -INVERSIS-",
+        "d": 507912,
+        "h": 2838072
+      },
+      {
+        "Subcuenta": "4790000292",
+        "Titulo": "Pasivos por diferencias temporarias imponibles PACIFIC NTH OF STH EM ALL EQ ISIN: IE00BM8QS764 -INVERSIS-",
+        "d": 697102,
+        "h": 3234013
+      },
+      {
+        "Subcuenta": "4790000293",
+        "Titulo": "Pasivos por diferencias temporarias imponibles LIGHTMN EUROPN EQTI FUND-I-EUR ISIN: LU2214500949 -INVERSIS-",
+        "d": 1048646,
+        "h": 2243258
+      },
+      {
+        "Subcuenta": "4790000294",
+        "Titulo": "Pasivos por diferencias temporarias imponibles BLUEBA-INV.GRADE BD Q EUR-ACC- ISIN: LU1170326638",
+        "d": 302669,
+        "h": 2662614
+      },
+      {
+        "Subcuenta": "4790000297",
+        "Titulo": "Pasivos por diferencias temporarias imponibles BLUEBOX GLB TECH FND I ACC USD ISIN: LU1793346666 -INVERSIS-",
+        "d": 342614,
+        "h": 6652112
+      },
+      {
+        "Subcuenta": "4790000300",
+        "Titulo": "Pasivos por diferencias temporarias imponibles MI METROPOLIS VALUEFD AC GBP ISIN: GB00BYQPY596 -INVERSIS-",
+        "d": 178015,
+        "h": 2733194
+      },
+      {
+        "Subcuenta": "4790000301",
+        "Titulo": "Pasivos por diferencias temporarias imponibles SHORTDURATION HY EUR ACC H ISIN: IE00B9721Z33 -INVERSIS-",
+        "d": 502878,
+        "h": 502878
+      },
+      {
+        "Subcuenta": "4790000303",
+        "Titulo": "Pasivos por diferencias temporarias imponibles ISHARES WORLD EQUITY INDEX D2 ACC EUR ISIN: LU0875157702",
+        "d": 1386566,
+        "h": 4728032
+      },
+      {
+        "Subcuenta": "4790000310",
+        "Titulo": "Pasivos por diferencias temporarias imponibles PHYSICAL GOLD (INVESCO)-ETC-311200 ISIN: IE00B579F325",
+        "d": 639995,
+        "h": 4418506
+      },
+      {
+        "Subcuenta": "4790000311",
+        "Titulo": "Pasivos por diferencias temporarias imponibles US SHORT DUR YLD A ACC EURH ISIN: LU0194345913 -INVERSIS-",
+        "d": 336201,
+        "h": 1059236
+      },
+      {
+        "Subcuenta": "4790000312",
+        "Titulo": "Pasivos por diferencias temporarias imponibles LETRAS DEL TESORO ESPAÑA VTO 31-01-2025 ISIN: ES0000012F92 -INVERSIS-",
+        "d": 461808,
+        "h": 461808
+      },
+      {
+        "Subcuenta": "4790000314",
+        "Titulo": "Pasivos por diferencias temporarias imponibles SPGB 0,8 300727 BONOS Y OBLIGACIONES DEL ESTADO ESPAÑOL VTO 30-07-2027 ISIN: ES0000012G26 -INVERSIS-",
+        "d": 0,
+        "h": 863226
+      },
+      {
+        "Subcuenta": "4790000316",
+        "Titulo": "Pasivos por diferencias temporarias imponibles FRTR 250226 DEUDA PUBLICA FRANCESA VTO 25-02-2026 ISIN: FR0013508470",
+        "d": 1089620,
+        "h": 1089620
+      },
+      {
+        "Subcuenta": "4790000317",
+        "Titulo": "Pasivos por diferencias temporarias imponibles BOND EUR MEDIUM TRIM Z AC EUR ISIN: LU0335987698",
+        "d": 1850337,
+        "h": 5230294
+      },
+      {
+        "Subcuenta": "4790000318",
+        "Titulo": "Pasivos por diferencias temporarias imponibles EFSF 0,5 110725 DEUDA PUBLICA EUROPEA VTO 11-07-2025 ISIN: EU000A1G0DV6",
+        "d": 491404,
+        "h": 491404
+      },
+      {
+        "Subcuenta": "4790000319",
+        "Titulo": "Pasivos por diferencias temporarias imponibles NETHER 150126 DEUDA PUBLICA NETHERLANDS VTO 15-01-2026 ISIN: NL0015000QL2",
+        "d": 1057591,
+        "h": 1057591
+      },
+      {
+        "Subcuenta": "4790000322",
+        "Titulo": "Pasivos por diferencias temporarias imponibles IRISH 150526 DEUDA PUBLICA IRISH GOVT VTO 15-05-2026 ISIN: IE00BVBC9418",
+        "d": 0,
+        "h": 654286
+      },
+      {
+        "Subcuenta": "4790000324",
+        "Titulo": "Pasivos por diferencias temporarias imponibles GROUPAMA TRESORERIE I ACC EUR *70971 ISIN: FR0000989626 -INVERSIS-",
+        "d": 27499,
+        "h": 58751
+      },
+      {
+        "Subcuenta": "4790000325",
+        "Titulo": "Pasivos por diferencias temporarias imponibles POLAR CAPITAL PLC JAPAN VALUE FUND-I-EU ISIN: IE000B4WLVU3 -INVERSIS-",
+        "d": 121380,
+        "h": 1442908
+      },
+      {
+        "Subcuenta": "4790000326",
+        "Titulo": "Pasivos por diferencias temporarias imponibles JPMIF-GLOBAL SELECT EQUIT.I EUR-ACC ISIN: LU2552654589",
+        "d": 2029172,
+        "h": 3643106
+      },
+      {
+        "Subcuenta": "4790000327",
+        "Titulo": "Pasivos por diferencias temporarias imponibles MONTL.-C.CR.P.N.A.L./S EQ.INS.PO.EUR ISIN: IE00BG08P667",
+        "d": 778121,
+        "h": 778121
+      },
+      {
+        "Subcuenta": "4790000329",
+        "Titulo": "Pasivos por diferencias temporarias imponibles BON BELGIUM KINGDOM 1% 22-06-2026 ISIN: BE000337460",
+        "d": 0,
+        "h": 971222
+      },
+      {
+        "Subcuenta": "4790000330",
+        "Titulo": "Pasivos por diferencias temporarias imponibles BON UBS GROUP 4,625% 17-03-2028 ISIN: CH1255915006",
+        "d": 152157,
+        "h": 152157
+      },
+      {
+        "Subcuenta": "4790000331",
+        "Titulo": "Pasivos por diferencias temporarias imponibles BON EUROPEAN UNION 0% 06-07-2026 ISIN: EU000A3KTGV8",
+        "d": 0,
+        "h": 1595932
+      },
+      {
+        "Subcuenta": "4790000332",
+        "Titulo": "Pasivos por diferencias temporarias imponibles BON BPCE 0,375% 02-02-2026 ISIN: FR0014007VF4",
+        "d": 1267490,
+        "h": 1267490
+      },
+      {
+        "Subcuenta": "4790000333",
+        "Titulo": "Pasivos por diferencias temporarias imponibles BON Y OBLI. ESTADO 0% 31-01-2026 ISIN: ES0000012G91",
+        "d": 2145755,
+        "h": 2145755
+      },
+      {
+        "Subcuenta": "4790000336",
+        "Titulo": "Pasivos por diferencias temporarias imponibles BON ANGLO AMERICAN C 1,62 03-26 ISIN: XS1962513674",
+        "d": 372558,
+        "h": 372558
+      },
+      {
+        "Subcuenta": "4790000338",
+        "Titulo": "Pasivos por diferencias temporarias imponibles EURO FUND A-2 ACC EUR ISIN: LU0090865873",
+        "d": 0,
+        "h": 681567
+      },
+      {
+        "Subcuenta": "4790000339",
+        "Titulo": "Pasivos por diferencias temporarias imponibles BON REPUBLICA DE ITALIA 3,50% VTO 15-01-2026 Isin: IT0005514473",
+        "d": 796219,
+        "h": 796219
+      },
+      {
+        "Subcuenta": "4790000341",
+        "Titulo": "Pasivos por diferencias temporarias imponibles BONOS FCC SERVICIO MEDIO AMBIENTE VTO 04-12-2026 Isin: XS2081500907",
+        "d": 0,
+        "h": 755898
+      },
+      {
+        "Subcuenta": "4790000342",
+        "Titulo": "Pasivos por diferencias temporarias imponibles BONOS UNICREDIT 0,325% VTO 19-01-2026 ISIN: XS2289133915",
+        "d": 1032229,
+        "h": 1032229
+      },
+      {
+        "Subcuenta": "4790000343",
+        "Titulo": "Pasivos por diferencias temporarias imponibles BONOS AUTOSTRADE LITALIA 1,750% VTO 26-06-2026 ISIN: XS1327504087",
+        "d": 0,
+        "h": 623820
+      },
+      {
+        "Subcuenta": "4790000345",
+        "Titulo": "Pasivos por diferencias temporarias imponibles BONOS INTESA SAN PAOLO 0,625% VTO 24-02-2026 ISIN: XS2304664167",
+        "d": 953315,
+        "h": 953315
+      },
+      {
+        "Subcuenta": "4790000346",
+        "Titulo": "Pasivos por diferencias temporarias imponibles BONOS IMPERIAL BRANDS 3,375% VTO 26-02-2026 ISIN: XS1040508241",
+        "d": 11168,
+        "h": 11168
+      },
+      {
+        "Subcuenta": "4790000349",
+        "Titulo": "Pasivos por diferencias temporarias imponibles NOMURA-US HIGH YIELD BOND 1 EUR HDG A EUR ISIN: IE00B78FDY06",
+        "d": 53766,
+        "h": 53765
+      },
+      {
+        "Subcuenta": "4790000352",
+        "Titulo": "Pasivos por diferencias temporarias imponibles ELEVA EUROEAN SELECTION I EUR ACC ISIN: LU1111643042",
+        "d": 12813,
+        "h": 1172457
+      },
+      {
+        "Subcuenta": "4790000354",
+        "Titulo": "Pasivos por diferencias temporarias imponibles SCHRODEER ISF JAPANESE OPPORT C ACC EUR ISIN: LU1799645038",
+        "d": 3141,
+        "h": 383851
+      },
+      {
+        "Subcuenta": "4790000355",
+        "Titulo": "Pasivos por diferencias temporarias imponibles PICTET EMERGING MARKETS INDEX I ACC EUR ISIN: LU0474967725",
+        "d": 1174497,
+        "h": 1174497
+      },
+      {
+        "Subcuenta": "4790000357",
+        "Titulo": "Pasivos por diferencias temporarias imponibles GIS EURO BOND BX ACC EUR ISIN: LU0145476148",
+        "d": 0,
+        "h": 44344
+      },
+      {
+        "Subcuenta": "4790000358",
+        "Titulo": "Pasivos por diferencias temporarias imponibles BNPP EASY JPM ESG EMU GO IG 3-5Y ACC EUR ISIN: LU2533813452",
+        "d": 87,
+        "h": 418797
+      },
+      {
+        "Subcuenta": "4790000359",
+        "Titulo": "Pasivos por diferencias temporarias imponibles EVLI SHORT CORPORATE BOND IB EUR ACC ISIN: FI400233242",
+        "d": 232347,
+        "h": 232346
+      },
+      {
+        "Subcuenta": "4790000360",
+        "Titulo": "Pasivos por diferencias temporarias imponibles AMUNDI INDEX S&P 500 IE ACC EUR ISIN: LU0996177720",
+        "d": 1281324,
+        "h": 1281323
+      },
+      {
+        "Subcuenta": "4790000361",
+        "Titulo": "Pasivos por diferencias temporarias imponibles EURIZON BOND USD LTE Z AC EUR ISIN: LU0335989553",
+        "d": 203600,
+        "h": 203600
+      },
+      {
+        "Subcuenta": "4790000362",
+        "Titulo": "Pasivos por diferencias temporarias imponibles BON CREDIT SUISSE GRO 1,00 06-27 ISIN: CH0483180946",
+        "d": 0,
+        "h": 423668
+      },
+      {
+        "Subcuenta": "4790000363",
+        "Titulo": "Pasivos por diferencias temporarias imponibles BON BANCO SANTANDER S 4,62 10-27 ISIN: XS2705604077",
+        "d": 99550,
+        "h": 99550
+      },
+      {
+        "Subcuenta": "4790000364",
+        "Titulo": "Pasivos por diferencias temporarias imponibles BON EDP FINANCE BV 1,50 11-27 ISIN: XS1721051495",
+        "d": 0,
+        "h": 68623
+      },
+      {
+        "Subcuenta": "4790000365",
+        "Titulo": "Pasivos por diferencias temporarias imponibles BON AIB GROUP PLC 0,50 11-27 ISIN: XS2343340852",
+        "d": 0,
+        "h": 414561
+      },
+      {
+        "Subcuenta": "4790000366",
+        "Titulo": "Pasivos por diferencias temporarias imponibles BON BNP PARIBAS VARIABLE 01-27 ISIN: FR0013398070",
+        "d": 274109,
+        "h": 274109
+      },
+      {
+        "Subcuenta": "4790000367",
+        "Titulo": "Pasivos por diferencias temporarias imponibles OBL BKT 0,625 10-27 ISIN: ES0213679JR9",
+        "d": 0,
+        "h": 650661
+      },
+      {
+        "Subcuenta": "4790000368",
+        "Titulo": "Pasivos por diferencias temporarias imponibles BON BRITISH AMERICAN 1,25 03-27 ISIN: XS1203859928",
+        "d": 0,
+        "h": 380335
+      },
+      {
+        "Subcuenta": "4790000369",
+        "Titulo": "Pasivos por diferencias temporarias imponibles BON CAIXABANK SA 4,62 05-27 ISIN: XS2623501181",
+        "d": 108425,
+        "h": 108425
+      },
+      {
+        "Subcuenta": "4790000370",
+        "Titulo": "Pasivos por diferencias temporarias imponibles BON SANDOZ FINANCE BV 3,97 04-27 ISIN: XS2715297672",
+        "d": 162459,
+        "h": 162459
+      },
+      {
+        "Subcuenta": "4790000372",
+        "Titulo": "Pasivos por diferencias temporarias imponibles PICTET-EUR CORPORATE BONDS-I EUR ISIN: LU0128472205",
+        "d": 0,
+        "h": 520981
+      },
+      {
+        "Subcuenta": "4790000374",
+        "Titulo": "Pasivos por diferencias temporarias imponibles MC SICAV AZ VALOR INTERNAT I ISIN: LU1333146287 -INVERSIS-",
+        "d": 0,
+        "h": 659544
+      },
+      {
+        "Subcuenta": "4790000375",
+        "Titulo": "Pasivos por diferencias temporarias imponibles ETF ISHARES MSCI WORLD ACC ISIN: IE00B4L5Y983 -CACEIS-",
+        "d": 224423,
+        "h": 224423
+      },
+      {
+        "Subcuenta": "4790000376",
+        "Titulo": "Pasivos por diferencias temporarias imponibles AIGI IM - ETF INDUST MTLS DJ UBSCISM ISIN: GB00B15KYG56 -CACEIS-",
+        "d": 1260782,
+        "h": 1260782
+      },
+      {
+        "Subcuenta": "4790000377",
+        "Titulo": "Pasivos por diferencias temporarias imponibles ZGLDHE SW - ETF ZKB GOLD H-EUR ISIN: CH0103326762 -CACEIS-",
+        "d": 2912770,
+        "h": 17139655
+      },
+      {
+        "Subcuenta": "4790000378",
+        "Titulo": "Pasivos por diferencias temporarias imponibles MS EURO CORP BOND Z ACC EUR ISIN: LU0360483100 -CACEIS-",
+        "d": 2743471,
+        "h": 2743471
+      },
+      {
+        "Subcuenta": "4790000379",
+        "Titulo": "Pasivos por diferencias temporarias imponibles EDR FUND BIG DATA P ACC EUR ISIN: LU2225826366 -CACEIS-",
+        "d": 301749,
+        "h": 4812558
+      },
+      {
+        "Subcuenta": "4790000380",
+        "Titulo": "Pasivos por diferencias temporarias imponibles GUINNESS GLB EQ INC Y ACC EUR ISIN: IE00BVYPNZ31 -CACEIS-",
+        "d": 238000,
+        "h": 3176623
+      },
+      {
+        "Subcuenta": "4790000381",
+        "Titulo": "Pasivos por diferencias temporarias imponibles GROUPAMA TRESORERIE I ACC EUR ISIN: FR0000989626 -CACEIS-",
+        "d": 0,
+        "h": 922344
+      },
+      {
+        "Subcuenta": "4790000382",
+        "Titulo": "Pasivos por diferencias temporarias imponibles HERMES ASIA EXJAPN EQ F AC EUR ISIN: IE00B83XD802 -CACEIS-",
+        "d": 565670,
+        "h": 3372133
+      },
+      {
+        "Subcuenta": "4790000383",
+        "Titulo": "Pasivos por diferencias temporarias imponibles REDWHEEL GBL EQ INCO S ACC EUR ISIN: LU2264081188 -CACEIS-",
+        "d": 0,
+        "h": 2920531
+      },
+      {
+        "Subcuenta": "4790000384",
+        "Titulo": "Pasivos por diferencias temporarias imponibles VERITAS GLOBAL FOCUS C ACC EUR ISIN: IE00B3W2QP15 -CACEIS-",
+        "d": 2287931,
+        "h": 4106487
+      },
+      {
+        "Subcuenta": "4790000385",
+        "Titulo": "Pasivos por diferencias temporarias imponibles MULTIPART KONWAVE GOLD EQ C EU ISIN: LU1425270227 -INVERSIS-",
+        "d": 439071,
+        "h": 3094279
+      },
+      {
+        "Subcuenta": "4790000386",
+        "Titulo": "Pasivos por diferencias temporarias imponibles SISF-ASIAN TOTAL RETURN C USD-ACC.- ISIN: LU0326949186 -CACEIS-",
+        "d": 1222892,
+        "h": 4992059
+      },
+      {
+        "Subcuenta": "4790000388",
+        "Titulo": "Pasivos por diferencias temporarias imponibles SHORTDURATION HY EUR ACC H ISIN: IE00B9721Z33 -CACEIS-",
+        "d": 720353,
+        "h": 720353
+      },
+      {
+        "Subcuenta": "4790000389",
+        "Titulo": "Pasivos por diferencias temporarias imponibles MUZNCH GLB SHRT DURTN INVT GRD H ACC EUR ISIN: IE00BJCXFM61 -CACEIS-",
+        "d": 753326,
+        "h": 2818561
+      },
+      {
+        "Subcuenta": "4790000390",
+        "Titulo": "Pasivos por diferencias temporarias imponibles MAN GLG ASIA CREDIT OPPOR IF H ISIN: IE0006UIVA78 -CACEIS-",
+        "d": 461880,
+        "h": 2893724
+      },
+      {
+        "Subcuenta": "4790000391",
+        "Titulo": "Pasivos por diferencias temporarias imponibles POLAR CAPITAL PLC JAPAN VALUE FUND-I-EU ISIN: IE000B4WLVU3 -CACEIS-",
+        "d": 134671,
+        "h": 2591616
+      },
+      {
+        "Subcuenta": "4790000394",
+        "Titulo": "Pasivos por diferencias temporarias imponibles BNPP INSTIC EUR I SH TM VNAV A ISIN: LU0094219127 -CACEIS-",
+        "d": 2014270,
+        "h": 2465088
+      },
+      {
+        "Subcuenta": "4790000395",
+        "Titulo": "Pasivos por diferencias temporarias imponibles PACIFIC NTH OF STH EM ALL EQ ISIN: IE00BM8QS764 -CACEIS-",
+        "d": 604645,
+        "h": 5031335
+      },
+      {
+        "Subcuenta": "4790000396",
+        "Titulo": "Pasivos por diferencias temporarias imponibles GUARDCAP GLOBAL EQUITY I AC EU ISIN: IE00BZ036616 -CACEIS-",
+        "d": 1511983,
+        "h": 1511984
+      },
+      {
+        "Subcuenta": "4790000397",
+        "Titulo": "Pasivos por diferencias temporarias imponibles LIGHTMN EUROPN EQTI FUND-I-EUR ISIN: LU2214500949 -CACEIS-",
+        "d": 630545,
+        "h": 3579387
+      },
+      {
+        "Subcuenta": "4790000398",
+        "Titulo": "Pasivos por diferencias temporarias imponibles COMGEST GROWTH EUROPE I AC EUR ISIN: IE00B5WN3467 -CACEIS-",
+        "d": 841842,
+        "h": 841842
+      },
+      {
+        "Subcuenta": "4790000399",
+        "Titulo": "Pasivos por diferencias temporarias imponibles MAGALLANES EUROPEAN EQUITY I ISIN: LU1330191385 -CACEIS-",
+        "d": 1133734,
+        "h": 3211999
+      },
+      {
+        "Subcuenta": "4790000401",
+        "Titulo": "Pasivos por diferencias temporarias imponibles US SHORT DUR YLD A ACC EURH ISIN: LU0194345913 -CACEIS-",
+        "d": 642671,
+        "h": 1593865
+      },
+      {
+        "Subcuenta": "4790000402",
+        "Titulo": "Pasivos por diferencias temporarias imponibles NXT GNRT EMRG MRK EQ B ACC EUR ISIN: LU1965309831 -CACEIS-",
+        "d": 480689,
+        "h": 4652093
+      },
+      {
+        "Subcuenta": "4790000403",
+        "Titulo": "Pasivos por diferencias temporarias imponibles SISF EURO CORP BOND C ACC EUR ISIN: LU0113258742 -CACEIS-",
+        "d": 892884,
+        "h": 4957506
+      },
+      {
+        "Subcuenta": "4790000404",
+        "Titulo": "Pasivos por diferencias temporarias imponibles LETRAS DEL TESORO ESPAÑA VTO 31-01-2025 ISIN: ES0000012F92 -CACEIS-",
+        "d": 538675,
+        "h": 538675
+      },
+      {
+        "Subcuenta": "4790000405",
+        "Titulo": "Pasivos por diferencias temporarias imponibles LETRAS DEL TESORO ESTADO DE ESPAÑA. VTO 31-05-2026 ISIN: ES0000012L29 -CACEIS-",
+        "d": 0,
+        "h": 1118710
+      },
+      {
+        "Subcuenta": "4790000406",
+        "Titulo": "Pasivos por diferencias temporarias imponibles SPGB 0,8 300727 BONOS Y OBLIGACIONES DEL ESTADO ESPAÑOL VTO 30-07-2027 ISIN: ES0000012G26 -CACEIS-",
+        "d": 0,
+        "h": 1253777
+      },
+      {
+        "Subcuenta": "4790000407",
+        "Titulo": "Pasivos por diferencias temporarias imponibles SISF EURO CORP BOND C ACC EUR ISIN: LU0113258742 -PICTET-",
+        "d": 203425,
+        "h": 1480573
+      },
+      {
+        "Subcuenta": "4790000409",
+        "Titulo": "Pasivos por diferencias temporarias imponibles MC SICAV AZ VALOR INTERNAT I ISIN: LU1333146287 -CACEIS-",
+        "d": 1155068,
+        "h": 1155068
+      },
+      {
+        "Subcuenta": "4790000410",
+        "Titulo": "Pasivos por diferencias temporarias imponibles MI METROPOLIS VALUEFD AC GBP ISIN: GB00BYQPY596 -CACEIS-",
+        "d": 616284,
+        "h": 5922300
+      },
+      {
+        "Subcuenta": "4790000411",
+        "Titulo": "Pasivos por diferencias temporarias imponibles US STRUCTURED RESEARCH EQUITY FD IN EUR ISIN: LU2783628410 -BANCA MARCH-",
+        "d": 0,
+        "h": 1385183
+      },
+      {
+        "Subcuenta": "4790000412",
+        "Titulo": "Pasivos por diferencias temporarias imponibles AMUNDI INDEX MSCI EUROPE I E ACC EUR ISIN: LU0389811539 -BANCA MARCH-",
+        "d": 124966,
+        "h": 2302766
+      },
+      {
+        "Subcuenta": "4790000414",
+        "Titulo": "Pasivos por diferencias temporarias imponibles VANGUARD EURO GOVERMENT BOND EUR ISIN: IE0007472990 -BANCA MARCH-",
+        "d": 2261,
+        "h": 144909
+      },
+      {
+        "Subcuenta": "4790000416",
+        "Titulo": "Pasivos por diferencias temporarias imponibles FO.LAVL GAVEK LA LC DB EX.OPEN-END FUND ISIN: LU2751661898 -CACEIS-",
+        "d": 477069,
+        "h": 2165600
+      },
+      {
+        "Subcuenta": "4790000418",
+        "Titulo": "Pasivos por diferencias temporarias imponiblesFO.JB MULTIPART GLD ETY C EUR.OPEN-END FU ISIN: LU1425270227 -CACEIS-",
+        "d": 1556504,
+        "h": 6628223
+      },
+      {
+        "Subcuenta": "4790000419",
+        "Titulo": "Pasivos por diferencias temporarias imponibles SISF-ASIAN TOTAL RETURN C USD-ACC.- ISIN: LU0326949186 -PICTET-",
+        "d": 3001783,
+        "h": 3001783
+      },
+      {
+        "Subcuenta": "4790000420",
+        "Titulo": "Pasivos por diferencias temporarias imponibles BO.SPAIN LETRAS DEL TESORO 16/01/2026 ISIN: ES0L02601166 -CACEIS-",
+        "d": 447131,
+        "h": 447131
+      },
+      {
+        "Subcuenta": "4790000421",
+        "Titulo": "Pasivos por diferencias temporarias imponibles VANGUARD-GL.STOCK IDX INST + EUR-ACC ISIN: IE00BFPM9N11 -PICTET-",
+        "d": 336273,
+        "h": 424344
+      },
+      {
+        "Subcuenta": "4790000422",
+        "Titulo": "Pasivos por diferencias temporarias imponibles LARRAINVIAL GAVEKAL LAT LCL EX ISIN: LU2751661898 -INVERSIS-",
+        "d": 166855,
+        "h": 1081977
+      },
+      {
+        "Subcuenta": "4790000423",
+        "Titulo": "Pasivos por diferencias temporarias imponibles LETRAS DEL TESORO DE ESPAÑA SGLT 160126 - SGLT 160126 ISIN: ES0L02601166 -INVERSIS-",
+        "d": 311120,
+        "h": 311120
+      },
+      {
+        "Subcuenta": "4790000424",
+        "Titulo": "Pasivos por diferencias temporarias imponibles AMUNDI EURO LIQ IC ACC EUR ISIN: FR0010251660 -INVERSIS *16185-",
+        "d": 0,
+        "h": 525545
+      },
+      {
+        "Subcuenta": "4790000425",
+        "Titulo": "Pasivos por diferencias temporarias imponibles EURIZON BOND EUR SHORT TERM LTE Z AC EUR ISIN: LU0335987268 -INVERSIS *16185-",
+        "d": 0,
+        "h": 725075
+      },
+      {
+        "Subcuenta": "4790000426",
+        "Titulo": "Pasivos por diferencias temporarias imponibles SCHRODER ISF EURO CORP BND IZ ACC EUR ISIN: LU1078767826 -BANCA MARCH-",
+        "d": 0,
+        "h": 391130
+      },
+      {
+        "Subcuenta": "4790000427",
+        "Titulo": "Pasivos por diferencias temporarias imponibles MUZNCH GLB SHRT DURTN INVT GRD H ACC EUR ISIN: IE00BJCXFM61 -BANCA MARCH-",
+        "d": 0,
+        "h": 108284
+      },
+      {
+        "Subcuenta": "4790000431",
+        "Titulo": "Pasivos por diferencias temporarias imponibles FF GERMANY FUND Y ACC EUR ISIN: LU0346388530 -BANCA MARCH GDC-",
+        "d": 0,
+        "h": 755031
+      },
+      {
+        "Subcuenta": "4790000432",
+        "Titulo": "Pasivos por diferencias temporarias imponibles CT LUX AMERICAN SMALLER COMPANIES IE EUR ISIN: LU2005601161 -BANCA MARCH GDC-",
+        "d": 6457,
+        "h": 143974
+      },
+      {
+        "Subcuenta": "4790000433",
+        "Titulo": "Pasivos por diferencias temporarias imponibles SISF US DOLLAR LIQUIDITY EUR C ACC ISIN: LU0511055591 -BANCA MARCH GDC-",
+        "d": 5952,
+        "h": 35701
+      },
+      {
+        "Subcuenta": "4790000434",
+        "Titulo": "Pasivos por diferencias temporarias imponibles FO.AMUNDI CASH CORPORATE ISIN: FR0010251660 -CACEIS-",
+        "d": 0,
+        "h": 220305
+      },
+      {
+        "Subcuenta": "4790000435",
+        "Titulo": "Pasivos por diferencias temporarias imponibles UBS (LUX) FUND SOLUTIONS SICAV - BLOOMBERG EUR TREASURY 1-10 UCITS ETF -A EUR -ACC- ISIN: LU0969639474 -PICTET-",
+        "d": 0,
+        "h": 132610
+      },
+      {
+        "Subcuenta": "4790000436",
+        "Titulo": "Pasivos por diferencias temporarias imponibles PICTET-QUEST AI-DRIVEN GL.EQ.I EUR ISIN: LU2749781550 -PICTET-",
+        "d": 0,
+        "h": 2275032
+      },
+      {
+        "Subcuenta": "4790000437",
+        "Titulo": "Pasivos por diferencias temporarias imponibles BLACKSTONE-G.IG C.BD B EUR FOUN.ACC ISIN: IE000SBSF4A0 -PICTET-",
+        "d": 0,
+        "h": 339722
+      },
+      {
+        "Subcuenta": "4790000438",
+        "Titulo": "Pasivos por diferencias temporarias imponibles Bluebay-Financial Cap. BD Q EUR-ACC Isin: LU1163205096 -PICTET-",
+        "d": 0,
+        "h": 385796
+      },
+      {
+        "Subcuenta": "4790000439",
+        "Titulo": "Pasivos por diferencias temporarias imponibles AMUNIDI PRIME USA RE EUR ACC ISIN: LU3046359249 -BANCA MARCH-",
+        "d": 86181,
+        "h": 1607651
+      },
+      {
+        "Subcuenta": "4790000441",
+        "Titulo": "Pasivos por diferencias temporarias imponibles FO. ABANTE SPA. OPP. A EUR ISIN: LU0861897394 -CACEIS-",
+        "d": 1820138,
+        "h": 1820138
+      },
+      {
+        "Subcuenta": "4790000442",
+        "Titulo": "Pasivos por diferencias temporarias imponibles EXANE FDS 1-OVERDRIVE P EUR-ACC ISIN: LU3030334166 -PICTET-",
+        "d": 0,
+        "h": 16421
+      },
+      {
+        "Subcuenta": "4790000443",
+        "Titulo": "Pasivos por diferencias temporarias imponibles ABANTE OKAVANGO DELTA I FI ISIN: ES0167211004 -INVERSIS-",
+        "d": 1006442,
+        "h": 1006442
+      },
+      {
+        "Subcuenta": "4790000444",
+        "Titulo": "Pasivos por diferencias temporarias imponibles Concise Short Term High Yield FD 12 EUR ISIN: IE00BFYV9065 -INVERSIS-",
+        "d": 9519,
+        "h": 74742
+      },
+      {
+        "Subcuenta": "4790000445",
+        "Titulo": "Pasivos por diferencias temporarias imponibles BLACKROCK GF-CONTIN.EUR.FLEX I2 EUR ISIN: LU0888974473 -PICTET-",
+        "d": 0,
+        "h": 330892
+      },
+      {
+        "Subcuenta": "4790000446",
+        "Titulo": "Pasivos por diferencias temporarias imponibles FO. CONCISE S T HY FUND 12 EUR OPEN-END FUND ISIN:IE00BFYV9065 -CACEIS-",
+        "d": 13279,
+        "h": 98073
+      },
+      {
+        "Subcuenta": "4790000447",
+        "Titulo": "Pasivos por diferencias temporarias imponibles FO.LF CYC GLB EQ UCITS 11 ER AC.OPEN-END FUN ISIN: IE0004PBGJR7 -CACEIS-",
+        "d": 0,
+        "h": 307846
+      },
+      {
+        "Subcuenta": "4790000449",
+        "Titulo": "Pasivos por diferencias temporarias imponibles AMUNDI EURO LIQ IC ACC EUR ISIN: FR0010251660 -INVERSIS *70971-",
+        "d": 0,
+        "h": 44304
+      },
+      {
+        "Subcuenta": "4790000450",
+        "Titulo": "Pasivos por diferencias temporarias imponibles GROUPAMA TRESORERIE I ACC EUR *16185 ISIN: FR0000989626 -INVERSIS-",
+        "d": 19171,
+        "h": 626858
+      },
+      {
+        "Subcuenta": "4790000451",
+        "Titulo": "Pasivos por diferencias temporarias imponibles BNPP INSTIC EUR I SH TM VNAV A ISIN: LU0094219127 *16185 -INVERSIS-",
+        "d": 0,
+        "h": 395283
+      },
+      {
+        "Subcuenta": "4790000452",
+        "Titulo": "Pasivos por diferencias temporarias imponibles WT ENERGY TRANSITION METALS - WENT IM ISIN: XS2425848053-INVERSIS *70971-",
+        "d": 0,
+        "h": 368864
+      },
+      {
+        "Subcuenta": "4790000455",
+        "Titulo": "Pasivos por diferencias temporarias imponibles EVLI SHORT CORPOR BOND FUND IB2 EUR ACC ISIN: FI4000591854 -BANCA MARCH-",
+        "d": 0,
+        "h": 22658
+      },
+      {
+        "Subcuenta": "4790000457",
+        "Titulo": "Pasivos por diferencias temporarias imponibles BARINGS-GLOBAL H/Y BOND B EUR-ACC ISIN: IE00B55MXX92 -PICTET-",
+        "d": 0,
+        "h": 55753
+      },
+      {
+        "Subcuenta": "4790000458",
+        "Titulo": "Pasivos por diferencias temporarias imponibles VANGUARD-EM STOCK IDX INST + USD ACC ISIN: IE00BFPM9H50 -PICTET-",
+        "d": 0,
+        "h": 77666
+      },
+      {
+        "Subcuenta": "4790000459",
+        "Titulo": "Pasivos por diferencias temporarias imponibles FO.WT ENERGY TRANSITION METALS ISIN: XS2425848053 -CACEIS-",
+        "d": 0,
+        "h": 836081
+      }
+    ],
+    "terceros": [
+      {
+        "Codigo": "4100000098",
+        "Nombre": "A.C. 99 Motor S.L.",
+        "Nif": "B92108778",
+        "apuntes": 2,
+        "tDebe": 46967,
+        "tHaber": 46967
+      },
+      {
+        "Codigo": "4100000066",
+        "Nombre": "Acción Continua S.L.",
+        "Nif": "B65058513",
+        "apuntes": 0,
+        "tDebe": null,
+        "tHaber": null
+      },
+      {
+        "Codigo": "4100000075",
+        "Nombre": "Acerlux Metal S.L.",
+        "Nif": "B34260489",
+        "apuntes": 0,
+        "tDebe": null,
+        "tHaber": null
+      },
+      {
+        "Codigo": "4100000122",
+        "Nombre": "Adevinta Jobs S.L.U.",
+        "Nif": "B70813365",
+        "apuntes": 2,
+        "tDebe": 12885,
+        "tHaber": 12885
+      },
+      {
+        "Codigo": "4100000095",
+        "Nombre": "Adobe Systems Software Irelan Ltd",
+        "Nif": "IE6364992H",
+        "apuntes": 0,
+        "tDebe": null,
+        "tHaber": null
+      },
+      {
+        "Codigo": "4100000025",
+        "Nombre": "Agro-Tracción Vehículos S.A.",
+        "Nif": "A37003043",
+        "apuntes": 0,
+        "tDebe": null,
+        "tHaber": null
+      },
+      {
+        "Codigo": "4100000056",
+        "Nombre": "Alcaraván Gestión e Inversiones S.L.",
+        "Nif": "B45889649",
+        "apuntes": 0,
+        "tDebe": null,
+        "tHaber": null
+      },
+      {
+        "Codigo": "4100000101",
+        "Nombre": "AlertaSubastas S.L.",
+        "Nif": "B55284814",
+        "apuntes": 2,
+        "tDebe": 8318,
+        "tHaber": 8318
+      },
+      {
+        "Codigo": "4100000078",
+        "Nombre": "Altai Soft S.L.",
+        "Nif": "B83788158",
+        "apuntes": 0,
+        "tDebe": null,
+        "tHaber": null
+      },
+      {
+        "Codigo": "4100000027",
+        "Nombre": "Altim Tecnologías de Información S.L.",
+        "Nif": "B82945916",
+        "apuntes": 2,
+        "tDebe": 7590030,
+        "tHaber": 7590030
+      },
+      {
+        "Codigo": "4100000115",
+        "Nombre": "Amazon EU S.a.r.l.",
+        "Nif": "LU20260743",
+        "apuntes": 2,
+        "tDebe": 4923,
+        "tHaber": 4923
+      },
+      {
+        "Codigo": "4100000885",
+        "Nombre": "Amazon EU S.A.R.L. Sucursal en España",
+        "Nif": "W0184081H",
+        "apuntes": 2,
+        "tDebe": 89847,
+        "tHaber": 89847
+      },
+      {
+        "Codigo": "4100000814",
+        "Nombre": "AMT Palencia S.L.",
+        "Nif": "B34204974",
+        "apuntes": 0,
+        "tDebe": null,
+        "tHaber": null
+      },
+      {
+        "Codigo": "4100000019",
+        "Nombre": "Ana María Crespo Iribas",
+        "Nif": "09270168H",
+        "apuntes": 0,
+        "tDebe": null,
+        "tHaber": null
+      },
+      {
+        "Codigo": "4100000046",
+        "Nombre": "AndBank España S.A.U.",
+        "Nif": "A86701711",
+        "apuntes": 0,
+        "tDebe": null,
+        "tHaber": null
+      },
+      {
+        "Codigo": "4100001799",
+        "Nombre": "Anjana Investments S.L.U.",
+        "Nif": "B85509669",
+        "apuntes": 0,
+        "tDebe": null,
+        "tHaber": null
+      },
+      {
+        "Codigo": "4100001840",
+        "Nombre": "Apple Retail Spain S.L.U.",
+        "Nif": "B65130643",
+        "apuntes": 0,
+        "tDebe": null,
+        "tHaber": null
+      },
+      {
+        "Codigo": "4100000133",
+        "Nombre": "Applus Iteuve Technology S.L.U.",
+        "Nif": "B81041444",
+        "apuntes": 2,
+        "tDebe": 6814,
+        "tHaber": 6814
+      },
+      {
+        "Codigo": "4100000055",
+        "Nombre": "Araoz y Rueda Abogados S.L.P.",
+        "Nif": "B80784531",
+        "apuntes": 12,
+        "tDebe": 7783490,
+        "tHaber": 7783490
+      },
+      {
+        "Codigo": "4100000045",
+        "Nombre": "Arcano Value Added Operativa I S.L.",
+        "Nif": "B88072178",
+        "apuntes": 0,
+        "tDebe": null,
+        "tHaber": null
+      }
+    ],
+    "ejercicios": [
+      {
+        "Codigo": 18,
+        "Empresa": "VID",
+        "FechaInicial": "2026-01-01T00:00:00.000Z",
+        "FechaFinal": "2026-12-31T23:59:59.000Z",
+        "UltimoAsiento": 272,
+        "Descripcion": "Ejercicio 2026"
+      },
+      {
+        "Codigo": 17,
+        "Empresa": "VID",
+        "FechaInicial": "2025-01-01T00:00:00.000Z",
+        "FechaFinal": "2025-12-31T23:59:59.000Z",
+        "UltimoAsiento": 1266,
+        "Descripcion": "Ejercicio 2025"
+      },
+      {
+        "Codigo": 16,
+        "Empresa": "VID",
+        "FechaInicial": "2024-01-01T00:00:00.000Z",
+        "FechaFinal": "2024-12-31T23:59:59.000Z",
+        "UltimoAsiento": 1416,
+        "Descripcion": "Ejercicio 2024"
+      },
+      {
+        "Codigo": 15,
+        "Empresa": "VID",
+        "FechaInicial": "2023-01-01T00:00:00.000Z",
+        "FechaFinal": "2023-12-31T23:59:59.000Z",
+        "UltimoAsiento": 1386,
+        "Descripcion": "Ejercicio 2023"
+      },
+      {
+        "Codigo": 14,
+        "Empresa": "VID",
+        "FechaInicial": "2022-01-01T00:00:00.000Z",
+        "FechaFinal": "2022-12-31T23:59:59.000Z",
+        "UltimoAsiento": 1357,
+        "Descripcion": "Ejercicio 2022"
+      },
+      {
+        "Codigo": 13,
+        "Empresa": "VID",
+        "FechaInicial": "2021-01-01T00:00:00.000Z",
+        "FechaFinal": "2021-12-31T23:59:59.000Z",
+        "UltimoAsiento": 938,
+        "Descripcion": "Ejercicio 2021"
+      },
+      {
+        "Codigo": 12,
+        "Empresa": "VID",
+        "FechaInicial": "2020-01-01T00:00:00.000Z",
+        "FechaFinal": "2020-12-31T23:59:59.000Z",
+        "UltimoAsiento": 568,
+        "Descripcion": "Ejercicio 2020"
+      },
+      {
+        "Codigo": 11,
+        "Empresa": "VID",
+        "FechaInicial": "2019-01-01T00:00:00.000Z",
+        "FechaFinal": "2019-12-31T23:59:59.000Z",
+        "UltimoAsiento": 479,
+        "Descripcion": "Ejercicio 2019"
+      },
+      {
+        "Codigo": 10,
+        "Empresa": "VID",
+        "FechaInicial": "2018-01-01T00:00:00.000Z",
+        "FechaFinal": "2018-12-31T23:59:59.000Z",
+        "UltimoAsiento": 437,
+        "Descripcion": "Ejercicio 2018"
+      },
+      {
+        "Codigo": 9,
+        "Empresa": "VID",
+        "FechaInicial": "2017-01-01T00:00:00.000Z",
+        "FechaFinal": "2017-12-31T23:59:59.000Z",
+        "UltimoAsiento": 395,
+        "Descripcion": "Ejercicio 2017"
+      },
+      {
+        "Codigo": 8,
+        "Empresa": "VID",
+        "FechaInicial": "2016-01-01T00:00:00.000Z",
+        "FechaFinal": "2016-12-31T23:59:59.000Z",
+        "UltimoAsiento": 390,
+        "Descripcion": "Ejercicio 2016"
+      },
+      {
+        "Codigo": 7,
+        "Empresa": "VID",
+        "FechaInicial": "2015-01-01T00:00:00.000Z",
+        "FechaFinal": "2015-12-31T23:59:59.000Z",
+        "UltimoAsiento": 259,
+        "Descripcion": "Ejercicio 2015"
+      },
+      {
+        "Codigo": 6,
+        "Empresa": "VID",
+        "FechaInicial": "2014-01-01T00:00:00.000Z",
+        "FechaFinal": "2014-12-31T23:59:59.000Z",
+        "UltimoAsiento": 231,
+        "Descripcion": "Ejercicio 2014"
+      },
+      {
+        "Codigo": 5,
+        "Empresa": "VID",
+        "FechaInicial": "2013-01-01T00:00:00.000Z",
+        "FechaFinal": "2013-12-31T23:59:59.000Z",
+        "UltimoAsiento": 218,
+        "Descripcion": "Ejercicio 2013"
+      },
+      {
+        "Codigo": 4,
+        "Empresa": "VID",
+        "FechaInicial": "2012-01-01T00:00:00.000Z",
+        "FechaFinal": "2012-12-31T23:59:59.000Z",
+        "UltimoAsiento": 61,
+        "Descripcion": "Ejercicio 2012"
+      },
+      {
+        "Codigo": 3,
+        "Empresa": "VID",
+        "FechaInicial": "2009-01-01T00:00:00.000Z",
+        "FechaFinal": "2009-12-31T23:59:59.000Z",
+        "UltimoAsiento": 0,
+        "Descripcion": "Ejercicio 2009"
+      },
+      {
+        "Codigo": 2,
+        "Empresa": "VID",
+        "FechaInicial": "2011-01-01T00:00:00.000Z",
+        "FechaFinal": "2011-12-31T23:59:59.000Z",
+        "UltimoAsiento": 21,
+        "Descripcion": "Ejercicio 2011"
+      },
+      {
+        "Codigo": 1,
+        "Empresa": "VID",
+        "FechaInicial": "2010-01-01T00:00:00.000Z",
+        "FechaFinal": "2010-12-31T23:59:59.000Z",
+        "UltimoAsiento": 12,
+        "Descripcion": "Ejercicio 2010"
+      }
+    ],
+    "pgcGrupos": [
+      {
+        "grupo": "1",
+        "apuntes": 577,
+        "d": 938055267,
+        "h": 23756135883
+      },
+      {
+        "grupo": "2",
+        "apuntes": 888,
+        "d": 33437164357,
+        "h": 7503100095
+      },
+      {
+        "grupo": "4",
+        "apuntes": 2654,
+        "d": 950050258,
+        "h": 1050274999
+      },
+      {
+        "grupo": "5",
+        "apuntes": 1492,
+        "d": -3979181676,
+        "h": 15441598236
+      },
+      {
+        "grupo": "6",
+        "apuntes": 971,
+        "d": 424265555,
+        "h": 0
+      },
+      {
+        "grupo": "7",
+        "apuntes": 343,
+        "d": 0,
+        "h": 842713955
+      }
+    ],
+    "proveedores": [
+      {
+        "Subcuenta": "4100000085",
+        "Titulo": "MDEF Gestefin S.A.U. S.G.I.I.C.",
+        "pagado": 19368322,
+        "facturado": 20675294,
+        "n": 57
+      },
+      {
+        "Subcuenta": "4100000049",
+        "Titulo": "Gabinete Tributario de Orientación Fiscal S.L.",
+        "pagado": 15197431,
+        "facturado": 15197431,
+        "n": 2
+      },
+      {
+        "Subcuenta": "4100000057",
+        "Titulo": "Michavila de Fernando Family Partners S.A.",
+        "pagado": 10679066,
+        "facturado": 11421838,
+        "n": 34
+      },
+      {
+        "Subcuenta": "4100000092",
+        "Titulo": "Bank Pictet & Cie (Europe) AG Sucursal en España",
+        "pagado": 9144177,
+        "facturado": 9140755,
+        "n": 18
+      },
+      {
+        "Subcuenta": "4100000134",
+        "Titulo": "Bankinter S.A.",
+        "pagado": 8403592,
+        "facturado": 8403592,
+        "n": 10
+      },
+      {
+        "Subcuenta": "4100000055",
+        "Titulo": "Araoz y Rueda Abogados S.L.P.",
+        "pagado": 7783490,
+        "facturado": 7783490,
+        "n": 12
+      },
+      {
+        "Subcuenta": "4100000027",
+        "Titulo": "Altim Tecnologías de Información S.L.",
+        "pagado": 7590030,
+        "facturado": 7590030,
+        "n": 2
+      },
+      {
+        "Subcuenta": "4100000050",
+        "Titulo": "Banca March S.A.",
+        "pagado": 6452990,
+        "facturado": 6452990,
+        "n": 20
+      },
+      {
+        "Subcuenta": "4100000022",
+        "Titulo": "CEA Consultores Asesores Auditores SL",
+        "pagado": 5071630,
+        "facturado": 5071630,
+        "n": 2
+      },
+      {
+        "Subcuenta": "4100009000",
+        "Titulo": "Disfasa S.A.U.",
+        "pagado": 3932922,
+        "facturado": 3932922,
+        "n": 2
+      },
+      {
+        "Subcuenta": "4100004000",
+        "Titulo": "Viroda Inversiones S.L.U.",
+        "pagado": 3879823,
+        "facturado": 3846545,
+        "n": 16
+      },
+      {
+        "Subcuenta": "4100002002",
+        "Titulo": "Rovida S.L.U.",
+        "pagado": 2941530,
+        "facturado": 3188056,
+        "n": 36
+      },
+      {
+        "Subcuenta": "4100000083",
+        "Titulo": "Banco Inversis S.A.",
+        "pagado": 2721653,
+        "facturado": 2721653,
+        "n": 36
+      },
+      {
+        "Subcuenta": "4100000038",
+        "Titulo": "Lamoca, Rueda y Asociados S.L.",
+        "pagado": 2341435,
+        "facturado": 2455185,
+        "n": 31
+      },
+      {
+        "Subcuenta": "4100002000",
+        "Titulo": "Rovida S.L.",
+        "pagado": 2166248,
+        "facturado": 2313746,
+        "n": 33
+      }
+    ],
+    "clientes": [
+      {
+        "Subcuenta": "4330104001",
+        "Titulo": "Rovida S.L.U.",
+        "facturado": 3860388,
+        "cobrado": 3584646,
+        "n": 27
+      },
+      {
+        "Subcuenta": "4330109001",
+        "Titulo": "Disfasa S.A. (ARC)",
+        "facturado": 2529872,
+        "cobrado": 2371755,
+        "n": 30
+      },
+      {
+        "Subcuenta": "4330103001",
+        "Titulo": "Viroda Inversiones S.L.U.",
+        "facturado": 974806,
+        "cobrado": 905177,
+        "n": 27
+      }
+    ],
+    "retencionesSample": [
+      {
+        "Codigo": "9976",
+        "NFicha": 1,
+        "NIF": "E87599742",
+        "Nombre": "Registro Mercantil Central C.B.",
+        "Clave": "G",
+        "Hijos": 2,
+        "RetIntegra": null,
+        "Porcentaje": 14.9701,
+        "Retencion": null,
+        "ERetIntegra": 15.03,
+        "ERetencion": 2.25,
+        "Subclave": "2",
+        "Valoracion": 0,
+        "ICuenta": 0,
+        "IRepercutido": 0,
+        "Arrendador": "0",
+        "Devengo": null,
+        "NoResidente": null,
+        "ClaveCM": null,
+        "PorcentajeCM": null,
+        "ImpReduccion": null,
+        "ReducCeutaMelilla": null,
+        "ClaveL": null,
+        "PorcentNR": null,
+        "ClaveNR": null,
+        "Fliquidacion": null,
+        "TCodigo": null,
+        "CEmisor": null,
+        "GastosSS": 0,
+        "Penalizacion": 0,
+        "ReduccionesAplicables": 0,
+        "OpVinculada": 0,
+        "TipoVinculada": "",
+        "TipoOpeVinculada": "",
+        "MValoraVinculada": "",
+        "AccEmpEme": null,
+        "FondosVinculados": null
+      },
+      {
+        "Codigo": "9747",
+        "NFicha": 1,
+        "NIF": "12754164C",
+        "Nombre": "Rosa Elena Villagrá Blanco",
+        "Clave": "G",
+        "Hijos": 1,
+        "RetIntegra": null,
+        "Porcentaje": 15,
+        "Retencion": null,
+        "ERetIntegra": 3000,
+        "ERetencion": 450,
+        "Subclave": "1",
+        "Valoracion": 0,
+        "ICuenta": 0,
+        "IRepercutido": 0,
+        "Arrendador": "0",
+        "Devengo": null,
+        "NoResidente": null,
+        "ClaveCM": null,
+        "PorcentajeCM": null,
+        "ImpReduccion": null,
+        "ReducCeutaMelilla": null,
+        "ClaveL": null,
+        "PorcentNR": null,
+        "ClaveNR": null,
+        "Fliquidacion": null,
+        "TCodigo": null,
+        "CEmisor": null,
+        "GastosSS": 0,
+        "Penalizacion": 0,
+        "ReduccionesAplicables": 0,
+        "OpVinculada": 0,
+        "TipoVinculada": null,
+        "TipoOpeVinculada": null,
+        "MValoraVinculada": null,
+        "AccEmpEme": null,
+        "FondosVinculados": null
+      },
+      {
+        "Codigo": "9743",
+        "NFicha": 1,
+        "NIF": "12754164C",
+        "Nombre": "Rosa Elena Villagrá Blanco",
+        "Clave": "G",
+        "Hijos": 1,
+        "RetIntegra": null,
+        "Porcentaje": 15,
+        "Retencion": null,
+        "ERetIntegra": 3000,
+        "ERetencion": 450,
+        "Subclave": "1",
+        "Valoracion": 0,
+        "ICuenta": 0,
+        "IRepercutido": 0,
+        "Arrendador": "0",
+        "Devengo": null,
+        "NoResidente": null,
+        "ClaveCM": null,
+        "PorcentajeCM": null,
+        "ImpReduccion": null,
+        "ReducCeutaMelilla": null,
+        "ClaveL": null,
+        "PorcentNR": null,
+        "ClaveNR": null,
+        "Fliquidacion": null,
+        "TCodigo": null,
+        "CEmisor": null,
+        "GastosSS": 0,
+        "Penalizacion": 0,
+        "ReduccionesAplicables": 0,
+        "OpVinculada": 0,
+        "TipoVinculada": null,
+        "TipoOpeVinculada": null,
+        "MValoraVinculada": null,
+        "AccEmpEme": null,
+        "FondosVinculados": null
+      },
+      {
+        "Codigo": "9739",
+        "NFicha": 1,
+        "NIF": "12754164C",
+        "Nombre": "Rosa Elena Villagrá Blanco",
+        "Clave": "G",
+        "Hijos": 1,
+        "RetIntegra": null,
+        "Porcentaje": 15,
+        "Retencion": null,
+        "ERetIntegra": 3000,
+        "ERetencion": 450,
+        "Subclave": "1",
+        "Valoracion": 0,
+        "ICuenta": 0,
+        "IRepercutido": 0,
+        "Arrendador": "0",
+        "Devengo": null,
+        "NoResidente": null,
+        "ClaveCM": null,
+        "PorcentajeCM": null,
+        "ImpReduccion": null,
+        "ReducCeutaMelilla": null,
+        "ClaveL": null,
+        "PorcentNR": null,
+        "ClaveNR": null,
+        "Fliquidacion": null,
+        "TCodigo": null,
+        "CEmisor": null,
+        "GastosSS": 0,
+        "Penalizacion": 0,
+        "ReduccionesAplicables": 0,
+        "OpVinculada": 0,
+        "TipoVinculada": null,
+        "TipoOpeVinculada": null,
+        "MValoraVinculada": null,
+        "AccEmpEme": null,
+        "FondosVinculados": null
+      },
+      {
+        "Codigo": "9677",
+        "NFicha": 1,
+        "NIF": "E81458556",
+        "Nombre": "Registradores Mercantiles de Madrid C.B.",
+        "Clave": "G",
+        "Hijos": 1,
+        "RetIntegra": null,
+        "Porcentaje": 14.9989,
+        "Retencion": null,
+        "ERetIntegra": 44.47,
+        "ERetencion": 6.67,
+        "Subclave": "1",
+        "Valoracion": 0,
+        "ICuenta": 0,
+        "IRepercutido": 0,
+        "Arrendador": "0",
+        "Devengo": null,
+        "NoResidente": null,
+        "ClaveCM": null,
+        "PorcentajeCM": null,
+        "ImpReduccion": null,
+        "ReducCeutaMelilla": null,
+        "ClaveL": null,
+        "PorcentNR": null,
+        "ClaveNR": null,
+        "Fliquidacion": null,
+        "TCodigo": null,
+        "CEmisor": null,
+        "GastosSS": 0,
+        "Penalizacion": 0,
+        "ReduccionesAplicables": 0,
+        "OpVinculada": 0,
+        "TipoVinculada": null,
+        "TipoOpeVinculada": null,
+        "MValoraVinculada": null,
+        "AccEmpEme": null,
+        "FondosVinculados": null
+      }
+    ]
+  },
+  "RSQ": {
+    "stats": {
+      "total": 80525,
+      "minF": "2001-01-01T00:00:00.000Z",
+      "maxF": "2026-03-14T00:00:00.000Z",
+      "tDebe": 41780076412,
+      "tHaber": 45675637872,
+      "asientos": 2813,
+      "subctas": 1506
+    },
+    "monthly": [
+      {
+        "y": 2025,
+        "m": 1,
+        "n": 1292,
+        "asientos": 148,
+        "d": 2873702407,
+        "h": 4842693418
+      },
+      {
+        "y": 2025,
+        "m": 2,
+        "n": 1047,
+        "asientos": 146,
+        "d": 67016192,
+        "h": 67000574
+      },
+      {
+        "y": 2025,
+        "m": 3,
+        "n": 1139,
+        "asientos": 155,
+        "d": 85091903,
+        "h": 85124618
+      },
+      {
+        "y": 2025,
+        "m": 4,
+        "n": 1097,
+        "asientos": 156,
+        "d": 68642853,
+        "h": 60316351
+      },
+      {
+        "y": 2025,
+        "m": 5,
+        "n": 1082,
+        "asientos": 148,
+        "d": 57468726,
+        "h": 57718432
+      },
+      {
+        "y": 2025,
+        "m": 6,
+        "n": 1208,
+        "asientos": 169,
+        "d": 99367977,
+        "h": 98841686
+      },
+      {
+        "y": 2025,
+        "m": 7,
+        "n": 1097,
+        "asientos": 318,
+        "d": 68209899,
+        "h": 59489892
+      },
+      {
+        "y": 2025,
+        "m": 8,
+        "n": 919,
+        "asientos": 237,
+        "d": 59923992,
+        "h": 68446688
+      },
+      {
+        "y": 2025,
+        "m": 9,
+        "n": 1293,
+        "asientos": 434,
+        "d": 104974407,
+        "h": 103937824
+      },
+      {
+        "y": 2025,
+        "m": 10,
+        "n": 1209,
+        "asientos": 290,
+        "d": 440497282,
+        "h": 429414408
+      },
+      {
+        "y": 2025,
+        "m": 11,
+        "n": 1066,
+        "asientos": 293,
+        "d": 67878461,
+        "h": 94626681
+      },
+      {
+        "y": 2025,
+        "m": 12,
+        "n": 1412,
+        "asientos": 314,
+        "d": 1717636982,
+        "h": 1685641163
+      },
+      {
+        "y": 2026,
+        "m": 1,
+        "n": 1048,
+        "asientos": 272,
+        "d": 97411441,
+        "h": 86587655
+      },
+      {
+        "y": 2026,
+        "m": 2,
+        "n": 931,
+        "asientos": 243,
+        "d": 68285813,
+        "h": 68033082
+      },
+      {
+        "y": 2026,
+        "m": 3,
+        "n": 642,
+        "asientos": 185,
+        "d": 51374153,
+        "h": 51382181
+      }
+    ],
+    "topOperativas": [
+      {
+        "Subcuenta": "7520015001",
+        "Titulo": "Ingr.Arrend Edif. C/Piamonte 23 Madrid",
+        "d": 0,
+        "h": 133093111,
+        "n": 17
+      },
+      {
+        "Subcuenta": "6300000000",
+        "Titulo": "Impuesto sobre Sociedades",
+        "d": 34028012,
+        "h": 0,
+        "n": 1
+      },
+      {
+        "Subcuenta": "7520004005",
+        "Titulo": "Ing. Arrend Garajes C/Espronceda 32",
+        "d": 0,
+        "h": 27710470,
+        "n": 1140
+      },
+      {
+        "Subcuenta": "7520013001",
+        "Titulo": "Ingr.Arrend Local Barquillo 30 Madrid",
+        "d": 0,
+        "h": 20247579,
+        "n": 23
+      },
+      {
+        "Subcuenta": "6811015000",
+        "Titulo": "Dot. Amort. Edificio C/ Piamonte, 23 Madrid",
+        "d": 13393464,
+        "h": 0,
+        "n": 14
+      },
+      {
+        "Subcuenta": "6312015001",
+        "Titulo": "I.B.I Edificio Piamonte 23,Madrid",
+        "d": 10715609,
+        "h": 0,
+        "n": 1
+      },
+      {
+        "Subcuenta": "7520014001",
+        "Titulo": "Ingr.Arrend Local nºfinca 13182 C/Reina 15 Madrid",
+        "d": 0,
+        "h": 10668842,
+        "n": 16
+      },
+      {
+        "Subcuenta": "7520004010",
+        "Titulo": "Ingr.Arrend C/Constitución Locales Valladolid",
+        "d": 0,
+        "h": 10501153,
+        "n": 116
+      },
+      {
+        "Subcuenta": "7520004006",
+        "Titulo": "Ing. Arrend  Av. Cuba (Los Girasoles)",
+        "d": 0,
+        "h": 10004629,
+        "n": 8
+      },
+      {
+        "Subcuenta": "7690000001",
+        "Titulo": "Inter. Brutos Cta Corriente Bankinter",
+        "d": 0,
+        "h": 8661023,
+        "n": 5
+      },
+      {
+        "Subcuenta": "7520004000",
+        "Titulo": "Ing. Arrendam Ofic Av Europa Madrid Izq",
+        "d": 0,
+        "h": 7580397,
+        "n": 16
+      },
+      {
+        "Subcuenta": "6811007001",
+        "Titulo": "Dotac. Amortiz. Naves Avda Cuba 48-50-52 Palencia (Sin repartir)",
+        "d": 6914208,
+        "h": 0,
+        "n": 14
+      },
+      {
+        "Subcuenta": "7520017000",
+        "Titulo": "Ingr. Arrend. Bajo y sótano C/Prado, 10, Madrid",
+        "d": 0,
+        "h": 6505155,
+        "n": 4
+      },
+      {
+        "Subcuenta": "7520004001",
+        "Titulo": "Ing. Arrend Av Europa (Disfasa)",
+        "d": 0,
+        "h": 6355556,
+        "n": 19
+      },
+      {
+        "Subcuenta": "6400000000",
+        "Titulo": "Sueldos y salarios (sin desglose)",
+        "d": 5817493,
+        "h": 0,
+        "n": 26
+      },
+      {
+        "Subcuenta": "7520014002",
+        "Titulo": "Ingr.Arrend Local nºfinca 13184 C/Reina 15 Madrid",
+        "d": 0,
+        "h": 5342083,
+        "n": 16
+      },
+      {
+        "Subcuenta": "6811006001",
+        "Titulo": "Dotac. Amort. Garajes C/Espronceda, 32 Madrid",
+        "d": 5028820,
+        "h": 0,
+        "n": 14
+      },
+      {
+        "Subcuenta": "6230000000",
+        "Titulo": "Servicios de Profesionales (Sin Rep.)",
+        "d": 4627972,
+        "h": 0,
+        "n": 23
+      },
+      {
+        "Subcuenta": "6220008000",
+        "Titulo": "Gtos Cdad Garajes C/Espronceda 32 Madrid",
+        "d": 4270875,
+        "h": 0,
+        "n": 15
+      },
+      {
+        "Subcuenta": "6230000011",
+        "Titulo": "Serv. Profes. diversos de Gestorías",
+        "d": 3425675,
+        "h": 0,
+        "n": 1
+      },
+      {
+        "Subcuenta": "7710000001",
+        "Titulo": "Beneficios procedentes del inmovilizado material.",
+        "d": 0,
+        "h": 3298046,
+        "n": 4
+      },
+      {
+        "Subcuenta": "6299001001",
+        "Titulo": "Servicios intragrupo VIDARO según ARC",
+        "d": 3190404,
+        "h": 0,
+        "n": 14
+      },
+      {
+        "Subcuenta": "7520003010",
+        "Titulo": "Ing. Arrend. Gemelos XX T2, 1º C Benidorm",
+        "d": 0,
+        "h": 2878478,
+        "n": 8
+      },
+      {
+        "Subcuenta": "6811010001",
+        "Titulo": "Dotac. Amortiz. Nave C/ Metal, 4 Valladolid",
+        "d": 2711310,
+        "h": 0,
+        "n": 14
+      },
+      {
+        "Subcuenta": "7520003015",
+        "Titulo": "Ing. Arrend. Gemelos IV T1, 17º C Benidorm",
+        "d": 0,
+        "h": 2585639,
+        "n": 13
+      },
+      {
+        "Subcuenta": "7520004014",
+        "Titulo": "Ingr.Arrend Local M.Pelayo Palencia",
+        "d": 0,
+        "h": 2404811,
+        "n": 15
+      },
+      {
+        "Subcuenta": "7520004003",
+        "Titulo": "Ing. Arrend Av Europa (Vidaro)",
+        "d": 0,
+        "h": 2142120,
+        "n": 20
+      },
+      {
+        "Subcuenta": "6220005000",
+        "Titulo": "Gtos Cdad Av Europa 34B Madrid",
+        "d": 1995881,
+        "h": 0,
+        "n": 21
+      },
+      {
+        "Subcuenta": "7520003008",
+        "Titulo": "Ing. Arrend. Gemelos XX T2, 19º C Benidorm",
+        "d": 0,
+        "h": 1919717,
+        "n": 19
+      },
+      {
+        "Subcuenta": "7520003002",
+        "Titulo": "Ing. Arrend. Gemelos XX T2, 16º D Benidorm",
+        "d": 0,
+        "h": 1880162,
+        "n": 7
+      }
+    ],
+    "bancos": [
+      {
+        "Subcuenta": "5721000000",
+        "Titulo": "Bankinter(ES56 0128 0250 5901 0008 3954)",
+        "entradas": 919034083,
+        "salidas": 822391218,
+        "movs": 2083
+      },
+      {
+        "Subcuenta": "5722000000",
+        "Titulo": "B.B.V.A. (ES23 0182 0496 6802 0172 8339)",
+        "entradas": -1967514967,
+        "salidas": 12531312,
+        "movs": 26
+      }
+    ],
+    "iva": [
+      {
+        "Subcuenta": "4720001000",
+        "Titulo": "HP IVA soportado al 10% (Desde 01-09-12)",
+        "d": 11455,
+        "h": 10162
+      },
+      {
+        "Subcuenta": "4720002100",
+        "Titulo": "HP IVA soportado al 21% (Desde 01-09-12)",
+        "d": 6126292,
+        "h": 4251156
+      },
+      {
+        "Subcuenta": "4720002101",
+        "Titulo": "HP Iva Soportado, Inversión sujeto pasiv",
+        "d": 146033924,
+        "h": 146033924
+      },
+      {
+        "Subcuenta": "4730000000",
+        "Titulo": "Hda Pública pago a cta Impto Sociedades",
+        "d": 19498339,
+        "h": 19498339
+      },
+      {
+        "Subcuenta": "4730000001",
+        "Titulo": "Hda Deud. Retenc. Intereses Bankinte",
+        "d": 1645590,
+        "h": 1478441
+      },
+      {
+        "Subcuenta": "4750000000",
+        "Titulo": "Hda Publica Acreedora por I.V.A.",
+        "d": 50707652,
+        "h": 50707652
+      },
+      {
+        "Subcuenta": "4750001001",
+        "Titulo": "H.P. Acreedora, Ret. IRPF Nóminas",
+        "d": 571260,
+        "h": 657387
+      },
+      {
+        "Subcuenta": "4751000000",
+        "Titulo": "Hda Acreedora Retención IRPF Prof.",
+        "d": 342450,
+        "h": 387630
+      },
+      {
+        "Subcuenta": "4752000000",
+        "Titulo": "Hda Pública, acreedora por Impto Sdades",
+        "d": 4536231,
+        "h": 17587462
+      },
+      {
+        "Subcuenta": "4760000000",
+        "Titulo": "Organismos Seguridad Social, acreedora",
+        "d": 1822391,
+        "h": 2251319
+      },
+      {
+        "Subcuenta": "4770002100",
+        "Titulo": "HP. IVA Repercutido 21% (Desde 01-09-12)",
+        "d": 45929095,
+        "h": 58594330
+      },
+      {
+        "Subcuenta": "4770002101",
+        "Titulo": "HP Iva Repercutido, Inversión Suj.Pasivo",
+        "d": 146033924,
+        "h": 146033924
+      }
+    ],
+    "terceros": [
+      {
+        "Codigo": "4100000092",
+        "Nombre": "Accion Continua S.L.",
+        "Nif": "B65058513",
+        "apuntes": 0,
+        "tDebe": null,
+        "tHaber": null
+      },
+      {
+        "Codigo": "044",
+        "Nombre": "Acosol S.A.",
+        "Nif": "A29658416",
+        "apuntes": 91,
+        "tDebe": 22145195,
+        "tHaber": 21846883
+      },
+      {
+        "Codigo": "4300000082",
+        "Nombre": "ADOLFO ARCE ARCE",
+        "Nif": "50984857K",
+        "apuntes": 2,
+        "tDebe": 23294,
+        "tHaber": 23294
+      },
+      {
+        "Codigo": "4300002109",
+        "Nombre": "AEON-T COMPOSITE TECHNOLOGIES SL",
+        "Nif": "B88191689",
+        "apuntes": 19,
+        "tDebe": 226506,
+        "tHaber": 226506
+      },
+      {
+        "Codigo": "4100000138",
+        "Nombre": "AFINCAS GRACIA ADMINISTRACION, S.L",
+        "Nif": "B80779390",
+        "apuntes": 2,
+        "tDebe": 7046,
+        "tHaber": 7046
+      },
+      {
+        "Codigo": "4100000156",
+        "Nombre": "AGUA DE VALLADOLID E.P.E.L",
+        "Nif": "Q4700694E",
+        "apuntes": 10,
+        "tDebe": 10396,
+        "tHaber": 10396
+      },
+      {
+        "Codigo": "4300000081",
+        "Nombre": "AITANA VICENTE GAGO",
+        "Nif": "71039972X",
+        "apuntes": 2,
+        "tDebe": 28284,
+        "tHaber": 28284
+      },
+      {
+        "Codigo": "4100000082",
+        "Nombre": "Aki Bricolaje España S.L.U.",
+        "Nif": "B83985713",
+        "apuntes": 0,
+        "tDebe": null,
+        "tHaber": null
+      },
+      {
+        "Codigo": "4100000195",
+        "Nombre": "Álamo Home Europe S.L",
+        "Nif": "b67872572",
+        "apuntes": 2,
+        "tDebe": 201327,
+        "tHaber": 201327
+      },
+      {
+        "Codigo": "4300002020",
+        "Nombre": "Alberto Miguel Sanchez Holgado",
+        "Nif": "33529429Y",
+        "apuntes": 0,
+        "tDebe": null,
+        "tHaber": null
+      },
+      {
+        "Codigo": "4300000021",
+        "Nombre": "Alejandra García Villagrá",
+        "Nif": "79042598Q",
+        "apuntes": 0,
+        "tDebe": null,
+        "tHaber": null
+      },
+      {
+        "Codigo": "4300002003",
+        "Nombre": "Alejandro Vega Primo",
+        "Nif": "71556082T",
+        "apuntes": 0,
+        "tDebe": null,
+        "tHaber": null
+      },
+      {
+        "Codigo": "4300002083",
+        "Nombre": "Alfonso Dafonte Imedio",
+        "Nif": "51504134G",
+        "apuntes": 0,
+        "tDebe": null,
+        "tHaber": null
+      },
+      {
+        "Codigo": "4300002034",
+        "Nombre": "ALFONSO JOSÉ VAAMONDE MESSIA DE LA CERDA",
+        "Nif": "47375384F",
+        "apuntes": 30,
+        "tDebe": 374370,
+        "tHaber": 374370
+      },
+      {
+        "Codigo": "4300000059",
+        "Nombre": "ALFONSO RODRIGUEZ PORTERO",
+        "Nif": "47311682S",
+        "apuntes": 4,
+        "tDebe": 29950,
+        "tHaber": 29950
+      },
+      {
+        "Codigo": "4100000160",
+        "Nombre": "Almar & Partners Consulting Fimr S.L.",
+        "Nif": "B86408374",
+        "apuntes": 0,
+        "tDebe": null,
+        "tHaber": null
+      },
+      {
+        "Codigo": "4300000052",
+        "Nombre": "ALMUDENA NOGUEIRA ABAD",
+        "Nif": "77480779N",
+        "apuntes": 12,
+        "tDebe": 149082,
+        "tHaber": 149082
+      },
+      {
+        "Codigo": "4300002043",
+        "Nombre": "Alonso Sancho Sanchez",
+        "Nif": "07504877T",
+        "apuntes": 0,
+        "tDebe": null,
+        "tHaber": null
+      },
+      {
+        "Codigo": "4100000169",
+        "Nombre": "ALUMBRA CORPORATION S.L",
+        "Nif": "B66436437",
+        "apuntes": 33,
+        "tDebe": 137732,
+        "tHaber": 117965
+      },
+      {
+        "Codigo": "4100000109",
+        "Nombre": "Alvarez Royo-Villanova, Segismundo",
+        "Nif": "50831348Z",
+        "apuntes": 0,
+        "tDebe": null,
+        "tHaber": null
+      }
+    ],
+    "ejercicios": [
+      {
+        "Codigo": 27,
+        "Empresa": "RSQ",
+        "FechaInicial": "2026-01-01T00:00:00.000Z",
+        "FechaFinal": "2026-12-31T23:59:59.000Z",
+        "UltimoAsiento": 701,
+        "Descripcion": "Ejercicio 2026"
+      },
+      {
+        "Codigo": 26,
+        "Empresa": "RSQ",
+        "FechaInicial": "2025-01-01T00:00:00.000Z",
+        "FechaFinal": "2025-12-31T23:59:59.000Z",
+        "UltimoAsiento": 2925,
+        "Descripcion": "Ejercicio 2025"
+      },
+      {
+        "Codigo": 25,
+        "Empresa": "RSQ",
+        "FechaInicial": "2024-01-01T00:00:00.000Z",
+        "FechaFinal": "2024-12-31T23:59:59.000Z",
+        "UltimoAsiento": 2014,
+        "Descripcion": "Ejercicio 2024"
+      },
+      {
+        "Codigo": 24,
+        "Empresa": "RSQ",
+        "FechaInicial": "2023-01-01T00:00:00.000Z",
+        "FechaFinal": "2023-12-31T23:59:59.000Z",
+        "UltimoAsiento": 1837,
+        "Descripcion": "Ejercicio 2023"
+      },
+      {
+        "Codigo": 23,
+        "Empresa": "RSQ",
+        "FechaInicial": "2022-01-01T00:00:00.000Z",
+        "FechaFinal": "2022-12-31T23:59:59.000Z",
+        "UltimoAsiento": 1662,
+        "Descripcion": "Ejercicio 2022"
+      },
+      {
+        "Codigo": 22,
+        "Empresa": "RSQ",
+        "FechaInicial": "2021-01-01T00:00:00.000Z",
+        "FechaFinal": "2021-12-31T23:59:59.000Z",
+        "UltimoAsiento": 788,
+        "Descripcion": "Ejercicio 2021"
+      },
+      {
+        "Codigo": 21,
+        "Empresa": "RSQ",
+        "FechaInicial": "2020-01-01T00:00:00.000Z",
+        "FechaFinal": "2020-12-31T23:59:59.000Z",
+        "UltimoAsiento": 711,
+        "Descripcion": "Ejercicio 2020"
+      },
+      {
+        "Codigo": 20,
+        "Empresa": "RSQ",
+        "FechaInicial": "2019-01-01T00:00:00.000Z",
+        "FechaFinal": "2019-12-31T23:59:59.000Z",
+        "UltimoAsiento": 653,
+        "Descripcion": "Ejercicio 2019"
+      },
+      {
+        "Codigo": 19,
+        "Empresa": "RSQ",
+        "FechaInicial": "2018-01-01T00:00:00.000Z",
+        "FechaFinal": "2018-12-31T23:59:59.000Z",
+        "UltimoAsiento": 617,
+        "Descripcion": "Ejercicio 2018"
+      },
+      {
+        "Codigo": 18,
+        "Empresa": "RSQ",
+        "FechaInicial": "2017-01-01T00:00:00.000Z",
+        "FechaFinal": "2017-12-31T23:59:59.000Z",
+        "UltimoAsiento": 629,
+        "Descripcion": "Ejercicio 2017"
+      },
+      {
+        "Codigo": 17,
+        "Empresa": "RSQ",
+        "FechaInicial": "2016-01-01T00:00:00.000Z",
+        "FechaFinal": "2016-12-31T23:59:59.000Z",
+        "UltimoAsiento": 537,
+        "Descripcion": "Ejercicio 2016"
+      },
+      {
+        "Codigo": 16,
+        "Empresa": "RSQ",
+        "FechaInicial": "2015-01-01T00:00:00.000Z",
+        "FechaFinal": "2015-12-31T23:59:59.000Z",
+        "UltimoAsiento": 531,
+        "Descripcion": "Ejercicio 2015"
+      },
+      {
+        "Codigo": 15,
+        "Empresa": "RSQ",
+        "FechaInicial": "2014-01-01T00:00:00.000Z",
+        "FechaFinal": "2014-12-31T23:59:59.000Z",
+        "UltimoAsiento": 283,
+        "Descripcion": "Ejercicio 2014"
+      },
+      {
+        "Codigo": 14,
+        "Empresa": "RSQ",
+        "FechaInicial": "2013-01-01T00:00:00.000Z",
+        "FechaFinal": "2013-12-31T23:59:59.000Z",
+        "UltimoAsiento": 260,
+        "Descripcion": "Ejercicio 2013"
+      },
+      {
+        "Codigo": 13,
+        "Empresa": "RSQ",
+        "FechaInicial": "2012-01-01T00:00:00.000Z",
+        "FechaFinal": "2012-12-31T23:59:59.000Z",
+        "UltimoAsiento": 241,
+        "Descripcion": "Ejercicio 2012"
+      },
+      {
+        "Codigo": 12,
+        "Empresa": "RSQ",
+        "FechaInicial": "2011-01-01T00:00:00.000Z",
+        "FechaFinal": "2011-12-31T23:59:59.000Z",
+        "UltimoAsiento": 179,
+        "Descripcion": "Ejercicio 2011"
+      },
+      {
+        "Codigo": 11,
+        "Empresa": "RSQ",
+        "FechaInicial": "2010-01-01T00:00:00.000Z",
+        "FechaFinal": "2010-12-31T23:59:59.000Z",
+        "UltimoAsiento": 198,
+        "Descripcion": "Ejercicio 2010"
+      },
+      {
+        "Codigo": 10,
+        "Empresa": "RSQ",
+        "FechaInicial": "2009-01-01T00:00:00.000Z",
+        "FechaFinal": "2009-12-31T23:59:59.000Z",
+        "UltimoAsiento": 159,
+        "Descripcion": "Ejercicio 2009"
+      },
+      {
+        "Codigo": 9,
+        "Empresa": "RSQ",
+        "FechaInicial": "2008-01-01T00:00:00.000Z",
+        "FechaFinal": "2008-12-31T23:59:59.000Z",
+        "UltimoAsiento": 127,
+        "Descripcion": "Ejercicio 2008"
+      },
+      {
+        "Codigo": 8,
+        "Empresa": "RSQ",
+        "FechaInicial": "2007-01-01T00:00:00.000Z",
+        "FechaFinal": "2007-12-31T23:59:59.000Z",
+        "UltimoAsiento": 123,
+        "Descripcion": "Ejercicio 2007"
+      },
+      {
+        "Codigo": 7,
+        "Empresa": "RSQ",
+        "FechaInicial": "2006-01-01T00:00:00.000Z",
+        "FechaFinal": "2006-12-31T23:59:59.000Z",
+        "UltimoAsiento": 118,
+        "Descripcion": "Ejercicio 2006"
+      },
+      {
+        "Codigo": 6,
+        "Empresa": "RSQ",
+        "FechaInicial": "2005-01-01T00:00:00.000Z",
+        "FechaFinal": "2005-12-31T23:59:59.000Z",
+        "UltimoAsiento": 110,
+        "Descripcion": "Ejercicio 2005"
+      },
+      {
+        "Codigo": 5,
+        "Empresa": "RSQ",
+        "FechaInicial": "2004-01-01T00:00:00.000Z",
+        "FechaFinal": "2004-12-31T23:59:59.000Z",
+        "UltimoAsiento": 133,
+        "Descripcion": "Ejercicio 2004"
+      },
+      {
+        "Codigo": 4,
+        "Empresa": "RSQ",
+        "FechaInicial": "2003-01-01T00:00:00.000Z",
+        "FechaFinal": "2003-12-31T23:59:59.000Z",
+        "UltimoAsiento": 120,
+        "Descripcion": "Ejercicio 2003"
+      },
+      {
+        "Codigo": 3,
+        "Empresa": "RSQ",
+        "FechaInicial": "2000-01-01T00:00:00.000Z",
+        "FechaFinal": "2000-12-31T23:59:59.000Z",
+        "UltimoAsiento": 0,
+        "Descripcion": "Ejercicio 2000"
+      },
+      {
+        "Codigo": 2,
+        "Empresa": "RSQ",
+        "FechaInicial": "2002-01-01T00:00:00.000Z",
+        "FechaFinal": "2002-12-31T23:59:59.000Z",
+        "UltimoAsiento": 69,
+        "Descripcion": "Ejercicio 2002"
+      },
+      {
+        "Codigo": 1,
+        "Empresa": "RSQ",
+        "FechaInicial": "2001-01-01T00:00:00.000Z",
+        "FechaFinal": "2001-12-31T23:59:59.000Z",
+        "UltimoAsiento": 87,
+        "Descripcion": "Ejercicio 2001"
+      }
+    ],
+    "pgcGrupos": [
+      {
+        "grupo": "1",
+        "apuntes": 212,
+        "d": 21550342,
+        "h": 4810046799
+      },
+      {
+        "grupo": "2",
+        "apuntes": 524,
+        "d": 5150487182,
+        "h": 258903031
+      },
+      {
+        "grupo": "4",
+        "apuntes": 8765,
+        "d": 1635980229,
+        "h": 1656836531
+      },
+      {
+        "grupo": "5",
+        "apuntes": 2113,
+        "d": -1024446314,
+        "h": 842488863
+      },
+      {
+        "grupo": "6",
+        "apuntes": 3000,
+        "d": 143911049,
+        "h": 0
+      },
+      {
+        "grupo": "7",
+        "apuntes": 1868,
+        "d": 0,
+        "h": 290979429
+      }
+    ],
+    "proveedores": [
+      {
+        "Subcuenta": "4100000193",
+        "Titulo": "Pescaderías Coruñesas S.L.",
+        "pagado": 516129372,
+        "facturado": 524115900,
+        "n": 2
+      },
+      {
+        "Subcuenta": "4100000213",
+        "Titulo": "Edificaciones Globales Pénfola S.L.",
+        "pagado": 171468184,
+        "facturado": 171468184,
+        "n": 8
+      },
+      {
+        "Subcuenta": "4100000152",
+        "Titulo": "INMOBENINTER, S.L.U",
+        "pagado": 12537407,
+        "facturado": 12537407,
+        "n": 26
+      },
+      {
+        "Subcuenta": "4100000166",
+        "Titulo": "Comunidad de Madrid",
+        "pagado": 7861739,
+        "facturado": 7861739,
+        "n": 2
+      },
+      {
+        "Subcuenta": "4100000190",
+        "Titulo": "CBRE Real Estate S.A.",
+        "pagado": 4145066,
+        "facturado": 4145066,
+        "n": 2
+      },
+      {
+        "Subcuenta": "4100006000",
+        "Titulo": "Vidaro Inversiones S.L.",
+        "pagado": 3860388,
+        "facturado": 3876115,
+        "n": 29
+      },
+      {
+        "Subcuenta": "4100000181",
+        "Titulo": "Repsol Comercializadora de Electricidad y Gas, SLU",
+        "pagado": 2672963,
+        "facturado": 2668326,
+        "n": 463
+      },
+      {
+        "Subcuenta": "4100000196",
+        "Titulo": "Araoz y Rueda Abogados S.L.P.",
+        "pagado": 2620884,
+        "facturado": 2620884,
+        "n": 2
+      },
+      {
+        "Subcuenta": "4100000046",
+        "Titulo": "Vidaro Inversiones S.L.",
+        "pagado": 2465581,
+        "facturado": 2465590,
+        "n": 32
+      },
+      {
+        "Subcuenta": "4100000153",
+        "Titulo": "Electricidad Eleia, S.L",
+        "pagado": 1253280,
+        "facturado": 1259048,
+        "n": 30
+      },
+      {
+        "Subcuenta": "4100000170",
+        "Titulo": "Guidebridge Asset Management S.L.",
+        "pagado": 1126299,
+        "facturado": 1126299,
+        "n": 12
+      },
+      {
+        "Subcuenta": "4100000187",
+        "Titulo": "Gaolania Servicios SL",
+        "pagado": 907558,
+        "facturado": 940722,
+        "n": 168
+      },
+      {
+        "Subcuenta": "4100000096",
+        "Titulo": "Notarios Padre Damián 40 C.B.",
+        "pagado": 1121282,
+        "facturado": 871300,
+        "n": 21
+      },
+      {
+        "Subcuenta": "4100000172",
+        "Titulo": "Inversiones Inmobiliaras Calle Piamonte 23 SL",
+        "pagado": 0,
+        "facturado": 831930,
+        "n": 1
+      },
+      {
+        "Subcuenta": "4100000105",
+        "Titulo": "Manuel García Quilón",
+        "pagado": 665638,
+        "facturado": 770341,
+        "n": 7
+      }
+    ],
+    "clientes": [
+      {
+        "Subcuenta": "4300000043",
+        "Titulo": "Impulsa Hub Sur, S.L.",
+        "facturado": 161042671,
+        "cobrado": 161042671,
+        "n": 34
+      },
+      {
+        "Subcuenta": "4310000043",
+        "Titulo": "Impulsa Hub Sur, S.L, efectos a cobrar",
+        "facturado": 86593833,
+        "cobrado": 86593833,
+        "n": 18
+      },
+      {
+        "Subcuenta": "4300000037",
+        "Titulo": "INMOBENINTER, S.L.U",
+        "facturado": 40321133,
+        "cobrado": 36226834,
+        "n": 164
+      },
+      {
+        "Subcuenta": "4300000044",
+        "Titulo": "PROJECTS BC 2016 SL",
+        "facturado": 21616975,
+        "cobrado": 21313688,
+        "n": 33
+      },
+      {
+        "Subcuenta": "4300000041",
+        "Titulo": "The Stage Ventures S.L",
+        "facturado": 19373205,
+        "cobrado": 19373205,
+        "n": 60
+      },
+      {
+        "Subcuenta": "4300000008",
+        "Titulo": "Instituto de Vivienda de Madrid IVIMA",
+        "facturado": 12633515,
+        "cobrado": 1663860,
+        "n": 3
+      },
+      {
+        "Subcuenta": "4300000048",
+        "Titulo": "HIPER CH DISTRIBUCION SL",
+        "facturado": 12105598,
+        "cobrado": 20895849,
+        "n": 16
+      },
+      {
+        "Subcuenta": "4300000028",
+        "Titulo": "Red Hospitalaria Recoletas S.L",
+        "facturado": 9285399,
+        "cobrado": 9261119,
+        "n": 164
+      },
+      {
+        "Subcuenta": "4300000022",
+        "Titulo": "Netservices Travel Assitance SLNE",
+        "facturado": 9078660,
+        "cobrado": 9047270,
+        "n": 30
+      },
+      {
+        "Subcuenta": "4300000009",
+        "Titulo": "Disfasa, S.A.",
+        "facturado": 8403102,
+        "cobrado": 6958979,
+        "n": 38
+      },
+      {
+        "Subcuenta": "4310000041",
+        "Titulo": "The Stage Ventures S.L,efectos a cobrar",
+        "facturado": 7537104,
+        "cobrado": 7954253,
+        "n": 24
+      },
+      {
+        "Subcuenta": "4300000075",
+        "Titulo": "BOCA PRADO S. L.",
+        "facturado": 7247775,
+        "cobrado": 7247775,
+        "n": 6
+      },
+      {
+        "Subcuenta": "4300000011",
+        "Titulo": "Vidaro Inversiones S.L.",
+        "facturado": 5501802,
+        "cobrado": 5528190,
+        "n": 71
+      },
+      {
+        "Subcuenta": "4300000033",
+        "Titulo": "CAMARA OFICIAL DE LA PROPIEDAD URBANA DE PALENCIA",
+        "facturado": 2945032,
+        "cobrado": 0,
+        "n": 1
+      },
+      {
+        "Subcuenta": "4300002037",
+        "Titulo": "DISTRIBUCIÓN SUPERMERCADOS, SLU",
+        "facturado": 2609108,
+        "cobrado": 2609108,
+        "n": 30
+      }
+    ],
+    "retencionesSample": [
+      {
+        "Codigo": "9927",
+        "NFicha": 1,
+        "NIF": "A34006544",
+        "Nombre": "Los Girasoles S.A.U.",
+        "Clave": null,
+        "Hijos": 0,
+        "RetIntegra": null,
+        "Porcentaje": null,
+        "Retencion": null,
+        "ERetIntegra": 100,
+        "ERetencion": 21,
+        "Subclave": null,
+        "Valoracion": 0,
+        "ICuenta": 0,
+        "IRepercutido": 0,
+        "Arrendador": "1",
+        "Devengo": null,
+        "NoResidente": null,
+        "ClaveCM": null,
+        "PorcentajeCM": null,
+        "ImpReduccion": null,
+        "ReducCeutaMelilla": null,
+        "ClaveL": null,
+        "PorcentNR": null,
+        "ClaveNR": null,
+        "FLiquidacion": null,
+        "TCodigo": null,
+        "CEmisor": null,
+        "GastosSS": 0,
+        "Penalizacion": null,
+        "ReduccionesAplicables": null,
+        "OpVinculada": null,
+        "TipoVinculada": null,
+        "TipoOpeVinculada": null,
+        "MValoraVinculada": null,
+        "AccEmpEme": null,
+        "FondosVinculados": null
+      },
+      {
+        "Codigo": "9923",
+        "NFicha": 1,
+        "NIF": "A34006544",
+        "Nombre": "Los Girasoles S.A.U.",
+        "Clave": "",
+        "Hijos": 0,
+        "RetIntegra": null,
+        "Porcentaje": null,
+        "Retencion": null,
+        "ERetIntegra": 100,
+        "ERetencion": 21,
+        "Subclave": "",
+        "Valoracion": 0,
+        "ICuenta": 0,
+        "IRepercutido": 0,
+        "Arrendador": "1",
+        "Devengo": null,
+        "NoResidente": null,
+        "ClaveCM": null,
+        "PorcentajeCM": null,
+        "ImpReduccion": null,
+        "ReducCeutaMelilla": null,
+        "ClaveL": null,
+        "PorcentNR": null,
+        "ClaveNR": null,
+        "FLiquidacion": null,
+        "TCodigo": null,
+        "CEmisor": null,
+        "GastosSS": 0,
+        "Penalizacion": null,
+        "ReduccionesAplicables": null,
+        "OpVinculada": null,
+        "TipoVinculada": null,
+        "TipoOpeVinculada": null,
+        "MValoraVinculada": null,
+        "AccEmpEme": null,
+        "FondosVinculados": null
+      },
+      {
+        "Codigo": "9492",
+        "NFicha": 1,
+        "NIF": "A34006544",
+        "Nombre": "Los Girasoles S.A.U.",
+        "Clave": null,
+        "Hijos": 0,
+        "RetIntegra": null,
+        "Porcentaje": null,
+        "Retencion": null,
+        "ERetIntegra": 100,
+        "ERetencion": 21,
+        "Subclave": null,
+        "Valoracion": 0,
+        "ICuenta": 0,
+        "IRepercutido": 0,
+        "Arrendador": "1",
+        "Devengo": null,
+        "NoResidente": null,
+        "ClaveCM": null,
+        "PorcentajeCM": null,
+        "ImpReduccion": null,
+        "ReducCeutaMelilla": null,
+        "ClaveL": null,
+        "PorcentNR": null,
+        "ClaveNR": null,
+        "FLiquidacion": null,
+        "TCodigo": null,
+        "CEmisor": null,
+        "GastosSS": 0,
+        "Penalizacion": null,
+        "ReduccionesAplicables": null,
+        "OpVinculada": null,
+        "TipoVinculada": null,
+        "TipoOpeVinculada": null,
+        "MValoraVinculada": null,
+        "AccEmpEme": null,
+        "FondosVinculados": null
+      },
+      {
+        "Codigo": "9486",
+        "NFicha": 1,
+        "NIF": "A34006544",
+        "Nombre": "Los Girasoles S.A.U.",
+        "Clave": null,
+        "Hijos": 0,
+        "RetIntegra": null,
+        "Porcentaje": null,
+        "Retencion": null,
+        "ERetIntegra": 100,
+        "ERetencion": 21,
+        "Subclave": null,
+        "Valoracion": 0,
+        "ICuenta": 0,
+        "IRepercutido": 0,
+        "Arrendador": "1",
+        "Devengo": null,
+        "NoResidente": null,
+        "ClaveCM": null,
+        "PorcentajeCM": null,
+        "ImpReduccion": null,
+        "ReducCeutaMelilla": null,
+        "ClaveL": null,
+        "PorcentNR": null,
+        "ClaveNR": null,
+        "FLiquidacion": null,
+        "TCodigo": null,
+        "CEmisor": null,
+        "GastosSS": 0,
+        "Penalizacion": null,
+        "ReduccionesAplicables": null,
+        "OpVinculada": null,
+        "TipoVinculada": null,
+        "TipoOpeVinculada": null,
+        "MValoraVinculada": null,
+        "AccEmpEme": null,
+        "FondosVinculados": null
+      },
+      {
+        "Codigo": "9480",
+        "NFicha": 1,
+        "NIF": "A34006544",
+        "Nombre": "Los Girasoles S.A.U.",
+        "Clave": null,
+        "Hijos": 0,
+        "RetIntegra": null,
+        "Porcentaje": null,
+        "Retencion": null,
+        "ERetIntegra": 100,
+        "ERetencion": 21,
+        "Subclave": null,
+        "Valoracion": 0,
+        "ICuenta": 0,
+        "IRepercutido": 0,
+        "Arrendador": "1",
+        "Devengo": null,
+        "NoResidente": null,
+        "ClaveCM": null,
+        "PorcentajeCM": null,
+        "ImpReduccion": null,
+        "ReducCeutaMelilla": null,
+        "ClaveL": null,
+        "PorcentNR": null,
+        "ClaveNR": null,
+        "FLiquidacion": null,
+        "TCodigo": null,
+        "CEmisor": null,
+        "GastosSS": 0,
+        "Penalizacion": null,
+        "ReduccionesAplicables": null,
+        "OpVinculada": null,
+        "TipoVinculada": null,
+        "TipoOpeVinculada": null,
+        "MValoraVinculada": null,
+        "AccEmpEme": null,
+        "FondosVinculados": null
+      }
+    ]
+  },
+  "VIR": {
+    "stats": {
+      "total": 38665,
+      "minF": "2020-02-13T00:00:00.000Z",
+      "maxF": "2026-03-18T00:00:00.000Z",
+      "tDebe": 23790804382,
+      "tHaber": 23902003855,
+      "asientos": 3169,
+      "subctas": 1393
+    },
+    "monthly": [
+      {
+        "y": 2025,
+        "m": 1,
+        "n": 1528,
+        "asientos": 252,
+        "d": 3783115660,
+        "h": 3797733451
+      },
+      {
+        "y": 2025,
+        "m": 2,
+        "n": 1101,
+        "asientos": 214,
+        "d": 47414507,
+        "h": 46982547
+      },
+      {
+        "y": 2025,
+        "m": 3,
+        "n": 1192,
+        "asientos": 279,
+        "d": 54273768,
+        "h": 54582723
+      },
+      {
+        "y": 2025,
+        "m": 4,
+        "n": 1099,
+        "asientos": 230,
+        "d": 43916877,
+        "h": 43487383
+      },
+      {
+        "y": 2025,
+        "m": 5,
+        "n": 1107,
+        "asientos": 243,
+        "d": 42555454,
+        "h": 41675630
+      },
+      {
+        "y": 2025,
+        "m": 6,
+        "n": 1146,
+        "asientos": 233,
+        "d": 52877073,
+        "h": 52506832
+      },
+      {
+        "y": 2025,
+        "m": 7,
+        "n": 1156,
+        "asientos": 265,
+        "d": 51293977,
+        "h": 49726285
+      },
+      {
+        "y": 2025,
+        "m": 8,
+        "n": 1311,
+        "asientos": 280,
+        "d": 49649431,
+        "h": 48378450
+      },
+      {
+        "y": 2025,
+        "m": 9,
+        "n": 1071,
+        "asientos": 239,
+        "d": 52906612,
+        "h": 52444105
+      },
+      {
+        "y": 2025,
+        "m": 10,
+        "n": 1441,
+        "asientos": 319,
+        "d": 1840165866,
+        "h": 1839193470
+      },
+      {
+        "y": 2025,
+        "m": 11,
+        "n": 1190,
+        "asientos": 260,
+        "d": 156738042,
+        "h": 199033832
+      },
+      {
+        "y": 2025,
+        "m": 12,
+        "n": 1539,
+        "asientos": 355,
+        "d": 89903921,
+        "h": 79299915
+      },
+      {
+        "y": 2026,
+        "m": 1,
+        "n": 1472,
+        "asientos": 365,
+        "d": 63245102,
+        "h": 61844857
+      },
+      {
+        "y": 2026,
+        "m": 2,
+        "n": 1083,
+        "asientos": 325,
+        "d": 49909391,
+        "h": 50465780
+      },
+      {
+        "y": 2026,
+        "m": 3,
+        "n": 860,
+        "asientos": 181,
+        "d": 40991934,
+        "h": 40980063
+      }
+    ],
+    "topOperativas": [
+      {
+        "Subcuenta": "6230000011",
+        "Titulo": "Serv. Profes. diversos de Gestorías",
+        "d": 15065216,
+        "h": 0,
+        "n": 5
+      },
+      {
+        "Subcuenta": "7520000001",
+        "Titulo": "Ingr. Arrend. LOCAL C/Manuel Silvela 5",
+        "d": 0,
+        "h": 13604100,
+        "n": 21
+      },
+      {
+        "Subcuenta": "6300000000",
+        "Titulo": "Impuesto sobre Sociedades (Corriente)",
+        "d": 10126092,
+        "h": 0,
+        "n": 1
+      },
+      {
+        "Subcuenta": "7520004013",
+        "Titulo": "Ingr. Arrend 4ºA C/Reina 15, Madrid",
+        "d": 0,
+        "h": 9080652,
+        "n": 21
+      },
+      {
+        "Subcuenta": "7520000009",
+        "Titulo": "Ingr. Arrend. 4ºA C/Manuel Silvela 5",
+        "d": 0,
+        "h": 8676633,
+        "n": 25
+      },
+      {
+        "Subcuenta": "7520000011",
+        "Titulo": "Ingr. Arrend. 5ºA C/Manuel Silvela 5",
+        "d": 0,
+        "h": 8649134,
+        "n": 19
+      },
+      {
+        "Subcuenta": "7520000015",
+        "Titulo": "Ingr. Arrend. 6ºC C/Manuel Silvela 5",
+        "d": 0,
+        "h": 7483216,
+        "n": 29
+      },
+      {
+        "Subcuenta": "6400000000",
+        "Titulo": "Sueldos y salarios",
+        "d": 7296035,
+        "h": 0,
+        "n": 14
+      },
+      {
+        "Subcuenta": "7520004009",
+        "Titulo": "Ingr. Arrend 3ºA C/Reina 15, Madrid",
+        "d": 0,
+        "h": 7254002,
+        "n": 24
+      },
+      {
+        "Subcuenta": "7520000003",
+        "Titulo": "Ingr. Arrend. 1ºA C/Manuel Silvela 5",
+        "d": 0,
+        "h": 6590835,
+        "n": 14
+      },
+      {
+        "Subcuenta": "7520004014",
+        "Titulo": "Ingr. Arrend 4ºB C/Reina 15, Madrid",
+        "d": 0,
+        "h": 5958940,
+        "n": 19
+      },
+      {
+        "Subcuenta": "7520004005",
+        "Titulo": "Ingr. Arrend 2ºA C/Reina 15, Madrid",
+        "d": 0,
+        "h": 5877558,
+        "n": 21
+      },
+      {
+        "Subcuenta": "7520000007",
+        "Titulo": "Ingr. Arrend. 3ºA C/Manuel Silvela 5",
+        "d": 0,
+        "h": 5672707,
+        "n": 16
+      },
+      {
+        "Subcuenta": "6290009001",
+        "Titulo": "Cuotas I.V.A. no deducibles por prorrata",
+        "d": 5637101,
+        "h": 0,
+        "n": 6
+      },
+      {
+        "Subcuenta": "7520004010",
+        "Titulo": "Ingr. Arrend 3ºB C/Reina 15, Madrid",
+        "d": 0,
+        "h": 5564133,
+        "n": 15
+      },
+      {
+        "Subcuenta": "7520000010",
+        "Titulo": "Ingr. Arrend. 4ºB C/Manuel Silvela 5",
+        "d": 0,
+        "h": 5448462,
+        "n": 22
+      },
+      {
+        "Subcuenta": "7520004006",
+        "Titulo": "Ingr. Arrend 2ºB C/Reina 15, Madrid",
+        "d": 0,
+        "h": 5416376,
+        "n": 16
+      },
+      {
+        "Subcuenta": "7520000008",
+        "Titulo": "Ingr. Arrend. 3ºB C/Manuel Silvela 5",
+        "d": 0,
+        "h": 5370904,
+        "n": 21
+      },
+      {
+        "Subcuenta": "7520000005",
+        "Titulo": "Ingr. Arrend. 2ºA C/Manuel Silvela 5",
+        "d": 0,
+        "h": 5346079,
+        "n": 16
+      },
+      {
+        "Subcuenta": "7520000012",
+        "Titulo": "Ingr. Arrend. 5ºB C/Manuel Silvela 5",
+        "d": 0,
+        "h": 4890208,
+        "n": 25
+      },
+      {
+        "Subcuenta": "7520004008",
+        "Titulo": "Ingr. Arrend 2ºD C/Reina 15, Madrid",
+        "d": 0,
+        "h": 4824868,
+        "n": 20
+      },
+      {
+        "Subcuenta": "7520000013",
+        "Titulo": "Ingr. Arrend. 6ºA C/Manuel Silvela 5",
+        "d": 0,
+        "h": 4506980,
+        "n": 16
+      },
+      {
+        "Subcuenta": "7520000006",
+        "Titulo": "Ingr. Arrend. 2ºB C/Manuel Silvela 5",
+        "d": 0,
+        "h": 4322716,
+        "n": 16
+      },
+      {
+        "Subcuenta": "7520004012",
+        "Titulo": "Ingr. Arrend 3ºD C/Reina 15, Madrid",
+        "d": 0,
+        "h": 3969185,
+        "n": 15
+      },
+      {
+        "Subcuenta": "7520003004",
+        "Titulo": "Ingr. Arrend.1ºD C/Candelaria Mora 12-14",
+        "d": 0,
+        "h": 3771698,
+        "n": 22
+      },
+      {
+        "Subcuenta": "7520000014",
+        "Titulo": "Ingr. Arrend. 6ºB C/Manuel Silvela 5",
+        "d": 0,
+        "h": 3619089,
+        "n": 16
+      },
+      {
+        "Subcuenta": "7520004015",
+        "Titulo": "Ingr. Arrend 4ºC C/Reina 15, Madrid",
+        "d": 0,
+        "h": 3477046,
+        "n": 13
+      },
+      {
+        "Subcuenta": "7520000004",
+        "Titulo": "Ingr. Arrend. 1ºB C/Manuel Silvela 5",
+        "d": 0,
+        "h": 3466527,
+        "n": 16
+      },
+      {
+        "Subcuenta": "7520003013",
+        "Titulo": "Ingr. Arrend.4ºB C/Candelaria Mora 12-14",
+        "d": 0,
+        "h": 3427052,
+        "n": 25
+      },
+      {
+        "Subcuenta": "7520004002",
+        "Titulo": "Ingr. Arrend 1ºB C/Reina 15, Madrid",
+        "d": 0,
+        "h": 3418880,
+        "n": 12
+      }
+    ],
+    "bancos": [
+      {
+        "Subcuenta": "5720000003",
+        "Titulo": "Bankinter ES88 0128 0250 5901 0008 1826",
+        "entradas": 845332291,
+        "salidas": 830109259,
+        "movs": 2414
+      },
+      {
+        "Subcuenta": "5720000000",
+        "Titulo": "BBVA ES53 0182 0496 6102 0174 4438",
+        "entradas": 42825800,
+        "salidas": 38814414,
+        "movs": 60
+      }
+    ],
+    "iva": [
+      {
+        "Subcuenta": "4700000000",
+        "Titulo": "Hacienda Pública, deudora por IVA.",
+        "d": 490747,
+        "h": 490747
+      },
+      {
+        "Subcuenta": "4709000000",
+        "Titulo": "Hacienda Pública deudora por Impuesto sobre Sociedades",
+        "d": 4289162,
+        "h": 309799
+      },
+      {
+        "Subcuenta": "4720001000",
+        "Titulo": "Hacienda Publica, IVA soportado al 10%",
+        "d": 162219,
+        "h": 132758
+      },
+      {
+        "Subcuenta": "4720002100",
+        "Titulo": "Hacienda Pública, IVA soportado al 21%",
+        "d": 10531852,
+        "h": 8110991
+      },
+      {
+        "Subcuenta": "4720002101",
+        "Titulo": "H.P. IVA Soportado al 21% (NO DEDUCIBLE)",
+        "d": 0,
+        "h": 0
+      },
+      {
+        "Subcuenta": "4730000000",
+        "Titulo": "H.P. Pago a Cta Impuesto Sociedades",
+        "d": 9835226,
+        "h": 9835226
+      },
+      {
+        "Subcuenta": "4730000001",
+        "Titulo": "Hda Pública deudora, retenciones soportadas intereses",
+        "d": 449955,
+        "h": 413516
+      },
+      {
+        "Subcuenta": "4750000000",
+        "Titulo": "Hacienda Pública, acreedora por IVA",
+        "d": 1733434,
+        "h": 1733434
+      },
+      {
+        "Subcuenta": "4750001000",
+        "Titulo": "H. P., acreedora por IRPF Empleados",
+        "d": 1400353,
+        "h": 1647017
+      },
+      {
+        "Subcuenta": "4751000015",
+        "Titulo": "H.P. Acreedora Retenciones IRPF Profes. 15%",
+        "d": 225660,
+        "h": 226347
+      },
+      {
+        "Subcuenta": "4760000000",
+        "Titulo": "Organismos de la Seguridad Social, acreedores",
+        "d": 2768894,
+        "h": -66564
+      },
+      {
+        "Subcuenta": "4770000000",
+        "Titulo": "Hacienda Pública,Fras 0% IVA repercutido",
+        "d": 0,
+        "h": 0
+      },
+      {
+        "Subcuenta": "4770000001",
+        "Titulo": "IVA Repercutido Exento",
+        "d": 0,
+        "h": 0
+      },
+      {
+        "Subcuenta": "4770002100",
+        "Titulo": "Hacienda Pública, IVA repercutido 21%",
+        "d": 2966120,
+        "h": 3767935
+      }
+    ],
+    "terceros": [
+      {
+        "Codigo": "4100000162",
+        "Nombre": "3F Ingeniería Mantenimiento SL",
+        "Nif": "B81296949",
+        "apuntes": 11,
+        "tDebe": 261476,
+        "tHaber": 261476
+      },
+      {
+        "Codigo": "4300002048",
+        "Nombre": "Achar Haiat, David",
+        "Nif": "XDD694217",
+        "apuntes": 2,
+        "tDebe": 1664,
+        "tHaber": 1664
+      },
+      {
+        "Codigo": "4100000084",
+        "Nombre": "AGROBARCENILLA, S.L",
+        "Nif": "B34104661",
+        "apuntes": 0,
+        "tDebe": null,
+        "tHaber": null
+      },
+      {
+        "Codigo": "4100000196",
+        "Nombre": "Álamo Home Europe S.L",
+        "Nif": "B67872572",
+        "apuntes": 160,
+        "tDebe": 9995336,
+        "tHaber": 11262550
+      },
+      {
+        "Codigo": "4400000004",
+        "Nombre": "Álamo Home Europe S.L",
+        "Nif": "B67872572",
+        "apuntes": 26,
+        "tDebe": 6376966,
+        "tHaber": 6376968
+      },
+      {
+        "Codigo": "4300002039",
+        "Nombre": "ALAOUI SMAILI, YAZMINE",
+        "Nif": "UG6748361",
+        "apuntes": 32,
+        "tDebe": 5057321,
+        "tHaber": 4982443
+      },
+      {
+        "Codigo": "4300000040",
+        "Nombre": "ALEJANDRA KOROVAICHUK QUESADA",
+        "Nif": "60055439R",
+        "apuntes": 11,
+        "tDebe": 721909,
+        "tHaber": 688839
+      },
+      {
+        "Codigo": "4300000033",
+        "Nombre": "ALEXANDER DE FILIPPO",
+        "Nif": "YC1033608",
+        "apuntes": 12,
+        "tDebe": 721941,
+        "tHaber": 638922
+      },
+      {
+        "Codigo": "4100000201",
+        "Nombre": "ALGEMAR ELEVACIONES S.L",
+        "Nif": "B86385796",
+        "apuntes": 4,
+        "tDebe": 104690,
+        "tHaber": 104690
+      },
+      {
+        "Codigo": "4100000060",
+        "Nombre": "ALJUMI SUMINISTROS Y SOLUCIONES S.L.L",
+        "Nif": "B34270173",
+        "apuntes": 12,
+        "tDebe": 109442,
+        "tHaber": 109442
+      },
+      {
+        "Codigo": "4100000156",
+        "Nombre": "Almar & Partners Consulting Firm S.L.",
+        "Nif": "B86408374",
+        "apuntes": 0,
+        "tDebe": null,
+        "tHaber": null
+      },
+      {
+        "Codigo": "4100000143",
+        "Nombre": "ALUMBRA CORPORACION S.L",
+        "Nif": "B66436437",
+        "apuntes": 26,
+        "tDebe": 120950,
+        "tHaber": 120950
+      },
+      {
+        "Codigo": "4300000008",
+        "Nombre": "Álvarez Cañibano, Antonio",
+        "Nif": "09710280W",
+        "apuntes": 4,
+        "tDebe": 0,
+        "tHaber": 0
+      },
+      {
+        "Codigo": "4300002013",
+        "Nombre": "AMERICAN TOWER ESPAÑA SLU",
+        "Nif": "B87494936",
+        "apuntes": 38,
+        "tDebe": 3776078,
+        "tHaber": 3378922
+      },
+      {
+        "Codigo": "4300000047",
+        "Nombre": "ANDREW YOTNEGPARIAN",
+        "Nif": "674303147",
+        "apuntes": 9,
+        "tDebe": 514898,
+        "tHaber": 495332
+      },
+      {
+        "Codigo": "4300000011",
+        "Nombre": "ANDÚJAR HERNÁNDEZ, JORGE",
+        "Nif": "74859051P",
+        "apuntes": 30,
+        "tDebe": 4506980,
+        "tHaber": 4506980
+      },
+      {
+        "Codigo": "4300002052",
+        "Nombre": "Annie Yumi Joh Lee",
+        "Nif": "54698666C",
+        "apuntes": 19,
+        "tDebe": 1689266,
+        "tHaber": 1689266
+      },
+      {
+        "Codigo": "4300002065",
+        "Nombre": "Anthony Duffer Ramos-Lynch, Michael",
+        "Nif": "A29395669",
+        "apuntes": 11,
+        "tDebe": 3028226,
+        "tHaber": 3028226
+      },
+      {
+        "Codigo": "4100000090",
+        "Nombre": "AQUONA, GESTION DE AGUAS DE CASTILLA, S.A.U",
+        "Nif": "A66141169",
+        "apuntes": 20,
+        "tDebe": 57284,
+        "tHaber": 57284
+      },
+      {
+        "Codigo": "4300002063",
+        "Nombre": "Arana, Natalia",
+        "Nif": "661350463",
+        "apuntes": 3,
+        "tDebe": 515796,
+        "tHaber": 515797
+      }
+    ],
+    "ejercicios": [
+      {
+        "Codigo": 8,
+        "Empresa": "VIR",
+        "FechaInicial": "2026-01-01T00:00:00.000Z",
+        "FechaFinal": "2026-12-31T23:59:59.000Z",
+        "UltimoAsiento": 921,
+        "Descripcion": "Ejercicio 2026"
+      },
+      {
+        "Codigo": 7,
+        "Empresa": "VIR",
+        "FechaInicial": "2025-01-01T00:00:00.000Z",
+        "FechaFinal": "2025-12-31T23:59:59.000Z",
+        "UltimoAsiento": 3239,
+        "Descripcion": "Ejercicio 2025"
+      },
+      {
+        "Codigo": 6,
+        "Empresa": "VIR",
+        "FechaInicial": "2024-01-01T00:00:00.000Z",
+        "FechaFinal": "2024-12-31T23:59:59.000Z",
+        "UltimoAsiento": 2539,
+        "Descripcion": "Ejercicio 2024"
+      },
+      {
+        "Codigo": 5,
+        "Empresa": "VIR",
+        "FechaInicial": "2023-01-01T00:00:00.000Z",
+        "FechaFinal": "2023-12-31T23:59:59.000Z",
+        "UltimoAsiento": 1183,
+        "Descripcion": "Ejercicio 2023"
+      },
+      {
+        "Codigo": 4,
+        "Empresa": "VIR",
+        "FechaInicial": "2022-01-01T00:00:00.000Z",
+        "FechaFinal": "2022-12-31T23:59:59.000Z",
+        "UltimoAsiento": 685,
+        "Descripcion": "Ejercicio 2022"
+      },
+      {
+        "Codigo": 3,
+        "Empresa": "VIR",
+        "FechaInicial": "2019-01-01T00:00:00.000Z",
+        "FechaFinal": "2019-12-31T23:59:59.000Z",
+        "UltimoAsiento": 0,
+        "Descripcion": "Ejercicio 2019"
+      },
+      {
+        "Codigo": 2,
+        "Empresa": "VIR",
+        "FechaInicial": "2021-01-01T00:00:00.000Z",
+        "FechaFinal": "2021-12-31T23:59:59.000Z",
+        "UltimoAsiento": 30,
+        "Descripcion": "Ejercicio 2021"
+      },
+      {
+        "Codigo": 1,
+        "Empresa": "VIR",
+        "FechaInicial": "2020-01-01T00:00:00.000Z",
+        "FechaFinal": "2020-12-31T23:59:59.000Z",
+        "UltimoAsiento": 34,
+        "Descripcion": "Ejercicio 2020"
+      }
+    ],
+    "pgcGrupos": [
+      {
+        "grupo": "1",
+        "apuntes": 234,
+        "d": 29321062,
+        "h": 4267747566
+      },
+      {
+        "grupo": "2",
+        "apuntes": 2186,
+        "d": 4327123008,
+        "h": 81278268
+      },
+      {
+        "grupo": "4",
+        "apuntes": 7856,
+        "d": 1037215937,
+        "h": 1018171070
+      },
+      {
+        "grupo": "5",
+        "apuntes": 2478,
+        "d": 898429388,
+        "h": 874272455
+      },
+      {
+        "grupo": "6",
+        "apuntes": 4597,
+        "d": 126868220,
+        "h": 0
+      },
+      {
+        "grupo": "7",
+        "apuntes": 945,
+        "d": 0,
+        "h": 216865964
+      }
+    ],
+    "proveedores": [
+      {
+        "Subcuenta": "4100000213",
+        "Titulo": "Edificaciones Globales Pénfola S.L.",
+        "pagado": 629468268,
+        "facturado": 629468269,
+        "n": 30
+      },
+      {
+        "Subcuenta": "4100000217",
+        "Titulo": "CBRE Real Estate S.A.",
+        "pagado": 14936712,
+        "facturado": 14936712,
+        "n": 2
+      },
+      {
+        "Subcuenta": "4100000097",
+        "Titulo": "Martín Alvarez, Francisco José",
+        "pagado": 11267208,
+        "facturado": 11267208,
+        "n": 68
+      },
+      {
+        "Subcuenta": "4100000196",
+        "Titulo": "Álamo Home Europe S.L",
+        "pagado": 9995336,
+        "facturado": 11262550,
+        "n": 160
+      },
+      {
+        "Subcuenta": "4100000136",
+        "Titulo": "LUNA DE SUEÑOS SL",
+        "pagado": 7984029,
+        "facturado": 7984029,
+        "n": 24
+      },
+      {
+        "Subcuenta": "4100000126",
+        "Titulo": "CLEAN PLANET SERVICIOS GLOBALES SL",
+        "pagado": 3229408,
+        "facturado": 3229410,
+        "n": 28
+      },
+      {
+        "Subcuenta": "4100000190",
+        "Titulo": "Imput inversiones generales S.L",
+        "pagado": 2814306,
+        "facturado": 3159522,
+        "n": 42
+      },
+      {
+        "Subcuenta": "4100000200",
+        "Titulo": "GUIDEBRIDGE ASSET MANAGEMENT, SL",
+        "pagado": 3107123,
+        "facturado": 3107123,
+        "n": 14
+      },
+      {
+        "Subcuenta": "4100000145",
+        "Titulo": "Electricidad Eleia, S.L",
+        "pagado": 2826506,
+        "facturado": 2808562,
+        "n": 341
+      },
+      {
+        "Subcuenta": "4100000165",
+        "Titulo": "Eni Plenitude Iberia, S.L",
+        "pagado": 2195655,
+        "facturado": 2380545,
+        "n": 471
+      },
+      {
+        "Subcuenta": "4100000069",
+        "Titulo": "Repsol Comercializadora de Electricidad y Gas S.L.U",
+        "pagado": 1887400,
+        "facturado": 1887400,
+        "n": 362
+      },
+      {
+        "Subcuenta": "4100000051",
+        "Titulo": "Canal de Isabel II, S.A",
+        "pagado": 1681330,
+        "facturado": 1681330,
+        "n": 208
+      },
+      {
+        "Subcuenta": "4100000214",
+        "Titulo": "Gaolania Servicios SL",
+        "pagado": 1176015,
+        "facturado": 1232995,
+        "n": 203
+      },
+      {
+        "Subcuenta": "4100006001",
+        "Titulo": "Vidaro Inversiones S.L.",
+        "pagado": 1194137,
+        "facturado": 1194137,
+        "n": 36
+      },
+      {
+        "Subcuenta": "4100000144",
+        "Titulo": "Spotahome, S.L",
+        "pagado": 1172194,
+        "facturado": 1063749,
+        "n": 27
+      }
+    ],
+    "clientes": [
+      {
+        "Subcuenta": "4300000001",
+        "Titulo": "Pilates Lab S.L.",
+        "facturado": 16460967,
+        "cobrado": 16460967,
+        "n": 36
+      },
+      {
+        "Subcuenta": "4300002053",
+        "Titulo": "Batista Hernández, Francisco José",
+        "facturado": 11640084,
+        "cobrado": 10853882,
+        "n": 40
+      },
+      {
+        "Subcuenta": "4300000025",
+        "Titulo": "Chavez Castañeda, Ana Camila",
+        "facturado": 8676635,
+        "cobrado": 8108681,
+        "n": 29
+      },
+      {
+        "Subcuenta": "4300002057",
+        "Titulo": "Julian Abou-Jaoude",
+        "facturado": 8571105,
+        "cobrado": 8348424,
+        "n": 73
+      },
+      {
+        "Subcuenta": "4300002069",
+        "Titulo": "Arango Lago, Emma",
+        "facturado": 6295202,
+        "cobrado": 6295224,
+        "n": 32
+      },
+      {
+        "Subcuenta": "4300002086",
+        "Titulo": "Zélie Lourme, Josephine Marie",
+        "facturado": 6149463,
+        "cobrado": 5682431,
+        "n": 30
+      },
+      {
+        "Subcuenta": "4300002077",
+        "Titulo": "Setton Katz, David",
+        "facturado": 5704338,
+        "cobrado": 5193534,
+        "n": 20
+      },
+      {
+        "Subcuenta": "4300000015",
+        "Titulo": "Maestro de las Casas, Maria Luisa",
+        "facturado": 5346079,
+        "cobrado": 5346079,
+        "n": 30
+      },
+      {
+        "Subcuenta": "4300002071",
+        "Titulo": "Claude Khoury, Jean",
+        "facturado": 5301680,
+        "cobrado": 5124685,
+        "n": 51
+      },
+      {
+        "Subcuenta": "4300002070",
+        "Titulo": "Pensado, Federico",
+        "facturado": 5261357,
+        "cobrado": 5193098,
+        "n": 31
+      },
+      {
+        "Subcuenta": "4300002039",
+        "Titulo": "Alaoui Smaili, Yazmine",
+        "facturado": 5057321,
+        "cobrado": 4982443,
+        "n": 32
+      },
+      {
+        "Subcuenta": "4300002046",
+        "Titulo": "Tahan, Ella María",
+        "facturado": 4673141,
+        "cobrado": 4673141,
+        "n": 38
+      },
+      {
+        "Subcuenta": "4300000011",
+        "Titulo": "Andújar Hernández, Jorge",
+        "facturado": 4506980,
+        "cobrado": 4506980,
+        "n": 30
+      },
+      {
+        "Subcuenta": "4300000005",
+        "Titulo": "Sanz Ruiz, María",
+        "facturado": 4322716,
+        "cobrado": 4322716,
+        "n": 30
+      },
+      {
+        "Subcuenta": "4300002055",
+        "Titulo": "del Valle Álvarez, Maria Fernanda",
+        "facturado": 4306322,
+        "cobrado": 4306321,
+        "n": 21
+      }
+    ],
+    "retencionesSample": [
+      {
+        "Codigo": "9933",
+        "NFicha": 1,
+        "NIF": "E87885109",
+        "Nombre": "Notarios Padre Damián 40, C.B.",
+        "Clave": "G",
+        "Hijos": 1,
+        "RetIntegra": null,
+        "Porcentaje": 15,
+        "Retencion": null,
+        "ERetIntegra": 150,
+        "ERetencion": 22.5,
+        "Subclave": "1",
+        "Valoracion": 0,
+        "ICuenta": 0,
+        "IRepercutido": 0,
+        "Arrendador": "0",
+        "Devengo": null,
+        "NoResidente": null,
+        "ClaveCM": null,
+        "PorcentajeCM": null,
+        "ImpReduccion": null,
+        "ReducCeutaMelilla": "0",
+        "ClaveL": null,
+        "PorcentNR": null,
+        "ClaveNR": null,
+        "Fliquidacion": null,
+        "Tcodigo": null,
+        "Cemisor": null,
+        "GastosSS": 0,
+        "Penalizacion": 0,
+        "ReduccionesAplicables": 0,
+        "OpVinculada": 0,
+        "TipoVinculada": null,
+        "TipoOpeVinculada": null,
+        "MValoraVinculada": null,
+        "AccEmpEme": null,
+        "FondosVinculados": null
+      },
+      {
+        "Codigo": "9929",
+        "NFicha": 1,
+        "NIF": "E87885109",
+        "Nombre": "Notarios Padre Damián 40, C.B.",
+        "Clave": "G",
+        "Hijos": 1,
+        "RetIntegra": null,
+        "Porcentaje": 15,
+        "Retencion": null,
+        "ERetIntegra": 2245.34,
+        "ERetencion": 336.8,
+        "Subclave": "1",
+        "Valoracion": 0,
+        "ICuenta": 0,
+        "IRepercutido": 0,
+        "Arrendador": "0",
+        "Devengo": null,
+        "NoResidente": null,
+        "ClaveCM": null,
+        "PorcentajeCM": null,
+        "ImpReduccion": null,
+        "ReducCeutaMelilla": "0",
+        "ClaveL": null,
+        "PorcentNR": null,
+        "ClaveNR": null,
+        "Fliquidacion": null,
+        "Tcodigo": null,
+        "Cemisor": null,
+        "GastosSS": 0,
+        "Penalizacion": 0,
+        "ReduccionesAplicables": 0,
+        "OpVinculada": 0,
+        "TipoVinculada": null,
+        "TipoOpeVinculada": null,
+        "MValoraVinculada": null,
+        "AccEmpEme": null,
+        "FondosVinculados": null
+      },
+      {
+        "Codigo": "9538",
+        "NFicha": 1,
+        "NIF": "E81458556",
+        "Nombre": "Registradores Mercantiles de Madrid C.B.",
+        "Clave": "G",
+        "Hijos": 1,
+        "RetIntegra": null,
+        "Porcentaje": 14.9901,
+        "Retencion": null,
+        "ERetIntegra": 20.28,
+        "ERetencion": 3.04,
+        "Subclave": "1",
+        "Valoracion": 0,
+        "ICuenta": 0,
+        "IRepercutido": 0,
+        "Arrendador": "0",
+        "Devengo": null,
+        "NoResidente": null,
+        "ClaveCM": null,
+        "PorcentajeCM": null,
+        "ImpReduccion": null,
+        "ReducCeutaMelilla": "0",
+        "ClaveL": null,
+        "PorcentNR": null,
+        "ClaveNR": null,
+        "Fliquidacion": null,
+        "Tcodigo": null,
+        "Cemisor": null,
+        "GastosSS": 0,
+        "Penalizacion": 0,
+        "ReduccionesAplicables": 0,
+        "OpVinculada": 0,
+        "TipoVinculada": null,
+        "TipoOpeVinculada": null,
+        "MValoraVinculada": null,
+        "AccEmpEme": null,
+        "FondosVinculados": null
+      },
+      {
+        "Codigo": "9291",
+        "NFicha": 1,
+        "NIF": "01920345Y",
+        "Nombre": "García López, Jesús",
+        "Clave": "G",
+        "Hijos": 1,
+        "RetIntegra": null,
+        "Porcentaje": 15,
+        "Retencion": null,
+        "ERetIntegra": 2800,
+        "ERetencion": 420,
+        "Subclave": "1",
+        "Valoracion": 0,
+        "ICuenta": 0,
+        "IRepercutido": 0,
+        "Arrendador": "0",
+        "Devengo": null,
+        "NoResidente": null,
+        "ClaveCM": null,
+        "PorcentajeCM": null,
+        "ImpReduccion": null,
+        "ReducCeutaMelilla": "0",
+        "ClaveL": null,
+        "PorcentNR": null,
+        "ClaveNR": null,
+        "Fliquidacion": null,
+        "Tcodigo": null,
+        "Cemisor": null,
+        "GastosSS": 0,
+        "Penalizacion": 0,
+        "ReduccionesAplicables": 0,
+        "OpVinculada": 0,
+        "TipoVinculada": null,
+        "TipoOpeVinculada": null,
+        "MValoraVinculada": null,
+        "AccEmpEme": null,
+        "FondosVinculados": null
+      },
+      {
+        "Codigo": "8218",
+        "NFicha": 1,
+        "NIF": "E87885109",
+        "Nombre": "Notarios Padre Damián 40, C.B.",
+        "Clave": "G",
+        "Hijos": 1,
+        "RetIntegra": null,
+        "Porcentaje": 15.0049,
+        "Retencion": null,
+        "ERetIntegra": 72.11,
+        "ERetencion": 10.82,
+        "Subclave": "1",
+        "Valoracion": 0,
+        "ICuenta": 0,
+        "IRepercutido": 0,
+        "Arrendador": "0",
+        "Devengo": null,
+        "NoResidente": null,
+        "ClaveCM": null,
+        "PorcentajeCM": null,
+        "ImpReduccion": null,
+        "ReducCeutaMelilla": "0",
+        "ClaveL": null,
+        "PorcentNR": null,
+        "ClaveNR": null,
+        "Fliquidacion": null,
+        "Tcodigo": null,
+        "Cemisor": null,
+        "GastosSS": 0,
+        "Penalizacion": 0,
+        "ReduccionesAplicables": 0,
+        "OpVinculada": 0,
+        "TipoVinculada": null,
+        "TipoOpeVinculada": null,
+        "MValoraVinculada": null,
+        "AccEmpEme": null,
+        "FondosVinculados": null
+      }
+    ]
+  }
+}
