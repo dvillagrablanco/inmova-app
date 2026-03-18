@@ -274,6 +274,242 @@ export async function executeQuery(
 }
 
 // ============================================================================
+// LECTURA CONTABLE
+// ============================================================================
+// NOTA: Las queries de esta sección usan nombres de tabla genéricos de Zucchetti.
+// Tras ejecutar el discovery (scripts/discover-zucchetti-schema.ts) se ajustarán
+// los nombres reales de tablas y columnas.
+//
+// Nombres típicos en Zucchetti SQL Server:
+//   Asientos / Apuntes → cabecera + líneas de asientos contables
+//   Subcuentas / PlanCuentas → plan de cuentas
+//   Diario → libro diario
+//   Ejercicio → ejercicios contables
+//   Terceros → clientes/proveedores
+
+/**
+ * Configuración de nombres de tablas por base de datos.
+ * Se poblará tras el discovery. Mientras, usa valores por defecto.
+ */
+export interface ZucchettiTableNames {
+  /** Tabla de asientos contables (cabecera) */
+  asientos: string;
+  /** Tabla de líneas/apuntes de asientos */
+  apuntes: string;
+  /** Tabla de plan de cuentas / subcuentas */
+  subcuentas: string;
+  /** Tabla de ejercicios contables */
+  ejercicios: string;
+  /** Tabla de terceros (clientes/proveedores) */
+  terceros: string;
+  /** Tabla de diario */
+  diario: string;
+}
+
+/** Nombres por defecto — se actualizarán con el discovery */
+const DEFAULT_TABLE_NAMES: ZucchettiTableNames = {
+  asientos: 'Asientos',
+  apuntes: 'Apuntes',
+  subcuentas: 'Subcuentas',
+  ejercicios: 'Ejercicios',
+  terceros: 'Terceros',
+  diario: 'Diario',
+};
+
+/**
+ * Obtiene los nombres de tablas configurados.
+ * En el futuro se leerán de una config o BD; por ahora usa defaults.
+ */
+export function getTableNames(): ZucchettiTableNames {
+  return { ...DEFAULT_TABLE_NAMES };
+}
+
+/** Resultado de un asiento contable leído del SQL Server */
+export interface ZucchettiAsiento {
+  /** Número de asiento */
+  numero: number | string;
+  /** Fecha del asiento */
+  fecha: Date | string;
+  /** Descripción / concepto */
+  descripcion: string;
+  /** Referencia / documento */
+  referencia?: string;
+  /** Líneas del asiento */
+  lineas: ZucchettiApunte[];
+  /** Datos raw del SQL Server */
+  raw?: Record<string, unknown>;
+}
+
+/** Línea/apunte de un asiento */
+export interface ZucchettiApunte {
+  /** Código de subcuenta */
+  subcuenta: string;
+  /** Nombre de la subcuenta */
+  nombreSubcuenta?: string;
+  /** Importe en el debe */
+  debe: number;
+  /** Importe en el haber */
+  haber: number;
+  /** Concepto de la línea */
+  concepto?: string;
+  /** Datos raw */
+  raw?: Record<string, unknown>;
+}
+
+/** Subcuenta del plan de cuentas */
+export interface ZucchettiSubcuenta {
+  /** Código de la subcuenta (ej: 6220000) */
+  codigo: string;
+  /** Nombre/título */
+  nombre: string;
+  /** Saldo debe acumulado */
+  saldoDebe?: number;
+  /** Saldo haber acumulado */
+  saldoHaber?: number;
+  /** Datos raw */
+  raw?: Record<string, unknown>;
+}
+
+/**
+ * Lee asientos contables de un período.
+ *
+ * @param companyKey Sociedad (RSQ/VID/VIR)
+ * @param database Nombre de la BD en SQL Server
+ * @param fromDate Fecha inicio (YYYY-MM-DD)
+ * @param toDate Fecha fin (YYYY-MM-DD)
+ * @param limit Máximo de asientos (default 1000)
+ *
+ * NOTA: La query exacta depende del esquema descubierto.
+ * Esta implementación intenta queries genéricas y fallback.
+ */
+export async function getAccountingEntries(
+  companyKey: ZucchettiCompanyKey,
+  database: string,
+  fromDate: string,
+  toDate: string,
+  limit: number = 1000
+): Promise<ZucchettiAsiento[]> {
+  const pool = await getZucchettiPool(companyKey, database);
+  const tables = getTableNames();
+
+  // Intentar query genérica — se ajustará tras discovery
+  // Patrón típico Zucchetti: tabla de apuntes/movimientos con fecha, subcuenta, debe, haber
+  try {
+    const result = await pool
+      .request()
+      .input('fromDate', sql.Date, fromDate)
+      .input('toDate', sql.Date, toDate)
+      .query(`
+        SELECT TOP ${limit} *
+        FROM [dbo].[${tables.apuntes}]
+        WHERE Fecha >= @fromDate AND Fecha <= @toDate
+        ORDER BY Fecha, NumAsiento
+      `);
+
+    // Agrupar por número de asiento
+    const grouped = new Map<string, ZucchettiAsiento>();
+    for (const row of result.recordset) {
+      const key = String(row.NumAsiento || row.Numero || row.Id);
+      if (!grouped.has(key)) {
+        grouped.set(key, {
+          numero: key,
+          fecha: row.Fecha || row.FechaAsiento,
+          descripcion: row.Descripcion || row.Concepto || '',
+          referencia: row.Referencia || row.Documento || undefined,
+          lineas: [],
+          raw: row,
+        });
+      }
+      const asiento = grouped.get(key)!;
+      asiento.lineas.push({
+        subcuenta: String(row.Subcuenta || row.CuentaContable || row.Cuenta || ''),
+        nombreSubcuenta: row.NombreSubcuenta || row.NombreCuenta || undefined,
+        debe: parseFloat(row.Debe || row.ImporteDebe || 0),
+        haber: parseFloat(row.Haber || row.ImporteHaber || 0),
+        concepto: row.Concepto || row.ConceptoLinea || undefined,
+        raw: row,
+      });
+    }
+
+    return Array.from(grouped.values());
+  } catch (err: any) {
+    logger.warn(`[Zucchetti SQL] Query asientos falló en ${database}: ${err.message}`);
+    logger.warn('[Zucchetti SQL] Ejecuta el discovery para conocer los nombres reales de tablas');
+    return [];
+  }
+}
+
+/**
+ * Lee el plan de cuentas / subcuentas.
+ */
+export async function getChartOfAccounts(
+  companyKey: ZucchettiCompanyKey,
+  database: string
+): Promise<ZucchettiSubcuenta[]> {
+  const pool = await getZucchettiPool(companyKey, database);
+  const tables = getTableNames();
+
+  try {
+    const result = await pool.request().query(`
+      SELECT *
+      FROM [dbo].[${tables.subcuentas}]
+      ORDER BY Codigo
+    `);
+
+    return result.recordset.map((row: any) => ({
+      codigo: String(row.Codigo || row.Subcuenta || row.CuentaContable || ''),
+      nombre: row.Nombre || row.Titulo || row.Descripcion || '',
+      saldoDebe: parseFloat(row.SaldoDebe || row.Debe || 0),
+      saldoHaber: parseFloat(row.SaldoHaber || row.Haber || 0),
+      raw: row,
+    }));
+  } catch (err: any) {
+    logger.warn(`[Zucchetti SQL] Query subcuentas falló en ${database}: ${err.message}`);
+    return [];
+  }
+}
+
+/**
+ * Obtiene saldos de cuentas a una fecha dada.
+ */
+export async function getAccountBalances(
+  companyKey: ZucchettiCompanyKey,
+  database: string,
+  asOfDate: string
+): Promise<Array<{ subcuenta: string; nombre: string; debe: number; haber: number; saldo: number }>> {
+  const pool = await getZucchettiPool(companyKey, database);
+  const tables = getTableNames();
+
+  try {
+    const result = await pool
+      .request()
+      .input('asOfDate', sql.Date, asOfDate)
+      .query(`
+        SELECT
+          Subcuenta,
+          SUM(ISNULL(Debe, 0)) AS TotalDebe,
+          SUM(ISNULL(Haber, 0)) AS TotalHaber,
+          SUM(ISNULL(Debe, 0)) - SUM(ISNULL(Haber, 0)) AS Saldo
+        FROM [dbo].[${tables.apuntes}]
+        WHERE Fecha <= @asOfDate
+        GROUP BY Subcuenta
+        ORDER BY Subcuenta
+      `);
+
+    return result.recordset.map((row: any) => ({
+      subcuenta: String(row.Subcuenta || ''),
+      nombre: '',
+      debe: parseFloat(row.TotalDebe || 0),
+      haber: parseFloat(row.TotalHaber || 0),
+      saldo: parseFloat(row.Saldo || 0),
+    }));
+  } catch (err: any) {
+    logger.warn(`[Zucchetti SQL] Query balances falló en ${database}: ${err.message}`);
+    return [];
+  }
+}
+
+// ============================================================================
 // HELPERS
 // ============================================================================
 
