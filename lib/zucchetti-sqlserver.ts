@@ -545,13 +545,16 @@ export function getConfiguredCompanyKeys(): ZucchettiCompanyKey[] {
 
 /**
  * Mapeo de companyKey de Zucchetti a companyId de INMOVA.
- * Se actualizará tras el discovery cuando sepamos qué es RSQ.
+ *
+ * RSQ = Rovida S.L. (confirmado)
+ * VID = Vidaro Inversiones S.L.
+ * VIR = Viroda Inversiones S.L.U.
  */
 export function mapCompanyKeyToInmovaId(companyKey: ZucchettiCompanyKey): string | null {
   const mapping: Record<ZucchettiCompanyKey, string | null> = {
+    RSQ: 'rovida-sl',
     VID: 'vidaro-inversiones',
     VIR: 'viroda-inversiones',
-    RSQ: 'rovida-sl', // Pendiente confirmar
   };
   return mapping[companyKey] ?? null;
 }
@@ -561,9 +564,9 @@ export function mapCompanyKeyToInmovaId(companyKey: ZucchettiCompanyKey): string
  */
 export function mapInmovaIdToCompanyKey(companyId: string): ZucchettiCompanyKey | null {
   const mapping: Record<string, ZucchettiCompanyKey> = {
+    'rovida-sl': 'RSQ',
     'vidaro-inversiones': 'VID',
     'viroda-inversiones': 'VIR',
-    'rovida-sl': 'RSQ', // Pendiente confirmar
   };
   return mapping[companyId] ?? null;
 }

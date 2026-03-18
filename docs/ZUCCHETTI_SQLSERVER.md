@@ -6,13 +6,11 @@ Conexión directa al SQL Server de Zucchetti (`server.avannubo.com:33680`) para 
 
 ## Sociedades Configuradas
 
-| Clave | Usuario SQL         | Sociedad INMOVA         | Company ID INMOVA    |
-|-------|---------------------|-------------------------|----------------------|
-| RSQ   | `CONT_RSQ_RO`      | ¿Rovida? (pendiente)    | `rovida-sl`          |
-| VID   | `CONT_VID_RO`      | Vidaro Inversiones S.L. | `vidaro-inversiones` |
-| VIR   | `CONT_VIR_RO`      | Viroda Inversiones S.L.U.| `viroda-inversiones`|
-
-> **Nota**: RSQ aún no confirmado. Se determinará tras ejecutar el discovery.
+| Clave | Usuario SQL         | Sociedad INMOVA              | Company ID INMOVA    |
+|-------|---------------------|------------------------------|----------------------|
+| RSQ   | `CONT_RSQ_RO`      | Rovida S.L.                  | `rovida-sl`          |
+| VID   | `CONT_VID_RO`      | Vidaro Inversiones S.L.      | `vidaro-inversiones` |
+| VIR   | `CONT_VIR_RO`      | Viroda Inversiones S.L.U.    | `viroda-inversiones` |
 
 ## Variables de Entorno
 
