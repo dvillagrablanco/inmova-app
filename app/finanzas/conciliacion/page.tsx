@@ -207,6 +207,22 @@ export default function ConciliacionBancariaPage() {
     }>
   >([]);
 
+  // ── Estado de importación de extractos ──
+  const [importDragging, setImportDragging] = useState(false);
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [importLoading, setImportLoading] = useState(false);
+  const [importResult, setImportResult] = useState<{
+    success: boolean;
+    format: string;
+    imported: number;
+    duplicates: number;
+    errors: number;
+    total: number;
+    message: string;
+    statement?: Record<string, unknown>;
+  } | null>(null);
+  const fileInputRef = useState<HTMLInputElement | null>(null);
+
   // Cargar datos desde API - accepts explicit params to avoid stale closures
   const fetchData = async (
     page = 1,
@@ -723,7 +739,7 @@ export default function ConciliacionBancariaPage() {
               Movimientos ({stats.totalTransactions.toLocaleString('es-ES')})
             </TabsTrigger>
             <TabsTrigger value="sugerencias">Sugerencias IA</TabsTrigger>
-            <TabsTrigger value="importar">Importar CSV</TabsTrigger>
+            <TabsTrigger value="importar">Importar Extracto</TabsTrigger>
           </TabsList>
 
           {/* Tab: Movimientos */}
@@ -1276,53 +1292,247 @@ export default function ConciliacionBancariaPage() {
             </Card>
           </TabsContent>
 
-          {/* Tab: Importar CSV */}
+          {/* Tab: Importar Extractos */}
           <TabsContent value="importar" className="space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle>Importar Extracto Bancario</CardTitle>
                 <CardDescription>
-                  Sube un archivo CSV o OFX con los movimientos bancarios para conciliar
-                  automáticamente.
+                  Arrastra o selecciona un archivo con movimientos bancarios para importar y conciliar automáticamente.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                  <Upload className="mx-auto h-10 w-10 text-gray-400 mb-3" />
-                  <p className="text-sm text-gray-600 mb-2">
-                    <span className="font-medium text-primary">Haz click para seleccionar</span> o
-                    arrastra un archivo
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    Formatos soportados: CSV, OFX, CAMT.053 (máx. 10MB)
-                  </p>
-                  <input
-                    type="file"
-                    accept=".csv,.ofx,.xml"
-                    className="mt-4 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 cursor-pointer"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
+                {/* Drop Zone */}
+                <div
+                  className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${
+                    importDragging
+                      ? 'border-primary bg-primary/5 scale-[1.01]'
+                      : importFile
+                      ? 'border-green-400 bg-green-50 dark:bg-green-950'
+                      : 'border-gray-300 hover:border-gray-400'
+                  }`}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setImportDragging(true);
+                  }}
+                  onDragEnter={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setImportDragging(true);
+                  }}
+                  onDragLeave={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setImportDragging(false);
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setImportDragging(false);
+                    const file = e.dataTransfer.files?.[0];
+                    if (file) {
+                      setImportFile(file);
+                      setImportResult(null);
+                    }
+                  }}
+                  onClick={() => {
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = '.csv,.xml,.txt,.n43,.c43,.ofx';
+                    input.onchange = (ev) => {
+                      const file = (ev.target as HTMLInputElement).files?.[0];
                       if (file) {
-                        toast.success(
-                          `Archivo "${file.name}" seleccionado. La importación está en desarrollo.`
-                        );
+                        setImportFile(file);
+                        setImportResult(null);
                       }
-                    }}
-                  />
+                    };
+                    input.click();
+                  }}
+                >
+                  {importDragging ? (
+                    <>
+                      <Upload className="mx-auto h-12 w-12 text-primary mb-3 animate-bounce" />
+                      <p className="text-sm font-medium text-primary">Suelta el archivo aquí</p>
+                    </>
+                  ) : importFile ? (
+                    <>
+                      <FileText className="mx-auto h-10 w-10 text-green-600 mb-3" />
+                      <p className="text-sm font-medium text-green-700 dark:text-green-400">
+                        {importFile.name}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {(importFile.size / 1024).toFixed(1)} KB — Click para cambiar
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="mx-auto h-10 w-10 text-gray-400 mb-3" />
+                      <p className="text-sm text-gray-600 mb-2">
+                        <span className="font-medium text-primary">Haz click para seleccionar</span>{' '}
+                        o arrastra un archivo
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Formatos: Norma 43 (.txt, .n43, .c43), CAMT.053 (.xml), CSV (máx. 10MB)
+                      </p>
+                    </>
+                  )}
                 </div>
+
+                {/* Botón importar */}
+                {importFile && !importLoading && (
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={async () => {
+                        if (!importFile) return;
+                        setImportLoading(true);
+                        setImportResult(null);
+
+                        const toastId = toast.loading(`Importando ${importFile.name}...`);
+
+                        try {
+                          const formData = new FormData();
+                          formData.append('file', importFile);
+                          if (selectedCompany !== 'all') {
+                            formData.append('companyId', selectedCompany);
+                          }
+
+                          const res = await fetch('/api/finanzas/conciliacion/import', {
+                            method: 'POST',
+                            body: formData,
+                          });
+
+                          const data = await res.json();
+                          toast.dismiss(toastId);
+
+                          if (res.ok && data.success) {
+                            setImportResult(data);
+                            toast.success(data.message);
+                            // Recargar movimientos
+                            fetchData(1);
+                          } else {
+                            toast.error(data.error || 'Error importando archivo');
+                            setImportResult({ success: false, format: '', imported: 0, duplicates: 0, errors: 1, total: 0, message: data.error });
+                          }
+                        } catch (err: any) {
+                          toast.dismiss(toastId);
+                          toast.error('Error de conexión al importar');
+                        } finally {
+                          setImportLoading(false);
+                        }
+                      }}
+                      className="flex-1"
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      Importar Movimientos
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setImportFile(null);
+                        setImportResult(null);
+                      }}
+                    >
+                      <XCircle className="h-4 w-4 mr-2" />
+                      Cancelar
+                    </Button>
+                  </div>
+                )}
+
+                {/* Loading */}
+                {importLoading && (
+                  <div className="flex items-center justify-center gap-2 py-4">
+                    <RefreshCw className="h-5 w-5 animate-spin text-primary" />
+                    <span className="text-sm text-muted-foreground">Procesando extracto bancario...</span>
+                  </div>
+                )}
+
+                {/* Resultado de importación */}
+                {importResult && (
+                  <div
+                    className={`rounded-md p-4 ${
+                      importResult.success
+                        ? 'bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800'
+                        : 'bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      {importResult.success ? (
+                        <CheckCircle2 className="h-5 w-5 text-green-600" />
+                      ) : (
+                        <XCircle className="h-5 w-5 text-red-600" />
+                      )}
+                      <p
+                        className={`text-sm font-medium ${
+                          importResult.success
+                            ? 'text-green-800 dark:text-green-200'
+                            : 'text-red-800 dark:text-red-200'
+                        }`}
+                      >
+                        {importResult.message}
+                      </p>
+                    </div>
+                    {importResult.success && (
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
+                        <div className="text-center">
+                          <p className="text-2xl font-bold text-green-700 dark:text-green-300">{importResult.imported}</p>
+                          <p className="text-xs text-muted-foreground">Importados</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-2xl font-bold text-gray-500">{importResult.duplicates}</p>
+                          <p className="text-xs text-muted-foreground">Duplicados</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-2xl font-bold text-red-500">{importResult.errors}</p>
+                          <p className="text-xs text-muted-foreground">Errores</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-2xl font-bold text-blue-600">{importResult.total}</p>
+                          <p className="text-xs text-muted-foreground">Total en archivo</p>
+                        </div>
+                      </div>
+                    )}
+                    {importResult.statement && (
+                      <div className="mt-3 text-xs text-muted-foreground space-y-1">
+                        <p><strong>Formato:</strong> {(importResult.statement as any).format}</p>
+                        {(importResult.statement as any).iban && (
+                          <p><strong>IBAN:</strong> {(importResult.statement as any).iban}</p>
+                        )}
+                        {(importResult.statement as any).fullAccount && (
+                          <p><strong>Cuenta:</strong> {(importResult.statement as any).fullAccount}</p>
+                        )}
+                        {(importResult.statement as any).openingBalance !== undefined && (
+                          <p>
+                            <strong>Saldo:</strong>{' '}
+                            {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(
+                              (importResult.statement as any).openingBalance
+                            )}{' '}
+                            →{' '}
+                            {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(
+                              (importResult.statement as any).closingBalance
+                            )}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Info formatos */}
                 <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-md p-4">
-                  <p className="text-sm text-blue-800 dark:text-blue-200">
-                    <strong>Formato CSV esperado:</strong> Fecha, Concepto, Importe, Saldo. Los
-                    movimientos se conciliarán automáticamente con los pagos pendientes por importe
-                    y fecha.
-                  </p>
+                  <p className="text-sm text-blue-800 dark:text-blue-200 font-medium mb-2">Formatos aceptados:</p>
+                  <ul className="text-xs text-blue-700 dark:text-blue-300 space-y-1 list-disc list-inside">
+                    <li><strong>Norma 43</strong> (.txt, .n43, .c43) — Formato estándar de la AEB para extractos bancarios españoles</li>
+                    <li><strong>CAMT.053</strong> (.xml) — Formato ISO 20022 (Bankinter, BBVA, Santander, etc.)</li>
+                    <li><strong>CSV</strong> (.csv) — Formato genérico: Fecha, Concepto, Importe, Saldo</li>
+                  </ul>
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
       </div>
-      <AIDocumentAssistant />
+      <AIDocumentAssistant context="contabilidad" variant="floating" position="bottom-right" />
     </AuthenticatedLayout>
   );
 }
