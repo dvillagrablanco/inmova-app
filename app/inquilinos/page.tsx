@@ -91,6 +91,9 @@ function InquilinosPageContent() {
     'grid'
   );
 
+  // Morosidad data from accounting
+  const [morosidadMap, setMorosidadMap] = useState<Record<string, { saldo: number; nombre: string }>>({});
+
   // Delete confirmation dialog state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [tenantToDelete, setTenantToDelete] = useState<Tenant | null>(null);
@@ -131,6 +134,46 @@ function InquilinosPageContent() {
       fetchTenants();
     }
   }, [status]);
+
+  // Load morosidad data from Zucchetti
+  useEffect(() => {
+    if (status !== 'authenticated') return;
+    const fetchMorosidad = async () => {
+      try {
+        const res = await fetch('/api/accounting/enrichment?type=morosidad');
+        if (!res.ok) return;
+        const json = await res.json();
+        if (!json.success || !Array.isArray(json.data)) return;
+        const map: Record<string, { saldo: number; nombre: string }> = {};
+        for (const d of json.data) {
+          if (d.saldo > 50) {
+            // Key by lowercase name for fuzzy matching
+            const key = (d.nombre || '').toLowerCase().trim();
+            if (key) map[key] = { saldo: d.saldo, nombre: d.nombre };
+          }
+        }
+        setMorosidadMap(map);
+      } catch {
+        // Optional enrichment — silently fail
+      }
+    };
+    fetchMorosidad();
+  }, [status]);
+
+  // Find morosidad for a tenant
+  const getTenantDeuda = (tenant: Tenant): number => {
+    const nombre = (tenant.nombreCompleto || '').toLowerCase().trim();
+    // Try exact match
+    if (morosidadMap[nombre]) return morosidadMap[nombre].saldo;
+    // Try first word match
+    const firstName = nombre.split(/[\s,]+/)[0];
+    if (firstName.length > 3) {
+      for (const [key, val] of Object.entries(morosidadMap)) {
+        if (key.includes(firstName)) return val.saldo;
+      }
+    }
+    return 0;
+  };
 
   const handleDeleteClick = (tenant: Tenant) => {
     setTenantToDelete(tenant);
@@ -389,9 +432,16 @@ function InquilinosPageContent() {
                           </Avatar>
                           <div className="flex-1">
                             <CardTitle className="text-lg">{tenant.nombreCompleto}</CardTitle>
-                            <Badge variant={estadoBadge.variant} className="mt-1">
-                              {estadoBadge.label}
-                            </Badge>
+                            <div className="flex gap-1 mt-1 flex-wrap">
+                              <Badge variant={estadoBadge.variant}>
+                                {estadoBadge.label}
+                              </Badge>
+                              {getTenantDeuda(tenant) > 0 && (
+                                <Badge variant="destructive" className="text-xs">
+                                  Deuda: {getTenantDeuda(tenant).toLocaleString('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })}
+                                </Badge>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </CardHeader>
@@ -465,9 +515,16 @@ function InquilinosPageContent() {
                               </Avatar>
                               <div>
                                 <h3 className="text-xl font-bold">{tenant.nombreCompleto}</h3>
-                                <Badge variant={estadoBadge.variant} className="mt-1">
-                                  {estadoBadge.label}
-                                </Badge>
+                                <div className="flex gap-1 mt-1 flex-wrap">
+                                  <Badge variant={estadoBadge.variant}>
+                                    {estadoBadge.label}
+                                  </Badge>
+                                  {getTenantDeuda(tenant) > 0 && (
+                                    <Badge variant="destructive" className="text-xs">
+                                      Deuda: {getTenantDeuda(tenant).toLocaleString('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })}
+                                    </Badge>
+                                  )}
+                                </div>
                               </div>
                             </div>
 
