@@ -18,6 +18,10 @@
       "schedule": "0 6 * * *"
     },
     {
+      "path": "/api/cron/sync-zucchetti-sql",
+      "schedule": "30 6 * * *"
+    },
+    {
       "path": "/api/cron/sync-gocardless",
       "schedule": "*/15 * * * *"
     },
