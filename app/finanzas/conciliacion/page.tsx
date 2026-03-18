@@ -611,6 +611,13 @@ export default function ConciliacionBancariaPage() {
                 </SelectContent>
               </Select>
             )}
+            <Button
+              variant="default"
+              onClick={() => setActiveTab('importar')}
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              Importar Extracto
+            </Button>
             <Button variant="outline" onClick={handleSyncBanks} disabled={isSyncing}>
               <RefreshCw className={`h-4 w-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
               {isSyncing ? 'Descargando movimientos...' : 'Actualizar Movimientos'}

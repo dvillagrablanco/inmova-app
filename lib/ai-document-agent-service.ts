@@ -28,6 +28,71 @@ import { CLAUDE_MODEL_PRIMARY } from './ai-model-config';
 const DEFAULT_MODEL = CLAUDE_MODEL_PRIMARY;
 const MAX_TOKENS = 4096;
 
+/**
+ * Extrae JSON válido de una respuesta de texto de Claude.
+ * Busca el objeto JSON más externo, manejando anidamiento correcto.
+ * Más robusto que regex \{[\s\S]*\} que falla con contenido mixto.
+ */
+function extractJsonFromText(text: string): string | null {
+  // Buscar primer '{' 
+  const start = text.indexOf('{');
+  if (start === -1) return null;
+
+  let depth = 0;
+  let inString = false;
+  let escape = false;
+
+  for (let i = start; i < text.length; i++) {
+    const ch = text[i];
+
+    if (escape) {
+      escape = false;
+      continue;
+    }
+
+    if (ch === '\\' && inString) {
+      escape = true;
+      continue;
+    }
+
+    if (ch === '"') {
+      inString = !inString;
+      continue;
+    }
+
+    if (inString) continue;
+
+    if (ch === '{') depth++;
+    else if (ch === '}') {
+      depth--;
+      if (depth === 0) {
+        const candidate = text.substring(start, i + 1);
+        // Validar que es JSON parseable
+        try {
+          JSON.parse(candidate);
+          return candidate;
+        } catch {
+          // Si falla, intentar limpiar caracteres de control
+          const cleaned = candidate.replace(/[\x00-\x1f\x7f]/g, (c) =>
+            c === '\n' || c === '\r' || c === '\t' ? c : ''
+          );
+          try {
+            JSON.parse(cleaned);
+            return cleaned;
+          } catch {
+            // Seguir buscando otro JSON
+            continue;
+          }
+        }
+      }
+    }
+  }
+
+  // Fallback: regex simple
+  const match = text.match(/\{[\s\S]*\}/);
+  return match ? match[0] : null;
+}
+
 // Lazy initialization para evitar errores en tests/SSR
 let anthropicClient: Anthropic | null = null;
 
@@ -394,9 +459,9 @@ export async function classifyDocument(
 
     const content = response.content[0];
     if (content.type === 'text') {
-      const jsonMatch = content.text.match(/\{[\s\S]*\}/);
+      const jsonMatch = extractJsonFromText(content.text);
       if (jsonMatch) {
-        const result = JSON.parse(jsonMatch[0]);
+        const result = JSON.parse(jsonMatch);
         logger.info('📄 Documento clasificado', { 
           category: result.category, 
           confidence: result.confidence,
@@ -513,9 +578,9 @@ export async function extractDocumentData(
     });
 
     if (content.type === 'text') {
-      const jsonMatch = content.text.match(/\{[\s\S]*\}/);
+      const jsonMatch = extractJsonFromText(content.text);
       if (jsonMatch) {
-        const result = JSON.parse(jsonMatch[0]);
+        const result = JSON.parse(jsonMatch);
         
         // Mapear los campos extraídos al tipo correcto
         const fields: ExtractedField[] = (result.fields || []).map((f: any) => ({
