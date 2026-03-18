@@ -121,6 +121,12 @@ export default function EdificioDetallesPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [images, setImages] = useState<string[]>([]);
+  const [noiData, setNoiData] = useState<{
+    ingresoAnual: number;
+    gastosOperativos: number;
+    noi: number;
+    desglose: Array<{ tipo: string; importe: number }>;
+  } | null>(null);
 
   const buildingId = params?.id as string;
 
@@ -174,6 +180,60 @@ export default function EdificioDetallesPage() {
 
     fetchBuilding();
   }, [status, buildingId]);
+
+  // Cargar datos de rentabilidad contable (NOI)
+  useEffect(() => {
+    if (!building) return;
+    const fetchNoi = async () => {
+      try {
+        const res = await fetch(`/api/accounting/enrichment?type=noi`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!data.success || !data.data) return;
+
+        const nombre = (building.nombre + ' ' + building.direccion).toLowerCase();
+        const keywords = nombre.replace(/[,./]/g, ' ').split(/\s+/).filter((w: string) => w.length > 3);
+
+        // Match income entries by building name/address
+        let ingresoAnual = 0;
+        for (const ing of data.data.ingresos || []) {
+          const t = (ing.inmueble || '').toLowerCase();
+          if (keywords.some((k: string) => t.includes(k))) {
+            ingresoAnual += ing.ingresoAnual || 0;
+          }
+        }
+
+        // Match expense entries
+        let gastosOperativos = 0;
+        const desglose: Array<{ tipo: string; importe: number }> = [];
+        const gastosPorTipo: Record<string, number> = {};
+        for (const g of data.data.gastos || []) {
+          const t = (g.inmueble || '').toLowerCase();
+          if (keywords.some((k: string) => t.includes(k))) {
+            gastosOperativos += g.gastoAnual || 0;
+            const tipo = g.tipoGasto || 'Otros';
+            gastosPorTipo[tipo] = (gastosPorTipo[tipo] || 0) + (g.gastoAnual || 0);
+          }
+        }
+        for (const [tipo, importe] of Object.entries(gastosPorTipo)) {
+          desglose.push({ tipo, importe });
+        }
+        desglose.sort((a, b) => b.importe - a.importe);
+
+        if (ingresoAnual > 0 || gastosOperativos > 0) {
+          setNoiData({
+            ingresoAnual,
+            gastosOperativos,
+            noi: ingresoAnual - gastosOperativos,
+            desglose,
+          });
+        }
+      } catch {
+        // Silently fail — enrichment is optional
+      }
+    };
+    fetchNoi();
+  }, [building]);
 
   const handleDeleteConfirm = async () => {
     if (!building) return;
@@ -478,6 +538,59 @@ export default function EdificioDetallesPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Rentabilidad Contable (NOI) */}
+        {noiData && (
+          <Card className="border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-950/30">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base font-semibold flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-green-600" />
+                  Rentabilidad Contable (2025)
+                </CardTitle>
+                <Badge variant={noiData.noi > 0 ? 'default' : 'destructive'}>
+                  NOI: {noiData.noi > 0 ? '+' : ''}{noiData.noi.toLocaleString('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })}
+                </Badge>
+              </div>
+              <CardDescription>Datos reales de contabilidad (Zucchetti)</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-3 gap-4 mb-4">
+                <div className="text-center">
+                  <p className="text-lg font-bold text-green-600">
+                    {noiData.ingresoAnual.toLocaleString('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Ingresos/año</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-lg font-bold text-red-500">
+                    {noiData.gastosOperativos.toLocaleString('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Gastos/año</p>
+                </div>
+                <div className="text-center">
+                  <p className={`text-lg font-bold ${noiData.noi > 0 ? 'text-green-600' : 'text-red-500'}`}>
+                    {noiData.noi.toLocaleString('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })}
+                  </p>
+                  <p className="text-xs text-muted-foreground">NOI</p>
+                </div>
+              </div>
+              {noiData.desglose.length > 0 && (
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground mb-2">Desglose gastos:</p>
+                  {noiData.desglose.slice(0, 5).map((g, i) => (
+                    <div key={i} className="flex justify-between text-xs">
+                      <span className="text-muted-foreground">{g.tipo}</span>
+                      <span className="font-medium">
+                        {g.importe.toLocaleString('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
           {/* Columna Principal */}
