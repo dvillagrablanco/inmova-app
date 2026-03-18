@@ -103,3 +103,4 @@ data/dilitrust-doc-urls.json
 scraping-results/
 scripts/scrape-zona3*.py
 scripts/process-zona3-html.py
+data/zucchetti-deep-analysis.json
