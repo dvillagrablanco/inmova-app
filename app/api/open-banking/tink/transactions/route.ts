@@ -19,18 +19,42 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const { isTinkConfigured, listTransactions, parseTinkAmount } = await import('@/lib/tink-service');
+    const { isTinkConfigured, listTransactions, parseTinkAmount } = await import(
+      '@/lib/tink-service'
+    );
     if (!isTinkConfigured()) {
       return NextResponse.json({ error: 'Tink no configurado' }, { status: 503 });
     }
 
+    const { getPrismaClient } = await import('@/lib/db');
     const companyId = (session.user as any).companyId;
     const userId = (session.user as any).id;
-    const tinkUserId = `inmova_${companyId}_${userId}`;
+    if (!companyId || !userId) {
+      return NextResponse.json({ error: 'Sesión inválida' }, { status: 400 });
+    }
+
+    const prisma = getPrismaClient();
+    const connection = await prisma.bankConnection.findFirst({
+      where: {
+        companyId,
+        userId,
+        proveedor: 'tink',
+        accessToken: { not: null },
+      },
+      orderBy: { createdAt: 'desc' },
+      select: { accessToken: true, estado: true },
+    });
+
+    if (!connection?.accessToken) {
+      return NextResponse.json(
+        { error: 'No hay conexion Tink activa. Debes reconectar el banco.' },
+        { status: 404 }
+      );
+    }
 
     const { searchParams } = new URL(req.url);
 
-    const result = await listTransactions(tinkUserId, {
+    const result = await listTransactions(connection.accessToken, {
       accountId: searchParams.get('accountId') || undefined,
       dateFrom: searchParams.get('dateFrom') || undefined,
       dateTo: searchParams.get('dateTo') || undefined,

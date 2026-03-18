@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build && node -e \"const fs=require('fs'),p='.next/prerender-manifest.json';if(!fs.existsSync(p)){fs.writeFileSync(p,JSON.stringify({version:4,routes:{},dynamicRoutes:{},notFoundRoutes:[],preview:{previewModeId:'x',previewModeSigningKey:'x',previewModeEncryptionKey:'x'}}));console.log('Created missing prerender-manifest.json')}\"",
+    "build": "prisma generate && next build && node -e \"const fs=require('fs');const path=require('path');const ensure=(file,content,label)=>{const dir=path.dirname(file);if(!fs.existsSync(dir)){fs.mkdirSync(dir,{recursive:true});}if(!fs.existsSync(file)){fs.writeFileSync(file,JSON.stringify(content));console.log('Created missing '+label);}};ensure('.next/prerender-manifest.json',{version:4,routes:{},dynamicRoutes:{},notFoundRoutes:[],preview:{previewModeId:'x',previewModeSigningKey:'x',previewModeEncryptionKey:'x'}},'prerender-manifest.json');ensure('.next/server/middleware-manifest.json',{version:3,middleware:{},functions:{}},'middleware-manifest.json');\"",
     "build:vercel": "prisma generate && next build --no-lint",
     "start": "next start",
     "lint": "ESLINT_USE_FLAT_CONFIG=true eslint app/ lib/ components/ --ext .ts,.tsx --quiet",
