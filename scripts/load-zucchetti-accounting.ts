@@ -101,8 +101,11 @@ function classifySubcuenta(subcuenta: string, titulo: string): { tipo: 'ingreso'
     return { tipo: 'gasto', categoria: 'gasto_otro' };
   }
 
-  // Grupos 1-4 (balance): no son gastos/ingresos operativos — omitir de AccountingTransaction
-  // pero necesitamos los del grupo 57 para BankTransaction (se manejan aparte)
+  // Grupo 8/9: Resultado del ejercicio — omitir
+  if (sub.startsWith('8') || sub.startsWith('9')) return null;
+
+  // Grupos 1-4, 5 (balance/financieras): no son gastos/ingresos operativos
+  // Se omiten de AccountingTransaction (los de grupo 57 van a BankTransaction)
   return null;
 }
 
@@ -151,10 +154,11 @@ async function loadAccountingEntries(
         continue;
       }
 
-      const debe = parseFloat(row.Debe || 0);
-      const haber = parseFloat(row.Haber || 0);
+      // SQL Server money type comes in cents — divide by 100
+      const debe = parseFloat(row.Debe || 0) / 100;
+      const haber = parseFloat(row.Haber || 0) / 100;
       const monto = Math.abs(debe - haber);
-      if (monto === 0) { skipped++; continue; }
+      if (monto < 0.01) { skipped++; continue; }
 
       const referencia = `ZUC-${key}-${row.CodEjercicio}-${row.Asiento}-${row.Apunte}`;
       const concepto = [
@@ -262,10 +266,11 @@ async function loadBankMovements(
     const batch = result.recordset.slice(i, i + BATCH_SIZE);
 
     for (const row of batch) {
-      const debe = parseFloat(row.Debe || 0);
-      const haber = parseFloat(row.Haber || 0);
+      // SQL Server money type comes in cents — divide by 100
+      const debe = parseFloat(row.Debe || 0) / 100;
+      const haber = parseFloat(row.Haber || 0) / 100;
       const monto = debe - haber; // Positivo = entrada, negativo = salida
-      if (monto === 0) { skipped++; continue; }
+      if (Math.abs(monto) < 0.01) { skipped++; continue; }
 
       const txId = `ZUC-BK-${key}-${row.CodEjercicio}-${row.Asiento}-${row.Apunte}`;
 
