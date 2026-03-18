@@ -104,3 +104,4 @@ scraping-results/
 scripts/scrape-zona3*.py
 scripts/process-zona3-html.py
 data/zucchetti-deep-analysis.json
+data/zuc-enrich.json
