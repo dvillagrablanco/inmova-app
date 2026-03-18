@@ -36,6 +36,9 @@ yarn-error.log*
 .env.production
 .env.development
 
+# Zucchetti SQL discovery (may contain sensitive data)
+data/zucchetti-schema-discovery.json
+
 # vercel
 .vercel
 

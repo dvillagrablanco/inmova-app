@@ -80,6 +80,7 @@
     "@testing-library/user-event": "^14.6.1",
     "@types/adm-zip": "^0.5.7",
     "@types/jsdom": "^27",
+    "@types/mssql": "^9.1.9",
     "@types/node": "^24.10.1",
     "@types/papaparse": "^5.5.1",
     "@types/pdfkit": "^0.17.4",

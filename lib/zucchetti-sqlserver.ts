@@ -156,7 +156,7 @@ export async function getZucchettiPool(
  * Cierra todos los pools abiertos. Usar en cleanup/shutdown.
  */
 export async function closeAllPools(): Promise<void> {
-  for (const [key, pool] of pools.entries()) {
+  for (const [key, pool] of Array.from(pools.entries())) {
     try {
       await pool.close();
       logger.info(`[Zucchetti SQL] Pool ${key} cerrado`);
