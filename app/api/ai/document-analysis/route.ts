@@ -817,8 +817,17 @@ function mapFieldNameToTarget(fieldName: string, category: string = 'general'): 
  * Para imágenes, se usa Claude Vision directamente
  */
 async function extractTextFromFile(file: File): Promise<string> {
-  // Para archivos de texto
-  if (file.type === 'text/plain') {
+  // Para archivos de texto, XML, Norma 43
+  const fileName = (file.name || '').toLowerCase();
+  if (
+    file.type === 'text/plain' ||
+    file.type === 'text/xml' ||
+    file.type === 'application/xml' ||
+    fileName.endsWith('.txt') ||
+    fileName.endsWith('.xml') ||
+    fileName.endsWith('.n43') ||
+    fileName.endsWith('.c43')
+  ) {
     return await file.text();
   }
 
@@ -975,6 +984,8 @@ export async function POST(request: NextRequest) {
           'application/msword',
           'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
           'text/plain',
+          'text/xml',
+          'application/xml',
           'application/octet-stream', // Fallback genérico de algunos navegadores
         ];
 
@@ -992,6 +1003,9 @@ export async function POST(request: NextRequest) {
           '.txt',
           '.bmp',
           '.tiff',
+          '.xml',
+          '.n43',
+          '.c43',
         ];
 
         const fileExtension = (file.name || '').toLowerCase().match(/\.[a-z0-9]+$/)?.[0] || '';
@@ -1006,7 +1020,7 @@ export async function POST(request: NextRequest) {
           });
           return NextResponse.json(
             {
-              error: `Tipo de archivo no permitido: ${file.type || 'desconocido'} (${file.name}). Formatos aceptados: PDF, JPG, PNG, WEBP, DOC, DOCX, TXT.`,
+              error: `Tipo de archivo no permitido: ${file.type || 'desconocido'} (${file.name}). Formatos aceptados: PDF, JPG, PNG, WEBP, DOC, DOCX, TXT, XML, N43, C43.`,
             },
             { status: 400 }
           );
