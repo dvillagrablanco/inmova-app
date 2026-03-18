@@ -59,6 +59,179 @@ ChartJS.register(
   Legend
 );
 
+// ============================================
+// COMPONENTE FISCAL (Modelo 303 desde Zucchetti)
+// ============================================
+
+function FiscalDashboard({ companyId, periodo }: { companyId: string; periodo: string }) {
+  const [ivaData, setIvaData] = useState<any>(null);
+  const [loadingIva, setLoadingIva] = useState(false);
+  const [selectedQuarter, setSelectedQuarter] = useState<string>('all');
+
+  useEffect(() => {
+    if (!companyId) return;
+    const fetchIva = async () => {
+      setLoadingIva(true);
+      try {
+        const year = periodo.split('-')[0] || new Date().getFullYear();
+        const qParam = selectedQuarter !== 'all' ? `&quarter=${selectedQuarter}` : '';
+        const res = await fetch(`/api/accounting/iva?year=${year}${qParam}&companyId=${companyId}`);
+        if (res.ok) {
+          const data = await res.json();
+          setIvaData(data);
+        }
+      } catch {
+        // Silent fail
+      } finally {
+        setLoadingIva(false);
+      }
+    };
+    fetchIva();
+  }, [companyId, periodo, selectedQuarter]);
+
+  const fmt = (n: number) => n.toLocaleString('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 2 });
+
+  if (loadingIva) {
+    return <div className="flex items-center justify-center py-8"><RefreshCw className="h-6 w-6 animate-spin text-muted-foreground" /><span className="ml-2 text-muted-foreground">Cargando datos fiscales de Zucchetti...</span></div>;
+  }
+
+  if (!ivaData?.success) {
+    return (
+      <Card>
+        <CardContent className="py-8 text-center">
+          <Receipt className="mx-auto h-10 w-10 text-muted-foreground mb-3" />
+          <p className="text-muted-foreground">Conecta con Zucchetti SQL Server para ver datos fiscales reales.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const { summary, modelo303, facturas } = ivaData;
+
+  return (
+    <div className="space-y-4">
+      {/* Selector de trimestre */}
+      <div className="flex items-center gap-4">
+        <label className="text-sm font-medium">Trimestre:</label>
+        <div className="flex gap-1">
+          {['all', '1', '2', '3', '4'].map((q) => (
+            <Button
+              key={q}
+              variant={selectedQuarter === q ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setSelectedQuarter(q)}
+            >
+              {q === 'all' ? 'Anual' : `T${q}`}
+            </Button>
+          ))}
+        </div>
+        <Badge variant="secondary">{summary.totalFacturas} facturas</Badge>
+      </div>
+
+      {/* Modelo 303 */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Calculator className="h-5 w-5 text-blue-600" />
+            Modelo 303 — IVA {selectedQuarter === 'all' ? 'Anual' : `T${selectedQuarter}`} {summary.year}
+          </CardTitle>
+          <CardDescription>Estimación basada en el Registro de IVA de Zucchetti</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div className="text-center p-3 bg-green-50 dark:bg-green-950 rounded-lg">
+              <p className="text-2xl font-bold text-green-700">{fmt(modelo303.ivaRepercutido)}</p>
+              <p className="text-xs text-muted-foreground">IVA Repercutido</p>
+              <p className="text-xs text-muted-foreground">{summary.emitidas.count} facturas</p>
+            </div>
+            <div className="text-center p-3 bg-red-50 dark:bg-red-950 rounded-lg">
+              <p className="text-2xl font-bold text-red-700">{fmt(modelo303.ivaSoportado)}</p>
+              <p className="text-xs text-muted-foreground">IVA Soportado</p>
+              <p className="text-xs text-muted-foreground">{summary.recibidas.count} facturas</p>
+            </div>
+            <div className="text-center p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
+              <p className={`text-2xl font-bold ${modelo303.resultado >= 0 ? 'text-red-600' : 'text-green-600'}`}>
+                {fmt(modelo303.resultado)}
+              </p>
+              <p className="text-xs text-muted-foreground">Resultado</p>
+            </div>
+            <div className="text-center p-3 bg-amber-50 dark:bg-amber-950 rounded-lg">
+              <p className="text-2xl font-bold text-amber-700">{fmt(modelo303.aIngresar)}</p>
+              <p className="text-xs text-muted-foreground">A Ingresar</p>
+            </div>
+            <div className="text-center p-3 bg-purple-50 dark:bg-purple-950 rounded-lg">
+              <p className="text-2xl font-bold text-purple-700">{fmt(modelo303.aCompensar)}</p>
+              <p className="text-xs text-muted-foreground">A Compensar</p>
+            </div>
+          </div>
+
+          {/* Bases imponibles */}
+          <div className="mt-4 grid grid-cols-2 gap-4">
+            <div className="border rounded-lg p-3">
+              <h4 className="text-sm font-medium mb-2">Facturas Emitidas (Ventas)</h4>
+              <div className="space-y-1 text-sm">
+                <div className="flex justify-between"><span className="text-muted-foreground">Base imponible</span><span className="font-medium">{fmt(summary.emitidas.base)}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Cuota IVA</span><span className="font-medium">{fmt(summary.emitidas.cuota)}</span></div>
+                <div className="flex justify-between border-t pt-1"><span className="font-medium">Total</span><span className="font-bold">{fmt(summary.emitidas.total)}</span></div>
+              </div>
+            </div>
+            <div className="border rounded-lg p-3">
+              <h4 className="text-sm font-medium mb-2">Facturas Recibidas (Compras)</h4>
+              <div className="space-y-1 text-sm">
+                <div className="flex justify-between"><span className="text-muted-foreground">Base imponible</span><span className="font-medium">{fmt(summary.recibidas.base)}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Cuota IVA</span><span className="font-medium">{fmt(summary.recibidas.cuota)}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Retenciones</span><span className="font-medium">{fmt(summary.recibidas.retencion)}</span></div>
+                <div className="flex justify-between border-t pt-1"><span className="font-medium">Total</span><span className="font-bold">{fmt(summary.recibidas.total)}</span></div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Últimas facturas */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Últimas Facturas ({Math.min(facturas?.length || 0, 20)})</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b text-left">
+                  <th className="py-2 px-2">Tipo</th>
+                  <th className="py-2 px-2">Nº Factura</th>
+                  <th className="py-2 px-2">Fecha</th>
+                  <th className="py-2 px-2">Tercero</th>
+                  <th className="py-2 px-2 text-right">Base</th>
+                  <th className="py-2 px-2 text-right">IVA</th>
+                  <th className="py-2 px-2 text-right">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(facturas || []).slice(0, 20).map((f: any, i: number) => (
+                  <tr key={i} className="border-b hover:bg-muted/50">
+                    <td className="py-2 px-2">
+                      <Badge variant={f.tipo === 'emitida' ? 'default' : 'secondary'} className="text-xs">
+                        {f.tipo === 'emitida' ? 'E' : 'R'}
+                      </Badge>
+                    </td>
+                    <td className="py-2 px-2 font-mono text-xs">{f.numero || '-'}</td>
+                    <td className="py-2 px-2">{f.fecha ? new Date(f.fecha).toLocaleDateString('es-ES') : '-'}</td>
+                    <td className="py-2 px-2 truncate max-w-[200px]">{f.terceroNombre || f.terceroNif || '-'}</td>
+                    <td className="py-2 px-2 text-right">{fmt(f.base || 0)}</td>
+                    <td className="py-2 px-2 text-right">{fmt(f.cuota || 0)}</td>
+                    <td className="py-2 px-2 text-right font-medium">{fmt(f.total || 0)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 export default function ContabilidadPage() {
   const { data: session } = useSession() || {};
   const [periodo, setPeriodo] = useState(format(new Date(), 'yyyy-MM'));
@@ -1476,7 +1649,7 @@ export default function ContabilidadPage() {
           </TabsContent>
 
           <TabsContent value="fiscal" className="space-y-4">
-            <p className="text-muted-foreground">Aquí se mostrará la información fiscal</p>
+            <FiscalDashboard companyId={companyId} periodo={periodo} />
           </TabsContent>
 
           <TabsContent value="ratios" className="space-y-4">
