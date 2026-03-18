@@ -3051,6 +3051,7 @@ enum AccountingCategory {
   gasto_multas
   gasto_vehiculos
   gasto_intragrupo
+  gasto_gestion_inmueble
   gasto_otro
 }
 
