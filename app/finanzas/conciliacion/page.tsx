@@ -611,10 +611,13 @@ export default function ConciliacionBancariaPage() {
                 </SelectContent>
               </Select>
             )}
-            <Button
-              variant="default"
-              onClick={() => setActiveTab('importar')}
-            >
+            <Link href="/finanzas/bancaria-setup">
+              <Button variant="outline" size="sm">
+                <Building2 className="h-4 w-4 mr-2" />
+                Configurar bancos
+              </Button>
+            </Link>
+            <Button variant="default" onClick={() => setActiveTab('importar')}>
               <Upload className="h-4 w-4 mr-2" />
               Importar Extracto
             </Button>
@@ -690,8 +693,13 @@ export default function ConciliacionBancariaPage() {
                 <div className="flex items-center justify-between">
                   <p className="text-2xl font-bold text-purple-700">
                     {stats.totalTransactions > 0
-                      ? Math.round((stats.matchedCount / Math.max(stats.matchedCount + stats.pendingCount, 1)) * 100)
-                      : 0}%
+                      ? Math.round(
+                          (stats.matchedCount /
+                            Math.max(stats.matchedCount + stats.pendingCount, 1)) *
+                            100
+                        )
+                      : 0}
+                    %
                   </p>
                   <Sparkles className="h-5 w-5 text-purple-500" />
                 </div>
@@ -1330,7 +1338,8 @@ export default function ConciliacionBancariaPage() {
               <CardHeader>
                 <CardTitle>Importar Extracto Bancario</CardTitle>
                 <CardDescription>
-                  Arrastra o selecciona un archivo con movimientos bancarios para importar y conciliar automáticamente.
+                  Arrastra o selecciona un archivo con movimientos bancarios para importar y
+                  conciliar automáticamente.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -1340,8 +1349,8 @@ export default function ConciliacionBancariaPage() {
                     importDragging
                       ? 'border-primary bg-primary/5 scale-[1.01]'
                       : importFile
-                      ? 'border-green-400 bg-green-50 dark:bg-green-950'
-                      : 'border-gray-300 hover:border-gray-400'
+                        ? 'border-green-400 bg-green-50 dark:bg-green-950'
+                        : 'border-gray-300 hover:border-gray-400'
                   }`}
                   onDragOver={(e) => {
                     e.preventDefault();
@@ -1444,7 +1453,15 @@ export default function ConciliacionBancariaPage() {
                             fetchData(1);
                           } else {
                             toast.error(data.error || 'Error importando archivo');
-                            setImportResult({ success: false, format: '', imported: 0, duplicates: 0, errors: 1, total: 0, message: data.error });
+                            setImportResult({
+                              success: false,
+                              format: '',
+                              imported: 0,
+                              duplicates: 0,
+                              errors: 1,
+                              total: 0,
+                              message: data.error,
+                            });
                           }
                         } catch (err: any) {
                           toast.dismiss(toastId);
@@ -1475,7 +1492,9 @@ export default function ConciliacionBancariaPage() {
                 {importLoading && (
                   <div className="flex items-center justify-center gap-2 py-4">
                     <RefreshCw className="h-5 w-5 animate-spin text-primary" />
-                    <span className="text-sm text-muted-foreground">Procesando extracto bancario...</span>
+                    <span className="text-sm text-muted-foreground">
+                      Procesando extracto bancario...
+                    </span>
                   </div>
                 )}
 
@@ -1507,11 +1526,15 @@ export default function ConciliacionBancariaPage() {
                     {importResult.success && (
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
                         <div className="text-center">
-                          <p className="text-2xl font-bold text-green-700 dark:text-green-300">{importResult.imported}</p>
+                          <p className="text-2xl font-bold text-green-700 dark:text-green-300">
+                            {importResult.imported}
+                          </p>
                           <p className="text-xs text-muted-foreground">Importados</p>
                         </div>
                         <div className="text-center">
-                          <p className="text-2xl font-bold text-gray-500">{importResult.duplicates}</p>
+                          <p className="text-2xl font-bold text-gray-500">
+                            {importResult.duplicates}
+                          </p>
                           <p className="text-xs text-muted-foreground">Duplicados</p>
                         </div>
                         <div className="text-center">
@@ -1526,23 +1549,31 @@ export default function ConciliacionBancariaPage() {
                     )}
                     {importResult.statement && (
                       <div className="mt-3 text-xs text-muted-foreground space-y-1">
-                        <p><strong>Formato:</strong> {(importResult.statement as any).format}</p>
+                        <p>
+                          <strong>Formato:</strong> {(importResult.statement as any).format}
+                        </p>
                         {(importResult.statement as any).iban && (
-                          <p><strong>IBAN:</strong> {(importResult.statement as any).iban}</p>
+                          <p>
+                            <strong>IBAN:</strong> {(importResult.statement as any).iban}
+                          </p>
                         )}
                         {(importResult.statement as any).fullAccount && (
-                          <p><strong>Cuenta:</strong> {(importResult.statement as any).fullAccount}</p>
+                          <p>
+                            <strong>Cuenta:</strong> {(importResult.statement as any).fullAccount}
+                          </p>
                         )}
                         {(importResult.statement as any).openingBalance !== undefined && (
                           <p>
                             <strong>Saldo:</strong>{' '}
-                            {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(
-                              (importResult.statement as any).openingBalance
-                            )}{' '}
+                            {new Intl.NumberFormat('es-ES', {
+                              style: 'currency',
+                              currency: 'EUR',
+                            }).format((importResult.statement as any).openingBalance)}{' '}
                             →{' '}
-                            {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(
-                              (importResult.statement as any).closingBalance
-                            )}
+                            {new Intl.NumberFormat('es-ES', {
+                              style: 'currency',
+                              currency: 'EUR',
+                            }).format((importResult.statement as any).closingBalance)}
                           </p>
                         )}
                       </div>
@@ -1552,11 +1583,22 @@ export default function ConciliacionBancariaPage() {
 
                 {/* Info formatos */}
                 <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-md p-4">
-                  <p className="text-sm text-blue-800 dark:text-blue-200 font-medium mb-2">Formatos aceptados:</p>
+                  <p className="text-sm text-blue-800 dark:text-blue-200 font-medium mb-2">
+                    Formatos aceptados:
+                  </p>
                   <ul className="text-xs text-blue-700 dark:text-blue-300 space-y-1 list-disc list-inside">
-                    <li><strong>Norma 43</strong> (.txt, .n43, .c43) — Formato estándar de la AEB para extractos bancarios españoles</li>
-                    <li><strong>CAMT.053</strong> (.xml) — Formato ISO 20022 (Bankinter, BBVA, Santander, etc.)</li>
-                    <li><strong>CSV</strong> (.csv) — Formato genérico: Fecha, Concepto, Importe, Saldo</li>
+                    <li>
+                      <strong>Norma 43</strong> (.txt, .n43, .c43) — Formato estándar de la AEB para
+                      extractos bancarios españoles
+                    </li>
+                    <li>
+                      <strong>CAMT.053</strong> (.xml) — Formato ISO 20022 (Bankinter, BBVA,
+                      Santander, etc.)
+                    </li>
+                    <li>
+                      <strong>CSV</strong> (.csv) — Formato genérico: Fecha, Concepto, Importe,
+                      Saldo
+                    </li>
                   </ul>
                 </div>
               </CardContent>
