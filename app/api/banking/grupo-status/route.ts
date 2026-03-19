@@ -109,7 +109,6 @@ export async function GET(_request: NextRequest) {
             companyId: true,
             nombreBanco: true,
             ultimaSync: true,
-            proveedorConfig: true,
           },
           orderBy: { ultimaSync: 'desc' },
           take: 50,

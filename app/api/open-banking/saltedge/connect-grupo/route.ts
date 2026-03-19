@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
         estado: 'renovacion_requerida',
         refreshToken: customerSecret,
         consentId: '',
-        notasAdmin: `Conexión grupo. providerCode: ${providerCode || 'sin_filtro'}`,
+        errorDetalle: `Conexión grupo. providerCode: ${providerCode || 'sin_filtro'}`,
       },
     });
 

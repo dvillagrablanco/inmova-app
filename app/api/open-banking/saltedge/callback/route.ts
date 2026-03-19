@@ -138,26 +138,29 @@ export async function GET(request: NextRequest) {
     }
 
     // 5. Crear/actualizar BankConnection para cada sociedad encontrada
+    // proveedorItemId tiene @unique en el schema, así que usamos connectionId_companyId
+    // como ID único por empresa, y accessToken para el connectionId real de Salt Edge.
     let connectionsCreated = 0;
 
     for (const [cId, data] of ibanToCompany.entries()) {
-      // Buscar conexión existente para este banco y empresa
+      // ID único por empresa: evita conflicto con @unique de proveedorItemId
+      const uniqueItemId = `saltedge_${connectionId}_${cId}`;
+
+      // Buscar conexión existente por accessToken + companyId (puede haber duplicado por unique)
       const existingConn = await prisma.bankConnection.findFirst({
         where: {
           companyId: cId,
           proveedor: 'saltedge',
-          proveedorItemId: connectionId,
+          accessToken: connectionId,
         },
         select: { id: true },
       });
 
       if (existingConn) {
-        // Actualizar
         await prisma.bankConnection.update({
           where: { id: existingConn.id },
           data: {
             estado: 'conectado',
-            accessToken: connectionId,
             consentId: connectionSecret,
             refreshToken: customerSecret,
             nombreBanco: `${bankName} (${data.ibans.length} cuentas)`,
@@ -165,28 +168,46 @@ export async function GET(request: NextRequest) {
           },
         });
       } else {
-        // Crear nueva conexión
-        await prisma.bankConnection.create({
-          data: {
-            companyId: cId,
-            userId: userId || '',
-            proveedor: 'saltedge',
-            provider: 'saltedge',
-            proveedorItemId: connectionId,
-            accessToken: connectionId,
-            consentId: connectionSecret,
-            refreshToken: customerSecret,
-            nombreBanco: `${bankName} (${data.ibans.length} cuentas)`,
-            estado: 'conectado',
-            ultimaSync: new Date(),
-            proveedorConfig: {
-              providerCode,
-              ibans: data.ibans,
-              cuentas: data.ibans.length,
-            } as any,
-          },
-        });
-        connectionsCreated++;
+        // Verificar si proveedorItemId ya existe (por la restricción @unique)
+        const existsByItemId = await prisma.bankConnection
+          .findUnique({
+            where: { proveedorItemId: uniqueItemId },
+            select: { id: true },
+          })
+          .catch(() => null);
+
+        if (existsByItemId) {
+          await prisma.bankConnection.update({
+            where: { id: existsByItemId.id },
+            data: {
+              estado: 'conectado',
+              accessToken: connectionId,
+              consentId: connectionSecret,
+              refreshToken: customerSecret,
+              nombreBanco: `${bankName} (${data.ibans.length} cuentas)`,
+              ultimaSync: new Date(),
+            },
+          });
+        } else {
+          await prisma.bankConnection.create({
+            data: {
+              companyId: cId,
+              userId: userId || '',
+              proveedor: 'saltedge',
+              provider: 'saltedge',
+              // ID único por empresa para respetar @unique
+              proveedorItemId: uniqueItemId,
+              // accessToken almacena el connectionId real para las llamadas a la API
+              accessToken: connectionId,
+              consentId: connectionSecret,
+              refreshToken: customerSecret,
+              nombreBanco: `${bankName} (${data.ibans.length} cuentas)`,
+              estado: 'conectado',
+              ultimaSync: new Date(),
+            },
+          });
+          connectionsCreated++;
+        }
       }
 
       logger.info(
@@ -206,7 +227,7 @@ export async function GET(request: NextRequest) {
               estado: ibanToCompany.has(pendingConn.companyId)
                 ? 'conciliado_en_grupo'
                 : 'completado',
-              notasAdmin: `Grupo conectado: ${ibanToCompany.size} sociedades, ${accounts.length} cuentas`,
+              errorDetalle: `Grupo conectado: ${ibanToCompany.size} sociedades, ${accounts.length} cuentas`,
             },
           })
           .catch(() => null);
