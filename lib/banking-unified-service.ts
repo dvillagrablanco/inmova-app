@@ -42,10 +42,269 @@ export const SOCIEDADES = {
     banco: 'Bankinter',
     bic: 'BKBKESMMXXX',
   },
+  VIDARO: {
+    nombre: 'VIDARO INVERSIONES S.L.',
+    searchNames: ['VIDARO', 'VIDARO INVERSIONES', 'VIDARO INVERSIONES SL'],
+    iban: 'ES5301280250500100070675',
+    banco: 'Bankinter',
+    bic: 'BKBKESMMXXX',
+  },
+  VIBLA: {
+    nombre: 'VIBLA Private Equity SCR S.A.',
+    searchNames: ['VIBLA', 'VIBLA PRIVATE', 'VIBLA PE'],
+    iban: '',
+    banco: 'Bankinter',
+    bic: 'BKBKESMMXXX',
+  },
 } as const;
 
 // Nordigen institution ID para Bankinter
 export const BANKINTER_NORDIGEN_ID = 'BANKINTER_BKBKESMMXXX';
+
+/**
+ * Mapa completo IBAN → datos de la sociedad del Grupo Vidaro.
+ * Cubre todas las cuentas conocidas de las 3 sociedades operativas.
+ * Se usa para asociar automáticamente las cuentas que devuelve Salt Edge
+ * a la sociedad correcta en base al IBAN.
+ */
+export const GRUPO_VIDARO_IBAN_MAP: Record<
+  string,
+  {
+    sociedadKey: string;
+    nombre: string;
+    searchName: string; // para buscar la empresa en BD por nombre
+    banco: string;
+    alias: string;
+  }
+> = {
+  // ── ROVIDA S.L.U. ─────────────────────────────────────────────
+  ES5601280250590100083954: {
+    sociedadKey: 'ROVIDA',
+    nombre: 'ROVIDA S.L.',
+    searchName: 'Rovida',
+    banco: 'Bankinter',
+    alias: 'Bankinter Rovida',
+  },
+  ES2301820496680201728339: {
+    sociedadKey: 'ROVIDA',
+    nombre: 'ROVIDA S.L.',
+    searchName: 'Rovida',
+    banco: 'BBVA',
+    alias: 'BBVA Rovida',
+  },
+  // ── VIRODA INVERSIONES S.L.U. ────────────────────────────────
+  ES8801280250590100081826: {
+    sociedadKey: 'VIRODA',
+    nombre: 'VIRODA INVERSIONES S.L.',
+    searchName: 'Viroda',
+    banco: 'Bankinter',
+    alias: 'Bankinter Viroda',
+  },
+  ES5301820496610201744438: {
+    sociedadKey: 'VIRODA',
+    nombre: 'VIRODA INVERSIONES S.L.',
+    searchName: 'Viroda',
+    banco: 'BBVA',
+    alias: 'BBVA Viroda',
+  },
+  // ── VIDARO INVERSIONES S.L. (holding) ────────────────────────
+  ES4501820496610201685315: {
+    sociedadKey: 'VIDARO',
+    nombre: 'VIDARO INVERSIONES S.L.',
+    searchName: 'Vidaro',
+    banco: 'BBVA',
+    alias: 'BBVA Principal',
+  },
+  ES9800750142560600679446: {
+    sociedadKey: 'VIDARO',
+    nombre: 'VIDARO INVERSIONES S.L.',
+    searchName: 'Vidaro',
+    banco: 'Santander',
+    alias: 'Santander Principal',
+  },
+  ES5301280250500100070675: {
+    sociedadKey: 'VIDARO',
+    nombre: 'VIDARO INVERSIONES S.L.',
+    searchName: 'Vidaro',
+    banco: 'Bankinter',
+    alias: 'Bankinter Principal',
+  },
+  ES1101826462710201514692: {
+    sociedadKey: 'VIDARO',
+    nombre: 'VIDARO INVERSIONES S.L.',
+    searchName: 'Vidaro',
+    banco: 'BBVA',
+    alias: 'BBVA Inversión 2',
+  },
+  ES4500496740612416120184: {
+    sociedadKey: 'VIDARO',
+    nombre: 'VIDARO INVERSIONES S.L.',
+    searchName: 'Vidaro',
+    banco: 'Santander',
+    alias: 'Santander Inversión',
+  },
+  ES0600610377810088770119: {
+    sociedadKey: 'VIDARO',
+    nombre: 'VIDARO INVERSIONES S.L.',
+    searchName: 'Vidaro',
+    banco: 'Banca March',
+    alias: 'March Principal',
+  },
+  ES8915441202436650183570: {
+    sociedadKey: 'VIDARO',
+    nombre: 'VIDARO INVERSIONES S.L.',
+    searchName: 'Vidaro',
+    banco: 'AndBank',
+    alias: 'AndBank',
+  },
+  ES4102320543510038870971: {
+    sociedadKey: 'VIDARO',
+    nombre: 'VIDARO INVERSIONES S.L.',
+    searchName: 'Vidaro',
+    banco: 'Inversis',
+    alias: 'Inversis 1',
+  },
+  ES0701280250510100088644: {
+    sociedadKey: 'VIDARO',
+    nombre: 'VIDARO INVERSIONES S.L.',
+    searchName: 'Vidaro',
+    banco: 'Bankinter',
+    alias: 'Bankinter Asesorada MdF',
+  },
+  LU631980017392000100: {
+    sociedadKey: 'VIDARO',
+    nombre: 'VIDARO INVERSIONES S.L.',
+    searchName: 'Vidaro',
+    banco: 'Pictet',
+    alias: 'Pictet Luxemburgo',
+  },
+  ES1700610377860104020113: {
+    sociedadKey: 'VIDARO',
+    nombre: 'VIDARO INVERSIONES S.L.',
+    searchName: 'Vidaro',
+    banco: 'Banca March',
+    alias: 'March Inversión',
+  },
+  ES6502320543500039016185: {
+    sociedadKey: 'VIDARO',
+    nombre: 'VIDARO INVERSIONES S.L.',
+    searchName: 'Vidaro',
+    banco: 'Inversis',
+    alias: 'Inversis 2 (MdF AF)',
+  },
+  ES1602320543500043715359: {
+    sociedadKey: 'VIDARO',
+    nombre: 'VIDARO INVERSIONES S.L.',
+    searchName: 'Vidaro',
+    banco: 'Inversis',
+    alias: 'Inversis 3',
+  },
+  ES2800385777190016147134: {
+    sociedadKey: 'VIDARO',
+    nombre: 'VIDARO INVERSIONES S.L.',
+    searchName: 'Vidaro',
+    banco: 'CACEIS',
+    alias: 'CACEIS España',
+  },
+  ES0701280250520500008031: {
+    sociedadKey: 'VIDARO',
+    nombre: 'VIDARO INVERSIONES S.L.',
+    searchName: 'Vidaro',
+    banco: 'Bankinter',
+    alias: 'Bankinter Póliza Crédito',
+  },
+  CH7908270287843892001: {
+    sociedadKey: 'VIDARO',
+    nombre: 'VIDARO INVERSIONES S.L.',
+    searchName: 'Vidaro',
+    banco: 'BBVA Suiza',
+    alias: 'BBVA Suiza 1',
+  },
+  CH1408270287843892007: {
+    sociedadKey: 'VIDARO',
+    nombre: 'VIDARO INVERSIONES S.L.',
+    searchName: 'Vidaro',
+    banco: 'BBVA Suiza',
+    alias: 'BBVA Suiza 2',
+  },
+  CH7100206206550611608: {
+    sociedadKey: 'VIDARO',
+    nombre: 'VIDARO INVERSIONES S.L.',
+    searchName: 'Vidaro',
+    banco: 'UBS',
+    alias: 'UBS Suiza',
+  },
+  LU141770003673B00978: {
+    sociedadKey: 'VIDARO',
+    nombre: 'VIDARO INVERSIONES S.L.',
+    searchName: 'Vidaro',
+    banco: 'Bankinter',
+    alias: 'Bankinter Luxemburgo',
+  },
+};
+
+/**
+ * Dado un IBAN, busca la sociedad del Grupo Vidaro a la que pertenece.
+ * Primero usa el mapa estático; si no coincide, consulta la BD.
+ */
+export async function findSociedadByIban(iban: string): Promise<{
+  companyId: string;
+  companyName: string;
+  banco: string;
+  alias: string;
+} | null> {
+  const prisma = getPrismaClient();
+
+  // 1. Buscar en mapa estático
+  const ibanClean = iban.replace(/\s/g, '').toUpperCase();
+  const staticMatch = GRUPO_VIDARO_IBAN_MAP[ibanClean];
+
+  if (staticMatch) {
+    // Buscar companyId real en BD por nombre
+    const company = await prisma.company.findFirst({
+      where: { nombre: { contains: staticMatch.searchName, mode: 'insensitive' } },
+      select: { id: true, nombre: true },
+    });
+    if (company) {
+      return {
+        companyId: company.id,
+        companyName: company.nombre,
+        banco: staticMatch.banco,
+        alias: staticMatch.alias,
+      };
+    }
+  }
+
+  // 2. Buscar directamente por IBAN en Company.iban
+  const companyByIban = await prisma.company.findFirst({
+    where: { iban: ibanClean },
+    select: { id: true, nombre: true },
+  });
+  if (companyByIban) {
+    return {
+      companyId: companyByIban.id,
+      companyName: companyByIban.nombre,
+      banco: staticMatch?.banco || 'Desconocido',
+      alias: staticMatch?.alias || ibanClean,
+    };
+  }
+
+  // 3. Buscar en FinancialAccount.numeroCuenta
+  const fa = await prisma.financialAccount.findFirst({
+    where: { numeroCuenta: ibanClean },
+    select: { companyId: true, entidad: true, alias: true, company: { select: { nombre: true } } },
+  });
+  if (fa) {
+    return {
+      companyId: fa.companyId,
+      companyName: (fa as any).company?.nombre || fa.companyId,
+      banco: fa.entidad || 'Desconocido',
+      alias: fa.alias || ibanClean,
+    };
+  }
+
+  return null;
+}
 
 // ============================================================================
 // TYPES
@@ -545,8 +804,88 @@ export async function syncNordigenTransactions(companyId: string): Promise<{
 // ============================================================================
 
 /**
+ * Ejecuta fullSyncAndReconcile para TODAS las sociedades del Grupo Vidaro.
+ * Busca las empresas por nombre en BD, procesa cada una en paralelo limitado.
+ */
+export async function fullSyncAllGrupoVidaro(): Promise<{
+  companies: Array<{
+    companyId: string;
+    companyName: string;
+    sync: {
+      payments: number;
+      payouts: number;
+      bankTransactions: number;
+      newBankTransactions: number;
+    };
+    reconciliation: UnifiedReconciliationResult;
+  }>;
+  totalNewTransactions: number;
+  totalReconciled: number;
+}> {
+  const prisma = getPrismaClient();
+
+  // Buscar todas las sociedades del grupo
+  const companies = await prisma.company.findMany({
+    where: {
+      OR: [
+        { nombre: { contains: 'Rovida', mode: 'insensitive' } },
+        { nombre: { contains: 'Viroda', mode: 'insensitive' } },
+        { nombre: { contains: 'Vidaro', mode: 'insensitive' } },
+        { nombre: { contains: 'VIBLA', mode: 'insensitive' } },
+      ],
+      activo: true,
+    },
+    select: { id: true, nombre: true },
+    orderBy: { nombre: 'asc' },
+  });
+
+  logger.info(`[GrupoVidaro] Sincronizando ${companies.length} sociedades`);
+
+  const results = [];
+  let totalNewTransactions = 0;
+  let totalReconciled = 0;
+
+  for (const company of companies) {
+    try {
+      const result = await fullSyncAndReconcile(company.id);
+      results.push({
+        companyId: company.id,
+        companyName: company.nombre,
+        ...result,
+      });
+      totalNewTransactions += result.sync.newBankTransactions;
+      totalReconciled +=
+        (result.reconciliation.sepaToPayment?.matched || 0) +
+        (result.reconciliation.payoutToBankTx?.matched || 0) +
+        (result.reconciliation.bankTxToPayment?.matched || 0);
+    } catch (e: any) {
+      logger.error(`[GrupoVidaro] Error en ${company.nombre}:`, e);
+      results.push({
+        companyId: company.id,
+        companyName: company.nombre,
+        error: e.message,
+        sync: { payments: 0, payouts: 0, bankTransactions: 0, newBankTransactions: 0 },
+        reconciliation: {
+          companyId: company.id,
+          companyName: company.nombre,
+          sepaToPayment: { matched: 0, total: 0 },
+          payoutToBankTx: { matched: 0, total: 0 },
+          bankTxToPayment: { matched: 0, total: 0 },
+        },
+      });
+    }
+  }
+
+  logger.info(
+    `[GrupoVidaro] Completado: ${totalNewTransactions} nuevas tx, ${totalReconciled} conciliadas`
+  );
+
+  return { companies: results, totalNewTransactions, totalReconciled };
+}
+
+/**
  * Sincronización completa para una sociedad:
- * 1. Sync movimientos bancarios desde Nordigen (Open Banking)
+ * 1. Sync movimientos bancarios desde Salt Edge (si configurado) o Nordigen
  * 2. Sync pagos SEPA desde GoCardless API
  * 3. Sync payouts desde GoCardless API
  * 4. Conciliación unificada de 3 capas
@@ -567,17 +906,45 @@ export async function fullSyncAndReconcile(companyId: string): Promise<{
   let syncBankTx = 0;
   let newBankTx = 0;
 
-  // 1. Sync bank transactions from Nordigen (Open Banking)
+  // 1. Sync bank transactions — Salt Edge primero, Nordigen como fallback
+  let openBankingUsed = 'none';
   try {
-    const nordigenResult = await syncNordigenTransactions(companyId);
-    syncBankTx = nordigenResult.newTransactions + nordigenResult.updatedTransactions;
-    newBankTx = nordigenResult.newTransactions;
-    if (nordigenResult.errors.length > 0) {
-      logger.warn(`[FullSync] Nordigen sync warnings: ${nordigenResult.errors.join('; ')}`);
+    const { isSaltEdgeConfigured, syncSaltEdgeTransactions } =
+      await import('@/lib/saltedge-service');
+    if (isSaltEdgeConfigured()) {
+      const seResult = await syncSaltEdgeTransactions(companyId);
+      syncBankTx = seResult.newTransactions + seResult.updatedTransactions;
+      newBankTx = seResult.newTransactions;
+      openBankingUsed = 'saltedge';
+      if (seResult.errors.length > 0) {
+        logger.warn(
+          `[FullSync] Salt Edge sync warnings for ${companyId}: ${seResult.errors.join('; ')}`
+        );
+      }
     }
   } catch (e) {
-    logger.warn(`[FullSync] Nordigen sync error for ${companyId}:`, e);
+    logger.warn(`[FullSync] Salt Edge sync error for ${companyId}:`, e);
   }
+
+  // Fallback: Nordigen (si Salt Edge no está configurado o no tiene conexiones para esta empresa)
+  if (openBankingUsed === 'none' || syncBankTx === 0) {
+    try {
+      const nordigenResult = await syncNordigenTransactions(companyId);
+      const nordigenNew = nordigenResult.newTransactions + nordigenResult.updatedTransactions;
+      if (nordigenNew > 0) {
+        syncBankTx += nordigenNew;
+        newBankTx += nordigenResult.newTransactions;
+        openBankingUsed = 'nordigen';
+      }
+      if (nordigenResult.errors.length > 0) {
+        logger.warn(`[FullSync] Nordigen sync warnings: ${nordigenResult.errors.join('; ')}`);
+      }
+    } catch (e) {
+      logger.warn(`[FullSync] Nordigen sync error for ${companyId}:`, e);
+    }
+  }
+
+  logger.info(`[FullSync] Open banking used for ${companyId}: ${openBankingUsed}`);
 
   // 2. Sync payments from GC
   if (gc) {
