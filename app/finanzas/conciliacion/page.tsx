@@ -625,8 +625,8 @@ export default function ConciliacionBancariaPage() {
           </div>
         </div>
 
-        {/* Estadísticas */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {/* Estadísticas + Conciliación rápida */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <Card>
             <CardContent className="pt-4">
               <div className="flex items-center gap-3">
@@ -635,7 +635,7 @@ export default function ConciliacionBancariaPage() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{stats.pendingCount.toLocaleString('es-ES')}</p>
-                  <p className="text-xs text-muted-foreground">Pendientes</p>
+                  <p className="text-xs text-muted-foreground">Ingresos pendientes</p>
                 </div>
               </div>
             </CardContent>
@@ -680,6 +680,31 @@ export default function ConciliacionBancariaPage() {
                   </p>
                   <p className="text-xs text-muted-foreground">Gastos ({stats.expenseCount})</p>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+          {/* Ratio de conciliación + Botón rápido */}
+          <Card className="border-purple-200 bg-purple-50/50 dark:bg-purple-950/30">
+            <CardContent className="pt-4">
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <p className="text-2xl font-bold text-purple-700">
+                    {stats.totalTransactions > 0
+                      ? Math.round((stats.matchedCount / Math.max(stats.matchedCount + stats.pendingCount, 1)) * 100)
+                      : 0}%
+                  </p>
+                  <Sparkles className="h-5 w-5 text-purple-500" />
+                </div>
+                <p className="text-xs text-muted-foreground">Ratio conciliación</p>
+                <Button
+                  size="sm"
+                  className="w-full mt-1"
+                  disabled={aiProgress.active || stats.pendingCount === 0}
+                  onClick={() => runSmartReconcile(false)}
+                >
+                  <Zap className="h-3 w-3 mr-1" />
+                  Conciliar auto
+                </Button>
               </div>
             </CardContent>
           </Card>
