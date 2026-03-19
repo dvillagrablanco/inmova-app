@@ -41,11 +41,22 @@ import { toast } from 'sonner';
 // TYPES
 // ═══════════════════════════════════════════════════════════════
 
+interface SaltEdgeStatus {
+  configured: boolean;
+  connected: boolean;
+  error?: string;
+  message?: string;
+  bankinterAvailable?: boolean;
+  bankinterCode?: string | null;
+  note?: string;
+}
+
 interface SetupStatus {
   timestamp: string;
   environment: string;
   integrations: {
     nordigen: NordigenStatus;
+    saltedge: SaltEdgeStatus;
     gocardless: GoCardlessStatus;
     tink: TinkStatus;
   };
@@ -159,6 +170,7 @@ export default function BancariSetupPage() {
   const [connectingBank, setConnectingBank] = useState(false);
   const [institutions, setInstitutions] = useState<NordigenInstitution[]>([]);
   const [loadingInstitutions, setLoadingInstitutions] = useState(false);
+  const [connectingSaltEdge, setConnectingSaltEdge] = useState(false);
 
   // Redirect non-admins
   useEffect(() => {
@@ -328,11 +340,15 @@ export default function BancariSetupPage() {
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           <StatCard
             icon={<Wifi className="w-5 h-5" />}
-            label="Nordigen"
+            label="Open Banking (lectura)"
             value={
-              nordigen?.connected ? 'Conectado' : nordigen?.configured ? 'Error' : 'No configurado'
+              setupStatus?.integrations.saltedge?.connected
+                ? 'Salt Edge ✓'
+                : nordigen?.connected
+                  ? 'Nordigen ✓'
+                  : 'No conectado'
             }
-            ok={nordigen?.connected ? true : false}
+            ok={setupStatus?.integrations.saltedge?.connected || nordigen?.connected ? true : false}
           />
           <StatCard
             icon={<CreditCard className="w-5 h-5" />}
@@ -362,18 +378,65 @@ export default function BancariSetupPage() {
           />
         </div>
 
+        {/* ── SALT EDGE (RECOMENDADO) ── */}
+        <SaltEdgeCard
+          saltedge={setupStatus?.integrations.saltedge}
+          dbConnections={db?.bankConnections.list ?? []}
+          connecting={connectingSaltEdge}
+          onConnect={async (providerCode?: string) => {
+            setConnectingSaltEdge(true);
+            try {
+              const res = await fetch('/api/open-banking/saltedge/connect', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ providerCode }),
+              });
+              const data = await res.json();
+              if (!res.ok) throw new Error(data.error || 'Error conectando');
+              toast.success('Redirigiendo al banco para autorizar acceso...');
+              setTimeout(() => {
+                window.location.href = data.connectUrl;
+              }, 800);
+            } catch (err: any) {
+              toast.error(err.message);
+            } finally {
+              setConnectingSaltEdge(false);
+            }
+          }}
+          onSync={async () => {
+            try {
+              const res = await fetch('/api/open-banking/saltedge/sync', { method: 'POST' });
+              const data = await res.json();
+              if (!res.ok) throw new Error(data.error);
+              toast.success(`Salt Edge: ${data.newTransactions ?? 0} nuevas transacciones`);
+              fetchStatus(true);
+            } catch (err: any) {
+              toast.error(err.message);
+            }
+          }}
+        />
+
         {/* ── NORDIGEN / BANK ACCOUNT DATA ── */}
-        <Card>
+        <Card className="opacity-60">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Building2 className="w-5 h-5 text-blue-600" />
                 <div>
-                  <CardTitle className="text-base">
-                    GoCardless Bank Account Data (Nordigen)
-                  </CardTitle>
+                  <div className="flex items-center gap-2">
+                    <CardTitle className="text-base text-muted-foreground">
+                      GoCardless Bank Account Data (Nordigen)
+                    </CardTitle>
+                    <Badge
+                      variant="secondary"
+                      className="text-xs text-orange-700 border-orange-300 bg-orange-50"
+                    >
+                      Nuevos registros desactivados
+                    </Badge>
+                  </div>
                   <CardDescription>
-                    Lectura automática de movimientos Bankinter — Gratuito, sin licencia TPP
+                    Solo si ya tienes cuenta. Los nuevos registros están desactivados en 2025. Usa
+                    Salt Edge.
                   </CardDescription>
                 </div>
               </div>
@@ -840,6 +903,240 @@ export default function BancariSetupPage() {
         </Card>
       </div>
     </AuthenticatedLayout>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SALT EDGE CARD
+// ═══════════════════════════════════════════════════════════════
+
+const SALTEDGE_SPANISH_BANKS = [
+  { code: 'bankinter_xo_es', name: 'Bankinter' },
+  { code: 'santander_business_es', name: 'Santander' },
+  { code: 'bbva_xo_es', name: 'BBVA' },
+  { code: 'caixabank_xo_es', name: 'CaixaBank' },
+  { code: 'sabadell_xo_es', name: 'Sabadell' },
+  { code: 'ing_direct_xo_es', name: 'ING' },
+];
+
+function SaltEdgeCard({
+  saltedge,
+  dbConnections,
+  connecting,
+  onConnect,
+  onSync,
+}: {
+  saltedge?: {
+    configured: boolean;
+    connected: boolean;
+    error?: string;
+    bankinterAvailable?: boolean;
+    note?: string;
+  };
+  dbConnections: Array<{
+    provider: string;
+    bank: string | null;
+    status: string;
+    lastSync: string | null;
+  }>;
+  connecting: boolean;
+  onConnect: (providerCode?: string) => Promise<void>;
+  onSync: () => Promise<void>;
+}) {
+  const saltEdgeConnections = dbConnections.filter((c) => c.provider === 'saltedge');
+
+  return (
+    <Card className="border-blue-200 bg-blue-50/30">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Building2 className="w-5 h-5 text-blue-700" />
+            <div>
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-base">Salt Edge — Open Banking</CardTitle>
+                <Badge
+                  variant="secondary"
+                  className="text-xs bg-blue-100 text-blue-800 border-blue-200"
+                >
+                  RECOMENDADO
+                </Badge>
+              </div>
+              <CardDescription>
+                Alternativa a Nordigen · Sin licencia TPP · Bankinter + 2500 bancos EU
+              </CardDescription>
+            </div>
+          </div>
+          <StatusIcon ok={saltedge ? saltedge.connected : null} />
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex flex-wrap gap-2">
+          <StatusBadge
+            ok={saltedge?.configured ?? false}
+            text={saltedge?.configured ? 'Credenciales configuradas' : 'Sin credenciales'}
+          />
+          {saltedge?.configured && (
+            <StatusBadge
+              ok={saltedge.connected}
+              text={saltedge.connected ? 'API accesible' : 'Error de conexión'}
+            />
+          )}
+        </div>
+
+        {saltedge?.error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription className="text-sm">{saltedge.error}</AlertDescription>
+          </Alert>
+        )}
+
+        {!saltedge?.configured && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
+            <p className="text-sm font-semibold text-blue-900">
+              GoCardless Bank Account Data ha desactivado nuevos registros. Salt Edge es la
+              alternativa.
+            </p>
+            <ol className="text-sm text-blue-800 space-y-2 list-decimal list-inside">
+              <li>
+                Regístrate en{' '}
+                <a
+                  href="https://www.saltedge.com/partner_program"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline font-medium"
+                >
+                  saltedge.com/partner_program
+                </a>{' '}
+                (Partner Program — sin licencia TPP)
+              </li>
+              <li>Verifica el correo y accede al dashboard</li>
+              <li>
+                Ve a <strong>API Keys</strong> y copia el <strong>App ID</strong> y el{' '}
+                <strong>Secret</strong>
+              </li>
+              <li>
+                Añade a <code className="bg-blue-100 px-1 rounded">.env.production</code>:
+                <pre className="bg-blue-100 rounded p-2 mt-1 text-xs font-mono">
+                  {`SALTEDGE_APP_ID=tu_app_id\nSALTEDGE_SECRET=tu_secret`}
+                </pre>
+              </li>
+              <li>
+                <code className="bg-blue-100 px-1 rounded">
+                  pm2 restart inmova-app --update-env
+                </code>
+              </li>
+              <li>Vuelve aquí y conecta Bankinter con el botón de abajo</li>
+            </ol>
+            <div className="flex gap-2">
+              <Button size="sm" asChild>
+                <a
+                  href="https://www.saltedge.com/partner_program"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  Registrarse en Salt Edge
+                </a>
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {saltedge?.configured && (
+          <>
+            <Separator />
+            {saltEdgeConnections.length > 0 ? (
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Cuentas conectadas vía Salt Edge:</p>
+                {saltEdgeConnections.map((conn, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center justify-between p-3 bg-muted rounded-lg"
+                  >
+                    <div>
+                      <p className="text-sm font-medium">{conn.bank || 'Salt Edge'}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {conn.lastSync
+                          ? `Última sync: ${new Date(conn.lastSync).toLocaleDateString('es-ES')}`
+                          : 'Sin sincronizar'}
+                      </p>
+                    </div>
+                    <Badge variant={conn.status === 'conectado' ? 'default' : 'secondary'}>
+                      {conn.status}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Sin cuentas conectadas. Conecta un banco:
+              </p>
+            )}
+
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Conectar banco:</p>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                {SALTEDGE_SPANISH_BANKS.map((bank) => (
+                  <Button
+                    key={bank.code}
+                    variant={bank.code.includes('bankinter') ? 'default' : 'outline'}
+                    size="sm"
+                    disabled={connecting}
+                    onClick={() => onConnect(bank.code)}
+                    className="justify-start"
+                  >
+                    {connecting ? (
+                      <Loader2 className="w-3 h-3 mr-2 animate-spin" />
+                    ) : (
+                      <Building2 className="w-3 h-3 mr-2" />
+                    )}
+                    {bank.name}
+                  </Button>
+                ))}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={connecting}
+                  onClick={() => onConnect(undefined)}
+                >
+                  {connecting ? <Loader2 className="w-3 h-3 mr-2 animate-spin" /> : null}
+                  Otro banco
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Bankinter (resaltado) es el banco principal del Grupo Vidaro.
+              </p>
+            </div>
+
+            {saltEdgeConnections.length > 0 && (
+              <Button size="sm" onClick={onSync}>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Sincronizar movimientos
+              </Button>
+            )}
+          </>
+        )}
+
+        {/* Importación manual siempre disponible */}
+        <Separator />
+        <div className="space-y-2">
+          <p className="text-sm font-medium flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-green-500" />
+            Importación manual (disponible ahora sin configuración)
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Descarga el extracto desde Bankinter Online → Cuentas → Exportar → XML ISO 20022
+            (CAMT.053). Luego súbelo en Finanzas → Conciliación → Importar Extracto.
+          </p>
+          <Button size="sm" variant="outline" asChild>
+            <Link href="/finanzas/conciliacion">
+              <ArrowRight className="w-4 h-4 mr-2" />
+              Ir a importar extracto
+            </Link>
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 

@@ -28,6 +28,7 @@ export async function GET(request: NextRequest) {
       environment: process.env.NODE_ENV,
       integrations: {
         nordigen: await checkNordigen(),
+        saltedge: await checkSaltEdge(),
         gocardless: await checkGoCardless(),
         tink: checkTink(),
       },
@@ -36,10 +37,17 @@ export async function GET(request: NextRequest) {
     };
 
     // Generar recomendaciones
-    if (!status.integrations.nordigen.configured) {
+    const nordigenOk =
+      status.integrations.nordigen.configured && status.integrations.nordigen.connected;
+    const saltEdgeOk =
+      status.integrations.saltedge.configured && status.integrations.saltedge.connected;
+
+    if (!nordigenOk && !saltEdgeOk) {
       status.recommendations.push(
-        'Configurar GoCardless Bank Account Data (Nordigen) para leer movimientos bancarios automáticamente. ' +
-          'Registro gratuito en: https://bankaccountdata.gocardless.com/'
+        'NOTA: GoCardless Bank Account Data (Nordigen) ha desactivado nuevos registros. ' +
+          'Alternativa recomendada: Salt Edge Partner Program (sin licencia TPP). ' +
+          'Registro en: https://www.saltedge.com/partner_program — ' +
+          'O usa la importación manual de extractos CAMT.053/Norma43 desde Bankinter.'
       );
     }
     if (!status.integrations.gocardless.configured) {
@@ -67,6 +75,41 @@ export async function GET(request: NextRequest) {
   } catch (error: any) {
     logger.error('[Banking Setup Status Error]:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// SALT EDGE CHECK
+// ─────────────────────────────────────────────────────────────
+
+async function checkSaltEdge() {
+  const appId = process.env.SALTEDGE_APP_ID;
+  const secret = process.env.SALTEDGE_SECRET;
+
+  if (!appId || !secret) {
+    return {
+      configured: false,
+      connected: false,
+      note: 'Alternativa a Nordigen. Sin licencia TPP. Registro: https://www.saltedge.com/partner_program',
+    };
+  }
+
+  try {
+    const { testConnection, getBankinterProvider } = await import('@/lib/saltedge-service');
+    const test = await testConnection();
+    if (!test.ok) {
+      return { configured: true, connected: false, error: test.message };
+    }
+    const bankinter = await getBankinterProvider();
+    return {
+      configured: true,
+      connected: true,
+      message: test.message,
+      bankinterAvailable: !!bankinter,
+      bankinterCode: bankinter?.code || null,
+    };
+  } catch (err: any) {
+    return { configured: true, connected: false, error: err.message };
   }
 }
 

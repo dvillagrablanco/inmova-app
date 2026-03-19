@@ -133,11 +133,98 @@ async function checkEnvVars() {
 }
 
 // ============================================================
-// 2. CONECTIVIDAD NORDIGEN
+// 2. SALT EDGE (alternativa a Nordigen)
+// ============================================================
+
+async function checkSaltEdge() {
+  section('2. Salt Edge (Alternativa recomendada a Nordigen)');
+
+  const appId = process.env.SALTEDGE_APP_ID;
+  const secret = process.env.SALTEDGE_SECRET;
+
+  if (!appId || !secret) {
+    addResult(
+      'Salt Edge Credentials',
+      'skip',
+      'No configurado. Registro en: https://www.saltedge.com/partner_program (sin licencia TPP)'
+    );
+    return;
+  }
+
+  try {
+    info('Conectando a Salt Edge Partners API...');
+    const res = await fetch(
+      'https://www.saltedge.com/api/partners/v1/providers?country_code=ES&mode=oauth&status=active&per_page=5',
+      {
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          'App-id': appId,
+          Secret: secret,
+        },
+        signal: AbortSignal.timeout(10000),
+      }
+    );
+
+    if (!res.ok) {
+      const err = await res.text();
+      addResult('Salt Edge Connection', 'fail', `HTTP ${res.status}: ${err.substring(0, 150)}`);
+      return;
+    }
+
+    const json = await res.json();
+    const providers: any[] = json.data || [];
+    addResult('Salt Edge Connection', 'ok', `Conectado. ${providers.length} providers de muestra`);
+
+    // Buscar Bankinter
+    const bankinter = providers.find(
+      (p: any) => p.code?.includes('bankinter') || p.name?.toLowerCase().includes('bankinter')
+    );
+    if (bankinter) {
+      addResult(
+        'Bankinter (Salt Edge)',
+        'ok',
+        `Code: ${bankinter.code}, Status: ${bankinter.status}`
+      );
+    } else {
+      // Hacer búsqueda específica de Bankinter
+      const bankinterRes = await fetch(
+        'https://www.saltedge.com/api/partners/v1/providers?country_code=ES&mode=oauth&status=active&per_page=100',
+        {
+          headers: { Accept: 'application/json', 'App-id': appId, Secret: secret },
+          signal: AbortSignal.timeout(10000),
+        }
+      );
+      if (bankinterRes.ok) {
+        const allJson = await bankinterRes.json();
+        const all: any[] = allJson.data || [];
+        const bk = all.find(
+          (p: any) => p.code?.includes('bankinter') || p.name?.toLowerCase().includes('bankinter')
+        );
+        if (bk) {
+          addResult('Bankinter (Salt Edge)', 'ok', `Code: ${bk.code}, Status: ${bk.status}`);
+          info(`  Code para conectar: ${bk.code}`);
+        } else {
+          addResult(
+            'Bankinter (Salt Edge)',
+            'warn',
+            'No encontrado en la lista. Puede que el code sea diferente.'
+          );
+          info('  Prueba a conectar con code: bankinter_xo_es');
+        }
+      }
+    }
+  } catch (err: any) {
+    addResult('Salt Edge Connectivity', 'fail', `Error: ${err.message}`);
+  }
+}
+
+// ============================================================
+// NORDIGEN (desactivado para nuevos registros)
 // ============================================================
 
 async function checkNordigen() {
-  section('2. GoCardless Bank Account Data (Nordigen)');
+  section('3. GoCardless Bank Account Data (Nordigen) — Nuevos registros desactivados');
 
   const secretId = process.env.NORDIGEN_SECRET_ID;
   const secretKey = process.env.NORDIGEN_SECRET_KEY;
@@ -146,7 +233,7 @@ async function checkNordigen() {
     addResult(
       'Nordigen Credentials',
       'skip',
-      'Variables no configuradas. Ver: https://bankaccountdata.gocardless.com/'
+      'No configurado. NOTA: GoCardless ha desactivado nuevos registros en 2025. Usar Salt Edge en su lugar.'
     );
     return;
   }
@@ -464,20 +551,30 @@ function printSummary() {
 
   console.log(`\n${C.bold}Próximos pasos según lo faltante:${C.reset}`);
 
-  const nordigenMissing = results.some((r) => r.name.includes('Nordigen') && r.status === 'skip');
+  const saltEdgeMissing = results.some(
+    (r) => r.name.includes('Salt Edge Credentials') && r.status === 'skip'
+  );
   const gcMissing = results.some(
     (r) => r.name.includes('GoCardless Credentials') && r.status === 'skip'
   );
 
-  if (nordigenMissing) {
-    console.log(`\n  ${C.cyan}NORDIGEN (lectura de movimientos Bankinter):${C.reset}`);
-    console.log('  1. Registrarse en https://bankaccountdata.gocardless.com/');
-    console.log('  2. Ir a User secrets → crear par de secretos');
+  if (saltEdgeMissing) {
+    console.log(`\n  ${C.cyan}SALT EDGE — RECOMENDADO para leer movimientos Bankinter:${C.reset}`);
+    console.warn(
+      `  ${C.yellow}⚠️  GoCardless Bank Account Data (Nordigen) ha desactivado nuevos registros.${C.reset}`
+    );
+    console.log('  1. Regístrate en: https://www.saltedge.com/partner_program');
+    console.log('     (Partner Program: sin licencia TPP requerida)');
+    console.log('  2. Dashboard → API Keys → copiar App ID y Secret');
     console.log('  3. Añadir a .env.production:');
-    console.log('     NORDIGEN_SECRET_ID=xxxx');
-    console.log('     NORDIGEN_SECRET_KEY=xxxx');
+    console.log('     SALTEDGE_APP_ID=tu_app_id');
+    console.log('     SALTEDGE_SECRET=tu_secret');
     console.log('  4. pm2 restart inmova-app --update-env');
-    console.log('  5. Conectar Bankinter desde /finanzas/conciliacion');
+    console.log('  5. Ir a /finanzas/bancaria-setup → Salt Edge → Conectar Bankinter');
+    console.log('');
+    console.log(`  ${C.blue}ALTERNATIVA INMEDIATA (sin API):${C.reset}`);
+    console.log('  Bankinter → Mis cuentas → Movimientos → Exportar → XML ISO 20022 (CAMT.053)');
+    console.log('  Inmova → /finanzas/conciliacion → Importar Extracto → subir el XML');
   }
 
   if (gcMissing) {
@@ -514,6 +611,7 @@ async function main() {
   console.log(`  Fecha: ${new Date().toLocaleString('es-ES')}`);
 
   await checkEnvVars();
+  await checkSaltEdge();
   await checkNordigen();
   await checkGoCardless();
   await checkTink();
