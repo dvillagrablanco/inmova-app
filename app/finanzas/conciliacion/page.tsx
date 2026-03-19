@@ -611,10 +611,16 @@ export default function ConciliacionBancariaPage() {
                 </SelectContent>
               </Select>
             )}
+            <Link href="/finanzas/bancaria-grupo">
+              <Button variant="outline" size="sm">
+                <Building2 className="h-4 w-4 mr-2" />
+                Banca Grupo
+              </Button>
+            </Link>
             <Link href="/finanzas/bancaria-setup">
               <Button variant="outline" size="sm">
                 <Building2 className="h-4 w-4 mr-2" />
-                Configurar bancos
+                Configurar
               </Button>
             </Link>
             <Button variant="default" onClick={() => setActiveTab('importar')}>

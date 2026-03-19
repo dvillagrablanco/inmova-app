@@ -854,13 +854,19 @@ export default function BancariSetupPage() {
             ) : null}
 
             {db && db.pendingReconciliation > 0 && (
-              <div className="mt-4 flex gap-2">
+              <div className="mt-4 flex gap-2 flex-wrap">
                 <Button size="sm" asChild>
-                  <a href="/finanzas/conciliacion">
+                  <Link href="/finanzas/conciliacion">
                     <Zap className="w-4 h-4 mr-2" />
                     Conciliar ahora
                     <ArrowRight className="w-4 h-4 ml-2" />
-                  </a>
+                  </Link>
+                </Button>
+                <Button size="sm" variant="outline" asChild>
+                  <Link href="/finanzas/bancaria-grupo">
+                    <Building2 className="w-4 h-4 mr-2" />
+                    Panel del Grupo
+                  </Link>
                 </Button>
               </div>
             )}
