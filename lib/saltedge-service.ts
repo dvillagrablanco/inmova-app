@@ -1,22 +1,24 @@
 /**
- * SALT EDGE PARTNER PROGRAM — Open Banking sin licencia TPP
+ * SALT EDGE — API v6
  *
  * Alternativa a GoCardless Bank Account Data (Nordigen) dado que
  * Nordigen ha desactivado nuevos registros en 2025.
  *
- * Salt Edge actúa como AISP regulado. Tú accedes a sus datos
- * como partner sin necesitar licencia PSD2 propia.
+ * Salt Edge actúa como AISP/agregador. Para el Partner Program sin licencia PSD2,
+ * el acceso se hace mediante web-scraping de los portales bancarios.
  *
- * Cobertura: 2500+ bancos EU incluyendo Bankinter, BBVA, Santander, etc.
+ * API v6 BASE URL: https://www.saltedge.com/api/v6
+ * Connect Widget:  https://www.saltedge.com/connect
+ *
+ * DIFERENCIAS v1 vs v6:
+ *   v1 (deprecado): POST /connect_sessions/create → connect_url, necesita customer_secret
+ *   v6 (actual):    URL directa al widget con query params (app_id + customer_id)
+ *                   Sin customer_secret — autenticación solo App-id + Secret
  *
  * Registro: https://www.saltedge.com/partner_program
- * Docs API: https://docs.saltedge.com/partners/v1/
- * Dashboard: https://www.saltedge.com/dashboard
+ * Docs:     https://docs.saltedge.com/v6/
  *
- * Variables env requeridas:
- *   SALTEDGE_APP_ID     — App ID del dashboard
- *   SALTEDGE_SECRET     — Secret del dashboard
- *   SALTEDGE_CUSTOMER_SECRET — Secret del customer (generado al crear customer)
+ * Variables env: SALTEDGE_APP_ID, SALTEDGE_SECRET
  *
  * @module lib/saltedge-service
  */
@@ -29,7 +31,8 @@ import logger from '@/lib/logger';
 
 const SALTEDGE_APP_ID = process.env.SALTEDGE_APP_ID || '';
 const SALTEDGE_SECRET = process.env.SALTEDGE_SECRET || '';
-const SALTEDGE_BASE_URL = 'https://www.saltedge.com/api/partners/v1';
+const SALTEDGE_BASE_URL = 'https://www.saltedge.com/api/v6';
+const SALTEDGE_CONNECT_URL = 'https://www.saltedge.com/connect';
 
 export function isSaltEdgeConfigured(): boolean {
   return !!(SALTEDGE_APP_ID && SALTEDGE_SECRET);
@@ -40,24 +43,20 @@ export function isSaltEdgeConfigured(): boolean {
 // ═══════════════════════════════════════════════════════════════
 
 export interface SaltEdgeCustomer {
-  id: string;
-  identifier: string; // tu ID interno para este customer
-  secret: string; // necesario para las peticiones del customer
+  id: string; // customer_id numérico como string
+  identifier: string; // tu ID interno
   createdAt: string;
-  updatedAt: string;
 }
 
 export interface SaltEdgeConnection {
   id: string;
   customerId: string;
-  providerCode: string; // e.g. "bankinter_xo_es"
-  providerName: string; // e.g. "Bankinter"
+  providerCode: string;
+  providerName: string;
   status: 'active' | 'inactive' | 'disabled' | 'expired' | 'errored';
-  categorized: boolean;
   createdAt: string;
   updatedAt: string;
   lastSuccessAt?: string;
-  lastFail?: { at: string; message: string; class: string };
   countryCode: string;
 }
 
@@ -65,17 +64,15 @@ export interface SaltEdgeAccount {
   id: string;
   connectionId: string;
   name: string;
-  nature: 'account' | 'card' | 'savings' | 'bonus' | 'checking';
+  nature: string;
   balance: number;
   currencyCode: string;
   iban?: string;
-  status: 'active' | 'inactive';
+  status: string;
   createdAt: string;
-  updatedAt: string;
   extra?: {
     iban?: string;
     swiftCode?: string;
-    sortCode?: string;
     accountName?: string;
   };
 }
@@ -83,9 +80,9 @@ export interface SaltEdgeAccount {
 export interface SaltEdgeTransaction {
   id: string;
   duplicated: boolean;
-  mode: 'normal' | 'fee' | 'transfer';
+  mode: string;
   status: 'posted' | 'pending';
-  madeOn: string; // YYYY-MM-DD
+  madeOn: string;
   amount: number;
   currencyCode: string;
   description: string;
@@ -93,10 +90,7 @@ export interface SaltEdgeTransaction {
   accountId: string;
   connectionId: string;
   createdAt: string;
-  updatedAt: string;
   extra?: {
-    originalAmount?: number;
-    originalCurrencyCode?: string;
     creditorName?: string;
     debtorName?: string;
     creditorIban?: string;
@@ -111,19 +105,11 @@ export interface SaltEdgeTransaction {
 export interface SaltEdgeProvider {
   code: string;
   name: string;
-  status: 'active' | 'inactive' | 'disabled';
+  status: string;
   countryCode: string;
-  homepage?: string;
+  mode: string;
   logoUrl?: string;
-  mode: 'oauth' | 'web' | 'api' | 'file';
-  authorizationMethod?: string;
-  instructionalDocumentUrl?: string;
-}
-
-export interface SaltEdgeConnectSession {
-  connectUrl: string;
-  expiresAt: string;
-  token?: string;
+  homeUrl?: string;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -131,25 +117,24 @@ export interface SaltEdgeConnectSession {
 // ═══════════════════════════════════════════════════════════════
 
 async function saltEdgeRequest<T>(
-  method: 'GET' | 'POST' | 'DELETE',
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE',
   path: string,
-  body?: unknown,
-  customerSecret?: string
+  queryParams?: Record<string, string>,
+  body?: unknown
 ): Promise<T> {
-  const headers: Record<string, string> = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    'App-id': SALTEDGE_APP_ID,
-    Secret: SALTEDGE_SECRET,
-  };
-
-  if (customerSecret) {
-    headers['Customer-secret'] = customerSecret;
+  const url = new URL(`${SALTEDGE_BASE_URL}${path}`);
+  if (queryParams) {
+    Object.entries(queryParams).forEach(([k, v]) => url.searchParams.set(k, v));
   }
 
-  const response = await fetch(`${SALTEDGE_BASE_URL}${path}`, {
+  const response = await fetch(url.toString(), {
     method,
-    headers,
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      'App-id': SALTEDGE_APP_ID,
+      Secret: SALTEDGE_SECRET,
+    },
     ...(body ? { body: JSON.stringify({ data: body }) } : {}),
   });
 
@@ -169,23 +154,16 @@ async function saltEdgeRequest<T>(
 
 export async function testConnection(): Promise<{ ok: boolean; message: string }> {
   if (!isSaltEdgeConfigured()) {
-    return {
-      ok: false,
-      message:
-        'SALTEDGE_APP_ID y SALTEDGE_SECRET no configurados. Registro en https://www.saltedge.com/partner_program',
-    };
+    return { ok: false, message: 'SALTEDGE_APP_ID y SALTEDGE_SECRET no configurados' };
   }
 
   try {
-    // Listar providers es una llamada pública autenticada — buen test
-    const providers = await saltEdgeRequest<SaltEdgeProvider[]>(
-      'GET',
-      '/providers?country_code=ES&mode=oauth&status=active&per_page=5'
-    );
-    return {
-      ok: true,
-      message: `Conectado. ${Array.isArray(providers) ? providers.length : '?'} providers activos en España (muestra)`,
-    };
+    const providers = await saltEdgeRequest<SaltEdgeProvider[]>('GET', '/providers', {
+      country_code: 'ES',
+      per_page: '5',
+    });
+    const count = Array.isArray(providers) ? providers.length : 0;
+    return { ok: true, message: `Conectado correctamente. ${count} providers en España.` };
   } catch (err: any) {
     return { ok: false, message: err.message };
   }
@@ -195,20 +173,14 @@ export async function testConnection(): Promise<{ ok: boolean; message: string }
 // PROVIDERS (bancos disponibles)
 // ═══════════════════════════════════════════════════════════════
 
-/**
- * Lista bancos disponibles para un país
- */
 export async function getProviders(countryCode = 'ES'): Promise<SaltEdgeProvider[]> {
   if (!isSaltEdgeConfigured()) return [];
 
   try {
-    const providers = await saltEdgeRequest<SaltEdgeProvider[]>(
-      'GET',
-      `/providers?country_code=${countryCode}&mode=oauth&status=active&per_page=100`
-    );
-    logger.info(
-      `[SaltEdge] ${Array.isArray(providers) ? providers.length : 0} providers para ${countryCode}`
-    );
+    const providers = await saltEdgeRequest<SaltEdgeProvider[]>('GET', '/providers', {
+      country_code: countryCode,
+      per_page: '200',
+    });
     return Array.isArray(providers) ? providers : [];
   } catch (err: any) {
     logger.error('[SaltEdge] Error listando providers:', err.message);
@@ -216,159 +188,136 @@ export async function getProviders(countryCode = 'ES'): Promise<SaltEdgeProvider
   }
 }
 
-/**
- * Busca el provider de Bankinter
- */
 export async function getBankinterProvider(): Promise<SaltEdgeProvider | null> {
   const providers = await getProviders('ES');
   return (
     providers.find(
-      (p) =>
-        p.code.toLowerCase().includes('bankinter') || p.name.toLowerCase().includes('bankinter')
+      (p) => p.code === 'bankinter_es' || p.name.toLowerCase().includes('bankinter')
     ) || null
   );
 }
 
 // ═══════════════════════════════════════════════════════════════
-// CUSTOMERS (uno por empresa/sociedad)
+// CUSTOMERS
 // ═══════════════════════════════════════════════════════════════
 
-/**
- * Crea un customer en Salt Edge.
- * Cada sociedad (ROVIDA, VIRODA) necesita su propio customer.
- * El `identifier` es tu ID interno (e.g. companyId de Inmova).
- */
 export async function createCustomer(identifier: string): Promise<SaltEdgeCustomer> {
-  const customer = await saltEdgeRequest<SaltEdgeCustomer>('POST', '/customers', {
-    identifier,
-  });
-  logger.info(`[SaltEdge] Customer creado: ${customer.id} (${identifier})`);
-  return customer;
+  const raw = await saltEdgeRequest<any>('POST', '/customers', undefined, { identifier });
+  return {
+    id: String(raw.customer_id || raw.id),
+    identifier: raw.identifier,
+    createdAt: raw.created_at,
+  };
 }
 
-/**
- * Obtiene un customer por su identifier interno
- */
+export async function listCustomers(): Promise<SaltEdgeCustomer[]> {
+  const raw = await saltEdgeRequest<any[]>('GET', '/customers');
+  const list = Array.isArray(raw) ? raw : [];
+  return list.map((c) => ({
+    id: String(c.customer_id || c.id),
+    identifier: c.identifier,
+    createdAt: c.created_at,
+  }));
+}
+
 export async function getCustomerByIdentifier(
   identifier: string
 ): Promise<SaltEdgeCustomer | null> {
   try {
-    const customers = await saltEdgeRequest<SaltEdgeCustomer[]>(
-      'GET',
-      `/customers?identifier=${encodeURIComponent(identifier)}`
-    );
-    return Array.isArray(customers) && customers.length > 0 ? customers[0] : null;
+    const customers = await listCustomers();
+    return customers.find((c) => c.identifier === identifier) || null;
   } catch {
     return null;
   }
 }
 
 // ═══════════════════════════════════════════════════════════════
-// CONNECT SESSION (autorización bancaria)
+// CONNECT URL (v6: URL directa al widget, sin API de sesión)
 // ═══════════════════════════════════════════════════════════════
 
 /**
- * Crea una sesión de conexión.
- * Devuelve una URL a la que redirigir al usuario para que
- * autorice el acceso a su banco.
+ * Genera la URL del widget de conexión de Salt Edge (v6).
  *
- * Una vez completado, Salt Edge llama al callback con `connection_id` y `connection_secret`.
+ * En v6 ya no existe el endpoint /connect_sessions/create.
+ * El widget se accede directamente con query params.
+ *
+ * El usuario es redirigido a esta URL, entra sus credenciales bancarias
+ * en la interfaz de Salt Edge, y Salt Edge redirige de vuelta a callbackUrl
+ * con `connection_id` como query param.
  */
-export async function createConnectSession(params: {
-  customerSecret: string;
-  providerCode?: string; // si se conoce de antemano (e.g. "bankinter_xo_es")
+export function generateConnectUrl(params: {
+  customerId: string;
   callbackUrl: string;
-  companyId: string;
-  fromDate?: string; // YYYY-MM-DD (histórico a cargar)
-}): Promise<SaltEdgeConnectSession> {
-  const body: Record<string, unknown> = {
-    customer_secret: params.customerSecret,
-    consent: {
-      scopes: ['account_details', 'transactions_details'],
-      from_date:
-        params.fromDate ||
-        new Date(Date.now() - 730 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 2 años atrás
-    },
-    attempt: {
-      return_to: params.callbackUrl,
-      store_credentials: true,
-    },
-  };
-
+  providerCode?: string;
+  countryCode?: string;
+}): string {
+  const url = new URL(SALTEDGE_CONNECT_URL);
+  url.searchParams.set('app_id', SALTEDGE_APP_ID);
+  url.searchParams.set('customer_id', params.customerId);
+  url.searchParams.set('return_to', params.callbackUrl);
   if (params.providerCode) {
-    body['provider_code'] = params.providerCode;
+    url.searchParams.set('provider_code', params.providerCode);
   }
+  if (params.countryCode) {
+    url.searchParams.set('country_code', params.countryCode);
+  }
+  return url.toString();
+}
 
-  const session = await saltEdgeRequest<{ connect_url: string; expires_at: string }>(
-    'POST',
-    '/connect_sessions/create',
-    body
-  );
-
-  logger.info(`[SaltEdge] Connect session creada → ${session.connect_url}`);
-
-  return {
-    connectUrl: session.connect_url,
-    expiresAt: session.expires_at,
-  };
+// Alias para compatibilidad con los endpoints existentes
+export async function createConnectSession(params: {
+  customerId: string;
+  callbackUrl: string;
+  providerCode?: string;
+  companyId?: string;
+  fromDate?: string;
+  // customer_secret ya no se usa en v6
+  customerSecret?: string;
+}): Promise<{ connectUrl: string; expiresAt: string }> {
+  const connectUrl = generateConnectUrl({
+    customerId: params.customerId,
+    callbackUrl: params.callbackUrl,
+    providerCode: params.providerCode,
+    countryCode: 'ES',
+  });
+  // v6 no devuelve expiresAt — usar 1 hora como valor nominal
+  const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+  return { connectUrl, expiresAt };
 }
 
 // ═══════════════════════════════════════════════════════════════
-// CONNECTIONS (conexiones bancarias)
+// CONNECTIONS
 // ═══════════════════════════════════════════════════════════════
 
-/**
- * Lista conexiones de un customer
- */
-export async function listConnections(customerSecret: string): Promise<SaltEdgeConnection[]> {
+export async function listConnections(customerId: string): Promise<SaltEdgeConnection[]> {
   try {
-    const connections = await saltEdgeRequest<SaltEdgeConnection[]>(
-      'GET',
-      '/connections',
-      undefined,
-      customerSecret
-    );
-    return Array.isArray(connections) ? connections : [];
+    const raw = await saltEdgeRequest<any[]>('GET', '/connections', { customer_id: customerId });
+    if (!Array.isArray(raw)) return [];
+    return raw.map(mapConnection);
   } catch (err: any) {
     logger.error('[SaltEdge] Error listando connections:', err.message);
     return [];
   }
 }
 
-/**
- * Obtiene una conexión por ID
- */
 export async function getConnection(
   connectionId: string,
-  customerSecret: string
+  _customerSecret?: string
 ): Promise<SaltEdgeConnection | null> {
   try {
-    const conn = await saltEdgeRequest<SaltEdgeConnection>(
-      'GET',
-      `/connections/${connectionId}`,
-      undefined,
-      customerSecret
-    );
-    return conn;
+    const raw = await saltEdgeRequest<any>('GET', `/connections/${connectionId}`);
+    return raw ? mapConnection(raw) : null;
   } catch {
     return null;
   }
 }
 
-/**
- * Elimina (desconecta) una conexión bancaria
- */
 export async function deleteConnection(
   connectionId: string,
-  customerSecret: string
+  _customerSecret?: string
 ): Promise<boolean> {
   try {
-    await saltEdgeRequest<unknown>(
-      'DELETE',
-      `/connections/${connectionId}`,
-      undefined,
-      customerSecret
-    );
+    await saltEdgeRequest<unknown>('DELETE', `/connections/${connectionId}`);
     logger.info(`[SaltEdge] Connection ${connectionId} eliminada`);
     return true;
   } catch (err: any) {
@@ -377,81 +326,127 @@ export async function deleteConnection(
   }
 }
 
+function mapConnection(c: any): SaltEdgeConnection {
+  return {
+    id: String(c.id),
+    customerId: String(c.customer_id),
+    providerCode: c.provider_code,
+    providerName: c.provider_name || c.provider_code,
+    status: c.status,
+    createdAt: c.created_at,
+    updatedAt: c.updated_at,
+    lastSuccessAt: c.last_success_at,
+    countryCode: c.country_code,
+  };
+}
+
 // ═══════════════════════════════════════════════════════════════
-// ACCOUNTS (cuentas bancarias)
+// ACCOUNTS
 // ═══════════════════════════════════════════════════════════════
 
 /**
- * Lista cuentas de una conexión
+ * Lista cuentas de un customer (todas las conexiones) o de una conexión específica.
+ * En v6 el customer_id va como query param.
  */
 export async function listAccounts(
-  connectionId: string,
-  customerSecret: string
+  connectionIdOrCustomerId: string,
+  _customerSecret?: string
 ): Promise<SaltEdgeAccount[]> {
   try {
-    const accounts = await saltEdgeRequest<SaltEdgeAccount[]>(
-      'GET',
-      `/accounts?connection_id=${connectionId}`,
-      undefined,
-      customerSecret
-    );
-    return Array.isArray(accounts) ? accounts : [];
+    // Intentar primero como connection_id
+    const raw = await saltEdgeRequest<any[]>('GET', '/accounts', {
+      connection_id: connectionIdOrCustomerId,
+    }).catch(() => null);
+
+    if (raw && Array.isArray(raw)) {
+      return raw.map(mapAccount);
+    }
+
+    // Fallback: tratar como customer_id
+    const raw2 = await saltEdgeRequest<any[]>('GET', '/accounts', {
+      customer_id: connectionIdOrCustomerId,
+    });
+    return Array.isArray(raw2) ? raw2.map(mapAccount) : [];
   } catch (err: any) {
     logger.error('[SaltEdge] Error listando accounts:', err.message);
     return [];
   }
 }
 
+export async function listAccountsForCustomer(customerId: string): Promise<SaltEdgeAccount[]> {
+  try {
+    const raw = await saltEdgeRequest<any[]>('GET', '/accounts', { customer_id: customerId });
+    return Array.isArray(raw) ? raw.map(mapAccount) : [];
+  } catch (err: any) {
+    logger.error('[SaltEdge] Error listando accounts por customer:', err.message);
+    return [];
+  }
+}
+
+function mapAccount(a: any): SaltEdgeAccount {
+  return {
+    id: String(a.id),
+    connectionId: String(a.connection_id),
+    name: a.name,
+    nature: a.nature,
+    balance: parseFloat(a.balance || '0'),
+    currencyCode: a.currency_code || 'EUR',
+    iban: a.extra?.iban || undefined,
+    status: a.status,
+    createdAt: a.created_at,
+    extra: a.extra,
+  };
+}
+
 // ═══════════════════════════════════════════════════════════════
-// TRANSACTIONS (movimientos bancarios)
+// TRANSACTIONS
 // ═══════════════════════════════════════════════════════════════
 
 /**
- * Obtiene transacciones de una cuenta.
- * Salt Edge pagina con `next_id` — esta función itera todas las páginas.
- *
- * @param accountId   ID de la cuenta en Salt Edge
- * @param customerSecret  Customer secret
- * @param fromDate    Fecha inicio YYYY-MM-DD (opcional)
- * @param toDate      Fecha fin YYYY-MM-DD (opcional)
- * @param maxPages    Máximo de páginas a obtener (seguridad, default 20)
+ * Obtiene transacciones de una conexión específica.
+ * En v6 se requiere connection_id (no account_id ni customer_secret).
  */
 export async function getTransactions(
-  accountId: string,
-  customerSecret: string,
+  connectionId: string,
+  _customerSecret?: string,
   fromDate?: string,
   toDate?: string,
   maxPages = 20
 ): Promise<SaltEdgeTransaction[]> {
   const transactions: SaltEdgeTransaction[] = [];
 
-  let url = `/transactions?account_id=${accountId}&per_page=1000`;
-  if (fromDate) url += `&from_date=${fromDate}`;
-  if (toDate) url += `&to_date=${toDate}`;
+  const params: Record<string, string> = {
+    connection_id: connectionId,
+    per_page: '1000',
+  };
+  if (fromDate) params.from_date = fromDate;
+  if (toDate) params.to_date = toDate;
 
   let page = 0;
   let nextId: string | null = null;
 
   while (page < maxPages) {
-    const pageUrl = nextId ? `${url}&next_id=${nextId}` : url;
+    const p = { ...params };
+    if (nextId) p.next_id = nextId;
 
     try {
-      const response = await fetch(`${SALTEDGE_BASE_URL}${pageUrl}`, {
+      const url = new URL(`${SALTEDGE_BASE_URL}/transactions`);
+      Object.entries(p).forEach(([k, v]) => url.searchParams.set(k, v));
+
+      const response = await fetch(url.toString(), {
         headers: {
           Accept: 'application/json',
           'App-id': SALTEDGE_APP_ID,
           Secret: SALTEDGE_SECRET,
-          'Customer-secret': customerSecret,
         },
       });
 
       if (!response.ok) break;
 
       const json = await response.json();
-      const batch: SaltEdgeTransaction[] = json.data || [];
-      transactions.push(...batch);
+      const batch: any[] = json.data || [];
+      transactions.push(...batch.map(mapTransaction));
 
-      // Salt Edge devuelve meta.next_id para la siguiente página
       nextId = json.meta?.next_id || null;
       page++;
 
@@ -462,19 +457,37 @@ export async function getTransactions(
     }
   }
 
-  logger.info(
-    `[SaltEdge] ${transactions.length} transacciones obtenidas para account ${accountId}`
-  );
+  logger.info(`[SaltEdge] ${transactions.length} transacciones para connection ${connectionId}`);
   return transactions;
 }
 
+function mapTransaction(t: any): SaltEdgeTransaction {
+  return {
+    id: String(t.id),
+    duplicated: t.duplicated || false,
+    mode: t.mode || 'normal',
+    status: t.status || 'posted',
+    madeOn: t.made_on,
+    amount: parseFloat(t.amount || '0'),
+    currencyCode: t.currency_code || 'EUR',
+    description: t.description || '',
+    category: t.category || '',
+    accountId: String(t.account_id),
+    connectionId: String(t.connection_id),
+    createdAt: t.created_at,
+    extra: t.extra,
+  };
+}
+
 // ═══════════════════════════════════════════════════════════════
-// SYNC (descargar y guardar en BD)
+// SYNC — descargar y guardar en BD
 // ═══════════════════════════════════════════════════════════════
 
 /**
- * Descarga todas las transacciones nuevas de todas las conexiones
- * Salt Edge activas de una empresa y las guarda en BankTransaction.
+ * Descarga todas las transacciones nuevas de las conexiones Salt Edge
+ * activas de una empresa y las guarda en BankTransaction.
+ *
+ * accessToken almacena el connection_id de Salt Edge (no customer_secret).
  */
 export async function syncSaltEdgeTransactions(companyId: string): Promise<{
   connections: number;
@@ -489,16 +502,12 @@ export async function syncSaltEdgeTransactions(companyId: string): Promise<{
     errors: [] as string[],
   };
 
-  if (!isSaltEdgeConfigured()) {
-    logger.info('[SaltEdge] No configurado, saltando sync');
-    return result;
-  }
+  if (!isSaltEdgeConfigured()) return result;
 
   const { getPrismaClient } = await import('@/lib/db');
   const prisma = getPrismaClient();
 
-  // Buscar conexiones Salt Edge activas en BD
-  const connections = await prisma.bankConnection.findMany({
+  const dbConnections = await prisma.bankConnection.findMany({
     where: {
       companyId,
       proveedor: 'saltedge',
@@ -508,49 +517,42 @@ export async function syncSaltEdgeTransactions(companyId: string): Promise<{
     select: {
       id: true,
       accessToken: true, // Salt Edge connection_id
-      refreshToken: true, // Salt Edge customer_secret
+      refreshToken: true, // customer_id (guardado aquí)
       ultimaSync: true,
       nombreBanco: true,
     },
   });
 
-  result.connections = connections.length;
-  if (connections.length === 0) return result;
+  result.connections = dbConnections.length;
+  if (dbConnections.length === 0) return result;
 
-  for (const conn of connections) {
+  for (const conn of dbConnections) {
     try {
       const connectionId = conn.accessToken!;
-      const customerSecret = conn.refreshToken!;
-      if (!connectionId || !customerSecret) continue;
-
-      // Obtener cuentas de la conexión
-      const accounts = await listAccounts(connectionId, customerSecret);
-      if (accounts.length === 0) {
-        result.errors.push(`No accounts for connection ${connectionId}`);
+      if (!connectionId || connectionId.startsWith('saltedge_')) {
+        // Skip entradas de grupo que tienen ID compuesto
         continue;
       }
 
-      // Calcular rango de fechas
+      // Rango de fechas
       const fromDate = conn.ultimaSync
         ? new Date(conn.ultimaSync.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
         : new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-      const toDate = new Date().toISOString().split('T')[0];
+
+      // Obtener cuentas de la conexión
+      const accounts = await listAccounts(connectionId);
 
       for (const account of accounts) {
         try {
-          const txs = await getTransactions(account.id, customerSecret, fromDate, toDate);
+          const txs = await getTransactions(connectionId, undefined, fromDate);
 
           for (const tx of txs) {
-            // Salt Edge usa IDs propios — usarlos como proveedorTxId
             const txId = `saltedge_${tx.id}`;
-
             try {
               const existing = await prisma.bankTransaction.findUnique({
                 where: { proveedorTxId: txId },
                 select: { id: true },
               });
-
-              const iban = account.extra?.iban || account.iban;
 
               const txData = {
                 descripcion: tx.description || tx.category || 'Sin descripción',
@@ -581,8 +583,6 @@ export async function syncSaltEdgeTransactions(companyId: string): Promise<{
                     debtorName: txData.debtorName,
                     creditorIban: txData.creditorIban,
                     debtorIban: txData.debtorIban,
-                    // Guardar IBAN de la cuenta Inmova como referencia
-                    ...(iban ? { referencia: iban } : {}),
                     rawData: tx as any,
                     estado: 'pendiente_revision',
                   },
@@ -600,15 +600,12 @@ export async function syncSaltEdgeTransactions(companyId: string): Promise<{
         }
       }
 
-      // Actualizar última sincronización
       await prisma.bankConnection.update({
         where: { id: conn.id },
         data: { ultimaSync: new Date() },
       });
 
-      logger.info(
-        `[SaltEdge] ${conn.nombreBanco}: +${result.newTransactions} nuevas, ${result.updatedTransactions} actualizadas`
-      );
+      logger.info(`[SaltEdge] ${conn.nombreBanco}: +${result.newTransactions} nuevas`);
     } catch (e: any) {
       logger.error(`[SaltEdge] Error en connection ${conn.id}:`, e);
       result.errors.push(`Connection ${conn.id}: ${e.message}`);
@@ -619,20 +616,19 @@ export async function syncSaltEdgeTransactions(companyId: string): Promise<{
 }
 
 // ═══════════════════════════════════════════════════════════════
-// BANCOS ESPAÑOLES CONOCIDOS (para mostrar en la UI sin llamada API)
+// BANCOS ESPAÑOLES CONOCIDOS (provider codes de v6)
 // ═══════════════════════════════════════════════════════════════
 
 export const SPANISH_BANKS_SALTEDGE = [
-  { code: 'bankinter_xo_es', name: 'Bankinter', popular: true },
-  { code: 'santander_business_es', name: 'Banco Santander', popular: true },
-  { code: 'bbva_xo_es', name: 'BBVA', popular: true },
-  { code: 'caixabank_xo_es', name: 'CaixaBank', popular: true },
-  { code: 'sabadell_xo_es', name: 'Banco Sabadell', popular: true },
-  { code: 'ing_direct_xo_es', name: 'ING España', popular: false },
-  { code: 'unicaja_xo_es', name: 'Unicaja', popular: false },
-  { code: 'kutxabank_xo_es', name: 'Kutxabank', popular: false },
-  { code: 'abanca_xo_es', name: 'Abanca', popular: false },
-  { code: 'openbank_xo_es', name: 'Openbank', popular: false },
+  { code: 'bankinter_es', name: 'Bankinter', popular: true },
+  { code: 'santander_es', name: 'Santander', popular: true },
+  { code: 'la_caixa_es', name: 'CaixaBank', popular: true },
+  { code: 'santander_empresas_es', name: 'Santander Empresas', popular: true },
+  { code: 'bbva_es', name: 'BBVA', popular: true },
+  { code: 'kutxabank_es', name: 'Kutxabank', popular: false },
+  { code: 'ibercaja_es', name: 'Ibercaja', popular: false },
+  { code: 'evobanco_es', name: 'EVO Banco', popular: false },
+  { code: 'arquia_es', name: 'Arquia', popular: false },
 ];
 
 export default {
@@ -641,12 +637,15 @@ export default {
   getProviders,
   getBankinterProvider,
   createCustomer,
+  listCustomers,
   getCustomerByIdentifier,
+  generateConnectUrl,
   createConnectSession,
   listConnections,
   getConnection,
   deleteConnection,
   listAccounts,
+  listAccountsForCustomer,
   getTransactions,
   syncSaltEdgeTransactions,
   SPANISH_BANKS_SALTEDGE,

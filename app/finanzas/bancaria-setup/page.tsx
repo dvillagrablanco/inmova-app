@@ -916,13 +916,14 @@ export default function BancariSetupPage() {
 // SALT EDGE CARD
 // ═══════════════════════════════════════════════════════════════
 
+// Códigos correctos de Salt Edge API v6 para España
 const SALTEDGE_SPANISH_BANKS = [
-  { code: 'bankinter_xo_es', name: 'Bankinter' },
-  { code: 'santander_business_es', name: 'Santander' },
-  { code: 'bbva_xo_es', name: 'BBVA' },
-  { code: 'caixabank_xo_es', name: 'CaixaBank' },
-  { code: 'sabadell_xo_es', name: 'Sabadell' },
-  { code: 'ing_direct_xo_es', name: 'ING' },
+  { code: 'bankinter_es', name: 'Bankinter' },
+  { code: 'santander_es', name: 'Santander' },
+  { code: 'santander_empresas_es', name: 'Santander Empresas' },
+  { code: 'la_caixa_es', name: 'CaixaBank' },
+  { code: 'kutxabank_es', name: 'Kutxabank' },
+  { code: 'ibercaja_es', name: 'Ibercaja' },
 ];
 
 function SaltEdgeCard({

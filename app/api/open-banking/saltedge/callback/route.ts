@@ -10,24 +10,28 @@ export const runtime = 'nodejs';
 /**
  * GET /api/open-banking/saltedge/callback
  *
- * Salt Edge redirige aquí tras la autorización bancaria.
+ * Salt Edge redirige aquí tras la autorización bancaria (API v6).
  *
- * Parámetros de Salt Edge:
- *   - connection_id: ID de la conexión creada
- *   - connection_secret: Secret para acceder a las cuentas
- *   - stage: "success" | "error" | "fetching"
+ * Parámetros que envía Salt Edge v6:
+ *   - connection_id: ID de la conexión creada (principal)
+ *   - stage: "success" | "error" | "fetching" (si lo envía)
+ *   - error: descripción del error (si aplica)
+ *
+ * Nota: En v6 ya NO hay connection_secret. La autenticación es
+ * siempre App-id + Secret + connection_id como query param.
  *
  * Lógica de grupo:
- *   1. Lista todas las cuentas de la conexión
+ *   1. Lista todas las cuentas de la conexión vía API v6
  *   2. Para cada cuenta con IBAN conocido, identifica la sociedad del Grupo Vidaro
- *   3. Crea o actualiza BankConnection en BD para cada sociedad con cuentas
+ *   3. Crea o actualiza BankConnection en BD para cada sociedad
  *   4. Redirige a la UI con el resumen
  */
 export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams;
   const stage = params.get('stage');
   const connectionId = params.get('connection_id');
-  const connectionSecret = params.get('connection_secret');
+  // v6: connection_secret ya no existe, pero lo aceptamos por compatibilidad
+  const connectionSecret = params.get('connection_secret') || connectionId || '';
   const companyId = params.get('companyId');
   const userId = params.get('userId');
   const errorMessage = params.get('error');
@@ -69,8 +73,8 @@ export async function GET(request: NextRequest) {
 
     logger.info(`[SaltEdge Callback] Conexión ${connectionId} — banco: ${bankName}`);
 
-    // 2. Obtener todas las cuentas de la conexión
-    const accounts = await listAccounts(connectionId, connectionSecret);
+    // 2. Obtener todas las cuentas de la conexión (v6: por connection_id)
+    const accounts = await listAccounts(connectionId);
     logger.info(`[SaltEdge Callback] ${accounts.length} cuentas encontradas`);
 
     // 3. Recuperar el customer_secret desde la conexión pendiente en BD

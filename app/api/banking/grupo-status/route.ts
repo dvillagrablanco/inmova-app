@@ -228,34 +228,24 @@ export async function GET(_request: NextRequest) {
       saltEdge: saltEdgeStatus,
       globalReconciliation,
       bancosPorConectar,
+      // Códigos verificados de Salt Edge API v6 para España
       availableBanks: [
         {
-          code: 'bankinter_xo_es',
+          code: 'bankinter_es',
           name: 'Bankinter',
           sociedades: ['Rovida', 'Viroda', 'Vidaro'],
           priority: 'HIGH',
         },
+        { code: 'santander_es', name: 'Santander', sociedades: ['Vidaro'], priority: 'HIGH' },
         {
-          code: 'bbva_xo_es',
-          name: 'BBVA',
-          sociedades: ['Rovida', 'Viroda', 'Vidaro'],
+          code: 'santander_empresas_es',
+          name: 'Santander Empresas',
+          sociedades: ['Vidaro'],
           priority: 'HIGH',
         },
-        {
-          code: 'santander_business_es',
-          name: 'Santander',
-          sociedades: ['Vidaro'],
-          priority: 'MEDIUM',
-        },
-        {
-          code: 'banca_march_xo_es',
-          name: 'Banca March',
-          sociedades: ['Vidaro'],
-          priority: 'MEDIUM',
-        },
-        { code: 'andbank_xo_es', name: 'AndBank', sociedades: ['Vidaro'], priority: 'LOW' },
-        { code: 'inversis_xo_es', name: 'Inversis', sociedades: ['Vidaro'], priority: 'LOW' },
-        { code: 'caceis_xo_es', name: 'CACEIS', sociedades: ['Vidaro'], priority: 'LOW' },
+        { code: 'la_caixa_es', name: 'CaixaBank', sociedades: ['Vidaro'], priority: 'MEDIUM' },
+        { code: 'kutxabank_es', name: 'Kutxabank', sociedades: ['Vidaro'], priority: 'LOW' },
+        { code: 'ibercaja_es', name: 'Ibercaja', sociedades: ['Vidaro'], priority: 'LOW' },
       ],
     });
   } catch (error: any) {

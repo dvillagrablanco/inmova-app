@@ -5,7 +5,7 @@ import {
   isSaltEdgeConfigured,
   createCustomer,
   getCustomerByIdentifier,
-  createConnectSession,
+  generateConnectUrl,
 } from '@/lib/saltedge-service';
 import { getPrismaClient } from '@/lib/db';
 import logger from '@/lib/logger';
@@ -16,17 +16,15 @@ export const runtime = 'nodejs';
 /**
  * POST /api/open-banking/saltedge/connect-grupo
  *
- * Inicia la conexión bancaria para TODO el Grupo Vidaro de una vez.
- * Crea un único customer Salt Edge "grupo_vidaro" y genera una URL
- * de autorización que, tras ser completada, importará automáticamente
- * todas las cuentas y las asignará a la sociedad correspondiente
- * basándose en el IBAN.
+ * Inicia la conexión bancaria para TODO el Grupo Vidaro (API v6).
+ * Crea un único customer Salt Edge "grupo_vidaro" y genera la URL
+ * del widget de conexión. Tras la autorización, el callback detecta
+ * automáticamente los IBANs y los asigna a cada sociedad.
  *
  * Body: { providerCode?: string }
- *   providerCode puede ser:
- *     - "bankinter_xo_es" → Bankinter (Rovida + Viroda + Vidaro)
- *     - "bbva_xo_es"      → BBVA (Rovida + Viroda + Vidaro)
- *     - undefined         → Salt Edge muestra selector de banco
+ *   "bankinter_es" → Bankinter (Rovida + Viroda + Vidaro)
+ *   "santander_es" → Santander (Vidaro)
+ *   etc.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -37,10 +35,7 @@ export async function POST(request: NextRequest) {
 
     if (!isSaltEdgeConfigured()) {
       return NextResponse.json(
-        {
-          error: 'Salt Edge no configurado',
-          help: 'Añadir SALTEDGE_APP_ID y SALTEDGE_SECRET al .env.production',
-        },
+        { error: 'Salt Edge no configurado — añadir SALTEDGE_APP_ID y SALTEDGE_SECRET' },
         { status: 503 }
       );
     }
@@ -55,33 +50,33 @@ export async function POST(request: NextRequest) {
     const GRUPO_IDENTIFIER = 'grupo_vidaro';
     const prisma = getPrismaClient();
 
-    // Buscar customer_secret en BD (guardado de una conexión anterior del grupo)
+    // Buscar customer_id en BD
     const existingConn = await prisma.bankConnection.findFirst({
-      where: { proveedor: 'saltedge', estado: { not: 'error' } },
+      where: { proveedor: 'saltedge', refreshToken: { not: null } },
       select: { refreshToken: true },
       orderBy: { createdAt: 'desc' },
     });
 
-    let customerSecret: string;
+    let customerId: string;
 
-    if (existingConn?.refreshToken) {
-      customerSecret = existingConn.refreshToken;
-      logger.info('[SaltEdge Grupo] Reutilizando customer existente');
+    if (existingConn?.refreshToken && !existingConn.refreshToken.startsWith('pending_')) {
+      customerId = existingConn.refreshToken;
+      logger.info(`[SaltEdge Grupo] Reutilizando customer_id: ${customerId}`);
     } else {
       let customer = await getCustomerByIdentifier(GRUPO_IDENTIFIER);
       if (!customer) {
         customer = await createCustomer(GRUPO_IDENTIFIER);
       }
-      customerSecret = customer.secret;
-      logger.info(`[SaltEdge Grupo] Customer: ${customer.id}`);
+      customerId = customer.id;
+      logger.info(`[SaltEdge Grupo] Customer: ${customerId}`);
     }
 
-    // 2. Crear connect session
-    const connectSession = await createConnectSession({
-      customerSecret,
-      providerCode,
+    // 2. Generar URL del widget (v6: URL directa)
+    const connectUrl = generateConnectUrl({
+      customerId,
       callbackUrl,
-      companyId: session.user.companyId,
+      providerCode,
+      countryCode: 'ES',
     });
 
     // 3. Registrar conexión pendiente en BD
@@ -91,27 +86,22 @@ export async function POST(request: NextRequest) {
         userId: session.user.id,
         proveedor: 'saltedge',
         provider: 'saltedge',
-        proveedorItemId: '',
-        nombreBanco: providerCode
-          ? providerCode.replace(/_xo_es$/, '').replace(/_/g, ' ')
-          : 'Grupo Vidaro — por conectar',
+        proveedorItemId: `pending_grupo_${Date.now()}`,
+        nombreBanco: providerCode?.replace(/_es$/, '').replace(/_/g, ' ') || 'Grupo Vidaro',
         estado: 'renovacion_requerida',
-        refreshToken: customerSecret,
+        refreshToken: customerId,
         consentId: '',
-        errorDetalle: `Conexión grupo. providerCode: ${providerCode || 'sin_filtro'}`,
+        errorDetalle: `Conexión grupo. providerCode: ${providerCode || 'selector'}`,
       },
     });
 
-    const bankLabel = providerCode
-      ? providerCode.replace(/_xo_es$/, '').replace(/_/g, ' ')
-      : 'banco seleccionable';
+    const bankLabel = providerCode?.replace(/_es$/, '').replace(/_/g, ' ') || 'selector de banco';
 
     return NextResponse.json({
       success: true,
-      connectUrl: connectSession.connectUrl,
-      expiresAt: connectSession.expiresAt,
-      message: `Redirigir al usuario a connectUrl para autorizar ${bankLabel}. Todas las cuentas del Grupo Vidaro en ese banco se conectarán automáticamente.`,
-      grupoIdentifier: GRUPO_IDENTIFIER,
+      connectUrl,
+      message: `Redirigir a connectUrl para autorizar ${bankLabel}. Salt Edge detectará automáticamente las cuentas de todas las sociedades del grupo.`,
+      customerId,
     });
   } catch (error: any) {
     logger.error('[SaltEdge Connect Grupo Error]:', error);
