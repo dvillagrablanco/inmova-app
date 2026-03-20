@@ -285,20 +285,28 @@ export async function startAuth(params: {
  * Completa el flujo OAuth2. Se llama desde el callback del banco.
  * Devuelve el auth_token que se usa para acceder a las cuentas.
  */
+/**
+ * Intercambia el authorization code por una sesión de Enable Banking.
+ * Enable Banking usa POST /sessions (no /sessions/token).
+ * El session uid resultante se usa como session_id en las llamadas posteriores.
+ */
 export async function completeAuth(params: { code: string; state?: string }): Promise<{
   authToken: string;
+  sessionId: string;
   accounts: string[];
   bank?: string;
 }> {
-  const data = await ebRequest<any>('POST', '/sessions/token', {
+  const data = await ebRequest<any>('POST', '/sessions', {
     code: params.code,
-    ...(params.state ? { state: params.state } : {}),
   });
 
-  logger.info(`[EnableBanking] Auth completada — token obtenido`);
+  // El uid de la sesión es el identificador que se usa para obtener cuentas
+  const sessionId = String(data.uid || data.session_id || data.id || '');
+  logger.info(`[EnableBanking] Sesión creada: uid=${sessionId} bank=${data.aspsp?.name}`);
 
   return {
-    authToken: data.token || data.access_token || data.auth_token,
+    authToken: sessionId,
+    sessionId,
     accounts: data.accounts || [],
     bank: data.aspsp?.name,
   };
@@ -308,18 +316,24 @@ export async function completeAuth(params: { code: string; state?: string }): Pr
 // CUENTAS Y SALDOS
 // ═══════════════════════════════════════════════════════════════
 
-export async function getAccounts(authToken: string): Promise<EBAccount[]> {
-  try {
-    const data = await ebRequest<any>('GET', '/accounts', undefined, {
-      auth_token: authToken,
-    });
-    const accounts = Array.isArray(data) ? data : data.accounts || [];
-    logger.info(`[EnableBanking] ${accounts.length} cuentas obtenidas`);
-    return accounts;
-  } catch (err: any) {
-    logger.error('[EnableBanking] Error obteniendo cuentas:', err.message);
-    return [];
+export async function getAccounts(sessionIdOrToken: string): Promise<EBAccount[]> {
+  // Intentar con session_id primero (parámetro correcto para Enable Banking)
+  for (const param of ['session_id', 'auth_token']) {
+    try {
+      const data = await ebRequest<any>('GET', '/accounts', undefined, {
+        [param]: sessionIdOrToken,
+      });
+      const accounts = Array.isArray(data) ? data : data.accounts || [];
+      if (accounts.length > 0) {
+        logger.info(`[EnableBanking] ${accounts.length} cuentas obtenidas (${param})`);
+        return accounts;
+      }
+    } catch (err: any) {
+      if (err.message?.includes('404') || err.message?.includes('400')) continue;
+      logger.error(`[EnableBanking] Error obteniendo cuentas (${param}):`, err.message);
+    }
   }
+  return [];
 }
 
 export async function getAccountBalances(
