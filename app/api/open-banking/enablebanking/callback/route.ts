@@ -266,6 +266,20 @@ export async function GET(request: NextRequest) {
       })
       .catch((e: any) => logger.warn(`[EB Callback] Cleanup error (no crítico): ${e.message}`));
 
+    // ── PASO 5: Sync inmediato de transacciones ──────────────────────
+    // Aprovechamos que la sesión acaba de crearse y está activa
+    let txSynced = 0;
+    try {
+      const { syncEnableBankingTransactions } = await import('@/lib/enablebanking-service');
+      for (const [cId] of companyToAccounts.entries()) {
+        const syncResult = await syncEnableBankingTransactions(cId);
+        txSynced += syncResult.newTransactions;
+      }
+      logger.info(`[EB Callback] Sync automático: ${txSynced} nuevas transacciones`);
+    } catch (syncErr: any) {
+      logger.warn(`[EB Callback] Sync automático error (no crítico): ${syncErr.message}`);
+    }
+
     const totalAccounts = accountUids.length;
     const totalSociedades = companyToAccounts.size;
 
@@ -274,7 +288,7 @@ export async function GET(request: NextRequest) {
     );
 
     return NextResponse.redirect(
-      `${redirectBase}?provider=enablebanking&success=bank_connected&bank=${encodeURIComponent(bankName)}&accounts=${totalAccounts}&sociedades=${totalSociedades}`
+      `${redirectBase}?provider=enablebanking&success=bank_connected&bank=${encodeURIComponent(bankName)}&accounts=${totalAccounts}&sociedades=${totalSociedades}&tx=${txSynced}`
     );
   } catch (error: any) {
     logger.error('[EB Callback Error]:', error);
