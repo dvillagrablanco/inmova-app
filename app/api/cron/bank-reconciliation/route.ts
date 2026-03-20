@@ -41,7 +41,38 @@ export async function POST(request: NextRequest) {
     const now = new Date();
     logger.info('[Cron] Iniciando reconciliación bancaria Grupo Vidaro');
 
-    // ── FASE 1: Sync + Reconciliación por sociedad ──────────────────────────
+    // ── FASE 1: Enable Banking → BankTransaction (prioridad 1) ─────────────
+    let ebNewTx = 0;
+    try {
+      const { isEnableBankingConfigured, syncEnableBankingTransactions } =
+        await import('@/lib/enablebanking-service');
+
+      if (isEnableBankingConfigured()) {
+        const { getPrismaClient: getPrisma2 } = await import('@/lib/db');
+        const p2 = getPrisma2();
+        const ebCompanies = await p2.company.findMany({
+          where: {
+            OR: [
+              { nombre: { contains: 'Rovida', mode: 'insensitive' } },
+              { nombre: { contains: 'Viroda', mode: 'insensitive' } },
+              { nombre: { contains: 'Vidaro', mode: 'insensitive' } },
+            ],
+            activo: true,
+          },
+          select: { id: true },
+        });
+
+        for (const c of ebCompanies) {
+          const r = await syncEnableBankingTransactions(c.id);
+          ebNewTx += r.newTransactions;
+        }
+        logger.info(`[Cron] Enable Banking: +${ebNewTx} nuevas transacciones`);
+      }
+    } catch (e: any) {
+      logger.warn('[Cron] Enable Banking sync error:', e.message);
+    }
+
+    // ── FASE 2: Salt Edge / Nordigen + SEPA + reconciliación 3 capas ────────
     let syncResult = {
       companies: [] as any[],
       totalNewTransactions: 0,
@@ -52,10 +83,37 @@ export async function POST(request: NextRequest) {
       const { fullSyncAllGrupoVidaro } = await import('@/lib/banking-unified-service');
       syncResult = await fullSyncAllGrupoVidaro();
       logger.info(
-        `[Cron] Salt Edge sync: +${syncResult.totalNewTransactions} tx, ${syncResult.totalReconciled} conciliadas`
+        `[Cron] GC/Salt Edge sync: +${syncResult.totalNewTransactions} tx, ${syncResult.totalReconciled} conciliadas`
       );
     } catch (e: any) {
       logger.warn('[Cron] Error en fullSyncAllGrupoVidaro:', e.message);
+    }
+
+    // ── FASE 3: Reconciliación bancaria ↔ contabilidad Zucchetti ────────────
+    let accountingRecon: any = { status: 'skip' };
+    try {
+      const { reconcileAllGrupoVidaro } = await import('@/lib/banking-accounting-reconciliation');
+      const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      const reconResults = await reconcileAllGrupoVidaro(thirtyDaysAgo, now);
+      const totalMatched = reconResults.reduce((s, r) => s + r.summary.matched, 0);
+      const totalDiscrepancy = reconResults.reduce((s, r) => s + r.summary.discrepancy, 0);
+      accountingRecon = {
+        status: 'ok',
+        matched: totalMatched,
+        discrepancy: Math.round(totalDiscrepancy * 100) / 100,
+        companies: reconResults.map((r) => ({
+          name: r.companyName,
+          matched: r.summary.matched,
+          rate: r.summary.matchRate,
+          discrepancy: Math.round(r.summary.discrepancy * 100) / 100,
+        })),
+      };
+      logger.info(
+        `[Cron] Reconciliación contable: ${totalMatched} matches, discrepancia: ${totalDiscrepancy.toFixed(2)}€`
+      );
+    } catch (e: any) {
+      accountingRecon = { status: 'error', message: e.message };
+      logger.warn('[Cron] Reconciliación contable error:', e.message);
     }
 
     // ── FASE 2: Detección de impagos (análisis de contratos) ────────────────
@@ -119,10 +177,11 @@ export async function POST(request: NextRequest) {
       date: now.toISOString(),
       duration: `${duration}s`,
       openBanking: {
-        provider: 'saltedge',
+        enableBankingNewTx: ebNewTx,
         sociedadesSync: syncResult.companies.length,
-        newTransactions: syncResult.totalNewTransactions,
+        newTransactions: syncResult.totalNewTransactions + ebNewTx,
         reconciledTransactions: syncResult.totalReconciled,
+        accountingReconciliation: accountingRecon,
         byCompany: syncResult.companies.map((c: any) => ({
           company: c.companyName,
           newTx: c.sync?.newBankTransactions || 0,
