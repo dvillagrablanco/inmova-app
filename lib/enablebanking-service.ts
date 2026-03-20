@@ -473,8 +473,18 @@ export async function syncEnableBankingTransactions(companyId: string): Promise<
         continue;
       }
 
-      // Obtener UIDs de cuentas desde la sesión (método correcto)
-      const accountUids = await getAccountUidsFromSession(sessionId);
+      // Obtener UIDs: primero del campo refreshToken (guardados en callback), luego de la sesión
+      let accountUids: string[] = [];
+      if (conn.refreshToken) {
+        try {
+          accountUids = JSON.parse(conn.refreshToken as string);
+        } catch {
+          // refreshToken no es JSON — intentar desde la API
+        }
+      }
+      if (accountUids.length === 0) {
+        accountUids = await getAccountUidsFromSession(sessionId);
+      }
       if (accountUids.length === 0) {
         logger.warn(`[EnableBanking] Sin cuentas para sesión ${sessionId.substring(0, 20)}`);
         continue;
