@@ -53,8 +53,7 @@ export function isEnableBankingConfigured(): boolean {
  * - Payload: { iss: "enablebanking.com", aud: "api.enablebanking.com", iat, exp }
  *
  * La clave privada es el archivo .pem generado por Enable Banking durante
- * el registro de la aplicación. Se descarga como:
- *   66042e75-0fb2-4105-894a-1c55e518efa0.pem
+ * el registro de la aplicación.
  */
 function generateJWT(): string {
   const privateKey = getPrivateKey();
@@ -67,17 +66,31 @@ function generateJWT(): string {
       iss: 'enablebanking.com',
       aud: 'api.enablebanking.com',
       iat: now,
-      exp: now + 3600, // 1 hora
+      exp: now + 3600,
     },
     privateKey,
     {
       algorithm: 'RS256',
       header: {
         alg: 'RS256',
-        kid: APP_ID, // El App ID va en el header como kid
+        kid: APP_ID,
       } as any,
     }
   );
+}
+
+/**
+ * Calcula la fecha de expiración del consentimiento.
+ * Enable Banking soporta un máximo de ~180 días (15552000 segundos).
+ * Usamos 90 días como valor seguro.
+ */
+function getConsentValidUntil(days = 90): string {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return d
+    .toISOString()
+    .replace('.000Z', 'Z')
+    .replace(/\.\d+Z$/, 'Z');
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -241,8 +254,8 @@ export async function startAuth(params: {
 }): Promise<EBAuthSession> {
   const body = {
     access: {
-      valid_until:
-        params.validUntil || new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
+      // Máximo 180 días. Usamos 90 días para estar dentro del límite.
+      valid_until: params.validUntil || getConsentValidUntil(90),
     },
     aspsp: {
       name: params.bankName,
