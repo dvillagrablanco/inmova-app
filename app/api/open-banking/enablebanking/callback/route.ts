@@ -246,7 +246,7 @@ export async function GET(request: NextRequest) {
           await prisma.bankConnection.create({
             data: {
               companyId: cId,
-              userId: userId || '',
+              userId: userId || null,
               proveedor: 'enablebanking',
               provider: 'enablebanking',
               proveedorItemId: uniqueItemId,
