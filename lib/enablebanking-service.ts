@@ -48,7 +48,13 @@ export function isEnableBankingConfigured(): boolean {
  * Genera un JWT RS256 firmado con la clave privada para autenticar
  * peticiones a la API de Enable Banking.
  *
- * El JWT tiene validez de 5 minutos y debe regenerarse para cada sesión.
+ * Formato según la documentación oficial de Enable Banking:
+ * - Header: { alg: "RS256", kid: APP_ID }
+ * - Payload: { iss: "enablebanking.com", aud: "api.enablebanking.com", iat, exp }
+ *
+ * La clave privada es el archivo .pem generado por Enable Banking durante
+ * el registro de la aplicación. Se descarga como:
+ *   66042e75-0fb2-4105-894a-1c55e518efa0.pem
  */
 function generateJWT(): string {
   const privateKey = getPrivateKey();
@@ -58,12 +64,19 @@ function generateJWT(): string {
 
   return jwt.sign(
     {
-      iss: APP_ID,
+      iss: 'enablebanking.com',
+      aud: 'api.enablebanking.com',
       iat: now,
-      exp: now + 300, // 5 minutos
+      exp: now + 3600, // 1 hora
     },
     privateKey,
-    { algorithm: 'RS256' }
+    {
+      algorithm: 'RS256',
+      header: {
+        alg: 'RS256',
+        kid: APP_ID, // El App ID va en el header como kid
+      } as any,
+    }
   );
 }
 
