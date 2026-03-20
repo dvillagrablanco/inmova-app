@@ -85,6 +85,28 @@ export const GRUPO_VIDARO_IBAN_MAP: Record<
     banco: 'Bankinter',
     alias: 'Bankinter Rovida',
   },
+  // Descubiertas via Enable Banking 2026-03-20
+  ES2001280250590100097891: {
+    sociedadKey: 'ROVIDA',
+    nombre: 'ROVIDA S.L.',
+    searchName: 'Rovida',
+    banco: 'Bankinter',
+    alias: 'Bankinter Rovida 2',
+  },
+  ES2401280250550100070661: {
+    sociedadKey: 'VIDARO',
+    nombre: 'VIDARO INVERSIONES S.L.',
+    searchName: 'Vidaro',
+    banco: 'Bankinter',
+    alias: 'Bankinter Vidaro 2',
+  },
+  ES4701280250500500008185: {
+    sociedadKey: 'VIDARO',
+    nombre: 'VIDARO INVERSIONES S.L.',
+    searchName: 'Vidaro',
+    banco: 'Bankinter',
+    alias: 'Bankinter Vidaro 3',
+  },
   ES2301820496680201728339: {
     sociedadKey: 'ROVIDA',
     nombre: 'ROVIDA S.L.',

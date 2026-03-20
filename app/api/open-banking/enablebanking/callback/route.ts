@@ -7,41 +7,51 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 /**
+ * CRÍTICO: Usar URL pública para redirects.
+ * Next.js detrás de Nginx usa request.url = http://localhost:3000 (URL interna).
+ * Si se usa request.url como base, el usuario es redirigido a localhost:3000
+ * en su propio navegador (su máquina local), no al servidor.
+ */
+function getRedirectBase(): string {
+  const appUrl = (
+    process.env.NEXTAUTH_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    'https://inmovaapp.com'
+  ).replace(/\/$/, '');
+  return `${appUrl}/finanzas/bancaria-grupo`;
+}
+
+/**
  * GET /api/open-banking/enablebanking/callback
  *
  * Enable Banking redirige aquí tras la autorización PSD2.
  *
  * Parámetros recibidos:
- *   code  — authorization code UUID (e.g. "309a7ec9-4d33-4d44-84e7-794a5913c80f")
- *   state — estado original (string simple como "bankinter_vidaro")
- *   error — si el usuario cancela o hay error en el banco
+ *   code  — authorization code UUID
+ *   state — estado original ("bankinter_vidaro", "bbva_vidaro", etc.)
+ *   error — si el usuario cancela o hay error
  *
- * Flujo CORRECTO (confirmado por análisis de la API):
- *   1. POST /sessions {code} → session object con:
- *        uid         — session_id para futuras llamadas
- *        accounts    — array de UIDs de cuentas autorizadas
- *        aspsp.name  — nombre del banco
- *   2. Guardar session uid + account UIDs en BankConnection
- *   3. Para saldos/transacciones: GET /accounts/{uid}/balances?session_id={uid}
- *   4. NO llamar GET /accounts — ese endpoint devuelve 404 sin contexto
- *
- * IMPORTANTE: Los IBANs NO están disponibles directamente en la respuesta.
- * Los accounts_data contienen identification_hash (opaco). Se asigna al
- * Grupo Vidaro (Vidaro holding) y el sync posterior distingue por transacciones.
+ * Flujo VERIFICADO con la API real:
+ *   1. POST /sessions {code} → session con:
+ *        uid           — session_id para futuras llamadas
+ *        accounts      — array de UIDs de cuentas autorizadas
+ *        accounts_data — array con datos completos incluyendo account_id.iban
+ *        aspsp.name    — nombre del banco
+ *   2. Leer IBANs de sessionData.accounts_data[].account_id.iban
+ *   3. Mapear cada IBAN a su sociedad del Grupo Vidaro
+ *   4. Crear una BankConnection por sociedad detectada
+ *   5. Guardar session_id como accessToken y accounts_data como refreshToken
  */
 export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams;
-  const redirectBase = '/finanzas/bancaria-grupo';
+  const redirectBase = getRedirectBase();
 
-  // ── Errores del banco ───────────────────────────────────────────
+  // ── Errores del banco ─────────────────────────────────────────────
   const errorParam = params.get('error') || params.get('error_description');
   if (errorParam) {
     logger.warn(`[EB Callback] Error del banco: ${errorParam}`);
     return NextResponse.redirect(
-      new URL(
-        `${redirectBase}?provider=enablebanking&error=${encodeURIComponent(errorParam)}`,
-        request.url
-      )
+      `${redirectBase}?provider=enablebanking&error=${encodeURIComponent(errorParam)}`
     );
   }
 
@@ -50,15 +60,13 @@ export async function GET(request: NextRequest) {
 
   if (!code) {
     logger.warn('[EB Callback] Sin code en la URL');
-    return NextResponse.redirect(
-      new URL(`${redirectBase}?provider=enablebanking&error=missing_code`, request.url)
-    );
+    return NextResponse.redirect(`${redirectBase}?provider=enablebanking&error=missing_code`);
   }
 
   logger.info(`[EB Callback] code=${code.substring(0, 8)}... state=${stateParam}`);
 
   try {
-    // ── Generar JWT para autenticar con Enable Banking ──────────────
+    // ── Generar JWT para Enable Banking API ───────────────────────────
     const jwtLib = await import('jsonwebtoken');
     const privateKey = (process.env.ENABLE_BANKING_PRIVATE_KEY || '').replace(/\\n/g, '\n');
     const appId = process.env.ENABLE_BANKING_APP_ID || '';
@@ -70,8 +78,8 @@ export async function GET(request: NextRequest) {
       { algorithm: 'RS256', header: { alg: 'RS256', kid: appId } } as any
     );
 
-    // ── PASO 1: Intercambiar code por sesión ────────────────────────
-    // POST /sessions devuelve: { uid, accounts: [uid1, uid2...], aspsp: {name}, ... }
+    // ── PASO 1: Intercambiar code por sesión ──────────────────────────
+    // POST /sessions devuelve: uid, accounts (UIDs), accounts_data (con IBANs), aspsp
     const sessionRes = await fetch('https://api.enablebanking.com/sessions', {
       method: 'POST',
       headers: {
@@ -85,122 +93,111 @@ export async function GET(request: NextRequest) {
     if (!sessionRes.ok) {
       const errData = await sessionRes.json().catch(() => ({}));
       const errMsg = (errData as any).message || `HTTP ${sessionRes.status}`;
-      logger.error(`[EB Callback] POST /sessions falló: ${sessionRes.status} — ${errMsg}`);
+      logger.error(`[EB Callback] POST /sessions falló: ${errMsg}`);
       return NextResponse.redirect(
-        new URL(
-          `${redirectBase}?provider=enablebanking&error=${encodeURIComponent(errMsg)}`,
-          request.url
-        )
+        `${redirectBase}?provider=enablebanking&error=${encodeURIComponent(errMsg)}`
       );
     }
 
     const sessionData = await sessionRes.json();
-    logger.info(`[EB Callback] Sesión creada: ${JSON.stringify(sessionData).substring(0, 300)}`);
+    logger.info(
+      `[EB Callback] Sesión: uid=${sessionData.uid} bank=${sessionData.aspsp?.name} accounts=${sessionData.accounts?.length}`
+    );
 
-    // Extraer datos de la sesión
-    const sessionId: string = sessionData.uid || sessionData.session_id || sessionData.id || '';
-    // Los account UIDs vienen directamente en la respuesta del POST
+    const sessionId: string = sessionData.uid || '';
     const accountUids: string[] = Array.isArray(sessionData.accounts) ? sessionData.accounts : [];
+    // accounts_data contiene IBANs completos — los guardamos para sync
+    const accountsData: any[] = Array.isArray(sessionData.accounts_data)
+      ? sessionData.accounts_data
+      : [];
     const bankName: string = sessionData.aspsp?.name || 'Enable Banking';
 
     if (!sessionId) {
-      logger.error(`[EB Callback] Sin uid en respuesta. Keys: ${Object.keys(sessionData)}`);
-      return NextResponse.redirect(
-        new URL(`${redirectBase}?provider=enablebanking&error=no_session_uid`, request.url)
+      logger.error(
+        `[EB Callback] Sin uid en respuesta. Keys: ${Object.keys(sessionData).join(', ')}`
       );
+      return NextResponse.redirect(`${redirectBase}?provider=enablebanking&error=no_session_uid`);
     }
 
-    logger.info(
-      `[EB Callback] SessionId=${sessionId} | ${bankName} | ${accountUids.length} cuentas`
-    );
-
-    // ── PASO 2: Intentar obtener IBANs para mapear a sociedades ──────
-    // Enable Banking restringe acceso a IBANs, pero intentamos con balances
+    // ── PASO 2: Mapear IBANs a sociedades del Grupo Vidaro ────────────
+    // accounts_data[].account_id.iban contiene los IBANs reales
     const prisma = getPrismaClient();
-    const ibanToCompany: Map<string, { companyId: string; companyName: string; ibans: string[] }> =
-      new Map();
+    const companyToAccounts: Map<
+      string,
+      {
+        companyId: string;
+        companyName: string;
+        ibans: string[];
+        uids: string[];
+      }
+    > = new Map();
 
-    for (const accountUid of accountUids) {
-      try {
-        // Intentar obtener detalle de la cuenta con session_id
-        const detailRes = await fetch(
-          `https://api.enablebanking.com/accounts/${accountUid}?session_id=${encodeURIComponent(sessionId)}`,
-          { headers: { Accept: 'application/json', Authorization: `Bearer ${apiToken}` } }
-        );
+    for (const accData of accountsData) {
+      const iban = (accData.account_id?.iban || '').replace(/\s/g, '').toUpperCase();
+      const uid = accData.uid || '';
 
-        if (detailRes.ok) {
-          const accDetail = await detailRes.json();
-          const iban = (accDetail.account_id?.iban || accDetail.identification?.iban || '').replace(
-            /\s/g,
-            ''
-          );
+      if (!iban) continue;
 
-          if (iban) {
-            const match = await findSociedadByIban(iban);
-            if (match) {
-              const existing = ibanToCompany.get(match.companyId);
-              if (existing) {
-                existing.ibans.push(iban);
-              } else {
-                ibanToCompany.set(match.companyId, {
-                  companyId: match.companyId,
-                  companyName: match.companyName,
-                  ibans: [iban],
-                });
-              }
-              logger.info(`[EB Callback] IBAN ${iban} → ${match.companyName}`);
-            }
-          }
+      const match = await findSociedadByIban(iban);
+      if (match) {
+        const existing = companyToAccounts.get(match.companyId);
+        if (existing) {
+          existing.ibans.push(iban);
+          existing.uids.push(uid);
+        } else {
+          companyToAccounts.set(match.companyId, {
+            companyId: match.companyId,
+            companyName: match.companyName,
+            ibans: [iban],
+            uids: [uid],
+          });
         }
-      } catch {
-        // IBAN no disponible — usar fallback al Grupo Vidaro
+        logger.info(
+          `[EB Callback] IBAN ${iban} → ${match.companyName} (uid=${uid.substring(0, 8)})`
+        );
+      } else {
+        logger.info(`[EB Callback] IBAN ${iban} no reconocido en Grupo Vidaro`);
       }
     }
 
-    // ── PASO 3: Fallback — asignar al Grupo Vidaro ──────────────────
-    // Si no podemos obtener IBANs, asignamos al holding Vidaro.
-    // Durante el sync posterior se pueden mapear por transacciones.
-    if (ibanToCompany.size === 0) {
-      // Buscar Vidaro como holding
-      let fallbackCompany = await prisma.company.findFirst({
-        where: { nombre: { contains: 'Vidaro', mode: 'insensitive' }, activo: true },
+    // ── Fallback: si no hay IBANs mapeados, usar Vidaro ───────────────
+    if (companyToAccounts.size === 0) {
+      const vidaro = await prisma.company.findFirst({
+        where: {
+          OR: [
+            { nombre: { contains: 'Vidaro', mode: 'insensitive' } },
+            { nombre: { contains: 'Rovida', mode: 'insensitive' } },
+          ],
+          activo: true,
+        },
         select: { id: true, nombre: true },
       });
-
-      // Si no hay Vidaro, buscar cualquier empresa del grupo
-      if (!fallbackCompany) {
-        fallbackCompany = await prisma.company.findFirst({
-          where: {
-            OR: [
-              { nombre: { contains: 'Rovida', mode: 'insensitive' } },
-              { nombre: { contains: 'Viroda', mode: 'insensitive' } },
-            ],
-            activo: true,
-          },
-          select: { id: true, nombre: true },
-        });
-      }
-
-      if (fallbackCompany) {
-        ibanToCompany.set(fallbackCompany.id, {
-          companyId: fallbackCompany.id,
-          companyName: fallbackCompany.nombre,
+      if (vidaro) {
+        companyToAccounts.set(vidaro.id, {
+          companyId: vidaro.id,
+          companyName: vidaro.nombre,
           ibans: [],
+          uids: accountUids,
         });
-        logger.info(`[EB Callback] Fallback a ${fallbackCompany.nombre} (sin IBANs detectados)`);
+        logger.warn(`[EB Callback] Fallback a ${vidaro.nombre}`);
       }
     }
 
-    // ── PASO 4: Crear/actualizar BankConnection ─────────────────────
+    // ── PASO 3: Crear/actualizar BankConnection por sociedad ──────────
     let connectionsCreated = 0;
 
-    for (const [cId, data] of ibanToCompany.entries()) {
-      // Nombre descriptivo: banco + número de cuentas
-      const nombreBanco = `${bankName} (${accountUids.length} cuentas)`;
-      // ID único por sociedad + sesión
+    for (const [cId, data] of companyToAccounts.entries()) {
+      const nombreBanco = `${bankName} (${data.uids.length || accountUids.length} cuentas)`;
       const uniqueItemId = `eb_${sessionId.substring(0, 20)}_${cId}`;
 
-      // Verificar si ya existe conexión con esta sesión
+      // Serializar accounts_data para el sync (incluye IBANs y UIDs)
+      const accountsDataForCompany = accountsData.filter(
+        (acc) => data.uids.includes(acc.uid || '') || data.uids.length === 0
+      );
+      const refreshTokenValue = JSON.stringify(
+        accountsDataForCompany.length > 0 ? accountsDataForCompany : accountsData
+      );
+
       const existingConn = await prisma.bankConnection.findFirst({
         where: { companyId: cId, proveedor: 'enablebanking', accessToken: sessionId },
         select: { id: true },
@@ -213,15 +210,10 @@ export async function GET(request: NextRequest) {
             estado: 'conectado',
             nombreBanco,
             ultimaSync: new Date(),
-            // Guardar UIDs de cuentas en refreshToken para el sync posterior
-            refreshToken: JSON.stringify(accountUids),
+            refreshToken: refreshTokenValue,
           },
         });
-        logger.info(
-          `[EB Callback] Actualizada conexión ${existingConn.id} para ${data.companyName}`
-        );
       } else {
-        // Buscar si existe por proveedorItemId
         const existsByItemId = await prisma.bankConnection
           .findFirst({ where: { proveedorItemId: uniqueItemId }, select: { id: true } })
           .catch(() => null);
@@ -232,7 +224,7 @@ export async function GET(request: NextRequest) {
             data: {
               estado: 'conectado',
               accessToken: sessionId,
-              refreshToken: JSON.stringify(accountUids),
+              refreshToken: refreshTokenValue,
               nombreBanco,
               ultimaSync: new Date(),
             },
@@ -245,10 +237,8 @@ export async function GET(request: NextRequest) {
               proveedor: 'enablebanking',
               provider: 'enablebanking',
               proveedorItemId: uniqueItemId,
-              // session_id para autenticar futuras llamadas
               accessToken: sessionId,
-              // UIDs de cuentas serializados para el sync
-              refreshToken: JSON.stringify(accountUids),
+              refreshToken: refreshTokenValue,
               nombreBanco,
               estado: 'conectado',
               ultimaSync: new Date(),
@@ -259,46 +249,37 @@ export async function GET(request: NextRequest) {
       }
 
       logger.info(
-        `[EB Callback] ${data.companyName}: ${accountUids.length} cuentas, session=${sessionId.substring(0, 20)}`
+        `[EB Callback] ${data.companyName}: IBANs=[${data.ibans.join(', ')}] session=${sessionId.substring(0, 20)}`
       );
     }
 
-    // ── PASO 5: Limpiar pendientes ──────────────────────────────────
+    // ── PASO 4: Limpiar pendientes ────────────────────────────────────
+    // Usar 'desconectado' (enum válido) para marcar los intentos anteriores
     await prisma.bankConnection
       .updateMany({
         where: {
           proveedor: 'enablebanking',
-          estado: { in: ['renovacion_requerida', 'completado_grupo', 'completado'] },
-          accessToken: { not: sessionId }, // no borrar la que acabamos de crear
+          estado: 'renovacion_requerida',
+          NOT: { accessToken: sessionId },
         },
-        data: { estado: 'completado' },
+        data: { estado: 'desconectado' },
       })
-      .catch(() => null);
+      .catch((e: any) => logger.warn(`[EB Callback] Cleanup error (no crítico): ${e.message}`));
 
     const totalAccounts = accountUids.length;
-    const totalSociedades = ibanToCompany.size;
+    const totalSociedades = companyToAccounts.size;
 
     logger.info(
-      `[EB Callback] ÉXITO: ${bankName} — ${totalAccounts} cuentas en ${totalSociedades} sociedades, ` +
-        `session=${sessionId.substring(0, 20)}`
+      `[EB Callback] ÉXITO: ${bankName} — ${totalAccounts} cuentas, ${totalSociedades} sociedades, session=${sessionId.substring(0, 20)}`
     );
 
     return NextResponse.redirect(
-      new URL(
-        `${redirectBase}?provider=enablebanking&success=bank_connected` +
-          `&bank=${encodeURIComponent(bankName)}` +
-          `&accounts=${totalAccounts}` +
-          `&sociedades=${totalSociedades}`,
-        request.url
-      )
+      `${redirectBase}?provider=enablebanking&success=bank_connected&bank=${encodeURIComponent(bankName)}&accounts=${totalAccounts}&sociedades=${totalSociedades}`
     );
   } catch (error: any) {
     logger.error('[EB Callback Error]:', error);
     return NextResponse.redirect(
-      new URL(
-        `${redirectBase}?provider=enablebanking&error=${encodeURIComponent(error.message || 'unknown')}`,
-        request.url
-      )
+      `${redirectBase}?provider=enablebanking&error=${encodeURIComponent(error.message || 'unknown')}`
     );
   }
 }
