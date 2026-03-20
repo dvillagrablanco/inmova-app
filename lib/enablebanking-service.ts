@@ -316,24 +316,54 @@ export async function completeAuth(params: { code: string; state?: string }): Pr
 // CUENTAS Y SALDOS
 // ═══════════════════════════════════════════════════════════════
 
-export async function getAccounts(sessionIdOrToken: string): Promise<EBAccount[]> {
-  // Intentar con session_id primero (parámetro correcto para Enable Banking)
-  for (const param of ['session_id', 'auth_token']) {
-    try {
-      const data = await ebRequest<any>('GET', '/accounts', undefined, {
-        [param]: sessionIdOrToken,
-      });
-      const accounts = Array.isArray(data) ? data : data.accounts || [];
-      if (accounts.length > 0) {
-        logger.info(`[EnableBanking] ${accounts.length} cuentas obtenidas (${param})`);
-        return accounts;
-      }
-    } catch (err: any) {
-      if (err.message?.includes('404') || err.message?.includes('400')) continue;
-      logger.error(`[EnableBanking] Error obteniendo cuentas (${param}):`, err.message);
+/**
+ * Obtiene las cuentas de una sesión de Enable Banking.
+ * La forma correcta: GET /sessions/{session_id} → campo "accounts" (UIDs)
+ * NO llamar a GET /accounts directamente (devuelve 404 sin contexto de sesión).
+ */
+export async function getAccounts(sessionId: string): Promise<EBAccount[]> {
+  try {
+    // La sesión contiene directamente los UIDs y accounts_data
+    const session = await ebRequest<any>('GET', `/sessions/${sessionId}`);
+    const accountUids: string[] = session.accounts || [];
+    const accountsData: any[] = session.accounts_data || [];
+
+    if (accountUids.length === 0) {
+      logger.warn(`[EnableBanking] Sesión ${sessionId} sin cuentas`);
+      return [];
     }
+
+    logger.info(`[EnableBanking] ${accountUids.length} cuentas en sesión ${sessionId}`);
+
+    // Construir accounts desde accounts_data + UIDs
+    return accountUids.map((uid, i) => {
+      const data = accountsData[i] || {};
+      return {
+        uid,
+        currency: 'EUR',
+        status: 'enabled',
+        name: data.name || uid.substring(0, 8),
+        extra: data,
+      } as EBAccount;
+    });
+  } catch (err: any) {
+    logger.error('[EnableBanking] Error obteniendo cuentas de sesión:', err.message);
+    return [];
   }
-  return [];
+}
+
+/**
+ * Obtiene cuentas usando la sesión desde el endpoint /sessions/{id}.
+ * Devuelve los UIDs directamente para usarlos en balances y transacciones.
+ */
+export async function getAccountUidsFromSession(sessionId: string): Promise<string[]> {
+  try {
+    const session = await ebRequest<any>('GET', `/sessions/${sessionId}`);
+    return session.accounts || [];
+  } catch (err: any) {
+    logger.error('[EnableBanking] Error obteniendo UIDs de sesión:', err.message);
+    return [];
+  }
 }
 
 export async function getAccountBalances(
@@ -342,7 +372,7 @@ export async function getAccountBalances(
 ): Promise<EBBalance[]> {
   try {
     const data = await ebRequest<any>('GET', `/accounts/${accountUid}/balances`, undefined, {
-      auth_token: authToken,
+      session_id: authToken, // Enable Banking usa session_id (mismo valor que auth_token)
     });
     return data.balances || [];
   } catch (err: any) {
@@ -357,12 +387,13 @@ export async function getAccountBalances(
 
 export async function getTransactions(
   accountUid: string,
-  authToken: string,
+  sessionId: string,
   dateFrom?: string,
   dateTo?: string
 ): Promise<{ booked: EBTransaction[]; pending: EBTransaction[] }> {
   try {
-    const params: Record<string, string> = { auth_token: authToken };
+    // Enable Banking requiere session_id como query param para acceder a transacciones
+    const params: Record<string, string> = { session_id: sessionId };
     if (dateFrom) params.date_from = dateFrom;
     if (dateTo) params.date_to = dateTo;
 
@@ -373,8 +404,11 @@ export async function getTransactions(
       params
     );
 
-    const booked = data.transactions?.booked || data.booked || [];
-    const pending = data.transactions?.pending || data.pending || [];
+    // Enable Banking devuelve { transactions: [...] } donde cada tx tiene entry_reference, etc.
+    const allTx = data.transactions || data.booked || data || [];
+    const txArray = Array.isArray(allTx) ? allTx : [];
+    const booked = txArray.filter((t: any) => t.status !== 'pending');
+    const pending = txArray.filter((t: any) => t.status === 'pending');
 
     logger.info(`[EnableBanking] ${booked.length} booked, ${pending.length} pending`);
     return { booked, pending };
@@ -434,12 +468,15 @@ export async function syncEnableBankingTransactions(companyId: string): Promise<
 
   for (const conn of dbConnections) {
     try {
-      const authToken = conn.accessToken!;
+      const sessionId = conn.accessToken!;
+      if (!sessionId || sessionId.startsWith('pending_') || sessionId.startsWith('saltedge_')) {
+        continue;
+      }
 
-      // Obtener cuentas
-      const accounts = await getAccounts(authToken);
-      if (accounts.length === 0) {
-        logger.warn(`[EnableBanking] Sin cuentas para connection ${conn.id}`);
+      // Obtener UIDs de cuentas desde la sesión (método correcto)
+      const accountUids = await getAccountUidsFromSession(sessionId);
+      if (accountUids.length === 0) {
+        logger.warn(`[EnableBanking] Sin cuentas para sesión ${sessionId.substring(0, 20)}`);
         continue;
       }
 
@@ -447,19 +484,34 @@ export async function syncEnableBankingTransactions(companyId: string): Promise<
         ? new Date(conn.ultimaSync.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
         : new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
-      for (const account of accounts) {
+      logger.info(
+        `[EnableBanking] Sync ${conn.nombreBanco}: ${accountUids.length} cuentas, desde ${fromDate}`
+      );
+
+      for (const accountUid of accountUids) {
         try {
-          const { booked, pending } = await getTransactions(account.uid, authToken, fromDate);
+          // Usar session_id como query param (método correcto para Enable Banking)
+          const { booked, pending } = await getTransactions(accountUid, sessionId, fromDate);
           const allTx = [...booked, ...pending];
 
           for (const tx of allTx) {
-            const txId = `eb_${tx.uid}`;
-            const amount = parseFloat(tx.transactionAmount.amount);
+            // Enable Banking usa entry_reference como identificador único
+            const txId = `eb_${tx.uid || (tx as any).entry_reference || Date.now()}`;
+            const rawTx = tx as any;
+            const txAmount = rawTx.transaction_amount || tx.transactionAmount || {};
+            const amount = parseFloat(txAmount.amount || '0');
+            // Descripción: remittance_information.unstructured es un array en Enable Banking
+            const ri = rawTx.remittance_information || {};
+            const unstructured = Array.isArray(ri.unstructured)
+              ? ri.unstructured[0]
+              : ri.unstructured;
             const desc =
+              unstructured ||
               tx.remittanceInformationUnstructured ||
-              tx.remittanceInformationStructured ||
               tx.creditorName ||
+              rawTx.creditor_name ||
               tx.debtorName ||
+              rawTx.debtor_name ||
               'Sin descripción';
 
             try {
@@ -468,13 +520,15 @@ export async function syncEnableBankingTransactions(companyId: string): Promise<
                 select: { id: true },
               });
 
+              const creditor = rawTx.creditor || {};
+              const debtor = rawTx.debtor || {};
               const txData = {
                 descripcion: desc,
                 monto: amount,
-                creditorName: tx.creditorName || null,
-                debtorName: tx.debtorName || null,
-                creditorIban: tx.creditorIban || null,
-                debtorIban: tx.debtorIban || null,
+                creditorName: tx.creditorName || creditor.name || rawTx.creditor_name || null,
+                debtorName: tx.debtorName || debtor.name || rawTx.debtor_name || null,
+                creditorIban: tx.creditorIban || creditor.account?.iban || null,
+                debtorIban: tx.debtorIban || debtor.account?.iban || null,
               };
 
               if (existing) {
