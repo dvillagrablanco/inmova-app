@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
         nombreBanco: providerCode?.replace(/_es$/, '').replace(/_/g, ' ') || 'Grupo Vidaro',
         estado: 'renovacion_requerida',
         refreshToken: customerId,
-        consentId: '',
+        consentId: null,
         errorDetalle: `Conexión grupo. providerCode: ${providerCode || 'selector'}`,
       },
     });

@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
         nombreBanco: providerCode?.replace(/_es$/, '').replace(/_/g, ' ') || 'Por conectar',
         estado: 'renovacion_requerida',
         refreshToken: customerId, // guardamos customer_id aquí
-        consentId: '',
+        consentId: null,
       },
     });
 
