@@ -926,7 +926,29 @@ export async function fullSyncAndReconcile(companyId: string): Promise<{
     logger.warn(`[FullSync] Salt Edge sync error for ${companyId}:`, e);
   }
 
-  // Fallback: Nordigen (si Salt Edge no está configurado o no tiene conexiones para esta empresa)
+  // Fallback 2: Enable Banking
+  if (openBankingUsed === 'none' || syncBankTx === 0) {
+    try {
+      const { isEnableBankingConfigured, syncEnableBankingTransactions } =
+        await import('@/lib/enablebanking-service');
+      if (isEnableBankingConfigured()) {
+        const ebResult = await syncEnableBankingTransactions(companyId);
+        const ebNew = ebResult.newTransactions + ebResult.updatedTransactions;
+        if (ebNew > 0) {
+          syncBankTx += ebNew;
+          newBankTx += ebResult.newTransactions;
+          openBankingUsed = 'enablebanking';
+        }
+        if (ebResult.errors.length > 0) {
+          logger.warn(`[FullSync] Enable Banking sync warnings: ${ebResult.errors.join('; ')}`);
+        }
+      }
+    } catch (e) {
+      logger.warn(`[FullSync] Enable Banking sync error for ${companyId}:`, e);
+    }
+  }
+
+  // Fallback 3: Nordigen (si ambos anteriores fallan)
   if (openBankingUsed === 'none' || syncBankTx === 0) {
     try {
       const nordigenResult = await syncNordigenTransactions(companyId);

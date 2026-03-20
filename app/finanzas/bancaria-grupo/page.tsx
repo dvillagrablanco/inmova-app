@@ -154,18 +154,27 @@ export default function BancariaGrupoPage() {
   }, [fetchStatus]);
 
   const connectBank = async (providerCode?: string) => {
-    setConnecting(providerCode || 'all');
+    setConnecting(bankName || 'all');
     try {
-      const res = await fetch('/api/open-banking/saltedge/connect-grupo', {
+      // Enable Banking (PSD2 OAuth — prioritario)
+      const res = await fetch('/api/open-banking/enablebanking/connect', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ providerCode }),
+        body: JSON.stringify({ bankName: bankName || 'Bankinter', countryCode: 'ES' }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Error');
+      if (!res.ok) {
+        if (data.error?.includes('no configurado') || data.error?.includes('PRIVATE_KEY')) {
+          throw new Error(
+            'Falta la clave privada de Enable Banking. ' +
+              'Ve a https://enablebanking.com/dashboard → Applications → tu app → Keys → descarga la clave privada.'
+          );
+        }
+        throw new Error(data.error || 'Error al conectar');
+      }
       toast.success('Redirigiendo al banco...');
       setTimeout(() => {
-        window.location.href = data.connectUrl;
+        window.location.href = data.authUrl;
       }, 800);
     } catch (err: any) {
       toast.error(err.message);
@@ -330,7 +339,7 @@ export default function BancariaGrupoPage() {
                         isConnected ? 'outline' : bank.priority === 'HIGH' ? 'default' : 'outline'
                       }
                       size="sm"
-                      onClick={() => connectBank(bank.code)}
+                      onClick={() => connectBank(bank.name)}
                       disabled={connecting !== null}
                       className={`justify-start text-xs ${isConnected ? 'opacity-70' : ''}`}
                     >
@@ -353,7 +362,7 @@ export default function BancariaGrupoPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => connectBank(undefined)}
+                  onClick={() => connectBank('Bankinter')}
                   disabled={connecting !== null}
                   className="text-xs justify-start"
                 >

@@ -27,6 +27,7 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV,
       integrations: {
+        enablebanking: await checkEnableBanking(),
         nordigen: await checkNordigen(),
         saltedge: await checkSaltEdge(),
         gocardless: await checkGoCardless(),
@@ -37,17 +38,27 @@ export async function GET(request: NextRequest) {
     };
 
     // Generar recomendaciones
+    const ebOk =
+      (status.integrations as any).enablebanking?.configured &&
+      (status.integrations as any).enablebanking?.connected;
     const nordigenOk =
       status.integrations.nordigen.configured && status.integrations.nordigen.connected;
     const saltEdgeOk =
       status.integrations.saltedge.configured && status.integrations.saltedge.connected;
 
-    if (!nordigenOk && !saltEdgeOk) {
+    if (!ebOk && !nordigenOk && !saltEdgeOk) {
       status.recommendations.push(
-        'NOTA: GoCardless Bank Account Data (Nordigen) ha desactivado nuevos registros. ' +
-          'Alternativa recomendada: Salt Edge Partner Program (sin licencia TPP). ' +
-          'Registro en: https://www.saltedge.com/partner_program — ' +
-          'O usa la importación manual de extractos CAMT.053/Norma43 desde Bankinter.'
+        'ACCIÓN REQUERIDA: Añadir ENABLE_BANKING_PRIVATE_KEY al .env.production. ' +
+          'Descargar desde Enable Banking Dashboard → Applications → ' +
+          '66042e75-0fb2-4105-894a-1c55e518efa0 → Keys. ' +
+          'ENABLE_BANKING_APP_ID ya está configurado.'
+      );
+    } else if (ebOk) {
+      // Enable Banking está OK — no hace falta recomendación
+    } else if (!nordigenOk && !saltEdgeOk) {
+      status.recommendations.push(
+        'Open Banking: usar importación manual CAMT.053 desde Bankinter (disponible en Finanzas → Conciliación → Importar) ' +
+          'mientras se configura Enable Banking.'
       );
     }
     if (!status.integrations.gocardless.configured) {
@@ -75,6 +86,50 @@ export async function GET(request: NextRequest) {
   } catch (error: any) {
     logger.error('[Banking Setup Status Error]:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// ENABLE BANKING CHECK
+// ─────────────────────────────────────────────────────────────
+
+async function checkEnableBanking() {
+  const appId = process.env.ENABLE_BANKING_APP_ID;
+  const privateKey = process.env.ENABLE_BANKING_PRIVATE_KEY;
+
+  if (!appId) {
+    return {
+      configured: false,
+      connected: false,
+      note: 'ENABLE_BANKING_APP_ID no configurado. App ID disponible: 66042e75-0fb2-4105-894a-1c55e518efa0',
+    };
+  }
+
+  if (!privateKey) {
+    return {
+      configured: false,
+      connected: false,
+      appIdPresent: true,
+      note: 'ENABLE_BANKING_PRIVATE_KEY falta. Descarga la clave privada desde Enable Banking Dashboard → Applications → tu app → Keys',
+      dashboardUrl: 'https://enablebanking.com/dashboard',
+    };
+  }
+
+  try {
+    const { testConnection, getBankinterInfo } = await import('@/lib/enablebanking-service');
+    const test = await testConnection();
+    if (!test.ok) {
+      return { configured: true, connected: false, error: test.message };
+    }
+    const bankinter = await getBankinterInfo();
+    return {
+      configured: true,
+      connected: true,
+      message: test.message,
+      bankinterAvailable: !!bankinter,
+    };
+  } catch (err: any) {
+    return { configured: true, connected: false, error: err.message };
   }
 }
 
