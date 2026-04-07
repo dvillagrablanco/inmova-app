@@ -269,26 +269,71 @@ export async function POST(request: NextRequest) {
  */
 async function generateContractPDF(contract: any): Promise<Buffer | null> {
   try {
-    // Implementación placeholder
-    // En producción, aquí generarías el PDF real del contrato
+    const lines: string[] = [];
+    lines.push('%PDF-1.4');
 
-    // Opción 1: Usar template HTML y Puppeteer
-    // const html = renderContractTemplate(contract);
-    // const pdfBuffer = await htmlToPdf(html);
+    const tenant = contract.tenant || {};
+    const unit = contract.unit || {};
+    const building = unit.building || {};
 
-    // Opción 2: Usar PDFKit
-    // const pdfBuffer = await createPdfWithPdfKit(contract);
+    const content = [
+      'CONTRATO DE ARRENDAMIENTO DE VIVIENDA',
+      '',
+      `Referencia: ${contract.referencia || contract.id}`,
+      `Fecha: ${new Date(contract.fechaInicio).toLocaleDateString('es-ES')}`,
+      '',
+      'REUNIDOS',
+      '',
+      `ARRENDADOR: ${building.nombre || 'N/A'}`,
+      `ARRENDATARIO: ${tenant.nombre || ''} ${tenant.apellidos || ''}`.trim(),
+      `DNI/NIE: ${tenant.dni || 'N/A'}`,
+      '',
+      'ESTIPULACIONES',
+      '',
+      `1. OBJETO: Vivienda sita en ${unit.numero || 'N/A'}, ${building.direccion || 'N/A'}`,
+      `2. DURACIÓN: Desde ${contract.fechaInicio ? new Date(contract.fechaInicio).toLocaleDateString('es-ES') : 'N/A'} hasta ${contract.fechaFin ? new Date(contract.fechaFin).toLocaleDateString('es-ES') : 'N/A'}`,
+      `3. RENTA: ${contract.rentaMensual || 0} EUR/mes`,
+      `4. FIANZA: ${contract.fianza || 0} EUR`,
+      `5. ACTUALIZACIÓN: Según ${contract.tipoActualizacion || 'IPC'}`,
+      '',
+      'Generado automáticamente por Inmova App',
+      `Fecha de generación: ${new Date().toLocaleDateString('es-ES')}`,
+    ].join('\n');
 
-    // Por ahora, retornamos null para indicar que no está implementado
-    // En producción, DEBES implementar esto
-    logger.warn('[generateContractPDF] PDF generation not implemented');
+    const stream: string[] = [];
+    stream.push('1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj');
+    stream.push('2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj');
+    stream.push(
+      '3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Contents 4 0 R/Resources<</Font<</F1 5 0 R>>>>>>endobj'
+    );
 
-    // Simulación: retornar un buffer básico solo para desarrollo
-    if (process.env.NODE_ENV === 'development') {
-      return Buffer.from(`Contrato demo\nID: ${contract.id}\n`, 'utf-8');
+    const textLines = content.split('\n');
+    let streamContent = 'BT\n/F1 11 Tf\n';
+    let y = 800;
+    for (const line of textLines) {
+      const escaped = line.replace(/[()\\]/g, '\\$&');
+      streamContent += `50 ${y} Td\n(${escaped}) Tj\n0 -15 Td\n`;
+      y -= 15;
     }
+    streamContent += 'ET';
 
-    return null;
+    stream.push(
+      `4 0 obj<</Length ${streamContent.length}>>stream\n${streamContent}\nendstream\nendobj`
+    );
+    stream.push('5 0 obj<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>endobj');
+
+    const pdfContent = [
+      '%PDF-1.4',
+      ...stream,
+      'xref',
+      '0 6',
+      `trailer<</Size 6/Root 1 0 R>>`,
+      'startxref',
+      '0',
+      '%%EOF',
+    ].join('\n');
+
+    return Buffer.from(pdfContent, 'utf-8');
   } catch (error: any) {
     logger.error('[generateContractPDF] Error:', error);
     return null;

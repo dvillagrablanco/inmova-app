@@ -1,57 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import { getPrismaClient } from '@/lib/db';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-const MOCK_AVALISTAS = [
-  {
-    id: 'av-1',
-    nombre: 'Juan Pérez Fernández',
-    dni: '12345678A',
-    telefono: '+34 612 345 678',
-    email: 'juan.perez@email.com',
-    contratoId: 'c1',
-    contratoRef: 'CT-2024-001',
-    inmuebleNombre: 'Edificio Centro - 3A',
-    tipoGarantia: 'personal',
-    importe: 2400,
-    estado: 'activo',
-    fechaInicio: '2024-01-15',
-    fechaFin: '2025-01-14',
-  },
-  {
-    id: 'av-2',
-    nombre: 'Laura Martínez Sánchez',
-    dni: '87654321B',
-    telefono: '+34 698 765 432',
-    email: 'laura.martinez@email.com',
-    contratoId: 'c2',
-    contratoRef: 'CT-2024-002',
-    inmuebleNombre: 'Residencial Norte - 5B',
-    tipoGarantia: 'bancaria',
-    importe: 3600,
-    estado: 'activo',
-    fechaInicio: '2024-02-01',
-    fechaFin: '2025-01-31',
-  },
-  {
-    id: 'av-3',
-    nombre: 'Pedro Gómez López',
-    dni: '11223344C',
-    telefono: '+34 655 111 222',
-    email: 'pedro.gomez@email.com',
-    contratoId: 'c3',
-    contratoRef: 'CT-2023-015',
-    inmuebleNombre: 'Edificio Centro - 1C',
-    tipoGarantia: 'seguro',
-    importe: 1800,
-    estado: 'liberado',
-    fechaInicio: '2023-06-01',
-    fechaFin: '2024-05-31',
-  },
-];
+const createSchema = z.object({
+  contractId: z.string().min(1),
+  nombre: z.string().min(1),
+  dni: z.string().optional(),
+  telefono: z.string().optional(),
+  email: z.string().email().optional().or(z.literal('')),
+  tipoGarantia: z.enum(['personal', 'bancaria', 'seguro']).default('personal'),
+  importe: z.number().min(0).default(0),
+  estado: z.enum(['activo', 'liberado', 'ejecutado']).default('activo'),
+  fechaInicio: z.string().optional(),
+  fechaFin: z.string().optional(),
+  notas: z.string().optional(),
+});
 
 export async function GET(req: NextRequest) {
   try {
@@ -60,24 +28,54 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
+    const prisma = getPrismaClient();
+    const companyId = session.user.companyId;
+    if (!companyId) return NextResponse.json([]);
+
     const { searchParams } = new URL(req.url);
     const estado = searchParams.get('estado');
     const tipoGarantia = searchParams.get('tipoGarantia');
 
-    let data = [...MOCK_AVALISTAS];
-    if (estado) {
-      data = data.filter((e) => e.estado === estado);
-    }
-    if (tipoGarantia) {
-      data = data.filter((e) => e.tipoGarantia === tipoGarantia);
-    }
+    const where: Record<string, unknown> = { companyId };
+    if (estado) where.estado = estado;
+    if (tipoGarantia) where.tipoGarantia = tipoGarantia;
 
-    return NextResponse.json(data);
+    const guarantors = await prisma.guarantor.findMany({
+      where: where as any,
+      include: {
+        contract: {
+          select: {
+            id: true,
+            tenant: { select: { nombre: true, apellidos: true } },
+            unit: { select: { numero: true, building: { select: { nombre: true } } } },
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const formatted = guarantors.map((g: any) => ({
+      id: g.id,
+      nombre: g.nombre,
+      dni: g.dni,
+      telefono: g.telefono,
+      email: g.email,
+      contratoId: g.contractId,
+      contratoRef: g.contractId,
+      inmuebleNombre: g.contract?.unit
+        ? `${g.contract.unit.building?.nombre || ''} - ${g.contract.unit.numero}`
+        : '',
+      tipoGarantia: g.tipoGarantia,
+      importe: g.importe,
+      estado: g.estado,
+      fechaInicio: g.fechaInicio?.toISOString().split('T')[0] || null,
+      fechaFin: g.fechaFin?.toISOString().split('T')[0] || null,
+    }));
+
+    return NextResponse.json(formatted);
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Error al obtener avalistas' },
-      { status: 500 }
-    );
+    console.error('[avalistas GET]:', error);
+    return NextResponse.json({ error: 'Error al obtener avalistas' }, { status: 500 });
   }
 }
 
@@ -88,44 +86,40 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const body = await req.json();
-    const {
-      nombre,
-      dni,
-      telefono,
-      email,
-      contratoId,
-      contratoRef,
-      inmuebleNombre,
-      tipoGarantia,
-      importe,
-      estado,
-      fechaInicio,
-      fechaFin,
-    } = body;
+    const prisma = getPrismaClient();
+    const companyId = session.user.companyId;
+    if (!companyId) return NextResponse.json({ error: 'Company requerida' }, { status: 400 });
 
-    const id = `av-${Date.now()}`;
-    const entry = {
-      id,
-      nombre: nombre || '',
-      dni: dni || '',
-      telefono: telefono || '',
-      email: email || '',
-      contratoId,
-      contratoRef: contratoRef || '',
-      inmuebleNombre: inmuebleNombre || '',
-      tipoGarantia: tipoGarantia || 'personal',
-      importe: importe || 0,
-      estado: estado || 'activo',
-      fechaInicio: fechaInicio || null,
-      fechaFin: fechaFin || null,
-    };
+    const body = await req.json();
+    const validation = createSchema.safeParse(body);
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: 'Datos inválidos', details: validation.error.errors },
+        { status: 400 }
+      );
+    }
+
+    const data = validation.data;
+    const entry = await prisma.guarantor.create({
+      data: {
+        companyId,
+        contractId: data.contractId,
+        nombre: data.nombre,
+        dni: data.dni || null,
+        telefono: data.telefono || null,
+        email: data.email || null,
+        tipoGarantia: data.tipoGarantia,
+        importe: data.importe,
+        estado: data.estado,
+        fechaInicio: data.fechaInicio ? new Date(data.fechaInicio) : null,
+        fechaFin: data.fechaFin ? new Date(data.fechaFin) : null,
+        notas: data.notas || null,
+      },
+    });
 
     return NextResponse.json(entry, { status: 201 });
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Error al crear avalista' },
-      { status: 500 }
-    );
+    console.error('[avalistas POST]:', error);
+    return NextResponse.json({ error: 'Error al crear avalista' }, { status: 500 });
   }
 }
