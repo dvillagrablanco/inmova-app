@@ -1,17 +1,7 @@
-// @ts-nocheck
-/**
- * API: Factura individual
- * GET: Obtener factura | PUT: Actualizar | DELETE: Eliminar
- */
-
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import {
-  facturasHommingStore,
-  seedFacturasHomming,
-  type FacturaItem,
-} from '@/lib/facturacion-homming-store';
+import { getPrismaClient } from '@/lib/db';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
@@ -40,22 +30,28 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = session.user.companyId || 'default';
-    seedFacturasHomming(companyId);
-
+    const prisma = getPrismaClient();
+    const companyId = session.user.companyId;
     const { id } = await params;
-    const factura = facturasHommingStore.get(id);
+
+    const factura = await prisma.invoice.findFirst({
+      where: { id, companyId: companyId || undefined },
+    });
 
     if (!factura) {
       return NextResponse.json({ error: 'Factura no encontrada' }, { status: 404 });
     }
 
-    if (factura.companyId !== companyId) {
-      return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
-    }
-
-    return NextResponse.json({ success: true, data: factura });
-  } catch (error: unknown) {
+    return NextResponse.json({
+      success: true,
+      data: {
+        ...factura,
+        fecha: factura.fecha.toISOString().split('T')[0],
+        fechaContable: factura.fechaContable.toISOString().split('T')[0],
+        destinatario: { nombre: factura.destinatarioNombre, nif: factura.destinatarioNif },
+      },
+    });
+  } catch (error) {
     console.error('[API facturacion/[id]] Error:', error);
     return NextResponse.json({ error: 'Error al obtener factura' }, { status: 500 });
   }
@@ -68,21 +64,19 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
+    const prisma = getPrismaClient();
+    const companyId = session.user.companyId;
     const { id } = await params;
-    const factura = facturasHommingStore.get(id);
 
-    if (!factura) {
+    const existing = await prisma.invoice.findFirst({
+      where: { id, companyId: companyId || undefined },
+    });
+    if (!existing) {
       return NextResponse.json({ error: 'Factura no encontrada' }, { status: 404 });
-    }
-
-    const companyId = session.user.companyId || 'default';
-    if (factura.companyId !== companyId) {
-      return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
     }
 
     const body = await req.json();
     const validation = updateFacturaSchema.safeParse(body);
-
     if (!validation.success) {
       return NextResponse.json(
         { error: 'Datos inválidos', details: validation.error.errors },
@@ -91,29 +85,44 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     }
 
     const data = validation.data;
-    const updated: FacturaItem = { ...factura };
+    const updateData: Record<string, unknown> = {};
 
-    if (data.estado !== undefined) updated.estado = data.estado;
-    if (data.concepto !== undefined) updated.concepto = data.concepto;
-    if (data.baseImponible !== undefined) updated.baseImponible = data.baseImponible;
-    if (data.iva !== undefined) updated.iva = data.iva;
-    if (data.irpf !== undefined) updated.irpf = data.irpf;
-    if (data.notas !== undefined) updated.notas = data.notas;
-    if (data.destinatario !== undefined) updated.destinatario = data.destinatario;
-    if (data.inmueble !== undefined) updated.inmueble = data.inmueble ?? undefined;
-
-    if (data.baseImponible !== undefined || data.iva !== undefined || data.irpf !== undefined) {
-      const base = updated.baseImponible;
-      const ivaImporte = (base * updated.iva) / 100;
-      const irpfImporte = (base * updated.irpf) / 100;
-      updated.totalImpuestos = ivaImporte - irpfImporte;
-      updated.total = base + updated.totalImpuestos;
+    if (data.estado !== undefined) updateData.estado = data.estado;
+    if (data.concepto !== undefined) updateData.concepto = data.concepto;
+    if (data.notas !== undefined) updateData.notas = data.notas;
+    if (data.inmueble !== undefined) updateData.inmueble = data.inmueble;
+    if (data.destinatario) {
+      updateData.destinatarioNombre = data.destinatario.nombre;
+      if (data.destinatario.nif !== undefined) updateData.destinatarioNif = data.destinatario.nif;
     }
 
-    facturasHommingStore.set(id, updated);
+    const base = data.baseImponible ?? existing.baseImponible;
+    const iva = data.iva ?? existing.iva;
+    const irpf = data.irpf ?? existing.irpf;
 
-    return NextResponse.json({ success: true, data: updated });
-  } catch (error: unknown) {
+    if (data.baseImponible !== undefined || data.iva !== undefined || data.irpf !== undefined) {
+      updateData.baseImponible = base;
+      updateData.iva = iva;
+      updateData.irpf = irpf;
+      const ivaImporte = (base * iva) / 100;
+      const irpfImporte = (base * irpf) / 100;
+      updateData.totalImpuestos = ivaImporte - irpfImporte;
+      updateData.total = base + (ivaImporte - irpfImporte);
+    }
+
+    const updated = await prisma.invoice.update({
+      where: { id },
+      data: updateData as any,
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        ...updated,
+        destinatario: { nombre: updated.destinatarioNombre, nif: updated.destinatarioNif },
+      },
+    });
+  } catch (error) {
     console.error('[API facturacion/[id]] Error:', error);
     return NextResponse.json({ error: 'Error al actualizar factura' }, { status: 500 });
   }
@@ -126,22 +135,21 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
+    const prisma = getPrismaClient();
+    const companyId = session.user.companyId;
     const { id } = await params;
-    const factura = facturasHommingStore.get(id);
 
-    if (!factura) {
+    const existing = await prisma.invoice.findFirst({
+      where: { id, companyId: companyId || undefined },
+    });
+    if (!existing) {
       return NextResponse.json({ error: 'Factura no encontrada' }, { status: 404 });
     }
 
-    const companyId = session.user.companyId || 'default';
-    if (factura.companyId !== companyId) {
-      return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
-    }
-
-    facturasHommingStore.delete(id);
+    await prisma.invoice.delete({ where: { id } });
 
     return NextResponse.json({ success: true, message: 'Factura eliminada' });
-  } catch (error: unknown) {
+  } catch (error) {
     console.error('[API facturacion/[id]] Error:', error);
     return NextResponse.json({ error: 'Error al eliminar factura' }, { status: 500 });
   }

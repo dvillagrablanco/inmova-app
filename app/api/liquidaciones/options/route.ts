@@ -1,32 +1,10 @@
-/**
- * API: Opciones para formulario de liquidaciones
- * Propietarios e inmuebles (mock o desde BD)
- */
-
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import { getPrismaClient } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
-
-// Mock data cuando no hay modelo Prisma
-const MOCK_PROPIETARIOS = [
-  { id: 'prop-1', nombre: 'Juan García López', email: 'juan.garcia@email.com' },
-  { id: 'prop-2', nombre: 'María Fernández Ruiz', email: 'maria.fernandez@email.com' },
-  { id: 'prop-3', nombre: 'Carlos Martínez Sánchez', email: 'carlos.martinez@email.com' },
-  { id: 'prop-4', nombre: 'Ana Rodríguez Pérez', email: 'ana.rodriguez@email.com' },
-  { id: 'prop-5', nombre: 'Pedro Sánchez Gómez', email: 'pedro.sanchez@email.com' },
-];
-
-const MOCK_INMUEBLES = [
-  { id: 'inv-1', nombre: 'Calle Mayor 10, 1A', direccion: 'Calle Mayor 10, 1A, 28013 Madrid', propietarioId: 'prop-1' },
-  { id: 'inv-2', nombre: 'Calle Mayor 10, 2B', direccion: 'Calle Mayor 10, 2B, 28013 Madrid', propietarioId: 'prop-1' },
-  { id: 'inv-3', nombre: 'Avenida España 45, 3º', direccion: 'Avenida España 45, 3º, 28003 Madrid', propietarioId: 'prop-2' },
-  { id: 'inv-4', nombre: 'Plaza Central 7, Bajo', direccion: 'Plaza Central 7, Bajo, 08001 Barcelona', propietarioId: 'prop-3' },
-  { id: 'inv-5', nombre: 'Calle Nueva 22, 4C', direccion: 'Calle Nueva 22, 4C, 41001 Sevilla', propietarioId: 'prop-4' },
-  { id: 'inv-6', nombre: 'Paseo del Parque 15', direccion: 'Paseo del Parque 15, 29001 Málaga', propietarioId: 'prop-5' },
-];
 
 export async function GET() {
   try {
@@ -35,18 +13,46 @@ export async function GET() {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
+    const prisma = getPrismaClient();
+    const companyId = session.user.companyId;
+    if (!companyId) {
+      return NextResponse.json({ success: true, data: { propietarios: [], inmuebles: [] } });
+    }
+
+    const [users, units] = await Promise.all([
+      prisma.user.findMany({
+        where: { companyId, activo: true },
+        select: { id: true, name: true, email: true },
+        orderBy: { name: 'asc' },
+      }),
+      prisma.unit.findMany({
+        where: { building: { companyId } },
+        select: {
+          id: true,
+          numero: true,
+          building: { select: { nombre: true, direccion: true } },
+        },
+        orderBy: { numero: 'asc' },
+      }),
+    ]);
+
     return NextResponse.json({
       success: true,
       data: {
-        propietarios: MOCK_PROPIETARIOS,
-        inmuebles: MOCK_INMUEBLES,
+        propietarios: users.map((u: any) => ({
+          id: u.id,
+          nombre: u.name,
+          email: u.email,
+        })),
+        inmuebles: units.map((u: any) => ({
+          id: u.id,
+          nombre: `${u.building?.nombre || ''} - ${u.numero}`,
+          direccion: u.building?.direccion || '',
+        })),
       },
     });
-  } catch (error: unknown) {
+  } catch (error) {
     console.error('[Liquidaciones Options GET]:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener opciones' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al obtener opciones' }, { status: 500 });
   }
 }

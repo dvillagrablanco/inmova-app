@@ -1,24 +1,11 @@
-// @ts-nocheck
-/**
- * API: Facturación inmobiliaria (estilo Homming)
- * GET: Listar facturas con filtros | POST: Crear factura
- * Mock data con 8 facturas de ejemplo
- */
-
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { z } from 'zod';
-import {
-  facturasHommingStore,
-  seedFacturasHomming,
-  type FacturaItem,
-} from '@/lib/facturacion-homming-store';
+import { getPrismaClient } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
-
-export type { FacturaItem, FacturaDestinatario } from '@/lib/facturacion-homming-store';
 
 const createFacturaSchema = z.object({
   serieId: z.string(),
@@ -42,8 +29,11 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = session.user.companyId || 'default';
-    seedFacturasHomming(companyId);
+    const prisma = getPrismaClient();
+    const companyId = session.user.companyId;
+    if (!companyId) {
+      return NextResponse.json({ error: 'Company no encontrada' }, { status: 400 });
+    }
 
     const { searchParams } = new URL(req.url);
     const serie = searchParams.get('serie');
@@ -53,65 +43,56 @@ export async function GET(req: NextRequest) {
     const fechaHasta = searchParams.get('fechaHasta');
     const destinatario = searchParams.get('destinatario');
 
-    let facturas = Array.from(facturasHommingStore.values()).filter(
-      (f) => f.companyId === companyId
-    );
+    const where: Record<string, unknown> = { companyId };
 
+    if (estado) where.estado = estado;
+    if (tipo) where.tipo = tipo;
     if (serie) {
-      facturas = facturas.filter(
-        (f) => f.serie.startsWith(serie) || f.numeroFactura.includes(serie)
-      );
+      where.OR = [{ serie: { startsWith: serie } }, { numeroFactura: { contains: serie } }];
     }
-    if (estado) {
-      facturas = facturas.filter((f) => f.estado === estado);
-    }
-    if (tipo) {
-      facturas = facturas.filter((f) => f.tipo === tipo);
-    }
-    if (fechaDesde) {
-      const desde = new Date(fechaDesde);
-      facturas = facturas.filter((f) => new Date(f.fecha) >= desde);
-    }
-    if (fechaHasta) {
-      const hasta = new Date(fechaHasta);
-      facturas = facturas.filter((f) => new Date(f.fecha) <= hasta);
+    if (fechaDesde || fechaHasta) {
+      where.fecha = {};
+      if (fechaDesde) (where.fecha as Record<string, unknown>).gte = new Date(fechaDesde);
+      if (fechaHasta) (where.fecha as Record<string, unknown>).lte = new Date(fechaHasta);
     }
     if (destinatario) {
-      const term = destinatario.toLowerCase();
-      facturas = facturas.filter(
-        (f) =>
-          f.destinatario.nombre.toLowerCase().includes(term) ||
-          (f.destinatario.nif && f.destinatario.nif.toLowerCase().includes(term))
-      );
+      where.destinatarioNombre = { contains: destinatario, mode: 'insensitive' };
     }
 
-    facturas.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
+    const facturas = await prisma.invoice.findMany({
+      where: where as any,
+      orderBy: { fecha: 'desc' },
+    });
 
-    // KPIs
-    const totalFacturado = facturas
-      .filter((f) => !['anulada', 'borrador'].includes(f.estado))
-      .reduce((s, f) => s + f.total, 0);
-    const pendientes = facturas.filter((f) => f.estado === 'emitida');
-    const facturasEsteMes = facturas.filter((f) => {
+    const formatted = facturas.map((f: any) => ({
+      ...f,
+      fecha: f.fecha.toISOString().split('T')[0],
+      fechaContable: f.fechaContable.toISOString().split('T')[0],
+      destinatario: { nombre: f.destinatarioNombre, nif: f.destinatarioNif },
+    }));
+
+    const active = formatted.filter((f: any) => !['anulada', 'borrador'].includes(f.estado));
+    const pendientes = formatted.filter((f: any) => f.estado === 'emitida');
+    const now = new Date();
+    const facturasEsteMes = formatted.filter((f: any) => {
       const d = new Date(f.fecha);
-      const now = new Date();
       return (
         d.getMonth() === now.getMonth() &&
         d.getFullYear() === now.getFullYear() &&
-        !['anulada'].includes(f.estado)
+        f.estado !== 'anulada'
       );
     }).length;
 
     return NextResponse.json({
       success: true,
-      data: facturas,
+      data: formatted,
       kpis: {
-        totalFacturado,
-        pendientesCobro: pendientes.reduce((s, f) => s + f.total, 0),
+        totalFacturado: active.reduce((s: number, f: any) => s + f.total, 0),
+        pendientesCobro: pendientes.reduce((s: number, f: any) => s + f.total, 0),
         facturasEsteMes,
       },
     });
-  } catch (error: unknown) {
+  } catch (error) {
     console.error('[API facturacion] Error:', error);
     return NextResponse.json({ error: 'Error al obtener facturas' }, { status: 500 });
   }
@@ -124,10 +105,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const companyId = session.user.companyId || 'default';
+    const prisma = getPrismaClient();
+    const companyId = session.user.companyId;
+    if (!companyId) {
+      return NextResponse.json({ error: 'Company no encontrada' }, { status: 400 });
+    }
+
     const body = await req.json();
     const validation = createFacturaSchema.safeParse(body);
-
     if (!validation.success) {
       return NextResponse.json(
         { error: 'Datos inválidos', details: validation.error.errors },
@@ -136,43 +121,69 @@ export async function POST(req: NextRequest) {
     }
 
     const data = validation.data;
-    const id = `fact-${companyId}-${Date.now()}`;
-
     const ivaImporte = (data.baseImponible * data.iva) / 100;
     const irpfImporte = (data.baseImponible * (data.irpf || 0)) / 100;
     const totalImpuestos = ivaImporte - irpfImporte;
     const total = data.baseImponible + totalImpuestos;
 
-    const prefijo = data.serieId.startsWith('F') ? 'F' : data.serieId.startsWith('P') ? 'P' : 'R';
-    const numero = String(Math.floor(Math.random() * 99999) + 1).padStart(5, '0');
+    let prefijo = 'F';
+    let nextNum = 1;
+
+    const series = await prisma.invoiceSeries.findFirst({
+      where: { id: data.serieId, companyId },
+    });
+
+    if (series) {
+      prefijo = series.prefijo;
+      nextNum = series.siguiente;
+      await prisma.invoiceSeries.update({
+        where: { id: series.id },
+        data: { siguiente: nextNum + 1 },
+      });
+    } else {
+      prefijo = data.serieId.startsWith('F') ? 'F' : data.serieId.startsWith('P') ? 'P' : 'R';
+      const count = await prisma.invoice.count({
+        where: { companyId, serie: { startsWith: prefijo } },
+      });
+      nextNum = count + 1;
+    }
+
+    const numero = String(nextNum).padStart(5, '0');
     const numeroFactura = `${prefijo}-${numero}`;
-    const serie = numeroFactura;
 
-    const factura: FacturaItem = {
-      id,
-      numeroFactura,
-      serie,
-      fecha: new Date().toISOString().split('T')[0],
-      fechaContable: new Date().toISOString().split('T')[0],
-      concepto: data.concepto,
-      baseImponible: data.baseImponible,
-      iva: data.iva,
-      irpf: data.irpf || 0,
-      totalImpuestos,
-      total,
-      estado: 'borrador',
-      tipo: data.tipo,
-      destinatario: data.destinatario,
-      inmueble: data.inmueble,
-      notas: data.notas,
-      companyId,
-      createdAt: new Date().toISOString(),
-    };
+    const factura = await prisma.invoice.create({
+      data: {
+        companyId,
+        numeroFactura,
+        serie: numeroFactura,
+        fecha: new Date(),
+        fechaContable: new Date(),
+        concepto: data.concepto,
+        baseImponible: data.baseImponible,
+        iva: data.iva,
+        irpf: data.irpf || 0,
+        totalImpuestos,
+        total,
+        estado: 'borrador',
+        tipo: data.tipo,
+        destinatarioNombre: data.destinatario.nombre,
+        destinatarioNif: data.destinatario.nif || null,
+        inmueble: data.inmueble || null,
+        notas: data.notas || null,
+      },
+    });
 
-    facturasHommingStore.set(id, factura);
-
-    return NextResponse.json({ success: true, data: factura }, { status: 201 });
-  } catch (error: unknown) {
+    return NextResponse.json(
+      {
+        success: true,
+        data: {
+          ...factura,
+          destinatario: { nombre: factura.destinatarioNombre, nif: factura.destinatarioNif },
+        },
+      },
+      { status: 201 }
+    );
+  } catch (error) {
     console.error('[API facturacion] Error:', error);
     return NextResponse.json({ error: 'Error al crear factura' }, { status: 500 });
   }

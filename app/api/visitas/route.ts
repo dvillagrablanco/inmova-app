@@ -1,25 +1,48 @@
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
-
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import { getPrismaClient } from '@/lib/db';
 
-const MOCK_VISITAS = [
-  { id: '1', fecha: '2026-03-08', hora: '10:00', inmuebleId: 'inv1', inmuebleNombre: 'Piso Centro Madrid', candidatoId: 'c1', candidatoNombre: 'Juan Pérez', agenteNombre: 'María García', estado: 'programada', notas: 'Primera visita', resultado: null },
-  { id: '2', fecha: '2026-03-07', hora: '16:00', inmuebleId: 'inv2', inmuebleNombre: 'Ático Barcelona', candidatoId: 'c2', candidatoNombre: 'Ana López', agenteNombre: 'Carlos Ruiz', estado: 'realizada', notas: 'Muy interesada', resultado: 'Interesado' },
-  { id: '3', fecha: '2026-03-06', hora: '11:30', inmuebleId: 'inv1', inmuebleNombre: 'Piso Centro Madrid', candidatoId: 'c3', candidatoNombre: 'Pedro Sánchez', agenteNombre: 'María García', estado: 'cancelada', notas: 'Canceló por trabajo', resultado: null },
-  { id: '4', fecha: '2026-03-05', hora: '09:00', inmuebleId: 'inv3', inmuebleNombre: 'Chalet Valencia', candidatoId: 'c4', candidatoNombre: 'Laura Martínez', agenteNombre: 'Carlos Ruiz', estado: 'no-show', notas: 'No se presentó', resultado: null },
-  { id: '5', fecha: '2026-03-04', hora: '12:00', inmuebleId: 'inv2', inmuebleNombre: 'Ático Barcelona', candidatoId: 'c5', candidatoNombre: 'Miguel Torres', agenteNombre: 'María García', estado: 'realizada', notas: 'Firma próxima semana', resultado: 'Contratado' },
-];
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session) {
+    if (!session?.user) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
-    return NextResponse.json(MOCK_VISITAS);
+
+    const prisma = getPrismaClient();
+    const companyId = session.user.companyId;
+    if (!companyId) return NextResponse.json([]);
+
+    const { searchParams } = new URL(req.url);
+    const estado = searchParams.get('estado');
+
+    const where: Record<string, unknown> = { companyId };
+    if (estado) where.estado = estado;
+
+    const visits = await prisma.propertyVisit.findMany({
+      where: where as any,
+      orderBy: { fecha: 'desc' },
+    });
+
+    const formatted = visits.map((v: any) => ({
+      id: v.id,
+      fecha: v.fecha.toISOString().split('T')[0],
+      hora: v.hora || '10:00',
+      inmuebleId: v.inmuebleId,
+      inmuebleNombre: v.inmuebleNombre,
+      candidatoId: v.candidatoId,
+      candidatoNombre: v.candidatoNombre || '-',
+      agenteNombre: v.agenteNombre || '-',
+      estado: v.estado,
+      notas: v.notas || '',
+      resultado: v.resultado,
+    }));
+
+    return NextResponse.json(formatted);
   } catch (error) {
     console.error('[visitas GET]:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
@@ -29,31 +52,61 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session) {
+    if (!session?.user) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
+
+    const prisma = getPrismaClient();
+    const companyId = session.user.companyId;
+    if (!companyId) return NextResponse.json({ error: 'Company requerida' }, { status: 400 });
+
     const body = await req.json();
-    const { fecha, hora, inmuebleId, inmuebleNombre, candidatoId, candidatoNombre, agenteNombre, estado, notas } = body;
-    if (!fecha || !inmuebleId || !inmuebleNombre) {
-      return NextResponse.json(
-        { error: 'Faltan campos: fecha, inmuebleId, inmuebleNombre' },
-        { status: 400 }
-      );
-    }
-    const nuevo = {
-      id: String(Date.now()),
+    const {
       fecha,
-      hora: hora || '10:00',
+      hora,
       inmuebleId,
       inmuebleNombre,
-      candidatoId: candidatoId || null,
-      candidatoNombre: candidatoNombre || '-',
-      agenteNombre: agenteNombre || session.user?.name || 'Agente',
-      estado: estado || 'programada',
-      notas: notas || '',
-      resultado: null,
-    };
-    return NextResponse.json(nuevo, { status: 201 });
+      candidatoId,
+      candidatoNombre,
+      agenteNombre,
+      estado,
+      notas,
+    } = body;
+    if (!fecha || !inmuebleNombre) {
+      return NextResponse.json({ error: 'Faltan campos: fecha, inmuebleNombre' }, { status: 400 });
+    }
+
+    const visit = await prisma.propertyVisit.create({
+      data: {
+        companyId,
+        fecha: new Date(fecha),
+        hora: hora || '10:00',
+        inmuebleId: inmuebleId || null,
+        inmuebleNombre,
+        candidatoId: candidatoId || null,
+        candidatoNombre: candidatoNombre || null,
+        agenteNombre: agenteNombre || session.user?.name || 'Agente',
+        agentId: (session.user as any).id || null,
+        estado: estado || 'programada',
+        notas: notas || null,
+      },
+    });
+
+    return NextResponse.json(
+      {
+        id: visit.id,
+        fecha: visit.fecha.toISOString().split('T')[0],
+        hora: visit.hora,
+        inmuebleId: visit.inmuebleId,
+        inmuebleNombre: visit.inmuebleNombre,
+        candidatoNombre: visit.candidatoNombre,
+        agenteNombre: visit.agenteNombre,
+        estado: visit.estado,
+        notas: visit.notas,
+        resultado: visit.resultado,
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error('[visitas POST]:', error);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });

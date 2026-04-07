@@ -1,82 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
+import { getPrismaClient } from '@/lib/db';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-const MOCK_ACTUALIZACIONES = [
-  {
-    id: 'ar-1',
-    contratoId: 'c1',
-    contratoRef: 'CT-2024-001',
-    inquilinoNombre: 'María García López',
-    inmuebleNombre: 'Edificio Centro - 3A',
-    fechaRevision: '2025-04-01',
-    tipo: 'IPC',
-    rentaAnterior: 950,
-    rentaNueva: 980,
-    incrementoPorcentaje: 3.16,
-    estado: 'pendiente',
-    fechaComunicacion: null,
-  },
-  {
-    id: 'ar-2',
-    contratoId: 'c2',
-    contratoRef: 'CT-2024-002',
-    inquilinoNombre: 'Carlos Ruiz Martínez',
-    inmuebleNombre: 'Residencial Norte - 5B',
-    fechaRevision: '2025-03-15',
-    tipo: 'IPC',
-    rentaAnterior: 1200,
-    rentaNueva: 1234,
-    incrementoPorcentaje: 2.83,
-    estado: 'comunicada',
-    fechaComunicacion: '2025-03-01',
-  },
-  {
-    id: 'ar-3',
-    contratoId: 'c3',
-    contratoRef: 'CT-2023-015',
-    inquilinoNombre: 'Ana Fernández Sánchez',
-    inmuebleNombre: 'Edificio Centro - 1C',
-    fechaRevision: '2025-05-01',
-    tipo: 'pactado',
-    rentaAnterior: 800,
-    rentaNueva: 840,
-    incrementoPorcentaje: 5,
-    estado: 'aplicada',
-    fechaComunicacion: '2025-02-15',
-  },
-  {
-    id: 'ar-4',
-    contratoId: 'c4',
-    contratoRef: 'CT-2022-008',
-    inquilinoNombre: 'Pedro Gómez López',
-    inmuebleNombre: 'Residencial Sur - 2A',
-    fechaRevision: '2025-06-01',
-    tipo: 'renta_referencia',
-    rentaAnterior: 1100,
-    rentaNueva: 1120,
-    incrementoPorcentaje: 1.82,
-    estado: 'pendiente',
-    fechaComunicacion: null,
-  },
-  {
-    id: 'ar-5',
-    contratoId: 'c5',
-    contratoRef: 'CT-2024-010',
-    inquilinoNombre: 'Laura Martínez Sánchez',
-    inmuebleNombre: 'Edificio Centro - 4B',
-    fechaRevision: '2025-04-15',
-    tipo: 'IPC',
-    rentaAnterior: 1050,
-    rentaNueva: 1079,
-    incrementoPorcentaje: 2.76,
-    estado: 'rechazada',
-    fechaComunicacion: '2025-03-10',
-  },
-];
+const createSchema = z.object({
+  contractId: z.string().min(1),
+  fechaRevision: z.string(),
+  tipo: z.enum(['IPC', 'pactado', 'renta_referencia', 'IRAV']).default('IPC'),
+  rentaAnterior: z.number().min(0),
+  rentaNueva: z.number().min(0),
+  estado: z.enum(['pendiente', 'comunicada', 'aplicada', 'rechazada']).default('pendiente'),
+  fechaComunicacion: z.string().nullable().optional(),
+  notas: z.string().optional(),
+});
 
 export async function GET(req: NextRequest) {
   try {
@@ -85,20 +25,54 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
+    const prisma = getPrismaClient();
+    const companyId = session.user.companyId;
+    if (!companyId) return NextResponse.json([]);
+
     const { searchParams } = new URL(req.url);
     const estado = searchParams.get('estado');
     const tipo = searchParams.get('tipo');
 
-    let data = [...MOCK_ACTUALIZACIONES];
-    if (estado) {
-      data = data.filter((e) => e.estado === estado);
-    }
-    if (tipo) {
-      data = data.filter((e) => e.tipo === tipo);
-    }
+    const where: Record<string, unknown> = { companyId };
+    if (estado) where.estado = estado;
+    if (tipo) where.tipo = tipo;
 
-    return NextResponse.json(data);
+    const updates = await prisma.rentUpdate.findMany({
+      where: where as any,
+      include: {
+        contract: {
+          select: {
+            id: true,
+            tenant: { select: { nombre: true, apellidos: true } },
+            unit: { select: { numero: true, building: { select: { nombre: true } } } },
+          },
+        },
+      },
+      orderBy: { fechaRevision: 'desc' },
+    });
+
+    const formatted = updates.map((u: any) => ({
+      id: u.id,
+      contratoId: u.contractId,
+      contratoRef: u.contractId,
+      inquilinoNombre: u.contract?.tenant
+        ? `${u.contract.tenant.nombre} ${u.contract.tenant.apellidos || ''}`.trim()
+        : '',
+      inmuebleNombre: u.contract?.unit
+        ? `${u.contract.unit.building?.nombre || ''} - ${u.contract.unit.numero}`.trim()
+        : '',
+      fechaRevision: u.fechaRevision.toISOString().split('T')[0],
+      tipo: u.tipo,
+      rentaAnterior: u.rentaAnterior,
+      rentaNueva: u.rentaNueva,
+      incrementoPorcentaje: u.incrementoPorcentaje,
+      estado: u.estado,
+      fechaComunicacion: u.fechaComunicacion?.toISOString().split('T')[0] || null,
+    }));
+
+    return NextResponse.json(formatted);
   } catch (error) {
+    console.error('[actualizaciones-renta GET]:', error);
     return NextResponse.json(
       { error: 'Error al obtener actualizaciones de renta' },
       { status: 500 }
@@ -113,46 +87,43 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const body = await req.json();
-    const {
-      contratoId,
-      contratoRef,
-      inquilinoNombre,
-      inmuebleNombre,
-      fechaRevision,
-      tipo,
-      rentaAnterior,
-      rentaNueva,
-      estado,
-      fechaComunicacion,
-    } = body;
+    const prisma = getPrismaClient();
+    const companyId = session.user.companyId;
+    if (!companyId) return NextResponse.json({ error: 'Company requerida' }, { status: 400 });
 
+    const body = await req.json();
+    const validation = createSchema.safeParse(body);
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: 'Datos inválidos', details: validation.error.errors },
+        { status: 400 }
+      );
+    }
+
+    const data = validation.data;
     const incrementoPorcentaje =
-      rentaAnterior > 0
-        ? ((rentaNueva - rentaAnterior) / rentaAnterior) * 100
+      data.rentaAnterior > 0
+        ? ((data.rentaNueva - data.rentaAnterior) / data.rentaAnterior) * 100
         : 0;
 
-    const id = `ar-${Date.now()}`;
-    const entry = {
-      id,
-      contratoId,
-      contratoRef: contratoRef || '',
-      inquilinoNombre: inquilinoNombre || '',
-      inmuebleNombre: inmuebleNombre || '',
-      fechaRevision: fechaRevision || new Date().toISOString().split('T')[0],
-      tipo: tipo || 'IPC',
-      rentaAnterior: rentaAnterior || 0,
-      rentaNueva: rentaNueva || 0,
-      incrementoPorcentaje,
-      estado: estado || 'pendiente',
-      fechaComunicacion: fechaComunicacion || null,
-    };
+    const entry = await prisma.rentUpdate.create({
+      data: {
+        companyId,
+        contractId: data.contractId,
+        fechaRevision: new Date(data.fechaRevision),
+        tipo: data.tipo,
+        rentaAnterior: data.rentaAnterior,
+        rentaNueva: data.rentaNueva,
+        incrementoPorcentaje: Math.round(incrementoPorcentaje * 100) / 100,
+        estado: data.estado,
+        fechaComunicacion: data.fechaComunicacion ? new Date(data.fechaComunicacion) : null,
+        notas: data.notas || null,
+      },
+    });
 
     return NextResponse.json(entry, { status: 201 });
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Error al crear actualización de renta' },
-      { status: 500 }
-    );
+    console.error('[actualizaciones-renta POST]:', error);
+    return NextResponse.json({ error: 'Error al crear actualización de renta' }, { status: 500 });
   }
 }
