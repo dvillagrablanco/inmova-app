@@ -26,6 +26,7 @@ import {
   Plus,
   FileText,
   Wrench,
+  CreditCard,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -139,6 +140,7 @@ export default function EdificioDetallesPage() {
     noi: number;
     desglose: Array<{ tipo: string; importe: number }>;
   } | null>(null);
+  const [buildingPayments, setBuildingPayments] = useState<any[]>([]);
 
   const buildingId = params?.id as string;
 
@@ -173,6 +175,19 @@ export default function EdificioDetallesPage() {
           };
           setBuilding(normalizedData);
           setImages(data.imagenes || []);
+
+          try {
+            const payRes = await fetch(`/api/payments?buildingId=${buildingId}`);
+            if (payRes.ok) {
+              const payJson = await payRes.json();
+              const list = Array.isArray(payJson) ? payJson : payJson.data || [];
+              setBuildingPayments(list);
+            } else {
+              setBuildingPayments([]);
+            }
+          } catch {
+            setBuildingPayments([]);
+          }
         } else if (response.status === 404) {
           setError('Edificio no encontrado');
           toast.error('Edificio no encontrado');
@@ -771,6 +786,67 @@ export default function EdificioDetallesPage() {
                       Crear Unidad
                     </Button>
                   </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CreditCard className="h-5 w-5" />
+                  Cobros del Edificio
+                </CardTitle>
+                <CardDescription>Pagos asociados a las unidades de este edificio</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex justify-between items-center mb-4">
+                  <p className="text-sm text-muted-foreground">
+                    {buildingPayments.length} pagos registrados
+                  </p>
+                  <Button
+                    size="sm"
+                    onClick={() => router.push(`/pagos/nuevo?buildingId=${buildingId}`)}
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    Registrar Cobro
+                  </Button>
+                </div>
+                {buildingPayments.length > 0 ? (
+                  <div className="divide-y">
+                    {buildingPayments.slice(0, 10).map((p: any) => (
+                      <div key={p.id} className="py-2 flex justify-between items-center">
+                        <div>
+                          <p className="text-sm font-medium">
+                            {p.contract?.tenant?.nombreCompleto || 'N/A'}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {p.periodo} · {p.contract?.unit?.numero || ''}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-semibold">
+                            €{Number(p.monto || 0).toLocaleString('es-ES')}
+                          </p>
+                          <Badge
+                            variant={
+                              p.estado === 'pagado'
+                                ? 'default'
+                                : p.estado === 'atrasado'
+                                  ? 'destructive'
+                                  : 'secondary'
+                            }
+                            className="text-xs"
+                          >
+                            {p.estado}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    No hay pagos registrados
+                  </p>
                 )}
               </CardContent>
             </Card>

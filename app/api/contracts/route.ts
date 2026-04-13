@@ -45,10 +45,12 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '15');
     const skip = (page - 1) * limit;
     const estadoParam = searchParams.get('estado');
+    const buildingIdParam = searchParams.get('buildingId');
     // Construir where clause
     const whereClause: {
       estado?: 'activo' | 'vencido' | 'cancelado';
       unit: {
+        buildingId?: string;
         building: {
           companyId: { in: string[] };
         };
@@ -60,6 +62,9 @@ export async function GET(req: NextRequest) {
         },
       },
     };
+    if (buildingIdParam) {
+      whereClause.unit.buildingId = buildingIdParam;
+    }
     if (estadoParam === 'activo' || estadoParam === 'vencido' || estadoParam === 'cancelado') {
       whereClause.estado = estadoParam;
     }
