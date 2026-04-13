@@ -78,6 +78,9 @@ export default function PagosClientPage({ initialPayments, session }: PagosClien
   const [filteredPayments, setFilteredPayments] = useState<Payment[]>(initialPayments);
   const [payments, setPayments] = useState<Payment[]>(initialPayments);
   const [searchTerm, setSearchTerm] = useState('');
+  const [estadoFilter, setEstadoFilter] = useState<'all' | 'pagado' | 'pendiente' | 'moroso'>(
+    'all'
+  );
   const [activeFilters, setActiveFilters] = useState<
     Array<{ id: string; label: string; value: string }>
   >([]);
@@ -87,7 +90,14 @@ export default function PagosClientPage({ initialPayments, session }: PagosClien
   const [paymentToDelete, setPaymentToDelete] = useState<Payment | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Apply search filter
+  const matchesEstadoFilter = (estadoRaw: string, filter: typeof estadoFilter) => {
+    const e = (estadoRaw || '').toLowerCase();
+    if (filter === 'all') return true;
+    if (filter === 'moroso') return e === 'atrasado' || e === 'vencido';
+    return e === filter;
+  };
+
+  // Apply search + estado filter
   useEffect(() => {
     let filtered = payments;
 
@@ -100,8 +110,12 @@ export default function PagosClientPage({ initialPayments, session }: PagosClien
       );
     }
 
+    if (estadoFilter !== 'all') {
+      filtered = filtered.filter((p) => matchesEstadoFilter(p.estado, estadoFilter));
+    }
+
     setFilteredPayments(filtered);
-  }, [searchTerm, payments]);
+  }, [searchTerm, estadoFilter, payments]);
 
   // Update active filters
   useEffect(() => {
@@ -115,17 +129,35 @@ export default function PagosClientPage({ initialPayments, session }: PagosClien
       });
     }
 
+    if (estadoFilter !== 'all') {
+      const labels: Record<typeof estadoFilter, string> = {
+        all: '',
+        pagado: 'Pagado',
+        pendiente: 'Pendiente',
+        moroso: 'Atrasado / vencido',
+      };
+      filters.push({
+        id: 'estado',
+        label: 'Estado',
+        value: labels[estadoFilter],
+      });
+    }
+
     setActiveFilters(filters);
-  }, [searchTerm]);
+  }, [searchTerm, estadoFilter]);
 
   const clearFilter = (id: string) => {
     if (id === 'search') {
       setSearchTerm('');
     }
+    if (id === 'estado') {
+      setEstadoFilter('all');
+    }
   };
 
   const clearAllFilters = () => {
     setSearchTerm('');
+    setEstadoFilter('all');
   };
 
   const handleDeleteClick = (payment: Payment) => {
@@ -161,25 +193,37 @@ export default function PagosClientPage({ initialPayments, session }: PagosClien
     }
   };
 
-  const getEstadoBadgeVariant = (estado: string) => {
+  const getEstadoBadgeProps = (estadoRaw: string) => {
+    const estado = (estadoRaw || '').toLowerCase();
     switch (estado) {
       case 'pagado':
-        return 'default';
+        return {
+          variant: 'outline' as const,
+          className:
+            'border-transparent bg-emerald-600 text-white hover:bg-emerald-600/90 dark:bg-emerald-600',
+        };
       case 'pendiente':
-        return 'secondary';
+        return {
+          variant: 'secondary' as const,
+          className:
+            'border-transparent bg-amber-400 text-amber-950 hover:bg-amber-400/90 dark:bg-amber-400',
+        };
+      case 'atrasado':
       case 'vencido':
-        return 'destructive';
+        return { variant: 'destructive' as const, className: undefined };
       default:
-        return 'outline';
+        return { variant: 'outline' as const, className: undefined };
     }
   };
 
-  const getEstadoIcon = (estado: string) => {
+  const getEstadoIcon = (estadoRaw: string) => {
+    const estado = (estadoRaw || '').toLowerCase();
     switch (estado) {
       case 'pagado':
         return <CheckCircle className="h-4 w-4" />;
       case 'pendiente':
         return <Clock className="h-4 w-4" />;
+      case 'atrasado':
       case 'vencido':
         return <XCircle className="h-4 w-4" />;
       default:
@@ -204,12 +248,26 @@ export default function PagosClientPage({ initialPayments, session }: PagosClien
   };
 
   const getPaymentsByStatus = (status: string) => {
-    return payments.filter((p) => p.estado === status).length;
+    return payments.filter((p) => (p.estado || '').toLowerCase() === status).length;
   };
+
+  const getOverdueCount = () =>
+    payments.filter((p) => {
+      const e = (p.estado || '').toLowerCase();
+      return e === 'atrasado' || e === 'vencido';
+    }).length;
+
+  const getOverdueTotal = () =>
+    payments
+      .filter((p) => {
+        const e = (p.estado || '').toLowerCase();
+        return e === 'atrasado' || e === 'vencido';
+      })
+      .reduce((sum, p) => sum + Number(p.monto || 0), 0);
 
   const getTotalByStatus = (status: string) => {
     return payments
-      .filter((p) => p.estado === status)
+      .filter((p) => (p.estado || '').toLowerCase() === status)
       .reduce((sum, p) => sum + Number(p.monto || 0), 0);
   };
 
@@ -292,9 +350,9 @@ export default function PagosClientPage({ initialPayments, session }: PagosClien
                 <XCircle className="h-4 w-4 text-red-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{getPaymentsByStatus('vencido')}</div>
+                <div className="text-2xl font-bold">{getOverdueCount()}</div>
                 <p className="text-xs text-muted-foreground">
-                  {formatCurrency(getTotalByStatus('vencido'))}
+                  {formatCurrency(getOverdueTotal())}
                 </p>
               </CardContent>
             </Card>
@@ -312,6 +370,28 @@ export default function PagosClientPage({ initialPayments, session }: PagosClien
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-9"
                   />
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-sm text-muted-foreground shrink-0">Estado:</span>
+                  {(
+                    [
+                      { key: 'all' as const, label: 'Todos' },
+                      { key: 'pagado' as const, label: 'Pagados' },
+                      { key: 'pendiente' as const, label: 'Pendientes' },
+                      { key: 'moroso' as const, label: 'Atrasados' },
+                    ] as const
+                  ).map(({ key, label }) => (
+                    <Button
+                      key={key}
+                      type="button"
+                      variant={estadoFilter === key ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setEstadoFilter(key)}
+                    >
+                      {label}
+                    </Button>
+                  ))}
                 </div>
 
                 {activeFilters.length > 0 && (
@@ -374,7 +454,7 @@ export default function PagosClientPage({ initialPayments, session }: PagosClien
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
                             <p className="font-medium">{payment.contract.tenant.nombreCompleto}</p>
-                            <Badge variant={getEstadoBadgeVariant(payment.estado)}>
+                            <Badge {...getEstadoBadgeProps(payment.estado)}>
                               {payment.estado}
                             </Badge>
                           </div>
