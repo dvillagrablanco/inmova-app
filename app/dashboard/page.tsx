@@ -14,7 +14,7 @@ import {
   Building2,
   Percent,
   AlertTriangle,
-  DollarSign,
+  Euro,
   TrendingDown,
   FileText,
   Wrench,
@@ -354,6 +354,7 @@ function DashboardPageContent() {
         >
           <KPICard
             title="Ingresos Mensuales"
+            tooltip="Suma de rentas de contratos activos (residencial)"
             value={`€${safeFormatNumber(Number(data.kpis.ingresosTotalesMensuales || 0))}`}
             icon={TrendingUp}
           />
@@ -364,13 +365,15 @@ function DashboardPageContent() {
             subtitle={`${data.kpis.totalEdificios || 0} edificios`}
           />
           <KPICard
-            title="Ocupación (sin garajes)"
+            title="Tasa de Ocupación"
+            tooltip="Porcentaje de unidades residenciales ocupadas (excluye garajes)"
             value={Number(data.kpis.tasaOcupacionCore || data.kpis.tasaOcupacion || 0).toFixed(1)}
             suffix="%"
             icon={Percent}
           />
           <KPICard
-            title="Tasa de Morosidad"
+            title="Morosos"
+            tooltip="Inquilinos con al menos un pago vencido sin cobrar"
             value={Number(data.kpis.tasaMorosidad || 0).toFixed(1)}
             suffix="%"
             icon={AlertTriangle}
@@ -381,8 +384,9 @@ function DashboardPageContent() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <KPICard
             title="Ingresos Netos"
+            tooltip="Ingresos menos gastos del periodo"
             value={`€${safeFormatNumber(Number(data.kpis.ingresosNetos || 0))}`}
-            icon={DollarSign}
+            icon={Euro}
           />
           <KPICard
             title="Gastos Totales"
@@ -421,6 +425,7 @@ function DashboardPageContent() {
                 tick={{ fontSize: 9, fill: '#666' }}
                 className="sm:text-xs"
                 width={40}
+                tickFormatter={(v) => `€${(v / 1000).toFixed(0)}k`}
               />
               <Tooltip
                 wrapperStyle={{ fontSize: 11 }}
@@ -430,6 +435,10 @@ function DashboardPageContent() {
                   border: '1px solid #e5e7eb',
                   fontSize: '12px',
                 }}
+                formatter={(value: number) => [
+                  `€${value.toLocaleString('es-ES', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
+                  'Ingresos',
+                ]}
               />
               <Legend
                 verticalAlign="top"

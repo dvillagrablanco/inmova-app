@@ -33,15 +33,15 @@ export interface PortfolioSummary {
   revalorizacionPct: number;
 
   // Patrimonio financiero (FinancialAccount + FinancialPosition)
-  totalTesoreria: number;          // Saldos bancarios (cuentas corrientes)
-  totalFinanciero: number;         // Valor de mercado de posiciones financieras
-  totalCosteFinanciero: number;    // Coste de adquisición de posiciones
-  pnlFinanciero: number;           // P&L no realizado (valorActual - costeTotal)
+  totalTesoreria: number; // Saldos bancarios (cuentas corrientes)
+  totalFinanciero: number; // Valor de mercado de posiciones financieras
+  totalCosteFinanciero: number; // Coste de adquisición de posiciones
+  pnlFinanciero: number; // P&L no realizado (valorActual - costeTotal)
 
   // Private Equity / Participaciones (Participation)
-  totalPE: number;                 // Valor estimado de participaciones/PE
-  totalCostePE: number;            // Coste de adquisición PE
-  totalCompromisosPE: number;      // Compromisos totales PE (capital llamado + pendiente)
+  totalPE: number; // Valor estimado de participaciones/PE
+  totalCostePE: number; // Coste de adquisición PE
+  totalCompromisosPE: number; // Compromisos totales PE (capital llamado + pendiente)
   totalCapitalPendientePE: number; // Capital pendiente de desembolsar
 
   // Patrimonio total (inmobiliario + financiero + PE + tesorería - deuda)
@@ -132,8 +132,16 @@ export async function getCompanyPortfolio(
   const scopeFilter = { in: scopeIds };
 
   const [
-    assets, buildings, units, contracts, payments, expenses, mortgages,
-    financialAccounts, financialPositions, participations,
+    assets,
+    buildings,
+    units,
+    contracts,
+    payments,
+    expenses,
+    mortgages,
+    financialAccounts,
+    financialPositions,
+    participations,
   ] = await Promise.all([
     prisma.assetAcquisition.findMany({
       where: { companyId: scopeFilter },
@@ -207,12 +215,12 @@ export async function getCompanyPortfolio(
     }),
   ]);
 
-  // Ingresos: suma la renta de TODAS las unidades con renta > 0
-  // (dato más fiable, viene de contabilidad/escrituras/gestión directa)
-  const unitRentTotal = units
-    .filter((u) => u.rentaMensual > 0)
-    .reduce((s, u) => s + u.rentaMensual, 0);
-  const totalMonthlyIncome = unitRentTotal;
+  // Ingresos canónicos: suma de rentaMensual de contratos ACTIVOS (fuente de verdad)
+  const contractedRentActive = contracts.reduce((sum, c) => sum + (c.rentaMensual || 0), 0);
+  const totalMonthlyIncome =
+    contractedRentActive > 0
+      ? contractedRentActive
+      : units.filter((u) => u.rentaMensual > 0).reduce((s, u) => s + u.rentaMensual, 0);
 
   // Gastos
   const totalMonthlyExpenses = expenses.reduce((sum, e) => sum + e.monto, 0);
@@ -305,12 +313,9 @@ export async function getCompanyPortfolio(
   }
 
   const dedupedValues = Object.values(isinMaxValue);
-  const totalFinanciero =
-    dedupedValues.reduce((s, p) => s + p.valor, 0) + noIsinTotal;
-  const totalCosteFinanciero =
-    dedupedValues.reduce((s, p) => s + p.coste, 0) + noIsinCoste;
-  const pnlFinanciero =
-    dedupedValues.reduce((s, p) => s + p.pnl, 0) + noIsinPnl;
+  const totalFinanciero = dedupedValues.reduce((s, p) => s + p.valor, 0) + noIsinTotal;
+  const totalCosteFinanciero = dedupedValues.reduce((s, p) => s + p.coste, 0) + noIsinCoste;
+  const pnlFinanciero = dedupedValues.reduce((s, p) => s + p.pnl, 0) + noIsinPnl;
 
   // 2. Tesorería: solo liquidez real, no NAV de posiciones
   // Si saldoActual ≈ sum(posiciones.valorActual) → la cuenta solo tiene inversiones, 0 liquidez
@@ -346,10 +351,7 @@ export async function getCompanyPortfolio(
   );
   const totalCostePE = participations.reduce((s, p) => s + (p.costeAdquisicion || 0), 0);
   const totalCompromisosPE = participations.reduce((s, p) => s + (p.compromisoTotal || 0), 0);
-  const totalCapitalPendientePE = participations.reduce(
-    (s, p) => s + (p.capitalPendiente || 0),
-    0
-  );
+  const totalCapitalPendientePE = participations.reduce((s, p) => s + (p.capitalPendiente || 0), 0);
 
   // Patrimonio total: inmobiliario (equity) + financiero + PE + tesorería
   const patrimonioTotal = totalEquity + totalTesoreria + totalFinanciero + totalPE;
@@ -649,12 +651,18 @@ export async function getConsolidatedReport(parentCompanyId: string): Promise<Co
     // Financial patrimony consolidation
     totalTesoreria: companies.reduce((s, c) => s + (c.portfolio.totalTesoreria || 0), 0),
     totalFinanciero: companies.reduce((s, c) => s + (c.portfolio.totalFinanciero || 0), 0),
-    totalCosteFinanciero: companies.reduce((s, c) => s + (c.portfolio.totalCosteFinanciero || 0), 0),
+    totalCosteFinanciero: companies.reduce(
+      (s, c) => s + (c.portfolio.totalCosteFinanciero || 0),
+      0
+    ),
     pnlFinanciero: companies.reduce((s, c) => s + (c.portfolio.pnlFinanciero || 0), 0),
     totalPE: companies.reduce((s, c) => s + (c.portfolio.totalPE || 0), 0),
     totalCostePE: companies.reduce((s, c) => s + (c.portfolio.totalCostePE || 0), 0),
     totalCompromisosPE: companies.reduce((s, c) => s + (c.portfolio.totalCompromisosPE || 0), 0),
-    totalCapitalPendientePE: companies.reduce((s, c) => s + (c.portfolio.totalCapitalPendientePE || 0), 0),
+    totalCapitalPendientePE: companies.reduce(
+      (s, c) => s + (c.portfolio.totalCapitalPendientePE || 0),
+      0
+    ),
     patrimonioTotal: 0, // Calculated below
   };
 
@@ -687,12 +695,14 @@ export async function getConsolidatedReport(parentCompanyId: string): Promise<Co
       : 0;
 
   // Patrimonio total consolidado: inmobiliario (equity) + tesorería + financiero + PE
-  consolidated.patrimonioTotal = Math.round(
-    (consolidated.totalEquity +
-      consolidated.totalTesoreria +
-      consolidated.totalFinanciero +
-      consolidated.totalPE) * 100
-  ) / 100;
+  consolidated.patrimonioTotal =
+    Math.round(
+      (consolidated.totalEquity +
+        consolidated.totalTesoreria +
+        consolidated.totalFinanciero +
+        consolidated.totalPE) *
+        100
+    ) / 100;
 
   return {
     companies,

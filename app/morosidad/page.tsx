@@ -76,10 +76,12 @@ export default function MorosidadPage() {
     return payments
       .filter((p) => {
         const estado = (p.estado || '').toLowerCase();
-        const isPendiente = estado === 'pendiente';
-        if (!isPendiente) return false;
-        const venc = p.fechaVencimiento ? new Date(p.fechaVencimiento) : null;
-        return venc && venc < today;
+        if (estado === 'atrasado' || estado === 'vencido') return true;
+        if (estado === 'pendiente') {
+          const venc = p.fechaVencimiento ? new Date(p.fechaVencimiento) : null;
+          return venc != null && venc < today;
+        }
+        return false;
       })
       .map((p) => {
         const venc = new Date(p.fechaVencimiento);

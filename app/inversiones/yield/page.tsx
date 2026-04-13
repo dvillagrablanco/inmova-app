@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { Home, Loader2, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
+import { formatPercent } from '@/lib/utils';
 
 const PRECIO_M2_ESTIMADO = 4500;
 
@@ -124,9 +125,6 @@ export default function YieldTrackerPage() {
   const fmt = (n: number) =>
     new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
 
-  const fmtPct = (n: number) =>
-    `${n.toFixed(2)}%`;
-
   if (loading) {
     return (
       <AuthenticatedLayout>
@@ -177,7 +175,7 @@ export default function YieldTrackerPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{fmtPct(yieldMedio)}</div>
+              <div className="text-2xl font-bold">{formatPercent(yieldMedio, 2)}</div>
             </CardContent>
           </Card>
           <Card>
@@ -188,7 +186,7 @@ export default function YieldTrackerPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                {fmtPct(yieldMaximo)}
+                {formatPercent(yieldMaximo, 2)}
               </div>
             </CardContent>
           </Card>
@@ -199,7 +197,7 @@ export default function YieldTrackerPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{fmtPct(yieldMinimo)}</div>
+              <div className="text-2xl font-bold">{formatPercent(yieldMinimo, 2)}</div>
             </CardContent>
           </Card>
           <Card>
@@ -247,7 +245,7 @@ export default function YieldTrackerPage() {
                       <TableCell>{r.edificio}</TableCell>
                       <TableCell>{fmt(r.rentaMensual)}</TableCell>
                       <TableCell>{r.superficie} m²</TableCell>
-                      <TableCell>{fmtPct(r.yieldPct)}</TableCell>
+                      <TableCell>{formatPercent(r.yieldPct, 2)}</TableCell>
                       <TableCell>
                         <Badge className={getBadgeClass(r.clasificacion)}>
                           {r.clasificacion}

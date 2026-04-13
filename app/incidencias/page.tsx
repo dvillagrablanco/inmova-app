@@ -5,8 +5,6 @@ import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { SmartBreadcrumbs } from '@/components/navigation/smart-breadcrumbs';
-import { ContextualQuickActions } from '@/components/navigation/contextual-quick-actions';
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -29,14 +27,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
 import { toast } from 'sonner';
 import {
   Home,
@@ -408,15 +398,6 @@ export default function IncidenciasPage() {
 
           {/* Quick Actions y botón nueva incidencia */}
           <div className="flex gap-2">
-            {canCreate && (
-              <ContextualQuickActions
-                pendingIssues={incidencias.filter((i) => i.estado === 'pendiente').length}
-                criticalIssues={
-                  incidencias.filter((i) => i.prioridad === 'alta' || i.prioridad === 'critica')
-                    .length
-                }
-              />
-            )}
             {canCreate && (
               <Dialog open={openDialog} onOpenChange={setOpenDialog}>
                 <DialogTrigger asChild>

@@ -49,14 +49,41 @@ export default function NuevoContratoGestionPage() {
 
     setIsSubmitting(true);
     try {
+      const inmuebles = form.inmuebles
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+      if (inmuebles.length === 0) {
+        toast.error('Indica al menos un inmueble');
+        setIsSubmitting(false);
+        return;
+      }
+      const honorariosValor = parseFloat(form.honorariosValor);
+      const payload =
+        form.honorariosTipo === 'fijo'
+          ? {
+              propietario: form.propietario,
+              inmuebles,
+              tipo: form.tipo,
+              honorarios: honorariosValor,
+              fechaInicio: form.fechaInicio,
+              fechaFin: form.fechaFin || form.fechaInicio,
+              condiciones: form.condiciones || undefined,
+            }
+          : {
+              propietario: form.propietario,
+              inmuebles,
+              tipo: form.tipo,
+              honorariosPorcentaje: honorariosValor,
+              fechaInicio: form.fechaInicio,
+              fechaFin: form.fechaFin || form.fechaInicio,
+              condiciones: form.condiciones || undefined,
+            };
+
       const res = await fetch('/api/contratos-gestion', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...form,
-          honorariosValor: parseFloat(form.honorariosValor),
-          inmuebles: form.inmuebles.split(',').map((s) => s.trim()).filter(Boolean),
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) throw new Error('Error al crear contrato');

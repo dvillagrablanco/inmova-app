@@ -398,6 +398,8 @@ export default function FinanzasPage() {
                   {financialSummary.totalBalance.toLocaleString('es-ES', {
                     style: 'currency',
                     currency: 'EUR',
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
                   })}
                 </p>
               </CardContent>
@@ -413,6 +415,8 @@ export default function FinanzasPage() {
                   {financialSummary.monthlyIncome.toLocaleString('es-ES', {
                     style: 'currency',
                     currency: 'EUR',
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
                   })}
                 </p>
               </CardContent>
@@ -428,6 +432,8 @@ export default function FinanzasPage() {
                   {financialSummary.monthlyExpenses.toLocaleString('es-ES', {
                     style: 'currency',
                     currency: 'EUR',
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
                   })}
                 </p>
               </CardContent>
@@ -442,6 +448,8 @@ export default function FinanzasPage() {
                   {financialSummary.pendingPayments.toLocaleString('es-ES', {
                     style: 'currency',
                     currency: 'EUR',
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
                   })}
                 </p>
               </CardContent>
@@ -456,6 +464,8 @@ export default function FinanzasPage() {
                   {financialSummary.overduePayments.toLocaleString('es-ES', {
                     style: 'currency',
                     currency: 'EUR',
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
                   })}
                 </p>
               </CardContent>
@@ -481,7 +491,7 @@ export default function FinanzasPage() {
                 <p
                   className={`text-2xl font-bold ${kpis.dso <= 15 ? 'text-green-600' : kpis.dso <= 30 ? 'text-amber-600' : 'text-red-600'}`}
                 >
-                  {kpis.dso} días
+                  {kpis.dso} {kpis.dso === 1 ? 'día' : 'días'}
                 </p>
               </CardContent>
             </Card>

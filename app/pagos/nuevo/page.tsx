@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
@@ -33,11 +33,13 @@ import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
 interface Contract {
   id: string;
   unit: { numero: string; building: { nombre: string } };
-  tenant: { nombre: string };
+  tenant: { nombre?: string; nombreCompleto?: string };
 }
 
 export default function NuevoPagoPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const buildingIdFromQuery = searchParams.get('buildingId');
   const { data: session, status } = useSession() || {};
   const [isLoading, setIsLoading] = useState(false);
   const [contracts, setContracts] = useState<Contract[]>([]);
@@ -63,10 +65,18 @@ export default function NuevoPagoPage() {
   useEffect(() => {
     const fetchContracts = async () => {
       try {
-        const response = await fetch('/api/contracts');
+        const q = buildingIdFromQuery
+          ? `limit=500&estado=activo&buildingId=${encodeURIComponent(buildingIdFromQuery)}`
+          : 'limit=500&estado=activo';
+        const response = await fetch(`/api/contracts?${q}`);
         if (response.ok) {
-          const data = await response.json();
-          setContracts(data.filter((c: any) => c.estado === 'activo'));
+          const json = await response.json();
+          const contractsArray = Array.isArray(json) ? json : json.data || [];
+          const active = contractsArray.filter((c: any) => c.estado === 'activo');
+          setContracts(active);
+          if (buildingIdFromQuery && active.length === 1) {
+            setFormData((prev) => ({ ...prev, contractId: active[0].id }));
+          }
         }
       } catch (error) {
         logger.error('Error fetching contracts:', error);
@@ -76,7 +86,7 @@ export default function NuevoPagoPage() {
     if (status === 'authenticated') {
       fetchContracts();
     }
-  }, [status]);
+  }, [status, buildingIdFromQuery]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -199,7 +209,7 @@ export default function NuevoPagoPage() {
                       {contracts.map((contract) => (
                         <SelectItem key={contract.id} value={contract.id}>
                           {contract.unit.building.nombre} - {contract.unit.numero} (
-                          {contract.tenant.nombre})
+                          {contract.tenant?.nombreCompleto || contract.tenant?.nombre || '—'})
                         </SelectItem>
                       ))}
                     </SelectContent>

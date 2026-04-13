@@ -26,6 +26,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { ChevronLeft, ChevronRight, Check, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { formatUnitTipoLabel } from '@/lib/utils';
 
 interface Unit {
   id: string;
@@ -347,7 +348,7 @@ export default function AltaRapidaInquilinoPage() {
                                 {u.building?.nombre || 'Edificio'} - {u.numero}
                               </p>
                               <p className="text-sm text-muted-foreground">
-                                {u.tipo} · {u.rentaMensual}€/mes
+                                {formatUnitTipoLabel(u.tipo)} · {u.rentaMensual}€/mes
                               </p>
                             </div>
                             {selectedUnitId === u.id && (

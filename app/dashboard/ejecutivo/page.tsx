@@ -127,7 +127,11 @@ export default function DashboardEjecutivoPage() {
   };
 
   const fmt = (n: number) =>
-    new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
+    new Intl.NumberFormat('es-ES', {
+      style: 'currency',
+      currency: 'EUR',
+      maximumFractionDigits: 0,
+    }).format(n);
 
   if (loading) {
     return (
@@ -135,7 +139,9 @@ export default function DashboardEjecutivoPage() {
         <div className="max-w-7xl mx-auto space-y-6">
           <Skeleton className="h-10 w-64" />
           <div className="grid gap-4 md:grid-cols-4">
-            {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-32" />)}
+            {[...Array(4)].map((_, i) => (
+              <Skeleton key={i} className="h-32" />
+            ))}
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             <Skeleton className="h-64" />
@@ -156,7 +162,8 @@ export default function DashboardEjecutivoPage() {
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Vista Ejecutiva</h1>
             <p className="text-gray-500 dark:text-gray-400">
-              Resumen consolidado del grupo · {new Date().toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
+              Resumen consolidado del grupo ·{' '}
+              {new Date().toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
             </p>
           </div>
           <Button variant="outline" size="sm" onClick={loadData}>
@@ -167,11 +174,7 @@ export default function DashboardEjecutivoPage() {
 
         {/* Patrimonio KPIs */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <KPICard
-            title="Patrimonio Total"
-            value={fmt(d?.patrimonio.total || 0)}
-            icon={Wallet}
-          />
+          <KPICard title="Patrimonio Total" value={fmt(d?.patrimonio.total || 0)} icon={Wallet} />
           <KPICard
             title="Ingresos Netos/mes"
             value={fmt(d?.operativo.ingresosNetos || 0)}
@@ -212,12 +215,26 @@ export default function DashboardEjecutivoPage() {
                     <span className="text-sm font-medium">Inmobiliario</span>
                   </div>
                   <div className="text-right">
-                    <span className="text-sm font-bold">{fmt(d?.patrimonio.inmobiliario || 0)}</span>
-                    <span className="text-xs text-gray-400 ml-2">({((d?.patrimonio.inmobiliario || 0) / (d?.patrimonio.total || 1) * 100).toFixed(0)}%)</span>
+                    <span className="text-sm font-bold">
+                      {fmt(d?.patrimonio.inmobiliario || 0)}
+                    </span>
+                    <span className="text-xs text-gray-400 ml-2">
+                      (
+                      {(
+                        ((d?.patrimonio.inmobiliario || 0) / (d?.patrimonio.total || 1)) *
+                        100
+                      ).toFixed(0)}
+                      %)
+                    </span>
                   </div>
                 </div>
                 <div className="h-2 w-full rounded-full bg-gray-100 dark:bg-gray-800">
-                  <div className="h-2 rounded-full bg-blue-500" style={{ width: `${Math.min((d?.patrimonio.inmobiliario || 0) / (d?.patrimonio.total || 1) * 100, 100)}%` }} />
+                  <div
+                    className="h-2 rounded-full bg-blue-500"
+                    style={{
+                      width: `${Math.min(((d?.patrimonio.inmobiliario || 0) / (d?.patrimonio.total || 1)) * 100, 100)}%`,
+                    }}
+                  />
                 </div>
                 {/* Libros vs Mercado sub-detail */}
                 <div className="grid grid-cols-2 gap-2 ml-6">
@@ -232,8 +249,15 @@ export default function DashboardEjecutivoPage() {
                 </div>
                 {(d?.patrimonio.inmobRevalorizacion || 0) !== 0 && (
                   <div className="ml-6 text-xs">
-                    <span className={d!.patrimonio.inmobRevalorizacion >= 0 ? 'text-green-600' : 'text-red-600'}>
-                      Revalorización: {d!.patrimonio.inmobRevalorizacion >= 0 ? '+' : ''}{fmt(d!.patrimonio.inmobRevalorizacion)} ({d!.patrimonio.inmobRevalorizacionPct >= 0 ? '+' : ''}{d!.patrimonio.inmobRevalorizacionPct.toFixed(1)}%)
+                    <span
+                      className={
+                        d!.patrimonio.inmobRevalorizacion >= 0 ? 'text-green-600' : 'text-red-600'
+                      }
+                    >
+                      Revalorización: {d!.patrimonio.inmobRevalorizacion >= 0 ? '+' : ''}
+                      {fmt(d!.patrimonio.inmobRevalorizacion)} (
+                      {d!.patrimonio.inmobRevalorizacionPct >= 0 ? '+' : ''}
+                      {d!.patrimonio.inmobRevalorizacionPct.toFixed(1)}%)
                     </span>
                   </div>
                 )}
@@ -241,11 +265,21 @@ export default function DashboardEjecutivoPage() {
 
               {/* Financiero + PE */}
               {[
-                { label: 'Financiero', value: d?.patrimonio.financiero || 0, color: 'bg-green-500', icon: TrendingUp },
-                { label: 'Private Equity', value: d?.patrimonio.pe || 0, color: 'bg-purple-500', icon: Landmark },
+                {
+                  label: 'Financiero',
+                  value: d?.patrimonio.financiero || 0,
+                  color: 'bg-green-500',
+                  icon: TrendingUp,
+                },
+                {
+                  label: 'Private Equity',
+                  value: d?.patrimonio.pe || 0,
+                  color: 'bg-purple-500',
+                  icon: Landmark,
+                },
               ].map((item) => {
                 const total = d?.patrimonio.total || 1;
-                const pct = ((item.value / total) * 100);
+                const pct = (item.value / total) * 100;
                 return (
                   <div key={item.label} className="space-y-2">
                     <div className="flex items-center justify-between">
@@ -259,7 +293,10 @@ export default function DashboardEjecutivoPage() {
                       </div>
                     </div>
                     <div className="h-2 w-full rounded-full bg-gray-100 dark:bg-gray-800">
-                      <div className={`h-2 rounded-full ${item.color}`} style={{ width: `${Math.min(pct, 100)}%` }} />
+                      <div
+                        className={`h-2 rounded-full ${item.color}`}
+                        style={{ width: `${Math.min(pct, 100)}%` }}
+                      />
                     </div>
                   </div>
                 );
@@ -297,19 +334,31 @@ export default function DashboardEjecutivoPage() {
               {d?.alertas.topAlerts && d.alertas.topAlerts.length > 0 ? (
                 <div className="space-y-3">
                   {d.alertas.topAlerts.map((alert) => (
-                    <div key={alert.id} className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
-                      <div className={`mt-0.5 h-2 w-2 rounded-full flex-shrink-0 ${
-                        alert.priority === 'alto' ? 'bg-red-500' :
-                        alert.priority === 'medio' ? 'bg-amber-500' : 'bg-green-500'
-                      }`} />
+                    <div
+                      key={alert.id}
+                      className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800"
+                    >
+                      <div
+                        className={`mt-0.5 h-2 w-2 rounded-full flex-shrink-0 ${
+                          alert.priority === 'alto'
+                            ? 'bg-red-500'
+                            : alert.priority === 'medio'
+                              ? 'bg-amber-500'
+                              : 'bg-green-500'
+                        }`}
+                      />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">{alert.title}</p>
                         <p className="text-xs text-gray-500 truncate">{alert.description}</p>
                       </div>
                       <Badge variant="outline" className="text-xs flex-shrink-0">
-                        {alert.type === 'payment' ? 'Pago' :
-                         alert.type === 'contract' ? 'Contrato' :
-                         alert.type === 'maintenance' ? 'Mant.' : 'Doc.'}
+                        {alert.type === 'payment'
+                          ? 'Pago'
+                          : alert.type === 'contract'
+                            ? 'Contrato'
+                            : alert.type === 'maintenance'
+                              ? 'Mant.'
+                              : 'Doc.'}
                       </Badge>
                     </div>
                   ))}
@@ -348,20 +397,35 @@ export default function DashboardEjecutivoPage() {
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               <div className="space-y-1">
-                <p className="text-sm text-gray-500 flex items-center gap-1"><Euro className="h-3 w-3" /> Ingresos/mes</p>
-                <p className="text-xl font-bold text-green-600">{fmt(d?.operativo.ingresosMensuales || 0)}</p>
+                <p className="text-sm text-gray-500 flex items-center gap-1">
+                  <Euro className="h-3 w-3" /> Ingresos/mes{' '}
+                  <span className="text-[10px] text-gray-400">(contractual)</span>
+                </p>
+                <p className="text-xl font-bold text-green-600">
+                  {fmt(d?.operativo.ingresosMensuales || 0)}
+                </p>
               </div>
               <div className="space-y-1">
-                <p className="text-sm text-gray-500 flex items-center gap-1"><TrendingUp className="h-3 w-3" /> Gastos/mes</p>
-                <p className="text-xl font-bold text-red-500">{fmt(d?.operativo.gastosTotales || 0)}</p>
+                <p className="text-sm text-gray-500 flex items-center gap-1">
+                  <TrendingUp className="h-3 w-3" /> Gastos/mes
+                </p>
+                <p className="text-xl font-bold text-red-500">
+                  {fmt(d?.operativo.gastosTotales || 0)}
+                </p>
               </div>
               <div className="space-y-1">
-                <p className="text-sm text-gray-500 flex items-center gap-1"><Building2 className="h-3 w-3" /> Unidades</p>
+                <p className="text-sm text-gray-500 flex items-center gap-1">
+                  <Building2 className="h-3 w-3" /> Unidades
+                </p>
                 <p className="text-xl font-bold">{d?.operativo.totalUnidades || 0}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-sm text-gray-500 flex items-center gap-1"><AlertTriangle className="h-3 w-3" /> Morosidad</p>
-                <p className="text-xl font-bold text-amber-600">{d?.operativo.tasaMorosidad?.toFixed(1) || 0}%</p>
+                <p className="text-sm text-gray-500 flex items-center gap-1">
+                  <AlertTriangle className="h-3 w-3" /> Morosidad
+                </p>
+                <p className="text-xl font-bold text-amber-600">
+                  {d?.operativo.tasaMorosidad?.toFixed(1) || 0}%
+                </p>
               </div>
             </div>
           </CardContent>
@@ -370,7 +434,12 @@ export default function DashboardEjecutivoPage() {
         {/* Quick Navigation */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: 'Propiedades', href: '/propiedades', icon: Home, desc: `${d?.operativo.totalUnidades || 0} unidades` },
+            {
+              label: 'Propiedades',
+              href: '/propiedades',
+              icon: Home,
+              desc: `${d?.operativo.totalUnidades || 0} unidades`,
+            },
             { label: 'Pagos', href: '/pagos', icon: CreditCard, desc: 'Gestión de cobros' },
             { label: 'Contratos', href: '/contratos', icon: FileText, desc: 'Alquileres activos' },
             { label: 'Mantenimiento', href: '/mantenimiento', icon: Wrench, desc: 'Incidencias' },

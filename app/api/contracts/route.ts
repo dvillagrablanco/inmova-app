@@ -44,14 +44,30 @@ export async function GET(req: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '15');
     const skip = (page - 1) * limit;
+    const estadoParam = searchParams.get('estado');
+    const buildingIdParam = searchParams.get('buildingId');
     // Construir where clause
-    const whereClause = {
+    const whereClause: {
+      estado?: 'activo' | 'vencido' | 'cancelado';
+      unit: {
+        buildingId?: string;
+        building: {
+          companyId: { in: string[] };
+        };
+      };
+    } = {
       unit: {
         building: {
           companyId: { in: scope.scopeCompanyIds },
         },
       },
     };
+    if (buildingIdParam) {
+      whereClause.unit.buildingId = buildingIdParam;
+    }
+    if (estadoParam === 'activo' || estadoParam === 'vencido' || estadoParam === 'cancelado') {
+      whereClause.estado = estadoParam;
+    }
 
     // Consulta directa (sin cache para evitar errores de build)
     const [contracts, total] = await Promise.all([
@@ -90,6 +106,7 @@ export async function GET(req: NextRequest) {
         id: contract.id,
         unitId: contract.unitId,
         tenantId: contract.tenantId,
+        numeroContrato: contract.numeroContrato,
         fechaInicio: contract.fechaInicio,
         fechaFin: contract.fechaFin,
         rentaMensual: Number(contract.rentaMensual || 0),
@@ -170,13 +187,38 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Empresa no definida' }, { status: 400 });
     }
 
+    const fechaInicio = new Date(validatedData.fechaInicio);
+    const year = fechaInicio.getFullYear();
+    const prefix = `CT-${year}-`;
+
+    const existingNumbers = await prisma.contract.findMany({
+      where: { numeroContrato: { startsWith: prefix } },
+      select: { numeroContrato: true },
+    });
+    let maxSeq = 0;
+    for (const row of existingNumbers) {
+      const n = row.numeroContrato?.match(/^CT-\d{4}-(\d+)$/);
+      if (n) maxSeq = Math.max(maxSeq, parseInt(n[1], 10));
+    }
+    const numeroContrato = `${prefix}${String(maxSeq + 1).padStart(4, '0')}`;
+
+    const rentaBase = validatedData.rentaMensual;
+    const ivaPct = validatedData.ivaPorcentaje ?? 0;
+    const baseImponible = validatedData.baseImponible ?? rentaBase;
+    const importeIva = validatedData.importeIva ?? (rentaBase * ivaPct) / 100;
+    const rentaTotal = validatedData.rentaTotal ?? rentaBase * (1 + ivaPct / 100);
+
     const contract = await prisma.contract.create({
       data: {
         unitId: validatedData.unitId,
         tenantId: validatedData.tenantId,
-        fechaInicio: new Date(validatedData.fechaInicio),
+        fechaInicio,
         fechaFin: new Date(validatedData.fechaFin),
         rentaMensual: validatedData.rentaMensual,
+        baseImponible,
+        ivaPorcentaje: ivaPct,
+        importeIva,
+        rentaTotal,
         deposito: validatedData.deposito || 0,
         estado: validatedData.estado || 'activo',
         diaPago: validatedData.diaCobranza || 1,
@@ -185,6 +227,7 @@ export async function POST(req: NextRequest) {
         codigoOperacion: validatedData.codigoOperacion,
         suministrosProvisionales: validatedData.suministrosProvisionales,
         ibiRepercutido: validatedData.ibiRepercutido,
+        numeroContrato,
       },
     });
 

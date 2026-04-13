@@ -54,9 +54,12 @@ const TIPO_LABELS: Record<string, string> = {
 };
 
 const ESTADO_LABELS: Record<string, string> = {
-  activo: 'Activo',
-  expirado: 'Expirado',
+  borrador: 'Borrador',
   pendiente: 'Pendiente',
+  activo: 'Activo',
+  vencido: 'Vencido',
+  cancelado: 'Cancelado',
+  expirado: 'Vencido',
 };
 
 export default function ContratosGestionPage() {
@@ -82,9 +85,16 @@ export default function ContratosGestionPage() {
         const res = await fetch('/api/contratos-gestion');
         if (res.ok) {
           const data = await res.json();
-          const items = Array.isArray(data) ? data : Array.isArray(data.data) ? data.data : [];
+          const raw = Array.isArray(data) ? data : Array.isArray(data.data) ? data.data : [];
+          const items: ContratoGestion[] = raw.map((c: any) => ({
+            ...c,
+            inmuebles: Array.isArray(c.inmuebles) ? c.inmuebles : [],
+            estado: typeof c.estado === 'string' ? c.estado : 'pendiente',
+          }));
           setContratos(items);
           setFilteredContratos(items);
+        } else if (res.status === 401) {
+          toast.error('Sesión requerida');
         }
       } catch {
         toast.error('Error de conexión');
@@ -240,8 +250,10 @@ export default function ContratosGestionPage() {
               <SelectContent>
                 <SelectItem value="all">Todos los estados</SelectItem>
                 <SelectItem value="activo">Activo</SelectItem>
-                <SelectItem value="expirado">Expirado</SelectItem>
+                <SelectItem value="vencido">Vencido</SelectItem>
                 <SelectItem value="pendiente">Pendiente</SelectItem>
+                <SelectItem value="borrador">Borrador</SelectItem>
+                <SelectItem value="cancelado">Cancelado</SelectItem>
               </SelectContent>
             </Select>
             <Select value={tipoFilter} onValueChange={setTipoFilter}>
@@ -328,7 +340,7 @@ export default function ContratosGestionPage() {
                             variant={
                               c.estado === 'activo'
                                 ? 'default'
-                                : c.estado === 'expirado'
+                                : c.estado === 'vencido' || c.estado === 'expirado'
                                   ? 'secondary'
                                   : 'outline'
                             }
@@ -337,10 +349,20 @@ export default function ContratosGestionPage() {
                           </Badge>
                         </td>
                         <td className="p-4 text-right">
-                          <Button variant="ghost" size="icon">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => router.push(`/contratos-gestion/${c.id}`)}
+                            aria-label="Ver contrato"
+                          >
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="icon">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => router.push(`/contratos-gestion/${c.id}/editar`)}
+                            aria-label="Editar contrato"
+                          >
                             <Edit className="h-4 w-4" />
                           </Button>
                         </td>

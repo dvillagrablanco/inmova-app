@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
       },
       include: {
         building: { select: { nombre: true, direccion: true } },
-        unit: { select: { numero: true } },
+        unit: { select: { numero: true, buildingId: true } },
         _count: { select: { claims: true } },
       },
       orderBy: { fechaVencimiento: 'asc' },
@@ -60,8 +60,34 @@ export async function GET(request: NextRequest) {
           });
         }
 
+        const raw = seguro as Record<string, unknown>;
+        const primaAnualNum =
+          typeof raw.primaAnual === 'number'
+            ? raw.primaAnual
+            : raw.primaAnual != null
+              ? Number(raw.primaAnual)
+              : null;
+        const primaMensualNum =
+          typeof raw.primaMensual === 'number'
+            ? raw.primaMensual
+            : raw.primaMensual != null
+              ? Number(raw.primaMensual)
+              : null;
+
+        let primaAnual = primaAnualNum;
+        if (
+          (primaAnual == null || Number.isNaN(primaAnual) || primaAnual === 0) &&
+          primaMensualNum != null &&
+          !Number.isNaN(primaMensualNum) &&
+          primaMensualNum > 0
+        ) {
+          primaAnual = Math.round(primaMensualNum * 12 * 100) / 100;
+        }
+
         return {
           ...seguro,
+          primaAnual,
+          primaMensual: primaMensualNum ?? undefined,
           alcance: isBuilding ? 'edificio' : seguro.unitId ? 'unidad' : 'empresa',
           unidadesCubiertas: isBuilding ? unidadesCubiertas : seguro.unitId ? 1 : 0,
           diasHastaVencimiento: Math.ceil(

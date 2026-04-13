@@ -23,6 +23,54 @@ export function formatCurrency(amount: number, currency: string = 'EUR', locale:
   }).format(amount);
 }
 
+export function formatEuro(amount: number): string {
+  return new Intl.NumberFormat('es-ES', {
+    style: 'currency',
+    currency: 'EUR',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
+}
+
+export function formatPercent(value: number, decimals: number = 1): string {
+  return new Intl.NumberFormat('es-ES', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  }).format(value) + '%';
+}
+
+export function formatFecha(fecha: Date | string): string {
+  return new Intl.DateTimeFormat('es-ES', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date(fecha));
+}
+
+export function formatNombre(nombre: string): string {
+  if (!nombre) return '';
+  if (nombre === nombre.toUpperCase() && nombre.length > 3) {
+    return nombre
+      .toLowerCase()
+      .split(' ')
+      .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ');
+  }
+  return nombre;
+}
+
+/** Etiqueta de tipo de unidad para UI (vivienda → Vivienda; resto capitalizado) */
+export function formatUnitTipoLabel(tipo: string | null | undefined): string {
+  if (!tipo) return '';
+  const normalized = tipo.trim().toLowerCase();
+  if (normalized === 'vivienda') return 'Vivienda';
+  return tipo
+    .replace(/_/g, ' ')
+    .split(' ')
+    .map((w) => (w ? w.charAt(0).toUpperCase() + w.slice(1).toLowerCase() : ''))
+    .join(' ');
+}
+
 export function formatDate(date: Date | string, format: 'short' | 'long' | 'full' = 'short', locale: string = 'es-ES'): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
   

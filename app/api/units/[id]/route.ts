@@ -100,6 +100,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
           select: {
             id: true,
             nombreCompleto: true,
+            empresa: true,
             email: true,
             telefono: true,
             dni: true,
@@ -244,6 +245,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
           select: {
             id: true,
             nombreCompleto: true,
+            empresa: true,
             email: true,
             telefono: true,
             dni: true,

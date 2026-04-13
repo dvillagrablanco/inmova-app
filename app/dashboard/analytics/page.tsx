@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 import {
   TrendingUp,
   TrendingDown,
-  DollarSign,
+  Euro,
   Home,
   Users,
   FileText,
@@ -30,6 +30,8 @@ import {
 interface DashboardStats {
   totalBuildings: number;
   totalUnits: number;
+  /** Unidades con estado disponible (vacantes) */
+  unidadesDisponiblesEstado: number;
   totalTenants: number;
   totalContracts: number;
   activeContracts: number;
@@ -66,7 +68,11 @@ export default function AnalyticsPage() {
       const contractsData = Array.isArray(contracts) ? contracts : contracts.data || [];
 
       const activeContracts = contractsData.filter((c: any) => c.estado === 'activo');
-      const occupiedUnits = unitsData.filter((u: any) => u.estado === 'ocupada');
+      const unitsForOccupancy = unitsData.filter((u: any) => u.estado !== 'uso_empresa');
+      const occupiedUnits = unitsForOccupancy.filter((u: any) => u.estado === 'ocupada');
+      const unidadesDisponiblesEstado = unitsData.filter(
+        (u: any) => u.estado === 'disponible'
+      ).length;
       const monthlyIncome = activeContracts.reduce(
         (sum: number, c: any) => sum + (Number(c.rentaMensual) || 0),
         0
@@ -82,11 +88,14 @@ export default function AnalyticsPage() {
       setStats({
         totalBuildings: buildingsData.length,
         totalUnits: unitsData.length,
+        unidadesDisponiblesEstado,
         totalTenants: tenantsData.length,
         totalContracts: contractsData.length,
         activeContracts: activeContracts.length,
         occupancyRate:
-          unitsData.length > 0 ? Math.round((occupiedUnits.length / unitsData.length) * 100) : 0,
+          unitsForOccupancy.length > 0
+            ? Math.round((occupiedUnits.length / unitsForOccupancy.length) * 100)
+            : 0,
         monthlyIncome,
         pendingPayments: 0, // Would need payments API
         expiringContracts: expiringContracts.length,
@@ -122,8 +131,9 @@ export default function AnalyticsPage() {
   const kpiCards = [
     {
       title: 'Ingresos Mensuales',
-      value: `€${stats?.monthlyIncome?.toLocaleString() || 0}`,
-      icon: DollarSign,
+      value: `€${stats?.monthlyIncome?.toLocaleString('es-ES') || 0}`,
+      subtitle: 'Renta contractual activa',
+      icon: Euro,
       color: 'text-green-500',
       bgColor: 'bg-green-50',
     },
@@ -282,9 +292,7 @@ export default function AnalyticsPage() {
             </div>
             <div className="text-center p-4 bg-gray-50 rounded-lg">
               <p className="text-2xl font-bold text-blue-600">
-                {stats?.totalUnits
-                  ? stats.totalUnits - Math.round(stats.totalUnits * (stats.occupancyRate / 100))
-                  : 0}
+                {stats?.unidadesDisponiblesEstado ?? 0}
               </p>
               <p className="text-sm text-gray-500">Unidades disponibles</p>
             </div>
@@ -314,7 +322,7 @@ export default function AnalyticsPage() {
               href="/finanzas/cuadro-de-mandos"
               className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
             >
-              <DollarSign className="h-8 w-8 text-blue-600" />
+              <Euro className="h-8 w-8 text-blue-600" />
               <div>
                 <p className="font-medium text-sm">Cuadro de Mandos</p>
                 <p className="text-xs text-gray-500">PyG Analítica por centro de coste</p>

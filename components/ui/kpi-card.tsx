@@ -1,8 +1,14 @@
 'use client';
 
-import { LucideIcon } from 'lucide-react';
+import { HelpCircle, LucideIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { memo } from 'react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface KPICardProps {
   title: string;
@@ -17,6 +23,8 @@ interface KPICardProps {
   sparklineData?: number[];
   accentColor?: string;
   className?: string;
+  /** Explicación breve del KPI (icono de ayuda + tooltip) */
+  tooltip?: string;
 }
 
 /**
@@ -64,10 +72,35 @@ export const KPICard = memo(function KPICard({
   subtitle,
   sparklineData,
   accentColor,
-  className = '' 
+  className = '',
+  tooltip,
 }: KPICardProps) {
   const borderStyle = accentColor ? { borderLeftColor: accentColor, borderLeftWidth: '4px' } : {};
   
+  const titleRow = tooltip ? (
+    <TooltipProvider delayDuration={200}>
+      <div className="flex items-center gap-1.5 mb-2">
+        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{title}</p>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              className="inline-flex text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              aria-label={`Información: ${title}`}
+            >
+              <HelpCircle className="h-4 w-4 shrink-0" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="max-w-xs text-left">
+            {tooltip}
+          </TooltipContent>
+        </Tooltip>
+      </div>
+    </TooltipProvider>
+  ) : (
+    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">{title}</p>
+  );
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -78,7 +111,7 @@ export const KPICard = memo(function KPICard({
     >
       <div className="flex items-start justify-between">
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">{title}</p>
+          {titleRow}
           <div className="flex items-baseline gap-2">
             <h3 className="text-3xl font-bold text-gray-900 dark:text-white">
               {typeof value === 'number' ? value.toLocaleString('es-ES') : value}

@@ -84,8 +84,8 @@ export async function GET(request: NextRequest) {
       let valorLibrosEdificio = 0;
       let valorMercadoEdificio = 0;
       const rentaEdificio = b.units.reduce((sum: number, u: any) => {
-        const contractRenta = u.contracts?.[0]?.rentaMensual;
-        return sum + (contractRenta || u.rentaMensual || 0);
+        const activeContract = u.contracts?.find((c: any) => c.estado === 'activo');
+        return sum + (activeContract?.rentaMensual || 0);
       }, 0);
 
       for (const u of b.units) {

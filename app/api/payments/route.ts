@@ -43,12 +43,13 @@ export async function GET(req: NextRequest) {
       const { searchParams } = new URL(req.url);
       const estado = searchParams.get('estado');
       const contractId = searchParams.get('contractId');
+      const buildingId = searchParams.get('buildingId');
       const page = parseInt(searchParams.get('page') || '1');
       const limit = parseInt(searchParams.get('limit') || '20');
       const skip = (page - 1) * limit;
 
       // Si hay filtros o paginación, no usar caché
-      const hasFilters = estado || contractId;
+      const hasFilters = estado || contractId || buildingId;
       const usePagination = searchParams.has('page') || searchParams.has('limit');
 
       if (hasFilters || usePagination) {
@@ -61,6 +62,9 @@ export async function GET(req: NextRequest) {
             },
           },
         };
+        if (buildingId) {
+          where.contract.unit.buildingId = buildingId;
+        }
         if (estado) where.estado = estado;
         if (contractId) where.contractId = contractId;
 

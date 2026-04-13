@@ -260,11 +260,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!precioAlquiler) {
+    const precio =
+      body.precioAlquiler != null && body.precioAlquiler !== ''
+        ? body.precioAlquiler
+        : body.rentaMensualBase;
+    if (precio == null || precio === '') {
       return NextResponse.json({ error: 'El precio de alquiler es requerido' }, { status: 400 });
     }
 
-    const rentaMensualBase = Number(precioAlquiler);
+    const rentaMensualBase = Number(precio);
     const superficieUtilValue = superficieUtil
       ? Number(superficieUtil)
       : Number(superficieConstruida) * 0.9;

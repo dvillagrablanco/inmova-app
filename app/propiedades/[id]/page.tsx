@@ -20,8 +20,6 @@ import {
   Calendar,
   FileText,
   TrendingUp,
-  Check,
-  X as XIcon,
   ExternalLink,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -45,6 +43,7 @@ import { InsuranceCoverageCard } from '@/components/property/InsuranceCoverageCa
 import { CatastroPlanoViewer } from '@/components/property/CatastroPlanoViewer';
 import { PhotoGallery } from '@/components/ui/photo-gallery';
 import { EntityDocuments } from '@/components/ui/entity-documents';
+import { cn } from '@/lib/utils';
 
 interface PropertyDetails {
   id: string;
@@ -83,6 +82,7 @@ interface PropertyDetails {
   tenant?: {
     id: string;
     nombreCompleto: string;
+    empresa?: string | null;
     email: string;
     telefono?: string;
   };
@@ -437,12 +437,15 @@ export default function PropiedadDetallesPage() {
                       key={item.label}
                       className="flex items-center gap-2 p-2 rounded bg-muted/50"
                     >
-                      {item.value ? (
-                        <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-                      ) : (
-                        <XIcon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                      )}
-                      <span className={`text-sm ${item.value ? '' : 'text-muted-foreground'}`}>
+                      <span
+                        className={cn(
+                          'text-sm',
+                          item.value
+                            ? 'text-green-700 font-medium'
+                            : 'text-muted-foreground line-through'
+                        )}
+                      >
+                        {item.value ? '✓ ' : ''}
                         {item.label}
                       </span>
                     </div>
@@ -586,11 +589,18 @@ export default function PropiedadDetallesPage() {
                   <div className="flex items-center gap-3">
                     <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
                       <span className="text-lg font-semibold">
-                        {property.tenant.nombreCompleto.charAt(0)}
+                        {(property.tenant.empresa || property.tenant.nombreCompleto).charAt(0)}
                       </span>
                     </div>
                     <div>
-                      <p className="font-semibold">{property.tenant.nombreCompleto}</p>
+                      <p className="font-semibold">
+                        {property.tenant.empresa || property.tenant.nombreCompleto}
+                      </p>
+                      {property.tenant.empresa && (
+                        <p className="text-xs text-muted-foreground">
+                          Contacto: {property.tenant.nombreCompleto}
+                        </p>
+                      )}
                       <p className="text-sm text-muted-foreground">{property.tenant.email}</p>
                       {property.tenant.telefono && (
                         <p className="text-sm text-muted-foreground">{property.tenant.telefono}</p>
@@ -719,8 +729,10 @@ export default function PropiedadDetallesPage() {
 
             {/* Mapa de Ubicación */}
             <PropertyMap
-              address={property.building.direccion}
-              city={property.building.ciudad}
+              address={property.building?.direccion || ''}
+              city={property.building?.ciudad || ''}
+              latitude={property.building?.latitud ?? undefined}
+              longitude={property.building?.longitud ?? undefined}
               showNearbyPoints={true}
             />
 

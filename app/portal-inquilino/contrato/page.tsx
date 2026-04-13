@@ -25,6 +25,7 @@ import {
 import { toast } from 'sonner';
 import { format, differenceInDays, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { formatUnitTipoLabel } from '@/lib/utils';
 
 interface Contract {
   id: string;
@@ -323,7 +324,7 @@ export default function PortalInquilinoContratoPage() {
               
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Tipo</span>
-                <span className="font-medium capitalize">{selectedContract.unit.tipo}</span>
+                <span className="font-medium">{formatUnitTipoLabel(selectedContract.unit.tipo)}</span>
               </div>
               
               {selectedContract.unit.superficie && (

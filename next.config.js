@@ -280,6 +280,7 @@ const nextConfig = {
   async redirects() {
     return [
       { source: '/knowledge-base', destination: '/ayuda', permanent: true },
+      { source: '/vista-ejecutiva', destination: '/dashboard/ejecutivo', permanent: true },
       // Comercial: singular → plural
       { source: '/comercial/local', destination: '/comercial/locales', permanent: true },
       { source: '/comercial/oficina', destination: '/comercial/oficinas', permanent: true },

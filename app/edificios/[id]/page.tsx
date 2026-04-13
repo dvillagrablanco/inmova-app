@@ -15,8 +15,6 @@ import {
   Trash2,
   Calendar,
   TrendingUp,
-  Check,
-  X as XIcon,
   Users,
   Warehouse,
   Car,
@@ -28,6 +26,7 @@ import {
   Plus,
   FileText,
   Wrench,
+  CreditCard,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -64,6 +63,7 @@ import { EntityDocuments } from '@/components/ui/entity-documents';
 import { PropertyMap } from '@/components/property/PropertyMap';
 import { CatastroPlanoViewer } from '@/components/property/CatastroPlanoViewer';
 import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
+import { cn, formatUnitTipoLabel } from '@/lib/utils';
 
 interface Unit {
   id: string;
@@ -83,6 +83,19 @@ interface Unit {
     fechaFin: string;
     estado: string;
   }>;
+}
+
+/** Extrae ciudad desde dirección tipo "calle, CP ciudad" y quita comas finales. */
+function ciudadFromDireccion(direccion: string): string {
+  const parts = direccion
+    .split(',')
+    .map((p) => p.trim().replace(/,+$/, '').trim())
+    .filter(Boolean);
+  if (parts.length < 2) return '';
+  const last = parts[parts.length - 1];
+  const cpCity = last.match(/^\d{5}\s+(.+)$/);
+  if (cpCity) return cpCity[1].replace(/,+$/, '').trim();
+  return last.replace(/,+$/, '').trim();
 }
 
 interface BuildingDetails {
@@ -127,6 +140,7 @@ export default function EdificioDetallesPage() {
     noi: number;
     desglose: Array<{ tipo: string; importe: number }>;
   } | null>(null);
+  const [buildingPayments, setBuildingPayments] = useState<any[]>([]);
 
   const buildingId = params?.id as string;
 
@@ -161,6 +175,19 @@ export default function EdificioDetallesPage() {
           };
           setBuilding(normalizedData);
           setImages(data.imagenes || []);
+
+          try {
+            const payRes = await fetch(`/api/payments?buildingId=${buildingId}`);
+            if (payRes.ok) {
+              const payJson = await payRes.json();
+              const list = Array.isArray(payJson) ? payJson : payJson.data || [];
+              setBuildingPayments(list);
+            } else {
+              setBuildingPayments([]);
+            }
+          } catch {
+            setBuildingPayments([]);
+          }
         } else if (response.status === 404) {
           setError('Edificio no encontrado');
           toast.error('Edificio no encontrado');
@@ -192,7 +219,10 @@ export default function EdificioDetallesPage() {
         if (!data.success || !data.data) return;
 
         const nombre = (building.nombre + ' ' + building.direccion).toLowerCase();
-        const keywords = nombre.replace(/[,./]/g, ' ').split(/\s+/).filter((w: string) => w.length > 3);
+        const keywords = nombre
+          .replace(/[,./]/g, ' ')
+          .split(/\s+/)
+          .filter((w: string) => w.length > 3);
 
         // Match income entries by building name/address
         let ingresoAnual = 0;
@@ -409,6 +439,7 @@ export default function EdificioDetallesPage() {
 
   const tipoBadge = getTipoBadge(building.tipo);
   const metrics = calculateMetrics();
+  const ciudadLine = ciudadFromDireccion(building.direccion || '');
 
   return (
     <AuthenticatedLayout>
@@ -549,7 +580,12 @@ export default function EdificioDetallesPage() {
                   Rentabilidad Contable (2025)
                 </CardTitle>
                 <Badge variant={noiData.noi > 0 ? 'default' : 'destructive'}>
-                  NOI: {noiData.noi > 0 ? '+' : ''}{noiData.noi.toLocaleString('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })}
+                  NOI: {noiData.noi > 0 ? '+' : ''}
+                  {noiData.noi.toLocaleString('es-ES', {
+                    style: 'currency',
+                    currency: 'EUR',
+                    maximumFractionDigits: 0,
+                  })}
                 </Badge>
               </div>
               <CardDescription>Datos reales de contabilidad (Zucchetti)</CardDescription>
@@ -558,19 +594,33 @@ export default function EdificioDetallesPage() {
               <div className="grid grid-cols-3 gap-4 mb-4">
                 <div className="text-center">
                   <p className="text-lg font-bold text-green-600">
-                    {noiData.ingresoAnual.toLocaleString('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })}
+                    {noiData.ingresoAnual.toLocaleString('es-ES', {
+                      style: 'currency',
+                      currency: 'EUR',
+                      maximumFractionDigits: 0,
+                    })}
                   </p>
                   <p className="text-xs text-muted-foreground">Ingresos/año</p>
                 </div>
                 <div className="text-center">
                   <p className="text-lg font-bold text-red-500">
-                    {noiData.gastosOperativos.toLocaleString('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })}
+                    {noiData.gastosOperativos.toLocaleString('es-ES', {
+                      style: 'currency',
+                      currency: 'EUR',
+                      maximumFractionDigits: 0,
+                    })}
                   </p>
                   <p className="text-xs text-muted-foreground">Gastos/año</p>
                 </div>
                 <div className="text-center">
-                  <p className={`text-lg font-bold ${noiData.noi > 0 ? 'text-green-600' : 'text-red-500'}`}>
-                    {noiData.noi.toLocaleString('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })}
+                  <p
+                    className={`text-lg font-bold ${noiData.noi > 0 ? 'text-green-600' : 'text-red-500'}`}
+                  >
+                    {noiData.noi.toLocaleString('es-ES', {
+                      style: 'currency',
+                      currency: 'EUR',
+                      maximumFractionDigits: 0,
+                    })}
                   </p>
                   <p className="text-xs text-muted-foreground">NOI</p>
                 </div>
@@ -582,7 +632,11 @@ export default function EdificioDetallesPage() {
                     <div key={i} className="flex justify-between text-xs">
                       <span className="text-muted-foreground">{g.tipo}</span>
                       <span className="font-medium">
-                        {g.importe.toLocaleString('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })}
+                        {g.importe.toLocaleString('es-ES', {
+                          style: 'currency',
+                          currency: 'EUR',
+                          maximumFractionDigits: 0,
+                        })}
                       </span>
                     </div>
                   ))}
@@ -651,12 +705,12 @@ export default function EdificioDetallesPage() {
                               >
                                 <TableCell className="font-medium">
                                   <div>{unit.numero}</div>
-                                  <div className="text-xs text-muted-foreground sm:hidden capitalize">
-                                    {unit.tipo}
+                                  <div className="text-xs text-muted-foreground sm:hidden">
+                                    {formatUnitTipoLabel(unit.tipo)}
                                   </div>
                                 </TableCell>
-                                <TableCell className="hidden sm:table-cell capitalize">
-                                  {unit.tipo}
+                                <TableCell className="hidden sm:table-cell">
+                                  {formatUnitTipoLabel(unit.tipo)}
                                 </TableCell>
                                 <TableCell>
                                   <Badge variant={estadoBadge.variant} className="text-xs">
@@ -736,6 +790,67 @@ export default function EdificioDetallesPage() {
               </CardContent>
             </Card>
 
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CreditCard className="h-5 w-5" />
+                  Cobros del Edificio
+                </CardTitle>
+                <CardDescription>Pagos asociados a las unidades de este edificio</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex justify-between items-center mb-4">
+                  <p className="text-sm text-muted-foreground">
+                    {buildingPayments.length} pagos registrados
+                  </p>
+                  <Button
+                    size="sm"
+                    onClick={() => router.push(`/pagos/nuevo?buildingId=${buildingId}`)}
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    Registrar Cobro
+                  </Button>
+                </div>
+                {buildingPayments.length > 0 ? (
+                  <div className="divide-y">
+                    {buildingPayments.slice(0, 10).map((p: any) => (
+                      <div key={p.id} className="py-2 flex justify-between items-center">
+                        <div>
+                          <p className="text-sm font-medium">
+                            {p.contract?.tenant?.nombreCompleto || 'N/A'}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {p.periodo} · {p.contract?.unit?.numero || ''}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-semibold">
+                            €{Number(p.monto || 0).toLocaleString('es-ES')}
+                          </p>
+                          <Badge
+                            variant={
+                              p.estado === 'pagado'
+                                ? 'default'
+                                : p.estado === 'atrasado'
+                                  ? 'destructive'
+                                  : 'secondary'
+                            }
+                            className="text-xs"
+                          >
+                            {p.estado}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    No hay pagos registrados
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+
             {/* Características del Edificio */}
             <Card>
               <CardHeader>
@@ -757,14 +872,17 @@ export default function EdificioDetallesPage() {
                         className="flex items-center gap-3 p-3 rounded-lg bg-muted/50"
                       >
                         <Icon
-                          className={`h-5 w-5 ${item.value ? 'text-green-600' : 'text-muted-foreground'}`}
+                          className={`h-5 w-5 flex-shrink-0 ${item.value ? 'text-green-600' : 'text-muted-foreground'}`}
                         />
-                        {item.value ? (
-                          <Check className="h-4 w-4 text-green-600" />
-                        ) : (
-                          <XIcon className="h-4 w-4 text-muted-foreground" />
-                        )}
-                        <span className={item.value ? '' : 'text-muted-foreground'}>
+                        <span
+                          className={cn(
+                            'text-sm',
+                            item.value
+                              ? 'text-green-700 font-medium'
+                              : 'text-muted-foreground line-through'
+                          )}
+                        >
+                          {item.value ? '✓ ' : ''}
                           {item.label}
                         </span>
                       </div>
@@ -780,6 +898,7 @@ export default function EdificioDetallesPage() {
             {/* Mapa de Ubicación */}
             <PropertyMap
               address={building.direccion}
+              city={ciudadLine || undefined}
               latitude={building.latitud ?? undefined}
               longitude={building.longitud ?? undefined}
             />
