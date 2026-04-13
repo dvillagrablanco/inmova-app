@@ -23,6 +23,23 @@ export function formatCurrency(amount: number, currency: string = 'EUR', locale:
   }).format(amount);
 }
 
+export function formatEuro(amount: number): string {
+  return new Intl.NumberFormat('es-ES', {
+    style: 'currency',
+    currency: 'EUR',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
+}
+
+export function formatFecha(fecha: Date | string): string {
+  return new Intl.DateTimeFormat('es-ES', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date(fecha));
+}
+
 export function formatDate(date: Date | string, format: 'short' | 'long' | 'full' = 'short', locale: string = 'es-ES'): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
   

@@ -15,8 +15,6 @@ import {
   Trash2,
   Calendar,
   TrendingUp,
-  Check,
-  X as XIcon,
   Users,
   Warehouse,
   Car,
@@ -64,6 +62,7 @@ import { EntityDocuments } from '@/components/ui/entity-documents';
 import { PropertyMap } from '@/components/property/PropertyMap';
 import { CatastroPlanoViewer } from '@/components/property/CatastroPlanoViewer';
 import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
+import { cn } from '@/lib/utils';
 
 interface Unit {
   id: string;
@@ -757,14 +756,17 @@ export default function EdificioDetallesPage() {
                         className="flex items-center gap-3 p-3 rounded-lg bg-muted/50"
                       >
                         <Icon
-                          className={`h-5 w-5 ${item.value ? 'text-green-600' : 'text-muted-foreground'}`}
+                          className={`h-5 w-5 flex-shrink-0 ${item.value ? 'text-green-600' : 'text-muted-foreground'}`}
                         />
-                        {item.value ? (
-                          <Check className="h-4 w-4 text-green-600" />
-                        ) : (
-                          <XIcon className="h-4 w-4 text-muted-foreground" />
-                        )}
-                        <span className={item.value ? '' : 'text-muted-foreground'}>
+                        <span
+                          className={cn(
+                            'text-sm',
+                            item.value
+                              ? 'text-green-700 font-medium'
+                              : 'text-muted-foreground line-through'
+                          )}
+                        >
+                          {item.value ? '✓ ' : ''}
                           {item.label}
                         </span>
                       </div>

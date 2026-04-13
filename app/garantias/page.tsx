@@ -40,7 +40,6 @@ import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Shield,
-  DollarSign,
   CheckCircle,
   Clock,
   AlertCircle,
@@ -840,7 +839,7 @@ export default function GarantiasPage() {
                                 setShowReturnDialog(true);
                               }}
                             >
-                              <DollarSign className="h-4 w-4 mr-2" />
+                              <Euro className="h-4 w-4 mr-2" />
                               Procesar devolución
                             </DropdownMenuItem>
                           )}
@@ -1021,7 +1020,7 @@ export default function GarantiasPage() {
                 Cancelar
               </Button>
               <Button onClick={handleProcessReturn} className="bg-green-600 hover:bg-green-700">
-                <DollarSign className="h-4 w-4 mr-2" />
+                <Euro className="h-4 w-4 mr-2" />
                 Confirmar Devolución
               </Button>
             </DialogFooter>

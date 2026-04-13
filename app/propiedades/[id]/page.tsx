@@ -20,8 +20,6 @@ import {
   Calendar,
   FileText,
   TrendingUp,
-  Check,
-  X as XIcon,
   ExternalLink,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -45,6 +43,7 @@ import { InsuranceCoverageCard } from '@/components/property/InsuranceCoverageCa
 import { CatastroPlanoViewer } from '@/components/property/CatastroPlanoViewer';
 import { PhotoGallery } from '@/components/ui/photo-gallery';
 import { EntityDocuments } from '@/components/ui/entity-documents';
+import { cn } from '@/lib/utils';
 
 interface PropertyDetails {
   id: string;
@@ -433,16 +432,16 @@ export default function PropiedadDetallesPage() {
                     { label: 'Balcón', value: property.balcon },
                     { label: 'Amueblado', value: property.amueblado },
                   ].map((item) => (
-                    <div
-                      key={item.label}
-                      className="flex items-center gap-2 p-2 rounded bg-muted/50"
-                    >
-                      {item.value ? (
-                        <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-                      ) : (
-                        <XIcon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                      )}
-                      <span className={`text-sm ${item.value ? '' : 'text-muted-foreground'}`}>
+                    <div key={item.label} className="flex items-center gap-2 p-2 rounded bg-muted/50">
+                      <span
+                        className={cn(
+                          'text-sm',
+                          item.value
+                            ? 'text-green-700 font-medium'
+                            : 'text-muted-foreground line-through'
+                        )}
+                      >
+                        {item.value ? '✓ ' : ''}
                         {item.label}
                       </span>
                     </div>
