@@ -40,6 +40,18 @@ export function formatFecha(fecha: Date | string): string {
   }).format(new Date(fecha));
 }
 
+/** Etiqueta de tipo de unidad para UI (vivienda → Vivienda; resto capitalizado) */
+export function formatUnitTipoLabel(tipo: string | null | undefined): string {
+  if (!tipo) return '';
+  const normalized = tipo.trim().toLowerCase();
+  if (normalized === 'vivienda') return 'Vivienda';
+  return tipo
+    .replace(/_/g, ' ')
+    .split(' ')
+    .map((w) => (w ? w.charAt(0).toUpperCase() + w.slice(1).toLowerCase() : ''))
+    .join(' ');
+}
+
 export function formatDate(date: Date | string, format: 'short' | 'long' | 'full' = 'short', locale: string = 'es-ES'): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
   

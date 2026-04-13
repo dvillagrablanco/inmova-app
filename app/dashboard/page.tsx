@@ -354,6 +354,7 @@ function DashboardPageContent() {
         >
           <KPICard
             title="Ingresos Mensuales"
+            tooltip="Suma de rentas de contratos activos (residencial)"
             value={`€${safeFormatNumber(Number(data.kpis.ingresosTotalesMensuales || 0))}`}
             icon={TrendingUp}
           />
@@ -364,13 +365,15 @@ function DashboardPageContent() {
             subtitle={`${data.kpis.totalEdificios || 0} edificios`}
           />
           <KPICard
-            title="Ocupación (sin garajes)"
+            title="Tasa de Ocupación"
+            tooltip="Porcentaje de unidades residenciales ocupadas (excluye garajes)"
             value={Number(data.kpis.tasaOcupacionCore || data.kpis.tasaOcupacion || 0).toFixed(1)}
             suffix="%"
             icon={Percent}
           />
           <KPICard
-            title="Tasa de Morosidad"
+            title="Morosos"
+            tooltip="Inquilinos con al menos un pago vencido sin cobrar"
             value={Number(data.kpis.tasaMorosidad || 0).toFixed(1)}
             suffix="%"
             icon={AlertTriangle}
@@ -381,6 +384,7 @@ function DashboardPageContent() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <KPICard
             title="Ingresos Netos"
+            tooltip="Ingresos menos gastos del periodo"
             value={`€${safeFormatNumber(Number(data.kpis.ingresosNetos || 0))}`}
             icon={DollarSign}
           />

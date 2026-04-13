@@ -33,6 +33,25 @@ import { SearchInput } from '@/components/ui/search-input';
 import { DeleteConfirmationDialog } from '@/components/ui/delete-confirmation-dialog';
 import { toast } from 'sonner';
 
+const displayPhone = (phone: string | null) => {
+  if (!phone || phone === '000000000' || phone === '+34 000 000 000' || phone.includes('000 000')) {
+    return 'No disponible';
+  }
+  return phone;
+};
+
+const displayEmail = (email: string | null) => {
+  if (
+    !email ||
+    email.includes('@rovida-tenant.local') ||
+    email.includes('@example.com') ||
+    email.includes('@pendiente')
+  ) {
+    return 'No disponible';
+  }
+  return email;
+};
+
 interface Tenant {
   id: string;
   nombreCompleto: string;
@@ -367,11 +386,11 @@ export default function InquilinosClientPage({
                     <div className="space-y-3">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Mail className="h-4 w-4" />
-                        <span>{tenant.email}</span>
+                        <span>{displayEmail(tenant.email)}</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Phone className="h-4 w-4" />
-                        <span>{tenant.telefono}</span>
+                        <span>{displayPhone(tenant.telefono)}</span>
                       </div>
                       {tenant.units && tenant.units.length > 0 && (
                         <div className="pt-3 border-t">
@@ -414,11 +433,11 @@ export default function InquilinosClientPage({
                           <div className="flex items-center gap-4 text-sm text-muted-foreground">
                             <span className="flex items-center gap-1">
                               <Mail className="h-3 w-3" />
-                              {tenant.email}
+                              {displayEmail(tenant.email)}
                             </span>
                             <span className="flex items-center gap-1">
                               <Phone className="h-3 w-3" />
-                              {tenant.telefono}
+                              {displayPhone(tenant.telefono)}
                             </span>
                           </div>
                           {tenant.units && tenant.units.length > 0 && (

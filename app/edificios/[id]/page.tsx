@@ -62,7 +62,7 @@ import { EntityDocuments } from '@/components/ui/entity-documents';
 import { PropertyMap } from '@/components/property/PropertyMap';
 import { CatastroPlanoViewer } from '@/components/property/CatastroPlanoViewer';
 import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
-import { cn } from '@/lib/utils';
+import { cn, formatUnitTipoLabel } from '@/lib/utils';
 
 interface Unit {
   id: string;
@@ -650,12 +650,12 @@ export default function EdificioDetallesPage() {
                               >
                                 <TableCell className="font-medium">
                                   <div>{unit.numero}</div>
-                                  <div className="text-xs text-muted-foreground sm:hidden capitalize">
-                                    {unit.tipo}
+                                  <div className="text-xs text-muted-foreground sm:hidden">
+                                    {formatUnitTipoLabel(unit.tipo)}
                                   </div>
                                 </TableCell>
-                                <TableCell className="hidden sm:table-cell capitalize">
-                                  {unit.tipo}
+                                <TableCell className="hidden sm:table-cell">
+                                  {formatUnitTipoLabel(unit.tipo)}
                                 </TableCell>
                                 <TableCell>
                                   <Badge variant={estadoBadge.variant} className="text-xs">
