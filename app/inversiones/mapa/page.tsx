@@ -87,7 +87,19 @@ export default function MapaPatrimonioPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/buildings');
+      const [res, segurosRes] = await Promise.all([
+        fetch('/api/buildings'),
+        fetch('/api/seguros'),
+      ]);
+      const insuredBuildingIds = new Set<string>();
+      if (segurosRes.ok) {
+        const rawSeguros = await segurosRes.json();
+        const segurosList = Array.isArray(rawSeguros) ? rawSeguros : [];
+        for (const s of segurosList) {
+          if (s.buildingId) insuredBuildingIds.add(s.buildingId);
+          else if (s.unit?.buildingId) insuredBuildingIds.add(s.unit.buildingId);
+        }
+      }
       if (res.ok) {
         const data = await res.json();
         const blds = (data.buildings || data || []).map((b: any) => {
@@ -112,7 +124,7 @@ export default function MapaPatrimonioPage() {
             occupiedUnits,
             occupancy,
             monthlyRent,
-            hasInsurance: (b.insurances?.length || 0) > 0,
+            hasInsurance: insuredBuildingIds.has(b.id),
             insuranceExpiring: false,
             pendingMaintenance: b.maintenanceRequests?.filter((m: any) => m.status !== 'completado').length || 0,
             yieldEstimated: b.metrics?.yieldBruto || (monthlyRent > 0 && valorMercado > 0 ? ((monthlyRent * 12) / valorMercado) * 100 : 0),

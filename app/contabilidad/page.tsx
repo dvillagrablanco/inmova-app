@@ -31,6 +31,7 @@ import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { Line, Bar, Pie } from 'react-chartjs-2';
 import logger, { logError } from '@/lib/logger';
+import { formatPercent } from '@/lib/utils';
 import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
 import { AIContextualButton } from '@/components/ai/AIContextualButton';
 import {
@@ -494,10 +495,6 @@ export default function ContabilidadPage() {
       style: 'currency',
       currency: 'EUR',
     }).format(amount);
-  };
-
-  const formatPercentage = (value: number) => {
-    return `${value.toFixed(2)}%`;
   };
 
   const handleSyncZucchetti = async () => {
@@ -1032,7 +1029,7 @@ export default function ContabilidadPage() {
                 {formatCurrency(profitLossData?.beneficioNeto || 0)}
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                Margen: {formatPercentage(profitLossData?.margenes.neto || 0)}
+                Margen: {formatPercent(profitLossData?.margenes.neto || 0, 2)}
               </p>
               {latestPeriod?.periodo && latestPeriod.periodo !== periodo && (
                 <p className="text-xs text-muted-foreground mt-1">
@@ -1056,7 +1053,7 @@ export default function ContabilidadPage() {
                 {formatCurrency(profitLossData?.ebitda || 0)}
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                Margen Operativo: {formatPercentage(profitLossData?.margenes.operativo || 0)}
+                Margen Operativo: {formatPercent(profitLossData?.margenes.operativo || 0, 2)}
               </p>
               {latestPeriod?.periodo && latestPeriod.periodo !== periodo && (
                 <p className="text-xs text-muted-foreground mt-1">

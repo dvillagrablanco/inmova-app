@@ -345,7 +345,10 @@ function AnalyticsPageContent() {
                         <LineChart data={occupancyData}>
                           <CartesianGrid strokeDasharray="3 3" />
                           <XAxis dataKey="name" />
-                          <YAxis domain={[0, 100]} />
+                          <YAxis
+                            domain={[0, 100]}
+                            tickFormatter={(v) => `${Math.min(Math.round(v), 100)}%`}
+                          />
                           <Tooltip />
                           <Legend />
                           <Line

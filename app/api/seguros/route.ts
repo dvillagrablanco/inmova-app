@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
       },
       include: {
         building: { select: { nombre: true, direccion: true } },
-        unit: { select: { numero: true } },
+        unit: { select: { numero: true, buildingId: true } },
         _count: { select: { claims: true } },
       },
       orderBy: { fechaVencimiento: 'asc' },

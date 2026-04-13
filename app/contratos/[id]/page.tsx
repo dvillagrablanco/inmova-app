@@ -57,8 +57,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { formatFecha, formatNombre } from '@/lib/utils';
 import { AIDocumentAssistant } from '@/components/ai/AIDocumentAssistant';
 
 interface Contract {
@@ -207,9 +206,7 @@ function ContractDocuments({
                   <div>
                     <p className="font-medium text-sm">{doc.nombre}</p>
                     <p className="text-xs text-muted-foreground">
-                      {doc.fechaSubida
-                        ? format(new Date(doc.fechaSubida), 'dd MMM yyyy', { locale: es })
-                        : ''}
+                      {doc.fechaSubida ? formatFecha(doc.fechaSubida) : ''}
                       {doc.tags?.length > 0 && ` · ${doc.tags.join(', ')}`}
                     </p>
                   </div>
@@ -346,7 +343,7 @@ export default function ContractDetailPage() {
   const formatDate = (dateString: string) => {
     if (!dateString) return '-';
     try {
-      return format(new Date(dateString), 'dd MMM yyyy', { locale: es });
+      return formatFecha(dateString);
     } catch {
       return dateString;
     }
@@ -617,9 +614,11 @@ export default function ContractDetailPage() {
                       <div>
                         <p className="text-sm text-muted-foreground">Nombre</p>
                         <p className="font-medium">
-                          {contract.tenant.nombreCompleto ||
-                            `${contract.tenant.nombre || ''} ${contract.tenant.apellido || ''}`.trim() ||
-                            'Sin nombre'}
+                          {formatNombre(
+                            contract.tenant.nombreCompleto ||
+                              `${contract.tenant.nombre || ''} ${contract.tenant.apellido || ''}`.trim() ||
+                              ''
+                          ) || 'Sin nombre'}
                         </p>
                       </div>
                       <div>
