@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MapPin, Loader2, AlertCircle, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,49 +13,36 @@ interface PropertyMapProps {
   showNearbyPoints?: boolean;
 }
 
-/**
- * Mapa embebido usando OpenStreetMap (gratuito, sin API key).
- * Geocodifica la dirección con Nominatim y muestra un iframe de OSM.
- */
-export function PropertyMap({
-  address,
-  city,
-  latitude,
-  longitude,
-  showNearbyPoints = false,
-}: PropertyMapProps) {
+export function PropertyMap({ address, city, latitude, longitude }: PropertyMapProps) {
   const [loading, setLoading] = useState(true);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const fullAddress = city ? `${address}, ${city}` : address;
 
-  // Limpiar dirección para geocodificación: eliminar piso/puerta que confunden al geocoder
   const cleanAddressForGeocoding = (addr: string): string => {
     return addr
-      .replace(/,?\s*\d+[ºª°]\s*[A-Za-z]?\b/g, '')   // "2ºA", "3º B", "1ª"
+      .replace(/,?\s*\d+[ºª°]\s*[A-Za-z]?\b/g, '')
       .replace(/,?\s*(bajo|ático|entresuelo|principal|ent|bjo|átic|piso)\s*\w*/gi, '')
-      .replace(/,?\s*\d+[ºª°]\b/g, '')                  // "2º" solo
-      .replace(/,\s*,/g, ',')                             // doble coma
-      .replace(/,\s*$/g, '')                              // coma final
+      .replace(/,?\s*\d+[ºª°]\b/g, '')
+      .replace(/,\s*,/g, ',')
+      .replace(/,\s*$/g, '')
       .trim();
   };
 
   useEffect(() => {
     const geocode = async () => {
-      // Si ya tenemos coordenadas, usarlas directamente
       if (latitude && longitude) {
         setCoords({ lat: latitude, lng: longitude });
         setLoading(false);
         return;
       }
 
-      // Geocodificar con Nominatim (OpenStreetMap, gratuito)
       try {
         const cleanedAddress = cleanAddressForGeocoding(fullAddress);
         const query = encodeURIComponent(cleanedAddress);
         const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${query}&limit=1`,
+          `https://nominatim.openstreetmap.org/search?format=json&q=${query}&limit=1&countrycodes=es`,
           { headers: { 'User-Agent': 'InmovaApp/1.0' } }
         );
 
@@ -69,8 +56,7 @@ export function PropertyMap({
         } else {
           setError('Error al buscar ubicación');
         }
-      } catch (err) {
-        console.error('Geocoding error:', err);
+      } catch {
         setError('Error de conexión');
       } finally {
         setLoading(false);
@@ -81,14 +67,8 @@ export function PropertyMap({
   }, [address, city, latitude, longitude, fullAddress]);
 
   const openInGoogleMaps = () => {
-    const query = encodeURIComponent(fullAddress);
+    const query = coords ? `${coords.lat},${coords.lng}` : encodeURIComponent(fullAddress);
     window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
-  };
-
-  const openInOSM = () => {
-    if (coords) {
-      window.open(`https://www.openstreetmap.org/?mlat=${coords.lat}&mlon=${coords.lng}#map=17/${coords.lat}/${coords.lng}`, '_blank');
-    }
   };
 
   if (loading) {
@@ -109,6 +89,10 @@ export function PropertyMap({
     );
   }
 
+  const googleEmbedUrl = coords
+    ? `https://www.google.com/maps?q=${coords.lat},${coords.lng}&z=17&output=embed`
+    : `https://www.google.com/maps?q=${encodeURIComponent(fullAddress)}&z=17&output=embed`;
+
   if (error || !coords) {
     return (
       <Card>
@@ -118,25 +102,32 @@ export function PropertyMap({
             Ubicación
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="aspect-video bg-muted rounded-lg flex flex-col items-center justify-center gap-3 text-muted-foreground">
-            <AlertCircle className="h-8 w-8" />
-            <p className="text-sm">{error || 'Ubicación no disponible'}</p>
-            <p className="text-xs">{fullAddress}</p>
-            <Button variant="outline" size="sm" onClick={openInGoogleMaps}>
-              <ExternalLink className="h-4 w-4 mr-2" />
-              Buscar en Google Maps
-            </Button>
+        <CardContent className="space-y-3">
+          <div className="aspect-video rounded-lg overflow-hidden border bg-muted relative">
+            <iframe
+              src={`https://www.google.com/maps?q=${encodeURIComponent(fullAddress)}&z=15&output=embed`}
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              allowFullScreen
+              title={`Mapa de ${fullAddress}`}
+              className="absolute inset-0"
+            />
           </div>
+          <div className="flex items-start gap-2 text-sm">
+            <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0 text-muted-foreground" />
+            <p className="font-medium">{fullAddress}</p>
+          </div>
+          <Button variant="outline" size="sm" onClick={openInGoogleMaps} className="w-full">
+            <ExternalLink className="mr-2 h-3.5 w-3.5" />
+            Abrir en Google Maps
+          </Button>
         </CardContent>
       </Card>
     );
   }
-
-  // OpenStreetMap iframe embed (100% gratuito)
-  const zoom = 17;
-  const bbox = 0.003; // ~300m alrededor del punto
-  const osmEmbedUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${coords.lng - bbox}%2C${coords.lat - bbox}%2C${coords.lng + bbox}%2C${coords.lat + bbox}&layer=mapnik&marker=${coords.lat}%2C${coords.lng}`;
 
   return (
     <Card>
@@ -147,21 +138,20 @@ export function PropertyMap({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        {/* Mapa real OSM embebido */}
         <div className="aspect-video rounded-lg overflow-hidden border bg-muted relative">
           <iframe
-            src={osmEmbedUrl}
+            src={googleEmbedUrl}
             width="100%"
             height="100%"
             style={{ border: 0 }}
             loading="lazy"
-            referrerPolicy="no-referrer"
+            referrerPolicy="no-referrer-when-downgrade"
+            allowFullScreen
             title={`Mapa de ${fullAddress}`}
             className="absolute inset-0"
           />
         </div>
 
-        {/* Dirección + coordenadas */}
         <div className="flex items-start gap-2 text-sm">
           <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0 text-muted-foreground" />
           <div>
@@ -173,17 +163,10 @@ export function PropertyMap({
           </div>
         </div>
 
-        {/* Botones */}
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={openInGoogleMaps} className="flex-1">
-            <ExternalLink className="mr-2 h-3.5 w-3.5" />
-            Google Maps
-          </Button>
-          <Button variant="outline" size="sm" onClick={openInOSM} className="flex-1">
-            <MapPin className="mr-2 h-3.5 w-3.5" />
-            OpenStreetMap
-          </Button>
-        </div>
+        <Button variant="outline" size="sm" onClick={openInGoogleMaps} className="w-full">
+          <ExternalLink className="mr-2 h-3.5 w-3.5" />
+          Abrir en Google Maps
+        </Button>
       </CardContent>
     </Card>
   );
