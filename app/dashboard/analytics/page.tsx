@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 import {
   TrendingUp,
   TrendingDown,
-  DollarSign,
+  Euro,
   Home,
   Users,
   FileText,
@@ -122,8 +122,9 @@ export default function AnalyticsPage() {
   const kpiCards = [
     {
       title: 'Ingresos Mensuales',
-      value: `€${stats?.monthlyIncome?.toLocaleString() || 0}`,
-      icon: DollarSign,
+      value: `€${stats?.monthlyIncome?.toLocaleString('es-ES') || 0}`,
+      subtitle: 'Renta contractual activa',
+      icon: Euro,
       color: 'text-green-500',
       bgColor: 'bg-green-50',
     },
@@ -314,7 +315,7 @@ export default function AnalyticsPage() {
               href="/finanzas/cuadro-de-mandos"
               className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
             >
-              <DollarSign className="h-8 w-8 text-blue-600" />
+              <Euro className="h-8 w-8 text-blue-600" />
               <div>
                 <p className="font-medium text-sm">Cuadro de Mandos</p>
                 <p className="text-xs text-gray-500">PyG Analítica por centro de coste</p>

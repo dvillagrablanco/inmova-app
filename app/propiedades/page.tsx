@@ -97,7 +97,7 @@ export default function PropiedadesPage() {
   const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
-  
+
   // Filtros
   const [searchTerm, setSearchTerm] = useState('');
   const [estadoFilter, setEstadoFilter] = useState<string>('all');
@@ -174,9 +174,7 @@ export default function PropiedadesPage() {
 
     // Filtro por habitaciones mínimas
     if (habitacionesMin) {
-      filtered = filtered.filter(
-        (prop) => (prop.habitaciones || 0) >= parseInt(habitacionesMin)
-      );
+      filtered = filtered.filter((prop) => (prop.habitaciones || 0) >= parseInt(habitacionesMin));
     }
 
     // Aplicar ordenamiento
@@ -211,16 +209,43 @@ export default function PropiedadesPage() {
     }
 
     setFilteredProperties(sorted);
-  }, [searchTerm, estadoFilter, tipoFilter, precioMin, precioMax, habitacionesMin, sortBy, properties]);
+  }, [
+    searchTerm,
+    estadoFilter,
+    tipoFilter,
+    precioMin,
+    precioMax,
+    habitacionesMin,
+    sortBy,
+    properties,
+  ]);
 
   // Funciones de utilidad
   const getEstadoBadge = (estado: string) => {
     const badges: Record<string, { variant: any; label: string; className: string }> = {
-      ocupada: { variant: 'default', label: 'Ocupada', className: 'bg-green-600 text-white border-green-600 hover:bg-green-700' },
-      disponible: { variant: 'default', label: 'Disponible', className: 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700' },
-      en_mantenimiento: { variant: 'default', label: 'Mantenimiento', className: 'bg-amber-500 text-white border-amber-500 hover:bg-amber-600' },
+      ocupada: {
+        variant: 'default',
+        label: 'Ocupada',
+        className: 'bg-green-600 text-white border-green-600 hover:bg-green-700',
+      },
+      disponible: {
+        variant: 'default',
+        label: 'Disponible',
+        className: 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700',
+      },
+      en_mantenimiento: {
+        variant: 'default',
+        label: 'Mantenimiento',
+        className: 'bg-amber-500 text-white border-amber-500 hover:bg-amber-600',
+      },
     };
-    return badges[estado] || { variant: 'default', label: estado, className: 'bg-gray-600 text-white border-gray-600' };
+    return (
+      badges[estado] || {
+        variant: 'default',
+        label: estado,
+        className: 'bg-gray-600 text-white border-gray-600',
+      }
+    );
   };
 
   const getTipoLabel = (tipo: string) => {
@@ -252,10 +277,9 @@ export default function PropiedadesPage() {
   const totalProperties = properties.length;
   const ocupadas = properties.filter((p) => p.estado === 'ocupada').length;
   const disponibles = properties.filter((p) => p.estado === 'disponible').length;
-  const ocupacionRate =
-    totalProperties > 0 ? Math.round((ocupadas / totalProperties) * 100) : 0;
+  const ocupacionRate = totalProperties > 0 ? Math.round((ocupadas / totalProperties) * 100) : 0;
   const ingresosMensuales = properties
-    .filter((p) => p.estado === 'ocupada')
+    .filter((p) => p.estado === 'ocupada' && p.rentaMensual > 0)
     .reduce((sum, p) => sum + p.rentaMensual, 0);
 
   // Limpiar filtros
@@ -316,20 +340,15 @@ export default function PropiedadesPage() {
     <AuthenticatedLayout>
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Smart Breadcrumbs */}
-        <SmartBreadcrumbs
-          totalCount={totalProperties}
-          showBackButton={true}
-        />
+        <SmartBreadcrumbs totalCount={totalProperties} showBackButton={true} />
 
         {/* Header con Quick Actions */}
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Gestión de Propiedades</h1>
-            <p className="text-muted-foreground">
-              Administra tu portfolio inmobiliario completo
-            </p>
+            <p className="text-muted-foreground">Administra tu portfolio inmobiliario completo</p>
           </div>
-          
+
           {/* Quick Actions */}
           <ContextualQuickActions />
         </div>
@@ -355,7 +374,16 @@ export default function PropiedadesPage() {
                   });
                 }
               }
-              return insights.length > 0 ? insights : [{ id: 'ok', nivel: 'verde', titulo: 'Rentas en línea', detalle: 'Todas las rentas están alineadas con el mercado.' }];
+              return insights.length > 0
+                ? insights
+                : [
+                    {
+                      id: 'ok',
+                      nivel: 'verde',
+                      titulo: 'Rentas en línea',
+                      detalle: 'Todas las rentas están alineadas con el mercado.',
+                    },
+                  ];
             }
             return recs.slice(0, 10).map((r: any, i: number) => ({
               id: `rec-${i}`,
@@ -410,7 +438,9 @@ export default function PropiedadesPage() {
               <div className="text-2xl font-bold text-purple-600">
                 €{ingresosMensuales.toLocaleString('es-ES')}
               </div>
-              <p className="text-xs text-muted-foreground">De propiedades ocupadas</p>
+              <p className="text-xs text-muted-foreground">
+                Renta contractual de unidades ocupadas
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -538,7 +568,9 @@ export default function PropiedadesPage() {
           <Card className="p-12">
             <EmptyState
               icon={Building2}
-              title={hasActiveFilters ? 'No se encontraron propiedades' : 'Añade tu primer inmueble'}
+              title={
+                hasActiveFilters ? 'No se encontraron propiedades' : 'Añade tu primer inmueble'
+              }
               description={
                 hasActiveFilters
                   ? 'No hay propiedades que coincidan con estos filtros. Prueba a ajustar los criterios.'
@@ -559,7 +591,8 @@ export default function PropiedadesPage() {
             {/* Contador de resultados */}
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">
-                {filteredProperties.length} {filteredProperties.length === 1 ? 'propiedad' : 'propiedades'}{' '}
+                {filteredProperties.length}{' '}
+                {filteredProperties.length === 1 ? 'propiedad' : 'propiedades'}{' '}
                 {hasActiveFilters && `de ${totalProperties} totales`}
               </p>
             </div>
@@ -606,7 +639,9 @@ export default function PropiedadesPage() {
                           </div>
                         )}
                         <div className="absolute top-2 right-2">
-                          <Badge variant={estadoBadge.variant} className={estadoBadge.className}>{estadoBadge.label}</Badge>
+                          <Badge variant={estadoBadge.variant} className={estadoBadge.className}>
+                            {estadoBadge.label}
+                          </Badge>
                         </div>
                       </div>
 
@@ -661,8 +696,12 @@ export default function PropiedadesPage() {
                         <div className="pt-3 border-t">
                           <div className="flex items-center justify-between">
                             <span className="text-sm text-muted-foreground">Renta mensual</span>
-                            <span className={`text-xl font-bold ${property.rentaMensual > 0 ? 'text-green-600' : 'text-gray-400'}`}>
-                              {property.rentaMensual > 0 ? `€${property.rentaMensual.toLocaleString('es-ES')}` : 'Sin asignar'}
+                            <span
+                              className={`text-xl font-bold ${property.rentaMensual > 0 ? 'text-green-600' : 'text-gray-400'}`}
+                            >
+                              {property.rentaMensual > 0
+                                ? `€${property.rentaMensual.toLocaleString('es-ES')}`
+                                : 'Sin asignar'}
                             </span>
                           </div>
                         </div>
@@ -776,7 +815,12 @@ export default function PropiedadesPage() {
                                   <h3 className="text-xl font-bold">
                                     {property.building.nombre} - {property.numero}
                                   </h3>
-                                  <Badge variant={estadoBadge.variant} className={estadoBadge.className}>{estadoBadge.label}</Badge>
+                                  <Badge
+                                    variant={estadoBadge.variant}
+                                    className={estadoBadge.className}
+                                  >
+                                    {estadoBadge.label}
+                                  </Badge>
                                 </div>
                                 <div className="flex items-center gap-2 text-muted-foreground">
                                   <MapPin className="h-4 w-4" />
@@ -811,8 +855,12 @@ export default function PropiedadesPage() {
                               )}
                               <div>
                                 <p className="text-sm text-muted-foreground">Renta/mes</p>
-                                <p className={`text-lg font-semibold ${property.rentaMensual > 0 ? 'text-green-600' : 'text-gray-400'}`}>
-                                  {property.rentaMensual > 0 ? `€${property.rentaMensual.toLocaleString('es-ES')}` : 'Sin asignar'}
+                                <p
+                                  className={`text-lg font-semibold ${property.rentaMensual > 0 ? 'text-green-600' : 'text-gray-400'}`}
+                                >
+                                  {property.rentaMensual > 0
+                                    ? `€${property.rentaMensual.toLocaleString('es-ES')}`
+                                    : 'Sin asignar'}
                                 </p>
                               </div>
                             </div>
@@ -871,11 +919,7 @@ export default function PropiedadesPage() {
         )}
 
         {/* Asistente IA de Documentos */}
-        <AIDocumentAssistant 
-          context="propiedades"
-          variant="floating"
-          position="bottom-right"
-        />
+        <AIDocumentAssistant context="propiedades" variant="floating" position="bottom-right" />
       </div>
     </AuthenticatedLayout>
   );
