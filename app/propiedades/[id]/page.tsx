@@ -82,6 +82,7 @@ interface PropertyDetails {
   tenant?: {
     id: string;
     nombreCompleto: string;
+    empresa?: string | null;
     email: string;
     telefono?: string;
   };
@@ -432,7 +433,10 @@ export default function PropiedadDetallesPage() {
                     { label: 'Balcón', value: property.balcon },
                     { label: 'Amueblado', value: property.amueblado },
                   ].map((item) => (
-                    <div key={item.label} className="flex items-center gap-2 p-2 rounded bg-muted/50">
+                    <div
+                      key={item.label}
+                      className="flex items-center gap-2 p-2 rounded bg-muted/50"
+                    >
                       <span
                         className={cn(
                           'text-sm',
@@ -585,11 +589,18 @@ export default function PropiedadDetallesPage() {
                   <div className="flex items-center gap-3">
                     <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
                       <span className="text-lg font-semibold">
-                        {property.tenant.nombreCompleto.charAt(0)}
+                        {(property.tenant.empresa || property.tenant.nombreCompleto).charAt(0)}
                       </span>
                     </div>
                     <div>
-                      <p className="font-semibold">{property.tenant.nombreCompleto}</p>
+                      <p className="font-semibold">
+                        {property.tenant.empresa || property.tenant.nombreCompleto}
+                      </p>
+                      {property.tenant.empresa && (
+                        <p className="text-xs text-muted-foreground">
+                          Contacto: {property.tenant.nombreCompleto}
+                        </p>
+                      )}
                       <p className="text-sm text-muted-foreground">{property.tenant.email}</p>
                       {property.tenant.telefono && (
                         <p className="text-sm text-muted-foreground">{property.tenant.telefono}</p>
@@ -718,8 +729,10 @@ export default function PropiedadDetallesPage() {
 
             {/* Mapa de Ubicación */}
             <PropertyMap
-              address={property.building.direccion}
-              city={property.building.ciudad}
+              address={property.building?.direccion || ''}
+              city={property.building?.ciudad || ''}
+              latitude={property.building?.latitud ?? undefined}
+              longitude={property.building?.longitud ?? undefined}
               showNearbyPoints={true}
             />
 

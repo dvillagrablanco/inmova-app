@@ -73,6 +73,7 @@ export default function CertificacionesPage() {
     empresaCertificadora: '',
     fechaEmision: '',
     fechaVencimiento: '',
+    urlCertificado: '',
     recomendaciones: '',
     ahorroEstimado: '',
   });
@@ -120,6 +121,7 @@ export default function CertificacionesPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...newCert,
+          urlCertificado: newCert.urlCertificado || undefined,
           consumoEnergetico: newCert.consumoEnergetico
             ? parseFloat(newCert.consumoEnergetico)
             : null,
@@ -239,420 +241,455 @@ export default function CertificacionesPage() {
     <AuthenticatedLayout>
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
-      <Breadcrumb>
-        <BreadcrumbList>
-        <BreadcrumbItem>
-        <BreadcrumbLink href="/dashboard">
-        <Home className="h-4 w-4" />
-        </BreadcrumbLink>
-        </BreadcrumbItem>
-        <BreadcrumbSeparator />
-        <BreadcrumbItem>
-        <BreadcrumbPage>Certificaciones</BreadcrumbPage>
-        </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-      <Button variant="outline" size="sm" onClick={() => router.push('/dashboard')}>
-        <ArrowLeft className="h-4 w-4 mr-2" />
-        Volver
-      </Button>
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/dashboard">
+                  <Home className="h-4 w-4" />
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Certificaciones</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+          <Button variant="outline" size="sm" onClick={() => router.push('/dashboard')}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Volver
+          </Button>
         </div>
         <div>
-      <h1 className="text-3xl font-bold">Certificaciones Energéticas</h1>
-      <p className="text-muted-foreground">Control de eficiencia energética</p>
+          <h1 className="text-3xl font-bold">Certificaciones Energéticas</h1>
+          <p className="text-muted-foreground">Control de eficiencia energética</p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">Total</CardTitle>
-        <Leaf className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-        <div className="text-2xl font-bold">{totalCertificados}</div>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">Vigentes</CardTitle>
-        <TrendingUp className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-        <div className="text-2xl font-bold">{vigentes}</div>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">Por Vencer</CardTitle>
-        <AlertCircle className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-        <div className="text-2xl font-bold text-orange-600">{porVencer}</div>
-        <p className="text-xs text-muted-foreground">Próximo año</p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">Distribución</CardTitle>
-        <Leaf className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-        <div className="flex gap-1">
-        {['A', 'B', 'C', 'D', 'E', 'F', 'G'].map((cal) => (
-        <div key={cal} className="text-center">
-        <div
-        className={`text-xs font-bold px-1 rounded ${getCalificacionColor(cal)}`}
-        >
-        {cal}
-        </div>
-        <div className="text-xs text-muted-foreground">
-        {calificacionesCount[cal] || 0}
-        </div>
-        </div>
-        ))}
-        </div>
-        </CardContent>
-      </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total</CardTitle>
+              <Leaf className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{totalCertificados}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Vigentes</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{vigentes}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Por Vencer</CardTitle>
+              <AlertCircle className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-orange-600">{porVencer}</div>
+              <p className="text-xs text-muted-foreground">Próximo año</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Distribución</CardTitle>
+              <Leaf className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="flex gap-1">
+                {['A', 'B', 'C', 'D', 'E', 'F', 'G'].map((cal) => (
+                  <div key={cal} className="text-center">
+                    <div className={`text-xs font-bold px-1 rounded ${getCalificacionColor(cal)}`}>
+                      {cal}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {calificacionesCount[cal] || 0}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
         <div className="flex flex-col sm:flex-row gap-4">
-      <div className="flex-1 relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-        <Input
-        placeholder="Buscar..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        className="pl-10"
-        />
-      </div>
-      <Button onClick={() => setOpenNew(true)}>
-        <Plus className="h-4 w-4 mr-2" />
-        Nuevo Certificado
-      </Button>
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Input
+              placeholder="Buscar..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <Button onClick={() => setOpenNew(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Nuevo Certificado
+          </Button>
         </div>
         <div className="grid grid-cols-1 gap-4">
-      {filteredCerts.map((cert) => (
-        <Card key={cert.id}>
-        <CardHeader>
-        <div className="flex items-start justify-between">
-        <div>
-        <CardTitle className="text-lg">
-        Unidad {cert.unit?.numero} - {cert.unit?.building?.nombre}
-        </CardTitle>
-        <CardDescription>Técnico: {cert.nombreTecnico}</CardDescription>
-        </div>
-        <div className="flex gap-2 items-center">
-        <Button variant="outline" size="sm" onClick={() => handleOpenEdit(cert)}>
-        <Edit className="h-4 w-4 mr-2" />
-        Editar
-        </Button>
-        <Badge className={getCalificacionColor(cert.calificacion)}>
-        {cert.calificacion}
-        </Badge>
-        <Badge variant={cert.vigente ? 'default' : 'secondary'}>
-        {cert.vigente ? 'Vigente' : 'Vencido'}
-        </Badge>
-        </div>
-        </div>
-        </CardHeader>
-        <CardContent>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div>
-        <p className="text-xs text-muted-foreground">Consumo</p>
-        <p className="text-sm font-medium">{cert.consumoEnergetico} kWh/m²/año</p>
-        </div>
-        <div>
-        <p className="text-xs text-muted-foreground">Emisiones CO₂</p>
-        <p className="text-sm font-medium">{cert.emisionesCO2} kg/m²/año</p>
-        </div>
-        <div>
-        <p className="text-xs text-muted-foreground">Emisión</p>
-        <p className="text-sm font-medium">
-        {format(new Date(cert.fechaEmision), 'dd/MM/yyyy', { locale: es })}
-        </p>
-        </div>
-        <div>
-        <p className="text-xs text-muted-foreground">Vencimiento</p>
-        <p className="text-sm font-medium">
-        {format(new Date(cert.fechaVencimiento), 'dd/MM/yyyy', { locale: es })}
-        </p>
-        </div>
-        </div>
-        {cert.ahorroEstimado && (
-        <div className="mt-3 p-2 bg-green-50 rounded-md text-sm flex items-center gap-2">
-        <Euro className="h-4 w-4 text-green-600" />
-        <span className="text-green-700">
-        Ahorro estimado: €{cert.ahorroEstimado.toLocaleString()}/año
-        </span>
-        </div>
-        )}
-        </CardContent>
-        </Card>
-        ))}
+          {filteredCerts.map((cert) => (
+            <Card key={cert.id}>
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <CardTitle className="text-lg">
+                      Unidad {cert.unit?.numero} - {cert.unit?.building?.nombre}
+                    </CardTitle>
+                    <CardDescription>Técnico: {cert.nombreTecnico}</CardDescription>
+                  </div>
+                  <div className="flex gap-2 items-center">
+                    <Button variant="outline" size="sm" onClick={() => handleOpenEdit(cert)}>
+                      <Edit className="h-4 w-4 mr-2" />
+                      Editar
+                    </Button>
+                    <Badge className={getCalificacionColor(cert.calificacion)}>
+                      {cert.calificacion}
+                    </Badge>
+                    <Badge variant={cert.vigente ? 'default' : 'secondary'}>
+                      {cert.vigente ? 'Vigente' : 'Vencido'}
+                    </Badge>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Consumo</p>
+                    <p className="text-sm font-medium">{cert.consumoEnergetico} kWh/m²/año</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Emisiones CO₂</p>
+                    <p className="text-sm font-medium">{cert.emisionesCO2} kg/m²/año</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Emisión</p>
+                    <p className="text-sm font-medium">
+                      {format(new Date(cert.fechaEmision), 'dd/MM/yyyy', { locale: es })}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Vencimiento</p>
+                    <p className="text-sm font-medium">
+                      {format(new Date(cert.fechaVencimiento), 'dd/MM/yyyy', { locale: es })}
+                    </p>
+                  </div>
+                </div>
+                {cert.ahorroEstimado && (
+                  <div className="mt-3 p-2 bg-green-50 rounded-md text-sm flex items-center gap-2">
+                    <Euro className="h-4 w-4 text-green-600" />
+                    <span className="text-green-700">
+                      Ahorro estimado: €{cert.ahorroEstimado.toLocaleString()}/año
+                    </span>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
       <Dialog open={openNew} onOpenChange={setOpenNew}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-      <DialogHeader>
-        <DialogTitle>Nuevo Certificado</DialogTitle>
-        <DialogDescription>Registra un certificado energético</DialogDescription>
-      </DialogHeader>
-      <div className="grid gap-4">
-        <div>
-      <Label>Unidad *</Label>
-      <Select
-        value={newCert.unitId}
-        onValueChange={(v) => setNewCert({ ...newCert, unitId: v })}
-        >
-        <SelectTrigger>
-        <SelectValue placeholder="Seleccionar" />
-        </SelectTrigger>
-        <SelectContent>
-        {units.map((u) => (
-        <SelectItem key={u.id} value={u.id}>
-        Unidad {u.numero} - {u.building?.nombre}
-        </SelectItem>
-        ))}
-        </SelectContent>
-      </Select>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-      <div>
-        <Label>Número Certificado</Label>
-        <Input
-        value={newCert.numeroCertificado}
-        onChange={(e) => setNewCert({ ...newCert, numeroCertificado: e.target.value })}
-        />
-      </div>
-      <div>
-        <Label>Calificación *</Label>
-        <Select
-        value={newCert.calificacion}
-        onValueChange={(v) => setNewCert({ ...newCert, calificacion: v })}
-        >
-        <SelectTrigger>
-        <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-        {['A', 'B', 'C', 'D', 'E', 'F', 'G'].map((c) => (
-        <SelectItem key={c} value={c}>
-        {c}
-        </SelectItem>
-        ))}
-        </SelectContent>
-        </Select>
-      </div>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-      <div>
-        <Label>Consumo (kWh/m²/año)</Label>
-        <Input
-        type="number"
-        step="0.01"
-        value={newCert.consumoEnergetico}
-        onChange={(e) => setNewCert({ ...newCert, consumoEnergetico: e.target.value })}
-        />
-      </div>
-      <div>
-        <Label>Emisiones CO₂ (kg/m²/año)</Label>
-        <Input
-        type="number"
-        step="0.01"
-        value={newCert.emisionesCO2}
-        onChange={(e) => setNewCert({ ...newCert, emisionesCO2: e.target.value })}
-        />
-      </div>
-        </div>
-        <div>
-      <Label>Nombre Técnico *</Label>
-      <Input
-        value={newCert.nombreTecnico}
-        onChange={(e) => setNewCert({ ...newCert, nombreTecnico: e.target.value })}
-        />
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-      <div>
-        <Label>Fecha Emisión *</Label>
-        <Input
-        type="date"
-        value={newCert.fechaEmision}
-        onChange={(e) => setNewCert({ ...newCert, fechaEmision: e.target.value })}
-        />
-      </div>
-      <div>
-        <Label>Fecha Vencimiento *</Label>
-        <Input
-        type="date"
-        value={newCert.fechaVencimiento}
-        onChange={(e) => setNewCert({ ...newCert, fechaVencimiento: e.target.value })}
-        />
-      </div>
-        </div>
-        <div>
-      <Label>Recomendaciones</Label>
-      <Textarea
-        value={newCert.recomendaciones}
-        onChange={(e) => setNewCert({ ...newCert, recomendaciones: e.target.value })}
-        rows={3}
-        />
-        </div>
-        <div>
-      <Label>Ahorro Estimado (€/año)</Label>
-      <Input
-        type="number"
-        step="0.01"
-        value={newCert.ahorroEstimado}
-        onChange={(e) => setNewCert({ ...newCert, ahorroEstimado: e.target.value })}
-        />
-        </div>
-      </div>
-      <DialogFooter>
-        <Button variant="outline" onClick={() => setOpenNew(false)}>
-        Cancelar
-        </Button>
-        <Button
-        onClick={handleCreate}
-        disabled={
-        !newCert.unitId ||
-        !newCert.nombreTecnico ||
-        !newCert.fechaEmision ||
-        !newCert.fechaVencimiento
-        }
-        >
-        Crear
-        </Button>
-      </DialogFooter>
+          <DialogHeader>
+            <DialogTitle>Nuevo Certificado</DialogTitle>
+            <DialogDescription>Registra un certificado energético</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4">
+            <div>
+              <Label>Unidad *</Label>
+              <Select
+                value={newCert.unitId}
+                onValueChange={(v) => setNewCert({ ...newCert, unitId: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar" />
+                </SelectTrigger>
+                <SelectContent>
+                  {units.map((u) => (
+                    <SelectItem key={u.id} value={u.id}>
+                      Unidad {u.numero} - {u.building?.nombre}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Documento del Certificado (PDF)</Label>
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  const formData = new FormData();
+                  formData.append('file', file);
+                  formData.append('folder', 'certificaciones');
+                  try {
+                    const res = await fetch('/api/documents/upload', {
+                      method: 'POST',
+                      body: formData,
+                    });
+                    if (res.ok) {
+                      const data = await res.json();
+                      setNewCert({
+                        ...newCert,
+                        urlCertificado:
+                          data.url || data.path || data.document?.cloudStoragePath || '',
+                      });
+                      toast.success('Documento subido');
+                    } else {
+                      toast.error('Error al subir documento');
+                    }
+                  } catch {
+                    toast.error('Error al subir documento');
+                  }
+                }}
+                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+              />
+            </div>
+            <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 space-y-3">
+              <p className="text-sm font-semibold text-foreground">Vigencia del certificado</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Fecha Emisión *</Label>
+                  <Input
+                    type="date"
+                    value={newCert.fechaEmision}
+                    onChange={(e) => setNewCert({ ...newCert, fechaEmision: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Fecha Vencimiento *</Label>
+                  <Input
+                    type="date"
+                    value={newCert.fechaVencimiento}
+                    onChange={(e) => setNewCert({ ...newCert, fechaVencimiento: e.target.value })}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Número Certificado</Label>
+                <Input
+                  value={newCert.numeroCertificado}
+                  onChange={(e) => setNewCert({ ...newCert, numeroCertificado: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label>Calificación *</Label>
+                <Select
+                  value={newCert.calificacion}
+                  onValueChange={(v) => setNewCert({ ...newCert, calificacion: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {['A', 'B', 'C', 'D', 'E', 'F', 'G'].map((c) => (
+                      <SelectItem key={c} value={c}>
+                        {c}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Consumo (kWh/m²/año)</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={newCert.consumoEnergetico}
+                  onChange={(e) => setNewCert({ ...newCert, consumoEnergetico: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label>Emisiones CO₂ (kg/m²/año)</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={newCert.emisionesCO2}
+                  onChange={(e) => setNewCert({ ...newCert, emisionesCO2: e.target.value })}
+                />
+              </div>
+            </div>
+            <div>
+              <Label>Nombre Técnico *</Label>
+              <Input
+                value={newCert.nombreTecnico}
+                onChange={(e) => setNewCert({ ...newCert, nombreTecnico: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Recomendaciones</Label>
+              <Textarea
+                value={newCert.recomendaciones}
+                onChange={(e) => setNewCert({ ...newCert, recomendaciones: e.target.value })}
+                rows={3}
+              />
+            </div>
+            <div>
+              <Label>Ahorro Estimado (€/año)</Label>
+              <Input
+                type="number"
+                step="0.01"
+                value={newCert.ahorroEstimado}
+                onChange={(e) => setNewCert({ ...newCert, ahorroEstimado: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpenNew(false)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleCreate}
+              disabled={
+                !newCert.unitId ||
+                !newCert.nombreTecnico ||
+                !newCert.fechaEmision ||
+                !newCert.fechaVencimiento
+              }
+            >
+              Crear
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
       <Dialog open={openEdit} onOpenChange={setOpenEdit}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-      <DialogHeader>
-        <DialogTitle>Editar Certificado</DialogTitle>
-        <DialogDescription>Actualiza los datos del certificado energético</DialogDescription>
-      </DialogHeader>
-      <div className="grid gap-4">
-        <div className="grid grid-cols-2 gap-4">
-      <div>
-        <Label>Número Certificado</Label>
-        <Input
-        value={editCert.numeroCertificado}
-        onChange={(e) => setEditCert({ ...editCert, numeroCertificado: e.target.value })}
-        />
-      </div>
-      <div>
-        <Label>Calificación *</Label>
-        <Select
-        value={editCert.calificacion}
-        onValueChange={(v) => setEditCert({ ...editCert, calificacion: v })}
-        >
-        <SelectTrigger>
-        <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-        {['A', 'B', 'C', 'D', 'E', 'F', 'G'].map((c) => (
-        <SelectItem key={c} value={c}>
-        {c}
-        </SelectItem>
-        ))}
-        </SelectContent>
-        </Select>
-      </div>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-      <div>
-        <Label>Consumo (kWh/m²/año)</Label>
-        <Input
-        type="number"
-        step="0.01"
-        value={editCert.consumoEnergetico}
-        onChange={(e) => setEditCert({ ...editCert, consumoEnergetico: e.target.value })}
-        />
-      </div>
-      <div>
-        <Label>Emisiones CO₂ (kg/m²/año)</Label>
-        <Input
-        type="number"
-        step="0.01"
-        value={editCert.emisionesCO2}
-        onChange={(e) => setEditCert({ ...editCert, emisionesCO2: e.target.value })}
-        />
-      </div>
-        </div>
-        <div>
-      <Label>Nombre Técnico *</Label>
-      <Input
-        value={editCert.nombreTecnico}
-        onChange={(e) => setEditCert({ ...editCert, nombreTecnico: e.target.value })}
-        />
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-      <div>
-        <Label>Número Colegiado</Label>
-        <Input
-        value={editCert.numeroColegiadoTecnico}
-        onChange={(e) =>
-        setEditCert({ ...editCert, numeroColegiadoTecnico: e.target.value })
-        }
-        />
-      </div>
-      <div>
-        <Label>Empresa Certificadora</Label>
-        <Input
-        value={editCert.empresaCertificadora}
-        onChange={(e) =>
-        setEditCert({ ...editCert, empresaCertificadora: e.target.value })
-        }
-        />
-      </div>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-      <div>
-        <Label>Fecha Emisión *</Label>
-        <Input
-        type="date"
-        value={editCert.fechaEmision}
-        onChange={(e) => setEditCert({ ...editCert, fechaEmision: e.target.value })}
-        />
-      </div>
-      <div>
-        <Label>Fecha Vencimiento *</Label>
-        <Input
-        type="date"
-        value={editCert.fechaVencimiento}
-        onChange={(e) => setEditCert({ ...editCert, fechaVencimiento: e.target.value })}
-        />
-      </div>
-        </div>
-        <div>
-      <Label>Recomendaciones</Label>
-      <Textarea
-        value={editCert.recomendaciones}
-        onChange={(e) => setEditCert({ ...editCert, recomendaciones: e.target.value })}
-        rows={3}
-        />
-        </div>
-        <div>
-      <Label>Ahorro Estimado (€/año)</Label>
-      <Input
-        type="number"
-        step="0.01"
-        value={editCert.ahorroEstimado}
-        onChange={(e) => setEditCert({ ...editCert, ahorroEstimado: e.target.value })}
-        />
-        </div>
-      </div>
-      <DialogFooter>
-        <Button variant="outline" onClick={() => setOpenEdit(false)}>
-        Cancelar
-        </Button>
-        <Button
-        onClick={handleUpdate}
-        disabled={
-        !editCert.nombreTecnico || !editCert.fechaEmision || !editCert.fechaVencimiento
-        }
-        >
-        Guardar Cambios
-        </Button>
-      </DialogFooter>
+          <DialogHeader>
+            <DialogTitle>Editar Certificado</DialogTitle>
+            <DialogDescription>Actualiza los datos del certificado energético</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Número Certificado</Label>
+                <Input
+                  value={editCert.numeroCertificado}
+                  onChange={(e) => setEditCert({ ...editCert, numeroCertificado: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label>Calificación *</Label>
+                <Select
+                  value={editCert.calificacion}
+                  onValueChange={(v) => setEditCert({ ...editCert, calificacion: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {['A', 'B', 'C', 'D', 'E', 'F', 'G'].map((c) => (
+                      <SelectItem key={c} value={c}>
+                        {c}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Consumo (kWh/m²/año)</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={editCert.consumoEnergetico}
+                  onChange={(e) => setEditCert({ ...editCert, consumoEnergetico: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label>Emisiones CO₂ (kg/m²/año)</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={editCert.emisionesCO2}
+                  onChange={(e) => setEditCert({ ...editCert, emisionesCO2: e.target.value })}
+                />
+              </div>
+            </div>
+            <div>
+              <Label>Nombre Técnico *</Label>
+              <Input
+                value={editCert.nombreTecnico}
+                onChange={(e) => setEditCert({ ...editCert, nombreTecnico: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Número Colegiado</Label>
+                <Input
+                  value={editCert.numeroColegiadoTecnico}
+                  onChange={(e) =>
+                    setEditCert({ ...editCert, numeroColegiadoTecnico: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <Label>Empresa Certificadora</Label>
+                <Input
+                  value={editCert.empresaCertificadora}
+                  onChange={(e) =>
+                    setEditCert({ ...editCert, empresaCertificadora: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Fecha Emisión *</Label>
+                <Input
+                  type="date"
+                  value={editCert.fechaEmision}
+                  onChange={(e) => setEditCert({ ...editCert, fechaEmision: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label>Fecha Vencimiento *</Label>
+                <Input
+                  type="date"
+                  value={editCert.fechaVencimiento}
+                  onChange={(e) => setEditCert({ ...editCert, fechaVencimiento: e.target.value })}
+                />
+              </div>
+            </div>
+            <div>
+              <Label>Recomendaciones</Label>
+              <Textarea
+                value={editCert.recomendaciones}
+                onChange={(e) => setEditCert({ ...editCert, recomendaciones: e.target.value })}
+                rows={3}
+              />
+            </div>
+            <div>
+              <Label>Ahorro Estimado (€/año)</Label>
+              <Input
+                type="number"
+                step="0.01"
+                value={editCert.ahorroEstimado}
+                onChange={(e) => setEditCert({ ...editCert, ahorroEstimado: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpenEdit(false)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleUpdate}
+              disabled={
+                !editCert.nombreTecnico || !editCert.fechaEmision || !editCert.fechaVencimiento
+              }
+            >
+              Guardar Cambios
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </AuthenticatedLayout>

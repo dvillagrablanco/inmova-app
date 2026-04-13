@@ -6,7 +6,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
-import { Building2, Home, ArrowLeft, Save } from 'lucide-react';
+import { Building2, FileText, Home, ArrowLeft, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -489,6 +489,55 @@ export default function EditarEdificioPage() {
                     placeholder="0.00"
                   />
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Documentos del Edificio
+              </CardTitle>
+              <CardDescription>
+                Sube documentos PDF (escrituras, CEE, ITE, contratos de mantenimiento)
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <input
+                  type="file"
+                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                  multiple
+                  onChange={async (e) => {
+                    const files = e.target.files;
+                    if (!files) return;
+                    for (const file of Array.from(files)) {
+                      const formData = new FormData();
+                      formData.append('file', file);
+                      formData.append('entityType', 'building');
+                      formData.append('entityId', buildingId);
+                      formData.append('nombre', file.name);
+                      try {
+                        const res = await fetch('/api/documents/upload', {
+                          method: 'POST',
+                          body: formData,
+                        });
+                        if (res.ok) {
+                          toast.success(`Documento "${file.name}" subido correctamente`);
+                        } else {
+                          toast.error(`Error al subir "${file.name}"`);
+                        }
+                      } catch {
+                        toast.error(`Error al subir "${file.name}"`);
+                      }
+                    }
+                  }}
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Formatos aceptados: PDF, DOC, DOCX, JPG, PNG. Máximo 50MB por archivo.
+                </p>
               </div>
             </CardContent>
           </Card>
