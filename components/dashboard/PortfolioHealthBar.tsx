@@ -14,7 +14,12 @@ interface PortfolioHealthBarProps {
  * Barra visual de salud de la cartera tipo semáforo.
  * 🟢 OK | 🟡 Alertas | 🔴 Problemas
  */
-export function PortfolioHealthBar({ ok, warning, critical, className = '' }: PortfolioHealthBarProps) {
+export function PortfolioHealthBar({
+  ok,
+  warning,
+  critical,
+  className = '',
+}: PortfolioHealthBarProps) {
   const total = ok + warning + critical;
   if (total === 0) return null;
 
@@ -23,7 +28,9 @@ export function PortfolioHealthBar({ ok, warning, critical, className = '' }: Po
   const critPct = (critical / total) * 100;
 
   return (
-    <div className={`bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-xl p-4 ${className}`}>
+    <div
+      className={`bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-xl p-4 ${className}`}
+    >
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
           <Building2 className="h-4 w-4" />
@@ -58,7 +65,9 @@ export function PortfolioHealthBar({ ok, warning, critical, className = '' }: Po
         {critical > 0 && (
           <Link href="/morosidad" className="flex items-center gap-1.5 hover:underline">
             <span className="h-2.5 w-2.5 rounded-full bg-red-500" />
-            <span className="text-gray-600 dark:text-gray-400">{critical} problemas</span>
+            <span className="text-gray-600 dark:text-gray-400">
+              {critical} {critical === 1 ? 'problema' : 'problemas'}
+            </span>
           </Link>
         )}
       </div>

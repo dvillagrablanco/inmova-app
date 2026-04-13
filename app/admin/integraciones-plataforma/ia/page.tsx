@@ -10,16 +10,16 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
-import { 
-  ArrowLeft, 
-  CheckCircle2, 
+import {
+  ArrowLeft,
+  CheckCircle2,
   Settings,
   RefreshCw,
   ExternalLink,
   Brain,
   Sparkles,
   MessageSquare,
-  FileText
+  FileText,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -27,6 +27,8 @@ export default function IAPlataformaPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [temperature, setTemperature] = useState([0.7]);
+  /** Placeholder until IA usage metrics are wired; when 0, success rate is not meaningful */
+  const conversations = 0;
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -47,7 +49,10 @@ export default function IAPlataformaPage() {
     <div className="container mx-auto py-6 px-4 max-w-5xl">
       {/* Header */}
       <div className="mb-6">
-        <Link href="/admin/integraciones-plataforma" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4">
+        <Link
+          href="/admin/integraciones-plataforma"
+          className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4"
+        >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Volver a Integraciones Plataforma
         </Link>
@@ -57,7 +62,9 @@ export default function IAPlataformaPage() {
           </div>
           <div>
             <h1 className="text-3xl font-bold">Inteligencia Artificial</h1>
-            <p className="text-muted-foreground">Anthropic Claude para asistencia y automatización</p>
+            <p className="text-muted-foreground">
+              Anthropic Claude para asistencia y automatización
+            </p>
           </div>
         </div>
       </div>
@@ -119,7 +126,9 @@ export default function IAPlataformaPage() {
             <div className="space-y-2">
               <Label>Modelo</Label>
               <Input defaultValue="claude-3-5-sonnet-20241022" readOnly />
-              <p className="text-xs text-muted-foreground">Claude 3.5 Sonnet - Mejor balance calidad/costo</p>
+              <p className="text-xs text-muted-foreground">
+                Claude 3.5 Sonnet - Mejor balance calidad/costo
+              </p>
             </div>
 
             <div className="space-y-4">
@@ -134,7 +143,9 @@ export default function IAPlataformaPage() {
                 max={1}
                 step={0.1}
               />
-              <p className="text-xs text-muted-foreground">0 = Más determinista, 1 = Más creativo</p>
+              <p className="text-xs text-muted-foreground">
+                0 = Más determinista, 1 = Más creativo
+              </p>
             </div>
 
             <div className="flex gap-2">
@@ -176,7 +187,9 @@ export default function IAPlataformaPage() {
                 <p className="text-xs text-muted-foreground">Agentes</p>
               </div>
               <div className="p-3 bg-white rounded-lg border text-center">
-                <p className="text-2xl font-bold text-green-600">95%</p>
+                <p className="text-2xl font-bold text-green-600">
+                  {conversations > 0 ? '95%' : 'N/A'}
+                </p>
                 <p className="text-xs text-muted-foreground">Tasa de éxito</p>
               </div>
               <div className="p-3 bg-white rounded-lg border text-center">
@@ -185,11 +198,17 @@ export default function IAPlataformaPage() {
               </div>
             </div>
             <div className="flex gap-2">
-              <Button className="flex-1" onClick={() => window.location.href = '/admin/ai-agents'}>
+              <Button
+                className="flex-1"
+                onClick={() => (window.location.href = '/admin/ai-agents')}
+              >
                 <Brain className="h-4 w-4 mr-2" />
                 Gestionar Agentes de IA
               </Button>
-              <Button variant="outline" onClick={() => window.location.href = '/admin/community-manager'}>
+              <Button
+                variant="outline"
+                onClick={() => (window.location.href = '/admin/community-manager')}
+              >
                 <MessageSquare className="h-4 w-4 mr-2" />
                 Community Manager
               </Button>
@@ -214,7 +233,9 @@ export default function IAPlataformaPage() {
                 </div>
                 <div>
                   <p className="font-medium">Generación de Descripciones</p>
-                  <p className="text-sm text-muted-foreground">Crear descripciones atractivas para propiedades</p>
+                  <p className="text-sm text-muted-foreground">
+                    Crear descripciones atractivas para propiedades
+                  </p>
                 </div>
               </div>
               <Switch defaultChecked />
@@ -227,7 +248,9 @@ export default function IAPlataformaPage() {
                 </div>
                 <div>
                   <p className="font-medium">Valoración Automática</p>
-                  <p className="text-sm text-muted-foreground">Estimar precio de propiedades con IA</p>
+                  <p className="text-sm text-muted-foreground">
+                    Estimar precio de propiedades con IA
+                  </p>
                 </div>
               </div>
               <Switch defaultChecked />
@@ -266,7 +289,9 @@ export default function IAPlataformaPage() {
                 </div>
                 <div>
                   <p className="font-medium">Clasificación de Incidencias</p>
-                  <p className="text-sm text-muted-foreground">Categorizar y priorizar automáticamente</p>
+                  <p className="text-sm text-muted-foreground">
+                    Categorizar y priorizar automáticamente
+                  </p>
                 </div>
               </div>
               <Switch />
@@ -279,11 +304,17 @@ export default function IAPlataformaPage() {
                 </div>
                 <div>
                   <p className="font-medium">Sistema Multi-Agente</p>
-                  <p className="text-sm text-muted-foreground">6 agentes especializados para diferentes tareas</p>
+                  <p className="text-sm text-muted-foreground">
+                    6 agentes especializados para diferentes tareas
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Button size="sm" variant="outline" onClick={() => window.location.href = '/admin/ai-agents'}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => (window.location.href = '/admin/ai-agents')}
+                >
                   Gestionar
                 </Button>
                 <Switch defaultChecked />
@@ -297,7 +328,9 @@ export default function IAPlataformaPage() {
                 </div>
                 <div>
                   <p className="font-medium">Análisis de Documentos</p>
-                  <p className="text-sm text-muted-foreground">Clasificación automática y extracción de datos</p>
+                  <p className="text-sm text-muted-foreground">
+                    Clasificación automática y extracción de datos
+                  </p>
                 </div>
               </div>
               <Switch defaultChecked />
@@ -325,7 +358,9 @@ export default function IAPlataformaPage() {
             <div className="flex items-center justify-between p-4 border rounded-lg">
               <div>
                 <p className="font-medium">Alertas de uso</p>
-                <p className="text-sm text-muted-foreground">Notificar al alcanzar 80% del límite</p>
+                <p className="text-sm text-muted-foreground">
+                  Notificar al alcanzar 80% del límite
+                </p>
               </div>
               <Switch defaultChecked />
             </div>

@@ -14,7 +14,7 @@ import {
   Building2,
   Percent,
   AlertTriangle,
-  DollarSign,
+  Euro,
   TrendingDown,
   FileText,
   Wrench,
@@ -386,7 +386,7 @@ function DashboardPageContent() {
             title="Ingresos Netos"
             tooltip="Ingresos menos gastos del periodo"
             value={`€${safeFormatNumber(Number(data.kpis.ingresosNetos || 0))}`}
-            icon={DollarSign}
+            icon={Euro}
           />
           <KPICard
             title="Gastos Totales"
