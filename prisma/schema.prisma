@@ -117,6 +117,7 @@ enum UnitStatus {
   ocupada
   disponible
   en_mantenimiento
+  uso_empresa
 }
 
 enum ContractStatus {
@@ -545,7 +546,7 @@ model Building {
   nombre                String
   direccion             String
   tipo                  BuildingType
-  referenciaCatastral   String?      // Ref catastral principal del edificio (ej: 0858104VK4705H)
+  referenciaCatastral   String? // Ref catastral principal del edificio (ej: 0858104VK4705H)
   anoConstructor        Int
   numeroUnidades        Int
   estadoConservacion    String?
@@ -565,16 +566,16 @@ model Building {
   createdAt             DateTime     @default(now())
   updatedAt             DateTime     @updatedAt
 
-  company              Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  units                Unit[]
-  expenses             Expense[]
-  documents            Document[]
-  maintenanceSchedules MaintenanceSchedule[]
-  serviceQuotes        ServiceQuote[]
-  serviceJobs          ServiceJob[]
-  energyReadings       EnergyReading[]
-  energyAlerts         EnergyAlert[]
-  insurancePolicies    InsurancePolicy[]
+  company                Company                 @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  units                  Unit[]
+  expenses               Expense[]
+  documents              Document[]
+  maintenanceSchedules   MaintenanceSchedule[]
+  serviceQuotes          ServiceQuote[]
+  serviceJobs            ServiceJob[]
+  energyReadings         EnergyReading[]
+  energyAlerts           EnergyAlert[]
+  insurancePolicies      InsurancePolicy[]
   insuranceQuoteRequests InsuranceQuoteRequest[]
 
   // Prioridades Medias
@@ -684,10 +685,10 @@ model Tenant {
   ciudad          String?
   codigoPostal    String?
   provincia       String?
-  pais            String?  @default("España")
+  pais            String? @default("España")
 
-  createdAt             DateTime          @default(now())
-  updatedAt             DateTime          @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   company               Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
   units                 Unit[]
@@ -798,9 +799,9 @@ model Unit {
   estado              UnitStatus @default(disponible)
   superficie          Float
   superficieUtil      Float?
-  referenciaCatastral String?    // Ref catastral individual de la finca (ej: 0858104VK4705H0001XX)
-  precioCompra        Float?    // Precio de compra escriturado (proporcional o individual)
-  valorMercado        Float?    // Última valoración de mercado estimada
+  referenciaCatastral String? // Ref catastral individual de la finca (ej: 0858104VK4705H0001XX)
+  precioCompra        Float? // Precio de compra escriturado (proporcional o individual)
+  valorMercado        Float? // Última valoración de mercado estimada
   fechaValoracion     DateTime? // Fecha de la última valoración
   habitaciones        Int?
   banos               Int?
@@ -808,19 +809,19 @@ model Unit {
   orientacion         String?
   rentaMensual        Float
   tenantId            String?
-  aireAcondicionado Boolean    @default(false)
-  calefaccion       Boolean    @default(false)
-  terraza           Boolean    @default(false)
-  balcon            Boolean    @default(false)
-  amueblado         Boolean    @default(false)
-  gastosComunidad   Float?     // Gastos de comunidad mensuales asignados a esta unidad
-  ibiAnual          Float?     // IBI anual asignado a esta unidad
-  imagenes          String[]   @default([])
-  tourVirtual       String?
-  planos            String[]   @default([])
-  isDemo            Boolean    @default(false) // Marca datos de demostración - excluir de estadísticas
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
+  aireAcondicionado   Boolean    @default(false)
+  calefaccion         Boolean    @default(false)
+  terraza             Boolean    @default(false)
+  balcon              Boolean    @default(false)
+  amueblado           Boolean    @default(false)
+  gastosComunidad     Float? // Gastos de comunidad mensuales asignados a esta unidad
+  ibiAnual            Float? // IBI anual asignado a esta unidad
+  imagenes            String[]   @default([])
+  tourVirtual         String?
+  planos              String[]   @default([])
+  isDemo              Boolean    @default(false) // Marca datos de demostración - excluir de estadísticas
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
 
   building             Building              @relation(fields: [buildingId], references: [id], onDelete: Cascade)
   tenant               Tenant?               @relation(fields: [tenantId], references: [id], onDelete: SetNull)
@@ -885,7 +886,7 @@ model Unit {
   smartLocks          SmartLock[]
 
   // Nuevas funcionalidades IA (Valoración, Matching)
-  propertyValuations    PropertyValuation[]   @relation("UnitPropertyValuations")
+  propertyValuations        PropertyValuation[]        @relation("UnitPropertyValuations")
   tenantPropertyMatches     TenantPropertyMatch[]      @relation("UnitTenantMatches")
   operatorSignatureRequests OperatorSignatureRequest[] @relation("UnitOperatorSignatures")
 
@@ -1400,6 +1401,10 @@ model Contract {
   fechaInicio          DateTime
   fechaFin             DateTime
   rentaMensual         Float
+  baseImponible        Float?
+  ivaPorcentaje        Float?         @default(0)
+  importeIva           Float?         @default(0)
+  rentaTotal           Float?
   diaPago              Int            @default(1)
   deposito             Float
   mesesFianza          Int            @default(1)
@@ -1466,10 +1471,10 @@ model Contract {
   checklistSalidaPath  String? // PDF del checklist de salida firmado
 
   // Campos adicionales
-  codigoOperacion       String? // Código de operación (registro, etc.)
+  codigoOperacion          String? // Código de operación (registro, etc.)
   suministrosProvisionales Float? // Importe suministros provisionales
-  ibiRepercutido        Float? // IBI repercutido al inquilino (€)
-  numeroContrato        String? @unique // Número legible (ej. CT-2026-0001)
+  ibiRepercutido           Float? // IBI repercutido al inquilino (€)
+  numeroContrato           String? @unique // Número legible (ej. CT-2026-0001)
 
   unit                  Unit                  @relation(fields: [unitId], references: [id], onDelete: Cascade)
   tenant                Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
@@ -1493,8 +1498,8 @@ model Contract {
   // Sociedades Inversoras
   fianzaDeposits FianzaDeposit[]
 
-  rentUpdates RentUpdate[]  @relation("ContractRentUpdates")
-  guarantors  Guarantor[]   @relation("ContractGuarantors")
+  rentUpdates RentUpdate[] @relation("ContractRentUpdates")
+  guarantors  Guarantor[]  @relation("ContractGuarantors")
 
   @@index([tenantId, estado])
   @@index([unitId, estado])
@@ -1531,8 +1536,8 @@ model Payment {
   concepto      String?
   referencia    String?
   baseImponible Float?
-  iva          Float?
-  irpf         Float?
+  iva           Float?
+  irpf          Float?
 
   // Stripe integration fields
   stripePaymentIntentId String?              @unique
@@ -1968,14 +1973,14 @@ model Company {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  users         User[]
-  buildings     Building[]
-  tenants       Tenant[]
-  providers     Provider[]
-  tasks                Task[]
-  managementContracts  ManagementContract[]
-  auditLogs            AuditLog[]
-  notifications Notification[]
+  users               User[]
+  buildings           Building[]
+  tenants             Tenant[]
+  providers           Provider[]
+  tasks               Task[]
+  managementContracts ManagementContract[]
+  auditLogs           AuditLog[]
+  notifications       Notification[]
 
   // Prioridades Medias
   valoraciones  ValoracionPropiedad[]
@@ -2165,7 +2170,7 @@ model Company {
   buildingInspections      BuildingInspection[]
 
   // Cuadro de Mandos Financiero
-  costCenters CostCenter[]
+  costCenters      CostCenter[]
   smartSuggestions SmartSuggestion[]
 
   // Coliving - Red Social y Servicios Premium
@@ -2226,9 +2231,9 @@ model Company {
   integrationLogs    IntegrationLog[]
 
   // 🏦 FAMILY OFFICE ADD-ON
-  financialAccounts    FinancialAccount[]
-  holdingParticipations Participation[] @relation("HoldingParticipations")
-  monthlySnapshots     MonthlySnapshot[] @relation("CompanyMonthlySnapshots")
+  financialAccounts     FinancialAccount[]
+  holdingParticipations Participation[]    @relation("HoldingParticipations")
+  monthlySnapshots      MonthlySnapshot[]  @relation("CompanyMonthlySnapshots")
 
   // 📊 CRM AVANZADO - Comentado temporalmente
   // crmLeads              CRMLead[]
@@ -2268,10 +2273,10 @@ model Company {
   onboardingDocumentSessions OnboardingDocumentSession?
 
   // 🏢 SOCIEDADES INVERSORAS / PATRIMONIALES
-  assetAcquisitions    AssetAcquisition[]
-  mortgages            Mortgage[]
-  fianzaDeposits       FianzaDeposit[]
-  investmentAnalyses   InvestmentAnalysis[]
+  assetAcquisitions  AssetAcquisition[]
+  mortgages          Mortgage[]
+  fianzaDeposits     FianzaDeposit[]
+  investmentAnalyses InvestmentAnalysis[]
 
   // 💳 GOCARDLESS - PAGOS SEPA
   gcCustomers       GCCustomer[]       @relation("CompanyGCCustomers")
@@ -5107,20 +5112,20 @@ model InsuranceQuotation {
   provider   InsuranceProvider      @relation(fields: [providerId], references: [id], onDelete: Cascade)
 
   // Datos de la cotización
-  codigo       String?       // Referencia del proveedor
-  tipoSeguro   InsuranceType
-  primaAnual   Float
-  primaMensual Float?
+  codigo        String? // Referencia del proveedor
+  tipoSeguro    InsuranceType
+  primaAnual    Float
+  primaMensual  Float?
   sumaAsegurada Float
-  franquicia   Float? // Deducible
+  franquicia    Float? // Deducible
 
   // Coberturas
-  coberturas           String[] @default([])
-  exclusiones          String[] @default([])
+  coberturas            String[] @default([])
+  exclusiones           String[] @default([])
   condicionesEspeciales String?  @db.Text
 
   // Validez
-  fechaCotizacion DateTime @default(now())
+  fechaCotizacion DateTime  @default(now())
   validaHasta     DateTime?
 
   // Estado
@@ -5132,7 +5137,7 @@ model InsuranceQuotation {
   documentosAdjuntos Json? // Array de {filename, url, uploadedAt}
 
   // Análisis IA
-  analisisIA Json?  // {score, pros, cons, recomendacion, riesgos}
+  analisisIA Json? // {score, pros, cons, recomendacion, riesgos}
   scoreIA    Float? // 0-100
 
   // Notas
@@ -10829,7 +10834,7 @@ model CostCenter {
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
 
-  company  Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  company  Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
   expenses Expense[]
 
   @@unique([companyId, codigo])
@@ -10842,7 +10847,7 @@ model CostCenter {
 // ═══════════════════════════════════════════════════════════════
 
 model PropertyValuationHistory {
-  id                 String @id @default(cuid())
+  id                 String   @id @default(cuid())
   unitId             String
   ejercicio          Int // Año fiscal: 2022, 2023, 2024...
   valorInversion     Float // Valor de inversión (coste de adquisición)
@@ -15260,21 +15265,21 @@ model ExternalMarketDataCache {
   id String @id @default(cuid())
 
   // Ubicación
-  city       String
-  postalCode String?
-  province   String?
+  city         String
+  postalCode   String?
+  province     String?
   neighborhood String?
 
   // Fuente
-  source     String // 'idealista', 'fotocasa', 'habitaclia', 'notariado', 'ine'
+  source      String // 'idealista', 'fotocasa', 'habitaclia', 'notariado', 'ine'
   sourceLabel String?
-  dataType   String // 'asking_price', 'transaction_price', 'index', 'estimate'
+  dataType    String // 'asking_price', 'transaction_price', 'index', 'estimate'
 
   // Datos de precios
-  pricePerM2Sale  Float?
-  pricePerM2Rent  Float?
-  avgPrice        Float?
-  sampleSize      Int?
+  pricePerM2Sale Float?
+  pricePerM2Rent Float?
+  avgPrice       Float?
+  sampleSize     Int?
 
   // Tendencia
   trend           String? // 'UP', 'STABLE', 'DOWN'
@@ -15406,13 +15411,13 @@ model SignatureWebhook {
 // ============================================================================
 
 enum OperatorSignatureStatus {
-  pending_review  // Recibido, pendiente de revisión
-  approved        // Aprobado, listo para enviar a firma
-  sent_to_sign    // Enviado a DocuSign/Signaturit
-  signed          // Firmado por todas las partes
-  rejected        // Rechazado por el gestor
-  expired         // Expirado sin firmar
-  cancelled       // Cancelado
+  pending_review // Recibido, pendiente de revisión
+  approved // Aprobado, listo para enviar a firma
+  sent_to_sign // Enviado a DocuSign/Signaturit
+  signed // Firmado por todas las partes
+  rejected // Rechazado por el gestor
+  expired // Expirado sin firmar
+  cancelled // Cancelado
 }
 
 model OperatorSignatureRequest {
@@ -15421,7 +15426,7 @@ model OperatorSignatureRequest {
   company   Company @relation("CompanyOperatorSignatures", fields: [companyId], references: [id], onDelete: Cascade)
 
   // Operador de media estancia
-  operatorName  String  // "Álamo", "Spotahome", "HousingAnywhere", etc.
+  operatorName  String // "Álamo", "Spotahome", "HousingAnywhere", etc.
   operatorEmail String?
   operatorPhone String?
   operatorRef   String? // Referencia interna del operador
@@ -15448,18 +15453,18 @@ model OperatorSignatureRequest {
   signatories Json // [{ name, email, role, phone? }]
 
   // Detalles del contrato
-  contractType    String? // "media_estancia", "temporada", "corporativo"
-  startDate       DateTime?
-  endDate         DateTime?
-  monthlyRent     Float?
-  currency        String   @default("EUR")
+  contractType String? // "media_estancia", "temporada", "corporativo"
+  startDate    DateTime?
+  endDate      DateTime?
+  monthlyRent  Float?
+  currency     String    @default("EUR")
 
   // Workflow de aprobación
-  status       OperatorSignatureStatus @default(pending_review)
-  reviewedBy   String?
-  reviewedAt   DateTime?
-  reviewNotes  String?                 @db.Text
-  rejectedReason String?               @db.Text
+  status         OperatorSignatureStatus @default(pending_review)
+  reviewedBy     String?
+  reviewedAt     DateTime?
+  reviewNotes    String?                 @db.Text
+  rejectedReason String?                 @db.Text
 
   // Enlace con firma digital (cuando se envía a DocuSign/Signaturit)
   signatureId         String? // ID del ContractSignature
@@ -15474,11 +15479,11 @@ model OperatorSignatureRequest {
   batchId String? // Para agrupar múltiples firmas
 
   // Timestamps
-  sentToSignAt  DateTime?
-  signedAt      DateTime?
-  expiresAt     DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  sentToSignAt DateTime?
+  signedAt     DateTime?
+  expiresAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   @@index([companyId])
   @@index([operatorName])
@@ -16384,47 +16389,47 @@ enum DepositStatus {
 /// Datos de adquisicion de un inmueble (Building o Unit)
 /// Tracking del valor de compra, gastos, y valor actual
 model AssetAcquisition {
-  id          String    @id @default(cuid())
-  companyId   String
-  buildingId  String?
-  unitId      String?
+  id         String  @id @default(cuid())
+  companyId  String
+  buildingId String?
+  unitId     String?
 
   // Datos de compra
-  assetType           AssetType
-  fechaAdquisicion    DateTime
-  precioCompra        Float       // Precio escriturado
-  gastosNotaria       Float       @default(0)
-  gastosRegistro      Float       @default(0)
-  gastosGestoria      Float       @default(0)
-  impuestoCompra      Float       @default(0) // ITP o IVA+AJD
-  otrosGastosCompra   Float       @default(0)
+  assetType         AssetType
+  fechaAdquisicion  DateTime
+  precioCompra      Float // Precio escriturado
+  gastosNotaria     Float     @default(0)
+  gastosRegistro    Float     @default(0)
+  gastosGestoria    Float     @default(0)
+  impuestoCompra    Float     @default(0) // ITP o IVA+AJD
+  otrosGastosCompra Float     @default(0)
 
   // Desglose catastral (necesario para amortizacion)
-  valorCatastralTotal       Float?
-  valorCatastralSuelo       Float?
+  valorCatastralTotal        Float?
+  valorCatastralSuelo        Float?
   valorCatastralConstruccion Float?
-  referenciaCatastral       String?
+  referenciaCatastral        String?
 
   // Valor actual
-  valorMercadoEstimado  Float?    // Ultima valoracion de mercado
-  fechaValoracion       DateTime? // Fecha de ultima valoracion
+  valorMercadoEstimado Float? // Ultima valoracion de mercado
+  fechaValoracion      DateTime? // Fecha de ultima valoracion
 
   // Reformas capitalizables (incrementan valor del activo)
-  reformasCapitalizadas Float     @default(0)
+  reformasCapitalizadas Float @default(0)
 
   // Datos calculados (se recalculan)
-  inversionTotal          Float?  // precioCompra + gastos + reformas
-  amortizacionAcumulada   Float   @default(0)
-  valorContableNeto       Float?  // inversionTotal - amortizacionAcumulada
-  plusvaliaLatente         Float?  // valorMercado - valorContable
+  inversionTotal        Float? // precioCompra + gastos + reformas
+  amortizacionAcumulada Float  @default(0)
+  valorContableNeto     Float? // inversionTotal - amortizacionAcumulada
+  plusvaliaLatente      Float? // valorMercado - valorContable
 
-  notas     String?   @db.Text
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  notas     String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  company   Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  building  Building? @relation(fields: [buildingId], references: [id], onDelete: SetNull)
-  unit      Unit?     @relation(fields: [unitId], references: [id], onDelete: SetNull)
+  company  Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  building Building? @relation(fields: [buildingId], references: [id], onDelete: SetNull)
+  unit     Unit?     @relation(fields: [unitId], references: [id], onDelete: SetNull)
 
   mortgages     Mortgage[]
   depreciations DepreciationEntry[]
@@ -16436,9 +16441,9 @@ model AssetAcquisition {
 
 /// Hipoteca asociada a un activo inmobiliario
 model Mortgage {
-  id                String         @id @default(cuid())
-  assetId           String
-  companyId         String
+  id        String @id @default(cuid())
+  assetId   String
+  companyId String
 
   // Datos del prestamo
   entidadFinanciera String
@@ -16446,35 +16451,35 @@ model Mortgage {
   tipoHipoteca      MortgageType
   estado            MortgageStatus @default(activa)
 
-  capitalInicial    Float          // Importe original del prestamo
-  capitalPendiente  Float          // Capital vivo actual
-  tipoInteres       Float          // Tipo de interes actual (%)
-  diferencial       Float?         // Diferencial sobre Euribor (para variable/mixto)
-  indiceReferencia   String?        // "euribor_12m", "euribor_6m", etc.
-  plazoAnos         Int            // Plazo total en anos
-  cuotaMensual      Float          // Cuota mensual actual
-  diaVencimiento    Int            @default(1) // Dia del mes de pago
+  capitalInicial   Float // Importe original del prestamo
+  capitalPendiente Float // Capital vivo actual
+  tipoInteres      Float // Tipo de interes actual (%)
+  diferencial      Float? // Diferencial sobre Euribor (para variable/mixto)
+  indiceReferencia String? // "euribor_12m", "euribor_6m", etc.
+  plazoAnos        Int // Plazo total en anos
+  cuotaMensual     Float // Cuota mensual actual
+  diaVencimiento   Int     @default(1) // Dia del mes de pago
 
-  fechaConstitucion DateTime       // Fecha firma hipoteca
-  fechaVencimiento  DateTime       // Fecha fin del prestamo
-  fechaRevision     DateTime?      // Proxima revision de tipo (variable/mixto)
-  periodoCarencia   Int?           // Meses de carencia (si aplica)
+  fechaConstitucion DateTime // Fecha firma hipoteca
+  fechaVencimiento  DateTime // Fecha fin del prestamo
+  fechaRevision     DateTime? // Proxima revision de tipo (variable/mixto)
+  periodoCarencia   Int? // Meses de carencia (si aplica)
 
   // Gastos asociados
-  gastosConstitucion Float         @default(0) // Notaria, tasacion, etc.
-  comisionApertura   Float         @default(0)
-  comisionCancelacion Float?       // Comision por cancelacion anticipada
+  gastosConstitucion  Float  @default(0) // Notaria, tasacion, etc.
+  comisionApertura    Float  @default(0)
+  comisionCancelacion Float? // Comision por cancelacion anticipada
 
   // Seguros vinculados
-  seguroVidaAnual   Float?
-  seguroHogarAnual  Float?
+  seguroVidaAnual  Float?
+  seguroHogarAnual Float?
 
-  notas     String?   @db.Text
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  notas     String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  asset             AssetAcquisition @relation(fields: [assetId], references: [id], onDelete: Cascade)
-  company           Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  asset             AssetAcquisition  @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  company           Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
   amortizationTable MortgagePayment[]
 
   @@index([companyId])
@@ -16483,19 +16488,19 @@ model Mortgage {
 
 /// Pago mensual de hipoteca (tabla de amortizacion real)
 model MortgagePayment {
-  id          String   @id @default(cuid())
-  mortgageId  String
+  id         String @id @default(cuid())
+  mortgageId String
 
-  fecha       DateTime
-  cuotaTotal  Float
-  capital     Float    // Parte de capital amortizado
-  intereses   Float    // Parte de intereses (gasto deducible)
+  fecha            DateTime
+  cuotaTotal       Float
+  capital          Float // Parte de capital amortizado
+  intereses        Float // Parte de intereses (gasto deducible)
   capitalPendiente Float // Capital restante tras este pago
-  pagado      Boolean  @default(false)
+  pagado           Boolean  @default(false)
 
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
 
-  mortgage    Mortgage @relation(fields: [mortgageId], references: [id], onDelete: Cascade)
+  mortgage Mortgage @relation(fields: [mortgageId], references: [id], onDelete: Cascade)
 
   @@index([mortgageId])
   @@index([fecha])
@@ -16503,18 +16508,18 @@ model MortgagePayment {
 
 /// Amortizacion contable anual de un activo (3% construccion para IS)
 model DepreciationEntry {
-  id        String   @id @default(cuid())
-  assetId   String
+  id      String @id @default(cuid())
+  assetId String
 
-  ano                 Int
-  baseAmortizable     Float   // Valor construccion + reformas capitalizables
-  porcentaje          Float   // Tipicamente 3% para inmuebles
-  cuotaAnual          Float   // baseAmortizable * porcentaje / 100
+  ano                   Int
+  baseAmortizable       Float // Valor construccion + reformas capitalizables
+  porcentaje            Float // Tipicamente 3% para inmuebles
+  cuotaAnual            Float // baseAmortizable * porcentaje / 100
   amortizacionAcumulada Float // Suma de todas las cuotas hasta este ano
 
   createdAt DateTime @default(now())
 
-  asset     AssetAcquisition @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  asset AssetAcquisition @relation(fields: [assetId], references: [id], onDelete: Cascade)
 
   @@unique([assetId, ano])
   @@index([assetId])
@@ -16522,26 +16527,26 @@ model DepreciationEntry {
 
 /// Tracking de fianzas depositadas en organismo autonomico
 model FianzaDeposit {
-  id          String        @id @default(cuid())
-  contractId  String
-  companyId   String
+  id         String @id @default(cuid())
+  contractId String
+  companyId  String
 
   importeFianza     Float
-  mesesFianza       Int         @default(1)
-  organismoDeposito String?     // IVIMA, INCASOL, AVVR, etc.
-  numeroDeposito    String?     // Referencia del deposito
+  mesesFianza       Int           @default(1)
+  organismoDeposito String? // IVIMA, INCASOL, AVVR, etc.
+  numeroDeposito    String? // Referencia del deposito
   fechaDeposito     DateTime?
   fechaDevolucion   DateTime?
   importeDevuelto   Float?
   importeRetenido   Float?
-  motivoRetencion   String?     @db.Text
+  motivoRetencion   String?       @db.Text
   estado            DepositStatus @default(pendiente_deposito)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  contract  Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
-  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  contract Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  company  Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   @@index([contractId])
   @@index([companyId])
@@ -16565,28 +16570,28 @@ enum AnalysisUnitType {
 
 /// Analisis de inversion inmobiliaria completo
 model InvestmentAnalysis {
-  id          String   @id @default(cuid())
-  companyId   String
-  createdBy   String
+  id        String @id @default(cuid())
+  companyId String
+  createdBy String
 
   // Datos del activo
-  nombre            String   // Nombre descriptivo del analisis
-  direccion         String?
-  ciudad            String?
-  tipoActivo        String?  // edificio_completo, unidad_individual, cartera
-  askingPrice       Float    // Precio que piden (techo de la tabla sensibilidad)
+  nombre      String // Nombre descriptivo del analisis
+  direccion   String?
+  ciudad      String?
+  tipoActivo  String? // edificio_completo, unidad_individual, cartera
+  askingPrice Float // Precio que piden (techo de la tabla sensibilidad)
 
   // Datos de compra
-  gastosNotaria       Float @default(0)
-  gastosRegistro      Float @default(0)
-  impuestoCompra      Float @default(0) // ITP o IVA+AJD
-  comisionCompra      Float @default(0) // Comision agencia compra (%)
-  otrosGastosCompra   Float @default(0)
+  gastosNotaria     Float @default(0)
+  gastosRegistro    Float @default(0)
+  impuestoCompra    Float @default(0) // ITP o IVA+AJD
+  comisionCompra    Float @default(0) // Comision agencia compra (%)
+  otrosGastosCompra Float @default(0)
 
   // CAPEX (reformas/mejoras)
-  capexReforma        Float @default(0)
-  capexImprevistos    Float @default(0) // % sobre capex
-  capexOtros          Float @default(0)
+  capexReforma     Float @default(0)
+  capexImprevistos Float @default(0) // % sobre capex
+  capexOtros       Float @default(0)
 
   // OPEX anual (gastos recurrentes)
   ibiAnual            Float @default(0)
@@ -16599,44 +16604,44 @@ model InvestmentAnalysis {
   otrosGastosAnuales  Float @default(0)
 
   // Financiacion
-  usaFinanciacion     Boolean @default(false)
-  ltv                 Float?  // % financiado sobre precio compra
-  tipoInteres         Float?  // % anual
-  plazoAnos           Int?
-  comisionApertura    Float?  // %
+  usaFinanciacion  Boolean @default(false)
+  ltv              Float? // % financiado sobre precio compra
+  tipoInteres      Float? // % anual
+  plazoAnos        Int?
+  comisionApertura Float? // %
 
   // Potencial de zona (EUR/m2)
-  precioM2Zona        Float?  // EUR/m2 medio de alquiler en la zona
-  precioM2ZonaFuente  String? // "manual", "ia", "idealista", etc.
+  precioM2Zona       Float? // EUR/m2 medio de alquiler en la zona
+  precioM2ZonaFuente String? // "manual", "ia", "idealista", etc.
 
   // Rent roll (JSON array de unidades)
   // Cada entrada: { tipo, referencia, superficie, rentaMensual, estado }
-  rentRoll            Json    @default("[]")
+  rentRoll Json @default("[]")
 
   // Resultados calculados (se regeneran al guardar)
-  rentaPotencialAnual   Float? // Si todas las unidades estuvieran al precio/m2 de zona
-  yieldPotencial        Float? // Yield si se alquila a precio de mercado
+  rentaPotencialAnual       Float? // Si todas las unidades estuvieran al precio/m2 de zona
+  yieldPotencial            Float? // Yield si se alquila a precio de mercado
   gapRentaActualVsPotencial Float? // % de diferencia renta actual vs potencial
-  rentaBrutaAnual       Float?
-  rentaNetaAnual        Float?
-  inversionTotal        Float?
-  capitalPropio         Float?
-  importeHipoteca       Float?
-  cuotaHipotecaMensual  Float?
-  cashFlowAnual         Float?
-  yieldBruto            Float?
-  yieldNeto             Float?
-  cashOnCash            Float?
-  paybackAnos           Float?
+  rentaBrutaAnual           Float?
+  rentaNetaAnual            Float?
+  inversionTotal            Float?
+  capitalPropio             Float?
+  importeHipoteca           Float?
+  cuotaHipotecaMensual      Float?
+  cashFlowAnual             Float?
+  yieldBruto                Float?
+  yieldNeto                 Float?
+  cashOnCash                Float?
+  paybackAnos               Float?
   // Tabla de sensibilidad (JSON)
   // Array de { precio, yield, cashOnCash, cashFlow }
-  tablaSensibilidad     Json?
+  tablaSensibilidad         Json?
 
   notas     String?  @db.Text
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   @@index([companyId])
   @@index([createdBy])
@@ -16683,8 +16688,8 @@ model GCCustomer {
   companyId String
 
   // GoCardless IDs
-  gcCustomerId     String  @unique // ID en GoCardless (CU...)
-  gcBankAccountId  String? // ID de cuenta bancaria (BA...)
+  gcCustomerId    String  @unique // ID en GoCardless (CU...)
+  gcBankAccountId String? // ID de cuenta bancaria (BA...)
 
   // Relacion con inquilino
   tenantId String? @unique
@@ -16705,9 +16710,9 @@ model GCCustomer {
   updatedAt DateTime @updatedAt
 
   // Relaciones
-  company       Company        @relation("CompanyGCCustomers", fields: [companyId], references: [id], onDelete: Cascade)
-  mandates      SepaMandate[]
-  metadata      Json?
+  company  Company       @relation("CompanyGCCustomers", fields: [companyId], references: [id], onDelete: Cascade)
+  mandates SepaMandate[]
+  metadata Json?
 
   @@unique([companyId, tenantId])
   @@index([companyId])
@@ -16721,7 +16726,7 @@ model SepaMandate {
   companyId String
 
   // GoCardless IDs
-  gcMandateId String @unique // ID en GoCardless (MD...)
+  gcMandateId  String @unique // ID en GoCardless (MD...)
   gcCustomerId String
 
   // Relacion
@@ -16730,7 +16735,7 @@ model SepaMandate {
 
   // Datos del mandato
   reference              String? // Referencia unica SEPA
-  scheme                 String  @default("sepa_core") // sepa_core, bacs, etc
+  scheme                 String            @default("sepa_core") // sepa_core, bacs, etc
   status                 SepaMandateStatus @default(pending_submission)
   nextPossibleChargeDate String? // YYYY-MM-DD
 
@@ -16765,8 +16770,8 @@ model SepaPayment {
   subscription   SepaSubscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
 
   // Datos del pago
-  amount      Int    // En centimos (1200 = 12.00 EUR)
-  currency    String @default("EUR")
+  amount      Int // En centimos (1200 = 12.00 EUR)
+  currency    String            @default("EUR")
   description String
   reference   String? // Referencia para conciliacion
   chargeDate  String? // YYYY-MM-DD
@@ -16795,9 +16800,9 @@ model SepaPayment {
   notaConciliacion String?   @db.Text
 
   // Errores y reintentos
-  failureReason    String?
-  chargeBackDate   DateTime?
-  amountRefunded   Int       @default(0)
+  failureReason  String?
+  chargeBackDate DateTime?
+  amountRefunded Int       @default(0)
 
   metadata  Json?
   createdAt DateTime @default(now())
@@ -16830,11 +16835,11 @@ model SepaSubscription {
 
   // Datos de la suscripcion
   name         String
-  amount       Int    // En centimos
-  currency     String @default("EUR")
-  interval     Int    @default(1)
-  intervalUnit String @default("monthly") // weekly, monthly, yearly
-  dayOfMonth   Int?   // 1-28
+  amount       Int // En centimos
+  currency     String                 @default("EUR")
+  interval     Int                    @default(1)
+  intervalUnit String                 @default("monthly") // weekly, monthly, yearly
+  dayOfMonth   Int? // 1-28
   startDate    String? // YYYY-MM-DD
   endDate      String? // YYYY-MM-DD
   status       SepaSubscriptionStatus @default(active)
@@ -16867,11 +16872,11 @@ model GCPayout {
   gcPayoutId String @unique // ID en GoCardless (PO...)
 
   // Datos del payout
-  amount       Int      // En centimos
-  currency     String   @default("EUR")
-  arrivalDate  DateTime // Fecha de llegada a cuenta bancaria
-  status       String   // pending, paid, bounced
-  reference    String?
+  amount      Int // En centimos
+  currency    String   @default("EUR")
+  arrivalDate DateTime // Fecha de llegada a cuenta bancaria
+  status      String // pending, paid, bounced
+  reference   String?
 
   // Desglose
   debitCount   Int @default(0)
@@ -16880,10 +16885,10 @@ model GCPayout {
   refundAmount Int @default(0)
 
   // Conciliacion bancaria
-  conciliado          Boolean   @default(false)
-  conciliadoEn        DateTime?
-  bankTransactionId   String?   // FK a BankTransaction si se concilia
-  notaConciliacion    String?   @db.Text
+  conciliado        Boolean   @default(false)
+  conciliadoEn      DateTime?
+  bankTransactionId String? // FK a BankTransaction si se concilia
+  notaConciliacion  String?   @db.Text
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -16897,7 +16902,7 @@ model GCPayout {
 }
 
 model GCWebhookEvent {
-  id        String @id @default(cuid())
+  id        String  @id @default(cuid())
   companyId String?
 
   // Datos del evento
@@ -16907,9 +16912,9 @@ model GCWebhookEvent {
   resourceId   String // ID del recurso afectado
 
   // Procesamiento
-  processed    Boolean  @default(false)
-  processedAt  DateTime?
-  error        String?  @db.Text
+  processed   Boolean   @default(false)
+  processedAt DateTime?
+  error       String?   @db.Text
 
   // Payload completo
   payload Json
@@ -16986,25 +16991,25 @@ model FinancialAccount {
   company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   // Entidad
-  entidad       String // Banca March, Pictet, UBS, CACEIS, Inversis, etc.
-  tipoEntidad   FinancialEntityType
-  numeroCuenta  String? // IBAN o número de cuenta
-  alias         String? // "Cartera Pictet", "Cuenta Bankinter"
+  entidad      String // Banca March, Pictet, UBS, CACEIS, Inversis, etc.
+  tipoEntidad  FinancialEntityType
+  numeroCuenta String? // IBAN o número de cuenta
+  alias        String? // "Cartera Pictet", "Cuenta Bankinter"
 
   // Divisa y saldos
-  divisa        String  @default("EUR")
-  saldoActual   Float   @default(0)
-  valorMercado  Float   @default(0) // Valor total de posiciones
-  pnlTotal      Float   @default(0) // P&L acumulado
+  divisa       String @default("EUR")
+  saldoActual  Float  @default(0)
+  valorMercado Float  @default(0) // Valor total de posiciones
+  pnlTotal     Float  @default(0) // P&L acumulado
 
   // Conexión
-  conexionTipo  String  @default("manual") // api_psd2, swift, ocr_pdf, manual
-  ultimaSync    DateTime?
-  apiConfig     Json?   // Configuración de conexión (encrypted)
+  conexionTipo String    @default("manual") // api_psd2, swift, ocr_pdf, manual
+  ultimaSync   DateTime?
+  apiConfig    Json? // Configuración de conexión (encrypted)
 
   // Estado
-  activa        Boolean @default(true)
-  notas         String? @db.Text
+  activa Boolean @default(true)
+  notas  String? @db.Text
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -17023,41 +17028,41 @@ model FinancialPosition {
   account   FinancialAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
   // Instrumento
-  nombre        String // "Pictet Global Bonds", "Iberdrola", etc.
-  isin          String? // ES0144580Y14, LU0128467544
-  ticker        String? // IBE.MC, AAPL
-  tipo          FinancialInstrumentType
-  categoria     String? // "Renta Fija EUR", "RV Global", "Monetario"
+  nombre    String // "Pictet Global Bonds", "Iberdrola", etc.
+  isin      String? // ES0144580Y14, LU0128467544
+  ticker    String? // IBE.MC, AAPL
+  tipo      FinancialInstrumentType
+  categoria String? // "Renta Fija EUR", "RV Global", "Monetario"
 
   // Posición
-  cantidad        Float   @default(0) // Participaciones o títulos
-  precioMedio     Float   @default(0) // Coste medio de adquisición
-  valorActual     Float   @default(0) // Valor de mercado actual
-  divisa          String  @default("EUR")
+  cantidad    Float  @default(0) // Participaciones o títulos
+  precioMedio Float  @default(0) // Coste medio de adquisición
+  valorActual Float  @default(0) // Valor de mercado actual
+  divisa      String @default("EUR")
 
   // P&L
-  costeTotal      Float   @default(0) // cantidad * precioMedio
-  pnlNoRealizado  Float   @default(0) // valorActual - costeTotal
-  pnlRealizado    Float   @default(0) // Ganancias ya materializadas
-  pnlPct          Float   @default(0) // % rentabilidad
+  costeTotal     Float @default(0) // cantidad * precioMedio
+  pnlNoRealizado Float @default(0) // valorActual - costeTotal
+  pnlRealizado   Float @default(0) // Ganancias ya materializadas
+  pnlPct         Float @default(0) // % rentabilidad
 
   // Metadata
   fechaCompra         DateTime?
   ultimaActualizacion DateTime?
-  peso                Float?    // % del total de la cuenta
+  peso                Float? // % del total de la cuenta
 
   // Rentabilidades (G11: return12m, returnYtd por posición)
-  return12m    Float? // Rentabilidad últimos 12 meses (%)
-  returnYtd    Float? // Rentabilidad YTD (%)
+  return12m Float? // Rentabilidad últimos 12 meses (%)
+  returnYtd Float? // Rentabilidad YTD (%)
 
   // Detalle bonos (G10: TIR, duración, cupón, vencimiento, rating)
   maturityDate DateTime? // Fecha vencimiento
-  couponRate   Float?    // Cupón (%)
-  yieldAtCost  Float?    // TIR de compra
-  currentYield Float?    // TIR actual
-  duration     Float?    // Duración modificada
-  rating       String?   // Rating crediticio (Baa1, A3, etc.)
-  nominal      Float?    // Valor nominal
+  couponRate   Float? // Cupón (%)
+  yieldAtCost  Float? // TIR de compra
+  currentYield Float? // TIR actual
+  duration     Float? // Duración modificada
+  rating       String? // Rating crediticio (Baa1, A3, etc.)
+  nominal      Float? // Valor nominal
 
   // Portfolio/custodian tracking (G5: multi-portfolio)
   portfolioCode String? // "1149.01", "1149.03", "1142.09"
@@ -17076,27 +17081,27 @@ model FinancialPosition {
 }
 
 model FinancialTransaction {
-  id         String           @id @default(cuid())
+  id         String             @id @default(cuid())
   accountId  String
-  account    FinancialAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  account    FinancialAccount   @relation(fields: [accountId], references: [id], onDelete: Cascade)
   positionId String?
   position   FinancialPosition? @relation(fields: [positionId], references: [id], onDelete: SetNull)
 
   // Movimiento
-  tipo        FinancialTxType
-  fecha       DateTime
-  concepto    String
-  importe     Float // Positivo = entrada, Negativo = salida
-  divisa      String @default("EUR")
+  tipo     FinancialTxType
+  fecha    DateTime
+  concepto String
+  importe  Float // Positivo = entrada, Negativo = salida
+  divisa   String          @default("EUR")
 
   // Detalle para compra/venta
-  cantidad    Float?  // Participaciones/títulos
-  precio      Float?  // Precio por unidad
-  comision    Float?  // Comisión cobrada
+  cantidad Float? // Participaciones/títulos
+  precio   Float? // Precio por unidad
+  comision Float? // Comisión cobrada
 
   // Referencia
-  referencia  String? // Número de operación del banco
-  notas       String? @db.Text
+  referencia String? // Número de operación del banco
+  notas      String? @db.Text
 
   createdAt DateTime @default(now())
 
@@ -17126,12 +17131,12 @@ enum SmartSuggestionStatus {
 }
 
 model SmartSuggestion {
-  id        String             @id @default(cuid())
+  id        String @id @default(cuid())
   companyId String
 
   // Clasificación
   area      SuggestionArea
-  prioridad SuggestionPriority   @default(media)
+  prioridad SuggestionPriority    @default(media)
   estado    SmartSuggestionStatus @default(pendiente)
   codigo    String // "CONTRACT_EXPIRING", "UNIT_VACANT_30D", "PE_TVPI_LOW", etc.
 
@@ -17144,21 +17149,21 @@ model SmartSuggestion {
   // Contexto
   entityType String? // "contract", "unit", "participation", "account"
   entityId   String? // ID del objeto relacionado
-  metadata   Json?   // Datos adicionales (importes, fechas, etc.)
+  metadata   Json? // Datos adicionales (importes, fechas, etc.)
 
   // Destinatario
-  targetRole String? // "administrador", "gestor", "super_admin"
+  targetRole   String? // "administrador", "gestor", "super_admin"
   targetUserId String? // Usuario específico (null = todos los del rol)
 
   // Notificación
-  notificadoInApp  Boolean   @default(false)
-  notificadoEmail  Boolean   @default(false)
+  notificadoInApp   Boolean   @default(false)
+  notificadoEmail   Boolean   @default(false)
   fechaNotificacion DateTime?
 
   // Auditoría
-  resueltoPor String?
+  resueltoPor     String?
   fechaResolucion DateTime?
-  notasResolucion String? @db.Text
+  notasResolucion String?   @db.Text
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -17174,7 +17179,7 @@ model SmartSuggestion {
 
 model Participation {
   id        String  @id @default(cuid())
-  companyId String  // Holding (ej: Vidaro)
+  companyId String // Holding (ej: Vidaro)
   company   Company @relation("HoldingParticipations", fields: [companyId], references: [id], onDelete: Cascade)
 
   // Sociedad participada
@@ -17183,45 +17188,45 @@ model Participation {
   targetCompanyId   String? // ID en INMOVA si es filial registrada
 
   // Participación
-  tipo              ParticipationType
-  porcentaje        Float // 100, 51, 33.33, etc.
-  fechaAdquisicion  DateTime
-  costeAdquisicion  Float   @default(0) // Precio pagado
+  tipo             ParticipationType
+  porcentaje       Float // 100, 51, 33.33, etc.
+  fechaAdquisicion DateTime
+  costeAdquisicion Float             @default(0) // Precio pagado
 
   // Valoración
-  valorContable     Float   @default(0) // Valor en libros
-  valorEstimado     Float?  // Última valoración estimada
-  fechaValoracion   DateTime?
+  valorContable   Float     @default(0) // Valor en libros
+  valorEstimado   Float? // Última valoración estimada
+  fechaValoracion DateTime?
 
   // PE specifics - Capital Management
-  compromisoTotal    Float?  // Total committed
-  capitalLlamado     Float?  // Total called/desembolsado
-  capitalPendiente   Float?  // Desembolsos pendientes (compromisoTotal - capitalLlamado)
-  capitalDistribuido Float?  // Total distributed (distribuciones acumuladas)
+  compromisoTotal    Float? // Total committed
+  capitalLlamado     Float? // Total called/desembolsado
+  capitalPendiente   Float? // Desembolsos pendientes (compromisoTotal - capitalLlamado)
+  capitalDistribuido Float? // Total distributed (distribuciones acumuladas)
 
   // PE specifics - Valoración y Métricas
-  valoracionActual          Float?    // NAV actual del fondo
-  tvpi                      Float?    // Total Value to Paid-In = (Valoración + Distribuciones) / Desembolsos
-  dpi                       Float?    // Distributed to Paid-In = Distribuciones / Desembolsos
-  moic                      Float?    // Multiple on Invested Capital
-  irr                       Float?    // Internal Rate of Return (%)
+  valoracionActual Float? // NAV actual del fondo
+  tvpi             Float? // Total Value to Paid-In = (Valoración + Distribuciones) / Desembolsos
+  dpi              Float? // Distributed to Paid-In = Distribuciones / Desembolsos
+  moic             Float? // Multiple on Invested Capital
+  irr              Float? // Internal Rate of Return (%)
 
   // PE specifics - Metadata
-  anoCompromiso             Int?      // Año vintage (2019, 2020, 2023...)
-  vehiculoInversor          String?   // "VIBLA_SCR" | "VIDARO_DIRECTO"
-  gestora                   String?   // "MdF Gestefin" etc.
-  fechaUltimaValoracion     DateTime? // Fecha del último NAV
+  anoCompromiso         Int? // Año vintage (2019, 2020, 2023...)
+  vehiculoInversor      String? // "VIBLA_SCR" | "VIDARO_DIRECTO"
+  gestora               String? // "MdF Gestefin" etc.
+  fechaUltimaValoracion DateTime? // Fecha del último NAV
 
   // PE specifics - Rentabilidad periodo
-  patrimonioInicioPeriodo   Float?    // NAV al inicio del periodo actual
-  rentabilidadPeriodoEur    Float?    // Rentabilidad € del periodo
-  rentabilidadPeriodoPct    Float?    // Rentabilidad % del periodo
-  desembolsosPeriodo        Float?    // Desembolsos realizados en el periodo
-  reembolsosPeriodo         Float?    // Reembolsos recibidos en el periodo
+  patrimonioInicioPeriodo Float? // NAV al inicio del periodo actual
+  rentabilidadPeriodoEur  Float? // Rentabilidad € del periodo
+  rentabilidadPeriodoPct  Float? // Rentabilidad % del periodo
+  desembolsosPeriodo      Float? // Desembolsos realizados en el periodo
+  reembolsosPeriodo       Float? // Reembolsos recibidos en el periodo
 
   // Estado
-  activa            Boolean @default(true)
-  notas             String? @db.Text
+  activa Boolean @default(true)
+  notas  String? @db.Text
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -17238,24 +17243,24 @@ model MonthlySnapshot {
   companyId String
   company   Company @relation("CompanyMonthlySnapshots", fields: [companyId], references: [id], onDelete: Cascade)
 
-  portfolioCode String   // "1149.01" (AF), "1149.02" (PE), "1149.03" (AR), "1142.09" (AMPER)
-  portfolioName String   // "BALDOMERO AF GRUPO"
+  portfolioCode String // "1149.01" (AF), "1149.02" (PE), "1149.03" (AR), "1142.09" (AMPER)
+  portfolioName String // "BALDOMERO AF GRUPO"
   reportDate    DateTime // Último día del mes del reporting
-  reportType    String   // "AF", "AR", "AMPER", "MIFID"
+  reportType    String // "AF", "AR", "AMPER", "MIFID"
 
   // Resumen patrimonial
-  totalValue    Float    // Patrimonio total a cierre de mes
-  previousValue Float    // Patrimonio mes anterior
+  totalValue    Float // Patrimonio total a cierre de mes
+  previousValue Float // Patrimonio mes anterior
   deposits      Float @default(0) // Aportaciones/retiradas
   netPnl        Float @default(0) // Beneficio neto
   fees          Float @default(0) // Comisiones totales (G7)
 
   // Asset allocation (G4: con targets)
-  monetario       Float @default(0) // Valor en mercado monetario
-  rentaFija       Float @default(0)
-  rentaVariable   Float @default(0)
-  commodities     Float @default(0)
-  alternativos    Float @default(0)
+  monetario     Float @default(0) // Valor en mercado monetario
+  rentaFija     Float @default(0)
+  rentaVariable Float @default(0)
+  commodities   Float @default(0)
+  alternativos  Float @default(0)
 
   // Targets (asset allocation objetivo — G4)
   targetMonetario     Float? // % objetivo mercado monetario
@@ -17298,8 +17303,8 @@ model PortfolioBenchmark {
   id        String @id @default(cuid())
   companyId String
 
-  name   String   // "MSCI World Net TR EUR", "Euro Govt 3-5Yr"
-  ticker String?  // "MSDEWIN Index", "BERPG2 Index"
+  name   String // "MSCI World Net TR EUR", "Euro Govt 3-5Yr"
+  ticker String? // "MSDEWIN Index", "BERPG2 Index"
   date   DateTime // Fecha del dato
 
   level Float? // Nivel del índice
@@ -17323,27 +17328,27 @@ model PortfolioBenchmark {
 // ============================================================================
 
 model Invoice {
-  id              String   @id @default(cuid())
-  companyId       String
-  company         Company  @relation("CompanyInvoices", fields: [companyId], references: [id], onDelete: Cascade)
-  numeroFactura   String
-  serie           String
-  fecha           DateTime
-  fechaContable   DateTime
-  concepto        String
-  baseImponible   Float
-  iva             Float    @default(21)
-  irpf            Float    @default(0)
-  totalImpuestos  Float
-  total           Float
-  estado          String   @default("borrador") // borrador, emitida, pagada, anulada, rectificada
-  tipo            String   @default("factura") // factura, proforma, rectificativa
+  id                 String   @id @default(cuid())
+  companyId          String
+  company            Company  @relation("CompanyInvoices", fields: [companyId], references: [id], onDelete: Cascade)
+  numeroFactura      String
+  serie              String
+  fecha              DateTime
+  fechaContable      DateTime
+  concepto           String
+  baseImponible      Float
+  iva                Float    @default(21)
+  irpf               Float    @default(0)
+  totalImpuestos     Float
+  total              Float
+  estado             String   @default("borrador") // borrador, emitida, pagada, anulada, rectificada
+  tipo               String   @default("factura") // factura, proforma, rectificativa
   destinatarioNombre String
   destinatarioNif    String?
-  inmueble        String?
-  notas           String?  @db.Text
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  inmueble           String?
+  notas              String?  @db.Text
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   @@index([companyId])
   @@index([estado])
@@ -17352,14 +17357,14 @@ model Invoice {
 }
 
 model InvoiceSeries {
-  id          String  @id @default(cuid())
+  id          String   @id @default(cuid())
   companyId   String
-  company     Company @relation("CompanyInvoiceSeries", fields: [companyId], references: [id], onDelete: Cascade)
+  company     Company  @relation("CompanyInvoiceSeries", fields: [companyId], references: [id], onDelete: Cascade)
   nombre      String
   prefijo     String
-  siguiente   Int     @default(1)
+  siguiente   Int      @default(1)
   descripcion String?
-  activo      Boolean @default(true)
+  activo      Boolean  @default(true)
   createdAt   DateTime @default(now())
 
   @@unique([companyId, prefijo])
@@ -17368,21 +17373,21 @@ model InvoiceSeries {
 }
 
 model RentUpdate {
-  id                   String   @id @default(cuid())
+  id                   String    @id @default(cuid())
   companyId            String
-  company              Company  @relation("CompanyRentUpdates", fields: [companyId], references: [id], onDelete: Cascade)
+  company              Company   @relation("CompanyRentUpdates", fields: [companyId], references: [id], onDelete: Cascade)
   contractId           String
-  contract             Contract @relation("ContractRentUpdates", fields: [contractId], references: [id], onDelete: Cascade)
+  contract             Contract  @relation("ContractRentUpdates", fields: [contractId], references: [id], onDelete: Cascade)
   fechaRevision        DateTime
-  tipo                 String   @default("IPC") // IPC, pactado, renta_referencia, IRAV
+  tipo                 String    @default("IPC") // IPC, pactado, renta_referencia, IRAV
   rentaAnterior        Float
   rentaNueva           Float
   incrementoPorcentaje Float
-  estado               String   @default("pendiente") // pendiente, comunicada, aplicada, rechazada
+  estado               String    @default("pendiente") // pendiente, comunicada, aplicada, rechazada
   fechaComunicacion    DateTime?
-  notas                String?  @db.Text
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  notas                String?   @db.Text
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
 
   @@index([companyId])
   @@index([contractId])
@@ -17408,23 +17413,23 @@ model Note {
 }
 
 model Guarantor {
-  id              String   @id @default(cuid())
-  companyId       String
-  company         Company  @relation("CompanyGuarantors", fields: [companyId], references: [id], onDelete: Cascade)
-  contractId      String
-  contract        Contract @relation("ContractGuarantors", fields: [contractId], references: [id], onDelete: Cascade)
-  nombre          String
-  dni             String?
-  telefono        String?
-  email           String?
-  tipoGarantia    String   @default("personal") // personal, bancaria, seguro
-  importe         Float    @default(0)
-  estado          String   @default("activo") // activo, liberado, ejecutado
-  fechaInicio     DateTime?
-  fechaFin        DateTime?
-  notas           String?  @db.Text
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id           String    @id @default(cuid())
+  companyId    String
+  company      Company   @relation("CompanyGuarantors", fields: [companyId], references: [id], onDelete: Cascade)
+  contractId   String
+  contract     Contract  @relation("ContractGuarantors", fields: [contractId], references: [id], onDelete: Cascade)
+  nombre       String
+  dni          String?
+  telefono     String?
+  email        String?
+  tipoGarantia String    @default("personal") // personal, bancaria, seguro
+  importe      Float     @default(0)
+  estado       String    @default("activo") // activo, liberado, ejecutado
+  fechaInicio  DateTime?
+  fechaFin     DateTime?
+  notas        String?   @db.Text
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   @@index([companyId])
   @@index([contractId])
@@ -17456,21 +17461,21 @@ model PropertyVisit {
 }
 
 model UtilitySupply {
-  id              String   @id @default(cuid())
-  companyId       String
-  company         Company  @relation("CompanyUtilitySupplies", fields: [companyId], references: [id], onDelete: Cascade)
-  unitId          String?
-  unitNombre      String?
-  tipo            String   // electricidad, agua, gas, internet, telefono
-  proveedor       String?
-  numeroContrato  String?
-  titular         String?
-  estado          String   @default("activo") // activo, baja, pendiente
-  ultimaLectura   String?
+  id                 String    @id @default(cuid())
+  companyId          String
+  company            Company   @relation("CompanyUtilitySupplies", fields: [companyId], references: [id], onDelete: Cascade)
+  unitId             String?
+  unitNombre         String?
+  tipo               String // electricidad, agua, gas, internet, telefono
+  proveedor          String?
+  numeroContrato     String?
+  titular            String?
+  estado             String    @default("activo") // activo, baja, pendiente
+  ultimaLectura      String?
   ultimaLecturaFecha DateTime?
-  lecturas        Json?    @default("[]")
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  lecturas           Json?     @default("[]")
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
   @@index([companyId])
   @@index([unitId])
@@ -17481,7 +17486,7 @@ model ParkingStorage {
   id              String   @id @default(cuid())
   companyId       String
   company         Company  @relation("CompanyParkingStorage", fields: [companyId], references: [id], onDelete: Cascade)
-  tipo            String   // garaje, trastero
+  tipo            String // garaje, trastero
   numero          String
   buildingId      String?
   buildingNombre  String?
@@ -17500,18 +17505,18 @@ model ParkingStorage {
 }
 
 model BatchAction {
-  id                  String   @id @default(cuid())
-  companyId           String
-  company             Company  @relation("CompanyBatchActions", fields: [companyId], references: [id], onDelete: Cascade)
-  tipo                String   // cobro_masivo, gasto_masivo, transferencia
-  entidades           Json     @default("[]")
-  concepto            String
-  importe             Float
-  estado              String   @default("pendiente") // pendiente, procesado, error
-  fechaProcesamiento  DateTime?
-  resultado           String?  @db.Text
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  id                 String    @id @default(cuid())
+  companyId          String
+  company            Company   @relation("CompanyBatchActions", fields: [companyId], references: [id], onDelete: Cascade)
+  tipo               String // cobro_masivo, gasto_masivo, transferencia
+  entidades          Json      @default("[]")
+  concepto           String
+  importe            Float
+  estado             String    @default("pendiente") // pendiente, procesado, error
+  fechaProcesamiento DateTime?
+  resultado          String?   @db.Text
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
   @@index([companyId])
   @@index([estado])
@@ -17519,20 +17524,20 @@ model BatchAction {
 }
 
 model PropertyCheckInOut {
-  id               String   @id @default(cuid())
-  companyId        String
-  company          Company  @relation("CompanyPropertyCheckInOut", fields: [companyId], references: [id], onDelete: Cascade)
-  tipo             String   // check-in, check-out
-  inquilinoId      String?
-  inquilinoNombre  String?
-  inmuebleId       String?
-  inmuebleNombre   String?
-  fecha            DateTime
-  estado           String   @default("pendiente") // pendiente, completado, cancelado
-  token            String?  @unique
-  items            Json?    @default("[]")
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  id              String   @id @default(cuid())
+  companyId       String
+  company         Company  @relation("CompanyPropertyCheckInOut", fields: [companyId], references: [id], onDelete: Cascade)
+  tipo            String // check-in, check-out
+  inquilinoId     String?
+  inquilinoNombre String?
+  inmuebleId      String?
+  inmuebleNombre  String?
+  fecha           DateTime
+  estado          String   @default("pendiente") // pendiente, completado, cancelado
+  token           String?  @unique
+  items           Json?    @default("[]")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   @@index([companyId])
   @@index([estado])
@@ -17543,9 +17548,9 @@ model CustomField {
   id          String   @id @default(cuid())
   companyId   String
   company     Company  @relation("CompanyCustomFields", fields: [companyId], references: [id], onDelete: Cascade)
-  entidad     String   // inmueble, inquilino, contrato, incidencia, propietario
+  entidad     String // inmueble, inquilino, contrato, incidencia, propietario
   nombre      String
-  tipo        String   // texto, numero, fecha, select, checkbox
+  tipo        String // texto, numero, fecha, select, checkbox
   obligatorio Boolean  @default(false)
   opciones    Json?    @default("[]")
   orden       Int      @default(0)
@@ -17559,17 +17564,17 @@ model CustomField {
 }
 
 model UnavailabilityPeriod {
-  id              String   @id @default(cuid())
-  companyId       String
-  company         Company  @relation("CompanyUnavailabilityPeriods", fields: [companyId], references: [id], onDelete: Cascade)
-  inmuebleId      String?
-  inmuebleNombre  String
-  motivo          String   // reforma, venta, personal, otro
-  fechaDesde      DateTime
-  fechaHasta      DateTime
-  notas           String?  @db.Text
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id             String   @id @default(cuid())
+  companyId      String
+  company        Company  @relation("CompanyUnavailabilityPeriods", fields: [companyId], references: [id], onDelete: Cascade)
+  inmuebleId     String?
+  inmuebleNombre String
+  motivo         String // reforma, venta, personal, otro
+  fechaDesde     DateTime
+  fechaHasta     DateTime
+  notas          String?  @db.Text
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   @@index([companyId])
   @@index([inmuebleId])

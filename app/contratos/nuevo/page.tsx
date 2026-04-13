@@ -69,6 +69,7 @@ export default function NuevoContratoPage() {
     fechaInicio: '',
     fechaFin: '',
     rentaMensual: '0',
+    ivaPorcentaje: 0,
     deposito: '0',
     tipo: 'residencial',
     codigoOperacion: '',
@@ -187,6 +188,7 @@ export default function NuevoContratoPage() {
           fechaInicio: new Date(formData.fechaInicio).toISOString(),
           fechaFin: new Date(formData.fechaFin).toISOString(),
           rentaMensual: parseFloat(formData.rentaMensual),
+          ivaPorcentaje: formData.ivaPorcentaje || 0,
           deposito: parseFloat(formData.deposito),
           tipo: formData.tipo,
           estado: 'activo',
@@ -365,6 +367,38 @@ export default function NuevoContratoPage() {
                         min="0"
                         placeholder="Ej: 850.00"
                       />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="ivaPorcentaje">IVA (%)</Label>
+                        <Input
+                          id="ivaPorcentaje"
+                          type="number"
+                          step="0.01"
+                          placeholder="0, 10, 21..."
+                          value={formData.ivaPorcentaje || ''}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              ivaPorcentaje: parseFloat(e.target.value) || 0,
+                            })
+                          }
+                        />
+                        <p className="text-xs text-muted-foreground mt-1">
+                          0% viviendas, 21% locales/garajes
+                        </p>
+                      </div>
+                      <div>
+                        <Label>Renta Total (con IVA)</Label>
+                        <div className="h-10 px-3 py-2 bg-muted rounded-md flex items-center text-sm">
+                          €
+                          {(
+                            (parseFloat(formData.rentaMensual) || 0) *
+                            (1 + (formData.ivaPorcentaje || 0) / 100)
+                          ).toFixed(2)}
+                        </div>
+                      </div>
                     </div>
 
                     {/* Depósito */}

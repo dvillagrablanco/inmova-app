@@ -188,10 +188,13 @@ export async function GET(request: NextRequest) {
         take: 5,
       }),
 
-      // Unidades agrupadas por tipo (para gráfico de ocupación)
+      // Unidades agrupadas por tipo (excluye uso_empresa del denominador de ocupación)
       prisma.unit.groupBy({
         by: ['tipo'],
-        where: { building: { companyId: companyFilter } },
+        where: {
+          building: { companyId: companyFilter },
+          estado: { not: 'uso_empresa' },
+        },
         _count: true,
       }),
     ]);
@@ -479,15 +482,23 @@ export async function GET(request: NextRequest) {
     const ingresosNetos = ingresosTotalesMensuales - gastosTotales;
     const margenNeto =
       ingresosTotalesMensuales > 0 ? (ingresosNetos / ingresosTotalesMensuales) * 100 : 0;
-    // Ocupación basada en unidades únicas con contrato activo (no contar múltiples contratos por unidad)
-    const occupiedUnitsCount = await prisma.unit.count({
+    // Ocupación: excluir unidades en uso_empresa de numerador y denominador
+    const unitsForOccupancyCount = await prisma.unit.count({
       where: {
         building: { companyId: companyFilter },
-        contracts: { some: { estado: 'activo' } },
+        estado: { not: 'uso_empresa' },
+      },
+    });
+    const ocupadasCount = await prisma.unit.count({
+      where: {
+        building: { companyId: companyFilter },
+        estado: 'ocupada',
       },
     });
     const tasaOcupacion =
-      totalUnits > 0 ? Math.min((occupiedUnitsCount / totalUnits) * 100, 100) : 0;
+      unitsForOccupancyCount > 0
+        ? Math.min((ocupadasCount / unitsForOccupancyCount) * 100, 100)
+        : 0;
 
     // Calcular morosidad (pagos vencidos no pagados)
     const overduePayments = await prisma.payment.count({

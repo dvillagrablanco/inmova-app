@@ -178,6 +178,10 @@ const contractBaseSchema = z.object({
     .number()
     .positive('La renta mensual debe ser mayor a 0')
     .max(1000000, 'La renta mensual no puede exceder 1,000,000'),
+  baseImponible: z.number().nonnegative().optional(),
+  ivaPorcentaje: z.number().min(0).max(100).optional().default(0),
+  importeIva: z.number().nonnegative().optional(),
+  rentaTotal: z.number().nonnegative().optional(),
   diaCobranza: z
     .number()
     .int('Debe ser un número entero')
