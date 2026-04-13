@@ -21,6 +21,7 @@ import {
   FileText,
   TrendingUp,
   ExternalLink,
+  Sparkles,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -644,14 +645,22 @@ export default function PropiedadDetallesPage() {
                 <Button
                   variant="outline"
                   className="w-full justify-start"
+                  onClick={() => router.push(`/valoracion-ia?unitId=${property.id}`)}
+                >
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Valoración con IA
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
                   onClick={() => {
                     const renta = property?.rentaMensual || property?.price || 0;
                     if (renta > 0) {
                       const ingresosAnuales = renta * 12;
-                      const gastosEstimados = ingresosAnuales * 0.15; // 15% gastos
+                      const gastosEstimados = ingresosAnuales * 0.15;
                       const beneficioNeto = ingresosAnuales - gastosEstimados;
                       const sup = property?.superficie || 1;
-                      const precioM2Madrid = 4500; // €/m² estimado
+                      const precioM2Madrid = 4500;
                       const valorEstimado = sup * precioM2Madrid;
                       const roi = ((beneficioNeto / valorEstimado) * 100).toFixed(2);
                       const rentaM2 = (renta / sup).toFixed(2);

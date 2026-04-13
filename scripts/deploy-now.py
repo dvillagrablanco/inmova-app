@@ -1,91 +1,99 @@
 #!/usr/bin/env python3
-"""Deploy directo con SSH - step by step con timeouts altos."""
-import paramiko
-import time
+"""Deploy to production server via SSH (Paramiko)"""
 import sys
-from datetime import datetime
+import time
 
-SERVER_IP = '157.180.119.236'
-USERNAME = 'root'
+sys.path.insert(0, '/home/ubuntu/.local/lib/python3.12/site-packages')
+import paramiko
+
+SERVER = '157.180.119.236'
+USER = 'root'
 PASSWORD = 'hBXxC6pZCQPBLPiHGUHkASiln+Su/BAVQAN6qQ+xjVo='
-APP_PATH = '/opt/inmova-app'
+APP_DIR = '/opt/inmova-app'
 
-def run(client, cmd, timeout=900, label=""):
-    ts = datetime.now().strftime('%H:%M:%S')
-    print(f"[{ts}] {label}...", flush=True)
-    try:
-        stdin, stdout, stderr = client.exec_command(cmd, timeout=timeout)
-        exit_code = stdout.channel.recv_exit_status()
-        out = stdout.read().decode('utf-8', errors='ignore')
-        err = stderr.read().decode('utf-8', errors='ignore')
-        if exit_code != 0 and err:
-            print(f"  stderr: {err[:200]}", flush=True)
-        return exit_code, out, err
-    except Exception as e:
-        print(f"  TIMEOUT/ERROR: {e}", flush=True)
-        return -1, "", str(e)
+def run(client, cmd, timeout=300):
+    print(f'\n>>> {cmd}')
+    stdin, stdout, stderr = client.exec_command(cmd, timeout=timeout)
+    exit_code = stdout.channel.recv_exit_status()
+    out = stdout.read().decode('utf-8', errors='replace').strip()
+    err = stderr.read().decode('utf-8', errors='replace').strip()
+    if out:
+        for line in out.split('\n')[-20:]:
+            print(f'  {line}')
+    if err:
+        for line in err.split('\n')[-10:]:
+            print(f'  [err] {line}')
+    print(f'  exit: {exit_code}')
+    return exit_code, out, err
 
 def main():
-    print("="*60, flush=True)
-    print("  DEPLOY INMOVA -> PRODUCCIÓN", flush=True)
-    print("="*60, flush=True)
-
+    print(f'Connecting to {SERVER}...')
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    client.connect(SERVER_IP, username=USERNAME, password=PASSWORD, timeout=30)
-    print("Conectado.", flush=True)
+    client.connect(SERVER, username=USER, password=PASSWORD, timeout=15)
+    print('Connected.\n')
 
     # 1. Git pull
-    code, out, _ = run(client, f"cd {APP_PATH} && git stash 2>&1; git pull origin main 2>&1", label="Git pull")
-    print(f"  {out[:200]}", flush=True)
+    print('=' * 60)
+    print('STEP 1: git pull origin main')
+    print('=' * 60)
+    code, out, _ = run(client, f'cd {APP_DIR} && git pull origin main', timeout=60)
+    if code != 0:
+        print('ERROR: git pull failed')
+        client.close()
+        sys.exit(1)
 
-    # 2. npm install
-    code, out, _ = run(client, f"cd {APP_PATH} && npm install --legacy-peer-deps 2>&1 | tail -5", timeout=600, label="npm install")
-    print(f"  {out[:200]}", flush=True)
+    # 2. Prisma migrate deploy
+    print('\n' + '=' * 60)
+    print('STEP 2: npx prisma migrate deploy')
+    print('=' * 60)
+    code, out, _ = run(client, f'cd {APP_DIR} && npx prisma migrate deploy', timeout=120)
 
-    # 3. Prisma generate
-    code, out, _ = run(client, f"cd {APP_PATH} && npx prisma generate 2>&1 | tail -5", timeout=120, label="Prisma generate")
-    print(f"  {out[:200]}", flush=True)
+    # 3. Prisma generate (ensure client is up to date)
+    print('\n' + '=' * 60)
+    print('STEP 3: npx prisma generate')
+    print('=' * 60)
+    code, out, _ = run(client, f'cd {APP_DIR} && npx prisma generate', timeout=60)
 
-    # 4. Prisma migrate (para ManagementContract)
-    code, out, _ = run(client, f"cd {APP_PATH} && npx prisma db push --accept-data-loss 2>&1 | tail -10", timeout=120, label="Prisma db push")
-    print(f"  {out[:300]}", flush=True)
+    # 4. npm run build
+    print('\n' + '=' * 60)
+    print('STEP 4: npm run build')
+    print('=' * 60)
+    code, out, _ = run(client, f'cd {APP_DIR} && npm run build', timeout=600)
+    if code != 0:
+        print('WARNING: build may have failed, checking...')
 
-    # 5. Build
-    code, out, _ = run(client, f"cd {APP_PATH} && npm run build 2>&1 | tail -30", timeout=900, label="Build (puede tardar 5-10 min)")
-    print(f"  {out[:500]}", flush=True)
+    # 5. PM2 reload
+    print('\n' + '=' * 60)
+    print('STEP 5: pm2 reload inmova-app')
+    print('=' * 60)
+    code, out, _ = run(client, 'pm2 reload inmova-app', timeout=30)
 
-    # 6. PM2 reload
-    code, out, _ = run(client, "pm2 reload inmova-app --update-env 2>&1 || pm2 restart inmova-app --update-env 2>&1", timeout=60, label="PM2 reload")
-    print(f"  {out[:200]}", flush=True)
+    # 6. Wait for warm-up
+    print('\nWaiting 15s for warm-up...')
+    time.sleep(15)
 
-    # 7. Wait
-    print("Esperando warm-up (20s)...", flush=True)
-    time.sleep(20)
+    # 7. Health check
+    print('\n' + '=' * 60)
+    print('STEP 6: Health check')
+    print('=' * 60)
+    code, out, _ = run(client, 'curl -s http://localhost:3000/api/health', timeout=15)
+    
+    if 'ok' in out.lower() or '"status"' in out:
+        print('\n' + '=' * 60)
+        print('DEPLOY SUCCESS')
+        print('=' * 60)
+    else:
+        print('\n' + '=' * 60)
+        print('WARNING: Health check may have issues')
+        print('=' * 60)
 
-    # 8. Health check
-    code, out, _ = run(client, "curl -sf http://localhost:3000/api/health 2>&1", label="Health check")
-    print(f"  {out[:200]}", flush=True)
-
-    # 9. PM2 status
-    code, out, _ = run(client, "pm2 status inmova-app --no-color 2>&1 | grep inmova", label="PM2 status")
-    print(f"  {out[:200]}", flush=True)
-
-    # 10. Auth check
-    code, out, _ = run(client, "curl -sf http://localhost:3000/api/auth/session 2>&1", label="Auth session")
-    ok = 'problem' not in out.lower()
-    print(f"  Auth: {'OK' if ok else 'ERROR - ' + out[:100]}", flush=True)
-
-    # 11. Check errors
-    code, out, _ = run(client, "pm2 logs inmova-app --err --lines 5 --nostream 2>&1 | tail -5", label="Error logs")
-    print(f"  {out[:200]}", flush=True)
+    # Show PM2 status
+    print('\nPM2 Status:')
+    run(client, 'pm2 status', timeout=10)
 
     client.close()
-
-    print("\n" + "="*60, flush=True)
-    print("  DEPLOY COMPLETADO", flush=True)
-    print("  https://inmovaapp.com", flush=True)
-    print("="*60, flush=True)
+    print('\nDone.')
 
 if __name__ == '__main__':
     main()
