@@ -84,6 +84,19 @@ interface Unit {
   }>;
 }
 
+/** Extrae ciudad desde dirección tipo "calle, CP ciudad" y quita comas finales. */
+function ciudadFromDireccion(direccion: string): string {
+  const parts = direccion
+    .split(',')
+    .map((p) => p.trim().replace(/,+$/, '').trim())
+    .filter(Boolean);
+  if (parts.length < 2) return '';
+  const last = parts[parts.length - 1];
+  const cpCity = last.match(/^\d{5}\s+(.+)$/);
+  if (cpCity) return cpCity[1].replace(/,+$/, '').trim();
+  return last.replace(/,+$/, '').trim();
+}
+
 interface BuildingDetails {
   id: string;
   nombre: string;
@@ -191,7 +204,10 @@ export default function EdificioDetallesPage() {
         if (!data.success || !data.data) return;
 
         const nombre = (building.nombre + ' ' + building.direccion).toLowerCase();
-        const keywords = nombre.replace(/[,./]/g, ' ').split(/\s+/).filter((w: string) => w.length > 3);
+        const keywords = nombre
+          .replace(/[,./]/g, ' ')
+          .split(/\s+/)
+          .filter((w: string) => w.length > 3);
 
         // Match income entries by building name/address
         let ingresoAnual = 0;
@@ -408,6 +424,7 @@ export default function EdificioDetallesPage() {
 
   const tipoBadge = getTipoBadge(building.tipo);
   const metrics = calculateMetrics();
+  const ciudadLine = ciudadFromDireccion(building.direccion || '');
 
   return (
     <AuthenticatedLayout>
@@ -548,7 +565,12 @@ export default function EdificioDetallesPage() {
                   Rentabilidad Contable (2025)
                 </CardTitle>
                 <Badge variant={noiData.noi > 0 ? 'default' : 'destructive'}>
-                  NOI: {noiData.noi > 0 ? '+' : ''}{noiData.noi.toLocaleString('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })}
+                  NOI: {noiData.noi > 0 ? '+' : ''}
+                  {noiData.noi.toLocaleString('es-ES', {
+                    style: 'currency',
+                    currency: 'EUR',
+                    maximumFractionDigits: 0,
+                  })}
                 </Badge>
               </div>
               <CardDescription>Datos reales de contabilidad (Zucchetti)</CardDescription>
@@ -557,19 +579,33 @@ export default function EdificioDetallesPage() {
               <div className="grid grid-cols-3 gap-4 mb-4">
                 <div className="text-center">
                   <p className="text-lg font-bold text-green-600">
-                    {noiData.ingresoAnual.toLocaleString('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })}
+                    {noiData.ingresoAnual.toLocaleString('es-ES', {
+                      style: 'currency',
+                      currency: 'EUR',
+                      maximumFractionDigits: 0,
+                    })}
                   </p>
                   <p className="text-xs text-muted-foreground">Ingresos/año</p>
                 </div>
                 <div className="text-center">
                   <p className="text-lg font-bold text-red-500">
-                    {noiData.gastosOperativos.toLocaleString('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })}
+                    {noiData.gastosOperativos.toLocaleString('es-ES', {
+                      style: 'currency',
+                      currency: 'EUR',
+                      maximumFractionDigits: 0,
+                    })}
                   </p>
                   <p className="text-xs text-muted-foreground">Gastos/año</p>
                 </div>
                 <div className="text-center">
-                  <p className={`text-lg font-bold ${noiData.noi > 0 ? 'text-green-600' : 'text-red-500'}`}>
-                    {noiData.noi.toLocaleString('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })}
+                  <p
+                    className={`text-lg font-bold ${noiData.noi > 0 ? 'text-green-600' : 'text-red-500'}`}
+                  >
+                    {noiData.noi.toLocaleString('es-ES', {
+                      style: 'currency',
+                      currency: 'EUR',
+                      maximumFractionDigits: 0,
+                    })}
                   </p>
                   <p className="text-xs text-muted-foreground">NOI</p>
                 </div>
@@ -581,7 +617,11 @@ export default function EdificioDetallesPage() {
                     <div key={i} className="flex justify-between text-xs">
                       <span className="text-muted-foreground">{g.tipo}</span>
                       <span className="font-medium">
-                        {g.importe.toLocaleString('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })}
+                        {g.importe.toLocaleString('es-ES', {
+                          style: 'currency',
+                          currency: 'EUR',
+                          maximumFractionDigits: 0,
+                        })}
                       </span>
                     </div>
                   ))}
@@ -782,6 +822,7 @@ export default function EdificioDetallesPage() {
             {/* Mapa de Ubicación */}
             <PropertyMap
               address={building.direccion}
+              city={ciudadLine || undefined}
               latitude={building.latitud ?? undefined}
               longitude={building.longitud ?? undefined}
             />

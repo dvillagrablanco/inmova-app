@@ -90,6 +90,7 @@ export async function GET(req: NextRequest) {
         id: contract.id,
         unitId: contract.unitId,
         tenantId: contract.tenantId,
+        numeroContrato: contract.numeroContrato,
         fechaInicio: contract.fechaInicio,
         fechaFin: contract.fechaFin,
         rentaMensual: Number(contract.rentaMensual || 0),
@@ -170,11 +171,26 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Empresa no definida' }, { status: 400 });
     }
 
+    const fechaInicio = new Date(validatedData.fechaInicio);
+    const year = fechaInicio.getFullYear();
+    const prefix = `CT-${year}-`;
+
+    const existingNumbers = await prisma.contract.findMany({
+      where: { numeroContrato: { startsWith: prefix } },
+      select: { numeroContrato: true },
+    });
+    let maxSeq = 0;
+    for (const row of existingNumbers) {
+      const n = row.numeroContrato?.match(/^CT-\d{4}-(\d+)$/);
+      if (n) maxSeq = Math.max(maxSeq, parseInt(n[1], 10));
+    }
+    const numeroContrato = `${prefix}${String(maxSeq + 1).padStart(4, '0')}`;
+
     const contract = await prisma.contract.create({
       data: {
         unitId: validatedData.unitId,
         tenantId: validatedData.tenantId,
-        fechaInicio: new Date(validatedData.fechaInicio),
+        fechaInicio,
         fechaFin: new Date(validatedData.fechaFin),
         rentaMensual: validatedData.rentaMensual,
         deposito: validatedData.deposito || 0,
@@ -185,6 +201,7 @@ export async function POST(req: NextRequest) {
         codigoOperacion: validatedData.codigoOperacion,
         suministrosProvisionales: validatedData.suministrosProvisionales,
         ibiRepercutido: validatedData.ibiRepercutido,
+        numeroContrato,
       },
     });
 

@@ -1469,6 +1469,7 @@ model Contract {
   codigoOperacion       String? // Código de operación (registro, etc.)
   suministrosProvisionales Float? // Importe suministros provisionales
   ibiRepercutido        Float? // IBI repercutido al inquilino (€)
+  numeroContrato        String? @unique // Número legible (ej. CT-2026-0001)
 
   unit                  Unit                  @relation(fields: [unitId], references: [id], onDelete: Cascade)
   tenant                Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
