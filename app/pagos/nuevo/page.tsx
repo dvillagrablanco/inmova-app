@@ -63,10 +63,11 @@ export default function NuevoPagoPage() {
   useEffect(() => {
     const fetchContracts = async () => {
       try {
-        const response = await fetch('/api/contracts');
+        const response = await fetch('/api/contracts?limit=500&estado=activo');
         if (response.ok) {
-          const data = await response.json();
-          setContracts(data.filter((c: any) => c.estado === 'activo'));
+          const json = await response.json();
+          const contractsArray = Array.isArray(json) ? json : json.data || [];
+          setContracts(contractsArray.filter((c: any) => c.estado === 'activo'));
         }
       } catch (error) {
         logger.error('Error fetching contracts:', error);

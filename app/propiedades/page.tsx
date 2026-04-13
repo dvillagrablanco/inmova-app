@@ -145,12 +145,13 @@ export default function PropiedadesPage() {
 
     // Búsqueda por texto
     if (searchTerm) {
+      const term = searchTerm.toLowerCase();
       filtered = filtered.filter(
         (prop) =>
-          prop.numero.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          prop.building.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          prop.building.direccion.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          prop.building.ciudad.toLowerCase().includes(searchTerm.toLowerCase())
+          (prop.numero || '').toLowerCase().includes(term) ||
+          (prop.building?.nombre || '').toLowerCase().includes(term) ||
+          (prop.building?.direccion || '').toLowerCase().includes(term) ||
+          (prop.building?.ciudad || '').toLowerCase().includes(term)
       );
     }
 

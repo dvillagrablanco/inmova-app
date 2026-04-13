@@ -229,7 +229,7 @@ export default function GarantiasPage() {
       }
 
       // Cargar contratos sin garantía para el selector
-      const contractsResponse = await fetch('/api/contracts?status=activo&limit=50');
+      const contractsResponse = await fetch('/api/contracts?estado=activo&limit=500');
       if (contractsResponse.ok) {
         const contractsResult = await contractsResponse.json();
         const contractsData = contractsResult.data || contractsResult || [];

@@ -44,14 +44,25 @@ export async function GET(req: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '15');
     const skip = (page - 1) * limit;
+    const estadoParam = searchParams.get('estado');
     // Construir where clause
-    const whereClause = {
+    const whereClause: {
+      estado?: 'activo' | 'vencido' | 'cancelado';
+      unit: {
+        building: {
+          companyId: { in: string[] };
+        };
+      };
+    } = {
       unit: {
         building: {
           companyId: { in: scope.scopeCompanyIds },
         },
       },
     };
+    if (estadoParam === 'activo' || estadoParam === 'vencido' || estadoParam === 'cancelado') {
+      whereClause.estado = estadoParam;
+    }
 
     // Consulta directa (sin cache para evitar errores de build)
     const [contracts, total] = await Promise.all([
@@ -186,6 +197,12 @@ export async function POST(req: NextRequest) {
     }
     const numeroContrato = `${prefix}${String(maxSeq + 1).padStart(4, '0')}`;
 
+    const rentaBase = validatedData.rentaMensual;
+    const ivaPct = validatedData.ivaPorcentaje ?? 0;
+    const baseImponible = validatedData.baseImponible ?? rentaBase;
+    const importeIva = validatedData.importeIva ?? (rentaBase * ivaPct) / 100;
+    const rentaTotal = validatedData.rentaTotal ?? rentaBase * (1 + ivaPct / 100);
+
     const contract = await prisma.contract.create({
       data: {
         unitId: validatedData.unitId,
@@ -193,6 +210,10 @@ export async function POST(req: NextRequest) {
         fechaInicio,
         fechaFin: new Date(validatedData.fechaFin),
         rentaMensual: validatedData.rentaMensual,
+        baseImponible,
+        ivaPorcentaje: ivaPct,
+        importeIva,
+        rentaTotal,
         deposito: validatedData.deposito || 0,
         estado: validatedData.estado || 'activo',
         diaPago: validatedData.diaCobranza || 1,

@@ -90,9 +90,11 @@ export default function ContratosClientPage({
     if (searchTerm) {
       filtered = filtered.filter(
         (contract) =>
-          contract.tenant.nombreCompleto.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          contract.unit.numero.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          contract.unit.building.nombre.toLowerCase().includes(searchTerm.toLowerCase())
+          (contract.tenant?.nombreCompleto || '')
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          (contract.unit?.numero || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (contract.unit?.building?.nombre || '').toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 

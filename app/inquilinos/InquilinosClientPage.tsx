@@ -113,9 +113,9 @@ export default function InquilinosClientPage({
     if (searchTerm) {
       filtered = filtered.filter(
         (tenant) =>
-          tenant.nombreCompleto.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          tenant.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          tenant.dni.toLowerCase().includes(searchTerm.toLowerCase())
+          (tenant.nombreCompleto || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (tenant.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (tenant.dni || '').toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 

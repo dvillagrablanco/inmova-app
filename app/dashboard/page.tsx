@@ -425,6 +425,7 @@ function DashboardPageContent() {
                 tick={{ fontSize: 9, fill: '#666' }}
                 className="sm:text-xs"
                 width={40}
+                tickFormatter={(v) => `€${(v / 1000).toFixed(0)}k`}
               />
               <Tooltip
                 wrapperStyle={{ fontSize: 11 }}
@@ -434,6 +435,10 @@ function DashboardPageContent() {
                   border: '1px solid #e5e7eb',
                   fontSize: '12px',
                 }}
+                formatter={(value: number) => [
+                  `€${value.toLocaleString('es-ES', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
+                  'Ingresos',
+                ]}
               />
               <Legend
                 verticalAlign="top"
