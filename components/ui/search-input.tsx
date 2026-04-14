@@ -2,7 +2,7 @@
  * Reusable search input component with debounce and accessibility features
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { Search, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -32,13 +32,13 @@ export function SearchInput({
 }: SearchInputProps) {
   const [localValue, setLocalValue] = useState(value);
   const debouncedValue = useDebounce(localValue, debounceMs);
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
 
-  // Update parent when debounced value changes
   useEffect(() => {
-    onChange(debouncedValue);
-  }, [debouncedValue, onChange]);
+    onChangeRef.current(debouncedValue);
+  }, [debouncedValue]);
 
-  // Sync with external value changes
   useEffect(() => {
     setLocalValue(value);
   }, [value]);

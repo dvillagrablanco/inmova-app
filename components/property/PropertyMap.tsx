@@ -90,8 +90,8 @@ export function PropertyMap({ address, city, latitude, longitude }: PropertyMapP
   }
 
   const googleEmbedUrl = coords
-    ? `https://www.google.com/maps?q=${coords.lat},${coords.lng}&z=17&output=embed`
-    : `https://www.google.com/maps?q=${encodeURIComponent(fullAddress)}&z=17&output=embed`;
+    ? `https://maps.google.com/maps?q=${coords.lat},${coords.lng}&z=17&output=embed`
+    : `https://maps.google.com/maps?q=${encodeURIComponent(fullAddress)}&z=17&output=embed`;
 
   if (error || !coords) {
     return (
@@ -105,7 +105,7 @@ export function PropertyMap({ address, city, latitude, longitude }: PropertyMapP
         <CardContent className="space-y-3">
           <div className="aspect-video rounded-lg overflow-hidden border bg-muted relative">
             <iframe
-              src={`https://www.google.com/maps?q=${encodeURIComponent(fullAddress)}&z=15&output=embed`}
+              src={`https://maps.google.com/maps?q=${encodeURIComponent(fullAddress)}&z=15&output=embed`}
               width="100%"
               height="100%"
               style={{ border: 0 }}

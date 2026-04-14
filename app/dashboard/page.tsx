@@ -75,10 +75,14 @@ interface DashboardData {
 
 const COLORS = ['#4F46E5', '#7C3AED', '#EC4899', '#8B5CF6', '#A78BFA']; // Indigo, Violet, Pink gradients
 
-// Helper function to safely format numbers
+const safeFormatCurrency = (value: number | null | undefined): string => {
+  const numValue = value ?? 0;
+  return numValue.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+};
+
 const safeFormatNumber = (value: number | null | undefined, locale: string = 'es-ES'): string => {
   const numValue = value ?? 0;
-  return numValue.toLocaleString(locale);
+  return numValue.toLocaleString(locale, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 };
 
 function DashboardPageContent() {
@@ -355,7 +359,7 @@ function DashboardPageContent() {
           <KPICard
             title="Ingresos Mensuales"
             tooltip="Suma de rentas de contratos activos (residencial)"
-            value={`€${safeFormatNumber(Number(data.kpis.ingresosTotalesMensuales || 0))}`}
+            value={`€${safeFormatCurrency(Number(data.kpis.ingresosTotalesMensuales || 0))}`}
             icon={TrendingUp}
           />
           <KPICard
@@ -385,12 +389,12 @@ function DashboardPageContent() {
           <KPICard
             title="Ingresos Netos"
             tooltip="Ingresos menos gastos del periodo"
-            value={`€${safeFormatNumber(Number(data.kpis.ingresosNetos || 0))}`}
+            value={`€${safeFormatCurrency(Number(data.kpis.ingresosNetos || 0))}`}
             icon={Euro}
           />
           <KPICard
             title="Gastos Totales"
-            value={`€${safeFormatNumber(Number(data.kpis.gastosTotales || 0))}`}
+            value={`€${safeFormatCurrency(Number(data.kpis.gastosTotales || 0))}`}
             icon={TrendingDown}
           />
           <KPICard
@@ -505,7 +509,7 @@ function DashboardPageContent() {
                       />
                       <span>{item.name}</span>
                     </div>
-                    <span className="font-semibold">€{safeFormatNumber(item.value)}</span>
+                    <span className="font-semibold">€{safeFormatCurrency(item.value)}</span>
                   </div>
                 ))}
               </div>

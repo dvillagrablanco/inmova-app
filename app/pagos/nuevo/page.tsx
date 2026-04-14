@@ -36,6 +36,71 @@ interface Contract {
   tenant: { nombre?: string; nombreCompleto?: string };
 }
 
+function ContractSearchSelect({
+  contracts,
+  value,
+  onValueChange,
+}: {
+  contracts: Contract[];
+  value: string;
+  onValueChange: (value: string) => void;
+}) {
+  const [search, setSearch] = useState('');
+  const [open, setOpen] = useState(false);
+
+  const getLabel = (c: Contract) =>
+    `${c.unit?.building?.nombre || '—'} - ${c.unit?.numero || '—'} (${c.tenant?.nombreCompleto || c.tenant?.nombre || '—'})`;
+
+  const filtered = search
+    ? contracts.filter((c) => getLabel(c).toLowerCase().includes(search.toLowerCase()))
+    : contracts;
+
+  const selectedContract = contracts.find((c) => c.id === value);
+
+  return (
+    <div className="relative">
+      <Input
+        type="text"
+        placeholder="Buscar contrato por edificio, unidad o inquilino..."
+        value={open ? search : selectedContract ? getLabel(selectedContract) : search}
+        onChange={(e) => {
+          setSearch(e.target.value);
+          if (!open) setOpen(true);
+          if (value) onValueChange('');
+        }}
+        onFocus={() => setOpen(true)}
+        className={selectedContract && !open ? 'text-foreground' : ''}
+      />
+      {open && (
+        <div className="absolute z-50 mt-1 w-full max-h-60 overflow-auto rounded-md border bg-popover shadow-md">
+          {filtered.length === 0 ? (
+            <div className="p-3 text-sm text-muted-foreground text-center">
+              No se encontraron contratos
+            </div>
+          ) : (
+            filtered.map((contract) => (
+              <div
+                key={contract.id}
+                className={`px-3 py-2 text-sm cursor-pointer hover:bg-accent ${contract.id === value ? 'bg-accent font-medium' : ''}`}
+                onClick={() => {
+                  onValueChange(contract.id);
+                  setSearch('');
+                  setOpen(false);
+                }}
+              >
+                {getLabel(contract)}
+              </div>
+            ))
+          )}
+        </div>
+      )}
+      {open && (
+        <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+      )}
+    </div>
+  );
+}
+
 export default function NuevoPagoPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -195,25 +260,14 @@ export default function NuevoPagoPage() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid gap-6 md:grid-cols-2">
-                {/* Contrato */}
+                {/* Contrato - Buscador */}
                 <div className="space-y-2 md:col-span-2">
                   <Label htmlFor="contractId">Contrato *</Label>
-                  <Select
+                  <ContractSearchSelect
+                    contracts={contracts}
                     value={formData.contractId}
                     onValueChange={(value) => setFormData({ ...formData, contractId: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecciona un contrato" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {contracts.map((contract) => (
-                        <SelectItem key={contract.id} value={contract.id}>
-                          {contract.unit.building.nombre} - {contract.unit.numero} (
-                          {contract.tenant?.nombreCompleto || contract.tenant?.nombre || '—'})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  />
                 </div>
 
                 {/* Periodo */}

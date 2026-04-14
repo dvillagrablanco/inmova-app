@@ -38,6 +38,7 @@ import { Badge } from '@/components/ui/badge';
 interface Unit {
   id: string;
   numero: string;
+  estado?: string;
   building: { nombre: string };
 }
 
@@ -151,7 +152,7 @@ export default function NuevoContratoPage() {
     const fetchData = async () => {
       try {
         const [unitsRes, tenantsRes] = await Promise.all([
-          fetch('/api/units?estado=disponible'),
+          fetch('/api/units'),
           fetch('/api/tenants'),
         ]);
 
@@ -298,6 +299,7 @@ export default function NuevoContratoPage() {
                           {units.map((unit) => (
                             <SelectItem key={unit.id} value={unit.id}>
                               {unit.building.nombre} - {unit.numero}
+                              {unit.estado && unit.estado !== 'disponible' ? ` (${unit.estado})` : ''}
                             </SelectItem>
                           ))}
                         </SelectContent>

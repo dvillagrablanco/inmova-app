@@ -409,7 +409,7 @@ export async function GET(request: NextRequest) {
 
       monthlyIncome.push({
         mes: monthDate.toLocaleDateString('es-ES', { month: 'short' }),
-        ingresos: ingresosMes,
+        ingresos: Number(Number(ingresosMes).toFixed(2)),
       });
     }
 
@@ -542,14 +542,14 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       kpis: {
-        ingresosTotalesMensuales,
+        ingresosTotalesMensuales: Number(Number(ingresosTotalesMensuales).toFixed(2)),
         numeroPropiedades: totalUnits,
         totalEdificios: totalBuildings,
         tasaOcupacion: Number(tasaOcupacion.toFixed(1)),
         tasaOcupacionCore: Number(tasaOcupacionCore.toFixed(1)),
         tasaMorosidad: Number(tasaMorosidad.toFixed(1)),
-        ingresosNetos,
-        gastosTotales,
+        ingresosNetos: Number(Number(ingresosNetos).toFixed(2)),
+        gastosTotales: Number(Number(gastosTotales).toFixed(2)),
         margenNeto: Number(margenNeto.toFixed(1)),
       },
       monthlyIncome,

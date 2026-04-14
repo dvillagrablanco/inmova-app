@@ -70,6 +70,7 @@ interface Contract {
   fechaInicio: string;
   fechaFin: string;
   rentaMensual: number;
+  ivaPorcentaje?: number;
   estado: string;
   tipo: string;
   tenant: {
@@ -77,6 +78,7 @@ interface Contract {
   };
   unit: {
     numero: string;
+    tipo?: string;
     building: {
       nombre: string;
     };
@@ -222,7 +224,7 @@ function ContratosPageContent() {
   const edificiosUnicos = Array.from(
     new Set([
       ...allUnits.map((u) => u.buildingNombre),
-      ...contracts.map((c) => c.unit.building.nombre),
+      ...contracts.map((c) => c.unit?.building?.nombre).filter(Boolean),
     ].filter(Boolean))
   ).sort();
 
@@ -234,8 +236,9 @@ function ContratosPageContent() {
             .filter((u) => u.buildingNombre === edificioFilter)
             .map((u) => u.numero),
           ...contracts
-            .filter((c) => c.unit.building.nombre === edificioFilter)
-            .map((c) => c.unit.numero),
+            .filter((c) => c.unit?.building?.nombre === edificioFilter)
+            .map((c) => c.unit?.numero)
+            .filter(Boolean),
         ])
       ).sort()
     : [];
@@ -250,20 +253,21 @@ function ContratosPageContent() {
     let filtered = contracts;
 
     if (searchTerm) {
+      const term = searchTerm.toLowerCase();
       filtered = filtered.filter(
         (contract) =>
-          contract.tenant.nombreCompleto.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          contract.unit.building.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          contract.unit.numero.toLowerCase().includes(searchTerm.toLowerCase())
+          (contract.tenant?.nombreCompleto || '').toLowerCase().includes(term) ||
+          (contract.unit?.building?.nombre || '').toLowerCase().includes(term) ||
+          (contract.unit?.numero || '').toLowerCase().includes(term)
       );
     }
 
     if (edificioFilter !== 'all') {
-      filtered = filtered.filter((c) => c.unit.building.nombre === edificioFilter);
+      filtered = filtered.filter((c) => c.unit?.building?.nombre === edificioFilter);
     }
 
     if (unidadFilter !== 'all') {
-      filtered = filtered.filter((c) => c.unit.numero === unidadFilter);
+      filtered = filtered.filter((c) => c.unit?.numero === unidadFilter);
     }
 
     if (estadoFilter !== 'all') {
@@ -487,7 +491,7 @@ function ContratosPageContent() {
                   <SelectItem value="all">Todas las unidades</SelectItem>
                   {unidadesPorEdificio.map((numero) => {
                     const hasContract = contracts.some(
-                      (c) => c.unit.building.nombre === edificioFilter && c.unit.numero === numero
+                      (c) => c.unit?.building?.nombre === edificioFilter && c.unit?.numero === numero
                     );
                     return (
                       <SelectItem key={numero} value={numero}>
@@ -627,7 +631,7 @@ function ContratosPageContent() {
         <div className="space-y-2 min-w-0 flex-1">
         <div className="flex items-center gap-2 flex-wrap">
         <h3 className="text-base sm:text-lg font-semibold break-words">
-        {contract.tenant.nombreCompleto}
+        {contract.tenant?.nombreCompleto || 'Sin inquilino'}
         </h3>
         <Badge
         variant={estadoBadge.variant}
@@ -641,7 +645,7 @@ function ContratosPageContent() {
         <div className="flex items-start gap-2 text-sm bg-muted/50 p-2 rounded-md">
         <Home className="h-4 w-4 mt-0.5 flex-shrink-0 text-muted-foreground" />
         <span className="break-words">
-        {contract.unit.building.nombre} - Unidad {contract.unit.numero}
+        {contract.unit?.building?.nombre || '—'} - Unidad {contract.unit?.numero || '—'}
         </span>
         </div>
         </div>
@@ -674,9 +678,21 @@ function ContratosPageContent() {
         </div>
         <div className="space-y-1">
         <p className="text-xs text-muted-foreground">Importe Mensual</p>
-                        <p className="text-base sm:text-lg font-bold text-green-600">
-                        €{Number(contract.rentaMensual || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </p>
+                        {contract.ivaPorcentaje && contract.ivaPorcentaje > 0 ? (
+                          <div>
+                            <p className="text-xs text-muted-foreground">
+                              Base: €{Number(contract.rentaMensual || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              {' + IVA '}{contract.ivaPorcentaje}%: €{(Number(contract.rentaMensual || 0) * contract.ivaPorcentaje / 100).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </p>
+                            <p className="text-base sm:text-lg font-bold text-green-600">
+                              €{(Number(contract.rentaMensual || 0) * (1 + contract.ivaPorcentaje / 100)).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </p>
+                          </div>
+                        ) : (
+                          <p className="text-base sm:text-lg font-bold text-green-600">
+                            €{Number(contract.rentaMensual || 0).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </p>
+                        )}
         </div>
         </div>
 
@@ -718,7 +734,7 @@ function ContratosPageContent() {
         variant="ghost"
         size="icon"
         icon={<MoreVertical className="h-4 w-4" />}
-        aria-label={`Opciones para contrato de ${contract.tenant.nombreCompleto}`}
+        aria-label={`Opciones para contrato de ${contract.tenant?.nombreCompleto || 'desconocido'}`}
         className="self-start"
         />
         </DropdownMenuTrigger>

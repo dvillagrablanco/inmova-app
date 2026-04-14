@@ -517,10 +517,11 @@ export default function CertificacionesPage() {
               </div>
             </div>
             <div>
-              <Label>Nombre Técnico *</Label>
+              <Label>Nombre Técnico</Label>
               <Input
                 value={newCert.nombreTecnico}
                 onChange={(e) => setNewCert({ ...newCert, nombreTecnico: e.target.value })}
+                placeholder="Opcional"
               />
             </div>
             <div>
@@ -549,7 +550,6 @@ export default function CertificacionesPage() {
               onClick={handleCreate}
               disabled={
                 !newCert.unitId ||
-                !newCert.nombreTecnico ||
                 !newCert.fechaEmision ||
                 !newCert.fechaVencimiento
               }

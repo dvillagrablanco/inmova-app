@@ -330,10 +330,10 @@ export default function ContratosGestionPage() {
                               : '-'}
                         </td>
                         <td className="p-4">
-                          {format(new Date(c.fechaInicio), 'dd MMM yyyy', { locale: es })}
+                          {c.fechaInicio ? format(new Date(c.fechaInicio), 'dd MMM yyyy', { locale: es }) : '—'}
                         </td>
                         <td className="p-4">
-                          {format(new Date(c.fechaFin), 'dd MMM yyyy', { locale: es })}
+                          {c.fechaFin ? format(new Date(c.fechaFin), 'dd MMM yyyy', { locale: es }) : '—'}
                         </td>
                         <td className="p-4">
                           <Badge

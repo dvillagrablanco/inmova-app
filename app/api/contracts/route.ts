@@ -110,6 +110,7 @@ export async function GET(req: NextRequest) {
         fechaInicio: contract.fechaInicio,
         fechaFin: contract.fechaFin,
         rentaMensual: Number(contract.rentaMensual || 0),
+        ivaPorcentaje: contract.ivaPorcentaje != null ? Number(contract.ivaPorcentaje) : 0,
         deposito: Number(contract.deposito || 0),
         estado: contract.estado,
         tipo: contract.tipo,

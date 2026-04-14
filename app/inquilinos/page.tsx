@@ -207,11 +207,12 @@ function InquilinosPageContent() {
 
   useEffect(() => {
     if (searchTerm) {
+      const term = searchTerm.toLowerCase();
       const filtered = tenants.filter(
         (tenant) =>
-          tenant.nombreCompleto.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          tenant.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          tenant.dni.toLowerCase().includes(searchTerm.toLowerCase())
+          (tenant.nombreCompleto || '').toLowerCase().includes(term) ||
+          (tenant.email || '').toLowerCase().includes(term) ||
+          (tenant.dni || '').toLowerCase().includes(term)
       );
       setFilteredTenants(filtered);
     } else {

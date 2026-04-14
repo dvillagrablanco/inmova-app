@@ -56,6 +56,7 @@ export default function EditarPropiedadPage() {
   const [loadingData, setLoadingData] = useState(true);
   const [buildings, setBuildings] = useState<Building[]>([]);
   const [photos, setPhotos] = useState<string[]>([]);
+  const [documents, setDocuments] = useState<Array<{ id: string; name: string; url: string; uploading?: boolean }>>([]);
 
   const propertyId = params?.id as string;
 
@@ -679,6 +680,98 @@ export default function EditarPropiedadPage() {
                 onPhotosChange={setPhotos}
                 maxPhotos={10}
               />
+            </CardContent>
+          </Card>
+
+          {/* Documentos de la Propiedad */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Upload className="h-5 w-5" />
+                Documentos de la Propiedad
+              </CardTitle>
+              <CardDescription>
+                Sube contratos, escrituras, certificados energéticos u otros documentos PDF.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
+                <label htmlFor="property-doc-upload" className="cursor-pointer">
+                  <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+                  <p className="text-sm text-gray-600">
+                    <span className="font-medium text-primary">Click para subir</span> o arrastra archivos
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">PDF, DOC, DOCX (max. 10MB)</p>
+                  <input
+                    id="property-doc-upload"
+                    type="file"
+                    className="hidden"
+                    accept=".pdf,.doc,.docx,.xls,.xlsx"
+                    multiple
+                    onChange={async (e) => {
+                      const files = e.target.files;
+                      if (!files) return;
+                      for (let i = 0; i < files.length; i++) {
+                        const file = files[i];
+                        const docId = `doc-${Date.now()}-${i}`;
+                        if (file.size > 10 * 1024 * 1024) {
+                          const { toast } = await import('sonner');
+                          toast.error(`${file.name} es demasiado grande (max 10MB)`);
+                          continue;
+                        }
+                        setDocuments(prev => [...prev, { id: docId, name: file.name, url: '', uploading: true }]);
+                        try {
+                          const fd = new FormData();
+                          fd.append('file', file);
+                          fd.append('folder', `properties/${propertyId}/documents`);
+                          fd.append('entityType', 'property');
+                          const res = await fetch('/api/upload/private', { method: 'POST', body: fd });
+                          if (res.ok) {
+                            const data = await res.json();
+                            setDocuments(prev => prev.map(d => d.id === docId ? { ...d, uploading: false, url: data.url || data.key } : d));
+                            const { toast } = await import('sonner');
+                            toast.success(`${file.name} subido correctamente`);
+                          } else {
+                            setDocuments(prev => prev.filter(d => d.id !== docId));
+                            const { toast } = await import('sonner');
+                            toast.error(`Error al subir ${file.name}`);
+                          }
+                        } catch {
+                          setDocuments(prev => prev.filter(d => d.id !== docId));
+                          const { toast } = await import('sonner');
+                          toast.error(`Error al subir ${file.name}`);
+                        }
+                      }
+                      e.target.value = '';
+                    }}
+                  />
+                </label>
+              </div>
+              {documents.length > 0 && (
+                <div className="space-y-2">
+                  {documents.map((doc) => (
+                    <div key={doc.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <Upload className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                        <span className="text-sm truncate">{doc.name}</span>
+                        {doc.uploading ? (
+                          <span className="text-xs text-muted-foreground">Subiendo...</span>
+                        ) : (
+                          <span className="text-xs text-green-600">Subido</span>
+                        )}
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setDocuments(prev => prev.filter(d => d.id !== doc.id))}
+                      >
+                        ×
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
 

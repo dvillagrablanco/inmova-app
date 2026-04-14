@@ -140,8 +140,13 @@ export function PhotoUploader({
   };
 
   const setMainPhoto = (index: number) => {
-    setMainPhotoIndex(index);
-    toast.success('Foto principal actualizada');
+    const newPhotos = [...photos];
+    const [selected] = newPhotos.splice(index, 1);
+    newPhotos.unshift(selected);
+    setPhotos(newPhotos);
+    setMainPhotoIndex(0);
+    onPhotosChange?.(newPhotos);
+    toast.success('Foto de portada actualizada');
   };
 
   return (
@@ -216,8 +221,9 @@ export function PhotoUploader({
                       variant={index === mainPhotoIndex ? 'default' : 'secondary'}
                       onClick={() => setMainPhoto(index)}
                       className="h-8 px-2"
+                      title={index === mainPhotoIndex ? 'Foto de portada actual' : 'Establecer como portada'}
                     >
-                      <Star className="h-4 w-4" />
+                      <Star className={`h-4 w-4 ${index === mainPhotoIndex ? 'fill-current' : ''}`} />
                     </Button>
                     <Button
                       size="sm"
@@ -241,11 +247,10 @@ export function PhotoUploader({
             ))}
           </div>
 
-          {photos.length < maxPhotos && (
-            <p className="text-xs text-muted-foreground text-center">
-              Puedes agregar {maxPhotos - photos.length} foto(s) más
-            </p>
-          )}
+          <p className="text-xs text-muted-foreground text-center">
+            {photos.length < maxPhotos && `Puedes agregar ${maxPhotos - photos.length} foto(s) más. `}
+            Haz click en la estrella para establecer la foto de portada.
+          </p>
         </div>
       )}
 

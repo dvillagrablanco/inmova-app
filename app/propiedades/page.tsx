@@ -239,6 +239,11 @@ export default function PropiedadesPage() {
         label: 'Mantenimiento',
         className: 'bg-amber-500 text-white border-amber-500 hover:bg-amber-600',
       },
+      uso_empresa: {
+        variant: 'default',
+        label: 'Uso Empresa',
+        className: 'bg-purple-600 text-white border-purple-600 hover:bg-purple-700',
+      },
     };
     return (
       badges[estado] || {
@@ -274,11 +279,12 @@ export default function PropiedadesPage() {
     }
   };
 
-  // Estadísticas
   const totalProperties = properties.length;
+  const propertiesForOccupancy = properties.filter((p) => p.estado !== 'uso_empresa');
   const ocupadas = properties.filter((p) => p.estado === 'ocupada').length;
   const disponibles = properties.filter((p) => p.estado === 'disponible').length;
-  const ocupacionRate = totalProperties > 0 ? Math.round((ocupadas / totalProperties) * 100) : 0;
+  const usoEmpresa = properties.filter((p) => p.estado === 'uso_empresa').length;
+  const ocupacionRate = propertiesForOccupancy.length > 0 ? Math.round((ocupadas / propertiesForOccupancy.length) * 100) : 0;
   const ingresosMensuales = properties
     .filter((p) => p.estado === 'ocupada' && p.rentaMensual > 0)
     .reduce((sum, p) => sum + p.rentaMensual, 0);
@@ -497,6 +503,7 @@ export default function PropiedadesPage() {
                   <SelectItem value="disponible">Disponible</SelectItem>
                   <SelectItem value="ocupada">Ocupada</SelectItem>
                   <SelectItem value="en_mantenimiento">Mantenimiento</SelectItem>
+                  <SelectItem value="uso_empresa">Uso Empresa</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -651,12 +658,12 @@ export default function PropiedadesPage() {
                         <div className="flex items-start justify-between gap-2">
                           <div className="space-y-1 flex-1">
                             <CardTitle className="text-lg line-clamp-1">
-                              {property.building.nombre} - {property.numero}
+                              {property.building?.nombre || '—'} - {property.numero}
                             </CardTitle>
                             <div className="flex items-center gap-1 text-sm text-muted-foreground">
                               <MapPin className="h-3 w-3" />
                               <span className="line-clamp-1">
-                                {property.building.direccion}, {property.building.ciudad}
+                                {property.building?.direccion || ''}{property.building?.ciudad ? `, ${property.building.ciudad}` : ''}
                               </span>
                             </div>
                           </div>
@@ -814,7 +821,7 @@ export default function PropiedadesPage() {
                               <div className="space-y-1">
                                 <div className="flex items-center gap-2">
                                   <h3 className="text-xl font-bold">
-                                    {property.building.nombre} - {property.numero}
+                                    {property.building?.nombre || '—'} - {property.numero}
                                   </h3>
                                   <Badge
                                     variant={estadoBadge.variant}
@@ -826,7 +833,7 @@ export default function PropiedadesPage() {
                                 <div className="flex items-center gap-2 text-muted-foreground">
                                   <MapPin className="h-4 w-4" />
                                   <span>
-                                    {property.building.direccion}, {property.building.ciudad}
+                                    {property.building?.direccion || ''}{property.building?.ciudad ? `, ${property.building.ciudad}` : ''}
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
