@@ -766,9 +766,21 @@ export default function PropiedadesPage() {
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
                                 className="text-red-600"
-                                onClick={(e) => {
+                                onClick={async (e) => {
                                   e.stopPropagation();
-                                  toast.error('Función en desarrollo');
+                                  if (!confirm(`¿Eliminar ${property.building?.nombre} - ${property.numero}? Esta acción no se puede deshacer.`)) return;
+                                  try {
+                                    const res = await fetch(`/api/units/${property.id}`, { method: 'DELETE' });
+                                    if (res.ok) {
+                                      setProperties(prev => prev.filter(p => p.id !== property.id));
+                                      toast.success('Propiedad eliminada correctamente');
+                                    } else {
+                                      const err = await res.json();
+                                      toast.error(err.error || 'Error al eliminar la propiedad');
+                                    }
+                                  } catch {
+                                    toast.error('Error de conexión');
+                                  }
                                 }}
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />

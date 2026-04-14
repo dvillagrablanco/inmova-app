@@ -271,8 +271,8 @@ function InquilinosPageContent() {
   };
 
   const getEstadoBadge = (estado: string) => {
-    const badges: Record<string, { variant: any; label: string }> = {
-      activo: { variant: 'default', label: 'Activo' },
+    const badges: Record<string, { variant: any; label: string; className?: string }> = {
+      activo: { variant: 'default', label: 'Activo', className: 'bg-green-600 text-white border-green-600' },
       inactivo: { variant: 'secondary', label: 'Inactivo' },
       moroso: { variant: 'destructive', label: 'Moroso' },
       pendiente: { variant: 'outline', label: 'Pendiente' },
@@ -434,7 +434,7 @@ function InquilinosPageContent() {
                           <div className="flex-1">
                             <CardTitle className="text-lg">{tenant.nombreCompleto}</CardTitle>
                             <div className="flex gap-1 mt-1 flex-wrap">
-                              <Badge variant={estadoBadge.variant}>
+                              <Badge variant={estadoBadge.variant} className={estadoBadge.className}>
                                 {estadoBadge.label}
                               </Badge>
                               {getTenantDeuda(tenant) > 0 && (
@@ -517,7 +517,7 @@ function InquilinosPageContent() {
                               <div>
                                 <h3 className="text-xl font-bold">{tenant.nombreCompleto}</h3>
                                 <div className="flex gap-1 mt-1 flex-wrap">
-                                  <Badge variant={estadoBadge.variant}>
+                                  <Badge variant={estadoBadge.variant} className={estadoBadge.className}>
                                     {estadoBadge.label}
                                   </Badge>
                                   {getTenantDeuda(tenant) > 0 && (
@@ -605,7 +605,7 @@ function InquilinosPageContent() {
                                   <Mail className="h-3 w-3" />
                                   {tenant.email}
                                 </span>
-                                <Badge variant={estadoBadge.variant} className="text-xs">
+                                <Badge variant={estadoBadge.variant} className={`text-xs ${estadoBadge.className || ''}`}>
                                   {estadoBadge.label}
                                 </Badge>
                               </div>

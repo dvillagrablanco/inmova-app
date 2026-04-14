@@ -482,19 +482,24 @@ export async function GET(request: NextRequest) {
     const ingresosNetos = ingresosTotalesMensuales - gastosTotales;
     const margenNeto =
       ingresosTotalesMensuales > 0 ? (ingresosNetos / ingresosTotalesMensuales) * 100 : 0;
-    // Ocupación: excluir unidades en uso_empresa de numerador y denominador
     const unitsForOccupancyCount = await prisma.unit.count({
       where: {
         building: { companyId: companyFilter },
         estado: { not: 'uso_empresa' },
       },
     });
-    const ocupadasCount = await prisma.unit.count({
+
+    const unitsWithActiveContract = await prisma.unit.count({
       where: {
         building: { companyId: companyFilter },
-        estado: 'ocupada',
+        estado: { not: 'uso_empresa' },
+        contracts: {
+          some: { estado: 'activo' },
+        },
       },
     });
+
+    const ocupadasCount = unitsWithActiveContract;
     const tasaOcupacion =
       unitsForOccupancyCount > 0
         ? Math.min((ocupadasCount / unitsForOccupancyCount) * 100, 100)

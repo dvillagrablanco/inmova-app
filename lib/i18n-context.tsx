@@ -77,10 +77,11 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     setLocaleState(newLocale);
     if (mounted && typeof window !== 'undefined') {
       localStorage.setItem('locale', newLocale);
+      document.cookie = `NEXT_LOCALE=${newLocale}; path=/; max-age=31536000; SameSite=Lax`;
       if (typeof document !== 'undefined') {
-        // Actualizar el atributo lang del HTML
         document.documentElement.lang = newLocale;
       }
+      window.location.reload();
     }
   };
 

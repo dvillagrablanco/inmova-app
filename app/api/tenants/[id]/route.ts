@@ -22,7 +22,7 @@ const tenantUpdateSchema = z.object({
     .min(2, { message: 'El nombre debe tener al menos 2 caracteres' })
     .optional(),
   dni: z.string().optional(),
-  email: z.string().email({ message: 'Email inválido' }).optional(),
+  email: z.string().email({ message: 'Email inválido' }).or(z.literal('')).optional(),
   telefono: z.string().optional(),
   fechaNacimiento: z
     .string()

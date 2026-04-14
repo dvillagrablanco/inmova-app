@@ -44,7 +44,8 @@ interface Unit {
 
 interface Tenant {
   id: string;
-  nombre: string;
+  nombre?: string;
+  nombreCompleto?: string;
   email: string;
 }
 
@@ -55,6 +56,71 @@ interface UploadedDocument {
   url?: string;
   uploading?: boolean;
   progress?: number;
+}
+
+function TenantSearchSelect({
+  tenants,
+  value,
+  onValueChange,
+}: {
+  tenants: Tenant[];
+  value: string;
+  onValueChange: (value: string) => void;
+}) {
+  const [search, setSearch] = useState('');
+  const [open, setOpen] = useState(false);
+
+  const getLabel = (t: Tenant) => {
+    const name = t.nombreCompleto || t.nombre || '—';
+    return t.email ? `${name} (${t.email})` : name;
+  };
+
+  const filtered = search
+    ? tenants.filter((t) => getLabel(t).toLowerCase().includes(search.toLowerCase()))
+    : tenants;
+
+  const selected = tenants.find((t) => t.id === value);
+
+  return (
+    <div className="relative">
+      <Input
+        type="text"
+        placeholder="Buscar inquilino por nombre o email..."
+        value={open ? search : selected ? (selected.nombreCompleto || selected.nombre || '—') : search}
+        onChange={(e) => {
+          setSearch(e.target.value);
+          if (!open) setOpen(true);
+          if (value) onValueChange('');
+        }}
+        onFocus={() => setOpen(true)}
+      />
+      {open && (
+        <div className="absolute z-50 mt-1 w-full max-h-60 overflow-auto rounded-md border bg-popover shadow-md">
+          {filtered.length === 0 ? (
+            <div className="p-3 text-sm text-muted-foreground text-center">
+              No se encontraron inquilinos
+            </div>
+          ) : (
+            filtered.map((tenant) => (
+              <div
+                key={tenant.id}
+                className={`px-3 py-2 text-sm cursor-pointer hover:bg-accent ${tenant.id === value ? 'bg-accent font-medium' : ''}`}
+                onClick={() => {
+                  onValueChange(tenant.id);
+                  setSearch('');
+                  setOpen(false);
+                }}
+              >
+                <div className="font-medium">{tenant.nombreCompleto || tenant.nombre || '—'}</div>
+                {tenant.email && <div className="text-xs text-muted-foreground">{tenant.email}</div>}
+              </div>
+            ))
+          )}
+        </div>
+      )}
+      {open && <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />}
+    </div>
+  );
 }
 
 export default function NuevoContratoPage() {
@@ -306,24 +372,14 @@ export default function NuevoContratoPage() {
                       </Select>
                     </div>
 
-                    {/* Inquilino */}
+                    {/* Inquilino - Buscador */}
                     <div className="space-y-2">
                       <Label htmlFor="tenantId">Inquilino *</Label>
-                      <Select
+                      <TenantSearchSelect
+                        tenants={tenants}
                         value={formData.tenantId}
                         onValueChange={(value) => setFormData({ ...formData, tenantId: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecciona un inquilino" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {tenants.map((tenant) => (
-                            <SelectItem key={tenant.id} value={tenant.id}>
-                              {tenant.nombre} - {tenant.email}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      />
                     </div>
 
                     {/* Tipo de Contrato */}
@@ -658,7 +714,7 @@ export default function NuevoContratoPage() {
                           </p>
                           <p>
                             <span className="text-muted-foreground">Inquilino:</span>{' '}
-                            {tenants.find((t) => t.id === formData.tenantId)?.nombre}
+                            {tenants.find((t) => t.id === formData.tenantId)?.nombreCompleto || tenants.find((t) => t.id === formData.tenantId)?.nombre || '—'}
                           </p>
                           <p>
                             <span className="text-muted-foreground">Tipo:</span> {formData.tipo}

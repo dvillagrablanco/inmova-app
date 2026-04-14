@@ -108,8 +108,9 @@ export async function POST(request: NextRequest) {
   const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.companyId || session.user.role === 'operador') {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
+    const allowedRoles = ['super_admin', 'administrador', 'gestor'];
+    if (!session?.user?.companyId || !allowedRoles.includes(session.user.role as string)) {
+      return NextResponse.json({ error: 'No autorizado. Se requiere rol de administrador o gestor.' }, { status: 403 });
     }
 
     const body = await request.json();

@@ -111,7 +111,7 @@ export default function RenovacionesContratosPage() {
 
   const loadContratos = async () => {
     try {
-      const res = await fetch('/api/contracts');
+      const res = await fetch('/api/contracts?limit=1000&estado=activo');
       if (!res.ok) throw new Error('Error cargando contratos');
       const data = await res.json();
 

@@ -144,16 +144,8 @@ export default function EditarInquilinoPage() {
       toast.error('El nombre completo es obligatorio');
       return false;
     }
-    if (!formData.email.trim()) {
-      toast.error('El email es obligatorio');
-      return false;
-    }
-    if (!formData.telefono.trim()) {
-      toast.error('El teléfono es obligatorio');
-      return false;
-    }
-    if (!formData.dni.trim()) {
-      toast.error('El DNI/NIE es obligatorio');
+    if (formData.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+      toast.error('El formato del email no es válido');
       return false;
     }
     return true;
@@ -169,11 +161,11 @@ export default function EditarInquilinoPage() {
     try {
       const payload: Record<string, any> = {
         nombreCompleto: formData.nombreCompleto.trim(),
-        email: formData.email.trim(),
-        telefono: formData.telefono.trim(),
-        dni: formData.dni.trim(),
         nivelRiesgo: formData.nivelRiesgo,
       };
+      if (formData.email.trim()) payload.email = formData.email.trim();
+      if (formData.telefono.trim()) payload.telefono = formData.telefono.trim();
+      if (formData.dni.trim()) payload.dni = formData.dni.trim();
 
       if (formData.fechaNacimiento) {
         payload.fechaNacimiento = new Date(formData.fechaNacimiento).toISOString();
@@ -338,9 +330,7 @@ export default function EditarInquilinoPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="dni">
-                    DNI/NIE <span className="text-red-500">*</span>
-                  </Label>
+                  <Label htmlFor="dni">DNI/NIE</Label>
                   <div className="relative">
                     <FileText className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
@@ -348,16 +338,13 @@ export default function EditarInquilinoPage() {
                       placeholder="12345678A"
                       value={formData.dni}
                       onChange={(e) => handleInputChange('dni', e.target.value)}
-                      required
                       className="pl-10"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="email">
-                    Email <span className="text-red-500">*</span>
-                  </Label>
+                  <Label htmlFor="email">Email</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
@@ -366,16 +353,13 @@ export default function EditarInquilinoPage() {
                       placeholder="juan@email.com"
                       value={formData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
-                      required
                       className="pl-10"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="telefono">
-                    Teléfono <span className="text-red-500">*</span>
-                  </Label>
+                  <Label htmlFor="telefono">Teléfono</Label>
                   <div className="relative">
                     <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
@@ -383,7 +367,6 @@ export default function EditarInquilinoPage() {
                       placeholder="+34 600 123 456"
                       value={formData.telefono}
                       onChange={(e) => handleInputChange('telefono', e.target.value)}
-                      required
                       className="pl-10"
                     />
                   </div>
