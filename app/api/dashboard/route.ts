@@ -327,7 +327,7 @@ export async function GET(request: NextRequest) {
 
       expensesChartData = Object.entries(accountingExpensesByCategory).map(([key, value]) => ({
         name: key,
-        value,
+        value: Number(value) || 0,
       }));
     }
 
