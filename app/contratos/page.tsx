@@ -356,8 +356,8 @@ function ContratosPageContent() {
   if (!session) return null;
 
   const getEstadoBadge = (estado: string) => {
-    const badges: Record<string, { variant: any; label: string; icon: any }> = {
-      activo: { variant: 'default', label: 'Activo', icon: Clock },
+    const badges: Record<string, { variant: any; label: string; icon: any; className?: string }> = {
+      activo: { variant: 'default', label: 'Activo', icon: Clock, className: 'bg-black text-white border-black hover:bg-black/90' },
       finalizado: { variant: 'secondary', label: 'Finalizado', icon: FileText },
       cancelado: { variant: 'destructive', label: 'Cancelado', icon: AlertTriangle },
       pendiente: { variant: 'outline', label: 'Pendiente', icon: Clock },
@@ -636,11 +636,11 @@ function ContratosPageContent() {
         <div className="space-y-2 min-w-0 flex-1">
         <div className="flex items-center gap-2 flex-wrap">
         <h3 className="text-base sm:text-lg font-semibold break-words">
-        {contract.tenant?.nombreCompleto || 'Sin inquilino'}
+        {contract.tenant?.nombreCompleto || 'Sin inquilino asignado'}
         </h3>
         <Badge
         variant={estadoBadge.variant}
-        className="flex items-center gap-1"
+        className={`flex items-center gap-1 ${estadoBadge.className || ''}`}
         >
         <IconComponent className="h-3 w-3" />
         {estadoBadge.label}
@@ -798,7 +798,7 @@ function ContratosPageContent() {
         title="¿Eliminar contrato?"
         description={
       contractToDelete
-        ? `Se eliminará el contrato de ${contractToDelete.tenant.nombreCompleto} para la unidad ${contractToDelete.unit.numero}. Esta acción no se puede deshacer.`
+        ? `Se eliminará el contrato de ${contractToDelete.tenant?.nombreCompleto || 'este inquilino'} para la unidad ${contractToDelete.unit?.numero || '—'}. Esta acción no se puede deshacer.`
         : 'Se eliminará el contrato y todos sus datos asociados.'
         }
       />

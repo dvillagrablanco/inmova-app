@@ -126,11 +126,16 @@ export default function ContratosGestionPage() {
     .reduce((sum, c) => sum + (c.honorarios || 0), 0);
 
   const contratosPorRenovar = contratos.filter((c) => {
-    if (c.estado !== 'activo') return false;
-    const fin = new Date(c.fechaFin);
-    const hoy = new Date();
-    const dias = Math.ceil((fin.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
-    return dias > 0 && dias <= 90;
+    if (c.estado !== 'activo' || !c.fechaFin) return false;
+    try {
+      const fin = new Date(c.fechaFin);
+      if (isNaN(fin.getTime())) return false;
+      const hoy = new Date();
+      const dias = Math.ceil((fin.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
+      return dias > 0 && dias <= 90;
+    } catch {
+      return false;
+    }
   }).length;
 
   const propietariosUnicos = Array.from(new Set(contratos.map((c) => c.propietario)));
@@ -330,10 +335,10 @@ export default function ContratosGestionPage() {
                               : '-'}
                         </td>
                         <td className="p-4">
-                          {c.fechaInicio ? format(new Date(c.fechaInicio), 'dd MMM yyyy', { locale: es }) : '—'}
+                          {(() => { try { return c.fechaInicio ? format(new Date(c.fechaInicio), 'dd MMM yyyy', { locale: es }) : '—'; } catch { return '—'; } })()}
                         </td>
                         <td className="p-4">
-                          {c.fechaFin ? format(new Date(c.fechaFin), 'dd MMM yyyy', { locale: es }) : '—'}
+                          {(() => { try { return c.fechaFin ? format(new Date(c.fechaFin), 'dd MMM yyyy', { locale: es }) : '—'; } catch { return '—'; } })()}
                         </td>
                         <td className="p-4">
                           <Badge

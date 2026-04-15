@@ -88,13 +88,14 @@ export default function ContratosClientPage({
     let filtered = initialContracts;
 
     if (searchTerm) {
+      const term = searchTerm.toLowerCase();
       filtered = filtered.filter(
         (contract) =>
-          (contract.tenant?.nombreCompleto || '')
+          (contract.tenant?.nombreCompleto || 'Sin inquilino')
             .toLowerCase()
-            .includes(searchTerm.toLowerCase()) ||
-          (contract.unit?.numero || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (contract.unit?.building?.nombre || '').toLowerCase().includes(searchTerm.toLowerCase())
+            .includes(term) ||
+          (contract.unit?.numero || '').toLowerCase().includes(term) ||
+          (contract.unit?.building?.nombre || '').toLowerCase().includes(term)
       );
     }
 
@@ -167,6 +168,11 @@ export default function ContratosClientPage({
       default:
         return 'outline';
     }
+  };
+
+  const getEstadoBadgeClassName = (estado: string) => {
+    if (estado === 'activo') return 'bg-black text-white border-black hover:bg-black/90';
+    return '';
   };
 
   const formatCurrency = (value: number) => {
@@ -345,8 +351,8 @@ export default function ContratosClientPage({
                       <div className="flex items-center gap-4 flex-1">
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
-                            <p className="font-medium">{contract.tenant.nombreCompleto}</p>
-                            <Badge variant={getEstadoBadgeVariant(contract.estado)}>
+                            <p className="font-medium">{contract.tenant?.nombreCompleto || 'Sin inquilino'}</p>
+                            <Badge variant={getEstadoBadgeVariant(contract.estado)} className={getEstadoBadgeClassName(contract.estado)}>
                               {contract.estado}
                             </Badge>
                             {contract.diasHastaVencimiento !== undefined &&
@@ -360,7 +366,7 @@ export default function ContratosClientPage({
                               )}
                           </div>
                           <p className="text-sm text-muted-foreground">
-                            {contract.unit.building.nombre} - Unidad {contract.unit.numero}
+                            {contract.unit?.building?.nombre || '—'} - Unidad {contract.unit?.numero || '—'}
                           </p>
                           <div className="flex items-center gap-4 text-sm text-muted-foreground">
                             <span className="flex items-center gap-1">
@@ -428,7 +434,7 @@ export default function ContratosClientPage({
         onOpenChange={setDeleteDialogOpen}
         onConfirm={handleDeleteConfirm}
         title="¿Eliminar contrato?"
-        description={`¿Estás seguro de que deseas eliminar el contrato de ${contractToDelete?.tenant.nombreCompleto}? Esta acción no se puede deshacer.`}
+        description={`¿Estás seguro de que deseas eliminar el contrato de ${contractToDelete?.tenant?.nombreCompleto || 'este inquilino'}? Esta acción no se puede deshacer.`}
       />
     </div>
   );

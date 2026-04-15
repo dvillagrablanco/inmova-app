@@ -192,8 +192,8 @@ export async function POST(req: NextRequest) {
         companyId: scope.activeCompanyId,
         nombreCompleto: nombreCompletoFinal,
         dni: validatedData.dni || '',
-        email: validatedData.email,
-        telefono: validatedData.telefono,
+        email: validatedData.email || `${Date.now()}@pendiente.local`,
+        telefono: validatedData.telefono || '',
         fechaNacimiento: validatedData.fechaNacimiento
           ? new Date(validatedData.fechaNacimiento)
           : new Date(),

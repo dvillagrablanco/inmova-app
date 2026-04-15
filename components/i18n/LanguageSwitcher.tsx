@@ -34,15 +34,16 @@ export function LanguageSwitcher({ currentLocale }: LanguageSwitcherProps) {
     setIsChanging(true);
 
     try {
-      // Guardar preferencia en cookie
       document.cookie = `NEXT_LOCALE=${newLocale}; path=/; max-age=31536000; SameSite=Lax`;
 
-      // Construir nueva URL con locale
-      const newPathname = pathname.replace(`/${currentLocale}`, `/${newLocale}`);
-
-      // Recargar con nuevo locale
-      router.push(newPathname);
-      router.refresh();
+      const hasLocalePrefix = locales.some((l) => pathname.startsWith(`/${l}/`) || pathname === `/${l}`);
+      if (hasLocalePrefix) {
+        const newPathname = pathname.replace(`/${currentLocale}`, `/${newLocale}`);
+        router.push(newPathname);
+        router.refresh();
+      } else {
+        window.location.reload();
+      }
     } catch (error) {
       console.error('Error changing language:', error);
     } finally {

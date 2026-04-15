@@ -672,7 +672,7 @@ export default function EditarPropiedadPage() {
                 Fotos de la Propiedad
               </CardTitle>
               <CardDescription>
-                Sube hasta 10 fotos de la propiedad. La primera será la foto principal.
+                Sube hasta 10 fotos de la propiedad. Haz click en la estrella ★ para elegir la foto de portada que se mostrará en la vista previa.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -725,8 +725,9 @@ export default function EditarPropiedadPage() {
                         try {
                           const fd = new FormData();
                           fd.append('file', file);
-                          fd.append('folder', `properties/${propertyId}/documents`);
+                          fd.append('folder', 'propiedades');
                           fd.append('entityType', 'property');
+                          fd.append('entityId', propertyId);
                           const res = await fetch('/api/upload/private', { method: 'POST', body: fd });
                           if (res.ok) {
                             const data = await res.json();

@@ -178,16 +178,18 @@ export default function InquilinosClientPage({
   };
 
   const getInitials = (name: string) => {
+    if (!name) return '??';
     return name
       .split(' ')
+      .filter(Boolean)
       .map((n) => n[0])
       .join('')
       .toUpperCase()
-      .substring(0, 2);
+      .substring(0, 2) || '??';
   };
 
   const getTenantStatus = (tenant: Tenant) => {
-    const hasActiveContract = tenant.contracts && tenant.contracts.length > 0;
+    const hasActiveContract = tenant.contracts && Array.isArray(tenant.contracts) && tenant.contracts.length > 0;
     return hasActiveContract ? 'activo' : 'inactivo';
   };
 

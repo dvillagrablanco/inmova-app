@@ -125,14 +125,18 @@ export const tenantCreateSchema = z.object({
     .min(1, 'Los apellidos son requeridos')
     .max(200, 'Los apellidos no pueden exceder 200 caracteres')
     .trim(),
-  email: z.string().email('Email inválido').toLowerCase().trim(),
+  email: z.string().email('Email inválido').toLowerCase().trim()
+    .optional()
+    .or(z.literal('')),
   telefono: z
     .string()
     .regex(
       /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/,
       'Teléfono inválido'
     )
-    .trim(),
+    .trim()
+    .optional()
+    .or(z.literal('')),
   dni: z
     .string()
     .regex(/^[0-9]{8}[A-Z]$/, 'DNI/NIE inválido (formato: 12345678A)')

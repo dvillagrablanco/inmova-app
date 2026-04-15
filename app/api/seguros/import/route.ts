@@ -18,7 +18,7 @@ async function getPrisma() {
   return getPrismaClient();
 }
 
-const ADMIN_ROLES = new Set(['ADMIN', 'SUPERADMIN', 'administrador', 'super_admin', 'soporte']);
+const ADMIN_ROLES = new Set(['ADMIN', 'SUPERADMIN', 'administrador', 'super_admin', 'soporte', 'GESTOR', 'gestor', 'manager']);
 
 const FIELD_ALIASES = {
   numeroPoliza: ['numero_poliza', 'poliza', 'policy_number', 'npoliza', 'numero'],
@@ -141,7 +141,7 @@ export async function POST(request: NextRequest) {
     const role = session.user.role;
     if (!ADMIN_ROLES.has(role)) {
       return NextResponse.json(
-        { error: 'Solo administradores pueden importar seguros' },
+        { error: 'Solo administradores y gestores pueden importar seguros' },
         { status: 403 }
       );
     }

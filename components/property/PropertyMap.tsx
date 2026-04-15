@@ -95,9 +95,9 @@ export function PropertyMap({ address, city, latitude, longitude }: PropertyMapP
     );
   }
 
-  const googleEmbedUrl = coords
-    ? `https://maps.google.com/maps?q=${coords.lat},${coords.lng}&z=17&output=embed`
-    : `https://maps.google.com/maps?q=${encodeURIComponent(fullAddress)}&z=17&output=embed`;
+  const osmEmbedUrl = coords
+    ? `https://www.openstreetmap.org/export/embed.html?bbox=${coords.lng - 0.005},${coords.lat - 0.003},${coords.lng + 0.005},${coords.lat + 0.003}&layer=mapnik&marker=${coords.lat},${coords.lng}`
+    : null;
 
   return (
     <Card>
@@ -109,17 +109,25 @@ export function PropertyMap({ address, city, latitude, longitude }: PropertyMapP
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="aspect-video rounded-lg overflow-hidden border bg-muted relative">
-          <iframe
-            src={googleEmbedUrl}
-            width="100%"
-            height="100%"
-            style={{ border: 0 }}
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            allowFullScreen
-            title={`Mapa de ${fullAddress}`}
-            className="absolute inset-0"
-          />
+          {osmEmbedUrl ? (
+            <iframe
+              src={osmEmbedUrl}
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              loading="lazy"
+              allowFullScreen
+              title={`Mapa de ${fullAddress}`}
+              className="absolute inset-0"
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
+              <div className="text-center">
+                <MapPin className="h-8 w-8 mx-auto mb-2" />
+                <p className="text-sm">No se pudo determinar la ubicación exacta</p>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex items-start gap-2 text-sm">
@@ -127,9 +135,11 @@ export function PropertyMap({ address, city, latitude, longitude }: PropertyMapP
           <div>
             <p className="font-medium">{address}</p>
             {city && <p className="text-muted-foreground text-xs">{city}</p>}
-            <p className="text-muted-foreground text-xs mt-0.5">
-              {coords.lat.toFixed(6)}, {coords.lng.toFixed(6)}
-            </p>
+            {coords && (
+              <p className="text-muted-foreground text-xs mt-0.5">
+                {coords.lat.toFixed(6)}, {coords.lng.toFixed(6)}
+              </p>
+            )}
           </div>
         </div>
 

@@ -123,6 +123,73 @@ function TenantSearchSelect({
   );
 }
 
+function UnitSearchSelect({
+  units,
+  value,
+  onValueChange,
+}: {
+  units: Unit[];
+  value: string;
+  onValueChange: (value: string) => void;
+}) {
+  const [search, setSearch] = useState('');
+  const [open, setOpen] = useState(false);
+
+  const getLabel = (u: Unit) => {
+    const estado = u.estado && u.estado !== 'disponible' ? ` (${u.estado})` : '';
+    return `${u.building.nombre} - ${u.numero}${estado}`;
+  };
+
+  const filtered = search
+    ? units.filter((u) => getLabel(u).toLowerCase().includes(search.toLowerCase()))
+    : units;
+
+  const selected = units.find((u) => u.id === value);
+
+  return (
+    <div className="relative">
+      <Input
+        type="text"
+        placeholder="Buscar propiedad por nombre o número..."
+        value={open ? search : selected ? getLabel(selected) : search}
+        onChange={(e) => {
+          setSearch(e.target.value);
+          if (!open) setOpen(true);
+          if (value) onValueChange('');
+        }}
+        onFocus={() => setOpen(true)}
+      />
+      {open && (
+        <div className="absolute z-50 mt-1 w-full max-h-60 overflow-auto rounded-md border bg-popover shadow-md">
+          {filtered.length === 0 ? (
+            <div className="p-3 text-sm text-muted-foreground text-center">
+              No se encontraron propiedades
+            </div>
+          ) : (
+            filtered.map((unit) => (
+              <div
+                key={unit.id}
+                className={`px-3 py-2 text-sm cursor-pointer hover:bg-accent ${unit.id === value ? 'bg-accent font-medium' : ''}`}
+                onClick={() => {
+                  onValueChange(unit.id);
+                  setSearch('');
+                  setOpen(false);
+                }}
+              >
+                <div className="font-medium">{unit.building.nombre} - {unit.numero}</div>
+                {unit.estado && unit.estado !== 'disponible' && (
+                  <div className="text-xs text-muted-foreground">Estado: {unit.estado}</div>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+      )}
+      {open && <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />}
+    </div>
+  );
+}
+
 export default function NuevoContratoPage() {
   const router = useRouter();
   const { data: session, status } = useSession() || {};
@@ -351,25 +418,14 @@ export default function NuevoContratoPage() {
                 description: 'Selecciona la unidad, inquilino y tipo de contrato',
                 fields: (
                   <div className="space-y-4">
-                    {/* Unidad */}
+                    {/* Unidad - Buscador */}
                     <div className="space-y-2">
-                      <Label htmlFor="unitId">Unidad *</Label>
-                      <Select
+                      <Label htmlFor="unitId">Unidad / Propiedad *</Label>
+                      <UnitSearchSelect
+                        units={units}
                         value={formData.unitId}
                         onValueChange={(value) => setFormData({ ...formData, unitId: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecciona una unidad" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {units.map((unit) => (
-                            <SelectItem key={unit.id} value={unit.id}>
-                              {unit.building.nombre} - {unit.numero}
-                              {unit.estado && unit.estado !== 'disponible' ? ` (${unit.estado})` : ''}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      />
                     </div>
 
                     {/* Inquilino - Buscador */}

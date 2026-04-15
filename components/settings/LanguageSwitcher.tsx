@@ -2,12 +2,13 @@
  * Componente: Language Switcher
  * 
  * Selector de idioma para el usuario.
+ * Funciona con o sin I18nProvider.
  */
 
 'use client';
 
-import { useTranslation } from '@/lib/i18n-client';
-import { locales, localeNames, localeFlags, type Locale } from '@/lib/i18n-config';
+import { useState, useEffect } from 'react';
+import { locales, localeNames, localeFlags, defaultLocale, type Locale } from '@/lib/i18n-config';
 import {
   Select,
   SelectContent,
@@ -16,11 +17,26 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
+function getCookieLocale(): Locale {
+  if (typeof document === 'undefined') return defaultLocale;
+  const match = document.cookie.match(/NEXT_LOCALE=(\w+)/);
+  const val = match?.[1];
+  if (val && (locales as readonly string[]).includes(val)) return val as Locale;
+  return defaultLocale;
+}
+
 export function LanguageSwitcher() {
-  const { locale, setLocale } = useTranslation();
+  const [locale, setLocaleState] = useState<Locale>(defaultLocale);
+
+  useEffect(() => {
+    setLocaleState(getCookieLocale());
+  }, []);
 
   const handleChange = (newLocale: string) => {
-    setLocale(newLocale as Locale);
+    const loc = newLocale as Locale;
+    setLocaleState(loc);
+    document.cookie = `NEXT_LOCALE=${loc}; path=/; max-age=31536000; SameSite=Lax`;
+    window.location.reload();
   };
 
   return (

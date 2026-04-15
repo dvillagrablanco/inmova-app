@@ -308,7 +308,7 @@ export default function ContractDetailPage() {
   const getStatusBadge = (estado: string) => {
     switch (estado?.toLowerCase()) {
       case 'activo':
-        return <Badge className="bg-green-100 text-green-800 border-green-200">Activo</Badge>;
+        return <Badge className="bg-black text-white border-black">Activo</Badge>;
       case 'vencido':
         return <Badge className="bg-red-100 text-red-800 border-red-200">Vencido</Badge>;
       case 'cancelado':
