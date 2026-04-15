@@ -34,7 +34,7 @@ const unitUpdateSchema = z.object({
       'coworking_space',
     ])
     .optional(),
-  estado: z.enum(['disponible', 'ocupada', 'en_mantenimiento']).optional(),
+  estado: z.enum(['disponible', 'ocupada', 'en_mantenimiento', 'uso_empresa']).optional(),
   superficie: z.number().positive().optional(),
   superficieUtil: z.number().positive().nullable().optional(),
   referenciaCatastral: z.string().nullable().optional(),

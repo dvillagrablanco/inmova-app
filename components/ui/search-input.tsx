@@ -33,20 +33,30 @@ export function SearchInput({
   const [localValue, setLocalValue] = useState(value);
   const debouncedValue = useDebounce(localValue, debounceMs);
   const onChangeRef = useRef(onChange);
+  const isTypingRef = useRef(false);
   onChangeRef.current = onChange;
 
   useEffect(() => {
     onChangeRef.current(debouncedValue);
+    isTypingRef.current = false;
   }, [debouncedValue]);
 
   useEffect(() => {
-    setLocalValue(value);
+    if (!isTypingRef.current) {
+      setLocalValue(value);
+    }
   }, [value]);
 
   const handleClear = () => {
+    isTypingRef.current = false;
     setLocalValue('');
     onChange('');
     onClear?.();
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    isTypingRef.current = true;
+    setLocalValue(e.target.value);
   };
 
   return (
@@ -58,7 +68,7 @@ export function SearchInput({
       <Input
         type="search"
         value={localValue}
-        onChange={(e) => setLocalValue(e.target.value)}
+        onChange={handleChange}
         placeholder={placeholder}
         className="pl-9 pr-9"
         autoFocus={autoFocus}

@@ -336,6 +336,7 @@ export default function InquilinosClientPage({
                           <CardTitle className="text-lg">{tenant.nombreCompleto}</CardTitle>
                           <Badge
                             variant={getTenantStatus(tenant) === 'activo' ? 'default' : 'secondary'}
+                            className={getTenantStatus(tenant) === 'activo' ? 'bg-green-600 text-white border-green-600' : ''}
                           >
                             {getTenantStatus(tenant)}
                           </Badge>
@@ -426,6 +427,7 @@ export default function InquilinosClientPage({
                               variant={
                                 getTenantStatus(tenant) === 'activo' ? 'default' : 'secondary'
                               }
+                              className={getTenantStatus(tenant) === 'activo' ? 'bg-green-600 text-white border-green-600' : ''}
                             >
                               {getTenantStatus(tenant)}
                             </Badge>

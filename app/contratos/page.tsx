@@ -271,7 +271,7 @@ function ContratosPageContent() {
     }
 
     if (estadoFilter !== 'all') {
-      filtered = filtered.filter((c) => c.estado.toLowerCase() === estadoFilter);
+      filtered = filtered.filter((c) => (c.estado || '').toLowerCase() === estadoFilter);
     }
 
     setFilteredContracts(filtered);
@@ -374,18 +374,23 @@ function ContratosPageContent() {
     return badges[tipo.toLowerCase()] || { variant: 'default', label: tipo };
   };
 
-  const activosCount = contracts.filter((c) => c.estado.toLowerCase() === 'activo').length;
-  const finalizadosCount = contracts.filter((c) => c.estado.toLowerCase() === 'finalizado').length;
+  const activosCount = contracts.filter((c) => (c.estado || '').toLowerCase() === 'activo').length;
+  const finalizadosCount = contracts.filter((c) => (c.estado || '').toLowerCase() === 'finalizado').length;
   const totalIngresos = contracts
     .filter((c) => c.estado.toLowerCase() === 'activo')
     .reduce((acc, c) => acc + Number(c.rentaMensual || 0), 0);
 
-  const getDaysUntilExpiry = (fechaFin: string) => {
-    const today = new Date();
-    const endDate = new Date(fechaFin);
-    const diffTime = endDate.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
+  const getDaysUntilExpiry = (fechaFin: string | null | undefined) => {
+    if (!fechaFin) return 999;
+    try {
+      const today = new Date();
+      const endDate = new Date(fechaFin);
+      if (isNaN(endDate.getTime())) return 999;
+      const diffTime = endDate.getTime() - today.getTime();
+      return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    } catch {
+      return 999;
+    }
   };
 
   return (
@@ -656,18 +661,18 @@ function ContratosPageContent() {
         <div className="space-y-1">
         <p className="text-xs text-muted-foreground">Fecha Inicio</p>
         <p className="text-sm font-medium">
-        {format(new Date(contract.fechaInicio), 'dd MMM yyyy', {
+        {contract.fechaInicio ? format(new Date(contract.fechaInicio), 'dd MMM yyyy', {
         locale: es,
-        })}
+        }) : '—'}
         </p>
         </div>
         <div className="space-y-1">
         <p className="text-xs text-muted-foreground">Fecha Fin</p>
         <div className="flex items-center gap-2 flex-wrap">
         <p className="text-sm font-medium">
-        {format(new Date(contract.fechaFin), 'dd MMM yyyy', {
+        {contract.fechaFin ? format(new Date(contract.fechaFin), 'dd MMM yyyy', {
         locale: es,
-        })}
+        }) : '—'}
         </p>
         {isExpiringSoon && (
         <Badge variant="destructive" className="text-[10px]">
@@ -697,7 +702,7 @@ function ContratosPageContent() {
         </div>
 
         {/* Alertas */}
-        {isExpiringSoon && contract.estado.toLowerCase() === 'activo' && (
+        {isExpiringSoon && (contract.estado || '').toLowerCase() === 'activo' && (
         <div className="flex items-start gap-2 p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg">
         <AlertTriangle className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
         <p className="text-xs sm:text-sm text-red-600 font-medium">

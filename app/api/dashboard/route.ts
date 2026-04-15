@@ -199,12 +199,11 @@ export async function GET(request: NextRequest) {
       }),
     ]);
 
-    // Calcular ocupación por tipo de unidad
     const occupiedByType = await prisma.unit.groupBy({
       by: ['tipo'],
       where: {
         building: { companyId: companyFilter },
-        estado: 'ocupada',
+        contracts: { some: { estado: 'activo' } },
       },
       _count: true,
     });
@@ -362,49 +361,50 @@ export async function GET(request: NextRequest) {
       const monthDate = subMonths(currentMonth, i);
       const mStart = startOfMonth(monthDate);
       const mEnd = endOfMonth(monthDate);
+      const isCurrentMonth = i === 0;
 
       let ingresosMes = 0;
 
-      // 1. Try accounting transactions
-      if (useAccountingIncome) {
-        ingresosMes = accountingTransactions.reduce((sum, transaction) => {
-          if (
-            transaction.tipo === 'ingreso' &&
-            transaction.fecha >= mStart &&
-            transaction.fecha <= mEnd
-          ) {
-            return sum + transaction.monto;
-          }
-          return sum;
-        }, 0);
-      }
-
-      // 2. If no accounting data, try payments
-      if (ingresosMes === 0 && !useAccountingIncome) {
-        const monthPayments = await prisma.payment.aggregate({
-          where: {
-            contract: { unit: { building: { companyId: companyFilter } } },
-            fechaVencimiento: { gte: mStart, lte: mEnd },
-            estado: 'pagado',
-          },
-          _sum: { monto: true },
-        });
-        ingresosMes = Number(monthPayments._sum.monto) || 0;
-      }
-
-      // 3. If still no data, try bank transactions
-      if (ingresosMes === 0 && bankTransactionsHistorical.length > 0) {
-        ingresosMes = bankTransactionsHistorical.reduce((sum, tx) => {
-          if (tx.fecha >= mStart && tx.fecha <= mEnd) {
-            return sum + tx.monto;
-          }
-          return sum;
-        }, 0);
-      }
-
-      // 4. If still 0 and there are active contracts, use expected rent as estimate
-      if (ingresosMes === 0 && rentaMensualEsperada > 0) {
+      if (isCurrentMonth) {
         ingresosMes = rentaMensualEsperada;
+      } else {
+        if (useAccountingIncome) {
+          ingresosMes = accountingTransactions.reduce((sum, transaction) => {
+            if (
+              transaction.tipo === 'ingreso' &&
+              transaction.fecha >= mStart &&
+              transaction.fecha <= mEnd
+            ) {
+              return sum + transaction.monto;
+            }
+            return sum;
+          }, 0);
+        }
+
+        if (ingresosMes === 0 && !useAccountingIncome) {
+          const monthPayments = await prisma.payment.aggregate({
+            where: {
+              contract: { unit: { building: { companyId: companyFilter } } },
+              fechaVencimiento: { gte: mStart, lte: mEnd },
+              estado: 'pagado',
+            },
+            _sum: { monto: true },
+          });
+          ingresosMes = Number(monthPayments._sum.monto) || 0;
+        }
+
+        if (ingresosMes === 0 && bankTransactionsHistorical.length > 0) {
+          ingresosMes = bankTransactionsHistorical.reduce((sum, tx) => {
+            if (tx.fecha >= mStart && tx.fecha <= mEnd) {
+              return sum + tx.monto;
+            }
+            return sum;
+          }, 0);
+        }
+
+        if (ingresosMes === 0 && rentaMensualEsperada > 0) {
+          ingresosMes = rentaMensualEsperada;
+        }
       }
 
       monthlyIncome.push({

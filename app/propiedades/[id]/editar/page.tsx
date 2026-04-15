@@ -216,6 +216,7 @@ export default function EditarPropiedadPage() {
         balcon: formData.balcon,
         amueblado: formData.amueblado,
         tourVirtual: formData.tourVirtual.trim() || null,
+        imagenes: photos,
       };
 
       const response = await fetch(`/api/units/${propertyId}`, {
@@ -388,6 +389,7 @@ export default function EditarPropiedadPage() {
                       <SelectItem value="disponible">Disponible</SelectItem>
                       <SelectItem value="ocupada">Ocupada</SelectItem>
                       <SelectItem value="en_mantenimiento">En Mantenimiento</SelectItem>
+                      <SelectItem value="uso_empresa">Uso Empresa</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

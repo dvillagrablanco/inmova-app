@@ -16,7 +16,6 @@ interface PropertyMapProps {
 export function PropertyMap({ address, city, latitude, longitude }: PropertyMapProps) {
   const [loading, setLoading] = useState(true);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
   const fullAddress = city ? `${address}, ${city}` : address;
 
@@ -50,14 +49,21 @@ export function PropertyMap({ address, city, latitude, longitude }: PropertyMapP
           const data = await res.json();
           if (data.length > 0) {
             setCoords({ lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) });
-          } else {
-            setError('No se encontró la ubicación');
+          } else if (city) {
+            const cityRes = await fetch(
+              `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(city + ', Spain')}&limit=1`,
+              { headers: { 'User-Agent': 'InmovaApp/1.0' } }
+            );
+            if (cityRes.ok) {
+              const cityData = await cityRes.json();
+              if (cityData.length > 0) {
+                setCoords({ lat: parseFloat(cityData[0].lat), lng: parseFloat(cityData[0].lon) });
+              }
+            }
           }
-        } else {
-          setError('Error al buscar ubicación');
         }
       } catch {
-        setError('Error de conexión');
+        // Geocoding failed silently — fallback map will show
       } finally {
         setLoading(false);
       }
@@ -92,42 +98,6 @@ export function PropertyMap({ address, city, latitude, longitude }: PropertyMapP
   const googleEmbedUrl = coords
     ? `https://maps.google.com/maps?q=${coords.lat},${coords.lng}&z=17&output=embed`
     : `https://maps.google.com/maps?q=${encodeURIComponent(fullAddress)}&z=17&output=embed`;
-
-  if (error || !coords) {
-    return (
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-            <MapPin className="h-5 w-5" />
-            Ubicación
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="aspect-video rounded-lg overflow-hidden border bg-muted relative">
-            <iframe
-              src={`https://maps.google.com/maps?q=${encodeURIComponent(fullAddress)}&z=15&output=embed`}
-              width="100%"
-              height="100%"
-              style={{ border: 0 }}
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              allowFullScreen
-              title={`Mapa de ${fullAddress}`}
-              className="absolute inset-0"
-            />
-          </div>
-          <div className="flex items-start gap-2 text-sm">
-            <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0 text-muted-foreground" />
-            <p className="font-medium">{fullAddress}</p>
-          </div>
-          <Button variant="outline" size="sm" onClick={openInGoogleMaps} className="w-full">
-            <ExternalLink className="mr-2 h-3.5 w-3.5" />
-            Abrir en Google Maps
-          </Button>
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
     <Card>
