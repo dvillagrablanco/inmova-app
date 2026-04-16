@@ -29,6 +29,7 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -62,7 +63,7 @@ const ESTADO_LABELS: Record<string, string> = {
   expirado: 'Vencido',
 };
 
-export default function ContratosGestionPage() {
+function ContratosGestionContent() {
   const router = useRouter();
   const { data: session, status } = useSession();
   const [contratos, setContratos] = useState<ContratoGestion[]>([]);
@@ -384,5 +385,13 @@ export default function ContratosGestionPage() {
         )}
       </div>
     </AuthenticatedLayout>
+  );
+}
+
+export default function ContratosGestionPage() {
+  return (
+    <ErrorBoundary>
+      <ContratosGestionContent />
+    </ErrorBoundary>
   );
 }

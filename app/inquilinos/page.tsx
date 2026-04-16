@@ -162,17 +162,20 @@ function InquilinosPageContent() {
 
   // Find morosidad for a tenant
   const getTenantDeuda = (tenant: Tenant): number => {
-    const nombre = (tenant.nombreCompleto || '').toLowerCase().trim();
-    // Try exact match
-    if (morosidadMap[nombre]) return morosidadMap[nombre].saldo;
-    // Try first word match
-    const firstName = nombre.split(/[\s,]+/)[0];
-    if (firstName.length > 3) {
-      for (const [key, val] of Object.entries(morosidadMap)) {
-        if (key.includes(firstName)) return val.saldo;
+    try {
+      const nombre = (tenant.nombreCompleto || '').toLowerCase().trim();
+      if (!nombre) return 0;
+      if (morosidadMap[nombre]) return morosidadMap[nombre].saldo;
+      const firstName = nombre.split(/[\s,]+/)[0];
+      if (firstName && firstName.length > 3) {
+        for (const [key, val] of Object.entries(morosidadMap)) {
+          if (key.includes(firstName)) return val.saldo;
+        }
       }
+      return 0;
+    } catch {
+      return 0;
     }
-    return 0;
   };
 
   const handleDeleteClick = (tenant: Tenant) => {
@@ -262,11 +265,11 @@ function InquilinosPageContent() {
   if (!session) return null;
 
   const getTenantEstado = (tenant: Tenant): string => {
-    // Si tiene contratos activos, está activo
-    if (tenant.contracts && tenant.contracts.some((c) => c.estado === 'activo')) {
-      return 'activo';
-    }
-    // Si no tiene contratos activos, está inactivo
+    try {
+      if (tenant.contracts && Array.isArray(tenant.contracts) && tenant.contracts.some((c) => c?.estado === 'activo')) {
+        return 'activo';
+      }
+    } catch {}
     return 'inactivo';
   };
 
@@ -452,11 +455,11 @@ function InquilinosPageContent() {
                         <div className="space-y-3">
                           <div className="flex items-center gap-2 text-sm">
                             <Mail className="h-4 w-4 text-muted-foreground" />
-                            <span className="truncate">{tenant.email}</span>
+                            <span className="truncate">{tenant.email && !tenant.email.includes('@pendiente') ? tenant.email : 'No disponible'}</span>
                           </div>
                           <div className="flex items-center gap-2 text-sm">
                             <Phone className="h-4 w-4 text-muted-foreground" />
-                            <span>{tenant.telefono}</span>
+                            <span>{tenant.telefono || 'No disponible'}</span>
                           </div>
                           {primeraUnidad && (
                             <div className="border-t pt-3">

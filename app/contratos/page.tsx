@@ -661,18 +661,14 @@ function ContratosPageContent() {
         <div className="space-y-1">
         <p className="text-xs text-muted-foreground">Fecha Inicio</p>
         <p className="text-sm font-medium">
-        {contract.fechaInicio ? format(new Date(contract.fechaInicio), 'dd MMM yyyy', {
-        locale: es,
-        }) : '—'}
+        {(() => { try { return contract.fechaInicio ? format(new Date(contract.fechaInicio), 'dd MMM yyyy', { locale: es }) : '—'; } catch { return '—'; } })()}
         </p>
         </div>
         <div className="space-y-1">
         <p className="text-xs text-muted-foreground">Fecha Fin</p>
         <div className="flex items-center gap-2 flex-wrap">
         <p className="text-sm font-medium">
-        {contract.fechaFin ? format(new Date(contract.fechaFin), 'dd MMM yyyy', {
-        locale: es,
-        }) : '—'}
+        {(() => { try { return contract.fechaFin ? format(new Date(contract.fechaFin), 'dd MMM yyyy', { locale: es }) : '—'; } catch { return '—'; } })()}
         </p>
         {isExpiringSoon && (
         <Badge variant="destructive" className="text-[10px]">

@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Globe, Check } from 'lucide-react';
+import { toast } from 'sonner';
 
 type Locale = 'es' | 'en' | 'pt' | 'fr' | 'de' | 'it';
 
@@ -37,20 +38,32 @@ export function LanguageSelector() {
   }, []);
 
   const handleLocaleChange = (newLocale: Locale) => {
+    if (newLocale === locale) return;
     setLocaleState(newLocale);
     document.cookie = `NEXT_LOCALE=${newLocale}; path=/; max-age=31536000; SameSite=Lax`;
     if (typeof localStorage !== 'undefined') {
       localStorage.setItem('locale', newLocale);
     }
-    window.location.reload();
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = newLocale;
+    }
+    const langName = availableLocales.find(l => l.code === newLocale)?.name || newLocale;
+    if (newLocale !== 'es') {
+      toast.info(`Idioma cambiado a ${langName}. La traducción completa está en desarrollo.`, { duration: 4000 });
+    } else {
+      toast.success(`Idioma cambiado a ${langName}`);
+    }
+    setTimeout(() => window.location.reload(), 500);
   };
+
+  const currentFlag = availableLocales.find(l => l.code === locale)?.flag || '🌐';
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
-          <Globe className="h-5 w-5" />
-          <span className="sr-only">Cambiar idioma</span>
+        <Button variant="ghost" size="sm" className="relative gap-1.5 px-2">
+          <span className="text-base">{currentFlag}</span>
+          <Globe className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">

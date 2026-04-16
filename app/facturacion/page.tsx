@@ -52,6 +52,7 @@ import {
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import logger from '@/lib/logger';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
 
 function safeFormatDate(dateStr: string | null | undefined, fmt: string = 'dd/MM/yyyy'): string {
   if (!dateStr) return '—';
@@ -107,7 +108,7 @@ interface Company {
   maxPropiedades?: number;
 }
 
-export default function FacturacionPage() {
+function FacturacionContent() {
   const { data: session } = useSession() || {};
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -146,29 +147,34 @@ export default function FacturacionPage() {
     try {
       setLoading(true);
 
-      const invoicesRes = await fetch('/api/b2b-billing/invoices');
-      if (invoicesRes.ok) {
-        const data = await invoicesRes.json();
-        setInvoices(data.invoices || []);
-      }
+      try {
+        const invoicesRes = await fetch('/api/b2b-billing/invoices');
+        if (invoicesRes.ok) {
+          const data = await invoicesRes.json();
+          setInvoices(data.invoices || []);
+        }
+      } catch {}
 
-      const companyRes = await fetch('/api/company');
-      if (companyRes.ok) {
-        const companyData = await companyRes.json();
-        setCompany(companyData);
-      }
+      try {
+        const companyRes = await fetch('/api/company');
+        if (companyRes.ok) {
+          const companyData = await companyRes.json();
+          setCompany(companyData);
+        }
+      } catch {}
 
-      const statsRes = await fetch('/api/dashboard?stats=usage');
-      if (statsRes.ok) {
-        const stats = await statsRes.json();
-        setUsageStats({
-          usuarios: stats.totalUsers || 0,
-          propiedades: stats.totalBuildings || 0,
-        });
-      }
+      try {
+        const statsRes = await fetch('/api/dashboard?stats=usage');
+        if (statsRes.ok) {
+          const stats = await statsRes.json();
+          setUsageStats({
+            usuarios: stats.totalUsers || 0,
+            propiedades: stats.totalBuildings || 0,
+          });
+        }
+      } catch {}
     } catch (error) {
       logger.error('Error al cargar datos:', error);
-      toast.error('Error al cargar datos de facturación');
     } finally {
       setLoading(false);
     }
@@ -750,5 +756,13 @@ function InvoiceTable({
         </TableBody>
       </Table>
     </div>
+  );
+}
+
+export default function FacturacionPage() {
+  return (
+    <ErrorBoundary>
+      <FacturacionContent />
+    </ErrorBoundary>
   );
 }

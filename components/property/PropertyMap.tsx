@@ -21,9 +21,10 @@ export function PropertyMap({ address, city, latitude, longitude }: PropertyMapP
 
   const cleanAddressForGeocoding = (addr: string): string => {
     return addr
-      .replace(/,?\s*\d+[ºª°]\s*[A-Za-z]?\b/g, '')
-      .replace(/,?\s*(bajo|ático|entresuelo|principal|ent|bjo|átic|piso)\s*\w*/gi, '')
+      .replace(/,?\s*\d+[ºª°]\s*(Dcha|Izda|Izq|Dch|Ext|Int|[A-Z])?\b/gi, '')
+      .replace(/,?\s*(bajo|ático|entresuelo|principal|ent|bjo|átic|piso|planta|puerta)\s*\w*/gi, '')
       .replace(/,?\s*\d+[ºª°]\b/g, '')
+      .replace(/\b(Urb\.?|Urbanización)\s*/gi, '')
       .replace(/,\s*,/g, ',')
       .replace(/,\s*$/g, '')
       .trim();
@@ -57,19 +58,33 @@ export function PropertyMap({ address, city, latitude, longitude }: PropertyMapP
         const cleanedAddress = cleanAddressForGeocoding(fullAddress);
         let result = await tryNominatim(cleanedAddress);
 
-        if (!result && address) {
-          result = await tryNominatim(address + (city ? `, ${city}, Spain` : ', Spain'));
+        if (!result) {
+          result = await tryNominatim(fullAddress);
         }
 
-        if (!result && city) {
-          const streetMatch = address.match(/^((?:Calle|C\/|Av\.|Avda|Paseo|Pso|Plaza|Pl\.)?\s*[^,\d]+)/i);
-          if (streetMatch) {
-            result = await tryNominatim(`${streetMatch[1].trim()}, ${city}, Spain`);
+        if (!result && address && city) {
+          result = await tryNominatim(`${address}, ${city}, España`);
+        }
+
+        if (!result && address) {
+          const streetNumber = address.match(/^([^,]+?\s+\d+)/);
+          if (streetNumber) {
+            result = await tryNominatim(`${streetNumber[1].trim()}, ${city || ''}, España`);
           }
         }
 
         if (!result && city) {
-          result = await tryNominatim(`${city}, Spain`);
+          const streetName = address
+            .replace(/^(Calle|C\/|Av\.|Avda\.?|Paseo|Pso\.?|Plaza|Pl\.?)\s*/i, '')
+            .split(/[,\d]/)[0]
+            .trim();
+          if (streetName && streetName.length > 3) {
+            result = await tryNominatim(`${streetName}, ${city}, España`);
+          }
+        }
+
+        if (!result && city) {
+          result = await tryNominatim(`${city}, España`);
         }
 
         if (result) {
