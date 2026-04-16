@@ -2,6 +2,8 @@
  * Funciones de sanitización y seguridad para inputs del usuario
  */
 
+import DOMPurify from 'isomorphic-dompurify';
+
 // Sanitizar input general - remueve caracteres peligrosos
 export function sanitizeInput(input: string, maxLength = 10000): string {
   return input
@@ -67,22 +69,12 @@ export function sanitizeFileName(filename: string): string {
 // Backward compatibility
 export const sanitizeFilename = sanitizeFileName;
 
-// Sanitizar HTML - permite tags seguros
+// Sanitizar HTML usando DOMPurify (auditoría seguridad 2026-04-16).
+// La implementación anterior basada en regex era bypasseable trivialmente
+// (atributos sin comillas, entidades HTML, data: URIs, SVG, etc.).
 export function sanitizeHtml(html: string): string {
-  // Esta es una implementación básica. En producción, usar DOMPurify o similar
-  // Por ahora, simplemente remueve scripts y atributos peligrosos
-  let sanitized = html;
-  
-  // Remover script tags
-  sanitized = sanitized.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-  
-  // Remover event handlers
-  sanitized = sanitized.replace(/on\w+\s*=\s*["'][^"']*["']/gi, '');
-  
-  // Remover javascript: en hrefs
-  sanitized = sanitized.replace(/javascript:/gi, '');
-  
-  return sanitized;
+  if (!html) return '';
+  return String(DOMPurify.sanitize(html));
 }
 
 // Sanitizar texto para prevenir inyección SQL (aunque esto debe hacerse en el backend)

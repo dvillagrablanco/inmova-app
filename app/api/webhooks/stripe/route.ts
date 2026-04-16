@@ -61,15 +61,17 @@ export async function POST(req: NextRequest) {
     let event: Stripe.Event;
 
     try {
+      // SECURITY: la verificación de firma es obligatoria en todos los entornos.
+      // Aceptar JSON sin firmar, aunque sea en dev, permite a cualquiera
+      // simular pagos/refunds si la URL del webhook es alcanzable.
       if (!webhookSecret) {
-        if (process.env.NODE_ENV === 'production') {
-          return NextResponse.json({ error: 'Webhook secret no configurado' }, { status: 503 });
-        }
-        logger.warn('[Stripe Webhook] No webhook secret configured (dev)');
-        event = JSON.parse(body);
-      } else {
-        event = getStripe().webhooks.constructEvent(body, signature, webhookSecret);
+        logger.error('[Stripe Webhook] STRIPE_WEBHOOK_SECRET no configurado');
+        return NextResponse.json(
+          { error: 'Webhook secret no configurado' },
+          { status: 503 }
+        );
       }
+      event = getStripe().webhooks.constructEvent(body, signature, webhookSecret);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Error desconocido';
       logger.error('[Stripe Webhook] Signature verification failed:', { message });

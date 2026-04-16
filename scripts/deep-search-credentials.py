@@ -7,14 +7,19 @@ Busca en archivos .env, backups, logs, historial, etc.
 import sys
 sys.path.insert(0, '/home/ubuntu/.local/lib/python3.12/site-packages')
 
+import os
 import paramiko
 import time
 import re
 
-SERVER_IP = "157.180.119.236"
-SERVER_USER = "root"
-SERVER_PASSWORD = "hBXxC6pZCQPBLPiHGUHkASiln+Su/BAVQAN6qQ+xjVo="
-APP_PATH = "/opt/inmova-app"
+# SECURITY: credenciales deben venir de entorno, nunca del código.
+SERVER_IP = os.environ.get("INMOVA_SSH_HOST", "")
+SERVER_USER = os.environ.get("INMOVA_SSH_USER", "deploy")
+SERVER_PASSWORD = os.environ.get("INMOVA_SSH_PASSWORD", "")
+APP_PATH = os.environ.get("INMOVA_APP_PATH", "/opt/inmova-app")
+
+if not SERVER_IP or not SERVER_PASSWORD:
+    raise SystemExit("ERROR: configura INMOVA_SSH_HOST y INMOVA_SSH_PASSWORD en el entorno.")
 
 class Colors:
     GREEN = '\033[92m'

@@ -12,11 +12,22 @@ import paramiko
 from datetime import datetime
 
 # Configuración
-SERVER_IP = "157.180.119.236"
-SERVER_USER = "root"
-SERVER_PASS = "XVcL9qHxqA7f"
-DOMAIN = "inmovaapp.com"
-DOMAIN_WWW = "www.inmovaapp.com"
+# SECURITY: Credenciales eliminadas del código fuente. Usar variables de entorno
+# o ssh-agent con clave pública. Nunca volver a commitear contraseñas en claro.
+import os
+
+SERVER_IP = os.environ.get("INMOVA_SSH_HOST", "")
+SERVER_USER = os.environ.get("INMOVA_SSH_USER", "deploy")
+SERVER_PASS = os.environ.get("INMOVA_SSH_PASSWORD", "")
+DOMAIN = os.environ.get("INMOVA_DOMAIN", "inmovaapp.com")
+DOMAIN_WWW = f"www.{DOMAIN}"
+
+if not SERVER_IP or not SERVER_PASS:
+    raise SystemExit(
+        "ERROR: Configura INMOVA_SSH_HOST y INMOVA_SSH_PASSWORD como variables "
+        "de entorno. Preferible: usar clave SSH pública + ssh-agent en vez de "
+        "contraseña, y deshabilitar PermitRootLogin+PasswordAuthentication en sshd."
+    )
 
 # Colores ANSI
 GREEN = '\033[0;32m'
