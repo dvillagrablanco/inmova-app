@@ -139,8 +139,7 @@ export const tenantCreateSchema = z.object({
     .or(z.literal('')),
   dni: z
     .string()
-    .regex(/^[0-9]{8}[A-Z]$/, 'DNI/NIE inválido (formato: 12345678A)')
-    .toUpperCase()
+    .max(20, 'DNI/NIE no puede exceder 20 caracteres')
     .trim()
     .optional()
     .or(z.literal('')),

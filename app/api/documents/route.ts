@@ -257,13 +257,32 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Upload file to S3
     const buffer = Buffer.from(await file.arrayBuffer());
     const fileName = `documents/${Date.now()}-${file.name}`;
-    const cloudStoragePath = await uploadFile(buffer, fileName);
+    let cloudStoragePath: string;
 
-    // Parse tags
-    const tagsArray = tags ? JSON.parse(tags) : [];
+    try {
+      cloudStoragePath = await uploadFile(buffer, fileName);
+    } catch (uploadErr: any) {
+      logger.error('S3 upload failed, trying local storage:', uploadErr?.message);
+      try {
+        const LocalStorage = await import('@/lib/local-storage');
+        if (LocalStorage.isLocalStorageAvailable()) {
+          const result = await LocalStorage.saveFile(buffer, fileName, {
+            uploadedBy: session.user.id as string,
+            originalName: file.name,
+            contentType: file.type,
+          });
+          cloudStoragePath = result.path;
+        } else {
+          cloudStoragePath = fileName;
+        }
+      } catch {
+        cloudStoragePath = fileName;
+      }
+    }
+
+    const tagsArray = tags ? (() => { try { return JSON.parse(tags); } catch { return []; } })() : [];
 
     // Create document record
     const document = await prisma.document.create({
@@ -302,8 +321,10 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json(document, { status: 201 });
-  } catch (error) {
-    logger.error('Error creating document:', error);
-    return NextResponse.json({ error: 'Error al crear documento' }, { status: 500 });
+  } catch (error: any) {
+    const errMsg = error?.message || 'Error desconocido';
+    const errCode = error?.code || '';
+    logger.error('Error creating document:', { message: errMsg, code: errCode, name: error?.name });
+    return NextResponse.json({ error: 'Error al crear documento', message: errMsg }, { status: 500 });
   }
 }

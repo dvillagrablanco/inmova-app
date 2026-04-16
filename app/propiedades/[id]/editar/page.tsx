@@ -741,8 +741,9 @@ export default function EditarPropiedadPage() {
                             toast.success(`${file.name} subido correctamente`);
                           } else {
                             setDocuments(prev => prev.filter(d => d.id !== docId));
+                            const errData = await res.json().catch(() => ({}));
                             const { toast } = await import('sonner');
-                            toast.error(`Error al subir ${file.name}`);
+                            toast.error(errData.message || errData.error || `Error al subir ${file.name}`);
                           }
                         } catch {
                           setDocuments(prev => prev.filter(d => d.id !== docId));

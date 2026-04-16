@@ -145,10 +145,12 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
 
-    // Preparar datos: convertir nombre completo a nombre/apellidos si es necesario
     let dataToValidate = { ...body };
 
-    // Si viene nombreCompleto o nombre contiene espacios y no hay apellidos
+    if (body.documentoIdentidad && !body.dni) {
+      dataToValidate.dni = body.documentoIdentidad;
+    }
+
     const nombreCompleto = body.nombreCompleto || body.nombre;
     if (nombreCompleto && !body.apellidos) {
       const partes = nombreCompleto.trim().split(' ');
@@ -187,12 +189,20 @@ export async function POST(req: NextRequest) {
       hashedPassword = await bcrypt.hash(body.portalPassword, 10);
     }
 
+    const uniqueSuffix = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const emailFinal = validatedData.email && validatedData.email.trim()
+      ? validatedData.email.trim()
+      : `tenant-${uniqueSuffix}@pendiente.local`;
+    const dniFinal = validatedData.dni && validatedData.dni.trim()
+      ? validatedData.dni.trim()
+      : `PEND-${uniqueSuffix}`;
+
     const tenant = await prisma.tenant.create({
       data: {
         companyId: scope.activeCompanyId,
         nombreCompleto: nombreCompletoFinal,
-        dni: validatedData.dni || '',
-        email: validatedData.email || `tenant-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@pendiente.local`,
+        dni: dniFinal,
+        email: emailFinal,
         telefono: validatedData.telefono || '',
         fechaNacimiento: validatedData.fechaNacimiento
           ? new Date(validatedData.fechaNacimiento)
