@@ -463,7 +463,7 @@ function InquilinosPageContent() {
                               <div className="flex items-center gap-2 text-sm">
                                 <Home className="h-4 w-4 text-muted-foreground" />
                                 <span className="font-medium">
-                                  {primeraUnidad.building.nombre} - {primeraUnidad.numero}
+                                  {primeraUnidad.building?.nombre || '—'} - {primeraUnidad.numero}
                                 </span>
                               </div>
                             </div>
@@ -554,7 +554,7 @@ function InquilinosPageContent() {
                                 <div>
                                   <p className="text-sm text-muted-foreground">Unidad actual</p>
                                   <p className="font-medium">
-                                    {primeraUnidad.building.nombre} - Unidad {primeraUnidad.numero}
+                                    {primeraUnidad.building?.nombre || '—'} - Unidad {primeraUnidad.numero}
                                   </p>
                                 </div>
                               </div>
@@ -622,7 +622,7 @@ function InquilinosPageContent() {
                               <div className="text-center max-w-[200px]">
                                 <p className="text-muted-foreground">Unidad</p>
                                 <p className="font-semibold truncate">
-                                  {primeraUnidad.building.nombre} - {primeraUnidad.numero}
+                                  {primeraUnidad.building?.nombre || '—'} - {primeraUnidad.numero}
                                 </p>
                               </div>
                             )}

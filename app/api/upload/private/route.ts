@@ -71,7 +71,6 @@ const uploadSchema = z.object({
   entityId: z.string().optional(),
 });
 
-// Tipos MIME permitidos para documentos
 const ALLOWED_MIME_TYPES = [
   'application/pdf',
   'image/jpeg',
@@ -79,6 +78,9 @@ const ALLOWED_MIME_TYPES = [
   'image/png',
   'application/msword',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/octet-stream',
 ];
 
 export async function POST(req: NextRequest) {

@@ -53,6 +53,17 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import logger from '@/lib/logger';
 
+function safeFormatDate(dateStr: string | null | undefined, fmt: string = 'dd/MM/yyyy'): string {
+  if (!dateStr) return '—';
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return '—';
+    return format(d, fmt, { locale: es });
+  } catch {
+    return '—';
+  }
+}
+
 interface FacturaInmobiliaria {
   id: string;
   numeroFactura: string;
@@ -271,7 +282,7 @@ export default function FacturacionPage() {
                     <Euro className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">€{kpis.totalFacturado.toFixed(2)}</div>
+                    <div className="text-2xl font-bold">€{(kpis.totalFacturado || 0).toFixed(2)}</div>
                     <p className="text-xs text-muted-foreground">Facturas emitidas y pagadas</p>
                   </CardContent>
                 </Card>
@@ -281,7 +292,7 @@ export default function FacturacionPage() {
                     <AlertCircle className="h-4 w-4 text-yellow-600" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">€{kpis.pendientesCobro.toFixed(2)}</div>
+                    <div className="text-2xl font-bold">€{(kpis.pendientesCobro || 0).toFixed(2)}</div>
                     <p className="text-xs text-muted-foreground">Facturas emitidas sin cobrar</p>
                   </CardContent>
                 </Card>
@@ -386,11 +397,11 @@ export default function FacturacionPage() {
                         {facturas.map((f) => (
                           <TableRow key={f.id}>
                             <TableCell className="font-medium">{f.numeroFactura}</TableCell>
-                            <TableCell>{format(new Date(f.fecha), 'dd/MM/yyyy', { locale: es })}</TableCell>
+                            <TableCell>{safeFormatDate(f.fecha)}</TableCell>
                             <TableCell>{f.concepto}</TableCell>
                             <TableCell>{f.destinatario.nombre}</TableCell>
                             <TableCell>{f.inmueble || '-'}</TableCell>
-                            <TableCell className="text-right font-medium">€{f.total.toFixed(2)}</TableCell>
+                            <TableCell className="text-right font-medium">€{(f.total || 0).toFixed(2)}</TableCell>
                             <TableCell>{getEstadoBadge(f.estado)}</TableCell>
                             <TableCell className="text-right">
                               <Button variant="ghost" size="sm" onClick={() => router.push(`/facturacion/${f.id}`)}>
@@ -704,12 +715,12 @@ function InvoiceTable({
               <TableCell className="font-medium">{invoice.numeroFactura}</TableCell>
               <TableCell>{invoice.periodo}</TableCell>
               <TableCell>
-                {format(new Date(invoice.fechaEmision), 'dd/MM/yyyy', { locale: es })}
+                {safeFormatDate(invoice.fechaEmision)}
               </TableCell>
               <TableCell>
-                {format(new Date(invoice.fechaVencimiento), 'dd/MM/yyyy', { locale: es })}
+                {safeFormatDate(invoice.fechaVencimiento)}
               </TableCell>
-              <TableCell className="text-right font-medium">€{invoice.total.toFixed(2)}</TableCell>
+              <TableCell className="text-right font-medium">€{(invoice.total || 0).toFixed(2)}</TableCell>
               <TableCell>{getEstadoBadge(invoice.estado)}</TableCell>
               <TableCell className="text-right">
                 <div className="flex gap-1 justify-end">

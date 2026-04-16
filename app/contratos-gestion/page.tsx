@@ -88,8 +88,11 @@ export default function ContratosGestionPage() {
           const raw = Array.isArray(data) ? data : Array.isArray(data.data) ? data.data : [];
           const items: ContratoGestion[] = raw.map((c: any) => ({
             ...c,
+            propietario: c.propietario || 'Sin propietario',
             inmuebles: Array.isArray(c.inmuebles) ? c.inmuebles : [],
             estado: typeof c.estado === 'string' ? c.estado : 'pendiente',
+            fechaInicio: c.fechaInicio || '',
+            fechaFin: c.fechaFin || '',
           }));
           setContratos(items);
           setFilteredContratos(items);

@@ -37,33 +37,46 @@ export function PropertyMap({ address, city, latitude, longitude }: PropertyMapP
         return;
       }
 
-      try {
-        const cleanedAddress = cleanAddressForGeocoding(fullAddress);
-        const query = encodeURIComponent(cleanedAddress);
-        const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${query}&limit=1&countrycodes=es`,
-          { headers: { 'User-Agent': 'InmovaApp/1.0' } }
-        );
-
-        if (res.ok) {
-          const data = await res.json();
-          if (data.length > 0) {
-            setCoords({ lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) });
-          } else if (city) {
-            const cityRes = await fetch(
-              `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(city + ', Spain')}&limit=1`,
-              { headers: { 'User-Agent': 'InmovaApp/1.0' } }
-            );
-            if (cityRes.ok) {
-              const cityData = await cityRes.json();
-              if (cityData.length > 0) {
-                setCoords({ lat: parseFloat(cityData[0].lat), lng: parseFloat(cityData[0].lon) });
-              }
+      const tryNominatim = async (query: string): Promise<{ lat: number; lng: number } | null> => {
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&countrycodes=es`,
+            { headers: { 'User-Agent': 'InmovaApp/1.0' } }
+          );
+          if (res.ok) {
+            const data = await res.json();
+            if (data.length > 0) {
+              return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
             }
           }
+        } catch {}
+        return null;
+      };
+
+      try {
+        const cleanedAddress = cleanAddressForGeocoding(fullAddress);
+        let result = await tryNominatim(cleanedAddress);
+
+        if (!result && address) {
+          result = await tryNominatim(address + (city ? `, ${city}, Spain` : ', Spain'));
+        }
+
+        if (!result && city) {
+          const streetMatch = address.match(/^((?:Calle|C\/|Av\.|Avda|Paseo|Pso|Plaza|Pl\.)?\s*[^,\d]+)/i);
+          if (streetMatch) {
+            result = await tryNominatim(`${streetMatch[1].trim()}, ${city}, Spain`);
+          }
+        }
+
+        if (!result && city) {
+          result = await tryNominatim(`${city}, Spain`);
+        }
+
+        if (result) {
+          setCoords(result);
         }
       } catch {
-        // Geocoding failed silently — fallback map will show
+        // Geocoding failed
       } finally {
         setLoading(false);
       }

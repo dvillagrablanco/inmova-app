@@ -210,17 +210,22 @@ function MantenimientoPage() {
   // ========== FUNCIONES PARA TAB SOLICITUDES ==========
   const filteredRequests = useMemo(() => {
     return requests.filter((request) => {
-      const matchesSearch =
-        searchTerm === '' ||
-        request.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        request.descripcion.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        request.unit.building.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        request.unit.numero.toLowerCase().includes(searchTerm.toLowerCase());
+      try {
+        const term = searchTerm.toLowerCase();
+        const matchesSearch =
+          searchTerm === '' ||
+          (request.titulo || '').toLowerCase().includes(term) ||
+          (request.descripcion || '').toLowerCase().includes(term) ||
+          (request.unit?.building?.nombre || '').toLowerCase().includes(term) ||
+          (request.unit?.numero || '').toLowerCase().includes(term);
 
-      const matchesEstado = estadoFilter === 'all' || request.estado === estadoFilter;
-      const matchesPrioridad = prioridadFilter === 'all' || request.prioridad === prioridadFilter;
+        const matchesEstado = estadoFilter === 'all' || request.estado === estadoFilter;
+        const matchesPrioridad = prioridadFilter === 'all' || request.prioridad === prioridadFilter;
 
-      return matchesSearch && matchesEstado && matchesPrioridad;
+        return matchesSearch && matchesEstado && matchesPrioridad;
+      } catch {
+        return true;
+      }
     });
   }, [requests, searchTerm, estadoFilter, prioridadFilter]);
 

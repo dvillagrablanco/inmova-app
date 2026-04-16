@@ -157,12 +157,12 @@ export default function PropiedadesPage() {
 
     // Filtro por estado
     if (estadoFilter && estadoFilter !== 'all') {
-      filtered = filtered.filter((prop) => prop.estado === estadoFilter);
+      filtered = filtered.filter((prop) => (prop.estado || '').toLowerCase() === estadoFilter.toLowerCase());
     }
 
     // Filtro por tipo
     if (tipoFilter && tipoFilter !== 'all') {
-      filtered = filtered.filter((prop) => prop.tipo === tipoFilter);
+      filtered = filtered.filter((prop) => (prop.tipo || '').toLowerCase() === tipoFilter.toLowerCase());
     }
 
     // Filtro por rango de precio

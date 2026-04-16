@@ -177,11 +177,16 @@ export default function EditarPropiedadPage() {
       toast.error('La superficie debe ser mayor a 0');
       return false;
     }
-    if (formData.rentaMensual === '' || formData.rentaMensual === null || formData.rentaMensual === undefined) {
-      toast.error('La renta mensual es obligatoria (puede ser 0 para uso interno)');
-      return false;
+    const rentaStr = formData.rentaMensual?.toString().trim();
+    if (rentaStr === '' || rentaStr === null || rentaStr === undefined) {
+      if (formData.estado === 'uso_empresa') {
+        handleInputChange('rentaMensual', '0');
+      } else {
+        toast.error('La renta mensual es obligatoria (puede ser 0 para uso interno)');
+        return false;
+      }
     }
-    if (parseFloat(formData.rentaMensual) < 0) {
+    if (rentaStr && parseFloat(rentaStr) < 0) {
       toast.error('La renta mensual no puede ser negativa');
       return false;
     }
@@ -207,7 +212,7 @@ export default function EditarPropiedadPage() {
         banos: formData.banos ? parseInt(formData.banos) : null,
         planta: formData.planta ? parseInt(formData.planta) : null,
         orientacion: formData.orientacion.trim() || null,
-        rentaMensual: parseFloat(formData.rentaMensual),
+        rentaMensual: parseFloat(formData.rentaMensual || '0'),
         gastosComunidad: formData.gastosComunidad ? parseFloat(formData.gastosComunidad) : null,
         ibiAnual: formData.ibiAnual ? parseFloat(formData.ibiAnual) : null,
         aireAcondicionado: formData.aireAcondicionado,

@@ -184,7 +184,10 @@ export function PhotoGallery({
               {images.map((url, idx) => (
                 <div
                   key={idx}
-                  className="relative group aspect-square rounded-lg overflow-hidden border bg-muted cursor-pointer"
+                  className={cn(
+                    "relative group aspect-square rounded-lg overflow-hidden border bg-muted cursor-pointer",
+                    idx === 0 && "ring-2 ring-primary ring-offset-2"
+                  )}
                   onClick={() => setPreviewUrl(url)}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -194,16 +197,38 @@ export function PhotoGallery({
                     className="absolute inset-0 w-full h-full object-cover"
                     loading="lazy"
                   />
+                  {idx === 0 && (
+                    <div className="absolute top-1.5 left-1.5 bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-full font-medium z-10">
+                      Portada
+                    </div>
+                  )}
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
                     <ZoomIn className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
                   {editable && (
-                    <button
-                      onClick={(e) => { e.stopPropagation(); handleDelete(url); }}
-                      className="absolute top-2 right-2 p-1.5 rounded-full bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </button>
+                    <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      {idx !== 0 && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const reordered = [...images];
+                            const [moved] = reordered.splice(idx, 1);
+                            reordered.unshift(moved);
+                            onImagesChange(reordered);
+                          }}
+                          className="p-1.5 rounded-full bg-primary text-white hover:bg-primary/80"
+                          title="Establecer como portada"
+                        >
+                          <Camera className="h-3 w-3" />
+                        </button>
+                      )}
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleDelete(url); }}
+                        className="p-1.5 rounded-full bg-red-500 text-white hover:bg-red-600"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </div>
                   )}
                 </div>
               ))}
