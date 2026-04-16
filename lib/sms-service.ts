@@ -201,10 +201,14 @@ function calcularCoste(mensaje: string): number {
 }
 
 /**
- * Genera ID externo simulado (como el que daría Twilio)
+ * Genera ID externo simulado (como el que daría Twilio).
+ * Usa crypto.getRandomValues para evitar colisiones/predicción.
  */
 function generarIdExterno(): string {
-  return `SM${Math.random().toString(36).substring(2, 15).toUpperCase()}`;
+  const bytes = new Uint8Array(10);
+  crypto.getRandomValues(bytes);
+  const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+  return `SM${hex.toUpperCase()}`;
 }
 
 /**

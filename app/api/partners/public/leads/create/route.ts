@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { trackPartnerLandingLead } from '@/lib/partner-branding-service';
 import { sendEmail } from '@/lib/email-service';
+import { withRateLimit } from '@/lib/rate-limiting';
 
 import logger from '@/lib/logger';
 
@@ -48,6 +49,16 @@ const leadSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  // Rate limit estricto: endpoint público sin auth que envía emails y escribe
+  // en BD. 10 requests / 5 min por IP es suficiente para uso legítimo.
+  return withRateLimit(
+    request,
+    () => handlePost(request),
+    { interval: 5 * 60 * 1000, uniqueTokenPerInterval: 10 }
+  );
+}
+
+async function handlePost(request: NextRequest) {
   const prisma = await getPrisma();
   try {
     const body = await request.json();

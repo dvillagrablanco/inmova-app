@@ -131,7 +131,18 @@ export function throttle<T extends (...args: any[]) => any>(
 }
 
 export function generateId(): string {
-  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  // Usa crypto.getRandomValues para hacer el ID impredecible. Aunque se use
+  // principalmente como correlation-id/UI-key, varios llamantes lo concatenan
+  // en URLs y nombres de archivo (auditoría seguridad 2026-04-16).
+  const bytes = new Uint8Array(9);
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    crypto.getRandomValues(bytes);
+  } else {
+    // Fallback determinístico para entornos sin WebCrypto (tests SSR).
+    for (let i = 0; i < bytes.length; i++) bytes[i] = (Date.now() + i) & 0xff;
+  }
+  const random = Array.from(bytes, (b) => b.toString(36).padStart(2, '0')).join('').slice(0, 9);
+  return `${Date.now()}-${random}`;
 }
 
 export function sleep(ms: number): Promise<void> {

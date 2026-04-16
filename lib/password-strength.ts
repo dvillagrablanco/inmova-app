@@ -108,7 +108,9 @@ export function validatePasswordPolicy(password: string): {
 }
 
 /**
- * Generar una contraseña segura aleatoria
+ * Generar una contraseña segura aleatoria.
+ * Usa crypto.getRandomValues (WebCrypto) — Math.random no es adecuado para
+ * generar credenciales, es predecible y puede reutilizar seed.
  */
 export function generateSecurePassword(length: number = 16): string {
   const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -117,23 +119,34 @@ export function generateSecurePassword(length: number = 16): string {
   const special = '!@#$%^&*()_+-=[]{}|;:,.<>?';
   const all = uppercase + lowercase + numbers + special;
 
-  let password = '';
-  // Garantizar al menos un carácter de cada tipo
-  password += uppercase[Math.floor(Math.random() * uppercase.length)];
-  password += lowercase[Math.floor(Math.random() * lowercase.length)];
-  password += numbers[Math.floor(Math.random() * numbers.length)];
-  password += special[Math.floor(Math.random() * special.length)];
+  const pickSecure = (alphabet: string): string => {
+    const max = Math.floor(0xffff / alphabet.length) * alphabet.length;
+    const buf = new Uint16Array(1);
+    while (true) {
+      crypto.getRandomValues(buf);
+      if (buf[0] < max) return alphabet[buf[0] % alphabet.length];
+    }
+  };
 
-  // Rellenar el resto
-  for (let i = password.length; i < length; i++) {
-    password += all[Math.floor(Math.random() * all.length)];
+  const chars: string[] = [
+    pickSecure(uppercase),
+    pickSecure(lowercase),
+    pickSecure(numbers),
+    pickSecure(special),
+  ];
+  for (let i = chars.length; i < length; i++) {
+    chars.push(pickSecure(all));
   }
 
-  // Mezclar los caracteres
-  return password
-    .split('')
-    .sort(() => Math.random() - 0.5)
-    .join('');
+  // Fisher-Yates shuffle criptográficamente seguro.
+  for (let i = chars.length - 1; i > 0; i--) {
+    const rand = new Uint32Array(1);
+    crypto.getRandomValues(rand);
+    const j = rand[0] % (i + 1);
+    [chars[i], chars[j]] = [chars[j], chars[i]];
+  }
+
+  return chars.join('');
 }
 
 /**
