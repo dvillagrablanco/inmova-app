@@ -187,6 +187,11 @@ function checkRateLimitMemory(
   };
 }
 
+// Flag para advertir solo la primera vez que se cae a fallback en memoria.
+// En producción con PM2 cluster, el fallback por-proceso multiplica los
+// límites efectivos por el número de workers, así que avisamos fuerte.
+let memoryFallbackWarned = false;
+
 /**
  * Check rate limit (auto-selecciona Redis o memoria)
  */
@@ -197,6 +202,14 @@ export async function checkRateLimit(
   const redis = await getRedis();
   if (redis) {
     return checkRateLimitRedis(redis, identifier, config);
+  }
+  if (process.env.NODE_ENV === 'production' && !memoryFallbackWarned) {
+    memoryFallbackWarned = true;
+    logger.error(
+      '[RateLimit] Redis NO disponible en producción. Usando fallback en memoria: ' +
+        'con múltiples workers, el rate limit efectivo será N*limit. ' +
+        'Configurar REDIS_URL o UPSTASH_REDIS_REST_URL urgentemente.'
+    );
   }
   return checkRateLimitMemory(identifier, config);
 }

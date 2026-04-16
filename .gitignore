@@ -31,10 +31,23 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# local env files
+# local env files + cualquier .env que no sea plantilla/ejemplo/test
 .env*.local
 .env.production
 .env.development
+.env
+.env.vercel
+
+# SSH / claves / deploy scripts con credenciales
+.ssh/
+*.ppk
+id_rsa*
+id_ed25519*
+*.key
+
+# Artefactos de build locales
+/.next/
+/out/
 
 # Zucchetti SQL discovery (may contain sensitive data)
 data/zucchetti-schema-discovery.json

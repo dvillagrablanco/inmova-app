@@ -23,9 +23,11 @@ echo ""
 # CONFIGURACIÓN - CAMBIAR ESTOS VALORES
 # ==========================================
 
-SERVER_IP="157.180.119.236"       # IP del servidor
-SERVER_USER="root"                # root o deploy
-SERVER_PASSWORD="XVcL9qHxqA7f"   # ⚠️ La contraseña que proporcionaste
+# SECURITY: credenciales eliminadas. Definir en el entorno o ~/.ssh/config.
+# Preferible: autenticación por clave pública, no contraseña.
+SERVER_IP="${INMOVA_SSH_HOST:?INMOVA_SSH_HOST no configurado}"
+SERVER_USER="${INMOVA_SSH_USER:-deploy}"
+SERVER_PASSWORD="${INMOVA_SSH_PASSWORD:-}"
 
 # ==========================================
 # NO MODIFICAR DEBAJO DE ESTA LÍNEA

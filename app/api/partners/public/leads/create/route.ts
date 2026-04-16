@@ -11,8 +11,23 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { trackPartnerLandingLead } from '@/lib/partner-branding-service';
 import { sendEmail } from '@/lib/email-service';
+import { withRateLimit } from '@/lib/rate-limiting';
 
 import logger from '@/lib/logger';
+
+/**
+ * Escapa HTML para prevenir XSS en templates de email. El input proviene de un
+ * formulario público sin autenticación, por lo que puede contener markup
+ * arbitrario (incluido `<script>`, `<img onerror>`, etc.).
+ */
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -34,6 +49,16 @@ const leadSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  // Rate limit estricto: endpoint público sin auth que envía emails y escribe
+  // en BD. 10 requests / 5 min por IP es suficiente para uso legítimo.
+  return withRateLimit(
+    request,
+    () => handlePost(request),
+    { interval: 5 * 60 * 1000, uniqueTokenPerInterval: 10 }
+  );
+}
+
+async function handlePost(request: NextRequest) {
   const prisma = await getPrisma();
   try {
     const body = await request.json();
@@ -87,20 +112,27 @@ export async function POST(request: NextRequest) {
     // Trackear el lead
     await trackPartnerLandingLead(validatedData.partnerSlug);
 
+    const safeNombre = escapeHtml(validatedData.nombre);
+    const safeEmail = escapeHtml(validatedData.email);
+    const safeTelefono = validatedData.telefono ? escapeHtml(validatedData.telefono) : null;
+    const safeMensaje = validatedData.mensaje ? escapeHtml(validatedData.mensaje) : null;
+    const safePartnerNombre = escapeHtml(partner.nombre);
+    const safeLeadId = escapeHtml(lead.id);
+
     const leadEmailSent = await sendEmail({
       to: partner.email,
-      subject: `Nuevo lead recibido desde tu landing (${partner.nombre})`,
+      subject: `Nuevo lead recibido desde tu landing (${safePartnerNombre})`,
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #111827;">
           <h2>Nuevo lead recibido</h2>
           <p>Has recibido un nuevo contacto desde tu landing de INMOVA.</p>
           <ul>
-            <li><strong>Nombre:</strong> ${validatedData.nombre}</li>
-            <li><strong>Email:</strong> ${validatedData.email}</li>
-            ${validatedData.telefono ? `<li><strong>Teléfono:</strong> ${validatedData.telefono}</li>` : ''}
-            ${validatedData.mensaje ? `<li><strong>Mensaje:</strong> ${validatedData.mensaje}</li>` : ''}
+            <li><strong>Nombre:</strong> ${safeNombre}</li>
+            <li><strong>Email:</strong> ${safeEmail}</li>
+            ${safeTelefono ? `<li><strong>Teléfono:</strong> ${safeTelefono}</li>` : ''}
+            ${safeMensaje ? `<li><strong>Mensaje:</strong> ${safeMensaje}</li>` : ''}
           </ul>
-          <p>ID del lead: ${lead.id}</p>
+          <p>ID del lead: ${safeLeadId}</p>
         </div>
       `,
     });

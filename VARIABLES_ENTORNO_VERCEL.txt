@@ -12,7 +12,9 @@
 NEXTAUTH_URL=https://www.inmovaapp.com
 
 # ✅ 2. NEXTAUTH_SECRET (CRÍTICO - Mantener este valor secreto)
-NEXTAUTH_SECRET=l7AMZ3AiGDSBNBrcXLCpEPiapxYSGZielDF7bUauXGI=
+# ⚠️ GENERAR: openssl rand -base64 48
+# ⚠️ NO commitear el valor real en este archivo.
+NEXTAUTH_SECRET=<REDACTED - generar con `openssl rand -base64 48`>
 
 # ✅ 3. DATABASE_URL (CRÍTICO - Obtener de tu proveedor PostgreSQL)
 # 
@@ -31,7 +33,9 @@ NEXTAUTH_SECRET=l7AMZ3AiGDSBNBrcXLCpEPiapxYSGZielDF7bUauXGI=
 DATABASE_URL=postgresql://usuario:password@host:5432/database_name
 
 # ✅ 4. ENCRYPTION_KEY (CRÍTICO - Para encriptar datos sensibles)
-ENCRYPTION_KEY=e2dd0f8a254cc6aee7b93f45329363b9
+# ⚠️ GENERAR: openssl rand -hex 32
+# ⚠️ NO commitear el valor real en este archivo.
+ENCRYPTION_KEY=<REDACTED - generar con `openssl rand -hex 32`>
 
 # ✅ 5. NODE_ENV (CRÍTICO - Debe ser "production")
 NODE_ENV=production

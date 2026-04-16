@@ -28,10 +28,13 @@ echo "║   Sistema de Control de Costos + Optimizaciones     ║"
 echo "╚═══════════════════════════════════════════════════════╝"
 echo ""
 
-SERVER_IP="157.180.119.236"
-SERVER_USER="root"
-SERVER_PASS="XVcL9qHxqA7f"
-APP_PATH="/opt/inmova-app"
+# SECURITY: credenciales eliminadas del script.
+# Definir en el entorno: INMOVA_SSH_HOST, INMOVA_SSH_USER, INMOVA_SSH_PASSWORD.
+# Preferible: clave SSH + ssh-agent y deshabilitar PasswordAuthentication en sshd.
+SERVER_IP="${INMOVA_SSH_HOST:?INMOVA_SSH_HOST no configurado}"
+SERVER_USER="${INMOVA_SSH_USER:-deploy}"
+SERVER_PASS="${INMOVA_SSH_PASSWORD:-}"
+APP_PATH="${INMOVA_APP_PATH:-/opt/inmova-app}"
 
 print_step() {
     echo -e "${GREEN}[✓]${NC} $1"

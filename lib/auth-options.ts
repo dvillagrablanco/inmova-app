@@ -6,6 +6,7 @@ import bcrypt from 'bcryptjs';
 
 import { getPrismaClient as getSharedPrismaClient } from '@/lib/db';
 import logger from '@/lib/logger';
+import { isAccountLocked, recordFailedAttempt, clearLockout } from '@/lib/account-lockout';
 // Lazy load de Prisma para evitar problemas en build
 function getPrismaClient() {
   if (
@@ -69,19 +70,13 @@ export const authOptions: NextAuthOptions = {
             throw new Error('Credenciales inválidas');
           }
 
-          // Account lockout check
-          try {
-            const { isAccountLocked } = require('./account-lockout');
-            const lockStatus = isAccountLocked(credentials.email);
-            if (lockStatus.locked) {
-              await addConstantDelay();
-              throw new Error(
-                `Cuenta bloqueada temporalmente. Intenta en ${Math.ceil(lockStatus.remainingSeconds / 60)} minutos.`
-              );
-            }
-          } catch (lockErr: any) {
-            if (lockErr.message?.includes('bloqueada')) throw lockErr;
-            // If lockout module fails, continue without it
+          // Account lockout check (import estático — era require() dinámico)
+          const lockStatus = isAccountLocked(credentials.email);
+          if (lockStatus.locked) {
+            await addConstantDelay();
+            throw new Error(
+              `Cuenta bloqueada temporalmente. Intenta en ${Math.ceil(lockStatus.remainingSeconds / 60)} minutos.`
+            );
           }
 
           // Intentar autenticar como usuario normal
@@ -114,17 +109,10 @@ export const authOptions: NextAuthOptions = {
           if (user) {
             // Usuario encontrado - validar credenciales y estado
             if (!user.password || !isPasswordValid) {
-              // Record failed attempt for lockout
-              try {
-                const { recordFailedAttempt } = require('./account-lockout');
-                const result = recordFailedAttempt(credentials.email);
-                if (result.locked) {
-                  await addConstantDelay();
-                  throw new Error(`Demasiados intentos. Cuenta bloqueada 15 minutos.`);
-                }
-              } catch (lockErr: any) {
-                if (lockErr.message?.includes('bloqueada') || lockErr.message?.includes('intentos'))
-                  throw lockErr;
+              const lockResult = recordFailedAttempt(credentials.email);
+              if (lockResult.locked) {
+                await addConstantDelay();
+                throw new Error('Demasiados intentos. Cuenta bloqueada 15 minutos.');
               }
               await addConstantDelay();
               throw new Error('Email o contraseña incorrectos');
@@ -152,10 +140,7 @@ export const authOptions: NextAuthOptions = {
             }
 
             // Clear lockout on successful login
-            try {
-              const { clearLockout } = require('./account-lockout');
-              clearLockout(credentials.email);
-            } catch {}
+            clearLockout(credentials.email);
 
             await addConstantDelay();
             return {
@@ -245,8 +230,26 @@ export const authOptions: NextAuthOptions = {
   },
   session: {
     strategy: 'jwt',
-    maxAge: 30 * 24 * 60 * 60, // 30 días
+    // Auditoría seguridad 2026-04-16: reducido de 30d → 7d. Sin refresh tokens,
+    // un JWT robado es válido hasta caducar; 30 días era excesivo para una app
+    // con datos financieros y personales.
+    maxAge: 7 * 24 * 60 * 60, // 7 días
     updateAge: 24 * 60 * 60, // Actualizar solo cada 24 horas (reduce peticiones a /api/auth/session)
+  },
+  cookies: {
+    // Forzar atributos seguros en la cookie de sesión cuando la URL es HTTPS.
+    sessionToken: {
+      name:
+        process.env.NODE_ENV === 'production'
+          ? '__Secure-next-auth.session-token'
+          : 'next-auth.session-token',
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+      },
+    },
   },
   secret: process.env.NEXTAUTH_SECRET,
 };
