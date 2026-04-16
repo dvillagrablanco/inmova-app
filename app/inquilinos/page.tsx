@@ -114,13 +114,21 @@ function InquilinosPageContent() {
       try {
         setError(null);
         const response = await fetch('/api/tenants');
+        if (!response.ok) {
+          throw new Error(`Error ${response.status} al cargar inquilinos`);
+        }
         const json = await response.json();
-        const data = Array.isArray(json) ? json : (json.data || json.buildings || json.units || json.tenants || json.payments || json.requests || []);
-        setTenants(data);
-        setFilteredTenants(data);
+        const data = Array.isArray(json)
+          ? json
+          : (json?.data || json?.tenants || []);
+        const safeData = Array.isArray(data) ? data : [];
+        setTenants(safeData);
+        setFilteredTenants(safeData);
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : 'Error desconocido';
         setError(errorMsg);
+        setTenants([]);
+        setFilteredTenants([]);
         logError(error instanceof Error ? error : new Error(errorMsg), {
           context: 'fetchTenants',
           page: 'inquilinos',
@@ -209,16 +217,28 @@ function InquilinosPageContent() {
   };
 
   useEffect(() => {
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      const filtered = tenants.filter(
-        (tenant) =>
-          (tenant.nombreCompleto || '').toLowerCase().includes(term) ||
-          (tenant.email || '').toLowerCase().includes(term) ||
-          (tenant.dni || '').toLowerCase().includes(term)
-      );
-      setFilteredTenants(filtered);
-    } else {
+    try {
+      if (searchTerm && searchTerm.trim()) {
+        const term = searchTerm.toLowerCase().trim();
+        const filtered = (tenants || []).filter((tenant) => {
+          if (!tenant) return false;
+          const nombre = (tenant.nombreCompleto || '').toLowerCase();
+          const email = (tenant.email || '').toLowerCase();
+          const telefono = (tenant.telefono || '').toLowerCase();
+          const dni = (tenant.dni || '').toLowerCase();
+          return (
+            nombre.includes(term) ||
+            email.includes(term) ||
+            telefono.includes(term) ||
+            dni.includes(term)
+          );
+        });
+        setFilteredTenants(filtered);
+      } else {
+        setFilteredTenants(tenants);
+      }
+    } catch (err) {
+      console.error('[InquilinosPage] Search error:', err);
       setFilteredTenants(tenants);
     }
   }, [searchTerm, tenants]);

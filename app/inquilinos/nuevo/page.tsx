@@ -326,28 +326,26 @@ export default function NuevoInquilinoPage() {
 
                     {/* Email */}
                     <div className="space-y-2">
-                      <Label htmlFor="email">Correo Electrónico *</Label>
+                      <Label htmlFor="email">Correo Electrónico</Label>
                       <Input
                         id="email"
                         name="email"
                         type="email"
                         value={formData.email}
                         onChange={handleChange}
-                        required
-                        placeholder="juan.perez@email.com"
+                        placeholder="juan.perez@email.com (opcional)"
                       />
                     </div>
 
                     {/* Teléfono */}
                     <div className="space-y-2">
-                      <Label htmlFor="telefono">Teléfono *</Label>
+                      <Label htmlFor="telefono">Teléfono</Label>
                       <Input
                         id="telefono"
                         name="telefono"
                         value={formData.telefono}
                         onChange={handleChange}
-                        required
-                        placeholder="+34 600 123 456"
+                        placeholder="+34 600 123 456 (opcional)"
                       />
                     </div>
 

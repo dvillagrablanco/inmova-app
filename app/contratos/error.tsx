@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle } from 'lucide-react';
+import { FileText } from 'lucide-react';
 
 export default function Error({
   error,
@@ -12,19 +12,25 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error('Error:', error);
+    console.error('[Contratos] Error:', error);
   }, [error]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-      <AlertTriangle className="h-12 w-12 text-destructive" />
-      <h2 className="text-xl font-semibold">Algo salió mal</h2>
+      <FileText className="h-12 w-12 text-muted-foreground" />
+      <h2 className="text-xl font-semibold">No hay contratos asociados</h2>
       <p className="text-muted-foreground text-center max-w-md">
-        {error.message || 'Se produjo un error inesperado. Por favor, inténtalo de nuevo.'}
+        No hay contratos asociados a este inmueble o inquilino. Puedes crear un nuevo contrato
+        para empezar.
       </p>
-      <Button onClick={reset} variant="outline">
-        Reintentar
-      </Button>
+      <div className="flex gap-3">
+        <Button onClick={() => (window.location.href = '/contratos/nuevo')} variant="default">
+          Crear contrato
+        </Button>
+        <Button onClick={reset} variant="outline">
+          Reintentar
+        </Button>
+      </div>
     </div>
   );
 }

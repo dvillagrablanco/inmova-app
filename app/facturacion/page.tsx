@@ -128,8 +128,8 @@ function FacturacionContent() {
   });
   const [filtrosFacturas, setFiltrosFacturas] = useState({
     serie: '',
-    estado: '',
-    tipo: '',
+    estado: 'all',
+    tipo: 'all',
     fechaDesde: '',
     fechaHasta: '',
     destinatario: '',
@@ -184,8 +184,8 @@ function FacturacionContent() {
     try {
       const params = new URLSearchParams();
       if (filtrosFacturas.serie) params.set('serie', filtrosFacturas.serie);
-      if (filtrosFacturas.estado) params.set('estado', filtrosFacturas.estado);
-      if (filtrosFacturas.tipo) params.set('tipo', filtrosFacturas.tipo);
+      if (filtrosFacturas.estado && filtrosFacturas.estado !== 'all') params.set('estado', filtrosFacturas.estado);
+      if (filtrosFacturas.tipo && filtrosFacturas.tipo !== 'all') params.set('tipo', filtrosFacturas.tipo);
       if (filtrosFacturas.fechaDesde) params.set('fechaDesde', filtrosFacturas.fechaDesde);
       if (filtrosFacturas.fechaHasta) params.set('fechaHasta', filtrosFacturas.fechaHasta);
       if (filtrosFacturas.destinatario) params.set('destinatario', filtrosFacturas.destinatario);
@@ -193,11 +193,16 @@ function FacturacionContent() {
       const res = await fetch(`/api/facturacion?${params}`);
       if (res.ok) {
         const json = await res.json();
-        setFacturas(json.data || []);
-        setKpis(json.kpis || { totalFacturado: 0, pendientesCobro: 0, facturasEsteMes: 0 });
+        setFacturas(Array.isArray(json?.data) ? json.data : []);
+        setKpis(json?.kpis || { totalFacturado: 0, pendientesCobro: 0, facturasEsteMes: 0 });
+      } else {
+        setFacturas([]);
+        setKpis({ totalFacturado: 0, pendientesCobro: 0, facturasEsteMes: 0 });
       }
-    } catch {
-      toast.error('Error al cargar facturas');
+    } catch (error) {
+      logger.error('Error al cargar facturas:', error);
+      setFacturas([]);
+      setKpis({ totalFacturado: 0, pendientesCobro: 0, facturasEsteMes: 0 });
     }
   };
 
@@ -337,7 +342,7 @@ function FacturacionContent() {
                       <SelectValue placeholder="Estado" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Todos</SelectItem>
+                      <SelectItem value="all">Todos</SelectItem>
                       <SelectItem value="borrador">Borrador</SelectItem>
                       <SelectItem value="emitida">Emitida</SelectItem>
                       <SelectItem value="pagada">Pagada</SelectItem>
@@ -350,7 +355,7 @@ function FacturacionContent() {
                       <SelectValue placeholder="Tipo" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Todos</SelectItem>
+                      <SelectItem value="all">Todos</SelectItem>
                       <SelectItem value="factura">Factura</SelectItem>
                       <SelectItem value="proforma">Proforma</SelectItem>
                       <SelectItem value="rectificativa">Rectificativa</SelectItem>

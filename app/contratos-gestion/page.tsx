@@ -85,23 +85,36 @@ function ContratosGestionContent() {
       try {
         const res = await fetch('/api/contratos-gestion');
         if (res.ok) {
-          const data = await res.json();
-          const raw = Array.isArray(data) ? data : Array.isArray(data.data) ? data.data : [];
+          const data = await res.json().catch(() => []);
+          const raw = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
           const items: ContratoGestion[] = raw.map((c: any) => ({
             ...c,
-            propietario: c.propietario || 'Sin propietario',
-            inmuebles: Array.isArray(c.inmuebles) ? c.inmuebles : [],
-            estado: typeof c.estado === 'string' ? c.estado : 'pendiente',
-            fechaInicio: c.fechaInicio || '',
-            fechaFin: c.fechaFin || '',
+            id: c?.id || String(Math.random()),
+            propietario: c?.propietario || 'Sin propietario',
+            inmuebles: Array.isArray(c?.inmuebles) ? c.inmuebles : [],
+            tipo: c?.tipo || 'integral',
+            estado: typeof c?.estado === 'string' ? c.estado : 'pendiente',
+            fechaInicio: c?.fechaInicio || '',
+            fechaFin: c?.fechaFin || '',
+            honorarios: typeof c?.honorarios === 'number' ? c.honorarios : undefined,
+            honorariosPorcentaje:
+              typeof c?.honorariosPorcentaje === 'number' ? c.honorariosPorcentaje : undefined,
+            createdAt: c?.createdAt || '',
           }));
           setContratos(items);
           setFilteredContratos(items);
         } else if (res.status === 401) {
           toast.error('Sesión requerida');
+          setContratos([]);
+          setFilteredContratos([]);
+        } else {
+          setContratos([]);
+          setFilteredContratos([]);
         }
-      } catch {
-        toast.error('Error de conexión');
+      } catch (err) {
+        console.error('[ContratosGestion] Error:', err);
+        setContratos([]);
+        setFilteredContratos([]);
       } finally {
         setIsLoading(false);
       }

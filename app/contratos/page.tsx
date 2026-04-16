@@ -127,16 +127,29 @@ function ContratosPageContent() {
       try {
         setError(null);
         const response = await fetch('/api/contracts?limit=500');
-        const json = await response.json();
-        const data = Array.isArray(json) ? json : (json.data || json.contracts || []);
-        setContracts(data);
-        setFilteredContracts(data);
+        const json = await response.json().catch(() => ({ data: [] }));
+        const data = Array.isArray(json) ? json : (json?.data || json?.contracts || []);
+        const safe = (Array.isArray(data) ? data : []).map((c: any) => ({
+          ...c,
+          id: c?.id || String(Math.random()),
+          tenant: c?.tenant || { nombreCompleto: 'Sin inquilino asignado' },
+          unit: c?.unit || { numero: '—', building: { nombre: '—' } },
+          estado: c?.estado || 'pendiente',
+          tipo: c?.tipo || 'alquiler',
+          rentaMensual: Number(c?.rentaMensual || 0),
+          fechaInicio: c?.fechaInicio || '',
+          fechaFin: c?.fechaFin || '',
+        }));
+        setContracts(safe);
+        setFilteredContracts(safe);
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : 'Error desconocido';
         setError(errorMsg);
+        setContracts([]);
+        setFilteredContracts([]);
         logError(error instanceof Error ? error : new Error(errorMsg), {
-      context: 'fetchContracts',
-      page: 'contratos',
+          context: 'fetchContracts',
+          page: 'contratos',
         });
       } finally {
         setIsLoading(false);
