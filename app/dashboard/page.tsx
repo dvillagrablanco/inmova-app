@@ -103,15 +103,15 @@ function DashboardPageContent() {
       try {
         const response = await fetch('/api/dashboard');
         if (response.ok) {
-          const dashboardData = await response.json();
+          const dashboardData = await response.json().catch(() => null);
 
           // Fetch analytics data
           const analyticsResponse = await fetch('/api/dashboard/analytics');
           if (analyticsResponse.ok) {
-            const analytics = await analyticsResponse.json();
-            setAnalyticsData(analytics);
+            const analytics = await analyticsResponse.json().catch(() => null);
+            if (analytics) setAnalyticsData(analytics);
           }
-          setData(dashboardData);
+          if (dashboardData) setData(dashboardData);
         }
       } catch (error: any) {
         logger.error('Error fetching dashboard data:', {

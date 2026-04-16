@@ -92,7 +92,7 @@ export default function ProyectosRenovacionPage() {
     try {
       setLoading(true);
       const params = new URLSearchParams();
-      if (filterEstado) params.append('estado', filterEstado);
+      if (filterEstado && filterEstado !== 'all') params.append('estado', filterEstado);
       
       const response = await fetch(`/api/proyectos-renovacion?${params}`);
       if (!response.ok) throw new Error('Error al cargar proyectos');
@@ -352,12 +352,12 @@ export default function ProyectosRenovacionPage() {
         {/* Filter */}
         <Card>
           <CardContent className="pt-4">
-            <Select value={filterEstado} onValueChange={setFilterEstado}>
+            <Select value={filterEstado || 'all'} onValueChange={(v) => setFilterEstado(v === 'all' ? '' : v)}>
               <SelectTrigger className="w-full md:w-48">
                 <SelectValue placeholder="Filtrar por estado" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos</SelectItem>
+                <SelectItem value="all">Todos</SelectItem>
                 <SelectItem value="planificacion">Planificación</SelectItem>
                 <SelectItem value="en_renovacion">En Renovación</SelectItem>
                 <SelectItem value="en_venta">En Venta</SelectItem>

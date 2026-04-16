@@ -149,16 +149,31 @@ export default function PagoDetallePage() {
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Vencimiento</span>
                   <span>
-                    {payment.fechaVencimiento
-                      ? format(new Date(payment.fechaVencimiento), 'dd MMM yyyy', { locale: es })
-                      : '-'}
+                    {(() => {
+                      try {
+                        if (!payment.fechaVencimiento) return '-';
+                        const d = new Date(payment.fechaVencimiento);
+                        if (isNaN(d.getTime())) return '-';
+                        return format(d, 'dd MMM yyyy', { locale: es });
+                      } catch {
+                        return '-';
+                      }
+                    })()}
                   </span>
                 </div>
                 {payment.fechaPago && (
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Fecha pago</span>
                     <span className="text-green-600 font-medium">
-                      {format(new Date(payment.fechaPago), 'dd MMM yyyy', { locale: es })}
+                      {(() => {
+                        try {
+                          const d = new Date(payment.fechaPago);
+                          if (isNaN(d.getTime())) return '—';
+                          return format(d, 'dd MMM yyyy', { locale: es });
+                        } catch {
+                          return '—';
+                        }
+                      })()}
                     </span>
                   </div>
                 )}

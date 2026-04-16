@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
   } catch (error: any) {
     logger.error('Error al obtener reportes:', error);
     return NextResponse.json(
-      { error: 'Error al obtener reportes', details: error.message },
+      { error: 'Error al obtener reportes', details: process.env.NODE_ENV === "production" ? undefined : error?.message },
       { status: 500 }
     );
   }
@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     logger.error('Error al generar reporte:', error);
     return NextResponse.json(
-      { error: 'Error al generar reporte', details: error.message },
+      { error: 'Error al generar reporte', details: process.env.NODE_ENV === "production" ? undefined : error?.message },
       { status: 500 }
     );
   }

@@ -69,7 +69,7 @@ export default function WebhookLogsPage() {
     try {
       const params = new URLSearchParams();
       if (filters.evento) params.set('evento', filters.evento);
-      if (filters.status) params.set('status', filters.status);
+      if (filters.status && filters.status !== 'all') params.set('status', filters.status);
       if (filters.fechaDesde) params.set('fechaDesde', filters.fechaDesde);
       if (filters.fechaHasta) params.set('fechaHasta', filters.fechaHasta);
       const res = await fetch(`/api/admin/webhook-logs?${params}`);
@@ -162,12 +162,12 @@ export default function WebhookLogsPage() {
               </div>
               <div>
                 <Label className="text-xs">Estado</Label>
-                <Select value={filters.status} onValueChange={(v) => setFilters({ ...filters, status: v })}>
+                <Select value={filters.status || 'all'} onValueChange={(v) => setFilters({ ...filters, status: v === 'all' ? '' : v })}>
                   <SelectTrigger className="w-32">
                     <SelectValue placeholder="Todos" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todos</SelectItem>
+                    <SelectItem value="all">Todos</SelectItem>
                     <SelectItem value="success">Exitoso</SelectItem>
                     <SelectItem value="error">Error</SelectItem>
                   </SelectContent>

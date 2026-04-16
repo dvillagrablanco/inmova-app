@@ -260,15 +260,15 @@ export default function NuevoDispositivoIOTPage() {
                 <div className="space-y-2">
                   <Label htmlFor="unitId">Unidad (opcional)</Label>
                   <Select
-                    value={form.unitId}
-                    onValueChange={(v) => setForm({ ...form, unitId: v })}
+                    value={form.unitId || '__common__'}
+                    onValueChange={(v) => setForm({ ...form, unitId: v === '__common__' ? '' : v })}
                     disabled={!form.buildingId}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Selecciona unidad" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Área común</SelectItem>
+                      <SelectItem value="__common__">Área común</SelectItem>
                       {units.map((unit) => (
                         <SelectItem key={unit.id} value={unit.id}>
                           {unit.numero}

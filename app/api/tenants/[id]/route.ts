@@ -56,12 +56,35 @@ const tenantUpdateSchema = z.object({
   pais: z.string().max(100).optional(),
 });
 
+async function assertTenantAccess(prisma: any, session: any, tenantId: string) {
+  const companyId = session?.user?.companyId;
+  if (!companyId) {
+    return { ok: false, status: 403 as const, error: 'Empresa no definida' };
+  }
+  const found = await prisma.tenant.findUnique({
+    where: { id: tenantId },
+    select: { id: true, companyId: true },
+  });
+  if (!found) return { ok: false, status: 404 as const, error: 'Inquilino no encontrado' };
+  const role = session?.user?.role;
+  const isSuper = role === 'SUPERADMIN' || role === 'ADMIN_SISTEMA';
+  if (!isSuper && found.companyId !== companyId) {
+    return { ok: false, status: 403 as const, error: 'Acceso denegado' };
+  }
+  return { ok: true as const };
+}
+
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    const access = await assertTenantAccess(prisma, session, params.id);
+    if (!access.ok) {
+      return NextResponse.json({ error: access.error }, { status: access.status });
     }
 
     const tenant = await prisma.tenant.findUnique({
@@ -104,6 +127,11 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    const access = await assertTenantAccess(prisma, session, params.id);
+    if (!access.ok) {
+      return NextResponse.json({ error: access.error }, { status: access.status });
     }
 
     const body = await req.json();
@@ -187,6 +215,11 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    const access = await assertTenantAccess(prisma, session, params.id);
+    if (!access.ok) {
+      return NextResponse.json({ error: access.error }, { status: access.status });
     }
 
     await prisma.tenant.delete({

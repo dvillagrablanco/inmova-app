@@ -141,7 +141,7 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     logger.error('Error al crear payment intent:', error);
     return NextResponse.json(
-      { error: 'Error al procesar el pago', details: error.message },
+      { error: 'Error al procesar el pago', details: process.env.NODE_ENV === "production" ? undefined : error?.message },
       { status: 500 }
     );
   }
@@ -219,7 +219,7 @@ export async function PUT(request: NextRequest) {
   } catch (error: any) {
     logger.error('Error al confirmar pago:', error);
     return NextResponse.json(
-      { error: 'Error al confirmar el pago', details: error.message },
+      { error: 'Error al confirmar el pago', details: process.env.NODE_ENV === "production" ? undefined : error?.message },
       { status: 500 }
     );
   }

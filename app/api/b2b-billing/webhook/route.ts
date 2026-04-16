@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     logger.error('Error processing webhook:', error);
     return NextResponse.json(
-      { error: 'Webhook processing failed', details: error.message },
+      { error: 'Webhook processing failed', details: process.env.NODE_ENV === "production" ? undefined : error?.message },
       { status: 500 }
     );
   }

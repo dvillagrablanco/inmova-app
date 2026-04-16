@@ -175,8 +175,19 @@ export default function FinalizarContratoPage() {
               <div>
                 <p className="text-sm text-muted-foreground">Periodo</p>
                 <p className="font-medium">
-                  {format(new Date(contract.fechaInicio), 'dd MMM yyyy', { locale: es })} -{' '}
-                  {format(new Date(contract.fechaFin), 'dd MMM yyyy', { locale: es })}
+                  {(() => {
+                    const fmt = (iso: string | null | undefined) => {
+                      try {
+                        if (!iso) return '—';
+                        const d = new Date(iso);
+                        if (isNaN(d.getTime())) return '—';
+                        return format(d, 'dd MMM yyyy', { locale: es });
+                      } catch {
+                        return '—';
+                      }
+                    };
+                    return `${fmt(contract.fechaInicio)} - ${fmt(contract.fechaFin)}`;
+                  })()}
                 </p>
               </div>
               <div>

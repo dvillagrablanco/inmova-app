@@ -93,13 +93,15 @@ export default function PropertiesPage() {
       ]);
 
       if (buildingsRes.ok) {
-        const buildingsData = await buildingsRes.json();
-        setBuildings(Array.isArray(buildingsData) ? buildingsData : buildingsData.data || []);
+        const buildingsData = await buildingsRes.json().catch(() => ({ data: [] }));
+        const raw = Array.isArray(buildingsData) ? buildingsData : buildingsData?.data || [];
+        setBuildings(Array.isArray(raw) ? raw : []);
       }
 
       if (unitsRes.ok) {
-        const unitsData = await unitsRes.json();
-        setUnits(Array.isArray(unitsData) ? unitsData : unitsData.data || []);
+        const unitsData = await unitsRes.json().catch(() => ({ data: [] }));
+        const raw = Array.isArray(unitsData) ? unitsData : unitsData?.data || [];
+        setUnits(Array.isArray(raw) ? raw : []);
       }
     } catch (error) {
       console.error('Error fetching data:', error);

@@ -110,7 +110,7 @@ export async function GET(
   } catch (error: any) {
     logger.error('Error generando PDF de factura B2B:', error);
     return NextResponse.json(
-      { error: 'Error al generar PDF', details: error.message },
+      { error: 'Error al generar PDF', details: process.env.NODE_ENV === "production" ? undefined : error?.message },
       { status: 500 }
     );
   }

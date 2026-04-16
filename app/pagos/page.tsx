@@ -45,6 +45,18 @@ import {
   isSameMonth,
 } from 'date-fns';
 import { es } from 'date-fns/locale';
+
+function safeFmtDate(iso: string | Date | null | undefined, fmt: string = 'dd MMM yyyy'): string {
+  try {
+    if (!iso) return '—';
+    const d = iso instanceof Date ? iso : new Date(iso);
+    if (isNaN(d.getTime())) return '—';
+    return format(d, fmt, { locale: es });
+  } catch {
+    return '—';
+  }
+}
+
 import PaymentsDashboard from './components/PaymentsDashboard';
 import { LoadingState } from '@/components/ui/loading-state';
 import { SkeletonList, SkeletonCard } from '@/components/ui/skeleton-card';
@@ -213,24 +225,25 @@ function PagosPage() {
 
   if (!session) return null;
 
-  const getEstadoBadge = (estado: string) => {
+  const getEstadoBadge = (estado: string | null | undefined) => {
     const badges: Record<string, { variant: any; label: string; icon: any }> = {
       pagado: { variant: 'default', label: 'Pagado', icon: CheckCircle },
       pendiente: { variant: 'outline', label: 'Pendiente', icon: Clock },
       vencido: { variant: 'destructive', label: 'Vencido', icon: XCircle },
     };
-    return badges[estado.toLowerCase()] || { variant: 'default', label: estado, icon: CreditCard };
+    const key = (estado || '').toLowerCase();
+    return badges[key] || { variant: 'default', label: estado || 'desconocido', icon: CreditCard };
   };
 
-  const pagadosCount = payments.filter((p) => p.estado.toLowerCase() === 'pagado').length;
-  const pendientesCount = payments.filter((p) => p.estado.toLowerCase() === 'pendiente').length;
-  const vencidosCount = payments.filter((p) => p.estado.toLowerCase() === 'vencido').length;
-  const totalCobrado = payments
-    .filter((p) => p.estado.toLowerCase() === 'pagado')
-    .reduce((acc, p) => acc + Number(p.monto || 0), 0);
-  const totalPendiente = payments
-    .filter((p) => p.estado.toLowerCase() === 'pendiente')
-    .reduce((acc, p) => acc + Number(p.monto || 0), 0);
+  const pagadosCount = (payments || []).filter((p) => (p?.estado || '').toLowerCase() === 'pagado').length;
+  const pendientesCount = (payments || []).filter((p) => (p?.estado || '').toLowerCase() === 'pendiente').length;
+  const vencidosCount = (payments || []).filter((p) => (p?.estado || '').toLowerCase() === 'vencido').length;
+  const totalCobrado = (payments || [])
+    .filter((p) => (p?.estado || '').toLowerCase() === 'pagado')
+    .reduce((acc, p) => acc + Number(p?.monto || 0), 0);
+  const totalPendiente = (payments || [])
+    .filter((p) => (p?.estado || '').toLowerCase() === 'pendiente')
+    .reduce((acc, p) => acc + Number(p?.monto || 0), 0);
 
   // Calendar logic
   const monthStart = currentDate ? startOfMonth(currentDate) : startOfMonth(new Date());
@@ -238,9 +251,16 @@ function PagosPage() {
   const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
   const getPaymentsForDay = (day: Date) => {
-    return payments.filter((payment) => {
-      const paymentDate = new Date(payment.fechaPago || payment.fechaVencimiento);
-      return isSameDay(paymentDate, day);
+    return (payments || []).filter((payment) => {
+      try {
+        const iso = payment?.fechaPago || payment?.fechaVencimiento;
+        if (!iso) return false;
+        const paymentDate = new Date(iso);
+        if (isNaN(paymentDate.getTime())) return false;
+        return isSameDay(paymentDate, day);
+      } catch {
+        return false;
+      }
     });
   };
 
@@ -416,7 +436,7 @@ function PagosPage() {
                     variant="outline"
                     size="sm"
                     onClick={async () => {
-                      const pendientes = payments.filter(p => p.estado.toLowerCase() === 'pendiente').map(p => p.id);
+                      const pendientes = (payments || []).filter(p => (p?.estado || '').toLowerCase() === 'pendiente').map(p => p.id);
                       if (pendientes.length === 0) return;
                       if (!confirm(`¿Marcar ${pendientes.length} pagos pendientes como cobrados?`)) return;
                       try {
@@ -516,9 +536,9 @@ function PagosPage() {
                                     className="text-xs p-1 rounded truncate"
                                     style={{
                                       backgroundColor:
-                                        payment.estado.toLowerCase() === 'pagado'
+                                        (payment.estado || '').toLowerCase() === 'pagado'
                                           ? 'rgb(220, 252, 231)'
-                                          : payment.estado.toLowerCase() === 'vencido'
+                                          : (payment.estado || '').toLowerCase() === 'vencido'
                                             ? 'rgb(254, 226, 226)'
                                             : 'rgb(254, 249, 195)',
                                     }}
@@ -579,7 +599,7 @@ function PagosPage() {
                               </div>
                               <div className="text-left sm:text-right">
                                 <p className="text-xl sm:text-2xl font-bold text-green-600">
-                                  €{payment.monto.toLocaleString()}
+                                  €{Number(payment.monto || 0).toLocaleString()}
                                 </p>
                               </div>
                             </div>
@@ -588,18 +608,14 @@ function PagosPage() {
                               <div className="space-y-1">
                                 <p className="text-xs text-muted-foreground">Fecha Vencimiento</p>
                                 <p className="text-sm font-medium">
-                                  {format(new Date(payment.fechaVencimiento), 'dd MMM yyyy', {
-                                    locale: es,
-                                  })}
+                                  {safeFmtDate(payment.fechaVencimiento)}
                                 </p>
                               </div>
                               {payment.fechaPago && (
                                 <div className="space-y-1">
                                   <p className="text-xs text-muted-foreground">Fecha Pago</p>
                                   <p className="text-sm font-medium">
-                                    {format(new Date(payment.fechaPago), 'dd MMM yyyy', {
-                                      locale: es,
-                                    })}
+                                    {safeFmtDate(payment.fechaPago)}
                                   </p>
                                 </div>
                               )}
@@ -621,7 +637,7 @@ function PagosPage() {
                               >
                                 Ver Detalles
                               </Button>
-                              {payment.estado.toLowerCase() === 'pendiente' && (
+                              {(payment.estado || '').toLowerCase() === 'pendiente' && (
                                 <Button
                                   size="sm"
                                   className="bg-green-600 hover:bg-green-700 text-white"

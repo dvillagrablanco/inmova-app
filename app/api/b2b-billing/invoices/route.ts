@@ -99,7 +99,7 @@ export async function GET(request: NextRequest) {
   } catch (error: any) {
     logger.error('Error al obtener facturas:', error);
     return NextResponse.json(
-      { error: 'Error al obtener facturas', details: error.message },
+      { error: 'Error al obtener facturas', details: process.env.NODE_ENV === "production" ? undefined : error?.message },
       { status: 500 }
     );
   }
@@ -215,7 +215,7 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     logger.error('Error al crear factura:', error);
     return NextResponse.json(
-      { error: 'Error al crear factura', details: error.message },
+      { error: 'Error al crear factura', details: process.env.NODE_ENV === "production" ? undefined : error?.message },
       { status: 500 }
     );
   }

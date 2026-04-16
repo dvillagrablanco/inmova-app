@@ -99,22 +99,33 @@ export default function PagosClientPage({ initialPayments, session }: PagosClien
 
   // Apply search + estado filter
   useEffect(() => {
-    let filtered = payments;
+    try {
+      let filtered = payments || [];
 
-    if (searchTerm) {
-      filtered = filtered.filter(
-        (payment) =>
-          payment.contract.tenant.nombreCompleto.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          payment.contract.unit.numero.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          payment.contract.unit.building.nombre.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+      if (searchTerm && searchTerm.trim()) {
+        const term = searchTerm.toLowerCase();
+        filtered = filtered.filter((payment) => {
+          if (!payment) return false;
+          const tenantName = (payment.contract?.tenant?.nombreCompleto || '').toLowerCase();
+          const unitNumero = (payment.contract?.unit?.numero || '').toLowerCase();
+          const buildingName = (payment.contract?.unit?.building?.nombre || '').toLowerCase();
+          return (
+            tenantName.includes(term) ||
+            unitNumero.includes(term) ||
+            buildingName.includes(term)
+          );
+        });
+      }
+
+      if (estadoFilter !== 'all') {
+        filtered = filtered.filter((p) => matchesEstadoFilter(p?.estado || '', estadoFilter));
+      }
+
+      setFilteredPayments(filtered);
+    } catch (err) {
+      console.error('[Pagos] Filter error:', err);
+      setFilteredPayments(payments || []);
     }
-
-    if (estadoFilter !== 'all') {
-      filtered = filtered.filter((p) => matchesEstadoFilter(p.estado, estadoFilter));
-    }
-
-    setFilteredPayments(filtered);
   }, [searchTerm, estadoFilter, payments]);
 
   // Update active filters

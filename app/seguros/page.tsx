@@ -243,14 +243,22 @@ export default function SegurosPage() {
       const response = await fetch(`/api/seguros${query}`);
       if (!response.ok) throw new Error('Error al obtener seguros');
 
-      const data = await response.json();
+      const raw = await response.json().catch(() => []);
+      const data = Array.isArray(raw) ? raw : (raw?.data || raw?.seguros || []);
 
-      // Calcular días hasta vencimiento
-      const segurosConDias = data.map((seguro: Insurance) => {
-        const diasHastaVencimiento = differenceInDays(
-          new Date(seguro.fechaVencimiento),
-          new Date()
-        );
+      // Calcular días hasta vencimiento (defensivo con fechas inválidas)
+      const segurosConDias = (Array.isArray(data) ? data : []).map((seguro: Insurance) => {
+        let diasHastaVencimiento: number | null = null;
+        try {
+          if (seguro?.fechaVencimiento) {
+            const d = new Date(seguro.fechaVencimiento);
+            if (!isNaN(d.getTime())) {
+              diasHastaVencimiento = differenceInDays(d, new Date());
+            }
+          }
+        } catch {
+          diasHastaVencimiento = null;
+        }
         return { ...seguro, diasHastaVencimiento };
       });
 
@@ -849,9 +857,16 @@ export default function SegurosPage() {
                         <TableCell>
                           <div className="space-y-1">
                             <div className="text-sm">
-                              {format(new Date(seguro.fechaVencimiento), "dd 'de' MMMM, yyyy", {
-                                locale: es,
-                              })}
+                              {(() => {
+                                try {
+                                  if (!seguro.fechaVencimiento) return '—';
+                                  const d = new Date(seguro.fechaVencimiento);
+                                  if (isNaN(d.getTime())) return '—';
+                                  return format(d, "dd 'de' MMMM, yyyy", { locale: es });
+                                } catch {
+                                  return '—';
+                                }
+                              })()}
                             </div>
                             {seguro.diasHastaVencimiento !== undefined && (
                               <div

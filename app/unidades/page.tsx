@@ -114,13 +114,19 @@ export default function UnidadesPage() {
       try {
         const response = await fetch('/api/units');
         if (response.ok) {
-          const json = await response.json();
-        const data = Array.isArray(json) ? json : (json.data || json.buildings || json.units || json.tenants || json.payments || json.requests || []);
+          const json = await response.json().catch(() => ({ data: [] }));
+          const raw = Array.isArray(json) ? json : (json?.data || json?.units || []);
+          const data = Array.isArray(raw) ? raw : [];
           setUnits(data);
           setFilteredUnits(data);
+        } else {
+          setUnits([]);
+          setFilteredUnits([]);
         }
       } catch (error) {
         logger.error('Error fetching units:', error);
+        setUnits([]);
+        setFilteredUnits([]);
       } finally {
         setIsLoading(false);
       }
@@ -132,26 +138,37 @@ export default function UnidadesPage() {
   }, [status]);
 
   useEffect(() => {
-    let filtered = units;
+    try {
+      let filtered = units || [];
 
-    if (searchTerm) {
-      filtered = filtered.filter(
-        (unit) =>
-          unit.numero.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          unit.building.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          unit.tenant?.nombreCompleto.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+      if (searchTerm && searchTerm.trim()) {
+        const term = searchTerm.toLowerCase();
+        filtered = filtered.filter((unit) => {
+          if (!unit) return false;
+          const numero = (unit.numero || '').toLowerCase();
+          const buildingName = (unit.building?.nombre || '').toLowerCase();
+          const tenantName = (unit.tenant?.nombreCompleto || '').toLowerCase();
+          return (
+            numero.includes(term) ||
+            buildingName.includes(term) ||
+            tenantName.includes(term)
+          );
+        });
+      }
+
+      if (estadoFilter && estadoFilter !== 'all') {
+        filtered = filtered.filter((unit) => unit?.estado === estadoFilter);
+      }
+
+      if (tipoFilter && tipoFilter !== 'all') {
+        filtered = filtered.filter((unit) => unit?.tipo === tipoFilter);
+      }
+
+      setFilteredUnits(filtered);
+    } catch (err) {
+      console.error('[Unidades] Filter error:', err);
+      setFilteredUnits(units || []);
     }
-
-    if (estadoFilter && estadoFilter !== 'all') {
-      filtered = filtered.filter((unit) => unit.estado === estadoFilter);
-    }
-
-    if (tipoFilter && tipoFilter !== 'all') {
-      filtered = filtered.filter((unit) => unit.tipo === tipoFilter);
-    }
-
-    setFilteredUnits(filtered);
   }, [searchTerm, estadoFilter, tipoFilter, units]);
 
   // Actualizar filtros activos

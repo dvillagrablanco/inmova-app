@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     logger.error('Error al registrar pago:', error);
     return NextResponse.json(
-      { error: 'Error al registrar pago', details: error.message },
+      { error: 'Error al registrar pago', details: process.env.NODE_ENV === "production" ? undefined : error?.message },
       { status: 500 }
     );
   }
@@ -132,7 +132,7 @@ export async function GET(request: NextRequest) {
   } catch (error: any) {
     logger.error('Error al obtener pagos:', error);
     return NextResponse.json(
-      { error: 'Error al obtener pagos', details: error.message },
+      { error: 'Error al obtener pagos', details: process.env.NODE_ENV === "production" ? undefined : error?.message },
       { status: 500 }
     );
   }
