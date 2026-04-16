@@ -221,11 +221,21 @@ export default function NuevoInquilinoPage() {
       });
 
       if (response.ok) {
-        toast.success('Inquilino creado correctamente');
+        const result = await response.json();
+        if (result.wasUpdated) {
+          toast.success('Inquilino actualizado correctamente (ya existía con ese DNI/email)');
+        } else {
+          toast.success('Inquilino creado correctamente');
+        }
         router.push('/inquilinos');
       } else {
         const error = await response.json();
-        toast.error(error.error || 'Error al crear el inquilino');
+        if (response.status === 409) {
+          toast.info(error.error || 'El inquilino ya existe y se han actualizado sus datos');
+          router.push('/inquilinos');
+        } else {
+          toast.error(error.error || 'Error al crear el inquilino');
+        }
       }
     } catch (error) {
       logger.error('Error:', error);

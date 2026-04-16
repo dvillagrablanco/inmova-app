@@ -197,28 +197,73 @@ export async function POST(req: NextRequest) {
       ? validatedData.dni.trim()
       : `PEND-${uniqueSuffix}`;
 
-    const tenant = await prisma.tenant.create({
-      data: {
-        companyId: scope.activeCompanyId,
-        nombreCompleto: nombreCompletoFinal,
-        dni: dniFinal,
-        email: emailFinal,
-        telefono: validatedData.telefono || '',
-        fechaNacimiento: validatedData.fechaNacimiento
-          ? new Date(validatedData.fechaNacimiento)
-          : new Date(),
-        notas: validatedData.notasInternas || '',
-        iban: validatedData.iban,
-        bic: validatedData.bic,
-        metodoPago: validatedData.metodoPago,
-        personaContacto: validatedData.personaContacto,
-        ciudad: validatedData.ciudad,
-        codigoPostal: validatedData.codigoPostal,
-        provincia: validatedData.provincia,
-        pais: validatedData.pais,
-        ...(hashedPassword && { password: hashedPassword }),
-      },
-    });
+    const tenantData = {
+      companyId: scope.activeCompanyId,
+      nombreCompleto: nombreCompletoFinal,
+      dni: dniFinal,
+      email: emailFinal,
+      telefono: validatedData.telefono || '',
+      fechaNacimiento: validatedData.fechaNacimiento
+        ? new Date(validatedData.fechaNacimiento)
+        : new Date(),
+      notas: validatedData.notasInternas || '',
+      iban: validatedData.iban,
+      bic: validatedData.bic,
+      metodoPago: validatedData.metodoPago,
+      personaContacto: validatedData.personaContacto,
+      ciudad: validatedData.ciudad,
+      codigoPostal: validatedData.codigoPostal,
+      provincia: validatedData.provincia,
+      pais: validatedData.pais,
+      ...(hashedPassword && { password: hashedPassword }),
+    };
+
+    let tenant;
+    let wasUpdated = false;
+    try {
+      tenant = await prisma.tenant.create({ data: tenantData });
+    } catch (createError: any) {
+      if (createError?.code === 'P2002') {
+        const target = createError?.meta?.target;
+        const conflictField = Array.isArray(target) ? target[0] : target;
+        logger.info('Tenant unique conflict, attempting upsert', { conflictField, dni: dniFinal, email: emailFinal });
+
+        let existing = null;
+        if (conflictField === 'dni' || conflictField === 'email') {
+          existing = await prisma.tenant.findFirst({
+            where: conflictField === 'dni' ? { dni: dniFinal } : { email: emailFinal },
+          });
+        }
+        if (!existing && dniFinal && !dniFinal.startsWith('PEND-')) {
+          existing = await prisma.tenant.findFirst({ where: { dni: dniFinal } });
+        }
+        if (!existing && emailFinal && !emailFinal.includes('@pendiente.local')) {
+          existing = await prisma.tenant.findFirst({ where: { email: emailFinal } });
+        }
+
+        if (existing) {
+          const { companyId: _c, email: _e, dni: _d, ...updateFields } = tenantData;
+          tenant = await prisma.tenant.update({
+            where: { id: existing.id },
+            data: {
+              ...updateFields,
+              ...(emailFinal && !emailFinal.includes('@pendiente.local') && { email: emailFinal }),
+              ...(dniFinal && !dniFinal.startsWith('PEND-') && { dni: dniFinal }),
+            },
+          });
+          wasUpdated = true;
+        } else {
+          const fallbackData = {
+            ...tenantData,
+            email: `tenant-${uniqueSuffix}@pendiente.local`,
+            dni: `PEND-${uniqueSuffix}`,
+          };
+          tenant = await prisma.tenant.create({ data: fallbackData });
+        }
+      } else {
+        throw createError;
+      }
+    }
 
     // Send welcome email with portal credentials if password was set
     if (hashedPassword && validatedData.email) {
@@ -292,15 +337,23 @@ export async function POST(req: NextRequest) {
         ...tenant,
         portalAccessEnabled: !!hashedPassword,
         welcomeEmailSent: !!hashedPassword,
+        wasUpdated,
       },
-      { status: 201 }
+      { status: wasUpdated ? 200 : 201 }
     );
   } catch (error: any) {
     if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) {
       return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 });
     }
-    logger.error('Error creating tenant:', error);
+    logger.error('Error creating tenant:', { message: error?.message, code: error?.code, meta: error?.meta });
     Sentry.captureException(error);
+    if (error?.code === 'P2002') {
+      const field = Array.isArray(error?.meta?.target) ? error.meta.target[0] : 'desconocido';
+      return NextResponse.json(
+        { error: `Ya existe un inquilino con este ${field === 'email' ? 'correo electrónico' : field === 'dni' ? 'DNI/NIF' : 'dato'}. Se han actualizado sus datos.` },
+        { status: 409 }
+      );
+    }
     if (error.message?.includes('permiso')) {
       return forbiddenResponse(error.message);
     }

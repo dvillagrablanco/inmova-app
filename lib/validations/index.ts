@@ -130,10 +130,7 @@ export const tenantCreateSchema = z.object({
     .or(z.literal('')),
   telefono: z
     .string()
-    .regex(
-      /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/,
-      'Teléfono inválido'
-    )
+    .max(30, 'Teléfono no puede exceder 30 caracteres')
     .trim()
     .optional()
     .or(z.literal('')),
