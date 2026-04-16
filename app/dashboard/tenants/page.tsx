@@ -123,12 +123,28 @@ export default function TenantsPage() {
     }
   };
 
-  const filteredTenants = tenants.filter(tenant =>
-    tenant.nombreCompleto?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    tenant.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    tenant.telefono?.includes(searchTerm) ||
-    tenant.dni?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredTenants = (() => {
+    try {
+      if (!searchTerm || !searchTerm.trim()) return tenants;
+      const term = searchTerm.toLowerCase().trim();
+      return tenants.filter((tenant) => {
+        if (!tenant) return false;
+        const nombre = (tenant.nombreCompleto || '').toLowerCase();
+        const email = (tenant.email || '').toLowerCase();
+        const telefono = (tenant.telefono || '').toLowerCase();
+        const dni = (tenant.dni || '').toLowerCase();
+        return (
+          nombre.includes(term) ||
+          email.includes(term) ||
+          telefono.includes(term) ||
+          dni.includes(term)
+        );
+      });
+    } catch (err) {
+      console.error('[TenantsPage] Search error:', err);
+      return tenants;
+    }
+  })();
 
   const activeContracts = tenants.filter(t => 
     t.contracts?.some(c => c.estado === 'activo')
@@ -207,23 +223,23 @@ export default function TenantsPage() {
                     </div>
                   </div>
                   <div>
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email">Email (opcional)</Label>
                     <Input
                       id="email"
                       type="email"
                       value={newTenant.email}
                       onChange={(e) => setNewTenant({ ...newTenant, email: e.target.value })}
-                      required
+                      placeholder="email@ejemplo.com"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="telefono">Teléfono</Label>
+                      <Label htmlFor="telefono">Teléfono (opcional)</Label>
                       <Input
                         id="telefono"
                         value={newTenant.telefono}
                         onChange={(e) => setNewTenant({ ...newTenant, telefono: e.target.value })}
-                        required
+                        placeholder="+34 600 123 456"
                       />
                     </div>
                     <div>

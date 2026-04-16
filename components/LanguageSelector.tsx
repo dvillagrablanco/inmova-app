@@ -47,13 +47,26 @@ export function LanguageSelector() {
     if (typeof document !== 'undefined') {
       document.documentElement.lang = newLocale;
     }
+
+    // Aplicar cookie de Google Translate para traducción inmediata
+    try {
+      const host = window.location.hostname;
+      const parts = host.split('.');
+      const domain = parts.length > 1 ? `.${parts.slice(-2).join('.')}` : host;
+
+      if (newLocale === 'es') {
+        document.cookie = 'googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
+        document.cookie = `googtrans=; path=/; domain=${domain}; expires=Thu, 01 Jan 1970 00:00:01 GMT`;
+      } else {
+        const value = `/es/${newLocale}`;
+        document.cookie = `googtrans=${value}; path=/`;
+        document.cookie = `googtrans=${value}; path=/; domain=${domain}`;
+      }
+    } catch {}
+
     const langName = availableLocales.find(l => l.code === newLocale)?.name || newLocale;
-    if (newLocale !== 'es') {
-      toast.info(`Idioma cambiado a ${langName}. La traducción completa está en desarrollo.`, { duration: 4000 });
-    } else {
-      toast.success(`Idioma cambiado a ${langName}`);
-    }
-    setTimeout(() => window.location.reload(), 500);
+    toast.success(`Idioma cambiado a ${langName}`);
+    setTimeout(() => window.location.reload(), 300);
   };
 
   const currentFlag = availableLocales.find(l => l.code === locale)?.flag || '🌐';

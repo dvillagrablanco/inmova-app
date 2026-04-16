@@ -2,6 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Google Translate — ocultar barra superior */
+.goog-te-banner-frame.skiptranslate,
+.goog-te-banner-frame,
+iframe.goog-te-menu-frame.skiptranslate,
+.skiptranslate > iframe:first-child {
+  display: none !important;
+  visibility: hidden !important;
+}
+body {
+  top: 0 !important;
+  position: static !important;
+}
+.goog-tooltip,
+.goog-tooltip:hover,
+.goog-text-highlight {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+#google_translate_element {
+  display: none !important;
+}
+
 /* ============================
    SIDEBAR MOBILE CSS (INLINE)
    ============================ */

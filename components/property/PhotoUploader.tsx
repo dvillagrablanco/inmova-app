@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Upload, X, Image as ImageIcon, Star, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -24,6 +24,12 @@ export function PhotoUploader({
   const [uploading, setUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [mainPhotoIndex, setMainPhotoIndex] = useState(0);
+
+  // Sincronizar fotos cuando cambian desde el padre (ej: al cargar una propiedad existente)
+  useEffect(() => {
+    setPhotos(existingPhotos);
+    setMainPhotoIndex(0);
+  }, [existingPhotos.length > 0 ? existingPhotos.join('|') : '']);
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
