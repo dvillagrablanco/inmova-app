@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     logger.error('Error generating quotes:', error);
     return NextResponse.json(
-      { error: 'Error al generar cotizaciones', details: error.message },
+      { error: 'Error al generar cotizaciones', details: process.env.NODE_ENV === "production" ? undefined : error?.message },
       { status: 500 }
     );
   }

@@ -27,6 +27,17 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import type { FacturaItem } from '@/lib/facturacion-homming-store';
 
+function safeFmtDate(iso: string | Date | null | undefined, fmt: string): string {
+  try {
+    if (!iso) return '—';
+    const d = iso instanceof Date ? iso : new Date(iso);
+    if (isNaN(d.getTime())) return '—';
+    return format(d, fmt, { locale: es });
+  } catch {
+    return '—';
+  }
+}
+
 const ESTADO_LABELS: Record<string, string> = {
   borrador: 'Borrador',
   emitida: 'Emitida',
@@ -60,8 +71,8 @@ export default function FacturaDetailPage() {
       setLoading(true);
       const res = await fetch(`/api/facturacion/${id}`);
       if (res.ok) {
-        const json = await res.json();
-        setFactura(json.data);
+        const json = await res.json().catch(() => null);
+        setFactura(json?.data || null);
       } else if (res.status === 404) {
         toast.error('Factura no encontrada');
         router.push('/facturacion');
@@ -158,7 +169,7 @@ export default function FacturaDetailPage() {
             <div>
               <h1 className="text-2xl font-bold">Factura {factura.numeroFactura}</h1>
               <p className="text-muted-foreground">
-                {TIPO_LABELS[factura.tipo] || factura.tipo} · {format(new Date(factura.fecha), 'dd MMM yyyy', { locale: es })}
+                {TIPO_LABELS[factura.tipo] || factura.tipo} · {safeFmtDate(factura.fecha, 'dd MMM yyyy')}
               </p>
             </div>
           </div>
@@ -193,8 +204,8 @@ export default function FacturaDetailPage() {
                   {factura.numeroFactura}
                 </CardTitle>
                 <CardDescription>
-                  Fecha: {format(new Date(factura.fecha), "dd/MM/yyyy", { locale: es })} ·{' '}
-                  Fecha contable: {format(new Date(factura.fechaContable), "dd/MM/yyyy", { locale: es })}
+                  Fecha: {safeFmtDate(factura.fecha, 'dd/MM/yyyy')} ·{' '}
+                  Fecha contable: {safeFmtDate(factura.fechaContable, 'dd/MM/yyyy')}
                 </CardDescription>
               </div>
               <Badge variant="outline">{TIPO_LABELS[factura.tipo]}</Badge>

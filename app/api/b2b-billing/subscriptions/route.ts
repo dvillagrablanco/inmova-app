@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     logger.error('Error al gestionar suscripción:', error);
     return NextResponse.json(
-      { error: 'Error al gestionar suscripción', details: error.message },
+      { error: 'Error al gestionar suscripción', details: process.env.NODE_ENV === "production" ? undefined : error?.message },
       { status: 500 }
     );
   }
@@ -164,7 +164,7 @@ export async function GET(request: NextRequest) {
   } catch (error: any) {
     logger.error('Error al obtener historial:', error);
     return NextResponse.json(
-      { error: 'Error al obtener historial', details: error.message },
+      { error: 'Error al obtener historial', details: process.env.NODE_ENV === "production" ? undefined : error?.message },
       { status: 500 }
     );
   }

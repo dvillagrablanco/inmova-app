@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     logger.error('Error en notificaciones:', error);
     return NextResponse.json(
-      { error: 'Error al procesar notificaciones', details: error.message },
+      { error: 'Error al procesar notificaciones', details: process.env.NODE_ENV === "production" ? undefined : error?.message },
       { status: 500 }
     );
   }

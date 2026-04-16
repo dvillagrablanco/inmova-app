@@ -70,7 +70,7 @@ export async function GET(
   } catch (error: any) {
     logger.error('Error al obtener factura:', error);
     return NextResponse.json(
-      { error: 'Error al obtener factura', details: error.message },
+      { error: 'Error al obtener factura', details: process.env.NODE_ENV === "production" ? undefined : error?.message },
       { status: 500 }
     );
   }
@@ -116,7 +116,7 @@ export async function PUT(
   } catch (error: any) {
     logger.error('Error al actualizar factura:', error);
     return NextResponse.json(
-      { error: 'Error al actualizar factura', details: error.message },
+      { error: 'Error al actualizar factura', details: process.env.NODE_ENV === "production" ? undefined : error?.message },
       { status: 500 }
     );
   }
@@ -153,7 +153,7 @@ export async function DELETE(
   } catch (error: any) {
     logger.error('Error al cancelar factura:', error);
     return NextResponse.json(
-      { error: 'Error al cancelar factura', details: error.message },
+      { error: 'Error al cancelar factura', details: process.env.NODE_ENV === "production" ? undefined : error?.message },
       { status: 500 }
     );
   }

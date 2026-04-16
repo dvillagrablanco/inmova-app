@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
     }
     logger.error('[Análisis IA POST]:', error);
     return NextResponse.json(
-      { error: 'Error en análisis IA', details: error.message },
+      { error: 'Error en análisis IA', details: process.env.NODE_ENV === "production" ? undefined : error?.message },
       { status: 500 }
     );
   }

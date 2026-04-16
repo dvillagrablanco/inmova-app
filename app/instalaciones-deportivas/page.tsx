@@ -673,14 +673,14 @@ export default function InstalacionesDeportivasPage() {
                   <div className="space-y-2">
                     <Label>Edificio (opcional)</Label>
                     <Select
-                      value={facilityForm.buildingId}
-                      onValueChange={(value) => setFacilityForm({ ...facilityForm, buildingId: value })}
+                      value={facilityForm.buildingId || '__none__'}
+                      onValueChange={(value) => setFacilityForm({ ...facilityForm, buildingId: value === '__none__' ? '' : value })}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Seleccionar" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Ninguno</SelectItem>
+                        <SelectItem value="__none__">Ninguno</SelectItem>
                         {buildings.map((b) => (
                           <SelectItem key={b.id} value={b.id}>
                             {b.nombre}

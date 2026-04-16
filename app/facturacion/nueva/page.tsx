@@ -273,14 +273,14 @@ export default function NuevaFacturaPage() {
                 <Label>Inmueble (opcional)</Label>
                 {units.length > 0 ? (
                   <Select
-                    value={form.inmueble}
-                    onValueChange={(v) => setForm({ ...form, inmueble: v })}
+                    value={form.inmueble || '__none__'}
+                    onValueChange={(v) => setForm({ ...form, inmueble: v === '__none__' ? '' : v })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar inmueble" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Ninguno</SelectItem>
+                      <SelectItem value="__none__">Ninguno</SelectItem>
                       {units.map((u) => (
                         <SelectItem key={u.id} value={u.display}>
                           {u.display}

@@ -122,14 +122,20 @@ export default function PropiedadesPage() {
       try {
         const response = await fetch('/api/units');
         if (response.ok) {
-          const data = await response.json();
+          const json = await response.json().catch(() => ({ data: [] }));
+          const raw = Array.isArray(json) ? json : (json?.data || json?.units || []);
+          const data = Array.isArray(raw) ? raw : [];
           setProperties(data);
           setFilteredProperties(data);
         } else {
+          setProperties([]);
+          setFilteredProperties([]);
           toast.error('Error al cargar propiedades');
         }
       } catch (error) {
         console.error('Error fetching properties:', error);
+        setProperties([]);
+        setFilteredProperties([]);
         toast.error('Error de conexión');
       } finally {
         setIsLoading(false);
@@ -167,10 +173,12 @@ export default function PropiedadesPage() {
 
     // Filtro por rango de precio
     if (precioMin) {
-      filtered = filtered.filter((prop) => prop.rentaMensual >= parseFloat(precioMin));
+      const min = parseFloat(precioMin);
+      filtered = filtered.filter((prop) => Number(prop.rentaMensual || 0) >= min);
     }
     if (precioMax) {
-      filtered = filtered.filter((prop) => prop.rentaMensual <= parseFloat(precioMax));
+      const max = parseFloat(precioMax);
+      filtered = filtered.filter((prop) => Number(prop.rentaMensual || 0) <= max);
     }
 
     // Filtro por habitaciones mínimas

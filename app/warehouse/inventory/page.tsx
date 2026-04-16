@@ -687,14 +687,14 @@ export default function WarehouseInventoryPage() {
               <div className="col-span-2 space-y-2">
                 <Label>Edificio (opcional)</Label>
                 <Select
-                  value={newItem.buildingId}
-                  onValueChange={v => setNewItem(prev => ({ ...prev, buildingId: v }))}
+                  value={newItem.buildingId || '__none__'}
+                  onValueChange={v => setNewItem(prev => ({ ...prev, buildingId: v === '__none__' ? '' : v }))}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccionar edificio" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Sin edificio asignado</SelectItem>
+                    <SelectItem value="__none__">Sin edificio asignado</SelectItem>
                     {buildings.map(building => (
                       <SelectItem key={building.id} value={building.id}>
                         {building.nombre}

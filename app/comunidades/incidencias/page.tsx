@@ -124,8 +124,8 @@ export default function IncidenciasPage() {
       const params = new URLSearchParams();
       if (comunidadId) params.append('comunidadId', comunidadId);
       if (buildingId) params.append('buildingId', buildingId);
-      if (filtroEstado) params.append('estado', filtroEstado);
-      if (filtroPrioridad) params.append('prioridad', filtroPrioridad);
+      if (filtroEstado && filtroEstado !== 'all') params.append('estado', filtroEstado);
+      if (filtroPrioridad && filtroPrioridad !== 'all') params.append('prioridad', filtroPrioridad);
 
       const res = await fetch(`/api/comunidades/incidencias?${params}`);
       if (res.ok) {
@@ -396,12 +396,12 @@ export default function IncidenciasPage() {
               className="pl-10"
             />
           </div>
-          <Select value={filtroEstado} onValueChange={setFiltroEstado}>
+          <Select value={filtroEstado || 'all'} onValueChange={(v) => setFiltroEstado(v === 'all' ? '' : v)}>
             <SelectTrigger className="w-[150px]">
               <SelectValue placeholder="Estado" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos</SelectItem>
+              <SelectItem value="all">Todos</SelectItem>
               {ESTADOS.map((e) => (
                 <SelectItem key={e.value} value={e.value}>
                   {e.label}
@@ -409,12 +409,12 @@ export default function IncidenciasPage() {
               ))}
             </SelectContent>
           </Select>
-          <Select value={filtroPrioridad} onValueChange={setFiltroPrioridad}>
+          <Select value={filtroPrioridad || 'all'} onValueChange={(v) => setFiltroPrioridad(v === 'all' ? '' : v)}>
             <SelectTrigger className="w-[150px]">
               <SelectValue placeholder="Prioridad" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todas</SelectItem>
+              <SelectItem value="all">Todas</SelectItem>
               {PRIORIDADES.map((p) => (
                 <SelectItem key={p.value} value={p.value}>
                   {p.label}

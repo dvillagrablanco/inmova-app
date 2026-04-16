@@ -643,14 +643,14 @@ export default function InventarioMantenimientoPage() {
               <div>
                 <Label>Edificio Asociado</Label>
                 <Select
-                  value={formData.buildingId}
-                  onValueChange={(value) => setFormData({ ...formData, buildingId: value })}
+                  value={formData.buildingId || '__none__'}
+                  onValueChange={(value) => setFormData({ ...formData, buildingId: value === '__none__' ? '' : value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccionar edificio" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Sin asignar</SelectItem>
+                    <SelectItem value="__none__">Sin asignar</SelectItem>
                     {buildings.map((b) => (
                       <SelectItem key={b.id} value={b.id}>{b.nombre}</SelectItem>
                     ))}

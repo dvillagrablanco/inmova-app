@@ -757,14 +757,14 @@ export default function HuertosUrbanosPage() {
                   <div className="space-y-2">
                     <Label>Edificio (opcional)</Label>
                     <Select
-                      value={gardenForm.buildingId}
-                      onValueChange={(value) => setGardenForm({ ...gardenForm, buildingId: value })}
+                      value={gardenForm.buildingId || '__none__'}
+                      onValueChange={(value) => setGardenForm({ ...gardenForm, buildingId: value === '__none__' ? '' : value })}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Seleccionar" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Ninguno</SelectItem>
+                        <SelectItem value="__none__">Ninguno</SelectItem>
                         {buildings.map((b) => (
                           <SelectItem key={b.id} value={b.id}>
                             {b.nombre}

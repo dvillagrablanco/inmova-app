@@ -1,11 +1,15 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { db } from '@/lib/db';
 import logger, { logError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+async function getPrisma() {
+  const { getPrismaClient } = await import('@/lib/db');
+  return getPrismaClient();
+}
 
 // GET /api/payments/receipt/[id] - Obtener datos para generar recibo
 export async function GET(
@@ -18,7 +22,11 @@ export async function GET(
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
+    const db = await getPrisma();
     const paymentId = params.id;
+    const sessionCompanyId = session.user?.companyId;
+    const role = session.user?.role;
+    const isSuper = role === 'SUPERADMIN' || role === 'ADMIN_SISTEMA';
 
     // Obtener el pago con todas las relaciones necesarias
     const payment = await db.payment.findUnique({
@@ -41,21 +49,35 @@ export async function GET(
       return NextResponse.json({ error: 'Pago no encontrado' }, { status: 404 });
     }
 
-    // Obtener configuración de la empresa
-    let company = await db.company.findFirst();
+    // Verificar acceso multi-tenant: el pago debe pertenecer a la empresa del usuario
+    const ownerCompanyId =
+      payment.contract?.unit?.building?.companyId ||
+      (payment.contract?.tenant as any)?.companyId;
+    if (!isSuper && sessionCompanyId && ownerCompanyId && ownerCompanyId !== sessionCompanyId) {
+      return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
+    }
+
+    // Obtener configuración de la empresa del pago (no "cualquiera")
+    const targetCompanyId = ownerCompanyId || sessionCompanyId;
+    let company = targetCompanyId
+      ? await db.company.findUnique({ where: { id: targetCompanyId } })
+      : null;
     if (!company) {
-      company = await db.company.create({
-        data: {
-          nombre: 'INMOVA',
-          colorPrimario: '#000000',
-          colorSecundario: '#FFFFFF',
-        },
-      });
+      company = {
+        nombre: 'INMOVA',
+        cif: null,
+        direccion: null,
+        telefono: null,
+        email: null,
+        logoUrl: null,
+        colorPrimario: '#000000',
+        colorSecundario: '#FFFFFF',
+        pieDocumento: null,
+      } as any;
     }
 
     // Preparar datos para el recibo
     const receiptData = {
-      // Datos del pago
       payment: {
         id: payment.id,
         periodo: payment.periodo,
@@ -65,38 +87,34 @@ export async function GET(
         estado: payment.estado,
         metodoPago: payment.metodoPago,
       },
-      // Datos del inquilino
       tenant: {
         nombreCompleto: payment.contract.tenant.nombreCompleto,
         dni: payment.contract.tenant.dni,
         email: payment.contract.tenant.email,
         telefono: payment.contract.tenant.telefono,
       },
-      // Datos de la unidad
       unit: {
         numero: payment.contract.unit.numero,
         tipo: payment.contract.unit.tipo,
         direccion: payment.contract.unit.building.direccion,
         edificio: payment.contract.unit.building.nombre,
       },
-      // Datos del contrato
       contract: {
         id: payment.contract.id,
         fechaInicio: payment.contract.fechaInicio,
         fechaFin: payment.contract.fechaFin,
         rentaMensual: payment.contract.rentaMensual,
       },
-      // Datos de la empresa
       company: {
-        nombre: company.nombre,
-        cif: company.cif,
-        direccion: company.direccion,
-        telefono: company.telefono,
-        email: company.email,
-        logoUrl: company.logoUrl,
-        colorPrimario: company.colorPrimario,
-        colorSecundario: company.colorSecundario,
-        pieDocumento: company.pieDocumento,
+        nombre: (company as any).nombre,
+        cif: (company as any).cif,
+        direccion: (company as any).direccion,
+        telefono: (company as any).telefono,
+        email: (company as any).email,
+        logoUrl: (company as any).logoUrl,
+        colorPrimario: (company as any).colorPrimario,
+        colorSecundario: (company as any).colorSecundario,
+        pieDocumento: (company as any).pieDocumento,
       },
     };
 

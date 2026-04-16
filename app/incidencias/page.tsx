@@ -169,12 +169,19 @@ export default function IncidenciasPage() {
       ]);
 
       const [incidenciasData, buildingsData] = await Promise.all([
-        incidenciasRes.json(),
-        buildingsRes.json(),
+        incidenciasRes.ok ? incidenciasRes.json().catch(() => []) : Promise.resolve([]),
+        buildingsRes.ok ? buildingsRes.json().catch(() => []) : Promise.resolve([]),
       ]);
 
-      setIncidencias(Array.isArray(incidenciasData) ? incidenciasData : []);
-      setBuildings(Array.isArray(buildingsData) ? buildingsData : []);
+      const incList = Array.isArray(incidenciasData)
+        ? incidenciasData
+        : incidenciasData?.data || incidenciasData?.incidencias || [];
+      const bldList = Array.isArray(buildingsData)
+        ? buildingsData
+        : buildingsData?.data || buildingsData?.buildings || [];
+
+      setIncidencias(Array.isArray(incList) ? incList : []);
+      setBuildings(Array.isArray(bldList) ? bldList : []);
     } catch (error) {
       logger.error('Error fetching data:', error);
       toast.error('Error al cargar datos');
@@ -298,18 +305,31 @@ export default function IncidenciasPage() {
     }
   };
 
-  const filteredIncidencias = incidencias.filter((inc) => {
-    const matchesSearch =
-      inc.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      inc.descripcion.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      inc.building.nombre.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredIncidencias = (() => {
+    try {
+      const term = (searchTerm || '').toLowerCase();
+      return (incidencias || []).filter((inc) => {
+        if (!inc) return false;
+        const titulo = (inc.titulo || '').toLowerCase();
+        const descripcion = (inc.descripcion || '').toLowerCase();
+        const buildingName = (inc.building?.nombre || '').toLowerCase();
+        const matchesSearch =
+          !term ||
+          titulo.includes(term) ||
+          descripcion.includes(term) ||
+          buildingName.includes(term);
 
-    const matchesEstado = filterEstado === 'todas' || inc.estado === filterEstado;
+        const matchesEstado = filterEstado === 'todas' || inc.estado === filterEstado;
+        const matchesPrioridad =
+          filterPrioridad === 'todas' || inc.prioridad === filterPrioridad;
 
-    const matchesPrioridad = filterPrioridad === 'todas' || inc.prioridad === filterPrioridad;
-
-    return matchesSearch && matchesEstado && matchesPrioridad;
-  });
+        return matchesSearch && matchesEstado && matchesPrioridad;
+      });
+    } catch (err) {
+      console.error('[Incidencias] Filter error:', err);
+      return incidencias || [];
+    }
+  })();
 
   // KPIs
   const totalIncidencias = incidencias.length;

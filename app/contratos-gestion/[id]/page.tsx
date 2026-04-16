@@ -49,7 +49,8 @@ export default function ContratoGestionDetallePage() {
           router.push('/contratos-gestion');
           return;
         }
-        setData(await res.json());
+        const json = await res.json().catch(() => null);
+        setData(json);
       } catch {
         toast.error('Error al cargar');
         router.push('/contratos-gestion');
@@ -132,8 +133,19 @@ export default function ContratoGestionDetallePage() {
               <div>
                 <p className="text-sm text-muted-foreground">Vigencia</p>
                 <p className="text-sm">
-                  {format(new Date(data.fechaInicio), 'dd MMM yyyy', { locale: es })} —{' '}
-                  {format(new Date(data.fechaFin), 'dd MMM yyyy', { locale: es })}
+                  {(() => {
+                    const fmt = (iso: string | undefined | null) => {
+                      try {
+                        if (!iso) return '—';
+                        const d = new Date(iso);
+                        if (isNaN(d.getTime())) return '—';
+                        return format(d, 'dd MMM yyyy', { locale: es });
+                      } catch {
+                        return '—';
+                      }
+                    };
+                    return `${fmt(data.fechaInicio)} — ${fmt(data.fechaFin)}`;
+                  })()}
                 </p>
               </div>
             </div>

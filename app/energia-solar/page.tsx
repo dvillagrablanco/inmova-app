@@ -596,14 +596,14 @@ export default function EnergiaSolarPage() {
                   <div className="space-y-2">
                     <Label>Edificio (opcional)</Label>
                     <Select
-                      value={formData.buildingId}
-                      onValueChange={(value) => setFormData({ ...formData, buildingId: value })}
+                      value={formData.buildingId || '__none__'}
+                      onValueChange={(value) => setFormData({ ...formData, buildingId: value === '__none__' ? '' : value })}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Seleccionar edificio" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Ninguno</SelectItem>
+                        <SelectItem value="__none__">Ninguno</SelectItem>
                         {buildings.map((building) => (
                           <SelectItem key={building.id} value={building.id}>
                             {building.nombre}

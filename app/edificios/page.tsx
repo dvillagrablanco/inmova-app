@@ -100,16 +100,22 @@ function EdificiosPageContent() {
       try {
         setError(null);
         const response = await fetch('/api/buildings');
-        const json = await response.json();
-        const data = Array.isArray(json) ? json : (json.data || json.buildings || json.units || json.tenants || json.payments || json.requests || []);
+        if (!response.ok) {
+          throw new Error(`Error ${response.status} al cargar edificios`);
+        }
+        const json = await response.json().catch(() => ({ data: [] }));
+        const raw = Array.isArray(json) ? json : (json?.data || json?.buildings || []);
+        const data = Array.isArray(raw) ? raw : [];
         setBuildings(data);
         setFilteredBuildings(data);
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : 'Error desconocido';
         setError(errorMsg);
+        setBuildings([]);
+        setFilteredBuildings([]);
         logError(error instanceof Error ? error : new Error(errorMsg), {
-      context: 'fetchBuildings',
-      page: 'edificios',
+          context: 'fetchBuildings',
+          page: 'edificios',
         });
       } finally {
         setIsLoading(false);
@@ -122,15 +128,26 @@ function EdificiosPageContent() {
   }, [status]);
 
   useEffect(() => {
-    if (searchTerm) {
-      const filtered = buildings.filter(
-        (building) =>
-      building.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      building.direccion.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      building.tipo.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+    try {
+      if (!searchTerm || !searchTerm.trim()) {
+        setFilteredBuildings(buildings);
+        return;
+      }
+      const term = searchTerm.toLowerCase();
+      const filtered = (buildings || []).filter((building) => {
+        if (!building) return false;
+        const nombre = (building.nombre || '').toLowerCase();
+        const direccion = (building.direccion || '').toLowerCase();
+        const tipo = (building.tipo || '').toLowerCase();
+        return (
+          nombre.includes(term) ||
+          direccion.includes(term) ||
+          tipo.includes(term)
+        );
+      });
       setFilteredBuildings(filtered);
-    } else {
+    } catch (err) {
+      console.error('[Edificios] Search error:', err);
       setFilteredBuildings(buildings);
     }
   }, [searchTerm, buildings]);

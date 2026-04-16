@@ -251,14 +251,14 @@ export function SignatureRequestForm({
         <div>
           <Label htmlFor="provider">Proveedor de Firma</Label>
           <Select
-            value={provider || ''}
-            onValueChange={(v) => setProvider(v as any)}
+            value={provider || 'auto'}
+            onValueChange={(v) => setProvider((v === 'auto' ? undefined : v) as any)}
           >
             <SelectTrigger>
               <SelectValue placeholder="Automático (DocuSign)" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Automático</SelectItem>
+              <SelectItem value="auto">Automático</SelectItem>
               <SelectItem value="docusign">DocuSign</SelectItem>
               <SelectItem value="signaturit">Signaturit</SelectItem>
             </SelectContent>

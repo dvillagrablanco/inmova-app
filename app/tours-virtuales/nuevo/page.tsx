@@ -196,14 +196,14 @@ export default function NuevoTourPage() {
                 <div className="space-y-2">
                   <Label htmlFor="buildingId">Edificio</Label>
                   <Select
-                    value={form.buildingId}
-                    onValueChange={(v) => setForm({ ...form, buildingId: v })}
+                    value={form.buildingId || '__none__'}
+                    onValueChange={(v) => setForm({ ...form, buildingId: v === '__none__' ? '' : v })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Selecciona edificio" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Ninguno</SelectItem>
+                      <SelectItem value="__none__">Ninguno</SelectItem>
                       {buildings.map((building) => (
                         <SelectItem key={building.id} value={building.id}>
                           {building.nombre}
@@ -215,14 +215,14 @@ export default function NuevoTourPage() {
                 <div className="space-y-2">
                   <Label htmlFor="unitId">Unidad/Propiedad</Label>
                   <Select
-                    value={form.unitId}
-                    onValueChange={(v) => setForm({ ...form, unitId: v })}
+                    value={form.unitId || '__none__'}
+                    onValueChange={(v) => setForm({ ...form, unitId: v === '__none__' ? '' : v })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Selecciona unidad" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Ninguna</SelectItem>
+                      <SelectItem value="__none__">Ninguna</SelectItem>
                       {properties.map((unit) => (
                         <SelectItem key={unit.id} value={unit.id}>
                           {unit.numero} - {unit.tipo}

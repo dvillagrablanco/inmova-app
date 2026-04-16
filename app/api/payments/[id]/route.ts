@@ -50,12 +50,47 @@ const paymentUpdateSchema = z.object({
   irpf: z.number().optional().nullable(),
 });
 
+async function assertPaymentAccess(prisma: any, session: any, paymentId: string) {
+  const companyId = session?.user?.companyId;
+  if (!companyId) {
+    return { ok: false as const, status: 403 as const, error: 'Empresa no definida' };
+  }
+  const payment = await prisma.payment.findUnique({
+    where: { id: paymentId },
+    select: {
+      id: true,
+      contract: {
+        select: {
+          unit: { select: { building: { select: { companyId: true } } } },
+          tenant: { select: { companyId: true } },
+        },
+      },
+    },
+  });
+  if (!payment) {
+    return { ok: false as const, status: 404 as const, error: 'Pago no encontrado' };
+  }
+  const role = session?.user?.role;
+  const isSuper = role === 'SUPERADMIN' || role === 'ADMIN_SISTEMA';
+  const ownerCompanyId =
+    payment.contract?.unit?.building?.companyId || payment.contract?.tenant?.companyId;
+  if (!isSuper && ownerCompanyId && ownerCompanyId !== companyId) {
+    return { ok: false as const, status: 403 as const, error: 'Acceso denegado' };
+  }
+  return { ok: true as const };
+}
+
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   const prisma = await getPrisma();
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    const access = await assertPaymentAccess(prisma, session, params.id);
+    if (!access.ok) {
+      return NextResponse.json({ error: access.error }, { status: access.status });
     }
 
     const payment = await prisma.payment.findUnique({
@@ -92,6 +127,11 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    const access = await assertPaymentAccess(prisma, session, params.id);
+    if (!access.ok) {
+      return NextResponse.json({ error: access.error }, { status: access.status });
     }
 
     const body = await req.json();
@@ -291,6 +331,11 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    const access = await assertPaymentAccess(prisma, session, params.id);
+    if (!access.ok) {
+      return NextResponse.json({ error: access.error }, { status: access.status });
     }
 
     const companyId = session.user?.companyId;

@@ -117,7 +117,7 @@ export default function CuotasPage() {
       const params = new URLSearchParams();
       if (comunidadId) params.append('comunidadId', comunidadId);
       if (buildingId) params.append('buildingId', buildingId);
-      if (filtroEstado) params.append('estado', filtroEstado);
+      if (filtroEstado && filtroEstado !== 'all') params.append('estado', filtroEstado);
 
       const res = await fetch(`/api/comunidades/cuotas?${params}`);
       if (res.ok) {
@@ -362,12 +362,12 @@ export default function CuotasPage() {
 
         {/* Filters */}
         <div className="flex items-center gap-4">
-          <Select value={filtroEstado} onValueChange={setFiltroEstado}>
+          <Select value={filtroEstado || 'all'} onValueChange={(v) => setFiltroEstado(v === 'all' ? '' : v)}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Filtrar por estado" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos los estados</SelectItem>
+              <SelectItem value="all">Todos los estados</SelectItem>
               {ESTADOS_CUOTA.map((e) => (
                 <SelectItem key={e.value} value={e.value}>
                   {e.label}

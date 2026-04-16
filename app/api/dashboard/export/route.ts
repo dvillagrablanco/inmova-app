@@ -103,7 +103,10 @@ export async function GET(request: NextRequest) {
   } catch (error: any) {
     logger.error('[Dashboard Export Error]:', error);
     return NextResponse.json(
-      { error: 'Error generando exportación', message: error.message },
+      {
+        error: 'Error generando exportación',
+        message: process.env.NODE_ENV === 'production' ? undefined : error?.message,
+      },
       { status: 500 }
     );
   }
