@@ -25,8 +25,6 @@ export async function GET(
     const db = await getPrisma();
     const paymentId = params.id;
     const sessionCompanyId = session.user?.companyId;
-    const role = session.user?.role;
-    const isSuper = role === 'SUPERADMIN' || role === 'ADMIN_SISTEMA';
 
     // Obtener el pago con todas las relaciones necesarias
     const payment = await db.payment.findUnique({
@@ -49,12 +47,27 @@ export async function GET(
       return NextResponse.json({ error: 'Pago no encontrado' }, { status: 404 });
     }
 
-    // Verificar acceso multi-tenant: el pago debe pertenecer a la empresa del usuario
+    // Verificar acceso multi-tenant respetando user_company_access y grupo
     const ownerCompanyId =
       payment.contract?.unit?.building?.companyId ||
       (payment.contract?.tenant as any)?.companyId;
-    if (!isSuper && sessionCompanyId && ownerCompanyId && ownerCompanyId !== sessionCompanyId) {
-      return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
+    if (ownerCompanyId) {
+      try {
+        const { resolveCompanyScope } = await import('@/lib/company-scope');
+        const scope = await resolveCompanyScope({
+          userId: session.user.id as string,
+          role: session.user.role as any,
+          primaryCompanyId: sessionCompanyId,
+          request: request as any,
+        });
+        if (!scope.accessibleCompanyIds.includes(ownerCompanyId)) {
+          return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
+        }
+      } catch (e) {
+        if (ownerCompanyId !== sessionCompanyId) {
+          return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
+        }
+      }
     }
 
     // Obtener configuración de la empresa del pago (no "cualquiera")

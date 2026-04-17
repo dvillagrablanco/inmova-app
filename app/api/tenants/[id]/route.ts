@@ -56,20 +56,33 @@ const tenantUpdateSchema = z.object({
   pais: z.string().max(100).optional(),
 });
 
-async function assertTenantAccess(prisma: any, session: any, tenantId: string) {
-  const companyId = session?.user?.companyId;
-  if (!companyId) {
-    return { ok: false, status: 403 as const, error: 'Empresa no definida' };
-  }
+async function assertTenantAccess(prisma: any, session: any, tenantId: string, req?: any) {
   const found = await prisma.tenant.findUnique({
     where: { id: tenantId },
     select: { id: true, companyId: true },
   });
-  if (!found) return { ok: false, status: 404 as const, error: 'Inquilino no encontrado' };
-  const role = session?.user?.role;
-  const isSuper = role === 'SUPERADMIN' || role === 'ADMIN_SISTEMA';
-  if (!isSuper && found.companyId !== companyId) {
-    return { ok: false, status: 403 as const, error: 'Acceso denegado' };
+  if (!found) return { ok: false as const, status: 404 as const, error: 'Inquilino no encontrado' };
+
+  // Reutilizamos resolveCompanyScope para respetar:
+  // - super_admin/soporte (acceso a todo)
+  // - userCompanyAccess (cross-company)
+  // - parent/child companies y grupo (Vidaro/Viroda/Rovida)
+  const { resolveCompanyScope } = await import('@/lib/company-scope');
+  try {
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: session.user.role as any,
+      primaryCompanyId: session.user.companyId,
+      request: req,
+    });
+    if (!scope.accessibleCompanyIds.includes(found.companyId)) {
+      return { ok: false as const, status: 403 as const, error: 'Acceso denegado' };
+    }
+  } catch (e) {
+    // En caso de error con scope (ej. tabla no disponible), fallback estricto: only own company
+    if (found.companyId !== session?.user?.companyId) {
+      return { ok: false as const, status: 403 as const, error: 'Acceso denegado' };
+    }
   }
   return { ok: true as const };
 }
@@ -82,7 +95,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const access = await assertTenantAccess(prisma, session, params.id);
+    const access = await assertTenantAccess(prisma, session, params.id, req);
     if (!access.ok) {
       return NextResponse.json({ error: access.error }, { status: access.status });
     }
@@ -129,7 +142,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const access = await assertTenantAccess(prisma, session, params.id);
+    const access = await assertTenantAccess(prisma, session, params.id, req);
     if (!access.ok) {
       return NextResponse.json({ error: access.error }, { status: access.status });
     }
@@ -217,7 +230,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const access = await assertTenantAccess(prisma, session, params.id);
+    const access = await assertTenantAccess(prisma, session, params.id, req);
     if (!access.ok) {
       return NextResponse.json({ error: access.error }, { status: access.status });
     }
