@@ -50,11 +50,7 @@ const paymentUpdateSchema = z.object({
   irpf: z.number().optional().nullable(),
 });
 
-async function assertPaymentAccess(prisma: any, session: any, paymentId: string) {
-  const companyId = session?.user?.companyId;
-  if (!companyId) {
-    return { ok: false as const, status: 403 as const, error: 'Empresa no definida' };
-  }
+async function assertPaymentAccess(prisma: any, session: any, paymentId: string, req?: any) {
   const payment = await prisma.payment.findUnique({
     where: { id: paymentId },
     select: {
@@ -70,12 +66,25 @@ async function assertPaymentAccess(prisma: any, session: any, paymentId: string)
   if (!payment) {
     return { ok: false as const, status: 404 as const, error: 'Pago no encontrado' };
   }
-  const role = session?.user?.role;
-  const isSuper = role === 'SUPERADMIN' || role === 'ADMIN_SISTEMA';
   const ownerCompanyId =
     payment.contract?.unit?.building?.companyId || payment.contract?.tenant?.companyId;
-  if (!isSuper && ownerCompanyId && ownerCompanyId !== companyId) {
-    return { ok: false as const, status: 403 as const, error: 'Acceso denegado' };
+  if (!ownerCompanyId) return { ok: true as const };
+
+  const { resolveCompanyScope } = await import('@/lib/company-scope');
+  try {
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: session.user.role as any,
+      primaryCompanyId: session.user.companyId,
+      request: req,
+    });
+    if (!scope.accessibleCompanyIds.includes(ownerCompanyId)) {
+      return { ok: false as const, status: 403 as const, error: 'Acceso denegado' };
+    }
+  } catch (e) {
+    if (ownerCompanyId !== session?.user?.companyId) {
+      return { ok: false as const, status: 403 as const, error: 'Acceso denegado' };
+    }
   }
   return { ok: true as const };
 }
@@ -88,7 +97,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const access = await assertPaymentAccess(prisma, session, params.id);
+    const access = await assertPaymentAccess(prisma, session, params.id, req);
     if (!access.ok) {
       return NextResponse.json({ error: access.error }, { status: access.status });
     }
@@ -129,7 +138,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const access = await assertPaymentAccess(prisma, session, params.id);
+    const access = await assertPaymentAccess(prisma, session, params.id, req);
     if (!access.ok) {
       return NextResponse.json({ error: access.error }, { status: access.status });
     }
@@ -333,7 +342,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const access = await assertPaymentAccess(prisma, session, params.id);
+    const access = await assertPaymentAccess(prisma, session, params.id, req);
     if (!access.ok) {
       return NextResponse.json({ error: access.error }, { status: access.status });
     }

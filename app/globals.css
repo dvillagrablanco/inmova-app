@@ -2,21 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Google Translate — ocultar barra superior y elementos de UI */
+/* Google Translate — ocultar UI del widget pero permitir traducción.
+   IMPORTANTE: NO usar display:none en el contenedor o Google no inicializa. */
 .goog-te-banner-frame.skiptranslate,
-.goog-te-banner-frame {
+.goog-te-banner-frame,
+.goog-te-banner,
+iframe.goog-te-banner-frame {
   display: none !important;
   visibility: hidden !important;
 }
 .goog-logo-link,
-.goog-te-gadget span,
+.goog-te-gadget > span > a,
+.goog-te-gadget > span,
 .goog-te-gadget img {
   display: none !important;
 }
 .goog-te-gadget {
+  color: transparent !important;
   font-size: 0 !important;
-  height: 0 !important;
-  overflow: hidden !important;
+}
+.goog-te-gadget .goog-te-combo {
+  display: none !important;
 }
 /* Forzar que el body no se desplace por el banner inyectado */
 body {
@@ -30,13 +36,16 @@ body {
   border: none !important;
   box-shadow: none !important;
 }
+/* El contenedor SE VE pero está fuera de pantalla: 
+   imprescindible para que Google Translate inicialice y traduzca */
 #google_translate_element {
-  position: fixed !important;
-  top: -2000px !important;
-  left: -2000px !important;
-  width: 1px !important;
-  height: 1px !important;
-  overflow: hidden !important;
+  position: fixed;
+  top: -1000px;
+  left: -1000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  z-index: -1;
 }
 
 /* ============================

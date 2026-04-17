@@ -87,16 +87,20 @@ export function GoogleTranslateWidget() {
     document.body.appendChild(script);
   }, []);
 
+  // El contenedor lo posicionamos fuera de pantalla SIN display:none
+  // (display:none impide que Google Translate inicialice).
   return (
     <div
       id="google_translate_element"
       style={{
         position: 'fixed',
-        top: '-2000px',
-        left: '-2000px',
+        top: '-1000px',
+        left: '-1000px',
         width: 1,
         height: 1,
         overflow: 'hidden',
+        opacity: 0,
+        pointerEvents: 'none',
       }}
       aria-hidden="true"
     />

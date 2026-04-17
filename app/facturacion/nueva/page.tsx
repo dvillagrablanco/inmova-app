@@ -221,7 +221,7 @@ export default function NuevaFacturaPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Serie *</Label>
-                  <Select value={form.serieId} onValueChange={handleSerieChange}>
+                  <Select value={form.serieId || undefined} onValueChange={handleSerieChange}>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar serie" />
                     </SelectTrigger>
