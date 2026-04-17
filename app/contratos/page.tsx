@@ -263,31 +263,41 @@ function ContratosPageContent() {
 
   // Filtrado combinado
   useEffect(() => {
-    let filtered = contracts;
+    try {
+      let filtered = contracts || [];
 
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(
-        (contract) =>
-          (contract.tenant?.nombreCompleto || '').toLowerCase().includes(term) ||
-          (contract.unit?.building?.nombre || '').toLowerCase().includes(term) ||
-          (contract.unit?.numero || '').toLowerCase().includes(term)
-      );
+      if (searchTerm && searchTerm.trim()) {
+        const term = searchTerm.toLowerCase();
+        filtered = filtered.filter((contract) => {
+          if (!contract) return false;
+          const tenantName = (contract.tenant?.nombreCompleto || '').toLowerCase();
+          const buildingName = (contract.unit?.building?.nombre || '').toLowerCase();
+          const unitNumero = (contract.unit?.numero || '').toLowerCase();
+          return (
+            tenantName.includes(term) ||
+            buildingName.includes(term) ||
+            unitNumero.includes(term)
+          );
+        });
+      }
+
+      if (edificioFilter !== 'all') {
+        filtered = filtered.filter((c) => c?.unit?.building?.nombre === edificioFilter);
+      }
+
+      if (unidadFilter !== 'all') {
+        filtered = filtered.filter((c) => c?.unit?.numero === unidadFilter);
+      }
+
+      if (estadoFilter !== 'all') {
+        filtered = filtered.filter((c) => (c?.estado || '').toLowerCase() === estadoFilter);
+      }
+
+      setFilteredContracts(filtered);
+    } catch (err) {
+      console.error('[Contratos] Filter error:', err);
+      setFilteredContracts(contracts || []);
     }
-
-    if (edificioFilter !== 'all') {
-      filtered = filtered.filter((c) => c.unit?.building?.nombre === edificioFilter);
-    }
-
-    if (unidadFilter !== 'all') {
-      filtered = filtered.filter((c) => c.unit?.numero === unidadFilter);
-    }
-
-    if (estadoFilter !== 'all') {
-      filtered = filtered.filter((c) => (c.estado || '').toLowerCase() === estadoFilter);
-    }
-
-    setFilteredContracts(filtered);
   }, [searchTerm, edificioFilter, unidadFilter, estadoFilter, contracts]);
 
   // Actualizar filtros activos

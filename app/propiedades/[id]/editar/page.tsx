@@ -40,6 +40,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PhotoUploader } from '@/components/property/PhotoUploader';
+import { CoverPhotoInput } from '@/components/property/CoverPhotoInput';
 
 interface Building {
   id: string;
@@ -669,15 +670,36 @@ export default function EditarPropiedadPage() {
             </CardContent>
           </Card>
 
-          {/* Fotos de la Propiedad */}
+          {/* Foto de Portada */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Upload className="h-5 w-5" />
-                Fotos de la Propiedad
+                Foto de Portada
               </CardTitle>
               <CardDescription>
-                Sube hasta 10 fotos de la propiedad. Haz click en la estrella ★ para elegir la foto de portada que se mostrará en la vista previa.
+                Esta foto se mostrará en la vista previa del listado de propiedades.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <CoverPhotoInput
+                propertyId={propertyId}
+                photos={photos}
+                onPhotosChange={setPhotos}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Galería de Fotos */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Upload className="h-5 w-5" />
+                Galería de Fotos
+              </CardTitle>
+              <CardDescription>
+                Sube hasta 10 fotos adicionales. La primera (★) es la portada en la vista previa.
+                Haz click en ★ para cambiarla desde aquí.
               </CardDescription>
             </CardHeader>
             <CardContent>

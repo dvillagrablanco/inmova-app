@@ -9,54 +9,66 @@ declare global {
   }
 }
 
+const TRANSLATABLE: string[] = ['en', 'pt', 'fr', 'de', 'it'];
+
 function getCookieLocale(): string {
   if (typeof document === 'undefined') return 'es';
-  const match = document.cookie.match(/NEXT_LOCALE=(\w+)/);
+  const match = document.cookie.match(/(?:^|; )NEXT_LOCALE=(\w+)/);
   return match?.[1] || 'es';
 }
 
-function applyGoogleTranslate(locale: string) {
-  const target = locale === 'es' ? '' : locale;
-  const existing = document.cookie.match(/googtrans=([^;]+)/)?.[1];
-  const desired = target ? `/es/${target}` : '';
-
-  if (existing === desired) return;
-
+function setGoogTransCookie(target: string) {
+  if (typeof document === 'undefined') return;
   const host = window.location.hostname;
   const parts = host.split('.');
-  const domain = parts.length > 1 ? `.${parts.slice(-2).join('.')}` : host;
+  const baseDomain =
+    parts.length > 1 ? `.${parts.slice(-2).join('.')}` : host;
+  const value = target ? `/es/${target}` : '';
+  const expire = new Date();
+  expire.setFullYear(expire.getFullYear() + 1);
 
-  if (desired) {
-    document.cookie = `googtrans=${desired}; path=/`;
-    document.cookie = `googtrans=${desired}; path=/; domain=${domain}`;
+  if (value) {
+    document.cookie = `googtrans=${value}; path=/; expires=${expire.toUTCString()}`;
+    document.cookie = `googtrans=${value}; path=/; domain=${host}; expires=${expire.toUTCString()}`;
+    document.cookie = `googtrans=${value}; path=/; domain=${baseDomain}; expires=${expire.toUTCString()}`;
   } else {
-    document.cookie = 'googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
-    document.cookie = `googtrans=; path=/; domain=${domain}; expires=Thu, 01 Jan 1970 00:00:01 GMT`;
+    const past = 'Thu, 01 Jan 1970 00:00:01 GMT';
+    document.cookie = `googtrans=; path=/; expires=${past}`;
+    document.cookie = `googtrans=; path=/; domain=${host}; expires=${past}`;
+    document.cookie = `googtrans=; path=/; domain=${baseDomain}; expires=${past}`;
   }
 }
 
 export function GoogleTranslateWidget() {
   useEffect(() => {
     const locale = getCookieLocale();
+    const isTranslatable = TRANSLATABLE.includes(locale);
 
-    if (locale === 'es') {
-      const existing = document.cookie.match(/googtrans=([^;]+)/)?.[1];
-      if (existing) {
-        applyGoogleTranslate('es');
-      }
+    // Aplicar/limpiar cookie ANTES de cargar el script
+    setGoogTransCookie(isTranslatable ? locale : '');
+
+    if (!isTranslatable) {
+      // Locale = español, no cargamos el widget
       return;
     }
 
-    applyGoogleTranslate(locale);
-
-    if (document.getElementById('google-translate-script')) return;
+    if (document.getElementById('google-translate-script')) {
+      // Ya estaba cargado: forzar reinicialización si el widget existe
+      try {
+        if (window.google?.translate) {
+          window.googleTranslateElementInit?.();
+        }
+      } catch {}
+      return;
+    }
 
     window.googleTranslateElementInit = () => {
       try {
+        if (!window.google?.translate?.TranslateElement) return;
         new window.google.translate.TranslateElement(
           {
             pageLanguage: 'es',
-            includedLanguages: 'en,pt,fr,de,it',
+            includedLanguages: TRANSLATABLE.join(','),
             autoDisplay: false,
             layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
           },
@@ -71,13 +83,21 @@ export function GoogleTranslateWidget() {
     script.id = 'google-translate-script';
     script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
     script.async = true;
+    script.defer = true;
     document.body.appendChild(script);
   }, []);
 
   return (
     <div
       id="google_translate_element"
-      style={{ position: 'fixed', top: '-1000px', left: '-1000px', visibility: 'hidden' }}
+      style={{
+        position: 'fixed',
+        top: '-2000px',
+        left: '-2000px',
+        width: 1,
+        height: 1,
+        overflow: 'hidden',
+      }}
       aria-hidden="true"
     />
   );

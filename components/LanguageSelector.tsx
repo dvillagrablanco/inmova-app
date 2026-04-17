@@ -40,7 +40,12 @@ export function LanguageSelector() {
   const handleLocaleChange = (newLocale: Locale) => {
     if (newLocale === locale) return;
     setLocaleState(newLocale);
-    document.cookie = `NEXT_LOCALE=${newLocale}; path=/; max-age=31536000; SameSite=Lax`;
+
+    // Cookie NEXT_LOCALE en TODOS los scopes para que se persista
+    const expire = new Date();
+    expire.setFullYear(expire.getFullYear() + 1);
+    document.cookie = `NEXT_LOCALE=${newLocale}; path=/; expires=${expire.toUTCString()}; SameSite=Lax`;
+
     if (typeof localStorage !== 'undefined') {
       localStorage.setItem('locale', newLocale);
     }
@@ -48,25 +53,31 @@ export function LanguageSelector() {
       document.documentElement.lang = newLocale;
     }
 
-    // Aplicar cookie de Google Translate para traducción inmediata
+    // Aplicar cookie de Google Translate para traducción inmediata.
+    // Importante: en TODOS los dominios/subdominios para que aplique al recargar.
     try {
       const host = window.location.hostname;
       const parts = host.split('.');
-      const domain = parts.length > 1 ? `.${parts.slice(-2).join('.')}` : host;
+      const baseDomain = parts.length > 1 ? `.${parts.slice(-2).join('.')}` : host;
+      const past = 'Thu, 01 Jan 1970 00:00:01 GMT';
 
       if (newLocale === 'es') {
-        document.cookie = 'googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
-        document.cookie = `googtrans=; path=/; domain=${domain}; expires=Thu, 01 Jan 1970 00:00:01 GMT`;
+        // Limpiar googtrans en todos los scopes
+        document.cookie = `googtrans=; path=/; expires=${past}`;
+        document.cookie = `googtrans=; path=/; domain=${host}; expires=${past}`;
+        document.cookie = `googtrans=; path=/; domain=${baseDomain}; expires=${past}`;
       } else {
         const value = `/es/${newLocale}`;
-        document.cookie = `googtrans=${value}; path=/`;
-        document.cookie = `googtrans=${value}; path=/; domain=${domain}`;
+        document.cookie = `googtrans=${value}; path=/; expires=${expire.toUTCString()}`;
+        document.cookie = `googtrans=${value}; path=/; domain=${host}; expires=${expire.toUTCString()}`;
+        document.cookie = `googtrans=${value}; path=/; domain=${baseDomain}; expires=${expire.toUTCString()}`;
       }
     } catch {}
 
     const langName = availableLocales.find(l => l.code === newLocale)?.name || newLocale;
     toast.success(`Idioma cambiado a ${langName}`);
-    setTimeout(() => window.location.reload(), 300);
+    // Recargar para que Google Translate lea las cookies y traduzca
+    setTimeout(() => window.location.reload(), 400);
   };
 
   const currentFlag = availableLocales.find(l => l.code === locale)?.flag || '🌐';

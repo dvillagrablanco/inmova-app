@@ -62,7 +62,7 @@ export async function GET(req: NextRequest) {
           },
         },
         orderBy: { createdAt: 'desc' },
-        take: scope.scopeCompanyIds.length > 1 ? 100 : undefined,
+        take: scope.scopeCompanyIds.length > 1 ? 5000 : undefined,
       });
       return NextResponse.json(tenants);
     }
@@ -243,10 +243,18 @@ export async function POST(req: NextRequest) {
 
         if (existing) {
           const { companyId: _c, email: _e, dni: _d, ...updateFields } = tenantData;
+          // Si el tenant existente pertenece a una empresa accesible por el usuario,
+          // reasignarlo a la empresa activa (resuelve el caso "no aparece en lista
+          // tras importar de contabilidad" cuando el grupo tiene varias empresas)
+          const reassignCompany =
+            existing.companyId &&
+            scope.scopeCompanyIds.includes(existing.companyId) &&
+            existing.companyId !== scope.activeCompanyId;
           tenant = await prisma.tenant.update({
             where: { id: existing.id },
             data: {
               ...updateFields,
+              ...(reassignCompany ? { companyId: scope.activeCompanyId } : {}),
               ...(emailFinal && !emailFinal.includes('@pendiente.local') && { email: emailFinal }),
               ...(dniFinal && !dniFinal.startsWith('PEND-') && { dni: dniFinal }),
             },
