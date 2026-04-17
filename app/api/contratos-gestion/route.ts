@@ -27,17 +27,22 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+      return NextResponse.json({ data: [] });
     }
 
     const prisma = await getPrisma();
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      select: { companyId: true },
-    });
+    let user: { companyId: string | null } | null = null;
+    try {
+      user = await prisma.user.findUnique({
+        where: { email: session.user.email },
+        select: { companyId: true },
+      });
+    } catch (e) {
+      console.error('[ContratosGestion API] user lookup failed:', e);
+    }
 
     if (!user?.companyId) {
-      return NextResponse.json([]);
+      return NextResponse.json({ data: [] });
     }
 
     try {
@@ -45,13 +50,22 @@ export async function GET() {
         where: { companyId: user.companyId },
         orderBy: { createdAt: 'desc' },
       });
-      return NextResponse.json(contracts);
-    } catch {
-      return NextResponse.json([]);
+      // Sanitizar campos que pueden ser null y romper el render
+      const safe = (Array.isArray(contracts) ? contracts : []).map((c: any) => ({
+        ...c,
+        propietario: c?.propietario || 'Sin propietario',
+        inmuebles: Array.isArray(c?.inmuebles) ? c.inmuebles : [],
+        tipo: c?.tipo || 'integral',
+        estado: c?.estado || 'pendiente',
+      }));
+      return NextResponse.json({ data: safe });
+    } catch (e) {
+      console.error('[ContratosGestion API] managementContract.findMany failed:', e);
+      return NextResponse.json({ data: [] });
     }
   } catch (error) {
     console.error('[ContratosGestion API] Error:', error);
-    return NextResponse.json([]);
+    return NextResponse.json({ data: [] });
   }
 }
 

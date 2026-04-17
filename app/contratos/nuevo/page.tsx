@@ -290,13 +290,15 @@ export default function NuevoContratoPage() {
         ]);
 
         if (unitsRes.ok) {
-          const unitsData = await unitsRes.json();
-          setUnits(unitsData);
+          const unitsRaw = await unitsRes.json().catch(() => []);
+          const unitsData = Array.isArray(unitsRaw) ? unitsRaw : (unitsRaw?.data || unitsRaw?.units || []);
+          setUnits(Array.isArray(unitsData) ? unitsData : []);
         }
 
         if (tenantsRes.ok) {
-          const tenantsData = await tenantsRes.json();
-          setTenants(tenantsData);
+          const tenantsRaw = await tenantsRes.json().catch(() => []);
+          const tenantsData = Array.isArray(tenantsRaw) ? tenantsRaw : (tenantsRaw?.data || tenantsRaw?.tenants || []);
+          setTenants(Array.isArray(tenantsData) ? tenantsData : []);
         }
       } catch (error) {
         logger.error('Error fetching data:', error);
@@ -338,8 +340,21 @@ export default function NuevoContratoPage() {
         toast.success('Contrato creado correctamente');
         router.push('/contratos');
       } else {
-        const error = await response.json();
-        toast.error(error.error || 'Error al crear el contrato');
+        const error = await response.json().catch(() => ({}));
+        // Si hay detalles de validación zod, mostrarlos al usuario
+        if (Array.isArray(error?.details) && error.details.length > 0) {
+          const fieldMsgs = error.details
+            .map((d: any) => {
+              const f = Array.isArray(d?.path) ? d.path.join('.') : d?.field || '';
+              return f ? `${f}: ${d?.message || ''}` : (d?.message || '');
+            })
+            .filter(Boolean)
+            .slice(0, 3)
+            .join(' • ');
+          toast.error(`${error?.error || 'Error de validación'}${fieldMsgs ? ' — ' + fieldMsgs : ''}`);
+        } else {
+          toast.error(error?.error || 'Error al crear el contrato');
+        }
       }
     } catch (error) {
       logger.error('Error:', error);

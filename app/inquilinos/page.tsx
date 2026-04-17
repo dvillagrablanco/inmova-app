@@ -171,13 +171,16 @@ function InquilinosPageContent() {
   // Find morosidad for a tenant
   const getTenantDeuda = (tenant: Tenant): number => {
     try {
-      const nombre = (tenant.nombreCompleto || '').toLowerCase().trim();
+      if (!tenant || !tenant.nombreCompleto) return 0;
+      const nombre = String(tenant.nombreCompleto).toLowerCase().trim();
       if (!nombre) return 0;
-      if (morosidadMap[nombre]) return morosidadMap[nombre].saldo;
+      if (morosidadMap && morosidadMap[nombre]) return Number(morosidadMap[nombre].saldo) || 0;
       const firstName = nombre.split(/[\s,]+/)[0];
-      if (firstName && firstName.length > 3) {
+      if (firstName && firstName.length > 3 && morosidadMap) {
         for (const [key, val] of Object.entries(morosidadMap)) {
-          if (key.includes(firstName)) return val.saldo;
+          if (key && typeof key === 'string' && key.includes(firstName)) {
+            return Number(val?.saldo) || 0;
+          }
         }
       }
       return 0;
@@ -286,32 +289,39 @@ function InquilinosPageContent() {
 
   const getTenantEstado = (tenant: Tenant): string => {
     try {
-      if (tenant.contracts && Array.isArray(tenant.contracts) && tenant.contracts.some((c) => c?.estado === 'activo')) {
+      if (!tenant) return 'inactivo';
+      const contracts = tenant.contracts;
+      if (Array.isArray(contracts) && contracts.some((c) => c && c.estado === 'activo')) {
         return 'activo';
       }
     } catch {}
     return 'inactivo';
   };
 
-  const getEstadoBadge = (estado: string) => {
+  const getEstadoBadge = (estado: string | null | undefined) => {
     const badges: Record<string, { variant: any; label: string; className?: string }> = {
       activo: { variant: 'default', label: 'Activo', className: 'bg-green-600 text-white border-green-600' },
       inactivo: { variant: 'secondary', label: 'Inactivo' },
       moroso: { variant: 'destructive', label: 'Moroso' },
       pendiente: { variant: 'outline', label: 'Pendiente' },
     };
-    return badges[estado.toLowerCase()] || { variant: 'default', label: estado };
+    const key = (estado || '').toLowerCase();
+    return badges[key] || { variant: 'default', label: estado || 'desconocido' };
   };
 
-  const getInitials = (name: string) => {
-    if (!name) return '??';
-    return name
-      .split(' ')
-      .filter(Boolean)
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2) || '??';
+  const getInitials = (name: string | null | undefined) => {
+    try {
+      if (!name || typeof name !== 'string') return '??';
+      return name
+        .split(' ')
+        .filter(Boolean)
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2) || '??';
+    } catch {
+      return '??';
+    }
   };
 
   const activeTenants = tenants.filter((t) => getTenantEstado(t) === 'activo').length;
@@ -443,9 +453,17 @@ function InquilinosPageContent() {
             {viewMode === 'grid' && (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {filteredTenants.map((tenant) => {
-                  const estado = getTenantEstado(tenant);
-                  const estadoBadge = getEstadoBadge(estado);
-                  const primeraUnidad = tenant.units?.[0];
+                  if (!tenant || !tenant.id) return null;
+                  let estado = 'inactivo';
+                  let estadoBadge: any = { variant: 'default', label: 'inactivo' };
+                  let primeraUnidad: any = null;
+                  try {
+                    estado = getTenantEstado(tenant);
+                    estadoBadge = getEstadoBadge(estado);
+                    primeraUnidad = Array.isArray(tenant.units) ? tenant.units[0] : null;
+                  } catch (e) {
+                    console.error('[Inquilinos] tenant render error', e, tenant);
+                  }
 
                   return (
                     <Card key={tenant.id} className="hover:shadow-lg transition-shadow">
@@ -524,9 +542,17 @@ function InquilinosPageContent() {
             {viewMode === 'list' && (
               <div className="space-y-4">
                 {filteredTenants.map((tenant) => {
-                  const estado = getTenantEstado(tenant);
-                  const estadoBadge = getEstadoBadge(estado);
-                  const primeraUnidad = tenant.units?.[0];
+                  if (!tenant || !tenant.id) return null;
+                  let estado = 'inactivo';
+                  let estadoBadge: any = { variant: 'default', label: 'inactivo' };
+                  let primeraUnidad: any = null;
+                  try {
+                    estado = getTenantEstado(tenant);
+                    estadoBadge = getEstadoBadge(estado);
+                    primeraUnidad = Array.isArray(tenant.units) ? tenant.units[0] : null;
+                  } catch (e) {
+                    console.error('[Inquilinos list] tenant render error', e, tenant);
+                  }
 
                   return (
                     <Card key={tenant.id} className="hover:shadow-lg transition-shadow">
@@ -607,9 +633,17 @@ function InquilinosPageContent() {
                 <CardContent className="pt-6">
                   <div className="space-y-2">
                     {filteredTenants.map((tenant) => {
-                      const estado = getTenantEstado(tenant);
-                      const estadoBadge = getEstadoBadge(estado);
-                      const primeraUnidad = tenant.units?.[0];
+                      if (!tenant || !tenant.id) return null;
+                      let estado = 'inactivo';
+                      let estadoBadge: any = { variant: 'default', label: 'inactivo' };
+                      let primeraUnidad: any = null;
+                      try {
+                        estado = getTenantEstado(tenant);
+                        estadoBadge = getEstadoBadge(estado);
+                        primeraUnidad = Array.isArray(tenant.units) ? tenant.units[0] : null;
+                      } catch (e) {
+                        console.error('[Inquilinos compact] tenant render error', e, tenant);
+                      }
 
                       return (
                         <div

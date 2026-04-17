@@ -2,14 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Google Translate — ocultar barra superior */
+/* Google Translate — ocultar barra superior y elementos de UI */
 .goog-te-banner-frame.skiptranslate,
-.goog-te-banner-frame,
-iframe.goog-te-menu-frame.skiptranslate,
-.skiptranslate > iframe:first-child {
+.goog-te-banner-frame {
   display: none !important;
   visibility: hidden !important;
 }
+.goog-logo-link,
+.goog-te-gadget span,
+.goog-te-gadget img {
+  display: none !important;
+}
+.goog-te-gadget {
+  font-size: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+/* Forzar que el body no se desplace por el banner inyectado */
 body {
   top: 0 !important;
   position: static !important;
@@ -22,7 +31,12 @@ body {
   box-shadow: none !important;
 }
 #google_translate_element {
-  display: none !important;
+  position: fixed !important;
+  top: -2000px !important;
+  left: -2000px !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
 }
 
 /* ============================

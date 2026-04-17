@@ -125,9 +125,15 @@ export function PropertyMap({ address, city, latitude, longitude }: PropertyMapP
 
   // Google Maps embed sin API key (modo búsqueda / marcador por coordenadas)
   // Preferir coords exactas si existen, si no geocodificamos la dirección limpia
+  // forzando España para evitar resultados ambiguos (ciudades repetidas).
+  const addressForMap = (() => {
+    const cleaned = cleanAddressForGeocoding(fullAddress);
+    const hasSpain = /españa|spain/i.test(cleaned);
+    return hasSpain ? cleaned : `${cleaned}, España`;
+  })();
   const googleEmbedUrl = coords
-    ? `https://maps.google.com/maps?q=${coords.lat},${coords.lng}&z=17&hl=es&output=embed`
-    : `https://maps.google.com/maps?q=${encodeURIComponent(fullAddress)}&z=17&hl=es&output=embed`;
+    ? `https://maps.google.com/maps?q=loc:${coords.lat},${coords.lng}&z=18&hl=es&output=embed&iwloc=near`
+    : `https://maps.google.com/maps?q=${encodeURIComponent(addressForMap)}&z=18&hl=es&output=embed&iwloc=near`;
 
   return (
     <Card>

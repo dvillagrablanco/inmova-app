@@ -8,6 +8,14 @@
 import { z } from 'zod';
 
 // ====================================
+// HELPERS COMUNES
+// ====================================
+
+// IDs en esta app son CUID (Prisma @default(cuid())), no UUID. Aceptamos string
+// no vacío de longitud razonable para ser tolerantes a cuid/uuid/identifiers.
+const idStringSchema = z.string().min(1, 'ID requerido').max(64, 'ID inválido');
+
+// ====================================
 // EDIFICIOS (BUILDINGS)
 // ====================================
 
@@ -57,7 +65,7 @@ export const buildingUpdateSchema = buildingCreateSchema.partial();
 // ====================================
 
 export const unitCreateSchema = z.object({
-  buildingId: z.string().uuid('ID de edificio inválido'),
+  buildingId: idStringSchema,
   numero: z
     .string()
     .min(1, 'El número de unidad es requerido')
@@ -170,8 +178,8 @@ export const tenantUpdateSchema = tenantCreateSchema.partial();
 // ====================================
 
 const contractBaseSchema = z.object({
-  unitId: z.string().uuid('ID de unidad inválido'),
-  tenantId: z.string().uuid('ID de inquilino inválido'),
+  unitId: idStringSchema,
+  tenantId: idStringSchema,
   fechaInicio: z.string().datetime({ message: 'Fecha de inicio inválida' }).or(z.date()),
   fechaFin: z.string().datetime({ message: 'Fecha de fin inválida' }).or(z.date()),
   rentaMensual: z
@@ -226,7 +234,7 @@ export const contractUpdateSchema = contractBaseSchema
 // ====================================
 
 const paymentBaseSchema = z.object({
-  contractId: z.string().uuid('ID de contrato inválido'),
+  contractId: idStringSchema,
   monto: z
     .number()
     .positive('El monto debe ser mayor a 0')
@@ -276,8 +284,8 @@ export const paymentUpdateSchema = paymentBaseSchema
 // ====================================
 
 export const maintenanceCreateSchema = z.object({
-  unitId: z.string().uuid('ID de unidad inválido').optional(),
-  buildingId: z.string().uuid('ID de edificio inválido'),
+  unitId: idStringSchema.optional(),
+  buildingId: idStringSchema,
   titulo: z
     .string()
     .min(1, 'El título es requerido')
@@ -312,7 +320,7 @@ export const maintenanceCreateSchema = z.object({
     .nonnegative('El costo final debe ser cero o mayor')
     .max(10000000, 'El costo final no puede exceder 10,000,000')
     .optional(),
-  asignadoA: z.string().uuid('ID de proveedor inválido').optional(),
+  asignadoA: idStringSchema.optional(),
 });
 
 export const maintenanceUpdateSchema = maintenanceCreateSchema.partial().omit({ buildingId: true });
@@ -371,7 +379,7 @@ export const userCreateSchema = z.object({
       'La contraseña debe contener al menos una mayúscula, una minúscula, un número y un carácter especial'
     ),
   role: z.enum(['administrador', 'gestor', 'operador', 'super_admin']).optional().default('gestor'),
-  companyId: z.string().uuid('ID de compañía inválido').optional(),
+  companyId: idStringSchema.optional(),
 });
 
 export const userUpdateSchema = userCreateSchema.partial().omit({ password: true });
@@ -447,7 +455,7 @@ export const taskCreateSchema = z.object({
   prioridad: z.enum(['baja', 'media', 'alta', 'urgente']).optional().default('media'),
   fechaLimite: z.string().optional(),
   fechaInicio: z.string().optional(),
-  asignadoA: z.string().uuid('ID de usuario asignado inválido').optional(),
+  asignadoA: idStringSchema.optional(),
   notas: z.string().max(5000, 'Las notas no pueden exceder 5000 caracteres').optional(),
 });
 
@@ -473,10 +481,10 @@ export const documentCreateSchema = z.object({
     'certificado',
     'otro',
   ]),
-  buildingId: z.string().uuid('ID de edificio inválido').optional(),
-  unitId: z.string().uuid('ID de unidad inválido').optional(),
-  tenantId: z.string().uuid('ID de inquilino inválido').optional(),
-  contractId: z.string().uuid('ID de contrato inválido').optional(),
+  buildingId: idStringSchema.optional(),
+  unitId: idStringSchema.optional(),
+  tenantId: idStringSchema.optional(),
+  contractId: idStringSchema.optional(),
   cloud_storage_path: z
     .string()
     .min(1, 'La ruta del archivo es requerida')
