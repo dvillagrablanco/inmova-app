@@ -66,13 +66,16 @@ export async function POST(
       });
     }
 
-    // Inferir ciudad de la dirección (segmento final tras última coma)
+    // Inferir ciudad y código postal de la dirección
     const segments = (building.direccion || '').split(',').map((s) => s.trim()).filter(Boolean);
-    const ciudad = segments.length >= 2 ? segments[segments.length - 1] : undefined;
+    const ciudad = segments.length >= 2 ? segments[segments.length - 1].replace(/^\d{5}\s*/, '').trim() : undefined;
+    const cpMatch = (building.direccion || '').match(/\b(\d{5})\b/);
+    const codigoPostal = cpMatch?.[1];
 
     const geo = await geocodeAddress({
       direccion: building.direccion,
       ciudad,
+      codigoPostal,
     });
 
     if (!geo) {

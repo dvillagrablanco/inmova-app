@@ -36,34 +36,103 @@ export function cleanAddressForGeocoding(addr: string): string {
     .trim();
 }
 
-async function nominatimQuery(query: string): Promise<GeocodeResult | null> {
+interface NominatimAddressDetails {
+  road?: string;
+  house_number?: string;
+  postcode?: string;
+  city?: string;
+  town?: string;
+  village?: string;
+  municipality?: string;
+  county?: string;
+  state?: string;
+  country?: string;
+}
+
+interface NominatimResult {
+  lat: string;
+  lon: string;
+  display_name: string;
+  importance?: number;
+  type?: string;
+  class?: string;
+  address?: NominatimAddressDetails;
+}
+
+async function nominatimQuery(query: string, limit = 5): Promise<NominatimResult[]> {
   try {
-    const url = `${NOMINATIM_URL}?format=json&q=${encodeURIComponent(query)}&limit=1&countrycodes=es&addressdetails=0`;
+    const url = `${NOMINATIM_URL}?format=json&q=${encodeURIComponent(query)}&limit=${limit}&countrycodes=es&addressdetails=1`;
     const res = await fetch(url, {
       headers: { 'User-Agent': USER_AGENT, 'Accept-Language': 'es' },
     });
     if (!res.ok) {
-      return null;
+      return [];
     }
-    const data = (await res.json()) as Array<{ lat: string; lon: string; display_name: string }>;
-    if (!Array.isArray(data) || data.length === 0) return null;
-
-    const top = data[0];
-    return {
-      lat: parseFloat(top.lat),
-      lon: parseFloat(top.lon),
-      displayName: top.display_name,
-      source: 'nominatim',
-    };
+    const data = (await res.json()) as NominatimResult[];
+    return Array.isArray(data) ? data : [];
   } catch (error) {
     logger.warn(`[geocoding] Error consultando Nominatim para "${query}":`, error as any);
-    return null;
+    return [];
   }
+}
+
+function getResultCity(r: NominatimResult): string | undefined {
+  return r.address?.city || r.address?.town || r.address?.village || r.address?.municipality;
+}
+
+/**
+ * Filtra y prioriza resultados:
+ *  1) Primero los que coinciden EXACTAMENTE con la ciudad pedida
+ *  2) Si hay codigoPostal, prioriza match exacto del postcode
+ *  3) Prefiere resultados con house_number (dirección exacta)
+ *  4) Penaliza resultados de tipo = "highway"/road sin número
+ */
+function rankResults(
+  results: NominatimResult[],
+  expectedCity?: string,
+  expectedPostcode?: string
+): NominatimResult | null {
+  if (results.length === 0) return null;
+
+  const norm = (s?: string) =>
+    (s || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim();
+  const eCity = norm(expectedCity);
+  const ePostcodePrefix = (expectedPostcode || '').slice(0, 3); // 340xx para Palencia capital
+
+  const scored = results.map((r) => {
+    let score = r.importance || 0;
+    const city = norm(getResultCity(r));
+
+    if (eCity) {
+      if (city === eCity) score += 1.0;
+      else if (city && (city.includes(eCity) || eCity.includes(city))) score += 0.3;
+      else score -= 0.5; // penaliza otra ciudad/pueblo distinta
+    }
+
+    if (expectedPostcode && r.address?.postcode) {
+      if (r.address.postcode === expectedPostcode) score += 0.8;
+      else if (r.address.postcode.startsWith(ePostcodePrefix)) score += 0.4;
+    }
+
+    if (r.address?.house_number) score += 0.3;
+    if (r.class === 'highway' && !r.address?.house_number) score -= 0.2;
+    if (r.class === 'place') score += 0.1;
+
+    return { r, score };
+  });
+
+  scored.sort((a, b) => b.score - a.score);
+  return scored[0].r;
 }
 
 /**
  * Geocodifica una dirección completa probando múltiples variantes.
- * Devuelve el primer match con suficiente confianza.
+ * Filtra resultados por ciudad esperada para evitar matches en pueblos
+ * homónimos de la misma provincia.
  */
 export async function geocodeAddress(opts: {
   direccion: string;
@@ -75,21 +144,70 @@ export async function geocodeAddress(opts: {
   if (!direccion || direccion.trim().length < 3) return null;
 
   const cleaned = cleanAddressForGeocoding(direccion);
-  const cleanedHasCity = ciudad ? cleaned.toLowerCase().includes(ciudad.toLowerCase()) : true;
 
-  const tries = [
-    cleanedHasCity ? cleaned : `${cleaned}, ${ciudad}, ${pais}`,
-    `${cleaned}, ${codigoPostal || ''} ${ciudad || ''}, ${pais}`.replace(/\s+/g, ' '),
-    `${cleaned}, ${pais}`,
-    direccion,
-    ...(ciudad ? [`${cleaned.split(',')[0]}, ${ciudad}, ${pais}`] : []),
-  ].filter(Boolean);
+  // Lista ordenada de queries, de más específica a más genérica
+  const tries: string[] = [];
+
+  if (codigoPostal && ciudad) {
+    tries.push(`${cleaned.split(',')[0]}, ${codigoPostal} ${ciudad}, ${pais}`);
+  }
+  if (ciudad) {
+    tries.push(`${cleaned.split(',')[0]}, ${ciudad}, ${pais}`);
+    tries.push(`${cleaned}, ${ciudad}, ${pais}`);
+  }
+  tries.push(`${cleaned}, ${pais}`);
+  tries.push(direccion);
+
+  let bestResult: NominatimResult | null = null;
+  let bestQuery = '';
 
   for (const q of tries) {
-    const result = await nominatimQuery(q.trim());
-    if (result) return result;
-    // pequeña pausa para respetar rate limit de Nominatim (~1 req/s)
+    const results = await nominatimQuery(q.trim(), 5);
+    const ranked = rankResults(results, ciudad, codigoPostal);
+    if (ranked) {
+      const cityMatch =
+        !ciudad ||
+        (() => {
+          const norm = (s?: string) =>
+            (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+          return norm(getResultCity(ranked)) === norm(ciudad);
+        })();
+
+      if (cityMatch) {
+        // Match perfecto, devolvemos directamente
+        return {
+          lat: parseFloat(ranked.lat),
+          lon: parseFloat(ranked.lon),
+          displayName: ranked.display_name,
+          source: 'nominatim',
+        };
+      }
+
+      // Guardar como fallback si no encontramos algo mejor
+      if (!bestResult) {
+        bestResult = ranked;
+        bestQuery = q;
+      }
+    }
     await new Promise((r) => setTimeout(r, 1100));
+  }
+
+  // Si no encontramos ningún resultado que coincida con la ciudad esperada,
+  // NO devolvemos un fallback en otra ciudad/pueblo: preferimos null para
+  // evitar localizar un edificio en un sitio incorrecto.
+  if (bestResult && !ciudad) {
+    return {
+      lat: parseFloat(bestResult.lat),
+      lon: parseFloat(bestResult.lon),
+      displayName: bestResult.display_name,
+      source: 'nominatim',
+    };
+  }
+
+  if (bestResult) {
+    logger.warn(
+      `[geocoding] Sin match exacto para "${ciudad}" en queries (${bestQuery}) → último intento: "${bestResult.display_name}"`
+    );
   }
 
   return null;

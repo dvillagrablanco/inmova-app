@@ -24,7 +24,13 @@ const ALLOWED_ROLES = new Set(['administrador', 'super_admin', 'gestor']);
 
 function inferCity(direccion: string): string | undefined {
   const segments = (direccion || '').split(',').map((s) => s.trim()).filter(Boolean);
-  return segments.length >= 2 ? segments[segments.length - 1] : undefined;
+  if (segments.length < 2) return undefined;
+  // Eliminar código postal del último segmento si presente: "34001 Palencia" -> "Palencia"
+  return segments[segments.length - 1].replace(/^\d{5}\s*/, '').trim();
+}
+
+function inferPostalCode(direccion: string): string | undefined {
+  return (direccion || '').match(/\b(\d{5})\b/)?.[1];
 }
 
 async function findCandidates(prisma: any, companyIds: string[]) {
@@ -104,9 +110,11 @@ export async function POST(request: NextRequest) {
 
     for (const b of batch) {
       const ciudad = inferCity(b.direccion);
+      const codigoPostal = inferPostalCode(b.direccion);
       const geo = await geocodeAddress({
         direccion: b.direccion,
         ciudad,
+        codigoPostal,
       });
 
       if (!geo) {
