@@ -125,6 +125,7 @@ interface FetchOptions {
   rooms?: number;
   propertyType?: string;
   companyId?: string;
+  referenciaCatastral?: string;
 }
 
 const INTERNAL_CAP_RATE_BY_PROPERTY_TYPE: Record<string, number> = {
@@ -703,6 +704,116 @@ async function fetchFromInternalDB(options: FetchOptions): Promise<PlatformMarke
  * y datos profesionales si hay credenciales configuradas.
  * Fiabilidad: 88% — datos agregados, más fiables que asking prices individuales.
  */
+/**
+ * Adaptador Idealista vía Playwright (browser real).
+ * Evade DataDome porque ejecuta el JS del captcha en chromium real.
+ *
+ * Devuelve datos del press kit + listings agregados + (si hay creds)
+ * Idealista Data Platform autenticado.
+ */
+async function fetchFromIdealistaPlaywright(
+  options: FetchOptions
+): Promise<PlatformMarketDataPoint | null> {
+  try {
+    const { getIdealistaPlaywrightReport, isPlaywrightConfigured } = await import(
+      '@/lib/idealista-playwright-scraper'
+    );
+    if (!isPlaywrightConfigured()) return null;
+
+    const report = await getIdealistaPlaywrightReport({
+      city: options.city,
+      postalCode: options.postalCode,
+      address: options.address,
+      useAuthenticatedData: true,
+      maxListings: 30,
+      timeoutMs: 75_000, // 75s máx — Playwright puede ser lento con login
+    });
+
+    if (!report) return null;
+
+    // Extraer mejor precio disponible: dataPlatform > pressKit > listings (sale)
+    const sale =
+      report.dataPlatform?.salePricePerM2 ||
+      report.pressKit?.salePricePerM2 ||
+      report.listings.find((l) => l.operation === 'sale')?.medianPricePerM2 ||
+      undefined;
+    const rent =
+      report.dataPlatform?.rentPricePerM2 ||
+      report.pressKit?.rentPricePerM2 ||
+      report.listings.find((l) => l.operation === 'rent')?.medianPricePerM2 ||
+      undefined;
+    const grossYield = report.dataPlatform?.grossYield;
+
+    if (!sale && !rent && !grossYield) return null;
+
+    // Trend
+    let trend: 'UP' | 'DOWN' | 'STABLE' = 'STABLE';
+    let trendPct: number | undefined;
+    if (report.pressKit?.saleAnnualVariation) {
+      trend =
+        report.pressKit.saleAnnualVariation > 1
+          ? 'UP'
+          : report.pressKit.saleAnnualVariation < -1
+            ? 'DOWN'
+            : 'STABLE';
+      trendPct = Math.abs(report.pressKit.saleAnnualVariation);
+    }
+
+    const sampleSize = report.listings.reduce((s, l) => s + l.sampleSize, 0);
+    const allPrices = report.listings.flatMap((l) => l.pricesPerM2);
+    const minP = allPrices.length > 0 ? Math.min(...allPrices) : undefined;
+    const maxP = allPrices.length > 0 ? Math.max(...allPrices) : undefined;
+
+    const labelParts: string[] = [];
+    if (report.dataPlatform?.available) labelParts.push('Data Platform autenticado');
+    if (report.pressKit) labelParts.push('press kit');
+    if (sampleSize > 0) labelParts.push(`${sampleSize} listings live`);
+
+    return {
+      source: 'idealista_data',
+      sourceLabel: `Idealista (Playwright real browser) — ${labelParts.join(' + ')}`,
+      sourceUrl: 'https://www.idealista.com',
+      fetchedAt: new Date().toISOString(),
+      reliability: report.reliability,
+      dataType: report.dataPlatform?.available ? 'transaction_price' : 'asking_price',
+      submarketPrecision: options.postalCode ? 'postal_code' : 'city',
+      propertyTypeCoverage:
+        normalizeValuationPropertyType(options.propertyType) === 'vivienda' ? 'exact' : 'mixed',
+      pricePerM2Sale: sale,
+      pricePerM2Rent: rent,
+      sampleSize: sampleSize || undefined,
+      trend,
+      trendPercentage: trendPct,
+      priceRange: minP && maxP ? { min: minP, max: maxP } : undefined,
+      avgDaysOnMarket: report.dataPlatform?.avgDaysOnMarket,
+      rawData: {
+        playwright: true,
+        dataPlatformAvailable: !!report.dataPlatform?.available,
+        pressKitAvailable: !!report.pressKit,
+        listingsCount: sampleSize,
+        grossYield: grossYield,
+        sampleListings:
+          report.listings.find((l) => l.operation === 'sale')?.listingsPreview?.slice(0, 5) || [],
+      },
+      comparables: report.listings
+        .find((l) => l.operation === 'sale')
+        ?.listingsPreview?.slice(0, 6)
+        .map((l) => ({
+          source: 'idealista_data' as PlatformSource,
+          address: l.title,
+          price: l.price,
+          pricePerM2: l.pricePerM2,
+          squareMeters: l.squareMeters,
+          rooms: l.rooms,
+          url: l.url,
+        })),
+    };
+  } catch (error) {
+    logger.warn('[IdealistaPlaywright] Error:', error);
+    return null;
+  }
+}
+
 async function fetchFromIdealistaData(
   options: FetchOptions
 ): Promise<PlatformMarketDataPoint | null> {
@@ -974,9 +1085,16 @@ export async function getAggregatedMarketData(
   // 1. Obtener datos de portales vía web scraping (Idealista, Fotocasa, Habitaclia, Pisos.com)
   // 2. Obtener datos profesionales de Idealista Data Platform (autenticado)
   // 3. Obtener datos oficiales (Notariado, INE) y base interna en paralelo
-  const [scrapedPortalData, idealistaDataResult, ...officialResults] = await Promise.all([
+  // 4. Idealista vía Playwright (browser real, evade DataDome)
+  const [
+    scrapedPortalData,
+    idealistaDataResult,
+    idealistaPlaywrightResult,
+    ...officialResults
+  ] = await Promise.all([
     fetchFromScrapedPortals(options),
     fetchFromIdealistaData(options).catch(() => null),
+    fetchFromIdealistaPlaywright(options).catch(() => null),
     fetchFromNotariado(options).catch(() => null),
     fetchFromINE(options).catch(() => null),
     fetchFromInternalDB(options).catch(() => null),
@@ -987,10 +1105,17 @@ export async function getAggregatedMarketData(
   const sourcesUsed: PlatformSource[] = [];
   const sourcesFailed: PlatformSource[] = [];
 
-  // Agregar datos profesionales de Idealista Data (alta prioridad, fiabilidad 88%)
+  // Agregar datos de Idealista Playwright (browser real — máxima fiabilidad
+  // entre los datos scrapeados, hasta 92% si hay datos del Data Platform)
+  if (idealistaPlaywrightResult && idealistaPlaywrightResult.reliability > 0) {
+    platformData.push(idealistaPlaywrightResult);
+    if (!sourcesUsed.includes('idealista_data')) sourcesUsed.push('idealista_data');
+  }
+
+  // Agregar datos profesionales de Idealista Data legacy (informes públicos, fiabilidad 85%)
   if (idealistaDataResult && idealistaDataResult.reliability > 0) {
     platformData.push(idealistaDataResult);
-    sourcesUsed.push('idealista_data');
+    if (!sourcesUsed.includes('idealista_data')) sourcesUsed.push('idealista_data');
   }
 
   // Agregar datos de portales scrapeados

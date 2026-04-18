@@ -116,6 +116,9 @@ export interface PropertyForAnalysis {
   precioVentaSimilarConocido?: number; // venta verificada en mismo edificio
   fuenteReferenciaUser?: string; // "Tasación bancaria 2024", "Notariado", "Vecino vendió", etc.
 
+  // === Identificadores únicos del activo ===
+  referenciaCatastral?: string; // 14 o 20 chars (incluye unidad)
+
   // === Factores específicos por tipo ===
   // Local
   metrosFachada?: number;
@@ -835,6 +838,7 @@ PROPIEDAD A VALORAR (${pTypeLabel})
 ═══════════════════════════════════════════════════════
 - Tipo: ${pTypeLabel}
 - Dirección: ${property.address}, ${property.city} (CP: ${property.postalCode})
+${property.referenciaCatastral ? `- Referencia catastral: ${property.referenciaCatastral}` : ''}
 ${property.neighborhood ? `- Barrio/Zona: ${property.neighborhood}` : ''}
 - Superficie: ${property.squareMeters}m²
 ${pType === 'vivienda' || pType === 'edificio' ? `- Distribución: ${property.rooms} habitaciones, ${property.bathrooms} baños` : pType === 'garaje' ? `- Plazas: ${property.rooms || 1}` : ''}

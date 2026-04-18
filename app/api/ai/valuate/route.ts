@@ -448,6 +448,9 @@ const valuateSchema = z.object({
   precioVentaUltimaTransaccion: z.coerce.number().positive().optional(),
   precioVentaSimilarConocido: z.coerce.number().positive().optional(),
   fuenteReferenciaUser: z.string().optional(),
+
+  // === Identificadores ===
+  referenciaCatastral: z.string().optional(),
 });
 
 /**
@@ -542,6 +545,7 @@ export async function POST(request: NextRequest) {
     let comunidadMensualReal: number | undefined = undefined;
     let rentaActualMensualReal: number | undefined = undefined;
     let superficieUtilReal: number | undefined = undefined;
+    let refCatastralReal: string | undefined = undefined;
     let sameAssetComparables: any[] = [];
     let valuationCompanyId = scope.activeCompanyId || session.user.companyId;
 
@@ -631,6 +635,11 @@ export async function POST(request: NextRequest) {
           undefined;
         rentaActualMensualReal = rentaActualMensualReal ?? selectedUnit.rentaMensual ?? undefined;
         superficieUtilReal = superficieUtilReal ?? selectedUnit.superficieUtil ?? undefined;
+        // Preferir RC de la UNIDAD (20 chars con sufijo) sobre la del edificio
+        refCatastralReal =
+          selectedUnit.referenciaCatastral ||
+          selectedUnit.building?.referenciaCatastral ||
+          undefined;
 
         const similarUnits = await prisma.unit.findMany({
           where: {
@@ -776,6 +785,8 @@ export async function POST(request: NextRequest) {
         squareMeters: superficie,
         rooms: habitaciones,
         propertyType,
+        referenciaCatastral:
+          validated.referenciaCatastral || refCatastralReal || undefined,
       });
       platformDataText = formatPlatformDataForPrompt(aggregatedPlatformData);
       logger.info('[AI Valuate] Datos de plataformas obtenidos', {
@@ -847,6 +858,8 @@ export async function POST(request: NextRequest) {
       precioVentaUltimaTransaccion: validated.precioVentaUltimaTransaccion,
       precioVentaSimilarConocido: validated.precioVentaSimilarConocido,
       fuenteReferenciaUser: validated.fuenteReferenciaUser,
+      // === Identificadores ===
+      referenciaCatastral: validated.referenciaCatastral || refCatastralReal || undefined,
     };
 
     const internalComparablesText =
