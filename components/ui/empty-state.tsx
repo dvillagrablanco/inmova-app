@@ -12,12 +12,23 @@ import { cn } from '@/lib/utils';
 // un objeto `{ $$typeof, render, displayName }` y NO un `function`. Si lo
 // renderizamos como children directamente provoca React error #31. Esta función
 // detecta el caso y nos dice si debemos invocarlo como componente.
+//
+// Distingue entre:
+// - Function component: typeof 'function'
+// - forwardRef/memo/etc (componente, no elemento): tiene `render` o `type`
+// - JSX Element (ya creado): tiene props/key (NO debe envolverse con createElement)
 function isReactComponentLike(value: unknown): boolean {
   if (typeof value === 'function') return true;
   if (value && typeof value === 'object') {
-    const $$typeof = (value as any).$$typeof;
-    if (typeof $$typeof === 'symbol') return true; // forwardRef, memo, etc.
-    if (typeof (value as any).render === 'function') return true;
+    const v = value as any;
+    const $$typeof = v.$$typeof;
+    if (typeof $$typeof !== 'symbol') return false;
+    // JSX element ya tiene props (es un elemento creado)
+    if ('props' in v && v.props !== undefined) return false;
+    // forwardRef tiene render, memo tiene type
+    if (typeof v.render === 'function') return true;
+    if (v.type !== undefined) return true;
+    return false;
   }
   return false;
 }
