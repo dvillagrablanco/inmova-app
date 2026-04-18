@@ -8,7 +8,9 @@
  * - Precaching de assets críticos
  */
 
-const CACHE_VERSION = 'v3.1.0-20260130';
+// IMPORTANT: bump this version on every release that touches sw.js
+// to forzar a los browsers a re-instalar el SW y purgar caches viejos.
+const CACHE_VERSION = 'v3.2.0-20260418';
 const CACHE_NAME = `inmova-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `inmova-runtime-${CACHE_VERSION}`;
 const IMAGES_CACHE = `inmova-images-${CACHE_VERSION}`;
@@ -94,19 +96,41 @@ self.addEventListener('fetch', (event) => {
   }
 
   // ============================================================================
-  // CRITICAL: Skip Service Worker completely for AI/Document processing APIs
-  // These requests can take 10-30+ seconds and MUST NOT be intercepted
+  // CRITICAL: Skip Service Worker completely para endpoints LENTOS
+  // (IA, valoración, scraping, documentos, generación PDF, OCR, etc.)
+  // Si NO se excluyen aquí, networkFirst los corta a los 15s y devuelve
+  // {"error":"Offline"} con HTTP 503 al usuario.
   // ============================================================================
-  if (url.pathname.startsWith('/api/ai/') || 
+  const SLOW_API_PATTERNS = [
+    '/api/ai/',
+    '/api/properties/',           // /api/properties/[id]/valuation, /pdf
+    '/api/valuations',            // valoración guardada y listado
+    '/api/buildings/',            // /api/buildings/[id]/geocode (Nominatim)
+    '/api/admin/geocode',         // re-geocoding masivo
+    '/api/incidents/classify',    // clasificación IA
+    '/api/matching/',             // matching de inquilinos
+    '/api/investment/',           // análisis de inversión IA
+    '/api/upload',                // uploads grandes a S3
+    '/api/document',              // procesamiento de documentos
+    '/api/ocr',                   // OCR
+    '/api/contracts/generate',    // generación PDF
+    '/api/reports/generate',      // generación PDF
+    '/api/ai',                    // por si alguna ruta /api/ai sin / final
+  ];
+  const isSlowApi = SLOW_API_PATTERNS.some(p => url.pathname.startsWith(p));
+  if (isSlowApi ||
       url.pathname.includes('document-analysis') ||
       url.pathname.includes('vision') ||
-      url.pathname.includes('claude')) {
-    // Let the browser handle these requests directly without SW intervention
+      url.pathname.includes('claude') ||
+      url.pathname.includes('valuation') ||
+      url.pathname.includes('valuate') ||
+      url.pathname.includes('geocode')) {
+    // Browser handles directly — no timeout, no caching, no offline fallback
     return;
   }
 
-  // Skip POST requests to API (they don't benefit from caching)
-  if (request.method === 'POST' && url.pathname.startsWith('/api/')) {
+  // Skip POST/PUT/PATCH/DELETE requests to API (they don't benefit from caching)
+  if (request.method !== 'GET' && url.pathname.startsWith('/api/')) {
     return;
   }
 
@@ -171,8 +195,10 @@ async function cacheFirst(request) {
 }
 
 // Network First: Try network, fallback to cache
-// Timeout increased to 15s for API requests (default was 3s which caused issues)
-async function networkFirst(request, timeout = 15000) {
+// Timeout: 30s para dar margen a APIs que tardan algo
+// (las APIs realmente lentas — IA, scraping, valoración — están excluidas
+//  arriba en el fetch handler y NUNCA llegan a este timeout).
+async function networkFirst(request, timeout = 30000) {
   try {
     const networkPromise = fetch(request);
     const timeoutPromise = new Promise((_, reject) =>
@@ -237,11 +263,19 @@ function offlineResponse(request) {
     );
   }
 
-  // JSON: return error
-  return new Response(JSON.stringify({ error: 'Offline' }), {
-    status: 503,
-    headers: { 'Content-Type': 'application/json' },
-  });
+  // JSON: return error con mensaje claro
+  return new Response(
+    JSON.stringify({
+      error: 'Sin conexión con el servidor',
+      offline: true,
+      message:
+        'No se pudo contactar con el servidor. Verifica tu conexión e intenta de nuevo.',
+    }),
+    {
+      status: 503,
+      headers: { 'Content-Type': 'application/json' },
+    }
+  );
 }
 
 // ============================================================================

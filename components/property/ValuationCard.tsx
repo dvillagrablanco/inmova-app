@@ -57,11 +57,23 @@ export function ValuationCard({ propertyId }: ValuationCardProps) {
     setError(null);
 
     try {
-      const response = await fetch(`/api/properties/${propertyId}/valuation`);
-      
+      // Cache: 'no-store' para evitar que el Service Worker intercepte
+      // (la valoración puede tardar 30-60s con scraping + IA).
+      const response = await fetch(`/api/properties/${propertyId}/valuation`, {
+        cache: 'no-store',
+      });
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Error al valorar');
+        const errorData = await response.json().catch(() => ({}));
+
+        // Detectar respuesta sintética del Service Worker
+        if (errorData.offline || errorData.error === 'Offline') {
+          throw new Error(
+            'La valoración tarda más de lo habitual. Intenta de nuevo en unos segundos (los servicios externos como Idealista pueden estar lentos).'
+          );
+        }
+
+        throw new Error(errorData.error || errorData.details || 'Error al valorar');
       }
 
       const result = await response.json();
