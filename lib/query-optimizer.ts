@@ -37,6 +37,8 @@ export const selectBuildingMinimal = {
   piscina: true,
   jardin: true,
   numeroUnidades: true,
+  latitud: true,
+  longitud: true,
 } satisfies Prisma.BuildingSelect;
 
 export const selectUnitMinimal = {

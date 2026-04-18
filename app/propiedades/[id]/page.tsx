@@ -743,6 +743,7 @@ export default function PropiedadDetallesPage() {
               latitude={property.building?.latitud ?? undefined}
               longitude={property.building?.longitud ?? undefined}
               showNearbyPoints={true}
+              buildingId={property.building?.id}
             />
 
             {/* Valoración con IA */}

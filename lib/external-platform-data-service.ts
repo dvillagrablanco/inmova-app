@@ -507,11 +507,16 @@ async function fetchFromInternalDB(options: FetchOptions): Promise<PlatformMarke
     const unitTypes = getUnitTypesForPropertyType(options.propertyType);
     const commercialTypes = getCommercialSpaceTypesForPropertyType(options.propertyType);
 
+    // El modelo Building no tiene campo `ciudad` separado: la ciudad va al
+    // final del `direccion`. Filtramos por substring de la dirección para
+    // restringir a la misma ciudad.
     const units = await prisma.unit.findMany({
       where: {
         building: {
           companyId: options.companyId,
-          ...(options.city && { ciudad: { contains: options.city, mode: 'insensitive' as const } }),
+          ...(options.city
+            ? { direccion: { contains: options.city, mode: 'insensitive' as const } }
+            : {}),
         },
         ...(unitTypes ? { tipo: { in: unitTypes as any } } : {}),
         superficie: options.squareMeters
@@ -541,7 +546,7 @@ async function fetchFromInternalDB(options: FetchOptions): Promise<PlatformMarke
         precioCompra: true,
         valorMercado: true,
         building: {
-          select: { direccion: true, ciudad: true },
+          select: { direccion: true },
         },
       },
       take: 15,

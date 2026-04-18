@@ -11,11 +11,15 @@ interface PropertyMapProps {
   latitude?: number;
   longitude?: number;
   showNearbyPoints?: boolean;
+  /** Si se proporciona, se mostrará un botón para re-geocodificar
+   *  el edificio en BD usando POST /api/buildings/{id}/geocode */
+  buildingId?: string;
 }
 
-export function PropertyMap({ address, city, latitude, longitude }: PropertyMapProps) {
+export function PropertyMap({ address, city, latitude, longitude, buildingId }: PropertyMapProps) {
   const [loading, setLoading] = useState(true);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [relocating, setRelocating] = useState(false);
 
   const fullAddress = city ? `${address}, ${city}` : address;
 
@@ -32,12 +36,6 @@ export function PropertyMap({ address, city, latitude, longitude }: PropertyMapP
 
   useEffect(() => {
     const geocode = async () => {
-      if (latitude && longitude) {
-        setCoords({ lat: latitude, lng: longitude });
-        setLoading(false);
-        return;
-      }
-
       const tryNominatim = async (query: string): Promise<{ lat: number; lng: number } | null> => {
         try {
           const res = await fetch(
@@ -54,6 +52,28 @@ export function PropertyMap({ address, city, latitude, longitude }: PropertyMapP
         return null;
       };
 
+      // Detecta coordenadas claramente "redondeadas" (3 decimales o menos)
+      // que indican geocoding aproximado o datos legacy poco precisos.
+      const looksLowPrecision = (n?: number) => {
+        if (typeof n !== 'number') return true;
+        const str = String(n);
+        const decimals = str.includes('.') ? str.split('.')[1].length : 0;
+        return decimals < 4;
+      };
+
+      // 1) Si tenemos coords de BD con buena precisión, las usamos directamente.
+      if (
+        typeof latitude === 'number' &&
+        typeof longitude === 'number' &&
+        !looksLowPrecision(latitude) &&
+        !looksLowPrecision(longitude)
+      ) {
+        setCoords({ lat: latitude, lng: longitude });
+        setLoading(false);
+        return;
+      }
+
+      // 2) Coords ausentes o de baja precisión → re-geocodificar.
       try {
         const cleanedAddress = cleanAddressForGeocoding(fullAddress);
         let result = await tryNominatim(cleanedAddress);
@@ -83,15 +103,19 @@ export function PropertyMap({ address, city, latitude, longitude }: PropertyMapP
           }
         }
 
-        if (!result && city) {
-          result = await tryNominatim(`${city}, España`);
-        }
-
         if (result) {
           setCoords(result);
+        } else if (typeof latitude === 'number' && typeof longitude === 'number') {
+          // Fallback final: usar las coords aproximadas que vinieran de BD
+          setCoords({ lat: latitude, lng: longitude });
+        } else if (city) {
+          const fallback = await tryNominatim(`${city}, España`);
+          if (fallback) setCoords(fallback);
         }
       } catch {
-        // Geocoding failed
+        if (typeof latitude === 'number' && typeof longitude === 'number') {
+          setCoords({ lat: latitude, lng: longitude });
+        }
       } finally {
         setLoading(false);
       }
@@ -103,6 +127,24 @@ export function PropertyMap({ address, city, latitude, longitude }: PropertyMapP
   const openInGoogleMaps = () => {
     const query = coords ? `${coords.lat},${coords.lng}` : encodeURIComponent(fullAddress);
     window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
+  };
+
+  const handleRelocate = async () => {
+    if (!buildingId) return;
+    setRelocating(true);
+    try {
+      const res = await fetch(`/api/buildings/${buildingId}/geocode?force=true`, {
+        method: 'POST',
+      });
+      const data = await res.json();
+      if (res.ok && typeof data.latitud === 'number' && typeof data.longitud === 'number') {
+        setCoords({ lat: data.latitud, lng: data.longitud });
+      }
+    } catch {
+      // silent
+    } finally {
+      setRelocating(false);
+    }
   };
 
   if (loading) {
@@ -171,10 +213,24 @@ export function PropertyMap({ address, city, latitude, longitude }: PropertyMapP
           </div>
         </div>
 
-        <Button variant="outline" size="sm" onClick={openInGoogleMaps} className="w-full">
-          <ExternalLink className="mr-2 h-3.5 w-3.5" />
-          Abrir en Google Maps
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={openInGoogleMaps} className="flex-1">
+            <ExternalLink className="mr-2 h-3.5 w-3.5" />
+            Abrir en Google Maps
+          </Button>
+          {buildingId && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleRelocate}
+              disabled={relocating}
+              title="Re-localizar el edificio en el mapa usando OpenStreetMap"
+            >
+              <MapPin className="mr-2 h-3.5 w-3.5" />
+              {relocating ? 'Localizando…' : 'Re-localizar'}
+            </Button>
+          )}
+        </div>
       </CardContent>
     </Card>
   );

@@ -901,6 +901,7 @@ export default function EdificioDetallesPage() {
               city={ciudadLine || undefined}
               latitude={building.latitud ?? undefined}
               longitude={building.longitud ?? undefined}
+              buildingId={building.id}
             />
 
             {/* Plano Catastral */}
