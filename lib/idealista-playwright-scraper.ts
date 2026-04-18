@@ -257,25 +257,65 @@ export async function getIdealistaPlaywrightReport(
     });
 
     const context = await browser.newContext({
-      viewport: { width: 1440, height: 900 },
+      viewport: { width: 1920, height: 1080 },
       userAgent:
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
       locale: 'es-ES',
       timezoneId: 'Europe/Madrid',
+      deviceScaleFactor: 2,
+      hasTouch: false,
+      isMobile: false,
+      javaScriptEnabled: true,
       extraHTTPHeaders: {
-        'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8',
+        'Accept-Language': 'es-ES,es;q=0.9,en-US;q=0.8,en;q=0.7',
+        'Sec-Ch-Ua':
+          '"Not A(Brand";v="99", "Google Chrome";v="121", "Chromium";v="121"',
+        'Sec-Ch-Ua-Mobile': '?0',
+        'Sec-Ch-Ua-Platform': '"macOS"',
       },
     });
 
-    // Anti-detección: ocultar webdriver
+    // Anti-detección agresiva (evade DataDome básico)
     await context.addInitScript(() => {
+      // Ocultar webdriver
       Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
       // @ts-ignore
-      window.chrome = { runtime: {} };
+      window.chrome = {
+        runtime: {},
+        loadTimes: () => ({}),
+        csi: () => ({}),
+        app: { isInstalled: false },
+      };
+      // Plugins falsos realistas
       Object.defineProperty(navigator, 'plugins', {
-        get: () => [1, 2, 3, 4, 5],
+        get: () => [
+          { name: 'PDF Viewer', filename: 'internal-pdf-viewer' },
+          { name: 'Chrome PDF Viewer', filename: 'internal-pdf-viewer' },
+          { name: 'Chromium PDF Viewer', filename: 'mhjfbmdgcfjbbpaeojofohoefgiehjai' },
+          { name: 'Microsoft Edge PDF Viewer', filename: 'mhjfbmdgcfjbbpaeojofohoefgiehjai' },
+          { name: 'WebKit built-in PDF', filename: 'internal-pdf-viewer' },
+        ],
       });
       Object.defineProperty(navigator, 'languages', { get: () => ['es-ES', 'es', 'en'] });
+      // Hardware concurrency realista (Mac)
+      Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 8 });
+      // DeviceMemory
+      Object.defineProperty(navigator, 'deviceMemory', { get: () => 8 });
+      // WebGL vendor
+      const getParameter = WebGLRenderingContext.prototype.getParameter;
+      // @ts-ignore
+      WebGLRenderingContext.prototype.getParameter = function (parameter: number) {
+        if (parameter === 37445) return 'Intel Inc.';
+        if (parameter === 37446) return 'Intel(R) Iris(TM) Plus Graphics';
+        return getParameter.apply(this, [parameter]);
+      };
+      // Permissions
+      const originalQuery = window.navigator.permissions.query;
+      // @ts-ignore
+      window.navigator.permissions.query = (params: any) =>
+        params.name === 'notifications'
+          ? Promise.resolve({ state: 'default' } as any)
+          : originalQuery(params);
     });
 
     const page = await context.newPage();
@@ -388,6 +428,47 @@ function address(options: IdealistaScrapeOptions): string {
 // FUNCIONES INTERNAS DE EXTRACCIÓN
 // ============================================================================
 
+/**
+ * Visita una URL y espera a que pase el captcha de DataDome.
+ * Devuelve true si pudo acceder al contenido real, false si quedó bloqueado.
+ */
+async function visitAndWaitForCaptcha(
+  page: any,
+  url: string,
+  maxWaitMs = 20_000
+): Promise<{ html: string; passedCaptcha: boolean }> {
+  await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 25_000 });
+
+  // Pequeñas interacciones humanas
+  await page.mouse.move(Math.random() * 800 + 100, Math.random() * 600 + 100);
+  await page.waitForTimeout(800 + Math.random() * 1200);
+
+  let html = await page.content();
+  let isCaptcha = /captcha-delivery|datadome|please enable js/i.test(html);
+
+  if (!isCaptcha) {
+    return { html, passedCaptcha: true };
+  }
+
+  // Esperar a que DataDome termine su análisis (a veces nos deja pasar tras 5-15s)
+  const startedAt = Date.now();
+  let attempt = 0;
+  while (isCaptcha && Date.now() - startedAt < maxWaitMs) {
+    attempt++;
+    await page.mouse.move(Math.random() * 1200, Math.random() * 700);
+    await page.evaluate(() => window.scrollTo(0, Math.random() * 200));
+    await page.waitForTimeout(1500 + Math.random() * 1500);
+    html = await page.content();
+    isCaptcha = /captcha-delivery|datadome|please enable js/i.test(html);
+    if (!isCaptcha) {
+      logger.info(`[IdealistaPlaywright] DataDome superado tras ${attempt} intentos`);
+      return { html, passedCaptcha: true };
+    }
+  }
+
+  return { html, passedCaptcha: false };
+}
+
 async function fetchPressKit(
   page: any,
   saleUrl: string,
@@ -403,47 +484,45 @@ async function fetchPressKit(
 
   // SALE
   try {
-    await page.goto(saleUrl, { waitUntil: 'domcontentloaded', timeout: 20000 });
-    // Wait for body content
-    await page.waitForTimeout(2500);
-    const saleData = await page.evaluate(() => {
-      const text = document.body.innerText;
-      const priceMatch = text.match(/([\d.,]+)\s*€\s*\/\s*m[²2]/);
-      const annualMatch = text.match(/([+-]?\d+[.,]?\d*)\s*%\s*(?:variaci[óo]n\s+anual|anual|interanual|último año)/i);
-      return {
-        text: text.substring(0, 3000),
-        priceMatch: priceMatch ? priceMatch[1] : null,
-        annualMatch: annualMatch ? annualMatch[1] : null,
-      };
-    });
-    if (saleData.priceMatch) {
-      result.salePricePerM2 = parseSpanishNumber(saleData.priceMatch);
-    }
-    if (saleData.annualMatch) {
-      result.saleAnnualVariation = parseSpanishNumber(saleData.annualMatch);
+    const { passedCaptcha } = await visitAndWaitForCaptcha(page, saleUrl);
+    if (passedCaptcha) {
+      const saleData = await page.evaluate(() => {
+        const text = document.body.innerText;
+        const priceMatch = text.match(/([\d.,]+)\s*€\s*\/\s*m[²2]/);
+        const annualMatch = text.match(
+          /([+-]?\d+[.,]?\d*)\s*%\s*(?:variaci[óo]n\s+anual|anual|interanual|último año)/i
+        );
+        return {
+          priceMatch: priceMatch ? priceMatch[1] : null,
+          annualMatch: annualMatch ? annualMatch[1] : null,
+        };
+      });
+      if (saleData.priceMatch) result.salePricePerM2 = parseSpanishNumber(saleData.priceMatch);
+      if (saleData.annualMatch)
+        result.saleAnnualVariation = parseSpanishNumber(saleData.annualMatch);
     }
   } catch (e: any) {
-    // ignore individual url failure
+    // ignore
   }
 
   // RENT
   try {
-    await page.goto(rentUrl, { waitUntil: 'domcontentloaded', timeout: 20000 });
-    await page.waitForTimeout(2500);
-    const rentData = await page.evaluate(() => {
-      const text = document.body.innerText;
-      const priceMatch = text.match(/([\d.,]+)\s*€\s*\/\s*m[²2]/);
-      const annualMatch = text.match(/([+-]?\d+[.,]?\d*)\s*%\s*(?:variaci[óo]n\s+anual|anual|interanual|último año)/i);
-      return {
-        priceMatch: priceMatch ? priceMatch[1] : null,
-        annualMatch: annualMatch ? annualMatch[1] : null,
-      };
-    });
-    if (rentData.priceMatch) {
-      result.rentPricePerM2 = parseSpanishNumber(rentData.priceMatch);
-    }
-    if (rentData.annualMatch) {
-      result.rentAnnualVariation = parseSpanishNumber(rentData.annualMatch);
+    const { passedCaptcha } = await visitAndWaitForCaptcha(page, rentUrl);
+    if (passedCaptcha) {
+      const rentData = await page.evaluate(() => {
+        const text = document.body.innerText;
+        const priceMatch = text.match(/([\d.,]+)\s*€\s*\/\s*m[²2]/);
+        const annualMatch = text.match(
+          /([+-]?\d+[.,]?\d*)\s*%\s*(?:variaci[óo]n\s+anual|anual|interanual|último año)/i
+        );
+        return {
+          priceMatch: priceMatch ? priceMatch[1] : null,
+          annualMatch: annualMatch ? annualMatch[1] : null,
+        };
+      });
+      if (rentData.priceMatch) result.rentPricePerM2 = parseSpanishNumber(rentData.priceMatch);
+      if (rentData.annualMatch)
+        result.rentAnnualVariation = parseSpanishNumber(rentData.annualMatch);
     }
   } catch (e: any) {
     // ignore
@@ -459,16 +538,8 @@ async function fetchListings(
   operation: 'sale' | 'rent',
   maxListings: number
 ): Promise<IdealistaPlaywrightReport['listings'][0] | null> {
-  await page.goto(listUrl, { waitUntil: 'domcontentloaded', timeout: 20000 });
-  await page.waitForTimeout(3000);
-
-  // Detectar captcha
-  const isCaptcha = await page
-    .evaluate(() => /captcha|datadome|please enable js/i.test(document.body.innerText))
-    .catch(() => false);
-  if (isCaptcha) {
-    return null;
-  }
+  const { passedCaptcha } = await visitAndWaitForCaptcha(page, listUrl, 25_000);
+  if (!passedCaptcha) return null;
 
   // Extraer listings desde DOM
   const listings = await page.evaluate(
