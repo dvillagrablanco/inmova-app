@@ -42,6 +42,7 @@ import { ValuationCard } from '@/components/property/ValuationCard';
 import { DeletePropertyDialog } from '@/components/property/DeletePropertyDialog';
 import { InsuranceCoverageCard } from '@/components/property/InsuranceCoverageCard';
 import { CatastroPlanoViewer } from '@/components/property/CatastroPlanoViewer';
+import { AutoFillDimensionsButton } from '@/components/property/AutoFillDimensionsButton';
 import { PhotoGallery } from '@/components/ui/photo-gallery';
 import { EntityDocuments } from '@/components/ui/entity-documents';
 import { cn } from '@/lib/utils';
@@ -343,7 +344,10 @@ export default function PropiedadDetallesPage() {
             {/* Características Principales */}
             <Card>
               <CardHeader>
-                <CardTitle>Características Principales</CardTitle>
+                <div className="flex items-start justify-between gap-2 flex-wrap">
+                  <CardTitle>Características Principales</CardTitle>
+                  <AutoFillDimensionsButton unitId={property.id} />
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 gap-3 sm:gap-6 md:grid-cols-2">

@@ -257,13 +257,25 @@ async function storeDocument(
     }
   }
 
+  // Serializar datos estructurados al final de descripcion como bloque JSON
+  // Marcador <!--EXTRACTED_DATA_JSON--> para detectarlo después.
+  const baseDesc =
+    extractedData.resumen || `${extractedData.tipo_escritura} (${extractedData.fecha})`;
+  const extractedJsonBlock = `\n\n<!--EXTRACTED_DATA_JSON-->\n${JSON.stringify({
+    fincas: extractedData.fincas || [],
+    inmueble: extractedData.inmueble,
+    numero_escritura: extractedData.numero_escritura,
+    fecha: extractedData.fecha,
+    notario: extractedData.notario,
+    precio_total: extractedData.precio_total,
+  })}\n<!--/EXTRACTED_DATA_JSON-->`;
+
   // Create Document record
   const doc = await prisma.document.create({
     data: {
       nombre: `Escritura ${extractedData.numero_escritura || ''} - ${extractedData.inmueble?.direccion || fileName}`,
       tipo: 'otro',
-      descripcion:
-        extractedData.resumen || `${extractedData.tipo_escritura} (${extractedData.fecha})`,
+      descripcion: baseDesc + extractedJsonBlock,
       cloudStoragePath: storagePath,
       ...(buildingId && { buildingId }),
       tags: [
@@ -333,6 +345,159 @@ async function createOrUpdateAssetAcquisition(
     },
   });
   return { action: 'created', id: created.id };
+}
+
+/**
+ * Actualiza unidades existentes con las dimensiones extraídas de las fincas
+ * de la escritura. Solo rellena campos vacíos (no machaca), salvo `force`.
+ */
+async function updateUnitsFromEscritura(
+  buildingId: string,
+  extractedData: any,
+  options: { force?: boolean } = {}
+): Promise<{ unitsUpdated: number; matched: number }> {
+  if (!extractedData?.fincas || !Array.isArray(extractedData.fincas)) {
+    return { unitsUpdated: 0, matched: 0 };
+  }
+
+  const { getPrismaClient } = await import('@/lib/db');
+  const prisma = getPrismaClient();
+
+  const units = await prisma.unit.findMany({
+    where: { buildingId },
+    select: {
+      id: true,
+      numero: true,
+      planta: true,
+      tipo: true,
+      superficie: true,
+      superficieUtil: true,
+      habitaciones: true,
+      banos: true,
+      referenciaCatastral: true,
+    },
+  });
+
+  const norm = (s: string) =>
+    String(s || '')
+      .replace(/[ºª°\s]/g, '')
+      .toUpperCase();
+
+  const parsePlanta = (p: string | number): number | null => {
+    if (typeof p === 'number') return p;
+    const s = String(p).toLowerCase().trim();
+    if (s === 'bajo' || s === 'pb' || s === '0') return 0;
+    if (s === 'sotano' || s === 'sótano' || s === '-1') return -1;
+    if (s === 'principal' || s === 'entresuelo') return 1;
+    if (s === 'atico' || s === 'ático') return 99;
+    const num = parseInt(s, 10);
+    return isNaN(num) ? null : num;
+  };
+
+  const usedFincas = new Set<number>();
+  let unitsUpdated = 0;
+  let matched = 0;
+
+  for (const unit of units) {
+    let bestScore = 0;
+    let bestIdx = -1;
+
+    extractedData.fincas.forEach((finca: any, idx: number) => {
+      if (usedFincas.has(idx)) return;
+
+      let score = 0;
+
+      // Match planta
+      if (finca.planta && unit.planta !== null) {
+        const p = parsePlanta(finca.planta);
+        if (p !== null && p === unit.planta) score += 4;
+      }
+
+      // Match tipo
+      if (finca.tipo && unit.tipo) {
+        const ft = String(finca.tipo).toLowerCase();
+        if (ft === unit.tipo) score += 3;
+        else if (
+          (unit.tipo === 'vivienda' &&
+            (ft.includes('vivienda') || ft.includes('residencial'))) ||
+          (unit.tipo === 'local' && (ft.includes('local') || ft.includes('comercial'))) ||
+          (unit.tipo === 'garaje' && (ft.includes('garaje') || ft.includes('aparcamiento'))) ||
+          (unit.tipo === 'trastero' && (ft.includes('trastero') || ft.includes('almac')))
+        ) {
+          score += 2;
+        }
+      }
+
+      // Match superficie
+      if (finca.superficie_construida && unit.superficie > 0) {
+        const ratio = unit.superficie / finca.superficie_construida;
+        if (ratio > 0.85 && ratio < 1.15) score += 2;
+        if (ratio > 0.95 && ratio < 1.05) score += 2;
+      }
+
+      // Match descripción / numero
+      const numNorm = norm(unit.numero);
+      if (finca.descripcion) {
+        const descNorm = norm(finca.descripcion);
+        if (descNorm.includes(numNorm)) score += 4;
+      }
+
+      if (score > bestScore) {
+        bestScore = score;
+        bestIdx = idx;
+      }
+    });
+
+    if (bestScore >= 5 && bestIdx >= 0) {
+      usedFincas.add(bestIdx);
+      matched++;
+
+      const finca = extractedData.fincas[bestIdx];
+      const dataToUpdate: Record<string, any> = {};
+      const isEmpty = (v: any) => v === null || v === undefined || v === 0;
+
+      if (
+        finca.superficie_construida > 0 &&
+        (options.force || isEmpty(unit.superficie))
+      ) {
+        dataToUpdate.superficie = finca.superficie_construida;
+      }
+      if (
+        finca.superficie_util > 0 &&
+        (options.force || isEmpty(unit.superficieUtil))
+      ) {
+        dataToUpdate.superficieUtil = finca.superficie_util;
+      }
+      if (
+        finca.referencia_catastral &&
+        (options.force || !unit.referenciaCatastral)
+      ) {
+        dataToUpdate.referenciaCatastral = finca.referencia_catastral;
+      }
+
+      // Habs/baños desde descripción
+      if (finca.descripcion) {
+        const habs = finca.descripcion.match(/(\d+)\s*(?:habitaci|hab|dormit)/i);
+        if (habs && (options.force || isEmpty(unit.habitaciones))) {
+          dataToUpdate.habitaciones = parseInt(habs[1], 10);
+        }
+        const banos = finca.descripcion.match(/(\d+)\s*ba[ñn]o/i);
+        if (banos && (options.force || isEmpty(unit.banos))) {
+          dataToUpdate.banos = parseInt(banos[1], 10);
+        }
+      }
+
+      if (Object.keys(dataToUpdate).length > 0) {
+        await prisma.unit.update({
+          where: { id: unit.id },
+          data: dataToUpdate,
+        });
+        unitsUpdated++;
+      }
+    }
+  }
+
+  return { unitsUpdated, matched };
 }
 
 async function findOrSuggestBuilding(extractedData: any, companyId: string) {
@@ -446,6 +611,16 @@ export async function POST(request: NextRequest) {
         if (assetResult) {
           actions.push(
             `AssetAcquisition ${assetResult.action}: ${assetResult.id} (${extractedData.precio_total.toLocaleString('es-ES')}€)`
+          );
+        }
+      }
+
+      // STEP 6: Actualizar dimensiones de unidades existentes con las fincas extraídas
+      if (buildingId && extractedData.fincas?.length) {
+        const updateRes = await updateUnitsFromEscritura(buildingId, extractedData);
+        if (updateRes.unitsUpdated > 0 || updateRes.matched > 0) {
+          actions.push(
+            `Unidades actualizadas con dimensiones de la escritura: ${updateRes.unitsUpdated} de ${updateRes.matched} matcheadas`
           );
         }
       }
