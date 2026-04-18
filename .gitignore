@@ -118,3 +118,8 @@ scripts/scrape-zona3*.py
 scripts/process-zona3-html.py
 data/zucchetti-deep-analysis.json
 data/zuc-enrich.json
+
+# Audit results (no commit screenshots/json)
+audit-vidaro/
+audit-vidaro-after/
+audit-results/
