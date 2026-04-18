@@ -1,0 +1,786 @@
+
+=== RESUMEN AUDITORÍA VIDARO ===
+{
+  "timestamp": "2026-04-18T17:03:39.902Z",
+  "baseUrl": "https://inmovaapp.com",
+  "user": "dvillagra@vidaroinversiones.com",
+  "total": 68,
+  "success": 0,
+  "warnings": 67,
+  "errors": 1
+}
+
+=== PROBLEMAS DETECTADOS ===
+
+[WARNING] /landing (public) HTTP=200
+  failedRequests (2):
+    - FAIL https://inmovaapp.com/ewoorker/landing?_rsc=byez1 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/register?_rsc=byez1 - net::ERR_ABORTED
+[WARNING] /login (public) HTTP=200
+  failedRequests (9):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/register?_rsc=1obve - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/auth-propietario/register?_rsc=1obve - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/forgot-password?_rsc=1obve - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/landing?_rsc=1obve - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/portal-proveedor/login?_rsc=1obve - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/partners/login?_rsc=1obve - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/cookies?_rsc=1obve - net::ERR_ABORTED
+[WARNING] /register (public) HTTP=200
+  failedRequests (4):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/landing?_rsc=1hmmm - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/login?_rsc=1hmmm - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/privacy?_rsc=1hmmm - net::ERR_ABORTED
+[WARNING] /forgot-password (public) HTTP=200
+  failedRequests (2):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/login?_rsc=1at5c - net::ERR_ABORTED
+[WARNING] /dashboard (dashboard) HTTP=200
+  console (6):
+    - Error loading onboarding progress: {}
+    - Error loading inactive modules: TypeError: Failed to fetch
+    at o (https://inmovaapp.com/_next/static/chunks/app/dashboard/page-5decd4b405c03cdf.js:4:4755)
+    at https://inmovaapp.com/_next/static/chunks/app/dashboard/page-5decd4b405c03cdf.js:4:4714
+    at aW (https://inmovaapp.com/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:73245)
+    at oe (https://inmovaapp.com/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:84686)
+    at ol (https://inmovaapp.com/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:85324)
+    at or (https://inmovaapp.com/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:85208)
+    at ol (https://inmovaapp.com/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:86269)
+    at or (https://inmovaapp.com/_next/static/ch
+  failedRequests (14):
+    - FAIL https://inmovaapp.com/api/onboarding/progress - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/modules?status=inactive - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/ai/suggestions - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/approvals?estado=pendiente - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=hi3jv - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/cookies?_rsc=hi3jv - net::ERR_ABORTED
+[WARNING] /perfil (dashboard) HTTP=200
+  console (1):
+    - Error fetching dashboard data: {message: Failed to fetch, name: TypeError, stack: TypeError: Failed to fetch
+    at e (https://inmov…s/app/dashboard/page-5decd4b405c03cdf.js:4:49942)}
+  failedRequests (7):
+    - FAIL https://inmovaapp.com/api/dashboard/analytics - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard?_rsc=130vz - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/privacy?_rsc=130vz - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/cookies?_rsc=130vz - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/alertas?_rsc=xk8m4 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard/ejecutivo?_rsc=xk8m4 - net::ERR_ABORTED
+[WARNING] /notificaciones (dashboard) HTTP=200
+  failedRequests (9):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/configuracion?_rsc=aziqv - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=aziqv - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard?_rsc=aziqv - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/hoy?_rsc=1hgf2 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard/ejecutivo?_rsc=1hgf2 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/alertas?_rsc=1hgf2 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/privacy?_rsc=aziqv - net::ERR_ABORTED
+[WARNING] /configuracion/notificaciones (dashboard) HTTP=200
+  failedRequests (9):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/configuracion?_rsc=2wzkw - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=2wzkw - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/privacy?_rsc=2wzkw - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/cookies?_rsc=2wzkw - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard?_rsc=2wzkw - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/vencimientos?_rsc=nz3el - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard/ejecutivo?_rsc=nz3el - net::ERR_ABORTED
+  visibleErrors:
+    - Has bloqueado las notificaciones. Debes habilitarlas desde la configuración de tu navegador.
+    - Los mensajes SMS pueden tener costo adicional según tu plan
+[WARNING] /propiedades (alquiler) HTTP=200
+  failedRequests (7):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/configuracion?_rsc=vr9gg - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/hoy?_rsc=16fm3 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/alertas?_rsc=16fm3 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=vr9gg - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/privacy?_rsc=vr9gg - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard?_rsc=16fm3 - net::ERR_ABORTED
+[WARNING] /propiedades/nuevo (alquiler) HTTP=200
+  failedRequests (9):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/propiedades/crear?_rsc=yr8qb - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/configuracion?_rsc=s4ikr - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=s4ikr - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/privacy?_rsc=s4ikr - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/cookies?_rsc=s4ikr - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard?_rsc=1pps9 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/alertas?_rsc=1pps9 - net::ERR_ABORTED
+[WARNING] /edificios (alquiler) HTTP=200
+  console (1):
+    - Failed to fetch RSC payload for https://inmovaapp.com/propiedades. Falling back to browser navigation. TypeError: Failed to fetch
+    at f (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:45578)
+    at https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:59129
+    at Object.u [as task] (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:31933)
+    at c.s (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:32638)
+    at c.enqueue (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:32063)
+    at s (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:59092)
+    at i (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:58632)
+    at a (https://inmovaapp.com/_next/
+  failedRequests (12):
+    - FAIL https://inmovaapp.com/hoy?_rsc=1pps9 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard/ejecutivo?_rsc=1pps9 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/propiedades?_rsc=s4ikr - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/configuracion?_rsc=1x5yb - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=1x5yb - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard?_rsc=owdrq - net::ERR_ABORTED
+[WARNING] /edificios/nuevo (alquiler) HTTP=200
+  console (2):
+    - Fetch API cannot load https://www.google.com/g/collect?v=2&tid=G-WX2LE41M4T&gtm=45je64g0h2v9239602651za200zd9239602651&_p=1776531651631&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AEAAAAQ&ae=a&are=1&cid=972733933.1776531615&frm=0&pscdl=noapi&rcb=19&sr=1440x900&uaa=x86&uab=64&uafvl=Not%253AA-Brand%3B99.0.0.0%7CHeadlessChrome%3B145.0.7632.6%7CChromium%3B145.0.7632.6&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=2&tag_exp=0%7E115616986%7E115938465%7E115938469%7E117266400&dp=%2Fedificios&sid=1776531614&sct=1&seg=1&dl=https%3A%2F%2Finmovaapp.com%2Fedificios&dt=Inmova+App+-+Gesti%C3%B3n+Inmobiliaria+Inteligente&en=scroll&ep.anonymize_ip=true&epn.percent_scrolled=90&_et=4&tfd=3039&gaf=1. Refused to connect because it violates the document's Content Security Policy.
+    - Fetch API cannot load https://www.
+  failedRequests (6):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/edificios?_rsc=1b53x - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard?_rsc=1b53x - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/configuracion?_rsc=1b53x - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/alertas?_rsc=gvrew - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/vencimientos?_rsc=gvrew - net::ERR_ABORTED
+[WARNING] /unidades (alquiler) HTTP=200
+  console (2):
+    - Fetch API cannot load https://www.google.com/g/collect?v=2&tid=G-WX2LE41M4T&gtm=45je64g0h2v9239602651za200zd9239602651&_p=1776531654445&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AAAAAAQ&are=1&cid=972733933.1776531615&frm=0&pscdl=noapi&rcb=6&sr=1440x900&uaa=x86&uab=64&uafvl=Not%253AA-Brand%3B99.0.0.0%7CHeadlessChrome%3B145.0.7632.6%7CChromium%3B145.0.7632.6&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=3&tag_exp=0%7E115938465%7E115938468%7E117266400%7E117884344%7E118463800&dp=%2Fedificios%2Fnuevo&sid=1776531614&sct=1&seg=1&dl=https%3A%2F%2Finmovaapp.com%2Fedificios%2Fnuevo&dt=INMOVA&en=user_engagement&ep.anonymize_ip=true&_et=2793&tfd=3035&gaf=1. Refused to connect because it violates the document's Content Security Policy.
+    - Fetch API cannot load https://www.google.com/g/collect?v=2&tid=G-WX2
+  failedRequests (5):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=11qcq - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/configuracion?_rsc=11qcq - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/cookies?_rsc=11qcq - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/alertas?_rsc=pi1uj - net::ERR_ABORTED
+[WARNING] /inquilinos (alquiler) HTTP=200
+  failedRequests (4):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=tesfj - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/configuracion?_rsc=tesfj - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/cookies?_rsc=tesfj - net::ERR_ABORTED
+[WARNING] /inquilinos/nuevo (alquiler) HTTP=200
+  console (2):
+    - Fetch API cannot load https://www.google.com/g/collect?v=2&tid=G-WX2LE41M4T&gtm=45je64g0h2v9239602651za200zd9239602651&_p=1776531660180&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AEAAAAQ&ae=a&are=1&cid=972733933.1776531615&frm=0&pscdl=noapi&rcb=10&sr=1440x900&uaa=x86&uab=64&uafvl=Not%253AA-Brand%3B99.0.0.0%7CHeadlessChrome%3B145.0.7632.6%7CChromium%3B145.0.7632.6&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=2&tag_exp=0%7E115616985%7E115938465%7E115938468%7E117266400%7E117884344&dp=%2Finquilinos&sid=1776531614&sct=1&seg=1&dl=https%3A%2F%2Finmovaapp.com%2Finquilinos&dt=Inmova+App+-+Gesti%C3%B3n+Inmobiliaria+Inteligente&en=scroll&ep.anonymize_ip=true&epn.percent_scrolled=90&_et=5&tfd=3270&gaf=1. Refused to connect because it violates the document's Content Security Policy.
+    - Fetch API cannot loa
+  failedRequests (8):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=cz537 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/configuracion?_rsc=cz537 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard?_rsc=cz537 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/privacy?_rsc=cz537 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/cookies?_rsc=cz537 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard/ejecutivo?_rsc=5xoe4 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/hoy?_rsc=5xoe4 - net::ERR_ABORTED
+[WARNING] /contratos (alquiler) HTTP=200
+  console (2):
+    - Fetch API cannot load https://www.google.com/g/collect?v=2&tid=G-WX2LE41M4T&gtm=45je64g0h2v9239602651za200zd9239602651&_p=1776531663258&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AEAAAAQ&ae=a&are=1&cid=972733933.1776531615&frm=0&pscdl=noapi&rcb=17&sr=1440x900&uaa=x86&uab=64&uafvl=Not%253AA-Brand%3B99.0.0.0%7CHeadlessChrome%3B145.0.7632.6%7CChromium%3B145.0.7632.6&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=2&tag_exp=0%7E115616985%7E115938465%7E115938469%7E117266400%7E117384406&dp=%2Finquilinos%2Fnuevo&sid=1776531614&sct=1&seg=1&dl=https%3A%2F%2Finmovaapp.com%2Finquilinos%2Fnuevo&dt=Inmova+App+-+Gesti%C3%B3n+Inmobiliaria+Inteligente&en=scroll&ep.anonymize_ip=true&epn.percent_scrolled=90&_et=1&tfd=3032&gaf=1. Refused to connect because it violates the document's Content Security Policy.
+    - Fetc
+  failedRequests (6):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/configuracion?_rsc=1436o - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/cookies?_rsc=1436o - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/alertas?_rsc=1uuq6 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=1436o - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/privacy?_rsc=1436o - net::ERR_ABORTED
+[WARNING] /contratos/nuevo (alquiler) HTTP=200
+  console (2):
+    - Fetch API cannot load https://www.google.com/g/collect?v=2&tid=G-WX2LE41M4T&gtm=45je64g0h2v9239602651za200zd9239602651&_p=1776531666089&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AAAAAAQ&are=1&cid=972733933.1776531615&frm=0&pscdl=noapi&rcb=15&sr=1440x900&uaa=x86&uab=64&uafvl=Not%253AA-Brand%3B99.0.0.0%7CHeadlessChrome%3B145.0.7632.6%7CChromium%3B145.0.7632.6&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=3&tag_exp=0%7E115938465%7E115938468%7E117266400&dp=%2Fcontratos&sid=1776531614&sct=1&seg=1&dl=https%3A%2F%2Finmovaapp.com%2Fcontratos&dt=INMOVA&en=user_engagement&ep.anonymize_ip=true&_et=3082&tfd=3362&gaf=1. Refused to connect because it violates the document's Content Security Policy.
+    - Fetch API cannot load https://www.google.com/g/collect?v=2&tid=G-WX2LE41M4T&gtm=45je64g0h2v9239602651za200z
+  failedRequests (9):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/contratos?_rsc=14uoi - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/configuracion?_rsc=14uoi - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard?_rsc=14uoi - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/cookies?_rsc=14uoi - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=14uoi - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/privacy?_rsc=14uoi - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/hoy?_rsc=albzy - net::ERR_ABORTED
+[WARNING] /pagos (alquiler) HTTP=200
+  failedRequests (4):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=1gb1r - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard?_rsc=mr5yq - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/hoy?_rsc=mr5yq - net::ERR_ABORTED
+[WARNING] /gastos (alquiler) HTTP=200
+  console (2):
+    - Fetch API cannot load https://www.google.com/g/collect?v=2&tid=G-WX2LE41M4T&gtm=45je64g0h2v9239602651za200zd9239602651&_p=1776531672111&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AEAAAAQ&ae=a&are=1&cid=972733933.1776531615&frm=0&pscdl=noapi&rcb=1&sr=1440x900&uaa=x86&uab=64&uafvl=Not%253AA-Brand%3B99.0.0.0%7CHeadlessChrome%3B145.0.7632.6%7CChromium%3B145.0.7632.6&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=2&tag_exp=0%7E115938465%7E115938469%7E117266400&dp=%2Fpagos&sid=1776531614&sct=1&seg=1&dl=https%3A%2F%2Finmovaapp.com%2Fpagos&dt=Inmova+App+-+Gesti%C3%B3n+Inmobiliaria+Inteligente&en=scroll&ep.anonymize_ip=true&epn.percent_scrolled=90&_et=5&tfd=3092&gaf=1. Refused to connect because it violates the document's Content Security Policy.
+    - Fetch API cannot load https://www.google.com/g/collect?
+  failedRequests (3):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=jzmu9 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/cookies?_rsc=jzmu9 - net::ERR_ABORTED
+[WARNING] /incidencias (alquiler) HTTP=200
+  console (1):
+    - Failed to fetch RSC payload for https://inmovaapp.com/reportes/financieros. Falling back to browser navigation. TypeError: network error
+  failedRequests (11):
+    - FAIL https://inmovaapp.com/finanzas/cuadro-de-mandos?_rsc=jzmu9 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/reportes/financieros?_rsc=jzmu9 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/_next/static/chunks/app/finanzas/cuadro-de-mandos/page-b2a495cd871178e9.js - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/_next/static/chunks/app/finanzas/error-fefe5b9e20a71d96.js - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/privacy?_rsc=1afxl - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=1afxl - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/cookies?_rsc=1afxl - net::ERR_ABORTED
+[WARNING] /documentos (alquiler) HTTP=200
+  console (2):
+    - Fetch API cannot load https://www.google.com/g/collect?v=2&tid=G-WX2LE41M4T&gtm=45je64g0h2v9239602651za200zd9239602651&_p=1776531678297&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AAAAAAQ&are=1&cid=972733933.1776531615&frm=0&pscdl=noapi&rcb=6&sr=1440x900&uaa=x86&uab=64&uafvl=Not%253AA-Brand%3B99.0.0.0%7CHeadlessChrome%3B145.0.7632.6%7CChromium%3B145.0.7632.6&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=3&tag_exp=0%7E115938465%7E115938469%7E117266400&dp=%2Fincidencias&sid=1776531614&sct=1&seg=1&dl=https%3A%2F%2Finmovaapp.com%2Fincidencias&dt=INMOVA&en=user_engagement&ep.anonymize_ip=true&_et=2739&tfd=3032&gaf=1. Refused to connect because it violates the document's Content Security Policy.
+    - Fetch API cannot load https://www.google.com/g/collect?v=2&tid=G-WX2LE41M4T&gtm=45je64g0h2v9239602651za2
+  failedRequests (8):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/configuracion?_rsc=1ufm8 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=1ufm8 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard/ejecutivo?_rsc=jvemi - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/alertas?_rsc=jvemi - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/vencimientos?_rsc=jvemi - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/hoy?_rsc=jvemi - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard?_rsc=jvemi - net::ERR_ABORTED
+[WARNING] /inspecciones (alquiler) HTTP=200
+  failedRequests (7):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard?_rsc=104cn - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/cookies?_rsc=104cn - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/privacy?_rsc=104cn - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/configuracion?_rsc=104cn - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/vencimientos?_rsc=dnwka - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/hoy?_rsc=dnwka - net::ERR_ABORTED
+[WARNING] /certificaciones (alquiler) HTTP=200
+  console (1):
+    - Error al cargar empresas: {}
+  failedRequests (7):
+    - FAIL https://inmovaapp.com/api/user/companies - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/cookies?_rsc=3ibp4 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard?_rsc=3ibp4 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=3ibp4 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/configuracion?_rsc=3ibp4 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard/ejecutivo?_rsc=84mfd - net::ERR_ABORTED
+[WARNING] /renovaciones (alquiler) HTTP=200
+  console (3):
+    - Error al cargar empresas: {}
+    - Fetch API cannot load https://www.google.com/g/collect?v=2&tid=G-WX2LE41M4T&gtm=45je64g0h2v9239602651za200zd9239602651&_p=1776531688030&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AEAAAAQ&ae=a&are=1&cid=972733933.1776531615&frm=0&pscdl=noapi&rcb=10&sr=1440x900&uaa=x86&uab=64&uafvl=Not%253AA-Brand%3B99.0.0.0%7CHeadlessChrome%3B145.0.7632.6%7CChromium%3B145.0.7632.6&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=2&tag_exp=0%7E115938466%7E115938468%7E117266400&dp=%2Fcertificaciones&sid=1776531614&sct=1&seg=1&dl=https%3A%2F%2Finmovaapp.com%2Fcertificaciones&dt=Inmova+App+-+Gesti%C3%B3n+Inmobiliaria+Inteligente&en=scroll&ep.anonymize_ip=true&epn.percent_scrolled=90&_et=2&tfd=3088&gaf=1. Refused to connect because it violates the document's Content Security Policy.
+    -
+  failedRequests (2):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/user/companies - net::ERR_ABORTED
+[WARNING] /seguros (alquiler) HTTP=200
+  failedRequests (6):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard/ejecutivo?_rsc=nn9di - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/alertas?_rsc=nn9di - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=5oefb - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/hoy?_rsc=nn9di - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/vencimientos?_rsc=nn9di - net::ERR_ABORTED
+[WARNING] /seguros/nuevo (alquiler) HTTP=200
+  failedRequests (6):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard?_rsc=15r6m - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/configuracion?_rsc=15r6m - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/seguros?_rsc=15r6m - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=15r6m - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/alertas?_rsc=pph2q - net::ERR_ABORTED
+[WARNING] /inversiones/oportunidades (inversiones) HTTP=200
+  console (2):
+    - Fetch API cannot load https://www.google.com/g/collect?v=2&tid=G-WX2LE41M4T&gtm=45je64g0h2v9239602651za200zd9239602651&_p=1776531696572&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AEAAAAQ&ae=a&are=1&cid=972733933.1776531615&frm=0&pscdl=noapi&rcb=7&sr=1440x900&uaa=x86&uab=64&uafvl=Not%253AA-Brand%3B99.0.0.0%7CHeadlessChrome%3B145.0.7632.6%7CChromium%3B145.0.7632.6&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=2&tag_exp=0%7E115616986%7E115938465%7E115938468%7E117266400%7E117884344%7E118128922&dp=%2Fseguros%2Fnuevo&sid=1776531614&sct=1&seg=1&dl=https%3A%2F%2Finmovaapp.com%2Fseguros%2Fnuevo&dt=Inmova+App+-+Gesti%C3%B3n+Inmobiliaria+Inteligente&en=scroll&ep.anonymize_ip=true&epn.percent_scrolled=90&_et=3&tfd=3082&gaf=1. Refused to connect because it violates the document's Content Security Policy.
+    -
+  failedRequests (5):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/hoy?_rsc=16aof - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard?_rsc=16aof - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=10m5d - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/alertas?_rsc=16aof - net::ERR_ABORTED
+[WARNING] /valoracion-ia (inversiones) HTTP=200
+  failedRequests (7):
+    - FAIL https://inmovaapp.com/api/investment/opportunities - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/privacy?_rsc=1ekfo - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/configuracion?_rsc=1ekfo - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=1ekfo - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/cookies?_rsc=1ekfo - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard?_rsc=to38u - net::ERR_ABORTED
+[WARNING] /finanzas (finanzas) HTTP=200
+  failedRequests (3):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=19mit - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard?_rsc=19mit - net::ERR_ABORTED
+[WARNING] /contabilidad (finanzas) HTTP=200
+  failedRequests (6):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=1fu2g - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/configuracion?_rsc=1fu2g - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/contabilidad/intragrupo?_rsc=1fu2g - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/contabilidad/integraciones?_rsc=1fu2g - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/privacy?_rsc=1fu2g - net::ERR_ABORTED
+[WARNING] /facturacion (finanzas) HTTP=200
+  console (6):
+    - Error cargando docs externos contabilidad: {}
+    - Error al cargar empresas: {}
+    - Failed to fetch RSC payload for https://inmovaapp.com/dashboard. Falling back to browser navigation. TypeError: Failed to fetch
+    at f (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:45578)
+    at https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:59129
+    at Object.u [as task] (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:31933)
+    at c.s (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:32638)
+    at c.enqueue (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:32063)
+    at s (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:59092)
+    at i (https://inmovaapp.com/_next/st
+  failedRequests (14):
+    - FAIL https://inmovaapp.com/api/documents?tipo=contabilidad - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/_next/static/chunks/app/contabilidad/intragrupo/page-302ddfafc5a85073.js - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/_next/static/chunks/app/contabilidad/integraciones/page-7790f7de1231dbc6.js - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/user/companies - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard?_rsc=tdmcn - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/accounting/analytics?periodo=2026-04&companyId=cmkctneuh0001nokn7nvhuweq - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard/ejecutivo?_rsc=tdmcn - net::ERR_ABORTED
+[WARNING] /presupuestos (finanzas) HTTP=200
+  console (2):
+    - Fetch API cannot load https://www.google.com/g/collect?v=2&tid=G-WX2LE41M4T&gtm=45je64g0h2v9239602651za200zd9239602651&_p=1776531710479&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AAAAAAQ&are=1&cid=972733933.1776531615&frm=0&pscdl=noapi&rcb=18&sr=1440x900&uaa=x86&uab=64&uafvl=Not%253AA-Brand%3B99.0.0.0%7CHeadlessChrome%3B145.0.7632.6%7CChromium%3B145.0.7632.6&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=3&tag_exp=0%7E115616986%7E115938466%7E115938468%7E117266400&dp=%2Ffacturacion&sid=1776531614&sct=1&seg=1&dl=https%3A%2F%2Finmovaapp.com%2Ffacturacion&dt=INMOVA&en=user_engagement&ep.anonymize_ip=true&_et=2749&tfd=3040&gaf=1. Refused to connect because it violates the document's Content Security Policy.
+    - Fetch API cannot load https://www.google.com/g/collect?v=2&tid=G-WX2LE41M4T&gtm=45je64g0h2v
+  failedRequests (8):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/dashboard?stats=usage - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=1ei4q - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/configuracion?_rsc=1ei4q - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/privacy?_rsc=1ei4q - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard/ejecutivo?_rsc=s1on5 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/hoy?_rsc=s1on5 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/vencimientos?_rsc=s1on5 - net::ERR_ABORTED
+[WARNING] /impuestos (finanzas) HTTP=200
+  failedRequests (8):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard?_rsc=ib5hk - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=ib5hk - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/configuracion?_rsc=ib5hk - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/cookies?_rsc=ib5hk - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/hoy?_rsc=192oz - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/alertas?_rsc=192oz - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/vencimientos?_rsc=192oz - net::ERR_ABORTED
+[WARNING] /open-banking (finanzas) HTTP=200
+  console (4):
+    - Error al cargar empresas: {}
+    - Fetch API cannot load https://www.google.com/g/collect?v=2&tid=G-WX2LE41M4T&gtm=45je64g0h2v9239602651za200zd9239602651&_p=1776531716699&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AAAAAAQ&are=1&cid=972733933.1776531615&frm=0&pscdl=noapi&rcb=13&sr=1440x900&uaa=x86&uab=64&uafvl=Not%253AA-Brand%3B99.0.0.0%7CHeadlessChrome%3B145.0.7632.6%7CChromium%3B145.0.7632.6&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=3&tag_exp=0%7E115938465%7E115938468%7E117266400%7E118128922&dp=%2Fimpuestos&sid=1776531614&sct=1&seg=1&dl=https%3A%2F%2Finmovaapp.com%2Fimpuestos&dt=INMOVA&en=user_engagement&ep.anonymize_ip=true&_et=2386&tfd=3155&gaf=1. Refused to connect because it violates the document's Content Security Policy.
+    - Fetch API cannot load https://www.google.com/g/collect?v=2&t
+  failedRequests (10):
+    - FAIL https://inmovaapp.com/api/user/companies - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/payments?limit=500 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/configuracion?_rsc=v9a32 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=v9a32 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/hoy?_rsc=8stze - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/vencimientos?_rsc=8stze - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard/ejecutivo?_rsc=8stze - net::ERR_ABORTED
+[WARNING] /comunidades (comunidades) HTTP=200
+  console (3):
+    - Error loading open banking data: TypeError: Failed to fetch
+    at https://inmovaapp.com/_next/static/chunks/app/open-banking/page-96ae54999a51c326.js:1:6282
+    at https://inmovaapp.com/_next/static/chunks/app/open-banking/page-96ae54999a51c326.js:1:6941
+    at aW (https://inmovaapp.com/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:73245)
+    at oe (https://inmovaapp.com/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:84686)
+    at ol (https://inmovaapp.com/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:85324)
+    at or (https://inmovaapp.com/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:85208)
+    at ol (https://inmovaapp.com/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:85304)
+    at or (https://inmovaapp.com/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:85208
+  failedRequests (9):
+    - FAIL https://inmovaapp.com/api/banking/reconcile-unified?all=true - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/finanzas/conciliacion?page=1&limit=1 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/configuracion?_rsc=r4wbv - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=r4wbv - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/privacy?_rsc=r4wbv - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard?_rsc=11t8y - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/vencimientos?_rsc=11t8y - net::ERR_ABORTED
+[WARNING] /comunidades/cuotas (comunidades) HTTP=200
+  failedRequests (6):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=1a6qt - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/configuracion?_rsc=1a6qt - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/cookies?_rsc=1a6qt - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard?_rsc=19nng - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/vencimientos?_rsc=19nng - net::ERR_ABORTED
+[WARNING] /comunidades/actas (comunidades) HTTP=200
+  console (2):
+    - Fetch API cannot load https://www.google.com/g/collect?v=2&tid=G-WX2LE41M4T&gtm=45je64g0h2v9239602651za200zd9239602651&_p=1776531725396&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AEAAAAQ&ae=a&are=1&cid=972733933.1776531615&frm=0&pscdl=noapi&rcb=5&sr=1440x900&uaa=x86&uab=64&uafvl=Not%253AA-Brand%3B99.0.0.0%7CHeadlessChrome%3B145.0.7632.6%7CChromium%3B145.0.7632.6&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=2&tag_exp=0%7E115616986%7E115938465%7E115938468%7E117266400&dp=%2Fcomunidades%2Fcuotas&sid=1776531614&sct=1&seg=1&dl=https%3A%2F%2Finmovaapp.com%2Fcomunidades%2Fcuotas&dt=Inmova+App+-+Gesti%C3%B3n+Inmobiliaria+Inteligente&en=scroll&ep.anonymize_ip=true&epn.percent_scrolled=90&_et=2&tfd=3074&gaf=1. Refused to connect because it violates the document's Content Security Policy.
+    - Fetch API can
+  failedRequests (8):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/configuracion?_rsc=7st7k - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=7st7k - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard?_rsc=15e2w - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard/ejecutivo?_rsc=15e2w - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/hoy?_rsc=15e2w - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/cookies?_rsc=7st7k - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/vencimientos?_rsc=15e2w - net::ERR_ABORTED
+[WARNING] /comunidades/votaciones (comunidades) HTTP=200
+  failedRequests (6):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/configuracion?_rsc=1x8t2 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=1x8t2 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard/ejecutivo?_rsc=17u1q - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/hoy?_rsc=17u1q - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/vencimientos?_rsc=17u1q - net::ERR_ABORTED
+[WARNING] /comunidades/finanzas (comunidades) HTTP=200
+  console (8):
+    - Fetch API cannot load https://www.google.com/g/collect?v=2&tid=G-WX2LE41M4T&gtm=45je64g0h2v9239602651za200zd9239602651&_p=1776531731158&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AAAAAAQ&are=1&cid=972733933.1776531615&frm=0&pscdl=noapi&rcb=4&sr=1440x900&uaa=x86&uab=64&uafvl=Not%253AA-Brand%3B99.0.0.0%7CHeadlessChrome%3B145.0.7632.6%7CChromium%3B145.0.7632.6&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=3&tag_exp=0%7E115938465%7E115938469%7E117266400%7E118128922&dp=%2Fcomunidades%2Fvotaciones&sid=1776531614&sct=1&seg=1&dl=https%3A%2F%2Finmovaapp.com%2Fcomunidades%2Fvotaciones&dt=INMOVA&en=user_engagement&ep.anonymize_ip=true&_et=2353&tfd=3115&gaf=1. Refused to connect because it violates the document's Content Security Policy.
+    - Fetch API cannot load https://www.google.com/g/collect?v=2&tid=G-W
+  failedRequests (11):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/configuracion?_rsc=wyki3 - net::ERR_ABORTED
+    - 500 https://inmovaapp.com/api/comunidades/dashboard?
+    - FAIL https://inmovaapp.com/dashboard?_rsc=12kqi - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/alertas?_rsc=12kqi - net::ERR_ABORTED
+    - 500 https://inmovaapp.com/api/user/onboarding-status
+    - FAIL https://inmovaapp.com/hoy?_rsc=12kqi - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard/ejecutivo?_rsc=12kqi - net::ERR_ABORTED
+[WARNING] /votaciones (comunidades) HTTP=200
+  console (9):
+    - Fetch API cannot load https://www.google.com/g/collect?v=2&tid=G-WX2LE41M4T&gtm=45je64g0h2v9239602651za200zd9239602651&_p=1776531734016&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AEAAAAQ&ae=a&are=1&cid=972733933.1776531615&frm=0&pscdl=noapi&rcb=11&sr=1440x900&uaa=x86&uab=64&uafvl=Not%253AA-Brand%3B99.0.0.0%7CHeadlessChrome%3B145.0.7632.6%7CChromium%3B145.0.7632.6&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=2&tag_exp=0%7E115938466%7E115938469%7E117266400&dp=%2Fcomunidades%2Ffinanzas&sid=1776531614&sct=1&seg=1&dl=https%3A%2F%2Finmovaapp.com%2Fcomunidades%2Ffinanzas&dt=Inmova+App+-+Gesti%C3%B3n+Inmobiliaria+Inteligente&en=scroll&ep.anonymize_ip=true&epn.percent_scrolled=90&_et=2&tfd=3060&gaf=1. Refused to connect because it violates the document's Content Security Policy.
+    - Fetch API cannot loa
+  failedRequests (15):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/user/onboarding-status - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/user/companies - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/comunidades/dashboard? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/user/companies - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=yn0tq - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/configuracion?_rsc=yn0tq - net::ERR_ABORTED
+    - 500 https://inmovaapp.com/api/votaciones
+[WARNING] /reuniones (comunidades) HTTP=200
+  console (7):
+    - Fetch API cannot load https://www.google.com/g/collect?v=2&tid=G-WX2LE41M4T&gtm=45je64g0h2v9239602651za200zd9239602651&_p=1776531736897&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AAAAAAQ&are=1&cid=972733933.1776531615&frm=0&pscdl=noapi&rcb=6&sr=1440x900&uaa=x86&uab=64&uafvl=Not%253AA-Brand%3B99.0.0.0%7CHeadlessChrome%3B145.0.7632.6%7CChromium%3B145.0.7632.6&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=3&tag_exp=0%7E115938466%7E115938469%7E117266400&dp=%2Fvotaciones&sid=1776531614&sct=1&seg=1&dl=https%3A%2F%2Finmovaapp.com%2Fvotaciones&dt=INMOVA&en=user_engagement&ep.anonymize_ip=true&_et=2337&tfd=3086&gaf=1. Refused to connect because it violates the document's Content Security Policy.
+    - Fetch API cannot load https://www.google.com/g/collect?v=2&tid=G-WX2LE41M4T&gtm=45je64g0h2v9239602651za200
+  failedRequests (12):
+    - FAIL https://inmovaapp.com/api/votaciones - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/user/onboarding-status - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/buildings - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/user/companies - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/user/companies - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=agl9i - net::ERR_ABORTED
+    - 500 https://inmovaapp.com/api/user/onboarding-status
+[WARNING] /anuncios (comunidades) HTTP=200
+  console (3):
+    - Fetch API cannot load https://www.google.com/g/collect?v=2&tid=G-WX2LE41M4T&gtm=45je64g0h2v9239602651za200zd9239602651&_p=1776531739735&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AEAAAAQ&ae=a&are=1&cid=972733933.1776531615&frm=0&pscdl=noapi&rcb=17&sr=1440x900&uaa=x86&uab=64&uafvl=Not%253AA-Brand%3B99.0.0.0%7CHeadlessChrome%3B145.0.7632.6%7CChromium%3B145.0.7632.6&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=2&tag_exp=0%7E115938466%7E115938468%7E117266400%7E118128922&dp=%2Freuniones&sid=1776531614&sct=1&seg=1&dl=https%3A%2F%2Finmovaapp.com%2Freuniones&dt=Inmova+App+-+Gesti%C3%B3n+Inmobiliaria+Inteligente&en=scroll&ep.anonymize_ip=true&epn.percent_scrolled=90&_et=3&tfd=3063&gaf=1. Refused to connect because it violates the document's Content Security Policy.
+    - Fetch API cannot load https://www.
+  failedRequests (13):
+    - FAIL https://inmovaapp.com/api/buildings - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/user/companies - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/reuniones - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/user/onboarding-status - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=8oo7k - net::ERR_ABORTED
+    - 404 https://inmovaapp.com/api/anuncios
+    - FAIL https://inmovaapp.com/dashboard?_rsc=16oxk - net::ERR_ABORTED
+[WARNING] /mantenimiento (operaciones) HTTP=200
+  console (2):
+    - Fetch API cannot load https://www.google.com/g/collect?v=2&tid=G-WX2LE41M4T&gtm=45je64g0h2v9239602651za200zd9239602651&_p=1776531742606&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AEAAAAQ&ae=a&are=1&cid=972733933.1776531615&frm=0&pscdl=noapi&rcb=4&sr=1440x900&uaa=x86&uab=64&uafvl=Not%253AA-Brand%3B99.0.0.0%7CHeadlessChrome%3B145.0.7632.6%7CChromium%3B145.0.7632.6&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=2&tag_exp=0%7E115938465%7E115938469%7E117266400&dp=%2Fanuncios&sid=1776531614&sct=1&seg=1&dl=https%3A%2F%2Finmovaapp.com%2Fanuncios&dt=Inmova+App+-+Gesti%C3%B3n+Inmobiliaria+Inteligente&en=scroll&ep.anonymize_ip=true&epn.percent_scrolled=90&_et=2&tfd=3072&gaf=1. Refused to connect because it violates the document's Content Security Policy.
+    - Fetch API cannot load https://www.google.com/g/co
+  failedRequests (6):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/anuncios - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=nfmuu - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/configuracion?_rsc=nfmuu - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/alertas?_rsc=2jaf2 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard/ejecutivo?_rsc=2jaf2 - net::ERR_ABORTED
+[WARNING] /calendario (operaciones) HTTP=200
+  console (3):
+    - Error al cargar empresas: {}
+    - Error al cargar empresas: {}
+    - Error al cargar empresas: {}
+  failedRequests (9):
+    - FAIL https://inmovaapp.com/hoy?_rsc=2jaf2 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/user/companies - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/user/companies - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/user/companies - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard?_rsc=x91fh - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard/ejecutivo?_rsc=x91fh - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/alertas?_rsc=x91fh - net::ERR_ABORTED
+[WARNING] /visitas (operaciones) HTTP=200
+  console (3):
+    - Error fetching auto events: TypeError: Failed to fetch
+    at https://inmovaapp.com/_next/static/chunks/app/calendario/page-6c532bf22acc46d5.js:1:1529
+    at https://inmovaapp.com/_next/static/chunks/app/calendario/page-6c532bf22acc46d5.js:1:1910
+    at aW (https://inmovaapp.com/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:73245)
+    at oe (https://inmovaapp.com/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:84686)
+    at ol (https://inmovaapp.com/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:85324)
+    at or (https://inmovaapp.com/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:85208)
+    at ol (https://inmovaapp.com/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:86269)
+    at or (https://inmovaapp.com/_next/static/chunks/fd9d1056-991dbec7e7d6068a.js:1:85208)
+    at 
+  failedRequests (8):
+    - FAIL https://inmovaapp.com/api/calendar/auto-events - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/cookies?_rsc=8s4zb - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/branding - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=sanze - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/configuracion?_rsc=sanze - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard?_rsc=1a9ix - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/cookies?_rsc=sanze - net::ERR_ABORTED
+[WARNING] /proveedores (operaciones) HTTP=200
+  failedRequests (3):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/configuracion?_rsc=slq46 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=slq46 - net::ERR_ABORTED
+[WARNING] /chat (comunicaciones) HTTP=200
+  failedRequests (6):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=1yt61 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/hoy?_rsc=vucw5 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/vencimientos?_rsc=vucw5 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard/ejecutivo?_rsc=vucw5 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard?_rsc=vucw5 - net::ERR_ABORTED
+[WARNING] /sms (comunicaciones) HTTP=200
+  failedRequests (4):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/hoy?_rsc=12unl - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/configuracion?_rsc=uv4gs - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=uv4gs - net::ERR_ABORTED
+[WARNING] /notificaciones/plantillas (comunicaciones) HTTP=200
+  console (6):
+    - Failed to load resource: the server responded with a status of 500 ()
+    - Failed to load resource: the server responded with a status of 500 ()
+    - Failed to load resource: the server responded with a status of 500 ()
+    - Error al cargar empresas: {}
+    - Failed to load resource: the server responded with a status of 500 ()
+  failedRequests (6):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=1y2k3 - net::ERR_ABORTED
+    - 500 https://inmovaapp.com/api/user/onboarding-status
+    - 500 https://inmovaapp.com/api/notification-templates
+    - 500 https://inmovaapp.com/api/user/companies
+    - 500 https://inmovaapp.com/api/user/companies
+[WARNING] /notificaciones/reglas (comunicaciones) HTTP=200
+  console (7):
+    - Failed to load resource: the server responded with a status of 500 ()
+    - Failed to load resource: the server responded with a status of 500 ()
+    - Failed to load resource: the server responded with a status of 500 ()
+    - Failed to load resource: the server responded with a status of 500 ()
+    - Error al cargar empresas: {}
+  failedRequests (12):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/user/companies - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/user/companies - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/notification-templates - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/user/onboarding-status - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=r0y1v - net::ERR_ABORTED
+    - 500 https://inmovaapp.com/api/notification-templates
+    - 500 https://inmovaapp.com/api/user/onboarding-status
+[WARNING] /firma-digital (documentos) HTTP=200
+  console (4):
+    - Fetch API cannot load https://www.google.com/g/collect?v=2&tid=G-WX2LE41M4T&gtm=45je64g0h2v9239602651za200zd9239602651&_p=1776531765666&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AEAAAAQ&ae=a&are=1&cid=972733933.1776531615&frm=0&pscdl=noapi&rcb=9&sr=1440x900&uaa=x86&uab=64&uafvl=Not%253AA-Brand%3B99.0.0.0%7CHeadlessChrome%3B145.0.7632.6%7CChromium%3B145.0.7632.6&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=2&tag_exp=0%7E115938466%7E115938468%7E117266400%7E117384406&dp=%2Fnotificaciones%2Freglas&sid=1776531614&sct=1&seg=1&dl=https%3A%2F%2Finmovaapp.com%2Fnotificaciones%2Freglas&dt=Inmova+App+-+Gesti%C3%B3n+Inmobiliaria+Inteligente&en=scroll&ep.anonymize_ip=true&epn.percent_scrolled=90&_et=8&tfd=3228&gaf=1. Refused to connect because it violates the document's Content Security Policy.
+    - Fetch A
+  failedRequests (14):
+    - FAIL https://inmovaapp.com/api/notification-templates - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/user/companies - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/user/companies - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/notification-rules - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/user/onboarding-status - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/configuracion?_rsc=3bu3n - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=3bu3n - net::ERR_ABORTED
+[WARNING] /firma-digital/templates (documentos) HTTP=200
+  console (10):
+    - Error al cargar empresas: {}
+    - Fetch API cannot load https://www.google.com/g/collect?v=2&tid=G-WX2LE41M4T&gtm=45je64g0h2v9239602651za200zd9239602651&_p=1776531768501&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AEAAAAQ&ae=a&are=1&cid=972733933.1776531615&frm=0&pscdl=noapi&rcb=15&sr=1440x900&uaa=x86&uab=64&uafvl=Not%253AA-Brand%3B99.0.0.0%7CHeadlessChrome%3B145.0.7632.6%7CChromium%3B145.0.7632.6&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=2&tag_exp=0%7E115938465%7E115938469%7E117266400&dp=%2Ffirma-digital&sid=1776531614&sct=1&seg=1&dl=https%3A%2F%2Finmovaapp.com%2Ffirma-digital&dt=Inmova+App+-+Gesti%C3%B3n+Inmobiliaria+Inteligente&en=scroll&ep.anonymize_ip=true&epn.percent_scrolled=90&_et=2&tfd=3080&gaf=1. Refused to connect because it violates the document's Content Security Policy.
+    - Fet
+  failedRequests (12):
+    - FAIL https://inmovaapp.com/api/user/companies - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/user/companies - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=agkkz - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/configuracion?_rsc=agkkz - net::ERR_ABORTED
+    - 500 https://inmovaapp.com/api/user/onboarding-status
+    - 500 https://inmovaapp.com/api/user/companies
+    - 404 https://inmovaapp.com/api/contract-templates
+[WARNING] /plantillas-legales (documentos) HTTP=200
+  failedRequests (8):
+    - FAIL https://inmovaapp.com/api/user/companies - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/user/companies - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/user/onboarding-status - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/contract-templates - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard/ejecutivo?_rsc=1koa2 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/alertas?_rsc=1koa2 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/vencimientos?_rsc=1koa2 - net::ERR_ABORTED
+[WARNING] /plantillas (documentos) HTTP=200
+  failedRequests (6):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard?_rsc=1ipt6 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard/ejecutivo?_rsc=1ipt6 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/hoy?_rsc=1ipt6 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=u8wqb - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/privacy?_rsc=u8wqb - net::ERR_ABORTED
+[WARNING] /analytics (analytics) HTTP=200
+  console (2):
+    - Fetch API cannot load https://www.google.com/g/collect?v=2&tid=G-WX2LE41M4T&gtm=45je64g0h2v9239602651za200zd9239602651&_p=1776531777058&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AEAAAAQ&ae=a&are=1&cid=972733933.1776531615&frm=0&pscdl=noapi&rcb=9&sr=1440x900&uaa=x86&uab=64&uafvl=Not%253AA-Brand%3B99.0.0.0%7CHeadlessChrome%3B145.0.7632.6%7CChromium%3B145.0.7632.6&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=2&tag_exp=0%7E115616985%7E115938466%7E115938469%7E117266400&dp=%2Fplantillas&sid=1776531614&sct=1&seg=1&dl=https%3A%2F%2Finmovaapp.com%2Fplantillas&dt=Inmova+App+-+Gesti%C3%B3n+Inmobiliaria+Inteligente&en=scroll&ep.anonymize_ip=true&epn.percent_scrolled=90&_et=2&tfd=3084&gaf=1. Refused to connect because it violates the document's Content Security Policy.
+    - Fetch API cannot load https://www
+  failedRequests (5):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/configuracion?_rsc=pv3ry - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/alertas?_rsc=1gmna - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=pv3ry - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard?_rsc=1gmna - net::ERR_ABORTED
+[WARNING] /bi (analytics) HTTP=200
+  console (12):
+    - Failed to fetch RSC payload for https://inmovaapp.com/unidades?estado=disponible. Falling back to browser navigation. TypeError: Failed to fetch
+    at f (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:45578)
+    at https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:59129
+    at Object.u [as task] (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:31933)
+    at c.s (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:32638)
+    at c.enqueue (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:32063)
+    at s (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:59092)
+    at i (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:58632)
+    at a (https://inmov
+  failedRequests (14):
+    - FAIL https://inmovaapp.com/unidades?estado=disponible&_rsc=pv3ry - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/user/companies - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard?_rsc=t51bd - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/alertas?_rsc=t51bd - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=1942b - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/configuracion?_rsc=1942b - net::ERR_ABORTED
+    - 500 https://inmovaapp.com/api/user/onboarding-status
+[WARNING] /reportes (analytics) HTTP=200
+  console (4):
+    - Failed to load resource: the server responded with a status of 500 ()
+    - Failed to load resource: the server responded with a status of 500 ()
+    - Error al cargar empresas: {}
+    - Failed to load resource: the server responded with a status of 500 ()
+  failedRequests (12):
+    - FAIL https://inmovaapp.com/api/user/companies - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/buildings - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/bi/dashboard?periodo=12&buildingId= - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/user/onboarding-status - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/user/companies - net::ERR_ABORTED
+    - 500 https://inmovaapp.com/api/reports?tipo=global&periodo=12
+    - FAIL https://inmovaapp.com/dashboard?_rsc=1hys5 - net::ERR_ABORTED
+[WARNING] /reportes/financieros (analytics) HTTP=200
+  console (12):
+    - Failed to load resource: the server responded with a status of 500 ()
+    - Error al cargar empresas: {}
+    - Fetch API cannot load https://www.google.com/g/collect?v=2&tid=G-WX2LE41M4T&gtm=45je64g0h2v9239602651za200zd9239602651&_p=1776531785784&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AAAAAAQ&are=1&cid=972733933.1776531615&frm=0&pscdl=noapi&rcb=10&sr=1440x900&uaa=x86&uab=64&uafvl=Not%253AA-Brand%3B99.0.0.0%7CHeadlessChrome%3B145.0.7632.6%7CChromium%3B145.0.7632.6&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=3&tag_exp=0%7E115938466%7E115938469%7E117266400&dp=%2Freportes&sid=1776531614&sct=1&seg=1&dl=https%3A%2F%2Finmovaapp.com%2Freportes&dt=INMOVA&en=user_engagement&ep.anonymize_ip=true&_et=2360&tfd=3148&gaf=1. Refused to connect because it violates the document's Content Security Policy.
+    
+  failedRequests (14):
+    - 500 https://inmovaapp.com/api/user/companies
+    - FAIL https://inmovaapp.com/api/user/onboarding-status - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/user/companies - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/reports?tipo=global&periodo=12 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/user/companies - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/configuracion?_rsc=15qdb - net::ERR_ABORTED
+    - 500 https://inmovaapp.com/api/user/onboarding-status
+[WARNING] /estadisticas (analytics) HTTP=200
+  console (10):
+    - Failed to load resource: the server responded with a status of 500 ()
+    - Failed to fetch RSC payload for https://inmovaapp.com/reportes. Falling back to browser navigation. TypeError: Failed to fetch
+    at f (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:45578)
+    at https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:59129
+    at Object.u [as task] (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:31933)
+    at c.s (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:32638)
+    at c.enqueue (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:32063)
+    at s (https://inmovaapp.com/_next/static/chunks/52117-9171f45fc8519441.js:1:59092)
+    at i (https://inmovaapp.com/_next/static/chunks/
+  failedRequests (20):
+    - 500 https://inmovaapp.com/api/buildings
+    - FAIL https://inmovaapp.com/api/buildings - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/user/companies - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/units - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/expenses?fechaDesde=2026-04-01&fechaHasta=2026-04-18 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/user/onboarding-status - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/user/companies - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/payments?limit=500 - net::ERR_ABORTED
+[WARNING] /crm (crm) HTTP=200
+  console (8):
+    - Fetch API cannot load https://www.google.com/g/collect?v=2&tid=G-WX2LE41M4T&gtm=45je64g0h2v9239602651za200zd9239602651&_p=1776531791463&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AAAAAAQ&are=1&cid=972733933.1776531615&frm=0&pscdl=noapi&rcb=6&sr=1440x900&uaa=x86&uab=64&uafvl=Not%253AA-Brand%3B99.0.0.0%7CHeadlessChrome%3B145.0.7632.6%7CChromium%3B145.0.7632.6&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=3&tag_exp=0%7E115616985%7E115938466%7E115938469%7E117266400&dp=%2Festadisticas&sid=1776531614&sct=1&seg=1&dl=https%3A%2F%2Finmovaapp.com%2Festadisticas&dt=INMOVA&en=user_engagement&ep.anonymize_ip=true&_et=2363&tfd=3063&gaf=1. Refused to connect because it violates the document's Content Security Policy.
+    - Fetch API cannot load https://www.google.com/g/collect?v=2&tid=G-WX2LE41M4T&gtm=45je64g0h2
+  failedRequests (12):
+    - FAIL https://inmovaapp.com/api/user/onboarding-status - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/estadisticas - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/user/companies - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/user/companies - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=1bmmd - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/configuracion?_rsc=1bmmd - net::ERR_ABORTED
+    - 500 https://inmovaapp.com/api/user/onboarding-status
+[WARNING] /candidatos (crm) HTTP=200
+  console (4):
+    - Fetch API cannot load https://www.google.com/g/collect?v=2&tid=G-WX2LE41M4T&gtm=45je64g0h2v9239602651za200zd9239602651&_p=1776531794367&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AEAAAAQ&ae=a&are=1&cid=972733933.1776531615&frm=0&pscdl=noapi&rcb=8&sr=1440x900&uaa=x86&uab=64&uafvl=Not%253AA-Brand%3B99.0.0.0%7CHeadlessChrome%3B145.0.7632.6%7CChromium%3B145.0.7632.6&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=2&tag_exp=0%7E115938466%7E115938469%7E117266400&dp=%2Fcrm&sid=1776531614&sct=1&seg=1&dl=https%3A%2F%2Finmovaapp.com%2Fcrm&dt=Inmova+App+-+Gesti%C3%B3n+Inmobiliaria+Inteligente&en=scroll&ep.anonymize_ip=true&epn.percent_scrolled=90&_et=2&tfd=3082&gaf=1. Refused to connect because it violates the document's Content Security Policy.
+    - Fetch API cannot load https://www.google.com/g/collect?v=2&
+  failedRequests (11):
+    - FAIL https://inmovaapp.com/api/modules/active?companyId=cmkctneuh0001nokn7nvhuweq - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/user/companies - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/user/onboarding-status - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/user/companies - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=950ah - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/configuracion?_rsc=950ah - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/hoy?_rsc=xlwqn - net::ERR_ABORTED
+[WARNING] /screening (crm) HTTP=200
+  console (5):
+    - Fetch API cannot load https://www.google.com/g/collect?v=2&tid=G-WX2LE41M4T&gtm=45je64g0h2v9239602651za200zd9239602651&_p=1776531797210&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AEAAAAQ&ae=a&are=1&cid=972733933.1776531615&frm=0&pscdl=noapi&rcb=16&sr=1440x900&uaa=x86&uab=64&uafvl=Not%253AA-Brand%3B99.0.0.0%7CHeadlessChrome%3B145.0.7632.6%7CChromium%3B145.0.7632.6&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=2&tag_exp=0%7E115938465%7E115938468%7E117266400%7E117384405&dp=%2Fcandidatos&sid=1776531614&sct=1&seg=1&dl=https%3A%2F%2Finmovaapp.com%2Fcandidatos&dt=Inmova+App+-+Gesti%C3%B3n+Inmobiliaria+Inteligente&en=scroll&ep.anonymize_ip=true&epn.percent_scrolled=90&_et=2&tfd=3045&gaf=1. Refused to connect because it violates the document's Content Security Policy.
+    - Fetch API cannot load https://ww
+  failedRequests (3):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/api/user/companies - net::ERR_ABORTED
+    - 500 https://inmovaapp.com/api/screening
+[WARNING] /valoraciones (crm) HTTP=200
+  failedRequests (6):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/configuracion?_rsc=2wx0t - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=2wx0t - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/vencimientos?_rsc=1fhkz - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/privacy?_rsc=2wx0t - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/cookies?_rsc=2wx0t - net::ERR_ABORTED
+[WARNING] /portal-inquilino/dashboard (portales) HTTP=200
+  console (3):
+    - Fetch API cannot load https://www.google.com/g/collect?v=2&tid=G-WX2LE41M4T&gtm=45je64g0h2v9239602651za200zd9239602651&_p=1776531802857&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AAAAAAQ&are=1&cid=972733933.1776531615&frm=0&pscdl=noapi&rcb=0&sr=1440x900&uaa=x86&uab=64&uafvl=Not%253AA-Brand%3B99.0.0.0%7CHeadlessChrome%3B145.0.7632.6%7CChromium%3B145.0.7632.6&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=3&tag_exp=0%7E115938465%7E115938469%7E117266400&dp=%2Fvaloraciones&sid=1776531614&sct=1&seg=1&dl=https%3A%2F%2Finmovaapp.com%2Fvaloraciones&dt=INMOVA&en=user_engagement&ep.anonymize_ip=true&_et=2371&tfd=3071&gaf=1. Refused to connect because it violates the document's Content Security Policy.
+    - Fetch API cannot load https://www.google.com/g/collect?v=2&tid=G-WX2LE41M4T&gtm=45je64g0h2v9239602651z
+  failedRequests (4):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - 404 https://inmovaapp.com/api/portal-inquilino/dashboard
+    - FAIL https://inmovaapp.com/legal/cookies?_rsc=1k6sx - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/privacy?_rsc=1k6sx - net::ERR_ABORTED
+[ERROR] /portal-propietario (portales) HTTP=404
+  notes: HTTP 404
+  console (1):
+    - Failed to load resource: the server responded with a status of 404 ()
+  failedRequests (6):
+    - 404 https://inmovaapp.com/portal-propietario
+    - FAIL https://inmovaapp.com/api/portal-inquilino/dashboard - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard?_rsc=77yha - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/cookies?_rsc=77yha - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/privacy?_rsc=77yha - net::ERR_ABORTED
+[WARNING] /soporte (soporte) HTTP=200
+  console (2):
+    - Fetch API cannot load https://www.google.com/g/collect?v=2&tid=G-WX2LE41M4T&gtm=45je64g0h2v9239602651za200zd9239602651&_p=1776531808121&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AEAAAAQ&ae=a&are=1&cid=972733933.1776531615&frm=0&pscdl=noapi&rcb=8&sr=1440x900&uaa=x86&uab=64&uafvl=Not%253AA-Brand%3B99.0.0.0%7CHeadlessChrome%3B145.0.7632.6%7CChromium%3B145.0.7632.6&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=2&tag_exp=0%7E115616985%7E115938465%7E115938469%7E117266400%7E117384406&dp=%2Fportal-propietario&sid=1776531614&sct=1&seg=1&dl=https%3A%2F%2Finmovaapp.com%2Fportal-propietario&dt=Inmova+App+-+Gesti%C3%B3n+Inmobiliaria+Inteligente&en=scroll&ep.anonymize_ip=true&epn.percent_scrolled=90&_et=5&tfd=3240&gaf=1. Refused to connect because it violates the document's Content Security Policy.
+    - Fetch
+  failedRequests (4):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard?_rsc=w8df4 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/perfil?_rsc=w8df4 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/configuracion?_rsc=w8df4 - net::ERR_ABORTED
+[WARNING] /sugerencias (soporte) HTTP=200
+  console (3):
+    - Error al cargar empresas: {}
+    - Fetch API cannot load https://www.google.com/g/collect?v=2&tid=G-WX2LE41M4T&gtm=45je64g0h2v9239602651za200zd9239602651&_p=1776531811588&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AEAAAAQ&ae=a&are=1&cid=972733933.1776531615&frm=0&pscdl=noapi&rcb=2&sr=1440x900&uaa=x86&uab=64&uafvl=Not%253AA-Brand%3B99.0.0.0%7CHeadlessChrome%3B145.0.7632.6%7CChromium%3B145.0.7632.6&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=2&tag_exp=0%7E115938465%7E115938469%7E117266400&dp=%2Fsoporte&sid=1776531614&sct=1&seg=1&dl=https%3A%2F%2Finmovaapp.com%2Fsoporte&dt=Inmova+App+-+Gesti%C3%B3n+Inmobiliaria+Inteligente&en=scroll&ep.anonymize_ip=true&epn.percent_scrolled=90&_et=3&tfd=3360&gaf=1. Refused to connect because it violates the document's Content Security Policy.
+    - Fetch API cannot
+  failedRequests (8):
+    - FAIL https://inmovaapp.com/api/user/companies - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard?_rsc=egd1l - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/configuracion?_rsc=egd1l - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/soporte?_rsc=egd1l - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/cookies?_rsc=egd1l - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/dashboard/ejecutivo?_rsc=p4po8 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/legal/privacy?_rsc=egd1l - net::ERR_ABORTED
+[WARNING] /knowledge-base (soporte) HTTP=200
+  failedRequests (9):
+    - FAIL https://inmovaapp.com/cdn-cgi/rum? - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/ayuda/academy?_rsc=ae542 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/ayuda/incidencias?_rsc=ae542 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/ayuda/como-empezar?_rsc=ae542 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/?_rsc=ae542 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/ayuda/portales?_rsc=ae542 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/ayuda/incidencias/gestionar-solucionar-incidencia?_rsc=ae542 - net::ERR_ABORTED
+    - FAIL https://inmovaapp.com/ayuda/gestionar-cuenta/crear-gestionar-equipos?_rsc=ae542 - net::ERR_ABORTED

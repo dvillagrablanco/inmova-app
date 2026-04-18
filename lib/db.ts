@@ -100,10 +100,11 @@ function createPrismaClient(): PrismaClient {
 
 export const prisma = globalForPrisma.prisma ?? createPrismaClient();
 
-// Guardar en global para desarrollo (evitar múltiples instancias en hot reload)
-if (process.env.NODE_ENV !== 'production') {
-  globalForPrisma.prisma = prisma;
-}
+// CRÍTICO: Reutilizar singleton también en producción para evitar
+// "Too many database connections opened" en PM2 cluster mode.
+// Cada worker PM2 tiene su propio process scope, pero dentro del worker
+// SIEMPRE debemos compartir la misma instancia.
+globalForPrisma.prisma = prisma;
 
 export const db = prisma; // Alias para compatibilidad
 export default prisma; // Default export para compatibilidad
@@ -111,18 +112,16 @@ export default prisma; // Default export para compatibilidad
 /**
  * Función para obtener instancia de Prisma (lazy loading compatible)
  * Usar en APIs con `const prisma = getPrismaClient()`
+ *
+ * Esta función SIEMPRE devuelve la misma instancia (singleton por worker).
  */
 export function getPrismaClient(): PrismaClient {
   if (globalForPrisma.prisma) {
     return globalForPrisma.prisma;
   }
 
-  // Crear nueva instancia si no existe
   const client = createPrismaClient();
-  if (process.env.NODE_ENV !== 'production') {
-    globalForPrisma.prisma = client;
-  }
-
+  globalForPrisma.prisma = client;
   return client;
 }
 

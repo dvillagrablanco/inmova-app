@@ -30,12 +30,12 @@ export async function GET(request: Request) {
   const prisma = await getPrisma();
   try {
     const user = await requireAuth();
-    
+
     // Verificar permiso de visualización de reportes
     if (user.role === 'operador') {
       return forbiddenResponse('No tienes permiso para ver reportes financieros');
     }
-    
+
     const companyId = user.companyId;
 
     const { searchParams } = new URL(request.url);
@@ -49,6 +49,7 @@ export async function GET(request: Request) {
 
     if (tipo === 'por_propiedad') {
       // Optimización: Usar agregaciones SQL nativas
+      // NOTA: Las tablas en Postgres están mapeadas en minúsculas (@@map)
       const reportes: PropertyReport[] = await prisma.$queryRaw`
         WITH building_stats AS (
           SELECT 
@@ -57,8 +58,8 @@ export async function GET(request: Request) {
             b.direccion,
             COUNT(DISTINCT u.id) as total_units,
             COUNT(DISTINCT CASE WHEN u.estado = 'ocupada' THEN u.id END) as occupied_units
-          FROM "Building" b
-          LEFT JOIN "Unit" u ON u."buildingId" = b.id
+          FROM "buildings" b
+          LEFT JOIN "units" u ON u."buildingId" = b.id
           WHERE b."companyId" = ${companyId}
           GROUP BY b.id, b.nombre, b.direccion
         ),
@@ -66,10 +67,10 @@ export async function GET(request: Request) {
           SELECT 
             b.id as building_id,
             COALESCE(SUM(p.monto), 0) as total_income
-          FROM "Building" b
-          LEFT JOIN "Unit" u ON u."buildingId" = b.id
-          LEFT JOIN "Contract" c ON c."unitId" = u.id
-          LEFT JOIN "Payment" p ON p."contractId" = c.id
+          FROM "buildings" b
+          LEFT JOIN "units" u ON u."buildingId" = b.id
+          LEFT JOIN "contracts" c ON c."unitId" = u.id
+          LEFT JOIN "payments" p ON p."contractId" = c.id
           WHERE b."companyId" = ${companyId}
             AND p.estado = 'pagado'
             AND p."fechaVencimiento" >= ${fechaInicio}
@@ -79,8 +80,8 @@ export async function GET(request: Request) {
           SELECT 
             b.id as building_id,
             COALESCE(SUM(e.monto), 0) as total_expenses
-          FROM "Building" b
-          LEFT JOIN "Expense" e ON e."buildingId" = b.id
+          FROM "buildings" b
+          LEFT JOIN "expenses" e ON e."buildingId" = b.id
           WHERE b."companyId" = ${companyId}
             AND e.fecha >= ${fechaInicio}
           GROUP BY b.id
@@ -106,12 +107,10 @@ export async function GET(request: Request) {
 
       // Calcular métricas adicionales
       const reportesConMetricas = reportes.map((r: any) => {
-        const rentabilidadBruta = r.ingresosBrutos > 0 
-          ? (r.ingresosBrutos / (r.ingresosBrutos + r.gastos)) * 100 
-          : 0;
-        const rentabilidadNeta = r.ingresosBrutos > 0 
-          ? (r.ingresosNetos / r.ingresosBrutos) * 100 
-          : 0;
+        const rentabilidadBruta =
+          r.ingresosBrutos > 0 ? (r.ingresosBrutos / (r.ingresosBrutos + r.gastos)) * 100 : 0;
+        const rentabilidadNeta =
+          r.ingresosBrutos > 0 ? (r.ingresosNetos / r.ingresosBrutos) * 100 : 0;
         const roi = r.gastos > 0 ? (r.ingresosNetos / r.gastos) * 100 : 0;
 
         return {
@@ -147,10 +146,10 @@ export async function GET(request: Request) {
           SELECT 
             DATE_TRUNC('month', p."fechaVencimiento") as month,
             SUM(p.monto) as income
-          FROM "Payment" p
-          JOIN "Contract" c ON c.id = p."contractId"
-          JOIN "Unit" u ON u.id = c."unitId"
-          JOIN "Building" b ON b.id = u."buildingId"
+          FROM "payments" p
+          JOIN "contracts" c ON c.id = p."contractId"
+          JOIN "units" u ON u.id = c."unitId"
+          JOIN "buildings" b ON b.id = u."buildingId"
           WHERE b."companyId" = ${companyId}
             AND p.estado = 'pagado'
             AND p."fechaVencimiento" >= ${fechaInicio}
@@ -161,8 +160,8 @@ export async function GET(request: Request) {
           SELECT 
             DATE_TRUNC('month', e.fecha) as month,
             SUM(e.monto) as expenses
-          FROM "Expense" e
-          JOIN "Building" b ON b.id = e."buildingId"
+          FROM "expenses" e
+          JOIN "buildings" b ON b.id = e."buildingId"
           WHERE b."companyId" = ${companyId}
             AND e.fecha >= ${fechaInicio}
             AND e.fecha <= ${now}
@@ -179,7 +178,10 @@ export async function GET(request: Request) {
       `;
 
       const flujoCaja = flujoCajaData.map((item: any) => ({
-        mes: new Date(item.month_start).toLocaleDateString('es-ES', { month: 'short', year: 'numeric' }),
+        mes: new Date(item.month_start).toLocaleDateString('es-ES', {
+          month: 'short',
+          year: 'numeric',
+        }),
         ingresos: Math.round(item.ingresos * 100) / 100,
         gastos: Math.round(item.gastos * 100) / 100,
         neto: Math.round((item.ingresos - item.gastos) * 100) / 100,
@@ -192,18 +194,18 @@ export async function GET(request: Request) {
     const globalStats: any = await prisma.$queryRaw`
       WITH company_income AS (
         SELECT COALESCE(SUM(p.monto), 0) as total_income
-        FROM "Payment" p
-        JOIN "Contract" c ON c.id = p."contractId"
-        JOIN "Unit" u ON u.id = c."unitId"
-        JOIN "Building" b ON b.id = u."buildingId"
+        FROM "payments" p
+        JOIN "contracts" c ON c.id = p."contractId"
+        JOIN "units" u ON u.id = c."unitId"
+        JOIN "buildings" b ON b.id = u."buildingId"
         WHERE b."companyId" = ${companyId}
           AND p.estado = 'pagado'
           AND p."fechaVencimiento" >= ${fechaInicio}
       ),
       company_expenses AS (
         SELECT COALESCE(SUM(e.monto), 0) as total_expenses
-        FROM "Expense" e
-        JOIN "Building" b ON b.id = e."buildingId"
+        FROM "expenses" e
+        JOIN "buildings" b ON b.id = e."buildingId"
         WHERE b."companyId" = ${companyId}
           AND e.fecha >= ${fechaInicio}
       ),
@@ -211,8 +213,8 @@ export async function GET(request: Request) {
         SELECT 
           COUNT(*) as total_units,
           COUNT(CASE WHEN u.estado = 'ocupada' THEN 1 END) as occupied_units
-        FROM "Unit" u
-        JOIN "Building" b ON b.id = u."buildingId"
+        FROM "units" u
+        JOIN "buildings" b ON b.id = u."buildingId"
         WHERE b."companyId" = ${companyId}
       )
       SELECT 
@@ -230,16 +232,14 @@ export async function GET(request: Request) {
       unidadesOcupadas: 0,
     };
     const ingresosNetos = stats.ingresosBrutos - stats.gastos;
-    const rentabilidadBruta = stats.ingresosBrutos > 0 
-      ? (stats.ingresosBrutos / (stats.ingresosBrutos + stats.gastos)) * 100 
-      : 0;
-    const rentabilidadNeta = stats.ingresosBrutos > 0 
-      ? (ingresosNetos / stats.ingresosBrutos) * 100 
-      : 0;
+    const rentabilidadBruta =
+      stats.ingresosBrutos > 0
+        ? (stats.ingresosBrutos / (stats.ingresosBrutos + stats.gastos)) * 100
+        : 0;
+    const rentabilidadNeta =
+      stats.ingresosBrutos > 0 ? (ingresosNetos / stats.ingresosBrutos) * 100 : 0;
     const roi = stats.gastos > 0 ? (ingresosNetos / stats.gastos) * 100 : 0;
-    const tasaOcupacion = stats.unidades > 0 
-      ? (stats.unidadesOcupadas / stats.unidades) * 100 
-      : 0;
+    const tasaOcupacion = stats.unidades > 0 ? (stats.unidadesOcupadas / stats.unidades) * 100 : 0;
 
     return NextResponse.json({
       global: {
@@ -256,7 +256,9 @@ export async function GET(request: Request) {
       periodo: meses,
     });
   } catch (error: any) {
-    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) { return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 }); }
+    if (error?.name === 'AuthError' || error?.statusCode === 401 || error?.statusCode === 403) {
+      return NextResponse.json({ error: error.message }, { status: error.statusCode || 401 });
+    }
     logger.error('Error al generar reportes:', error);
     if (error.message === 'No autenticado') {
       return NextResponse.json({ error: error.message }, { status: 401 });

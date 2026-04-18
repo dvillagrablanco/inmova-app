@@ -315,7 +315,8 @@ async function calculateRenewalRate(prisma: any, companyIds: string[]): Promise<
         where: {
           unit: { building: { companyId: { in: companyIds } } },
           fechaFin: { gte: oneYearAgo, lte: new Date() },
-          renovado: true,
+          // Aproximación: contratos con prorrogas realizadas o renovacionAutomatica
+          OR: [{ prorrogasRealizadas: { gt: 0 } }, { renovacionAutomatica: true }],
         },
       }),
     ]);
