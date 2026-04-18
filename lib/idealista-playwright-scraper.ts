@@ -392,18 +392,28 @@ export async function getIdealistaPlaywrightReport(
       }
     }
 
-    // Solo cachear si tenemos algo
+    // Solo cachear si tenemos algo útil
     const hasData =
       result.pressKit ||
       result.listings.some((l) => l.sampleSize > 0) ||
-      result.dataPlatform?.available;
+      (result.dataPlatform?.available &&
+        (result.dataPlatform.salePricePerM2 ||
+          result.dataPlatform.rentPricePerM2 ||
+          result.dataPlatform.grossYield));
     if (hasData) {
+      // Cache solo 6h con datos. Sin datos cache 30min para no martillar.
       setCached(cacheKey, result);
-      log(`Reporte completo, fiabilidad ${result.reliability}%`);
+      log(`Reporte con datos, fiabilidad ${result.reliability}%`);
       return result;
     }
 
-    log('Sin datos extraídos, devolviendo null');
+    // Si solo tenemos login OK pero sin datos parseados, dejamos que las
+    // otras fuentes (Notariado, INE, datos estáticos) tomen el relevo.
+    log(
+      `Sin datos extraídos (DataDome bloqueó scraping). dataPlatform.available=${
+        result.dataPlatform?.available
+      }`
+    );
     return null;
   } catch (error: any) {
     logger.error('[IdealistaPlaywright] Error global:', {

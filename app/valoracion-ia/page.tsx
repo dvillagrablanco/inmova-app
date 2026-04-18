@@ -1973,10 +1973,15 @@ ${
                     <CheckCircle2 className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" />
                     <div className="text-xs text-amber-900 dark:text-amber-200 leading-relaxed">
                       <strong>Recomendado:</strong> Si conoces precios reales del mercado en
-                      esta zona (tasación, vecino que vendió, anuncio que viste), apórtalos
-                      aquí. Idealista/Fotocasa bloquean el scraping desde nuestro servidor con
-                      anti-bot, así que los precios que tú aportes mejoran muchísimo la
-                      precisión de la valoración.
+                      esta zona (tasación bancaria, vecino que vendió, anuncio reciente),
+                      apórtalos aquí.
+                      <br />
+                      <span className="font-medium">Cómo conseguimos los datos de mercado:</span>{' '}
+                      Idealista Data Platform autenticado (con tus credenciales), pisos.com,
+                      Notariado, INE, base interna Inmova y datos públicos de zona. Idealista
+                      y Fotocasa protegen sus listados públicos con DataDome anti-bot que
+                      a veces bloquea nuestras consultas — los precios que tú aportes son la
+                      fuente más fiable.
                     </div>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
