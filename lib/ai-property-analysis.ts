@@ -1121,18 +1121,57 @@ ${
 
   const message = await anthropic.messages.create({
     model: CLAUDE_MODEL_PRIMARY,
-    max_tokens: 4096,
+    max_tokens: 6000, // Aumentado: el prompt RICS+ESG genera respuestas más largas
     temperature: 0.3,
     messages: [{ role: 'user', content: prompt }],
   });
 
   const text = message.content[0];
-  if (text.type !== 'text') throw new Error('No text in phase 2 response');
+  if (text.type !== 'text') {
+    logger.error('[Phase2] No text in response, type:', { type: (text as any)?.type });
+    throw new Error('No text in phase 2 response');
+  }
 
-  const jsonMatch = text.text.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) throw new Error('No JSON in phase 2 response');
+  // Buscar JSON con tolerancia: el modelo a veces lo envuelve en backticks
+  let jsonText = text.text.trim();
+  // Quitar fences ```json ... ```
+  jsonText = jsonText.replace(/^```(?:json)?\s*/, '').replace(/```\s*$/, '');
+  const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) {
+    logger.error('[Phase2] No JSON in response. Response preview:', {
+      preview: text.text.substring(0, 500),
+      length: text.text.length,
+      stopReason: message.stop_reason,
+    });
+    throw new Error(`No JSON in phase 2 response (stopReason: ${message.stop_reason})`);
+  }
 
-  const raw = JSON.parse(jsonMatch[0]);
+  let raw: any;
+  try {
+    raw = JSON.parse(jsonMatch[0]);
+  } catch (e: any) {
+    // Intentar recuperar JSON parcial si se truncó por max_tokens
+    logger.warn('[Phase2] JSON parse error, intentando reparar:', { error: e.message });
+    // Cerrar arrays/objetos abiertos
+    let repaired = jsonMatch[0];
+    const openBraces = (repaired.match(/\{/g) || []).length;
+    const closeBraces = (repaired.match(/\}/g) || []).length;
+    const openBrackets = (repaired.match(/\[/g) || []).length;
+    const closeBrackets = (repaired.match(/\]/g) || []).length;
+    repaired = repaired.replace(/,\s*$/, ''); // quitar trailing comma
+    for (let i = 0; i < openBrackets - closeBrackets; i++) repaired += ']';
+    for (let i = 0; i < openBraces - closeBraces; i++) repaired += '}';
+    try {
+      raw = JSON.parse(repaired);
+      logger.info('[Phase2] JSON reparado correctamente');
+    } catch (e2: any) {
+      logger.error('[Phase2] No se pudo reparar JSON', {
+        original: jsonMatch[0].substring(0, 300),
+        repaired: repaired.substring(0, 300),
+      });
+      throw new Error('JSON inválido en Phase 2 response');
+    }
+  }
 
   // Mapear comparables del resultado
   const comparables = (raw.comparablesUsados || []).map((c: any) => ({

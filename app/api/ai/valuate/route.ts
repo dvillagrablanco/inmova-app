@@ -1036,7 +1036,13 @@ export async function POST(request: NextRequest) {
       message: 'Valoración completada con éxito',
     });
   } catch (error: any) {
-    logger.error('[API AI Valuate] Error:', error);
+    // Logger más completo: captura mensaje y stack trace para diagnóstico
+    logger.error('[API AI Valuate] Error:', {
+      message: error?.message || String(error),
+      stack: error?.stack?.substring(0, 1500),
+      name: error?.name,
+      code: error?.code,
+    });
 
     // Error de validación
     if (error instanceof z.ZodError) {
