@@ -407,6 +407,39 @@ const valuateSchema = z.object({
   yearBuilt: z.coerce.number().int().min(1800).max(new Date().getFullYear()).optional(),
   avgPricePerM2: z.coerce.number().positive().optional(),
   marketTrend: z.enum(['UP', 'DOWN', 'STABLE']).optional(),
+
+  // === Campos avanzados (RICS Red Book 2024 / IVS / ECO 805/2003) ===
+  // ESG / energía
+  certificadoEnergetico: z.enum(['A', 'B', 'C', 'D', 'E', 'F', 'G']).optional(),
+  consumoEnergeticoKwhM2: z.coerce.number().nonnegative().optional(),
+  emisionesCo2KgM2: z.coerce.number().nonnegative().optional(),
+  // Calidad ubicación
+  proximidadTransportePublico: z.enum(['excelente', 'buena', 'regular', 'mala']).optional(),
+  distanciaMetroMin: z.coerce.number().nonnegative().optional(),
+  zonaRuido: z.enum(['tranquila', 'media', 'ruidosa']).optional(),
+  proximidadServicios: z.enum(['excelente', 'buena', 'regular', 'mala']).optional(),
+  calidadColegios: z.enum(['alta', 'media', 'baja']).optional(),
+  zonaVerdeProxima: z.boolean().optional(),
+  vistas: z.enum(['panoramicas', 'despejadas', 'normales', 'limitadas']).optional(),
+  zonaTensionada: z.boolean().optional(),
+  zbe: z.boolean().optional(),
+  // Riesgos
+  riesgoInundacion: z.enum(['alto', 'medio', 'bajo']).optional(),
+  ite: z.enum(['favorable', 'desfavorable', 'pendiente']).optional(),
+  cedulaHabitabilidad: z.boolean().optional(),
+  derramasPendientes: z.coerce.number().nonnegative().optional(),
+  inquilinosRentaAntigua: z.coerce.number().int().nonnegative().optional(),
+  // Económicos
+  ibiAnual: z.coerce.number().nonnegative().optional(),
+  comunidadMensual: z.coerce.number().nonnegative().optional(),
+  rentaActualMensual: z.coerce.number().nonnegative().optional(),
+  squareMetersUtil: z.coerce.number().positive().optional(),
+  yearLastRenovation: z.coerce
+    .number()
+    .int()
+    .min(1900)
+    .max(new Date().getFullYear())
+    .optional(),
 });
 
 /**
@@ -494,8 +527,24 @@ export async function POST(request: NextRequest) {
     let hasPool = validated.caracteristicas?.includes('piscina') || validated.hasPool || false;
     let hasTerrace =
       validated.hasTerrace || validated.caracteristicas?.includes('terraza') || false;
+    // RICS Red Book 2024: factores ESG / económicos del activo
+    let certificadoEnergetico:
+      | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | null = null;
+    let ibiAnualReal: number | undefined = undefined;
+    let comunidadMensualReal: number | undefined = undefined;
+    let rentaActualMensualReal: number | undefined = undefined;
+    let superficieUtilReal: number | undefined = undefined;
     let sameAssetComparables: any[] = [];
     let valuationCompanyId = scope.activeCompanyId || session.user.companyId;
+
+    const normalizeCee = (cee: unknown):
+      | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | null => {
+      if (!cee || typeof cee !== 'string') return null;
+      const letter = cee.trim().toUpperCase().charAt(0);
+      return ['A', 'B', 'C', 'D', 'E', 'F', 'G'].includes(letter)
+        ? (letter as 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G')
+        : null;
+    };
 
     if (validated.unitId) {
       const selectedUnit = await prisma.unit.findFirst({
@@ -507,6 +556,7 @@ export async function POST(request: NextRequest) {
           id: true,
           tipo: true,
           superficie: true,
+          superficieUtil: true,
           habitaciones: true,
           banos: true,
           planta: true,
@@ -518,6 +568,8 @@ export async function POST(request: NextRequest) {
           aireAcondicionado: true,
           calefaccion: true,
           terraza: true,
+          gastosComunidad: true,
+          ibiAnual: true,
           buildingId: true,
           building: {
             select: {
@@ -525,11 +577,15 @@ export async function POST(request: NextRequest) {
               direccion: true,
               referenciaCatastral: true,
               anoConstructor: true,
+              certificadoEnergetico: true,
+              estadoConservacion: true,
               ascensor: true,
               garaje: true,
               trastero: true,
               piscina: true,
               jardin: true,
+              ibiAnual: true,
+              gastosComunidad: true,
               tipo: true,
             },
           },
@@ -554,6 +610,19 @@ export async function POST(request: NextRequest) {
         hasGarden = hasGarden || !!selectedUnit.building?.jardin;
         hasPool = hasPool || !!selectedUnit.building?.piscina;
         hasTerrace = hasTerrace || !!selectedUnit.terraza;
+
+        // RICS Red Book 2024: factores ESG y económicos del activo
+        certificadoEnergetico =
+          certificadoEnergetico || normalizeCee(selectedUnit.building?.certificadoEnergetico);
+        ibiAnualReal =
+          ibiAnualReal ?? selectedUnit.ibiAnual ?? selectedUnit.building?.ibiAnual ?? undefined;
+        comunidadMensualReal =
+          comunidadMensualReal ??
+          selectedUnit.gastosComunidad ??
+          selectedUnit.building?.gastosComunidad ??
+          undefined;
+        rentaActualMensualReal = rentaActualMensualReal ?? selectedUnit.rentaMensual ?? undefined;
+        superficieUtilReal = superficieUtilReal ?? selectedUnit.superficieUtil ?? undefined;
 
         const similarUnits = await prisma.unit.findMany({
           where: {
@@ -715,13 +784,14 @@ export async function POST(request: NextRequest) {
 
     const comparables = sameAssetComparables;
 
-    // 7. Preparar datos para IA multi-paso
+    // 7. Preparar datos para IA multi-paso (RICS Red Book 2024 — incluye ESG)
     const propertyForAnalysis: PropertyForAnalysis = {
       propertyType,
       address: direccion,
       city: ciudad,
       postalCode: codigoPostal,
       squareMeters: superficie,
+      squareMetersUtil: superficieUtilReal,
       rooms: habitaciones,
       bathrooms: banos,
       floor: planta || undefined,
@@ -738,6 +808,31 @@ export async function POST(request: NextRequest) {
       caracteristicas: validated.caracteristicas || [],
       descripcionAdicional: validated.descripcionAdicional || '',
       finalidad: validated.finalidad || 'venta',
+      // === ESG (RICS Red Book 2024) === aplicar input usuario sobre BD
+      certificadoEnergetico: validated.certificadoEnergetico || certificadoEnergetico,
+      consumoEnergeticoKwhM2: validated.consumoEnergeticoKwhM2,
+      emisionesCo2KgM2: validated.emisionesCo2KgM2,
+      // === Calidad ubicación cualitativa ===
+      proximidadTransportePublico: validated.proximidadTransportePublico,
+      distanciaMetroMin: validated.distanciaMetroMin,
+      zonaRuido: validated.zonaRuido,
+      proximidadServicios: validated.proximidadServicios,
+      calidadColegios: validated.calidadColegios,
+      zonaVerdeProxima: validated.zonaVerdeProxima,
+      vistas: validated.vistas,
+      zonaTensionada: validated.zonaTensionada,
+      zbe: validated.zbe,
+      // === Riesgos ===
+      riesgoInundacion: validated.riesgoInundacion,
+      ite: validated.ite,
+      cedulaHabitabilidad: validated.cedulaHabitabilidad,
+      derramasPendientes: validated.derramasPendientes,
+      inquilinosRentaAntigua: validated.inquilinosRentaAntigua,
+      // === Económicos del activo ===
+      ibiAnual: validated.ibiAnual ?? ibiAnualReal,
+      comunidadMensual: validated.comunidadMensual ?? comunidadMensualReal,
+      rentaActualMensual: validated.rentaActualMensual ?? rentaActualMensualReal,
+      yearLastRenovation: validated.yearLastRenovation,
     };
 
     const internalComparablesText =
@@ -892,6 +987,8 @@ export async function POST(request: NextRequest) {
       metodologiaUsada: valuation.metodologiaUsada,
       phase1Summary: valuation.phase1Summary,
       aiSourcesUsed: valuation.sourcesUsed,
+      // Desglose de ajustes RICS Red Book 2024
+      ajustesPorFactores: valuation.ajustesPorFactores,
       platformSources: aggregatedPlatformData
         ? {
             sourcesUsed: aggregatedPlatformData.sourcesUsed,

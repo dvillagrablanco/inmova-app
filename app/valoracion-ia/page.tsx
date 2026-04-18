@@ -162,6 +162,12 @@ interface ValoracionResult {
   metodologiaUsada?: string;
   phase1Summary?: string;
   aiSourcesUsed?: string[];
+  // Desglose de ajustes RICS Red Book 2024
+  ajustesPorFactores?: {
+    esg?: { impactoTotal: string; ceeAplicado: string; detalle: string };
+    ubicacion?: { impactoTotal: string; factoresAplicados: string[] };
+    riesgos?: { impactoTotal: string; factoresAplicados: string[] };
+  };
 }
 
 // Características por tipo de activo
@@ -357,6 +363,32 @@ export default function ValoracionIAPage() {
     ciudadManual: '',
     codigoPostalManual: '',
     eficienciaEnergetica: 'none',
+    // === Criterios avanzados RICS Red Book 2024 / IVS / ECO 805/2003 ===
+    // ESG / energía
+    certificadoEnergetico: '' as '' | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G',
+    consumoEnergeticoKwhM2: '',
+    // Calidad de ubicación
+    proximidadTransportePublico: '' as '' | 'excelente' | 'buena' | 'regular' | 'mala',
+    distanciaMetroMin: '',
+    zonaRuido: '' as '' | 'tranquila' | 'media' | 'ruidosa',
+    proximidadServicios: '' as '' | 'excelente' | 'buena' | 'regular' | 'mala',
+    calidadColegios: '' as '' | 'alta' | 'media' | 'baja',
+    zonaVerdeProxima: false,
+    vistas: '' as '' | 'panoramicas' | 'despejadas' | 'normales' | 'limitadas',
+    zonaTensionada: false,
+    zbe: false,
+    // Riesgos
+    riesgoInundacion: '' as '' | 'alto' | 'medio' | 'bajo',
+    ite: '' as '' | 'favorable' | 'desfavorable' | 'pendiente',
+    cedulaHabitabilidad: undefined as boolean | undefined,
+    derramasPendientes: '',
+    inquilinosRentaAntigua: '',
+    // Económicos
+    ibiAnual: '',
+    comunidadMensual: '',
+    rentaActualMensual: '',
+    superficieUtil: '',
+    yearLastRenovation: '',
   });
 
   // Cargar datos al iniciar
@@ -698,6 +730,45 @@ export default function ValoracionIAPage() {
           codigoPostal,
           unitId: activeTab === 'mis-activos' ? unitId : undefined,
           buildingId: activeTab === 'mis-activos' ? buildingId : undefined,
+          // === Avanzados RICS Red Book 2024 — solo enviar si tienen valor ===
+          certificadoEnergetico: formData.certificadoEnergetico || undefined,
+          consumoEnergeticoKwhM2: formData.consumoEnergeticoKwhM2
+            ? parseFloat(formData.consumoEnergeticoKwhM2)
+            : undefined,
+          proximidadTransportePublico: formData.proximidadTransportePublico || undefined,
+          distanciaMetroMin: formData.distanciaMetroMin
+            ? parseFloat(formData.distanciaMetroMin)
+            : undefined,
+          zonaRuido: formData.zonaRuido || undefined,
+          proximidadServicios: formData.proximidadServicios || undefined,
+          calidadColegios: formData.calidadColegios || undefined,
+          zonaVerdeProxima: formData.zonaVerdeProxima || undefined,
+          vistas: formData.vistas || undefined,
+          zonaTensionada: formData.zonaTensionada || undefined,
+          zbe: formData.zbe || undefined,
+          riesgoInundacion: formData.riesgoInundacion || undefined,
+          ite: formData.ite || undefined,
+          cedulaHabitabilidad:
+            formData.cedulaHabitabilidad !== undefined ? formData.cedulaHabitabilidad : undefined,
+          derramasPendientes: formData.derramasPendientes
+            ? parseFloat(formData.derramasPendientes)
+            : undefined,
+          inquilinosRentaAntigua: formData.inquilinosRentaAntigua
+            ? parseInt(formData.inquilinosRentaAntigua)
+            : undefined,
+          ibiAnual: formData.ibiAnual ? parseFloat(formData.ibiAnual) : undefined,
+          comunidadMensual: formData.comunidadMensual
+            ? parseFloat(formData.comunidadMensual)
+            : undefined,
+          rentaActualMensual: formData.rentaActualMensual
+            ? parseFloat(formData.rentaActualMensual)
+            : undefined,
+          squareMetersUtil: formData.superficieUtil
+            ? parseFloat(formData.superficieUtil)
+            : undefined,
+          yearLastRenovation: formData.yearLastRenovation
+            ? parseInt(formData.yearLastRenovation)
+            : undefined,
         }),
       });
 
@@ -1876,6 +1947,346 @@ ${
                   />
                 </div>
 
+                {/* === Criterios avanzados (RICS Red Book 2024 / ECO 805/2003) === */}
+                <details className="group rounded-lg border bg-muted/20 p-4">
+                  <summary className="cursor-pointer flex items-center gap-2 font-medium text-sm">
+                    <Brain className="h-4 w-4 text-violet-600" />
+                    Criterios avanzados (ESG, ubicación, riesgos)
+                    <Badge variant="outline" className="ml-2 text-[10px]">
+                      Opcional · mejora la precisión
+                    </Badge>
+                  </summary>
+                  <div className="mt-4 space-y-5 text-sm">
+                    {/* ESG / Energía */}
+                    <div>
+                      <h4 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground mb-2">
+                        ESG / Eficiencia Energética
+                      </h4>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        <div className="space-y-1">
+                          <Label htmlFor="cee">CEE energético</Label>
+                          <Select
+                            value={formData.certificadoEnergetico || 'none'}
+                            onValueChange={(v) =>
+                              setFormData({
+                                ...formData,
+                                certificadoEnergetico: v === 'none' ? '' : (v as any),
+                              })
+                            }
+                          >
+                            <SelectTrigger id="cee">
+                              <SelectValue placeholder="—" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">No aportado</SelectItem>
+                              {['A', 'B', 'C', 'D', 'E', 'F', 'G'].map((l) => (
+                                <SelectItem key={l} value={l}>
+                                  {l}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-1">
+                          <Label htmlFor="kwh">Consumo (kWh/m²·año)</Label>
+                          <Input
+                            id="kwh"
+                            type="number"
+                            value={formData.consumoEnergeticoKwhM2}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                consumoEnergeticoKwhM2: e.target.value,
+                              })
+                            }
+                            placeholder="ej. 80"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Calidad de ubicación */}
+                    <div>
+                      <h4 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground mb-2">
+                        Calidad de ubicación
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                          <Label>Transporte público</Label>
+                          <Select
+                            value={formData.proximidadTransportePublico || 'none'}
+                            onValueChange={(v) =>
+                              setFormData({
+                                ...formData,
+                                proximidadTransportePublico: v === 'none' ? '' : (v as any),
+                              })
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="—" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">—</SelectItem>
+                              <SelectItem value="excelente">Excelente (+15-25%)</SelectItem>
+                              <SelectItem value="buena">Buena (+5-10%)</SelectItem>
+                              <SelectItem value="regular">Regular</SelectItem>
+                              <SelectItem value="mala">Mala (-3-7%)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-1">
+                          <Label>Distancia transporte (min andando)</Label>
+                          <Input
+                            type="number"
+                            value={formData.distanciaMetroMin}
+                            onChange={(e) =>
+                              setFormData({ ...formData, distanciaMetroMin: e.target.value })
+                            }
+                            placeholder="ej. 5"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label>Nivel de ruido</Label>
+                          <Select
+                            value={formData.zonaRuido || 'none'}
+                            onValueChange={(v) =>
+                              setFormData({
+                                ...formData,
+                                zonaRuido: v === 'none' ? '' : (v as any),
+                              })
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="—" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">—</SelectItem>
+                              <SelectItem value="tranquila">Tranquila (+3-5%)</SelectItem>
+                              <SelectItem value="media">Media</SelectItem>
+                              <SelectItem value="ruidosa">Ruidosa (-5-10%)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-1">
+                          <Label>Calidad colegios próximos</Label>
+                          <Select
+                            value={formData.calidadColegios || 'none'}
+                            onValueChange={(v) =>
+                              setFormData({
+                                ...formData,
+                                calidadColegios: v === 'none' ? '' : (v as any),
+                              })
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="—" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">—</SelectItem>
+                              <SelectItem value="alta">Alta (+10-30%)</SelectItem>
+                              <SelectItem value="media">Media</SelectItem>
+                              <SelectItem value="baja">Baja (-3-7%)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-1">
+                          <Label>Vistas</Label>
+                          <Select
+                            value={formData.vistas || 'none'}
+                            onValueChange={(v) =>
+                              setFormData({
+                                ...formData,
+                                vistas: v === 'none' ? '' : (v as any),
+                              })
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="—" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">—</SelectItem>
+                              <SelectItem value="panoramicas">Panorámicas (+8-15%)</SelectItem>
+                              <SelectItem value="despejadas">Despejadas (+3-6%)</SelectItem>
+                              <SelectItem value="normales">Normales</SelectItem>
+                              <SelectItem value="limitadas">Limitadas (-3-5%)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2 pt-6">
+                          <label className="inline-flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={formData.zonaVerdeProxima}
+                              onChange={(e) =>
+                                setFormData({
+                                  ...formData,
+                                  zonaVerdeProxima: e.target.checked,
+                                })
+                              }
+                            />
+                            Zona verde a &lt;500m (+2-5%)
+                          </label>
+                          <label className="inline-flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={formData.zonaTensionada}
+                              onChange={(e) =>
+                                setFormData({
+                                  ...formData,
+                                  zonaTensionada: e.target.checked,
+                                })
+                              }
+                            />
+                            Zona tensionada LAU (-3-8%)
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Riesgos */}
+                    <div>
+                      <h4 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground mb-2">
+                        Riesgos técnicos / legales
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                          <Label>ITE (Inspección Técnica)</Label>
+                          <Select
+                            value={formData.ite || 'none'}
+                            onValueChange={(v) =>
+                              setFormData({
+                                ...formData,
+                                ite: v === 'none' ? '' : (v as any),
+                              })
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="—" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">—</SelectItem>
+                              <SelectItem value="favorable">Favorable</SelectItem>
+                              <SelectItem value="pendiente">Pendiente (-3-5%)</SelectItem>
+                              <SelectItem value="desfavorable">Desfavorable (-10-25%)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-1">
+                          <Label>Riesgo inundación</Label>
+                          <Select
+                            value={formData.riesgoInundacion || 'none'}
+                            onValueChange={(v) =>
+                              setFormData({
+                                ...formData,
+                                riesgoInundacion: v === 'none' ? '' : (v as any),
+                              })
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="—" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">—</SelectItem>
+                              <SelectItem value="bajo">Bajo</SelectItem>
+                              <SelectItem value="medio">Medio (-3-8%)</SelectItem>
+                              <SelectItem value="alto">Alto (-10-20%)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-1">
+                          <Label>Derramas pendientes (€)</Label>
+                          <Input
+                            type="number"
+                            value={formData.derramasPendientes}
+                            onChange={(e) =>
+                              setFormData({ ...formData, derramasPendientes: e.target.value })
+                            }
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label>Inquilinos LAU 1964 (renta antigua)</Label>
+                          <Input
+                            type="number"
+                            value={formData.inquilinosRentaAntigua}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                inquilinosRentaAntigua: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Económicos */}
+                    <div>
+                      <h4 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground mb-2">
+                        Datos económicos del activo
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div className="space-y-1">
+                          <Label>IBI anual (€)</Label>
+                          <Input
+                            type="number"
+                            value={formData.ibiAnual}
+                            onChange={(e) =>
+                              setFormData({ ...formData, ibiAnual: e.target.value })
+                            }
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label>Comunidad mensual (€)</Label>
+                          <Input
+                            type="number"
+                            value={formData.comunidadMensual}
+                            onChange={(e) =>
+                              setFormData({ ...formData, comunidadMensual: e.target.value })
+                            }
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label>Renta actual mensual (€)</Label>
+                          <Input
+                            type="number"
+                            value={formData.rentaActualMensual}
+                            onChange={(e) =>
+                              setFormData({ ...formData, rentaActualMensual: e.target.value })
+                            }
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label>Superficie útil (m²)</Label>
+                          <Input
+                            type="number"
+                            value={formData.superficieUtil}
+                            onChange={(e) =>
+                              setFormData({ ...formData, superficieUtil: e.target.value })
+                            }
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label>Año última reforma integral</Label>
+                          <Input
+                            type="number"
+                            value={formData.yearLastRenovation}
+                            onChange={(e) =>
+                              setFormData({ ...formData, yearLastRenovation: e.target.value })
+                            }
+                            placeholder="ej. 2018"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <p className="text-[11px] text-muted-foreground italic">
+                      Aportar estos datos mejora la precisión de la valoración y la confianza
+                      del modelo IA. Estándares: RICS Red Book Global 2024, IVS 2024 y Orden
+                      ECO/805/2003.
+                    </p>
+                  </div>
+                </details>
+
                 {/* Botón de valorar */}
                 <Button
                   className="w-full bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600"
@@ -2452,6 +2863,73 @@ ${
                           <p className="text-sm text-muted-foreground whitespace-pre-line leading-relaxed">
                             {resultado.reasoning}
                           </p>
+                        </div>
+                      )}
+
+                      {/* Desglose de ajustes RICS Red Book 2024 */}
+                      {resultado.ajustesPorFactores && (
+                        <div className="rounded-lg border bg-violet-50/40 dark:bg-violet-950/20 p-3 space-y-3">
+                          <p className="text-xs font-semibold text-violet-800 dark:text-violet-300 uppercase tracking-wide">
+                            Desglose de ajustes (RICS Red Book 2024)
+                          </p>
+                          {resultado.ajustesPorFactores.esg && (
+                            <div className="text-xs space-y-1">
+                              <div className="font-medium">
+                                ESG / Eficiencia energética:{' '}
+                                <span className="text-violet-700">
+                                  {resultado.ajustesPorFactores.esg.impactoTotal}
+                                </span>
+                              </div>
+                              <div className="text-muted-foreground">
+                                CEE aplicado: {resultado.ajustesPorFactores.esg.ceeAplicado}
+                              </div>
+                              {resultado.ajustesPorFactores.esg.detalle && (
+                                <div className="text-muted-foreground">
+                                  {resultado.ajustesPorFactores.esg.detalle}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                          {resultado.ajustesPorFactores.ubicacion && (
+                            <div className="text-xs space-y-1">
+                              <div className="font-medium">
+                                Calidad de ubicación:{' '}
+                                <span className="text-violet-700">
+                                  {resultado.ajustesPorFactores.ubicacion.impactoTotal}
+                                </span>
+                              </div>
+                              {resultado.ajustesPorFactores.ubicacion.factoresAplicados?.length >
+                                0 && (
+                                <ul className="list-disc list-inside text-muted-foreground">
+                                  {resultado.ajustesPorFactores.ubicacion.factoresAplicados.map(
+                                    (f, i) => (
+                                      <li key={i}>{f}</li>
+                                    )
+                                  )}
+                                </ul>
+                              )}
+                            </div>
+                          )}
+                          {resultado.ajustesPorFactores.riesgos && (
+                            <div className="text-xs space-y-1">
+                              <div className="font-medium">
+                                Riesgos técnicos / legales:{' '}
+                                <span className="text-red-700">
+                                  {resultado.ajustesPorFactores.riesgos.impactoTotal}
+                                </span>
+                              </div>
+                              {resultado.ajustesPorFactores.riesgos.factoresAplicados?.length >
+                                0 && (
+                                <ul className="list-disc list-inside text-muted-foreground">
+                                  {resultado.ajustesPorFactores.riesgos.factoresAplicados.map(
+                                    (f, i) => (
+                                      <li key={i}>{f}</li>
+                                    )
+                                  )}
+                                </ul>
+                              )}
+                            </div>
+                          )}
                         </div>
                       )}
 

@@ -44,6 +44,7 @@ export type PropertyType =
   | 'coworking';
 
 export interface PropertyForAnalysis {
+  // Datos físicos básicos
   propertyType?: PropertyType;
   address: string;
   city: string;
@@ -51,11 +52,15 @@ export interface PropertyForAnalysis {
   province?: string;
   neighborhood?: string;
   squareMeters: number;
+  squareMetersUtil?: number; // Útil vs construido (puede haber 5-15% diferencia)
   rooms: number;
   bathrooms: number;
   floor?: number;
   condition: string;
   yearBuilt?: number;
+  yearLastRenovation?: number; // Año de última reforma integral
+
+  // Equipamiento básico
   hasElevator?: boolean;
   hasParking?: boolean;
   hasGarden?: boolean;
@@ -66,6 +71,54 @@ export interface PropertyForAnalysis {
   caracteristicas?: string[];
   descripcionAdicional?: string;
   finalidad?: string;
+
+  // === Factores ESG / Energía (RICS Red Book 2024 — obligatorio) ===
+  certificadoEnergetico?: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | null;
+  certificadoEmisiones?: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | null;
+  consumoEnergeticoKwhM2?: number; // kWh/m²·año
+  emisionesCo2KgM2?: number; // kg CO2/m²·año
+  aislamientoTermico?: 'alto' | 'medio' | 'bajo' | null;
+  ventanasDoblesAcristalamiento?: boolean;
+  paneles_solares?: boolean;
+  bombaCalor?: boolean;
+
+  // === Factores ubicación cualitativos ===
+  proximidadTransportePublico?: 'excelente' | 'buena' | 'regular' | 'mala' | null;
+  distanciaMetroMin?: number; // minutos andando al transporte más cercano
+  zonaRuido?: 'tranquila' | 'media' | 'ruidosa' | null; // calle peatonal vs avenida
+  proximidadServicios?: 'excelente' | 'buena' | 'regular' | 'mala' | null;
+  calidadColegios?: 'alta' | 'media' | 'baja' | null;
+  zonaVerdeProxima?: boolean;
+  vistas?: 'panoramicas' | 'despejadas' | 'normales' | 'limitadas' | null;
+  zonaTensionada?: boolean; // declarada como tensionada por la LAU
+  zbe?: boolean; // dentro de Zona de Bajas Emisiones (afecta a garajes)
+
+  // === Riesgos físicos / técnicos ===
+  riesgoInundacion?: 'alto' | 'medio' | 'bajo' | null;
+  riesgoSismico?: 'alto' | 'medio' | 'bajo' | null;
+  ite?: 'favorable' | 'desfavorable' | 'pendiente' | null; // Inspección Técnica Edificios
+  cedulaHabitabilidad?: boolean | null;
+  contaminacionSuelo?: boolean | null; // para suelo / nave
+
+  // === Factores económicos ===
+  cargaUrbanistica?: number; // % o euros (suelo)
+  ibiAnual?: number;
+  comunidadMensual?: number;
+  derramasPendientes?: number; // euros de derramas conocidas
+  rentaActualMensual?: number; // si ya está alquilado
+
+  // === Factores específicos por tipo ===
+  // Local
+  metrosFachada?: number;
+  alturaLibre?: number;
+  licenciaActividad?: boolean | null;
+  // Garaje
+  tipoPlaza?: 'normal' | 'doble' | 'moto' | 'grande';
+  puntoCargaElectrico?: boolean;
+  // Edificio
+  numeroUnidades?: number;
+  unidadesOcupadas?: number;
+  inquilinosRentaAntigua?: number; // contratos de la LAU 1964 (penalizan)
 }
 
 const PROPERTY_TYPE_LABELS: Record<string, string> = {
@@ -80,15 +133,205 @@ const PROPERTY_TYPE_LABELS: Record<string, string> = {
   coworking: 'Espacio coworking',
 };
 
+/**
+ * Construye el bloque ESG (RICS Red Book 2024) con impactos cuantificados.
+ * Devuelve string vacío si no hay datos relevantes.
+ */
+function buildEsgBlock(p: PropertyForAnalysis): string {
+  const items: string[] = [];
+
+  // Certificado energético — premium/descuento por letra
+  if (p.certificadoEnergetico) {
+    const c = p.certificadoEnergetico;
+    const impacto =
+      c === 'A'
+        ? '+10-15% (eficiencia top, prima ESG residencial)'
+        : c === 'B'
+          ? '+5-10%'
+          : c === 'C'
+            ? '+2-5% (cumple normativa, sin penalización)'
+            : c === 'D'
+              ? '0% (referencia mediana)'
+              : c === 'E'
+                ? '-2-5%'
+                : c === 'F'
+                  ? '-5-10% (penalización ESG, requiere rehabilitación)'
+                  : '-10-15% (alta penalización ESG, próxima obligación rehab)';
+    items.push(`- CEE energético: **${c}** → impacto en valor: ${impacto}`);
+  } else {
+    items.push('- CEE energético: NO aportado (asumir D/E por defecto, sin prima)');
+  }
+
+  if (p.certificadoEmisiones && p.certificadoEmisiones !== p.certificadoEnergetico) {
+    items.push(`- CEE emisiones CO₂: ${p.certificadoEmisiones}`);
+  }
+  if (p.consumoEnergeticoKwhM2) {
+    items.push(
+      `- Consumo: ${p.consumoEnergeticoKwhM2} kWh/m²·año (referencia normativa <60 kWh/m² para vivienda nueva)`
+    );
+  }
+  if (p.aislamientoTermico) {
+    items.push(`- Aislamiento térmico: ${p.aislamientoTermico}`);
+  }
+  if (p.ventanasDoblesAcristalamiento) items.push('- Doble acristalamiento: Sí (+1-2%)');
+  if (p.paneles_solares) items.push('- Paneles solares: Sí (+3-7%)');
+  if (p.bombaCalor) items.push('- Bomba de calor (alta eficiencia): Sí (+2-4%)');
+
+  if (items.length === 0) return '';
+
+  return `\n--- ESG / EFICIENCIA ENERGÉTICA (criterio obligatorio RICS Red Book 2024) ---\n${items.join('\n')}\n`;
+}
+
+/**
+ * Construye el bloque de calidad de ubicación cualitativa (POIs).
+ */
+function buildLocationQualityBlock(p: PropertyForAnalysis): string {
+  const items: string[] = [];
+
+  if (p.proximidadTransportePublico) {
+    const tag =
+      p.proximidadTransportePublico === 'excelente'
+        ? '+15-25% (top transport link premium)'
+        : p.proximidadTransportePublico === 'buena'
+          ? '+5-10%'
+          : p.proximidadTransportePublico === 'regular'
+            ? '0%'
+            : '-3-7%';
+    items.push(`- Transporte público: ${p.proximidadTransportePublico} → ${tag}`);
+  }
+  if (p.distanciaMetroMin !== undefined && p.distanciaMetroMin !== null) {
+    items.push(`- Distancia a transporte (min andando): ${p.distanciaMetroMin}min`);
+  }
+  if (p.zonaRuido) {
+    const tag =
+      p.zonaRuido === 'tranquila'
+        ? '+3-5%'
+        : p.zonaRuido === 'media'
+          ? '0%'
+          : '-5-10% (descuento por ruido)';
+    items.push(`- Nivel de ruido zona: ${p.zonaRuido} → ${tag}`);
+  }
+  if (p.proximidadServicios) {
+    items.push(
+      `- Comercios y servicios cercanos: ${p.proximidadServicios}` +
+        (p.proximidadServicios === 'excelente' ? ' (+3-5%)' : '')
+    );
+  }
+  if (p.calidadColegios) {
+    const tag =
+      p.calidadColegios === 'alta'
+        ? '+10-30% (catchment area premium)'
+        : p.calidadColegios === 'media'
+          ? '0%'
+          : '-3-7%';
+    items.push(`- Calidad de colegios próximos: ${p.calidadColegios} → ${tag}`);
+  }
+  if (p.zonaVerdeProxima) items.push('- Zona verde / parque a <500m: Sí (+2-5%)');
+  if (p.vistas) {
+    const tag =
+      p.vistas === 'panoramicas'
+        ? '+8-15% (vistas premium)'
+        : p.vistas === 'despejadas'
+          ? '+3-6%'
+          : p.vistas === 'limitadas'
+            ? '-3-5%'
+            : '0%';
+    items.push(`- Vistas: ${p.vistas} → ${tag}`);
+  }
+  if (p.zonaTensionada) {
+    items.push(
+      '- Zona declarada TENSIONADA (LAU): aplicar tope de incremento de renta — descuento de inversión -3-8%'
+    );
+  }
+  if (p.zbe) {
+    items.push(
+      '- Dentro de Zona de Bajas Emisiones (ZBE): impacto positivo en garajes (+5-10%) por escasez de aparcamiento; neutral en vivienda'
+    );
+  }
+
+  if (items.length === 0) return '';
+
+  return `\n--- CALIDAD DE UBICACIÓN (impactos cuantitativos por proximidad) ---\n${items.join('\n')}\n`;
+}
+
+/**
+ * Construye el bloque de riesgos técnicos / legales (descuentos significativos).
+ */
+function buildRiskBlock(p: PropertyForAnalysis): string {
+  const items: string[] = [];
+
+  if (p.riesgoInundacion && p.riesgoInundacion !== 'bajo') {
+    const tag = p.riesgoInundacion === 'alto' ? '-10-20%' : '-3-8%';
+    items.push(`- Riesgo inundación: ${p.riesgoInundacion} → ${tag} (verificar mapa CHN/CHS)`);
+  }
+  if (p.riesgoSismico === 'alto') {
+    items.push('- Riesgo sísmico alto: -3-8% + posible necesidad de refuerzo estructural');
+  }
+  if (p.ite === 'desfavorable') {
+    items.push(
+      '- ITE DESFAVORABLE: -10-25% (rehabilitación obligatoria, derramas inminentes esperadas)'
+    );
+  } else if (p.ite === 'pendiente') {
+    items.push('- ITE pendiente: -3-5% por incertidumbre');
+  }
+  if (p.cedulaHabitabilidad === false) {
+    items.push('- Sin cédula de habitabilidad: -5-15% hasta regularizar');
+  }
+  if (p.contaminacionSuelo) {
+    items.push('- Posible contaminación de suelo: -10-30% + estudio ambiental obligatorio');
+  }
+  if (p.derramasPendientes && p.derramasPendientes > 0) {
+    items.push(
+      `- Derramas pendientes conocidas: ${p.derramasPendientes.toLocaleString('es-ES')}€ (descuento equivalente al importe)`
+    );
+  }
+  if (p.inquilinosRentaAntigua && p.inquilinosRentaAntigua > 0) {
+    items.push(
+      `- Inquilinos LAU 1964 (renta antigua): ${p.inquilinosRentaAntigua} contratos → -10-30% por unidad afectada (renta sub-mercado vitalicia)`
+    );
+  }
+
+  if (items.length === 0) return '';
+
+  return `\n--- RIESGOS TÉCNICOS / LEGALES (descuentos significativos al valor) ---\n${items.join('\n')}\n`;
+}
+
+/**
+ * Construye el bloque de condicionantes económicos del activo concreto.
+ */
+function buildEconomicBlock(p: PropertyForAnalysis): string {
+  const items: string[] = [];
+  if (p.ibiAnual && p.ibiAnual > 0) items.push(`- IBI anual: ${p.ibiAnual}€`);
+  if (p.comunidadMensual && p.comunidadMensual > 0) {
+    items.push(`- Comunidad: ${p.comunidadMensual}€/mes (${p.comunidadMensual * 12}€/año)`);
+  }
+  if (p.rentaActualMensual && p.rentaActualMensual > 0) {
+    items.push(
+      `- Renta ACTUAL en vigor: ${p.rentaActualMensual}€/mes (${p.rentaActualMensual * 12}€/año brutos)`
+    );
+  }
+  if (p.cargaUrbanistica && p.cargaUrbanistica > 0) {
+    items.push(`- Cargas urbanísticas pendientes: ${p.cargaUrbanistica}€`);
+  }
+
+  if (items.length === 0) return '';
+  return `\n--- DATOS ECONÓMICOS DEL ACTIVO ---\n${items.join('\n')}\n`;
+}
+
 function getPropertyTypeContext(type: PropertyType): string {
   const contexts: Record<PropertyType, string> = {
-    vivienda: `TIPO: VIVIENDA RESIDENCIAL
-- Yields objetivo: 3.5-6% bruto según zona (prime 3.5-4.5%, media 4.5-5.5%, periferia 5.5-7%)
+    vivienda: `TIPO: VIVIENDA RESIDENCIAL (mercado España 2025)
+- Yields objetivo (rentabilidad bruta nacional 2025: ~6.9%):
+  · Madrid centro/BCN centro: 3.5-4.5% (escasez de oferta, altos precios)
+  · Madrid periferia, BCN periferia, ciudades grandes: 4.5-5.5%
+  · Ciudades medias (Valencia, Sevilla, Málaga, Bilbao): 5-7%
+  · Ciudades secundarias (Murcia, Valladolid, Palencia, Zaragoza): 6-9%
 - Gastos típicos: IBI ~0.5-1%, comunidad variable, seguro ~0.15%, mantenimiento 2-4% renta, gestión 5-8%
 - Vacío estimado: 5-8% anual
-- Métricas clave: €/m², habitaciones, baños, planta, ascensor, orientación
-- Riesgos: zona tensionada LAU, rotación inquilinos, morosidad
-- Cap rates: Madrid centro 3.5-4.2%, BCN centro 3.8-4.5%, ciudades medias 4.5-6%`,
+- Métricas clave: €/m², habitaciones, baños, planta, ascensor, orientación, CEE, distancia transporte
+- Riesgos: zona tensionada LAU (tope renta), rotación inquilinos, morosidad
+- Premium ESG (RICS 2024): CEE A/B = +5-15%, F/G = -5-15% (rehabilitación obligatoria próxima)
+- Premium ubicación: top transporte +15-25%, catchment colegios alta +10-30%`,
 
     local_comercial: `TIPO: LOCAL COMERCIAL
 - Yields objetivo: 5-9% bruto (prime 5-6%, zona secundaria 6-9%)
@@ -240,6 +483,23 @@ export interface AIValuationResult {
   // Metadatos del análisis
   phase1Summary: string;
   sourcesUsed: string[];
+
+  // Desglose de ajustes RICS Red Book 2024 / IVS / ECO 805/2003
+  ajustesPorFactores?: {
+    esg?: {
+      impactoTotal: string;
+      ceeAplicado: string;
+      detalle: string;
+    };
+    ubicacion?: {
+      impactoTotal: string;
+      factoresAplicados: string[];
+    };
+    riesgos?: {
+      impactoTotal: string;
+      factoresAplicados: string[];
+    };
+  };
 }
 
 // ============================================================================
@@ -474,6 +734,12 @@ ${phase1.zoneAnalysis.outliersPricePerM2.length > 0 ? `- Outliers descartados: $
   const pTypeLabel = PROPERTY_TYPE_LABELS[pType] || pType;
   const typeContext = getPropertyTypeContext(pType);
 
+  // === Bloques cualitativos avanzados (RICS Red Book 2024 + IVS + ECO 805/2003) ===
+  const esgBlock = buildEsgBlock(property);
+  const locationQualityBlock = buildLocationQualityBlock(property);
+  const riskBlock = buildRiskBlock(property);
+  const economicBlock = buildEconomicBlock(property);
+
   const prompt = `Eres un tasador inmobiliario certificado (RICS/ATASA) con 20+ años de experiencia en el mercado español. Realizas una valoración profesional rigurosa siguiendo las normas ECO 805/2003 y estándares internacionales de valoración (IVS).
 
 Tu valoración DEBE ser REALISTA — ni optimista ni pesimista — basada en datos verificables.
@@ -496,9 +762,11 @@ ${property.floor !== undefined ? `- Planta: ${property.floor}${property.floor ==
 ${property.yearBuilt ? `- Antigüedad: ${new Date().getFullYear() - property.yearBuilt} años (construido ${property.yearBuilt})` : ''}
 ${pType === 'vivienda' && property.orientacion ? `- Orientación: ${property.orientacion}` : ''}
 ${features.length > 0 ? `- Equipamiento: ${features.join(', ')}` : ''}
+${property.squareMetersUtil ? `- Superficie útil: ${property.squareMetersUtil}m² (vs ${property.squareMeters}m² construidos = ratio ${(property.squareMetersUtil / property.squareMeters).toFixed(2)})` : ''}
+${property.yearLastRenovation ? `- Última reforma integral: ${property.yearLastRenovation} (hace ${new Date().getFullYear() - property.yearLastRenovation} años)` : ''}
 ${property.descripcionAdicional ? `- Observaciones: ${property.descripcionAdicional}` : ''}
 - Finalidad valoración: ${property.finalidad === 'venta' ? 'Determinación valor de mercado (venta)' : property.finalidad === 'alquiler' ? 'Determinación renta de mercado (alquiler)' : 'Valor de mercado + Renta de mercado'}
-
+${esgBlock}${locationQualityBlock}${riskBlock}${economicBlock}
 ═══════════════════════════════════════════════════════
 DATOS DE MERCADO — MÚLTIPLES FUENTES VERIFICADAS
 ═══════════════════════════════════════════════════════
@@ -514,8 +782,10 @@ ${zoneText}
 ${internalComparables ? `═══════════════════════════════════════════════════════\nCOMPARABLES DEL PORTFOLIO PROPIO (propiedades gestionadas)\n═══════════════════════════════════════════════════════\n${internalComparables}` : ''}
 
 ═══════════════════════════════════════════════════════
-METODOLOGÍA DE VALORACIÓN (5 PASOS OBLIGATORIOS)
+METODOLOGÍA DE VALORACIÓN (6 PASOS OBLIGATORIOS — RICS Red Book 2024 + ECO 805/2003 + IVS 2024)
 ═══════════════════════════════════════════════════════
+NOTA RICS: La consideración de factores ESG (eficiencia energética, sostenibilidad,
+gobernanza) es OBLIGATORIA en cada paso de valoración profesional desde 2025.
 
 PASO 1 — MÉTODO DE COMPARACIÓN (peso: 50-60%):
 - CRÍTICO: Usa SOLO comparables DEL MISMO TIPO DE ACTIVO (${pTypeLabel})
@@ -610,7 +880,36 @@ ${
 - NO calcular media estancia si no aplica a este tipo de activo`
 }
 
-PASO 4 — VALIDACIÓN CRUZADA Y COHERENCIA:
+PASO 4 — AJUSTES POR FACTORES ESG, UBICACIÓN CUALITATIVA Y RIESGOS (RICS Red Book 2024):
+**OBLIGATORIO**: Aplica AL VALOR BASE de los pasos 1-2 los siguientes ajustes acumulativos:
+
+(a) ESG / Eficiencia energética (datos arriba en bloque ESG):
+- CEE A: +10-15% / B: +5-10% / C: +2-5% / D: 0% (referencia) / E: -2-5% / F: -5-10% / G: -10-15%
+- Si NO hay CEE aportado, asumir D-E (sin prima ni descuento explícito)
+- Aislamiento alto + doble ventana + bomba calor = +3-5% adicional combinado
+- A partir 2025-2027 entrarán en vigor restricciones de alquiler para CEE F/G en algunos países UE
+
+(b) Calidad de ubicación (datos arriba en bloque CALIDAD DE UBICACIÓN):
+- Top transporte público: +15-25% (la dominante: ubicación = 60-80% del valor)
+- Catchment de colegios alta calidad: +10-30% (residencial)
+- Zona tranquila vs ruidosa: ±5-10%
+- Vistas panorámicas/despejadas: +3-15%
+- Zona verde a <500m: +2-5%
+- Zona declarada tensionada (LAU): -3-8% en valor por tope de renta
+
+(c) Riesgos técnicos / legales (datos arriba en bloque RIESGOS):
+- ITE desfavorable: -10-25% (rehabilitación inminente)
+- Riesgo inundación alto: -10-20%
+- Sin cédula habitabilidad: -5-15%
+- Inquilinos LAU 1964 (renta antigua): -10-30% por unidad afectada
+- Derramas pendientes conocidas: descontar el importe completo
+
+(d) Datos económicos verificables del activo (bloque DATOS ECONÓMICOS):
+- Renta actual en vigor < renta de mercado: oportunidad de revalorización (informar pero NO inflar valor)
+- Renta actual en vigor ≥ renta de mercado: aplicar como referencia primaria
+- IBI o comunidad anormalmente alta: descontar capitalización del exceso
+
+PASO 5 — VALIDACIÓN CRUZADA Y COHERENCIA:
 - Compara el valor obtenido por comparables vs capitalización
   · Si difieren >15%, analiza por qué y ajusta
   · SIEMPRE prioriza comparables de mercado (transacciones reales) sobre capitalización
@@ -620,7 +919,7 @@ PASO 4 — VALIDACIÓN CRUZADA Y COHERENCIA:
 - Si hay evolución histórica de precios, verifica que la tendencia es coherente
 - Si hay datos de subzonas/distritos, usa la subzona más cercana como referencia primaria
 
-PASO 5 — DETERMINACIÓN FINAL Y CONFIANZA:
+PASO 6 — DETERMINACIÓN FINAL Y CONFIANZA:
 - Pondera: comparables de mercado (65%) + criterio experto (20%) + capitalización de rentas (15%)
 - IMPORTANTE: La capitalización de rentas es un método de VALIDACIÓN CRUZADA, NO el principal.
   El precio de mercado real (transacciones escrituradas y comparables) debe ser la referencia primaria.
@@ -707,7 +1006,23 @@ ${
   "recomendaciones": ["<recomendación1 con impacto en valor>", "<recomendación2>", "<recomendación3>"],
   "comparablesUsados": [
     {"direccion": "<dirección real del comparable>", "precio": <número>, "superficie": <número>, "precioM2": <número>, "similitud": <0.0-1.0>, "fuente": "<portal>"}
-  ]
+  ],
+
+  "ajustesPorFactores": {
+    "esg": {
+      "impactoTotal": "<+/-X% (resumen)>",
+      "ceeAplicado": "<letra o 'no aportado'>",
+      "detalle": "<frase 1-2 líneas>"
+    },
+    "ubicacion": {
+      "impactoTotal": "<+/-X%>",
+      "factoresAplicados": ["transporte:+10%", "colegios:+15%", "..."]
+    },
+    "riesgos": {
+      "impactoTotal": "<-X%>",
+      "factoresAplicados": ["ITE desfavorable:-15%", "..."]
+    }
+  }
 }`;
 
   const message = await anthropic.messages.create({
@@ -791,6 +1106,7 @@ ${
     comparables,
     phase1Summary: `Analizados ${phase1.rawComparablesCount} comparables de portales, ${phase1.filteredCount} seleccionados por IA con similitud >40%. Zona: ${phase1.zoneAnalysis.profile}`,
     sourcesUsed,
+    ajustesPorFactores: raw.ajustesPorFactores || undefined,
   };
 }
 

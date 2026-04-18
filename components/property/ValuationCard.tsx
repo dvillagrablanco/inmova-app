@@ -45,6 +45,11 @@ interface ValuationData {
   perfilInquilinoMediaEstancia?: string;
   metodologiaUsada?: string;
   tendenciaMercado?: string;
+  ajustesPorFactores?: {
+    esg?: { impactoTotal: string; ceeAplicado: string; detalle: string };
+    ubicacion?: { impactoTotal: string; factoresAplicados: string[] };
+    riesgos?: { impactoTotal: string; factoresAplicados: string[] };
+  };
 }
 
 export function ValuationCard({ propertyId }: ValuationCardProps) {
@@ -270,6 +275,54 @@ export function ValuationCard({ propertyId }: ValuationCardProps) {
               {valuation.reasoning}
             </p>
           </div>
+
+          {/* Ajustes RICS Red Book 2024 */}
+          {valuation.ajustesPorFactores && (
+            <div className="rounded-lg border bg-violet-50/40 dark:bg-violet-950/20 p-3 space-y-3">
+              <p className="text-xs font-semibold text-violet-800 dark:text-violet-300 uppercase tracking-wide">
+                Ajustes aplicados (RICS Red Book 2024)
+              </p>
+              {valuation.ajustesPorFactores.esg && (
+                <div className="text-xs space-y-1">
+                  <div className="font-medium">
+                    ESG / Eficiencia: <span className="text-violet-700">{valuation.ajustesPorFactores.esg.impactoTotal}</span>
+                  </div>
+                  <div className="text-muted-foreground">CEE: {valuation.ajustesPorFactores.esg.ceeAplicado}</div>
+                  {valuation.ajustesPorFactores.esg.detalle && (
+                    <div className="text-muted-foreground">{valuation.ajustesPorFactores.esg.detalle}</div>
+                  )}
+                </div>
+              )}
+              {valuation.ajustesPorFactores.ubicacion && (
+                <div className="text-xs space-y-1">
+                  <div className="font-medium">
+                    Calidad ubicación: <span className="text-violet-700">{valuation.ajustesPorFactores.ubicacion.impactoTotal}</span>
+                  </div>
+                  {valuation.ajustesPorFactores.ubicacion.factoresAplicados?.length > 0 && (
+                    <ul className="list-disc list-inside text-muted-foreground">
+                      {valuation.ajustesPorFactores.ubicacion.factoresAplicados.map((f, i) => (
+                        <li key={i}>{f}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
+              {valuation.ajustesPorFactores.riesgos && (
+                <div className="text-xs space-y-1">
+                  <div className="font-medium">
+                    Riesgos técnicos: <span className="text-red-700">{valuation.ajustesPorFactores.riesgos.impactoTotal}</span>
+                  </div>
+                  {valuation.ajustesPorFactores.riesgos.factoresAplicados?.length > 0 && (
+                    <ul className="list-disc list-inside text-muted-foreground">
+                      {valuation.ajustesPorFactores.riesgos.factoresAplicados.map((f, i) => (
+                        <li key={i}>{f}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           <Separator />
 
