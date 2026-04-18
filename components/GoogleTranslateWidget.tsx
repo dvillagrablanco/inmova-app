@@ -1,12 +1,14 @@
 'use client';
 
 import { useEffect } from 'react';
+import { applyRuntimeTranslation } from '@/lib/runtime-translator';
 
 declare global {
   interface Window {
     googleTranslateElementInit?: () => void;
     google?: any;
     __INMOVA_GTRANS_INITED__?: boolean;
+    __INMOVA_FALLBACK_APPLIED__?: boolean;
   }
 }
 
@@ -42,7 +44,11 @@ function setGoogTransCookie(target: string) {
 function initWidget() {
   try {
     if (!window.google?.translate?.TranslateElement) return;
-    if (window.__INMOVA_GTRANS_INITED__) return;
+    if (window.__INMOVA_GTRANS_INITED__) {
+      // Ya inicializado - intentar disparar traducción al locale actual
+      triggerTranslation();
+      return;
+    }
     new window.google.translate.TranslateElement(
       {
         pageLanguage: 'es',
@@ -53,8 +59,25 @@ function initWidget() {
       'google_translate_element'
     );
     window.__INMOVA_GTRANS_INITED__ = true;
+    // Disparar traducción tras un breve delay para que el select esté listo
+    setTimeout(() => triggerTranslation(), 600);
+    setTimeout(() => triggerTranslation(), 1500);
   } catch (e) {
     console.error('[GoogleTranslate] init error', e);
+  }
+}
+
+function triggerTranslation() {
+  try {
+    const locale = getCookieLocale();
+    if (!TRANSLATABLE.includes(locale)) return;
+    const select = document.querySelector('select.goog-te-combo') as HTMLSelectElement | null;
+    if (select && select.value !== locale) {
+      select.value = locale;
+      select.dispatchEvent(new Event('change'));
+    }
+  } catch (e) {
+    console.error('[GoogleTranslate] trigger error', e);
   }
 }
 
@@ -75,6 +98,13 @@ export function GoogleTranslateWidget() {
     // Si el script ya está cargado, ejecutar init directamente
     if (window.google?.translate) {
       initWidget();
+      // Fallback paralelo: aplicar diccionario tras 3s si Google no traduce todo
+      setTimeout(() => {
+        if (!window.__INMOVA_FALLBACK_APPLIED__) {
+          applyRuntimeTranslation(locale);
+          window.__INMOVA_FALLBACK_APPLIED__ = true;
+        }
+      }, 3000);
       return;
     }
 
@@ -100,7 +130,21 @@ export function GoogleTranslateWidget() {
     script.id = 'google-translate-script';
     script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
     script.async = true;
+    script.onerror = () => {
+      // Si Google bloqueado, aplicar diccionario local como fallback
+      console.warn('[GoogleTranslate] script blocked, falling back to local dictionary');
+      applyRuntimeTranslation(locale);
+      window.__INMOVA_FALLBACK_APPLIED__ = true;
+    };
     document.head.appendChild(script);
+
+    // Fallback de seguridad: si tras 5s no se traduce nada, aplicar diccionario
+    setTimeout(() => {
+      if (!window.__INMOVA_FALLBACK_APPLIED__) {
+        applyRuntimeTranslation(locale);
+        window.__INMOVA_FALLBACK_APPLIED__ = true;
+      }
+    }, 5000);
   }, []);
 
   return (

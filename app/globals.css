@@ -21,8 +21,12 @@ iframe.goog-te-banner-frame {
   color: transparent !important;
   font-size: 0 !important;
 }
+/* No usar display:none — JS necesita poder leer/disparar el select */
 .goog-te-gadget .goog-te-combo {
-  display: none !important;
+  position: absolute !important;
+  left: -9999px !important;
+  top: -9999px !important;
+  visibility: hidden !important;
 }
 /* Forzar que el body no se desplace por el banner inyectado */
 body {
