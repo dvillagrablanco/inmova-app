@@ -109,14 +109,14 @@ const nextConfig = {
     // CSP (Content Security Policy) - auditoria V2 2026-02-11
     const cspDirectives = [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://js.stripe.com https://www.googletagmanager.com https://client.crisp.chat https://static.cloudflareinsights.com https://*.sentry.io",
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://client.crisp.chat",
+      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://js.stripe.com https://www.googletagmanager.com https://client.crisp.chat https://static.cloudflareinsights.com https://*.sentry.io https://translate.google.com https://translate.googleapis.com https://www.gstatic.com https://*.googleusercontent.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://client.crisp.chat https://www.gstatic.com",
       "img-src 'self' data: blob: https: http:",
       "font-src 'self' data: https://fonts.gstatic.com https://client.crisp.chat",
-      "connect-src 'self' https://api.stripe.com https://*.amazonaws.com https://*.inmovaapp.com https://www.google-analytics.com https://client.crisp.chat wss://client.relay.crisp.chat https://*.sentry.io https://cloudflareinsights.com https://nominatim.openstreetmap.org",
+      "connect-src 'self' https://api.stripe.com https://*.amazonaws.com https://*.inmovaapp.com https://www.google-analytics.com https://client.crisp.chat wss://client.relay.crisp.chat https://*.sentry.io https://cloudflareinsights.com https://nominatim.openstreetmap.org https://translate.googleapis.com https://translate.google.com",
       "media-src 'self' data: blob:",
       "object-src 'none'",
-      "frame-src 'self' https://js.stripe.com https://game.crisp.chat https://www.openstreetmap.org",
+      "frame-src 'self' https://js.stripe.com https://game.crisp.chat https://www.openstreetmap.org https://www.google.com https://maps.google.com",
       "base-uri 'self'",
       "form-action 'self'",
       "frame-ancestors 'self'",

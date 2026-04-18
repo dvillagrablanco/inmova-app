@@ -6,6 +6,7 @@ declare global {
   interface Window {
     googleTranslateElementInit?: () => void;
     google?: any;
+    __INMOVA_GTRANS_INITED__?: boolean;
   }
 }
 
@@ -21,8 +22,7 @@ function setGoogTransCookie(target: string) {
   if (typeof document === 'undefined') return;
   const host = window.location.hostname;
   const parts = host.split('.');
-  const baseDomain =
-    parts.length > 1 ? `.${parts.slice(-2).join('.')}` : host;
+  const baseDomain = parts.length > 1 ? `.${parts.slice(-2).join('.')}` : host;
   const value = target ? `/es/${target}` : '';
   const expire = new Date();
   expire.setFullYear(expire.getFullYear() + 1);
@@ -39,56 +39,70 @@ function setGoogTransCookie(target: string) {
   }
 }
 
+function initWidget() {
+  try {
+    if (!window.google?.translate?.TranslateElement) return;
+    if (window.__INMOVA_GTRANS_INITED__) return;
+    new window.google.translate.TranslateElement(
+      {
+        pageLanguage: 'es',
+        includedLanguages: TRANSLATABLE.join(','),
+        autoDisplay: false,
+        layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
+      },
+      'google_translate_element'
+    );
+    window.__INMOVA_GTRANS_INITED__ = true;
+  } catch (e) {
+    console.error('[GoogleTranslate] init error', e);
+  }
+}
+
 export function GoogleTranslateWidget() {
   useEffect(() => {
     const locale = getCookieLocale();
     const isTranslatable = TRANSLATABLE.includes(locale);
 
-    // Aplicar/limpiar cookie ANTES de cargar el script
+    // Aplicar/limpiar cookie ANTES de cargar script
     setGoogTransCookie(isTranslatable ? locale : '');
 
     if (!isTranslatable) {
-      // Locale = español, no cargamos el widget
+      // Locale = español: no cargamos el script
       return;
     }
+
+    // CRÍTICO: definir callback global ANTES de añadir el script
+    // Si el script ya está cargado, ejecutar init directamente
+    if (window.google?.translate) {
+      initWidget();
+      return;
+    }
+
+    window.googleTranslateElementInit = initWidget;
 
     if (document.getElementById('google-translate-script')) {
-      // Ya estaba cargado: forzar reinicialización si el widget existe
-      try {
-        if (window.google?.translate) {
-          window.googleTranslateElementInit?.();
+      // Script presente pero google no listo todavía: poll corto
+      let attempts = 0;
+      const interval = setInterval(() => {
+        attempts++;
+        if (window.google?.translate?.TranslateElement) {
+          clearInterval(interval);
+          initWidget();
+        } else if (attempts > 20) {
+          clearInterval(interval);
         }
-      } catch {}
+      }, 250);
       return;
     }
 
-    window.googleTranslateElementInit = () => {
-      try {
-        if (!window.google?.translate?.TranslateElement) return;
-        new window.google.translate.TranslateElement(
-          {
-            pageLanguage: 'es',
-            includedLanguages: TRANSLATABLE.join(','),
-            autoDisplay: false,
-            layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
-          },
-          'google_translate_element'
-        );
-      } catch (error) {
-        console.error('[GoogleTranslate] init error', error);
-      }
-    };
-
+    // Cargar script
     const script = document.createElement('script');
     script.id = 'google-translate-script';
     script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
     script.async = true;
-    script.defer = true;
-    document.body.appendChild(script);
+    document.head.appendChild(script);
   }, []);
 
-  // El contenedor lo posicionamos fuera de pantalla SIN display:none
-  // (display:none impide que Google Translate inicialice).
   return (
     <div
       id="google_translate_element"

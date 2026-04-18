@@ -3,10 +3,24 @@
  * Estados vacíos mejorados con CTAs claros
  */
 
-import { ReactNode, isValidElement } from 'react';
+import React, { ReactNode, isValidElement } from 'react';
 import { Button } from '@/components/ui/button';
 import { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+// lucide-react v0.446+ exporta los iconos como `forwardRef`, que en runtime es
+// un objeto `{ $$typeof, render, displayName }` y NO un `function`. Si lo
+// renderizamos como children directamente provoca React error #31. Esta función
+// detecta el caso y nos dice si debemos invocarlo como componente.
+function isReactComponentLike(value: unknown): boolean {
+  if (typeof value === 'function') return true;
+  if (value && typeof value === 'object') {
+    const $$typeof = (value as any).$$typeof;
+    if (typeof $$typeof === 'symbol') return true; // forwardRef, memo, etc.
+    if (typeof (value as any).render === 'function') return true;
+  }
+  return false;
+}
 
 interface EmptyStateProps {
   icon?: LucideIcon | ReactNode;
@@ -75,12 +89,14 @@ export function EmptyState({
                 'rounded-full bg-gray-100 flex items-center justify-center'
               )}
             >
-              {typeof Icon === 'function' ? (
-                <Icon className={cn(sizes.icon, 'text-gray-400')} />
+              {isReactComponentLike(Icon) ? (
+                React.createElement(Icon as React.ComponentType<{ className?: string }>, {
+                  className: cn(sizes.icon, 'text-gray-400'),
+                })
               ) : isValidElement(Icon) ? (
                 Icon
               ) : (
-                <div className={cn(sizes.icon, 'text-gray-400')}>{Icon as any}</div>
+                <div className={cn(sizes.icon, 'text-gray-400')} />
               )}
             </div>
           </div>
