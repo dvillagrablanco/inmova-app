@@ -107,6 +107,15 @@ export interface PropertyForAnalysis {
   derramasPendientes?: number; // euros de derramas conocidas
   rentaActualMensual?: number; // si ya está alquilado
 
+  // === Precios de referencia conocidos (input usuario) ===
+  // Sirven como anclaje cuando los scrapers están bloqueados (DataDome)
+  // y la IA tiene que valorar zonas con escasos comparables.
+  precioVentaReferenciaUserM2?: number; // €/m² venta declarado por el usuario
+  precioAlquilerReferenciaUserM2?: number; // €/m² alquiler declarado por el usuario
+  precioVentaUltimaTransaccion?: number; // venta efectiva en escritura del propio inmueble (si la hubo)
+  precioVentaSimilarConocido?: number; // venta verificada en mismo edificio
+  fuenteReferenciaUser?: string; // "Tasación bancaria 2024", "Notariado", "Vecino vendió", etc.
+
   // === Factores específicos por tipo ===
   // Local
   metrosFachada?: number;
@@ -294,6 +303,58 @@ function buildRiskBlock(p: PropertyForAnalysis): string {
   if (items.length === 0) return '';
 
   return `\n--- RIESGOS TÉCNICOS / LEGALES (descuentos significativos al valor) ---\n${items.join('\n')}\n`;
+}
+
+/**
+ * Bloque de PRECIOS DE REFERENCIA aportados por el usuario.
+ * Estos prevalecen sobre cualquier dato scrapeado/IA (RICS Red Book 2024
+ * — datos del cliente verificables tienen mayor peso).
+ */
+function buildUserReferencePricesBlock(p: PropertyForAnalysis): string {
+  const items: string[] = [];
+
+  if (p.precioVentaUltimaTransaccion && p.precioVentaUltimaTransaccion > 0) {
+    items.push(
+      `- VENTA REAL del PROPIO inmueble (escritura): ${p.precioVentaUltimaTransaccion.toLocaleString(
+        'es-ES'
+      )}€  → DATO PRIMARIO. Usa este precio como ancla principal.`
+    );
+  }
+
+  if (p.precioVentaSimilarConocido && p.precioVentaSimilarConocido > 0) {
+    items.push(
+      `- Venta verificada en el MISMO EDIFICIO o portal: ${p.precioVentaSimilarConocido.toLocaleString(
+        'es-ES'
+      )}€ → comparable directo de máxima fiabilidad`
+    );
+  }
+
+  if (p.precioVentaReferenciaUserM2 && p.precioVentaReferenciaUserM2 > 0) {
+    items.push(
+      `- Precio venta de referencia aportado por el cliente: **${p.precioVentaReferenciaUserM2}€/m²**` +
+        (p.fuenteReferenciaUser ? ` (fuente: ${p.fuenteReferenciaUser})` : '')
+    );
+  }
+
+  if (p.precioAlquilerReferenciaUserM2 && p.precioAlquilerReferenciaUserM2 > 0) {
+    items.push(
+      `- Precio alquiler de referencia aportado por el cliente: **${p.precioAlquilerReferenciaUserM2}€/m²/mes**` +
+        (p.fuenteReferenciaUser ? ` (fuente: ${p.fuenteReferenciaUser})` : '')
+    );
+  }
+
+  if (items.length === 0) return '';
+
+  return (
+    `\n--- PRECIOS DE REFERENCIA APORTADOS POR EL CLIENTE (PRIORITARIOS) ---\n` +
+    `Tienen la MAYOR fiabilidad y deben anclar tu valoración.\n` +
+    `Si los datos de mercado scrapeados difieren >20% de estos precios,\n` +
+    `la IA debe revisar y AJUSTAR su valoración hacia el dato del cliente,\n` +
+    `salvo que pueda demostrar con comparables verificables que el cliente\n` +
+    `está sobre/infravalorando.\n` +
+    items.join('\n') +
+    '\n'
+  );
 }
 
 /**
@@ -739,6 +800,26 @@ ${phase1.zoneAnalysis.outliersPricePerM2.length > 0 ? `- Outliers descartados: $
   const locationQualityBlock = buildLocationQualityBlock(property);
   const riskBlock = buildRiskBlock(property);
   const economicBlock = buildEconomicBlock(property);
+  const userRefBlock = buildUserReferencePricesBlock(property);
+
+  // Detectar si hay pocos datos verificables de mercado para aplicar regla de prudencia
+  const hasReliablePlatformData =
+    aggregatedMarketData &&
+    aggregatedMarketData.platformData.some(
+      (pd) =>
+        pd.source !== 'idealista' &&
+        pd.source !== 'fotocasa' &&
+        pd.source !== 'habitaclia' &&
+        (pd.pricePerM2Sale || pd.pricePerM2Rent)
+    );
+  const hasInternalComparables = !!internalComparables && internalComparables.length > 50;
+  const hasUserReference =
+    !!property.precioVentaReferenciaUserM2 ||
+    !!property.precioAlquilerReferenciaUserM2 ||
+    !!property.precioVentaUltimaTransaccion ||
+    !!property.precioVentaSimilarConocido;
+  const lowDataMode =
+    !hasReliablePlatformData && !hasInternalComparables && !hasUserReference;
 
   const prompt = `Eres un tasador inmobiliario certificado (RICS/ATASA) con 20+ años de experiencia en el mercado español. Realizas una valoración profesional rigurosa siguiendo las normas ECO 805/2003 y estándares internacionales de valoración (IVS).
 
@@ -766,11 +847,24 @@ ${property.squareMetersUtil ? `- Superficie útil: ${property.squareMetersUtil}m
 ${property.yearLastRenovation ? `- Última reforma integral: ${property.yearLastRenovation} (hace ${new Date().getFullYear() - property.yearLastRenovation} años)` : ''}
 ${property.descripcionAdicional ? `- Observaciones: ${property.descripcionAdicional}` : ''}
 - Finalidad valoración: ${property.finalidad === 'venta' ? 'Determinación valor de mercado (venta)' : property.finalidad === 'alquiler' ? 'Determinación renta de mercado (alquiler)' : 'Valor de mercado + Renta de mercado'}
-${esgBlock}${locationQualityBlock}${riskBlock}${economicBlock}
+${userRefBlock}${esgBlock}${locationQualityBlock}${riskBlock}${economicBlock}
 ═══════════════════════════════════════════════════════
 DATOS DE MERCADO — MÚLTIPLES FUENTES VERIFICADAS
 ═══════════════════════════════════════════════════════
 ${platformDataText}
+
+${
+  lowDataMode
+    ? `\n⚠️ MODO DATOS LIMITADOS DETECTADO:
+- Idealista/Fotocasa están bloqueando scraping con anti-bot (DataDome) en este momento
+- No hay precios escriturados Notariado disponibles para esta zona
+- No hay comparables internos suficientes
+- No hay precios de referencia aportados por el cliente
+- INSTRUCCIÓN: Confianza máxima 70%. Rango ±15-20%. Recomienda al cliente
+  aportar 'Precio venta de referencia' o 'Precio alquiler de referencia'
+  para mejorar la precisión.\n`
+    : ''
+}
 
 ═══════════════════════════════════════════════════════
 COMPARABLES PRE-ANALIZADOS POR IA (Fase 1 — filtrados por similitud)

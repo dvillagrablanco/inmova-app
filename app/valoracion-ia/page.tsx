@@ -389,6 +389,12 @@ export default function ValoracionIAPage() {
     rentaActualMensual: '',
     superficieUtil: '',
     yearLastRenovation: '',
+    // === Precios de referencia conocidos por el usuario ===
+    precioVentaReferenciaUserM2: '',
+    precioAlquilerReferenciaUserM2: '',
+    precioVentaUltimaTransaccion: '',
+    precioVentaSimilarConocido: '',
+    fuenteReferenciaUser: '',
   });
 
   // Cargar datos al iniciar
@@ -769,6 +775,20 @@ export default function ValoracionIAPage() {
           yearLastRenovation: formData.yearLastRenovation
             ? parseInt(formData.yearLastRenovation)
             : undefined,
+          // === Precios de referencia ===
+          precioVentaReferenciaUserM2: formData.precioVentaReferenciaUserM2
+            ? parseFloat(formData.precioVentaReferenciaUserM2)
+            : undefined,
+          precioAlquilerReferenciaUserM2: formData.precioAlquilerReferenciaUserM2
+            ? parseFloat(formData.precioAlquilerReferenciaUserM2)
+            : undefined,
+          precioVentaUltimaTransaccion: formData.precioVentaUltimaTransaccion
+            ? parseFloat(formData.precioVentaUltimaTransaccion)
+            : undefined,
+          precioVentaSimilarConocido: formData.precioVentaSimilarConocido
+            ? parseFloat(formData.precioVentaSimilarConocido)
+            : undefined,
+          fuenteReferenciaUser: formData.fuenteReferenciaUser || undefined,
         }),
       });
 
@@ -1945,6 +1965,95 @@ ${
                     }
                     rows={3}
                   />
+                </div>
+
+                {/* === Precios de referencia (anchor de máxima fiabilidad) === */}
+                <div className="rounded-lg border-2 border-amber-300 bg-amber-50/50 dark:bg-amber-950/20 p-4 space-y-3">
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                    <div className="text-xs text-amber-900 dark:text-amber-200 leading-relaxed">
+                      <strong>Recomendado:</strong> Si conoces precios reales del mercado en
+                      esta zona (tasación, vecino que vendió, anuncio que viste), apórtalos
+                      aquí. Idealista/Fotocasa bloquean el scraping desde nuestro servidor con
+                      anti-bot, así que los precios que tú aportes mejoran muchísimo la
+                      precisión de la valoración.
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                    <div className="space-y-1">
+                      <Label htmlFor="ref-venta-m2">Precio venta de referencia (€/m²)</Label>
+                      <Input
+                        id="ref-venta-m2"
+                        type="number"
+                        step="any"
+                        value={formData.precioVentaReferenciaUserM2}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            precioVentaReferenciaUserM2: e.target.value,
+                          })
+                        }
+                        placeholder="ej. 1.500"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="ref-alq-m2">Precio alquiler de referencia (€/m²/mes)</Label>
+                      <Input
+                        id="ref-alq-m2"
+                        type="number"
+                        step="any"
+                        value={formData.precioAlquilerReferenciaUserM2}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            precioAlquilerReferenciaUserM2: e.target.value,
+                          })
+                        }
+                        placeholder="ej. 7,5"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="venta-ult">Última venta de ESTE inmueble (€)</Label>
+                      <Input
+                        id="venta-ult"
+                        type="number"
+                        value={formData.precioVentaUltimaTransaccion}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            precioVentaUltimaTransaccion: e.target.value,
+                          })
+                        }
+                        placeholder="ej. 75.000"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="venta-sim">Venta verificada en el mismo edificio (€)</Label>
+                      <Input
+                        id="venta-sim"
+                        type="number"
+                        value={formData.precioVentaSimilarConocido}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            precioVentaSimilarConocido: e.target.value,
+                          })
+                        }
+                        placeholder="ej. 80.000"
+                      />
+                    </div>
+                    <div className="space-y-1 sm:col-span-2">
+                      <Label htmlFor="ref-fuente">Fuente del dato (opcional)</Label>
+                      <Input
+                        id="ref-fuente"
+                        value={formData.fuenteReferenciaUser}
+                        onChange={(e) =>
+                          setFormData({ ...formData, fuenteReferenciaUser: e.target.value })
+                        }
+                        placeholder="ej. Tasación bancaria 2024, Notariado, Vecino vendió en 2025…"
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 {/* === Criterios avanzados (RICS Red Book 2024 / ECO 805/2003) === */}

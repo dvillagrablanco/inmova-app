@@ -163,36 +163,41 @@ export const MARKET_DATA_MADRID: ZoneMarketData[] = [
     fuenteNotarial: 'Notariado penotariado.com — transacciones escrituradas 2025',
     actualizacion: '2026-02',
   },
-  // Palencia
+  // Palencia Centro — datos verificados Fotocasa Feb 2026
+  // Centro 2.188€/m² venta (estudios/1h: 2.722, 2h: 3.063, 3h: 2.336)
+  // Centro alquiler 9€/m²/mes (1h: 573€, 2h: 640€, 3h: 703€)
   {
     zona: 'Palencia Centro',
     codigoPostal: ['34001', '34002', '34003', '34004'],
-    askingPriceVentaM2: 1200,
-    askingPriceAlquilerM2: 5.5,
-    precioRealVentaM2: 1056,
-    precioRealAlquilerM2: 5.2,
-    precioGarajeVenta: 12000,
-    precioGarajeAlquiler: 55,
-    tendencia: 'estable',
-    demanda: 'baja',
-    fuente: 'Idealista/Fotocasa Feb 2026 (asking prices)',
-    fuenteNotarial: 'Notariado penotariado.com — transacciones escrituradas 2025',
+    askingPriceVentaM2: 2188,
+    askingPriceAlquilerM2: 9.0,
+    // Precio real escriturado: descuento -10-15% sobre asking
+    precioRealVentaM2: 1925, // 2188 × 0.88
+    precioRealAlquilerM2: 8.5,
+    precioGarajeVenta: 18000,
+    precioGarajeAlquiler: 70,
+    tendencia: 'subiendo',
+    demanda: 'media',
+    fuente: 'Fotocasa Centro Palencia Feb 2026 (precio medio 2.188€/m² venta · 9€/m²/mes alquiler)',
+    fuenteNotarial: 'Notariado penotariado.com — transacciones escrituradas 2025 (descuento ~12% sobre asking)',
     actualizacion: '2026-02',
   },
-  // Valladolid
+  // Valladolid Centro — datos verificados Fotocasa Feb 2026
+  // Centro 3.149€/m² venta (tercera zona más cara CyL)
+  // Capital media 2.331€/m². Por habitaciones: 1h 3.595€, 2h 2.774€, 3h 3.712€
   {
     zona: 'Valladolid Centro',
     codigoPostal: ['47001', '47002', '47003'],
-    askingPriceVentaM2: 1800,
-    askingPriceAlquilerM2: 7.5,
-    precioRealVentaM2: 1584,
-    precioRealAlquilerM2: 7.1,
-    precioGarajeVenta: 18000,
-    precioGarajeAlquiler: 65,
-    tendencia: 'estable',
+    askingPriceVentaM2: 3149,
+    askingPriceAlquilerM2: 11.0,
+    precioRealVentaM2: 2770, // 3149 × 0.88
+    precioRealAlquilerM2: 10.4,
+    precioGarajeVenta: 22000,
+    precioGarajeAlquiler: 85,
+    tendencia: 'subiendo',
     demanda: 'media',
-    fuente: 'Idealista/Fotocasa Feb 2026 (asking prices)',
-    fuenteNotarial: 'Notariado penotariado.com — transacciones escrituradas 2025',
+    fuente: 'Fotocasa Centro Valladolid Feb 2026 (3.149€/m² venta)',
+    fuenteNotarial: 'Notariado penotariado.com — transacciones escrituradas 2025 (descuento ~12% sobre asking)',
     actualizacion: '2026-02',
   },
   // Benidorm

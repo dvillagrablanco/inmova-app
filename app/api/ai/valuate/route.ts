@@ -440,6 +440,14 @@ const valuateSchema = z.object({
     .min(1900)
     .max(new Date().getFullYear())
     .optional(),
+
+  // === Precios de referencia aportados por el cliente ===
+  // Críticos cuando los scrapers están bloqueados (DataDome).
+  precioVentaReferenciaUserM2: z.coerce.number().positive().optional(),
+  precioAlquilerReferenciaUserM2: z.coerce.number().positive().optional(),
+  precioVentaUltimaTransaccion: z.coerce.number().positive().optional(),
+  precioVentaSimilarConocido: z.coerce.number().positive().optional(),
+  fuenteReferenciaUser: z.string().optional(),
 });
 
 /**
@@ -833,6 +841,12 @@ export async function POST(request: NextRequest) {
       comunidadMensual: validated.comunidadMensual ?? comunidadMensualReal,
       rentaActualMensual: validated.rentaActualMensual ?? rentaActualMensualReal,
       yearLastRenovation: validated.yearLastRenovation,
+      // === Precios de referencia aportados por el cliente ===
+      precioVentaReferenciaUserM2: validated.precioVentaReferenciaUserM2,
+      precioAlquilerReferenciaUserM2: validated.precioAlquilerReferenciaUserM2,
+      precioVentaUltimaTransaccion: validated.precioVentaUltimaTransaccion,
+      precioVentaSimilarConocido: validated.precioVentaSimilarConocido,
+      fuenteReferenciaUser: validated.fuenteReferenciaUser,
     };
 
     const internalComparablesText =
