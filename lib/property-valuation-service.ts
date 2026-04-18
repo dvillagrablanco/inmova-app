@@ -120,10 +120,12 @@ async function fetchMarketData(
       where: {
         building: {
           companyId,
-          ciudad: city,
+          // Building.ciudad NO existe en el schema; filtramos por substring
+          // de la dirección del edificio (la ciudad va al final del campo).
+          direccion: { contains: city, mode: 'insensitive' as const },
         },
         estado: 'ocupada',
-        rentaMensual: { not: null },
+        rentaMensual: { gt: 0 },
       },
       select: {
         id: true,

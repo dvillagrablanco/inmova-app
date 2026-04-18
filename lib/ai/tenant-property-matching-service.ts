@@ -462,14 +462,20 @@ export async function encontrarMejoresMatches(
   limite: number = 10
 ): Promise<MatchResult[]> {
   // Obtener propiedades disponibles de la BD
+  // Building no tiene `city` separado: filtramos por substring de direccion
+  const ciudadesFiltro = inquilino.ciudadesPreferidas.filter(Boolean);
   const propiedadesDB = await prisma.unit.findMany({
     where: {
       estado: 'disponible',
-      building: {
-        city: {
-          in: inquilino.ciudadesPreferidas.length > 0 ? inquilino.ciudadesPreferidas : undefined,
-        },
-      },
+      ...(ciudadesFiltro.length > 0
+        ? {
+            building: {
+              OR: ciudadesFiltro.map((c) => ({
+                direccion: { contains: c, mode: 'insensitive' as const },
+              })),
+            },
+          }
+        : {}),
     },
     include: {
       building: true,

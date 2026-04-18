@@ -127,8 +127,8 @@ export async function findBestMatches(
             id: true,
             nombre: true,
             direccion: true,
-            ciudad: true,
-            codigoPostal: true,
+            // ciudad y codigoPostal no existen en el modelo Building;
+            // se infieren de la dirección (segmento final).
           },
         },
       },
@@ -210,11 +210,10 @@ function scorePropertyMatch(
 
   // Dirección contiene ciudad preferida
   const buildingAddress = (property.building?.direccion || '').toLowerCase();
-  const buildingCity = (property.building?.ciudad || '').toLowerCase();
   if (preferences.preferredCities.length > 0) {
     const matchesCity = preferences.preferredCities.some(
       (city) =>
-        buildingAddress.includes(city.toLowerCase()) || buildingCity.includes(city.toLowerCase())
+        buildingAddress.includes(city.toLowerCase())
     );
     if (matchesCity) {
       locationScore += 15;

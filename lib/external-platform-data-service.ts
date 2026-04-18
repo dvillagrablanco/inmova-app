@@ -533,7 +533,7 @@ async function fetchFromInternalDB(options: FetchOptions): Promise<PlatformMarke
               },
             }
           : {}),
-        rentaMensual: { not: null, gt: 0 },
+        rentaMensual: { gt: 0 },
       },
       select: {
         id: true,

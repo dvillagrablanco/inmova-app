@@ -154,11 +154,11 @@ export async function obtenerDatosMercado(ciudad: string, barrio?: string): Prom
   const precioBase = PRECIOS_MEDIOS_ZONA[key] || PRECIOS_MEDIOS_ZONA['default'];
 
   // Obtener datos de propiedades similares en la BD
+  // Building no tiene city/neighborhood: filtramos por substring direccion
   const propiedadesSimilares = await prisma.unit.findMany({
     where: {
       building: {
-        city: ciudad,
-        ...(barrio && { neighborhood: barrio }),
+        direccion: { contains: ciudad, mode: 'insensitive' as const },
       },
       estado: 'ocupado',
     },
