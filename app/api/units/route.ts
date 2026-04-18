@@ -90,6 +90,7 @@ export async function GET(req: NextRequest) {
               habitaciones: true,
               banos: true,
               rentaMensual: true,
+              imagenes: true,
               createdAt: true,
               building: {
                 select: selectBuildingMinimal,
@@ -136,6 +137,7 @@ export async function GET(req: NextRequest) {
           habitaciones: true,
           banos: true,
           rentaMensual: true,
+          imagenes: true,
           createdAt: true,
           building: {
             select: selectBuildingMinimal,
@@ -179,6 +181,7 @@ export async function GET(req: NextRequest) {
           habitaciones: true,
           banos: true,
           rentaMensual: true,
+          imagenes: true,
           createdAt: true,
           building: {
             select: selectBuildingMinimal,
@@ -219,6 +222,7 @@ export async function GET(req: NextRequest) {
         habitaciones: true,
         banos: true,
         rentaMensual: true,
+        imagenes: true,
         createdAt: true,
         building: { select: selectBuildingMinimal },
         contracts: {
