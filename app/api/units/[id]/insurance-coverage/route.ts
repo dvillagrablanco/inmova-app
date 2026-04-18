@@ -74,6 +74,23 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
         })
       : [];
 
+    // 2b. Sibling policies — pólizas asignadas a OTRAS unidades del mismo edificio
+    // Útil para informar al usuario de que existen pólizas en su edificio aunque
+    // su unidad concreta no esté cubierta.
+    const siblingPolicies = unit.buildingId
+      ? await prisma.insurance.findMany({
+          where: {
+            buildingId: unit.buildingId,
+            unitId: { not: null, notIn: [unitId] },
+          },
+          include: {
+            unit: { select: { id: true, numero: true } },
+          },
+          orderBy: { fechaVencimiento: 'desc' },
+          take: 10,
+        })
+      : [];
+
     // Calculate coverage status
     const now = new Date();
     const activeDirect = directPolicies.filter(
@@ -133,6 +150,15 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
         buildingName: p.building?.nombre,
         unidadesCubiertas: buildingUnitsCount,
         claims: p._count.claims,
+      })),
+      siblingPolicies: siblingPolicies.map((p: any) => ({
+        id: p.id,
+        tipo: p.tipo,
+        aseguradora: p.aseguradora,
+        numeroPoliza: p.numeroPoliza,
+        unitId: p.unitId,
+        unitNumero: p.unit?.numero || '—',
+        estado: p.estado,
       })),
       summary: {
         totalPolicies: directPolicies.length + buildingPolicies.length,

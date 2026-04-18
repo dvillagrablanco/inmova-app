@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import {
@@ -97,17 +97,23 @@ const aseguradoras = [
 
 export default function NuevoSeguroPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const [buildings, setBuildings] = useState<Building[]>([]);
   const [loadingBuildings, setLoadingBuildings] = useState(true);
   const [activeTab, setActiveTab] = useState('manual');
 
+  // Prefill desde query params (cuando se viene desde una propiedad/edificio)
+  const prefillUnitId = searchParams?.get('unitId') || '';
+  const prefillBuildingId = searchParams?.get('buildingId') || '';
+  const prefillTipo = searchParams?.get('tipo') || '';
+
   // Form data
   const [formData, setFormData] = useState({
-    tipo: '',
-    buildingId: '',
-    unitId: '',
+    tipo: prefillTipo,
+    buildingId: prefillBuildingId,
+    unitId: prefillUnitId,
     aseguradora: '',
     numeroPoliza: '',
     nombreAsegurado: '',
@@ -127,6 +133,27 @@ export default function NuevoSeguroPage() {
   useEffect(() => {
     fetchBuildings();
   }, []);
+
+  // Si vienen unitId pero no buildingId, inferir el buildingId desde la unit
+  useEffect(() => {
+    const inferBuildingFromUnit = async () => {
+      if (prefillUnitId && !prefillBuildingId && !formData.buildingId) {
+        try {
+          const r = await fetch(`/api/units/${prefillUnitId}`);
+          if (r.ok) {
+            const u = await r.json();
+            const bId = u.buildingId || u.building?.id;
+            if (bId) {
+              setFormData((f) => ({ ...f, buildingId: bId, unitId: prefillUnitId }));
+            }
+          }
+        } catch {
+          // ignore
+        }
+      }
+    };
+    inferBuildingFromUnit();
+  }, [prefillUnitId, prefillBuildingId]);
 
   const fetchBuildings = async () => {
     try {
