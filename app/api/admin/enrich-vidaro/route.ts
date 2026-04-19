@@ -111,12 +111,12 @@ export async function POST(request: NextRequest) {
     `, VIDARO_GROUP);
     results.terceroTenantLinks = tenantLink;
 
-    // ============ 5. ZucchettiTercero ↔ Provider link ============
+    // ============ 5. ZucchettiTercero ↔ Provider link (por nombre, Provider no tiene NIF) ============
     const provLink = await prisma.$executeRawUnsafe(`
       UPDATE zucchetti_terceros zt SET "providerId" = p.id
       FROM providers p
       WHERE zt."companyId" = ANY($1::text[]) AND p."companyId" = ANY($1::text[])
-        AND ((zt.nif IS NOT NULL AND zt.nif != '' AND zt.nif = p.cif) OR zt.nombre = p.nombre)
+        AND zt.nombre = p.nombre
         AND zt.tipo = 'proveedor' AND zt."providerId" IS NULL
     `, VIDARO_GROUP);
     results.terceroProviderLinks = provLink;
