@@ -3099,6 +3099,19 @@ model AccountingTransaction {
   expenseId     String?
   documentoPath String?
   notas         String?            @db.Text
+  // Campos enriquecidos desde Zucchetti (NULL si origen no Zucchetti)
+  subcuenta     String? // ej: 7520001 (cuenta del PGC)
+  contrapartida String? // subcuenta de contrapartida del asiento
+  centroCoste   String? // CentroDeCoste de Zucchetti
+  fechaValor    DateTime? // FechaValor del apunte
+  vencimiento   DateTime? // Vencimiento (efectos/facturas)
+  factura       String? // Número de factura asociado
+  documento     String? // Número de documento
+  asiento       String? // Número de asiento Zucchetti
+  ejercicio     Int? // CodEjercicio
+  apunte        String? // Apunte (línea dentro del asiento)
+  terceroNif    String? // NIF/CIF del tercero
+  terceroNombre String? // Razón social
   createdAt     DateTime           @default(now())
   updatedAt     DateTime           @updatedAt
 
@@ -3107,7 +3120,150 @@ model AccountingTransaction {
   @@index([tipo])
   @@index([categoria])
   @@index([fecha])
+  @@index([subcuenta])
+  @@index([centroCoste])
+  @@index([terceroNif])
   @@map("accounting_transactions")
+}
+
+/// Tabla de proveedores y clientes sincronizados desde Zucchetti (Terceros).
+/// Se vinculan a Provider/Tenant locales por NIF cuando es posible.
+model ZucchettiTercero {
+  id              String   @id @default(cuid())
+  companyId       String   // Sociedad Inmova destino (Rovida/Vidaro/Viroda)
+  zucchettiCodigo String   // Código en Zucchetti
+  nif             String?  // CIF/NIF
+  nombre          String   // Razón social
+  tipo            String?  // 'cliente' | 'proveedor' | 'otro' (deducido del código de subcuenta)
+  direccion       String?
+  telefono        String?
+  email           String?
+  iban            String?
+  // Vínculos con entidades Inmova
+  providerId      String?  // Si matcheó con Provider local
+  tenantId        String?  // Si matcheó con Tenant local
+  ultimaSync      DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([companyId, zucchettiCodigo])
+  @@index([companyId])
+  @@index([nif])
+  @@index([tipo])
+  @@map("zucchetti_terceros")
+}
+
+/// Registro de IVA importado de Zucchetti (Registro_IVA_IGIC).
+/// Permite reconstruir libros de IVA, modelo 303 histórico, modelo 347.
+model ZucchettiIvaRecord {
+  id                   String   @id @default(cuid())
+  companyId            String
+  zucchettiCodEjercicio Int
+  comprasVentas        String   // 'C' (compras/recibidas) | 'V' (ventas/emitidas)
+  facturaNumero        String
+  facturaFecha         DateTime
+  terceroNif           String?
+  terceroNombre        String?
+  base                 Float
+  cuota                Float
+  total                Float
+  impuestoPorcentaje   Float?
+  retencionPorcentaje  Float?
+  retencionImporte     Float?
+  tipoOperacion        String?
+  criterioCaja         Boolean? @default(false)
+  // Vínculos opcionales con entidades Inmova
+  providerId           String?
+  tenantId             String?
+  buildingId           String?
+  unitId               String?
+  ultimaSync           DateTime @default(now())
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@unique([companyId, zucchettiCodEjercicio, facturaNumero, comprasVentas])
+  @@index([companyId])
+  @@index([facturaFecha])
+  @@index([terceroNif])
+  @@index([comprasVentas])
+  @@map("zucchetti_iva_records")
+}
+
+/// Sumas y saldos por subcuenta y mes, recalculados desde Apuntes.
+/// Permite mostrar balance histórico sin reconsultar Zucchetti cada vez.
+model ZucchettiBalance {
+  id          String   @id @default(cuid())
+  companyId   String
+  subcuenta   String   // ej: 7520001
+  titulo      String?
+  ejercicio   Int
+  mes         Int      // 1..12
+  totalDebe   Float    @default(0)
+  totalHaber  Float    @default(0)
+  saldo       Float    @default(0) // Debe - Haber
+  numApuntes  Int      @default(0)
+  ultimaSync  DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([companyId, subcuenta, ejercicio, mes])
+  @@index([companyId])
+  @@index([subcuenta])
+  @@index([ejercicio, mes])
+  @@map("zucchetti_balances")
+}
+
+/// Movimientos de tesorería extraídos de Zucchetti (cuenta 57x).
+/// Base para conciliación banco-libro contable.
+model ZucchettiTreasuryEntry {
+  id            String   @id @default(cuid())
+  companyId     String
+  subcuenta     String   // ej: 5720001 (banco específico)
+  fecha         DateTime
+  fechaValor    DateTime?
+  concepto      String
+  importe       Float    // positivo = ingreso (haber); negativo = pago (debe)
+  contrapartida String?  // subcuenta contrapartida (cliente/proveedor/IVA...)
+  documento     String?
+  factura       String?
+  asiento       String?
+  ejercicio     Int?
+  apunte        String?
+  // Vínculos
+  bankTransactionId String? // Si se concilió con BankTransaction
+  ultimaSync    DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([companyId, ejercicio, asiento, apunte])
+  @@index([companyId])
+  @@index([subcuenta])
+  @@index([fecha])
+  @@index([bankTransactionId])
+  @@map("zucchetti_treasury_entries")
+}
+
+/// Snapshot de la última sincronización por sociedad Zucchetti.
+/// Permite mostrar status detallado en el dashboard.
+model ZucchettiSyncSnapshot {
+  id                 String   @id @default(cuid())
+  companyId          String   @unique
+  ultimaSync         DateTime
+  apuntesUltimoCount Int      @default(0)
+  ivaUltimoCount     Int      @default(0)
+  tercerosCount      Int      @default(0)
+  balancesCount      Int      @default(0)
+  treasuryCount      Int      @default(0)
+  fromDate           DateTime?
+  toDate             DateTime?
+  durationMs         Int?
+  errores            Int      @default(0)
+  ultimoError        String?  @db.Text
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([companyId])
+  @@map("zucchetti_sync_snapshots")
 }
 
 model CashFlowStatement {
