@@ -829,6 +829,18 @@ async function fetchFromIdealistaPlaywright(
 async function fetchFromIdealistaData(
   options: FetchOptions
 ): Promise<PlatformMarketDataPoint | null> {
+  // Timeout duro 12s — el login a Idealista tarda 5-10s y rara vez extrae
+  // datos parseables. Si no responde, dejamos que el resto del pipeline
+  // continúe.
+  return Promise.race([
+    fetchFromIdealistaDataInner(options),
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), 12_000)),
+  ]);
+}
+
+async function fetchFromIdealistaDataInner(
+  options: FetchOptions
+): Promise<PlatformMarketDataPoint | null> {
   try {
     const { getIdealistaDataReport, isIdealistaDataConfigured } =
       await import('@/lib/idealista-data-service');
