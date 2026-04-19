@@ -26,6 +26,12 @@ export async function GET(request: NextRequest) {
 
     // Resolve scope
     const { resolveCompanyScope } = await import('@/lib/company-scope');
+    const {
+      buildPaymentScopeFilter,
+      buildExpenseScopeFilter,
+      buildContractScopeFilter,
+      buildUnitScopeFilter,
+    } = await import('@/lib/unit-scope');
     const scope = await resolveCompanyScope({
       userId: session.user.id as string,
       role: (session.user as any).role as any,
@@ -33,6 +39,10 @@ export async function GET(request: NextRequest) {
       request,
     });
     const companyIds = scope.scopeCompanyIds;
+    const paymentScope = buildPaymentScopeFilter(companyIds);
+    const expenseScope = buildExpenseScopeFilter(companyIds);
+    const contractScope = buildContractScopeFilter(companyIds);
+    const unitScope = buildUnitScopeFilter(companyIds);
     const { searchParams } = new URL(request.url);
     const breakdown = searchParams.get('breakdown'); // 'sociedad' = per-company breakdown
 
@@ -52,31 +62,28 @@ export async function GET(request: NextRequest) {
 
     // Calculate P&L for each period
     async function calcPeriod(from: Date, to: Date, months: number, label: string, desc: string) {
-      // Ingresos: pagos cobrados en el periodo
+      // Ingresos: pagos cobrados en el periodo (por sociedad propietaria)
       const ingresos = await prisma.payment.aggregate({
         where: {
+          ...paymentScope,
           estado: 'pagado',
           fechaPago: { gte: from, lte: to },
-          contract: { unit: { building: { companyId: { in: companyIds } } } },
         },
         _sum: { monto: true },
       });
 
-      // Gastos operativos en el periodo
+      // Gastos operativos en el periodo (por sociedad propietaria o gestora)
       const gastos = await prisma.expense.aggregate({
         where: {
+          ...expenseScope,
           fecha: { gte: from, lte: to },
-          building: { companyId: { in: companyIds } },
         },
         _sum: { monto: true },
       });
 
-      // Renta contratada mensual (para estimar amortización e impuestos)
+      // Renta contratada mensual (por sociedad propietaria)
       const contracts = await prisma.contract.findMany({
-        where: {
-          estado: 'activo',
-          unit: { building: { companyId: { in: companyIds } } },
-        },
+        where: { ...contractScope, estado: 'activo' },
         select: { rentaMensual: true },
       });
       const rentaMensualContratada = contracts.reduce((s, c) => s + c.rentaMensual, 0);
@@ -88,9 +95,9 @@ export async function GET(request: NextRequest) {
       });
       const hipotecasMensual = mortgages.reduce((s, m) => s + m.cuotaMensual, 0);
 
-      // Amortización: 3% anual del valor construcción (estimado ~70% del precioCompra)
+      // Amortización: 3% anual del valor construcción (~70% del precioCompra)
       const unitAgg = await prisma.unit.aggregate({
-        where: { building: { companyId: { in: companyIds }, isDemo: false } },
+        where: { ...unitScope, isDemo: false },
         _sum: { precioCompra: true },
       });
       const precioCompraTotal = unitAgg._sum.precioCompra || 0;
@@ -138,13 +145,26 @@ export async function GET(request: NextRequest) {
         select: { id: true, nombre: true },
       });
       porSociedad = {};
+      const { buildPaymentOwnerFilter, buildExpenseOwnerFilter } =
+        await import('@/lib/unit-scope');
       for (const company of companies) {
-        // Override companyIds temporarily for per-company calc
-        const origIds = companyIds;
-        const singleId = [company.id];
-        // Inline calc for YTD only (most relevant)
-        const ing = await prisma.payment.aggregate({ where: { estado: 'pagado', fechaPago: { gte: ytdStart, lte: now }, contract: { unit: { building: { companyId: { in: singleId } } } } }, _sum: { monto: true } });
-        const gas = await prisma.expense.aggregate({ where: { fecha: { gte: ytdStart, lte: now }, building: { companyId: { in: singleId } } }, _sum: { monto: true } });
+        // Por sociedad propietaria estricta (incluye units que residen en
+        // edificios físicos de OTRA sociedad del mismo grupo)
+        const ing = await prisma.payment.aggregate({
+          where: {
+            ...buildPaymentOwnerFilter(company.id),
+            estado: 'pagado',
+            fechaPago: { gte: ytdStart, lte: now },
+          },
+          _sum: { monto: true },
+        });
+        const gas = await prisma.expense.aggregate({
+          where: {
+            ...buildExpenseOwnerFilter(company.id),
+            fecha: { gte: ytdStart, lte: now },
+          },
+          _sum: { monto: true },
+        });
         const ingVal = ing._sum.monto || 0;
         const gasVal = gas._sum.monto || 0;
         porSociedad[company.nombre] = {

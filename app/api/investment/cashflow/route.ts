@@ -25,6 +25,9 @@ export async function GET(request: NextRequest) {
     }
 
     const { resolveCompanyScope } = await import('@/lib/company-scope');
+    const { buildPaymentScopeFilter, buildExpenseScopeFilter } = await import(
+      '@/lib/unit-scope'
+    );
     const scope = await resolveCompanyScope({
       userId: session.user.id as string,
       role: (session.user as any).role as any,
@@ -32,6 +35,8 @@ export async function GET(request: NextRequest) {
       request,
     });
     const companyIds = scope.scopeCompanyIds;
+    const paymentScope = buildPaymentScopeFilter(companyIds);
+    const expenseScope = buildExpenseScopeFilter(companyIds);
     const now = new Date();
     const currentYear = now.getFullYear();
 
@@ -48,19 +53,19 @@ export async function GET(request: NextRequest) {
       // Cobros: pagos recibidos (estado pagado, con fechaPago en periodo)
       const cobros = await prisma.payment.aggregate({
         where: {
+          ...paymentScope,
           estado: 'pagado',
           fechaPago: { gte: period.from, lte: period.to },
-          contract: { unit: { building: { companyId: { in: companyIds } } } },
         },
         _sum: { monto: true },
         _count: true,
       });
 
-      // Pagos operativos: gastos del periodo
+      // Pagos operativos: gastos del periodo (sociedad propietaria o gestora)
       const gastosOp = await prisma.expense.aggregate({
         where: {
+          ...expenseScope,
           fecha: { gte: period.from, lte: period.to },
-          building: { companyId: { in: companyIds } },
         },
         _sum: { monto: true },
         _count: true,

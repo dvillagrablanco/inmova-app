@@ -10,6 +10,7 @@ import {
 } from '@/lib/api-cache-helpers';
 import { withPaymentRateLimit } from '@/lib/rate-limiting';
 import { resolveCompanyScope } from '@/lib/company-scope';
+import { buildPaymentScopeFilter } from '@/lib/unit-scope';
 import * as Sentry from '@sentry/nextjs';
 
 export const dynamic = 'force-dynamic';
@@ -53,17 +54,10 @@ export async function GET(req: NextRequest) {
       const usePagination = searchParams.has('page') || searchParams.has('limit');
 
       if (hasFilters || usePagination) {
-        const where: any = {
-          contract: {
-            unit: {
-              building: {
-                companyId: { in: scope.scopeCompanyIds },
-              },
-            },
-          },
-        };
+        // Imputado por sociedad propietaria real de la unidad
+        const where: any = { AND: [buildPaymentScopeFilter(scope.scopeCompanyIds)] };
         if (buildingId) {
-          where.contract.unit.buildingId = buildingId;
+          where.AND.push({ contract: { unit: { buildingId } } });
         }
         if (estado) where.estado = estado;
         if (contractId) where.contractId = contractId;

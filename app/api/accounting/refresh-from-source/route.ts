@@ -158,6 +158,47 @@ export async function POST(request: NextRequest) {
     let created = 0;
     let skipped = 0;
     let errors = 0;
+    let enriched = 0;
+
+    // Pre-cargar buildings del scope completo del grupo para enriquecer
+    // las transacciones contables con un buildingId cuando el título de la
+    // subcuenta apunta a un edificio físico identificable. Esto es CLAVE
+    // para que el módulo de finanzas pueda imputar correctamente a la
+    // sociedad propietaria de las units cuando se hagan cruces.
+    const allGroupBuildings = await prisma.building.findMany({
+      where: {
+        OR: [
+          { companyId },
+          { units: { some: { ownerCompanyId: companyId } } },
+        ],
+      },
+      select: { id: true, nombre: true, direccion: true, companyId: true },
+    });
+    const normalize = (s: string) =>
+      (s || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+    const buildingMatchers = allGroupBuildings.map((b) => ({
+      id: b.id,
+      keys: [b.nombre, b.direccion].filter(Boolean).map(normalize),
+    }));
+    function findBuildingByTitle(title: string): string | null {
+      const norm = normalize(title);
+      if (!norm) return null;
+      for (const m of buildingMatchers) {
+        for (const key of m.keys) {
+          // tokens significativos del nombre del edificio
+          const tokens = key
+            .split(/[\s,.\-]+/)
+            .filter((t) => t.length >= 4 && !['calle', 'avda', 'plaza'].includes(t));
+          if (tokens.some((tok) => norm.includes(tok))) {
+            return m.id;
+          }
+        }
+      }
+      return null;
+    }
 
     for (const row of result.recordset) {
       const sub = (row.Subcuenta || '').trim();
@@ -179,6 +220,11 @@ export async function POST(request: NextRequest) {
         });
         if (existing) { skipped++; continue; }
 
+        // Intentar enriquecer con buildingId basado en concepto + título
+        const conceptoFull = `${row.ConceptoTexto || ''} ${titulo}`.trim();
+        const matchedBuildingId = findBuildingByTitle(conceptoFull);
+        if (matchedBuildingId) enriched++;
+
         await prisma.accountingTransaction.create({
           data: {
             companyId,
@@ -189,6 +235,7 @@ export async function POST(request: NextRequest) {
             fecha: new Date(row.Fecha),
             referencia,
             notas: `Zucchetti ${companyKey}. Ej:${row.CodEjercicio} As:${row.Asiento}/${row.Apunte}`,
+            ...(matchedBuildingId && { buildingId: matchedBuildingId }),
           },
         });
         created++;
@@ -252,6 +299,7 @@ export async function POST(request: NextRequest) {
       summary: {
         asientosLeidos: result.recordset.length,
         transaccionesCreadas: created,
+        transaccionesEnriquecidasConBuilding: enriched,
         duplicadosSaltados: skipped,
         errores: errors,
         periodoDesde: minFecha?.toISOString().split('T')[0],

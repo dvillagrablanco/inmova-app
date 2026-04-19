@@ -111,19 +111,54 @@ export async function calculateRentalKPIs(companyId: string): Promise<RentalKPIs
   const yearStart = startOfYear(now);
 
   // ============================================
+  // FILTROS POR SOCIEDAD PROPIETARIA REAL
+  // ============================================
+  // Un edificio físico puede contener units de varias sociedades del grupo.
+  // Estos filtros aseguran imputación contable correcta.
+  const {
+    buildUnitOwnerFilter,
+    buildPaymentOwnerFilter,
+    buildExpenseOwnerFilter,
+    buildContractOwnerFilter: _ignored,
+  }: any = await import('@/lib/unit-scope');
+  const unitOwnerFilter = buildUnitOwnerFilter(companyId);
+  const paymentOwnerFilter = buildPaymentOwnerFilter(companyId);
+  const expenseOwnerFilter = buildExpenseOwnerFilter(companyId);
+  const contractOwnerFilter = {
+    unit: {
+      OR: [
+        { ownerCompanyId: companyId },
+        { AND: [{ ownerCompanyId: null }, { building: { companyId } }] },
+      ],
+    },
+  };
+
+  // ============================================
   // CONSULTAS BASE
   // ============================================
 
   const [buildings, units, contracts, payments, expenses, maintenanceRequests] = await Promise.all([
-    // Edificios con valor estimado
+    // Edificios visibles: gestor o con units propias
     prisma.building.findMany({
-      where: { companyId },
+      where: {
+        OR: [
+          { companyId },
+          { units: { some: { ownerCompanyId: companyId } } },
+        ],
+      },
       select: {
         id: true,
         nombre: true,
         tipo: true,
         valorEstimado: true,
         units: {
+          // Solo units del propietario
+          where: {
+            OR: [
+              { ownerCompanyId: companyId },
+              { AND: [{ ownerCompanyId: null }, { building: { companyId } }] },
+            ],
+          },
           select: {
             id: true,
             estado: true,
@@ -135,9 +170,8 @@ export async function calculateRentalKPIs(companyId: string): Promise<RentalKPIs
       },
     }),
 
-    // Todas las unidades
     prisma.unit.findMany({
-      where: { building: { companyId } },
+      where: unitOwnerFilter,
       select: {
         id: true,
         estado: true,
@@ -148,13 +182,12 @@ export async function calculateRentalKPIs(companyId: string): Promise<RentalKPIs
       },
     }),
 
-    // Contratos (activos y recientes)
     prisma.contract.findMany({
       where: {
-        unit: { building: { companyId } },
+        ...contractOwnerFilter,
         OR: [
           { estado: 'activo' },
-          { fechaFin: { gte: subMonths(now, 12) } }, // Últimos 12 meses
+          { fechaFin: { gte: subMonths(now, 12) } },
         ],
       },
       select: {
@@ -168,12 +201,8 @@ export async function calculateRentalKPIs(companyId: string): Promise<RentalKPIs
       },
     }),
 
-    // Pagos del año
     prisma.payment.findMany({
-      where: {
-        contract: { unit: { building: { companyId } } },
-        fechaVencimiento: { gte: yearStart },
-      },
+      where: { ...paymentOwnerFilter, fechaVencimiento: { gte: yearStart } },
       select: {
         id: true,
         monto: true,
@@ -184,12 +213,8 @@ export async function calculateRentalKPIs(companyId: string): Promise<RentalKPIs
       },
     }),
 
-    // Gastos del año
     prisma.expense.findMany({
-      where: {
-        building: { companyId },
-        fecha: { gte: yearStart },
-      },
+      where: { ...expenseOwnerFilter, fecha: { gte: yearStart } },
       select: {
         id: true,
         monto: true,
@@ -199,9 +224,8 @@ export async function calculateRentalKPIs(companyId: string): Promise<RentalKPIs
       },
     }),
 
-    // Solicitudes de mantenimiento
     prisma.maintenanceRequest.findMany({
-      where: { unit: { building: { companyId } } },
+      where: { unit: unitOwnerFilter },
       select: {
         id: true,
         estado: true,

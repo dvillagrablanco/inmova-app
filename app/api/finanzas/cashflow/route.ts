@@ -13,6 +13,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { resolveAccountingScope } from '@/lib/accounting-scope';
+import { buildPaymentScopeFilter } from '@/lib/unit-scope';
 import { startOfMonth, endOfMonth, subMonths, format, addMonths } from 'date-fns';
 import logger from '@/lib/logger';
 
@@ -75,10 +76,10 @@ export async function GET(request: NextRequest) {
         },
         select: { monto: true, fecha: true },
       }),
-      // Payment data
+      // Payment data — imputado por sociedad propietaria real de la unidad
       prisma.payment.findMany({
         where: {
-          contract: { unit: { building: { companyId: { in: companyIds } } } },
+          ...buildPaymentScopeFilter(companyIds),
           fechaVencimiento: { gte: startDate, lte: endDate },
           estado: 'pagado',
         },

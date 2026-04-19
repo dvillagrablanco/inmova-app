@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { resolveAccountingScope } from '@/lib/accounting-scope';
+import {
+  buildPaymentScopeFilter,
+  buildExpenseScopeFilter,
+  buildContractScopeFilter,
+  buildUnitScopeFilter,
+} from '@/lib/unit-scope';
 import { startOfMonth, endOfMonth, subMonths, format } from 'date-fns';
 
 import logger from '@/lib/logger';
@@ -170,11 +176,12 @@ export async function GET(request: NextRequest) {
       // BankTransaction might not have data
     }
 
-    // Pagos del periodo
+    // Pagos del periodo (imputados por sociedad PROPIETARIA real de la unidad)
+    const paymentsScopeFilter = buildPaymentScopeFilter(companyIds);
     const payments = await prisma.payment
       .findMany({
         where: {
-          contract: { unit: { building: { companyId: { in: companyIds } } } },
+          ...paymentsScopeFilter,
           fechaPago: { gte: displayStart, lte: displayEnd },
           estado: 'pagado',
         },
@@ -188,7 +195,7 @@ export async function GET(request: NextRequest) {
     const pendingPayments = await prisma.payment
       .findMany({
         where: {
-          contract: { unit: { building: { companyId: { in: companyIds } } } },
+          ...paymentsScopeFilter,
           estado: 'pendiente',
         },
         select: { monto: true, fechaVencimiento: true },
@@ -253,11 +260,14 @@ export async function GET(request: NextRequest) {
     if (monthlyIncome === 0) monthlyIncome = bankTxIncome;
 
     // Gastos: Expense > AccountingTransaction > BankTransaction
+    // Imputa por sociedad propietaria (units con owner) o gestora (gastos de
+    // edificio sin unit asociada).
+    const expenseScopeFilter = buildExpenseScopeFilter(companyIds);
     let monthlyExpenses = 0;
     try {
       const expenses = await prisma.expense.aggregate({
         where: {
-          building: { companyId: { in: companyIds } },
+          ...expenseScopeFilter,
           fecha: { gte: displayStart, lte: displayEnd },
         },
         _sum: { monto: true },
@@ -284,9 +294,10 @@ export async function GET(request: NextRequest) {
     // Rentabilidad
     let rentabilidad = 0;
     if (monthlyIncome > 0) {
+      const unitScopeFilter = buildUnitScopeFilter(companyIds);
       const totalRent = await prisma.unit
         .aggregate({
-          where: { building: { companyId: { in: companyIds }, isDemo: false }, isDemo: false },
+          where: { ...unitScopeFilter, isDemo: false },
           _sum: { rentaMensual: true },
         })
         .catch(() => ({ _sum: { rentaMensual: 0 } }));
@@ -344,7 +355,7 @@ export async function GET(request: NextRequest) {
       where: {
         estado: 'pagado',
         fechaPago: { not: null },
-        contract: { unit: { building: { companyId: { in: companyIds } } } },
+        ...paymentsScopeFilter,
       },
       select: { fechaVencimiento: true, fechaPago: true },
       take: 500,
@@ -364,11 +375,11 @@ export async function GET(request: NextRequest) {
     const totalPaid = await prisma.payment.count({
       where: {
         estado: 'pagado',
-        contract: { unit: { building: { companyId: { in: companyIds } } } },
+        ...paymentsScopeFilter,
       },
     });
     const totalPayments = await prisma.payment.count({
-      where: { contract: { unit: { building: { companyId: { in: companyIds } } } } },
+      where: paymentsScopeFilter,
     });
     const tasaCobro = totalPayments > 0 ? Math.round((totalPaid / totalPayments) * 100) : 0;
 

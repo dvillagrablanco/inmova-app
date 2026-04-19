@@ -5,6 +5,10 @@ import { authOptions } from '@/lib/auth-options';
 import { getPrismaClient } from '@/lib/db';
 import logger from '@/lib/logger';
 import { resolveCompanyScope } from '@/lib/company-scope';
+import {
+  buildPaymentScopeFilter,
+  buildExpenseScopeFilter,
+} from '@/lib/unit-scope';
 import type { Prisma } from '@/types/prisma-types';
 
 export const dynamic = 'force-dynamic';
@@ -95,46 +99,59 @@ export async function GET(request: NextRequest) {
     const period: Period = parsedPeriod.success ? parsedPeriod.data : 'month';
     const { start, end, previousStart, previousEnd } = getPeriodRange(period);
 
+    // Filtros que respetan Unit.ownerCompanyId (multi-sociedad por edificio).
+    // Para excluir demos, lo combinamos con AND.
     const paymentBaseWhere: Prisma.PaymentWhereInput = {
-      isDemo: false,
-      contract: {
-        isDemo: false,
-        unit: {
-          isDemo: false,
-          building: { companyId: { in: scope.scopeCompanyIds }, isDemo: false },
-        },
-      },
+      AND: [
+        buildPaymentScopeFilter(scope.scopeCompanyIds),
+        { isDemo: false },
+        { contract: { isDemo: false, unit: { isDemo: false } } },
+      ],
     };
 
     const expenseWhere: Prisma.ExpenseWhereInput = {
-      isDemo: false,
-      fecha: { gte: start, lte: end },
-      OR: [
-        { building: { companyId: { in: scope.scopeCompanyIds }, isDemo: false } },
-        {
-          unit: {
-            isDemo: false,
-            building: { companyId: { in: scope.scopeCompanyIds }, isDemo: false },
-          },
-        },
+      AND: [
+        buildExpenseScopeFilter(scope.scopeCompanyIds),
+        { isDemo: false },
+        { fecha: { gte: start, lte: end } },
       ],
     };
 
     const previousExpenseWhere: Prisma.ExpenseWhereInput = {
-      ...expenseWhere,
-      fecha: { gte: previousStart, lte: previousEnd },
+      AND: [
+        buildExpenseScopeFilter(scope.scopeCompanyIds),
+        { isDemo: false },
+        { fecha: { gte: previousStart, lte: previousEnd } },
+      ],
     };
 
     const [buildings, paidPayments, expenses, previousPaidPayments, previousExpenses, duePayments] =
       await Promise.all([
         prisma.building.findMany({
-          where: { companyId: { in: scope.scopeCompanyIds }, isDemo: false },
+          where: {
+            isDemo: false,
+            OR: [
+              { companyId: { in: scope.scopeCompanyIds } },
+              { units: { some: { ownerCompanyId: { in: scope.scopeCompanyIds } } } },
+            ],
+          },
           select: {
             id: true,
             nombre: true,
             direccion: true,
             units: {
-              where: { isDemo: false },
+              where: {
+                isDemo: false,
+                OR: [
+                  { ownerCompanyId: { in: scope.scopeCompanyIds } },
+                  {
+                    AND: [
+                      { ownerCompanyId: null },
+                      { building: { companyId: { in: scope.scopeCompanyIds } } },
+                    ],
+                  },
+                ],
+              },
               select: { id: true, estado: true },
             },
           },

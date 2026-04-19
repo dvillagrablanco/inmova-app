@@ -3,6 +3,12 @@ import { requireAuth } from '@/lib/permissions';
 import logger from '@/lib/logger';
 import { startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import { resolveCompanyScope } from '@/lib/company-scope';
+import {
+  buildPaymentScopeFilter,
+  buildExpenseScopeFilter,
+  buildContractScopeFilter,
+  buildUnitScopeFilter,
+} from '@/lib/unit-scope';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -41,6 +47,13 @@ export async function GET(request: NextRequest) {
     const companyFilter =
       scope.scopeCompanyIds.length > 1 ? { in: scope.scopeCompanyIds } : companyId;
 
+    // Filtros que respetan Unit.ownerCompanyId (multi-sociedad por edificio)
+    const scopeIds = scope.scopeCompanyIds;
+    const paymentScope = buildPaymentScopeFilter(scopeIds);
+    const expenseScope = buildExpenseScopeFilter(scopeIds);
+    const contractScope = buildContractScopeFilter(scopeIds);
+    const unitScope = buildUnitScopeFilter(scopeIds);
+
     // Obtener información de la empresa
     const company = await prisma.company.findUnique({
       where: { id: companyId },
@@ -66,39 +79,40 @@ export async function GET(request: NextRequest) {
       availableUnits,
       unitsByType,
     ] = await Promise.all([
-      // Total de edificios
-      prisma.building.count({ where: { companyId: companyFilter } }),
-
-      // Total de unidades
-      prisma.unit.count({ where: { building: { companyId: companyFilter } } }),
-
-      // Total de inquilinos
-      prisma.tenant.count({ where: { companyId: companyFilter } }),
-
-      // Contratos activos
-      prisma.contract.count({
+      // Total de edificios visibles (gestor en scope o con units en scope)
+      prisma.building.count({
         where: {
-          unit: { building: { companyId: companyFilter } },
-          estado: 'activo',
+          OR: [
+            { companyId: companyFilter },
+            { units: { some: { ownerCompanyId: { in: scopeIds } } } },
+          ],
         },
       }),
 
-      // Ingresos del mes (pagos pagados)
+      // Total de unidades — por sociedad propietaria real
+      prisma.unit.count({ where: unitScope }),
+
+      // Total de inquilinos (vinculados a la empresa, no a la unidad)
+      prisma.tenant.count({ where: { companyId: companyFilter } }),
+
+      // Contratos activos — por sociedad propietaria real
+      prisma.contract.count({
+        where: { ...contractScope, estado: 'activo' },
+      }),
+
+      // Ingresos del mes (pagos pagados) — sociedad propietaria
       prisma.payment.aggregate({
         where: {
-          contract: { unit: { building: { companyId: companyFilter } } },
+          ...paymentScope,
           fechaVencimiento: { gte: startDate, lte: endDate },
           estado: 'pagado',
         },
         _sum: { monto: true },
       }),
 
-      // Pagos pendientes (con detalles)
+      // Pagos pendientes (con detalles) — sociedad propietaria
       prisma.payment.findMany({
-        where: {
-          contract: { unit: { building: { companyId: companyFilter } } },
-          estado: 'pendiente',
-        },
+        where: { ...paymentScope, estado: 'pendiente' },
         include: {
           contract: {
             include: {
@@ -111,10 +125,11 @@ export async function GET(request: NextRequest) {
         take: 10,
       }),
 
-      // Gastos del mes
+      // Gastos del mes — sociedad propietaria (por unit) o gestora (gastos de
+      // edificio sin unit)
       prisma.expense.aggregate({
         where: {
-          building: { companyId: companyFilter },
+          ...expenseScope,
           fecha: { gte: startDate, lte: endDate },
         },
         _sum: { monto: true },
@@ -134,10 +149,10 @@ export async function GET(request: NextRequest) {
         },
       }),
 
-      // Contratos por vencer (próximos 30 días)
+      // Contratos por vencer (próximos 30 días) — por sociedad propietaria
       prisma.contract.findMany({
         where: {
-          unit: { building: { companyId: companyFilter } },
+          ...contractScope,
           estado: 'activo',
           fechaFin: {
             gte: new Date(),
@@ -157,10 +172,10 @@ export async function GET(request: NextRequest) {
         take: 5,
       }),
 
-      // Solicitudes de mantenimiento activas
+      // Solicitudes de mantenimiento activas — por sociedad propietaria
       prisma.maintenanceRequest.findMany({
         where: {
-          unit: { building: { companyId: companyFilter } },
+          unit: unitScope,
           estado: { in: ['pendiente', 'en_progreso'] },
         },
         include: {
@@ -175,12 +190,9 @@ export async function GET(request: NextRequest) {
         take: 5,
       }),
 
-      // Unidades disponibles
+      // Unidades disponibles — por sociedad propietaria
       prisma.unit.findMany({
-        where: {
-          building: { companyId: companyFilter },
-          estado: 'disponible',
-        },
+        where: { ...unitScope, estado: 'disponible' },
         include: {
           building: { select: { nombre: true } },
         },
@@ -188,23 +200,17 @@ export async function GET(request: NextRequest) {
         take: 5,
       }),
 
-      // Unidades agrupadas por tipo (excluye uso_empresa del denominador de ocupación)
+      // Unidades agrupadas por tipo — por sociedad propietaria
       prisma.unit.groupBy({
         by: ['tipo'],
-        where: {
-          building: { companyId: companyFilter },
-          estado: { not: 'uso_empresa' },
-        },
+        where: { ...unitScope, estado: { not: 'uso_empresa' } },
         _count: true,
       }),
     ]);
 
     const occupiedByType = await prisma.unit.groupBy({
       by: ['tipo'],
-      where: {
-        building: { companyId: companyFilter },
-        contracts: { some: { estado: 'activo' } },
-      },
+      where: { ...unitScope, contracts: { some: { estado: 'activo' } } },
       _count: true,
     });
 
@@ -221,10 +227,7 @@ export async function GET(request: NextRequest) {
     // Ocupación desglosada por tipo de activo (con tasas individuales y renta)
     const rentaByType = await prisma.contract.groupBy({
       by: ['tipo'],
-      where: {
-        unit: { building: { companyId: companyFilter } },
-        estado: 'activo',
-      },
+      where: { ...contractScope, estado: 'activo' },
       _sum: { rentaMensual: true },
       _count: true,
     });
@@ -292,11 +295,11 @@ export async function GET(request: NextRequest) {
     const useAccountingIncome = fallbackIngresos === 0 && accountingMonthTotals.ingresos > 0;
     const useAccountingExpenses = fallbackGastos === 0 && accountingMonthTotals.gastos > 0;
 
-    // Gastos por categoría (para gráfico de pastel)
+    // Gastos por categoría (para gráfico de pastel) — sociedad propietaria
     const expensesByCategory = await prisma.expense.groupBy({
       by: ['categoria'],
       where: {
-        building: { companyId: companyFilter },
+        ...expenseScope,
         fecha: { gte: subMonths(currentMonth, 3), lte: endDate },
       },
       _sum: { monto: true },
@@ -332,10 +335,7 @@ export async function GET(request: NextRequest) {
 
     // Renta mensual esperada = suma de rentas de contratos activos
     const activeContractsRent = await prisma.contract.aggregate({
-      where: {
-        unit: { building: { companyId: companyFilter } },
-        estado: 'activo',
-      },
+      where: { ...contractScope, estado: 'activo' },
       _sum: { rentaMensual: true },
     });
     const rentaMensualEsperada = Number(activeContractsRent._sum.rentaMensual) || 0;
@@ -384,7 +384,7 @@ export async function GET(request: NextRequest) {
         if (ingresosMes === 0 && !useAccountingIncome) {
           const monthPayments = await prisma.payment.aggregate({
             where: {
-              contract: { unit: { building: { companyId: companyFilter } } },
+              ...paymentScope,
               fechaVencimiento: { gte: mStart, lte: mEnd },
               estado: 'pagado',
             },
@@ -458,11 +458,10 @@ export async function GET(request: NextRequest) {
     }
 
     let gastosTotales = fallbackGastos;
-    // Fallback: si el mes actual no tiene gastos, usar promedio de últimos 3 meses
     if (gastosTotales === 0) {
       const gastos3meses = await prisma.expense.aggregate({
         where: {
-          building: { companyId: companyFilter },
+          ...expenseScope,
           fecha: { gte: subMonths(currentMonth, 3), lte: endDate },
         },
         _sum: { monto: true },
@@ -483,19 +482,14 @@ export async function GET(request: NextRequest) {
     const margenNeto =
       ingresosTotalesMensuales > 0 ? (ingresosNetos / ingresosTotalesMensuales) * 100 : 0;
     const unitsForOccupancyCount = await prisma.unit.count({
-      where: {
-        building: { companyId: companyFilter },
-        estado: { not: 'uso_empresa' },
-      },
+      where: { ...unitScope, estado: { not: 'uso_empresa' } },
     });
 
     const unitsWithActiveContract = await prisma.unit.count({
       where: {
-        building: { companyId: companyFilter },
+        ...unitScope,
         estado: { not: 'uso_empresa' },
-        contracts: {
-          some: { estado: 'activo' },
-        },
+        contracts: { some: { estado: 'activo' } },
       },
     });
 
@@ -508,14 +502,14 @@ export async function GET(request: NextRequest) {
     // Calcular morosidad (pagos vencidos no pagados)
     const overduePayments = await prisma.payment.count({
       where: {
-        contract: { unit: { building: { companyId: companyFilter } } },
+        ...paymentScope,
         estado: 'pendiente',
         fechaVencimiento: { lt: new Date() },
       },
     });
     const totalExpectedPayments = await prisma.payment.count({
       where: {
-        contract: { unit: { building: { companyId: companyFilter } } },
+        ...paymentScope,
         fechaVencimiento: { gte: subMonths(currentMonth, 3), lte: endDate },
       },
     });

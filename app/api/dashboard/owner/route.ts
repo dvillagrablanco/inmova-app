@@ -5,6 +5,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/prisma';
+import {
+  buildPaymentOwnerFilter,
+  buildExpenseOwnerFilter,
+  buildUnitOwnerFilter,
+} from '@/lib/unit-scope';
 import { startOfMonth, endOfMonth, subMonths, format } from 'date-fns';
 
 export async function GET(request: NextRequest) {
@@ -27,23 +32,30 @@ export async function GET(request: NextRequest) {
     const startOfCurrentMonth = startOfMonth(now);
     const endOfCurrentMonth = endOfMonth(now);
 
+    // Filtros estrictos por sociedad propietaria del usuario (no incluye otras
+    // sociedades del grupo aunque tengan acceso compartido).
+    const paymentFilter = buildPaymentOwnerFilter(user.companyId);
+    const expenseFilter = buildExpenseOwnerFilter(user.companyId);
+    const unitFilter = buildUnitOwnerFilter(user.companyId);
+
     // 1. KPIs principales
-    // Total de propiedades
+    // Total de propiedades visibles
     const totalProperties = await prisma.building.count({
-      where: { companyId: user.companyId }
+      where: {
+        OR: [
+          { companyId: user.companyId },
+          { units: { some: { ownerCompanyId: user.companyId } } },
+        ],
+      },
     });
 
-    // Total de unidades
-    const totalUnits = await prisma.unit.count({
-      where: { building: { companyId: user.companyId } }
-    });
+    // Total de unidades del propietario (incluye units en edificios ajenos del
+    // mismo grupo si su ownerCompanyId apunta a esta sociedad)
+    const totalUnits = await prisma.unit.count({ where: unitFilter });
 
     // Unidades ocupadas
     const occupiedUnits = await prisma.unit.count({
-      where: {
-        building: { companyId: user.companyId },
-        estado: 'ocupada'
-      }
+      where: { ...unitFilter, estado: 'ocupada' },
     });
 
     // Tasa de ocupación
@@ -52,80 +64,31 @@ export async function GET(request: NextRequest) {
     // Ingresos del mes actual (pagos completados)
     const monthlyIncomeResult = await prisma.payment.aggregate({
       where: {
-        contract: {
-          unit: {
-            building: {
-              companyId: user.companyId
-            }
-          }
-        },
+        ...paymentFilter,
         estado: 'pagado',
-        fechaPago: {
-          gte: startOfCurrentMonth,
-          lte: endOfCurrentMonth
-        }
+        fechaPago: { gte: startOfCurrentMonth, lte: endOfCurrentMonth },
       },
-      _sum: {
-        monto: true
-      }
+      _sum: { monto: true },
     });
     const monthlyIncome = monthlyIncomeResult._sum.monto || 0;
 
     // Pagos pendientes
     const pendingPaymentsResult = await prisma.payment.aggregate({
-      where: {
-        contract: {
-          unit: {
-            building: {
-              companyId: user.companyId
-            }
-          }
-        },
-        estado: 'pendiente'
-      },
-      _sum: {
-        monto: true
-      }
+      where: { ...paymentFilter, estado: 'pendiente' },
+      _sum: { monto: true },
     });
     const pendingPayments = pendingPaymentsResult._sum.monto || 0;
     const pendingPaymentsCount = await prisma.payment.count({
-      where: {
-        contract: {
-          unit: {
-            building: {
-              companyId: user.companyId
-            }
-          }
-        },
-        estado: 'pendiente'
-      }
+      where: { ...paymentFilter, estado: 'pendiente' },
     });
 
-    // Gastos del mes (expenses)
+    // Gastos del mes
     const monthlyExpensesResult = await prisma.expense.aggregate({
       where: {
-        OR: [
-          {
-            building: {
-              companyId: user.companyId
-            }
-          },
-          {
-            unit: {
-              building: {
-                companyId: user.companyId
-              }
-            }
-          }
-        ],
-        fecha: {
-          gte: startOfCurrentMonth,
-          lte: endOfCurrentMonth
-        }
+        ...expenseFilter,
+        fecha: { gte: startOfCurrentMonth, lte: endOfCurrentMonth },
       },
-      _sum: {
-        monto: true
-      }
+      _sum: { monto: true },
     });
     const monthlyExpenses = monthlyExpensesResult._sum.monto || 0;
 
@@ -145,42 +108,17 @@ export async function GET(request: NextRequest) {
       last6Months.map(async ({ month, startDate, endDate }) => {
         const income = await prisma.payment.aggregate({
           where: {
-            contract: {
-              unit: {
-                building: {
-                  companyId: user.companyId
-                }
-              }
-            },
+            ...paymentFilter,
             estado: 'pagado',
-            fechaPago: {
-              gte: startDate,
-              lte: endDate
-            }
+            fechaPago: { gte: startDate, lte: endDate },
           },
           _sum: { monto: true }
         });
 
         const expenses = await prisma.expense.aggregate({
           where: {
-            OR: [
-              {
-                building: {
-                  companyId: user.companyId
-                }
-              },
-              {
-                unit: {
-                  building: {
-                    companyId: user.companyId
-                  }
-                }
-              }
-            ],
-            fecha: {
-              gte: startDate,
-              lte: endDate
-            }
+            ...expenseFilter,
+            fecha: { gte: startDate, lte: endDate },
           },
           _sum: { monto: true }
         });
@@ -225,45 +163,15 @@ export async function GET(request: NextRequest) {
 
     // 4. Distribución de pagos
     const paymentsOnTime = await prisma.payment.count({
-      where: {
-        contract: {
-          unit: {
-            building: {
-              companyId: user.companyId
-            }
-          }
-        },
-        estado: 'pagado',
-        fechaPago: {
-          not: null
-        }
-      }
+      where: { ...paymentFilter, estado: 'pagado', fechaPago: { not: null } },
     });
 
     const paymentsLate = await prisma.payment.count({
-      where: {
-        contract: {
-          unit: {
-            building: {
-              companyId: user.companyId
-            }
-          }
-        },
-        estado: 'atrasado'
-      }
+      where: { ...paymentFilter, estado: 'atrasado' },
     });
 
     const paymentsPending = await prisma.payment.count({
-      where: {
-        contract: {
-          unit: {
-            building: {
-              companyId: user.companyId
-            }
-          }
-        },
-        estado: 'pendiente'
-      }
+      where: { ...paymentFilter, estado: 'pendiente' },
     });
 
     const paymentDistribution = [
@@ -275,15 +183,11 @@ export async function GET(request: NextRequest) {
     // 5. Próximos vencimientos de contratos (30 días)
     const upcomingExpirations = await prisma.contract.findMany({
       where: {
-        unit: {
-          building: {
-            companyId: user.companyId
-          }
-        },
+        unit: unitFilter,
         estado: 'activo',
         fechaFin: {
           gte: now,
-          lte: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000) // 30 días
+          lte: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
         }
       },
       select: {
@@ -307,29 +211,18 @@ export async function GET(request: NextRequest) {
 
     // 6. Propiedades con problemas (vacantes, mantenimiento urgente)
     const vacantUnits = await prisma.unit.findMany({
-      where: {
-        building: {
-          companyId: user.companyId
-        },
-        estado: 'disponible'
-      },
+      where: { ...unitFilter, estado: 'disponible' },
       select: {
         id: true,
         numero: true,
-        building: {
-          select: { nombre: true }
-        }
+        building: { select: { nombre: true } },
       },
       take: 5
     });
 
     const urgentMaintenance = await prisma.maintenanceRequest.count({
       where: {
-        unit: {
-          building: {
-            companyId: user.companyId
-          }
-        },
+        unit: unitFilter,
         prioridad: 'alta',
         estado: { notIn: ['completado'] }
       }

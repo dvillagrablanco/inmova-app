@@ -124,7 +124,8 @@ async function getExpensesByCategory(
 async function getIngresosArrendamientos(
   companyBuildingIds: string[],
   ejercicio: number,
-  buildingFilter?: string[]
+  buildingFilter?: string[],
+  scopeCompanyIds?: string[]
 ): Promise<number> {
   const startDate = new Date(ejercicio, 0, 1);
   const endDate = new Date(ejercicio + 1, 0, 1);
@@ -132,16 +133,28 @@ async function getIngresosArrendamientos(
   const targetBuildingIds =
     buildingFilter && buildingFilter.length > 0 ? buildingFilter : companyBuildingIds;
 
-  // Obtener unit IDs de los buildings filtrados
+  // Solo units del scope del grupo (filtra OUT units de un edificio compartido
+  // que pertenezcan a una sociedad ajena al grupo).
+  const unitWhere: any = { buildingId: { in: targetBuildingIds } };
+  if (scopeCompanyIds && scopeCompanyIds.length > 0) {
+    unitWhere.OR = [
+      { ownerCompanyId: { in: scopeCompanyIds } },
+      {
+        AND: [
+          { ownerCompanyId: null },
+          { building: { companyId: { in: scopeCompanyIds } } },
+        ],
+      },
+    ];
+  }
   const units = await prisma.unit.findMany({
-    where: { buildingId: { in: targetBuildingIds } },
+    where: unitWhere,
     select: { id: true },
   });
 
   const unitIds = units.map((u) => u.id);
   if (unitIds.length === 0) return 0;
 
-  // Pagos recibidos en el ejercicio (contratos activos)
   const payments = await prisma.payment.aggregate({
     where: {
       contract: { unitId: { in: unitIds } },
@@ -435,8 +448,16 @@ export async function getCuadroMandosData(
     ? [company.id, ...company.childCompanies.map((c: { id: string }) => c.id)]
     : [companyId];
 
+  // Incluir buildings físicos donde el grupo es propietario de algunas units
+  // (caso real grupo Vidaro: en Hernández de Tejada 6 el gestor es Rovida pero
+  // 12 viviendas son de Viroda; en Reina/M. Pelayo es al revés)
   const buildings = await prisma.building.findMany({
-    where: { companyId: { in: allCompanyIds } },
+    where: {
+      OR: [
+        { companyId: { in: allCompanyIds } },
+        { units: { some: { ownerCompanyId: { in: allCompanyIds } } } },
+      ],
+    },
     select: { id: true },
   });
   const companyBuildingIds = buildings.map((b) => b.id);
@@ -460,11 +481,12 @@ export async function getCuadroMandosData(
   // 2. KPIs de cartera
   const kpis = await getCarteraKpis(companyBuildingIds, ejercicio, buildingIds);
 
-  // 3. Ingresos
+  // 3. Ingresos (filtrados por sociedad propietaria del grupo)
   const ingresosArrendamientos = await getIngresosArrendamientos(
     companyBuildingIds,
     ejercicio,
-    buildingIds
+    buildingIds,
+    allCompanyIds
   );
   const otrosIngresos = await getOtrosIngresos(companyBuildingIds, ejercicio, buildingIds);
 

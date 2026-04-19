@@ -313,10 +313,21 @@ export async function cachedPayments(companyId: string) {
     cacheKey,
     async () => {
       const prisma = getPrismaSync();
+      // Imputado por sociedad propietaria (con fallback a building.companyId)
       const payments = await prisma.payment.findMany({
         where: {
           contract: {
-            unit: { building: { companyId } },
+            unit: {
+              OR: [
+                { ownerCompanyId: companyId },
+                {
+                  AND: [
+                    { ownerCompanyId: null },
+                    { building: { companyId } },
+                  ],
+                },
+              ],
+            },
           },
         },
         include: {
@@ -333,10 +344,12 @@ export async function cachedPayments(companyId: string) {
                 select: {
                   id: true,
                   numero: true,
+                  ownerCompanyId: true,
                   building: {
                     select: {
                       id: true,
                       nombre: true,
+                      companyId: true,
                     },
                   },
                 },
@@ -345,7 +358,7 @@ export async function cachedPayments(companyId: string) {
           },
         },
         orderBy: { fechaVencimiento: 'desc' },
-        take: 100, // Limitar a los 100 más recientes
+        take: 100,
       });
 
       // Convertir valores Decimal a números
