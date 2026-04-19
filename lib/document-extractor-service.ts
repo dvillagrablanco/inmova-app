@@ -14,7 +14,7 @@
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 import Anthropic from '@anthropic-ai/sdk';
 import { writeFile, unlink, mkdir } from 'fs/promises';
-import { existsSync } from 'fs';
+import { existsSync, unlinkSync } from 'fs';
 import { execSync } from 'child_process';
 import path from 'path';
 import logger from '@/lib/logger';
@@ -183,9 +183,9 @@ function pdfToText(localPath: string): string {
     for (let i = 1; i <= 3; i++) {
       const pageImg = `${tmpBase}-${i.toString().padStart(2, '0')}.png`;
       const pageImgAlt = `${tmpBase}-${i}.png`;
-      const imgPath = require('fs').existsSync(pageImg)
+      const imgPath = existsSync(pageImg)
         ? pageImg
-        : require('fs').existsSync(pageImgAlt)
+        : existsSync(pageImgAlt)
           ? pageImgAlt
           : null;
       if (!imgPath) break;
@@ -196,14 +196,9 @@ function pdfToText(localPath: string): string {
           timeout: 45_000,
         });
         allText += ocrOut + '\n\n';
-        require('fs').unlinkSync(imgPath);
+        try { unlinkSync(imgPath); } catch {}
       } catch {
-        // skip page
-        try {
-          require('fs').unlinkSync(imgPath);
-        } catch {
-          // ignore
-        }
+        try { unlinkSync(imgPath); } catch {}
       }
     }
     return allText.substring(0, 50_000);
