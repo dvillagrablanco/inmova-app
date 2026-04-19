@@ -27,6 +27,13 @@ async function getPrisma() {
 
 const ALLOWED_ROLES = new Set(['administrador', 'super_admin']);
 
+const STOPWORDS = new Set([
+  'calle', 'avda', 'avenida', 'plaza', 'paseo', 'carretera', 'autovia', 'autopista',
+  'inmueble', 'edificio', 'local', 'garaje', 'garajes', 'oficina', 'oficinas',
+  'palencia', 'madrid', 'valladolid', 'spain', 'españa',
+  'naves', 'nave', 'apartamentos', 'apartamento',
+]);
+
 function normalize(s: string): string {
   return (s || '')
     .toLowerCase()
@@ -68,23 +75,44 @@ export async function POST(request: NextRequest) {
       select: { id: true, nombre: true, direccion: true, companyId: true },
     });
 
-    const matchers = buildings.map((b) => ({
-      id: b.id,
-      keys: [b.nombre, b.direccion].filter(Boolean).map(normalize),
-    }));
+    interface Matcher {
+      id: string;
+      tokens: string[];
+      numeros: string[];
+    }
+    const matchers: Matcher[] = buildings.map((b) => {
+      const text = normalize(`${b.nombre || ''} ${b.direccion || ''}`);
+      const allTokens = text.split(/[\s,.\-/]+/).filter(Boolean);
+      const tokens = allTokens.filter(
+        (t) => t.length >= 4 && !STOPWORDS.has(t) && !/^\d+$/.test(t)
+      );
+      const numeros = allTokens.filter((t) => /^\d+$/.test(t) && t.length >= 1);
+      return { id: b.id, tokens, numeros };
+    });
 
     function findBuildingByText(text: string): string | null {
       const norm = normalize(text);
       if (!norm) return null;
+      let bestId: string | null = null;
+      let bestScore = 0;
       for (const m of matchers) {
-        for (const key of m.keys) {
-          const tokens = key
-            .split(/[\s,.\-]+/)
-            .filter((t) => t.length >= 4 && !['calle', 'avda', 'plaza', 'paseo'].includes(t));
-          if (tokens.some((tok) => norm.includes(tok))) return m.id;
+        let score = 0;
+        for (const tok of m.tokens) {
+          if (norm.includes(tok)) {
+            score += tok.length; // tokens más largos = más distintivos
+          }
+        }
+        for (const num of m.numeros) {
+          // Número como palabra aislada (no parte de otro)
+          const re = new RegExp(`(^|[^0-9])${num}([^0-9]|$)`);
+          if (re.test(norm)) score += 5;
+        }
+        if (score > bestScore) {
+          bestScore = score;
+          bestId = m.id;
         }
       }
-      return null;
+      return bestScore >= 8 ? bestId : null;
     }
 
     const txs = await prisma.accountingTransaction.findMany({
