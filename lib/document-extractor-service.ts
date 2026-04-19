@@ -153,17 +153,59 @@ async function downloadFromS3(key: string, localPath: string): Promise<void> {
 }
 
 /**
- * Convierte PDF a texto. Si falla pdftotext, intenta con pdf2text/pdftohtml.
+ * Convierte PDF a texto. Primero intenta pdftotext (PDF nativo); si devuelve
+ * vacío (PDF escaneado), hace OCR con Tesseract sobre las páginas convertidas
+ * a imagen con pdftoppm.
  */
 function pdfToText(localPath: string): string {
+  // Intento 1: pdftotext directo
   try {
     const out = execSync(`pdftotext -layout -nopgbrk "${localPath}" -`, {
       encoding: 'utf-8',
       maxBuffer: 50 * 1024 * 1024,
     });
-    return out.substring(0, 100_000); // limit a 100KB de texto
+    if (out.trim().length > 100) {
+      return out.substring(0, 100_000);
+    }
   } catch (e) {
     logger.warn(`[DocExtractor] pdftotext failed for ${localPath}`);
+  }
+
+  // Intento 2: OCR con Tesseract (PDF escaneado)
+  // Usar pdftoppm para convertir a PNG y luego tesseract en cada página
+  try {
+    const tmpBase = localPath.replace(/\.pdf$/i, '_ocr');
+    // Convertir hasta 5 páginas a PNG (resolución 200 DPI)
+    execSync(
+      `pdftoppm -png -r 200 -l 5 "${localPath}" "${tmpBase}" 2>/dev/null`,
+      { timeout: 120_000 }
+    );
+    let allText = '';
+    for (let i = 1; i <= 5; i++) {
+      const pageImg = `${tmpBase}-${i.toString().padStart(2, '0')}.png`;
+      const pageImgAlt = `${tmpBase}-${i}.png`;
+      const imgPath = require('fs').existsSync(pageImg)
+        ? pageImg
+        : require('fs').existsSync(pageImgAlt)
+          ? pageImgAlt
+          : null;
+      if (!imgPath) break;
+      try {
+        const ocrOut = execSync(`tesseract "${imgPath}" - -l spa+eng 2>/dev/null`, {
+          encoding: 'utf-8',
+          maxBuffer: 50 * 1024 * 1024,
+          timeout: 60_000,
+        });
+        allText += ocrOut + '\n\n';
+        // Limpiar
+        require('fs').unlinkSync(imgPath);
+      } catch {
+        // skip page
+      }
+    }
+    return allText.substring(0, 100_000);
+  } catch (e: any) {
+    logger.warn(`[DocExtractor] OCR also failed: ${e?.message}`);
     return '';
   }
 }
@@ -269,7 +311,7 @@ export async function extractDataFromText(
 
   try {
     const message = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
+      model: process.env.CLAUDE_MODEL || 'claude-sonnet-4-5-20250929',
       max_tokens: 2048,
       messages: [
         {
