@@ -65,6 +65,7 @@ export async function GET(request: NextRequest) {
         where: {
           companyId: { in: companyIds },
           fecha: { gte: startDate, lte: endDate },
+          esCorporativo: false, // Solo P&L operativo
         },
         select: { tipo: true, monto: true, fecha: true },
       }),

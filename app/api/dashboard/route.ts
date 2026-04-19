@@ -140,6 +140,7 @@ export async function GET(request: NextRequest) {
         where: {
           companyId: companyFilter,
           fecha: { gte: startOfMonth(subMonths(currentMonth, 5)), lte: endDate },
+          esCorporativo: false,
         },
         select: {
           fecha: true,

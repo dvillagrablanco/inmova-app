@@ -120,11 +120,13 @@ export async function GET(request: NextRequest) {
     // PASO 2: Obtener datos del periodo seleccionado
     // ================================================================
 
-    // Contabilidad del periodo
+    // Contabilidad del periodo (excluyendo apuntes corporativos para reflejar
+    // la rentabilidad operativa real del portfolio)
     const accountingTransactions = await prisma.accountingTransaction.findMany({
       where: {
         companyId: { in: companyIds },
         fecha: { gte: displayStart, lte: displayEnd },
+        esCorporativo: false,
       },
       select: { tipo: true, monto: true, categoria: true },
     });
@@ -331,7 +333,11 @@ export async function GET(request: NextRequest) {
     const prevEnd = endOfMonth(subMonths(displayStart, 1));
 
     const prevAccountingTx = await prisma.accountingTransaction.findMany({
-      where: { companyId: { in: companyIds }, fecha: { gte: prevStart, lte: prevEnd } },
+      where: {
+        companyId: { in: companyIds },
+        fecha: { gte: prevStart, lte: prevEnd },
+        esCorporativo: false,
+      },
       select: { tipo: true, monto: true },
     });
     const prevIngresos = prevAccountingTx
