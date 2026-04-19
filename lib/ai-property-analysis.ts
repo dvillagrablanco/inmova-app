@@ -1388,19 +1388,56 @@ export async function analyzeAndValuateProperty(
     comparablesCount: aggregatedMarketData?.allComparables.length || 0,
   });
 
-  // FASE 1: Análisis de comparables con IA rápida
-  logger.info('[AI Analysis] Fase 1: Análisis de comparables...');
-  const phase1 = await runPhase1Analysis(
-    property,
-    aggregatedMarketData?.allComparables || [],
-    platformDataText
-  );
+  // FASE 1: Análisis de comparables con IA rápida.
+  // Skip si hay <3 comparables o si SKIP_PHASE1=true (modo turbo, ahorra 15-25s).
+  const allComps = aggregatedMarketData?.allComparables || [];
+  const skipPhase1 =
+    process.env.AI_VALUATION_SKIP_PHASE1 === 'true' || allComps.length < 3;
 
-  logger.info('[AI Analysis] Fase 1 completada', {
-    rawComparables: phase1.rawComparablesCount,
-    filtered: phase1.filteredCount,
-    zoneProfile: phase1.zoneAnalysis.profile,
-  });
+  let phase1: Phase1Result;
+  if (skipPhase1) {
+    logger.info('[AI Analysis] Fase 1 SALTADA (turbo)', { comps: allComps.length });
+    // Construir Phase1Result sintético: pasamos los comparables tal cual,
+    // sin análisis IA. Phase 2 se encargará de filtrarlos en su prompt.
+    const pricesPerM2 = allComps.map((c) => c.pricePerM2).filter((p) => p > 0).sort((a, b) => a - b);
+    const median = pricesPerM2[Math.floor(pricesPerM2.length / 2)] || 0;
+    phase1 = {
+      analyzedComparables: allComps.slice(0, 10).map((c) => ({
+        address: c.address,
+        price: c.price,
+        pricePerM2: c.pricePerM2,
+        squareMeters: c.squareMeters,
+        rooms: c.rooms,
+        source: c.source,
+        url: c.url,
+        similarityScore: 75, // valor por defecto razonable
+        similarityReason: 'Comparable directo de portal (sin filtrado IA fase 1)',
+        priceAdjusted: c.price,
+      })),
+      zoneAnalysis: {
+        profile: 'Análisis rápido: comparables tomados directos de portales',
+        priceRange:
+          pricesPerM2.length > 0
+            ? { min: pricesPerM2[0], max: pricesPerM2[pricesPerM2.length - 1] }
+            : { min: 0, max: 0 },
+        dominantPricePerM2: median,
+        trend: 'estable',
+        demandLevel: 'media',
+        outliersPricePerM2: [],
+        keyInsights: [],
+      },
+      rawComparablesCount: allComps.length,
+      filteredCount: Math.min(allComps.length, 10),
+    };
+  } else {
+    logger.info('[AI Analysis] Fase 1: Análisis de comparables...');
+    phase1 = await runPhase1Analysis(property, allComps, platformDataText);
+    logger.info('[AI Analysis] Fase 1 completada', {
+      rawComparables: phase1.rawComparablesCount,
+      filtered: phase1.filteredCount,
+      zoneProfile: phase1.zoneAnalysis.profile,
+    });
+  }
 
   // FASE 2: Valoración experta
   logger.info('[AI Analysis] Fase 2: Valoración experta...');
