@@ -212,61 +212,41 @@ export default function EdificioDetallesPage() {
     fetchBuilding();
   }, [status, buildingId]);
 
-  // Cargar datos de rentabilidad contable (NOI)
+  // Cargar rentabilidad contable REAL desde AccountingTransaction (Zucchetti).
+  // Reemplaza el matching frágil por nombre con un endpoint dedicado que
+  // filtra por buildingId y unitId del edificio.
   useEffect(() => {
     if (!building) return;
-    const fetchNoi = async () => {
+    const fetchRentability = async () => {
       try {
-        const res = await fetch(`/api/accounting/enrichment?type=noi`);
+        const year = new Date().getFullYear();
+        const res = await fetch(`/api/buildings/${building.id}/rentability?year=${year}`, {
+          credentials: 'include',
+        });
         if (!res.ok) return;
         const data = await res.json();
-        if (!data.success || !data.data) return;
+        if (!data.success) return;
 
-        const nombre = (building.nombre + ' ' + building.direccion).toLowerCase();
-        const keywords = nombre
-          .replace(/[,./]/g, ' ')
-          .split(/\s+/)
-          .filter((w: string) => w.length > 3);
+        const desglose = (data.gastos?.porCategoria || []).map(
+          (g: { categoria: string; importe: number }) => ({
+            tipo: g.categoria,
+            importe: g.importe,
+          })
+        );
 
-        // Match income entries by building name/address
-        let ingresoAnual = 0;
-        for (const ing of data.data.ingresos || []) {
-          const t = (ing.inmueble || '').toLowerCase();
-          if (keywords.some((k: string) => t.includes(k))) {
-            ingresoAnual += ing.ingresoAnual || 0;
-          }
-        }
-
-        // Match expense entries
-        let gastosOperativos = 0;
-        const desglose: Array<{ tipo: string; importe: number }> = [];
-        const gastosPorTipo: Record<string, number> = {};
-        for (const g of data.data.gastos || []) {
-          const t = (g.inmueble || '').toLowerCase();
-          if (keywords.some((k: string) => t.includes(k))) {
-            gastosOperativos += g.gastoAnual || 0;
-            const tipo = g.tipoGasto || 'Otros';
-            gastosPorTipo[tipo] = (gastosPorTipo[tipo] || 0) + (g.gastoAnual || 0);
-          }
-        }
-        for (const [tipo, importe] of Object.entries(gastosPorTipo)) {
-          desglose.push({ tipo, importe });
-        }
-        desglose.sort((a, b) => b.importe - a.importe);
-
-        if (ingresoAnual > 0 || gastosOperativos > 0) {
+        if ((data.ingresos?.total || 0) > 0 || (data.gastos?.total || 0) > 0) {
           setNoiData({
-            ingresoAnual,
-            gastosOperativos,
-            noi: ingresoAnual - gastosOperativos,
+            ingresoAnual: data.ingresos.total,
+            gastosOperativos: data.gastos.total,
+            noi: data.rentabilidad.noi,
             desglose,
           });
         }
       } catch {
-        // Silently fail — enrichment is optional
+        // Silently fail
       }
     };
-    fetchNoi();
+    fetchRentability();
   }, [building]);
 
   const handleDeleteConfirm = async () => {

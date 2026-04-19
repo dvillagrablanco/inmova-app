@@ -96,7 +96,9 @@ function classifySubcuenta(
   return null;
 }
 
-// Building matcher para enriquecer con buildingId
+// Building matcher para enriquecer con buildingId.
+// Devuelve el match MÁS ESPECÍFICO (mayor número de tokens coincidentes,
+// con peso extra para tokens como números de portal y palabras únicas).
 function normalizeForMatch(s: string): string {
   return (s || '')
     .toLowerCase()
@@ -104,9 +106,17 @@ function normalizeForMatch(s: string): string {
     .replace(/[\u0300-\u036f]/g, '');
 }
 
+const STOPWORDS = new Set([
+  'calle', 'avda', 'avenida', 'plaza', 'paseo', 'carretera', 'autovia',
+  'inmueble', 'edificio', 'local', 'garaje', 'garajes', 'plaza',
+  'palencia', 'madrid', 'valladolid', 'spain', 'españa',
+]);
+
 interface BuildingMatcher {
   id: string;
-  tokens: string[];
+  tokens: string[];          // Palabras significativas (incluye nombre y dirección)
+  numeros: string[];         // Números (portal) presentes en nombre/dirección
+  raw: string;
 }
 
 function buildBuildingMatchers(
@@ -114,20 +124,47 @@ function buildBuildingMatchers(
 ): BuildingMatcher[] {
   return buildings.map((b) => {
     const text = normalizeForMatch(`${b.nombre} ${b.direccion}`);
-    const tokens = text
-      .split(/[\s,.\-]+/)
-      .filter((t) => t.length >= 4 && !['calle', 'avda', 'plaza', 'paseo'].includes(t));
-    return { id: b.id, tokens };
+    const allTokens = text.split(/[\s,.\-/]+/).filter(Boolean);
+    const tokens = allTokens.filter(
+      (t) => t.length >= 4 && !STOPWORDS.has(t) && !/^\d+$/.test(t)
+    );
+    const numeros = allTokens.filter((t) => /^\d+$/.test(t) && t.length >= 1);
+    return { id: b.id, tokens, numeros, raw: text };
   });
 }
 
 function findBuildingByText(text: string, matchers: BuildingMatcher[]): string | null {
   const norm = normalizeForMatch(text);
   if (!norm) return null;
+
+  let bestId: string | null = null;
+  let bestScore = 0;
+
   for (const m of matchers) {
-    if (m.tokens.some((tok) => norm.includes(tok))) return m.id;
+    let score = 0;
+    // Cada token coincidente suma puntos por longitud (+lon, +única)
+    for (const tok of m.tokens) {
+      if (norm.includes(tok)) {
+        score += tok.length; // tokens más largos = más distintivos
+      }
+    }
+    // Bonus si coincide ALGÚN número (portal) — gran indicador de identidad
+    for (const num of m.numeros) {
+      // Buscamos el número como palabra aislada para evitar falsos positivos
+      // ej: "5" no debe coincidir con "5320" o "15"
+      const re = new RegExp(`(^|[^0-9])${num}([^0-9]|$)`);
+      if (re.test(norm)) {
+        score += 5; // bonus para números
+      }
+    }
+    if (score > bestScore) {
+      bestScore = score;
+      bestId = m.id;
+    }
   }
-  return null;
+
+  // Umbral mínimo: al menos 8 puntos (token de 4 chars + número, o token largo)
+  return bestScore >= 8 ? bestId : null;
 }
 
 export async function syncZucchettiFull(options: FullSyncOptions): Promise<FullSyncResult> {
@@ -184,12 +221,19 @@ export async function syncZucchettiFull(options: FullSyncOptions): Promise<FullS
   const database = getZucchettiDatabase(companyKey);
   const pool = await getZucchettiPool(companyKey, database);
 
-  // Pre-cargar buildings del scope para enriquecer
+  // Pre-cargar buildings del GRUPO entero (Rovida + Vidaro + Viroda) — un
+  // apunte contable de cualquier sociedad puede referirse al mismo edificio
+  // físico (caso Vidaro paga gastos de comunidad de Pelayo 15 que es de Viroda)
+  const VIDARO_GROUP_IDS = [
+    'cef19f55f7b6ce0637d5ffb53', // Rovida
+    'c65159283deeaf6815f8eda95', // Vidaro
+    'cmkctneuh0001nokn7nvhuweq', // Viroda
+  ];
   const buildings = await prisma.building.findMany({
     where: {
       OR: [
-        { companyId },
-        { units: { some: { ownerCompanyId: companyId } } },
+        { companyId: { in: VIDARO_GROUP_IDS } },
+        { units: { some: { ownerCompanyId: { in: VIDARO_GROUP_IDS } } } },
       ],
     },
     select: { id: true, nombre: true, direccion: true },
