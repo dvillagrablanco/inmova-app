@@ -43,6 +43,7 @@ import { DeletePropertyDialog } from '@/components/property/DeletePropertyDialog
 import { InsuranceCoverageCard } from '@/components/property/InsuranceCoverageCard';
 import { CatastroPlanoViewer } from '@/components/property/CatastroPlanoViewer';
 import { AutoFillDimensionsButton } from '@/components/property/AutoFillDimensionsButton';
+import { EditableMainCharacteristics } from '@/components/property/EditableMainCharacteristics';
 import { PhotoGallery } from '@/components/ui/photo-gallery';
 import { EntityDocuments } from '@/components/ui/entity-documents';
 import { cn } from '@/lib/utils';
@@ -341,7 +342,7 @@ export default function PropiedadDetallesPage() {
               buildingId={property.building?.id}
             />
 
-            {/* Características Principales */}
+            {/* Características Principales (editable inline) */}
             <Card>
               <CardHeader>
                 <div className="flex items-start justify-between gap-2 flex-wrap">
@@ -350,112 +351,25 @@ export default function PropiedadDetallesPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 gap-3 sm:gap-6 md:grid-cols-2">
-                  <div className="flex items-center gap-3 sm:gap-4">
-                    <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <Maximize2 className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-xs sm:text-sm text-muted-foreground">Superficie</p>
-                      <p className="text-lg sm:text-2xl font-bold">{property.superficie}m²</p>
-                    </div>
-                  </div>
-
-                  {property.superficieUtil != null && property.superficieUtil > 0 && (
-                    <div className="flex items-center gap-3 sm:gap-4">
-                      <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg bg-blue-500/10 flex items-center justify-center flex-shrink-0">
-                        <Maximize2 className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
-                      </div>
-                      <div>
-                        <p className="text-xs sm:text-sm text-muted-foreground">Sup. Útil</p>
-                        <p className="text-lg sm:text-2xl font-bold">{property.superficieUtil}m²</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {property.habitaciones != null && property.habitaciones > 0 && (
-                    <div className="flex items-center gap-3 sm:gap-4">
-                      <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg bg-green-500/10 flex items-center justify-center flex-shrink-0">
-                        <Bed className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
-                      </div>
-                      <div>
-                        <p className="text-xs sm:text-sm text-muted-foreground">Habitaciones</p>
-                        <p className="text-lg sm:text-2xl font-bold">{property.habitaciones}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {property.banos != null && property.banos > 0 && (
-                    <div className="flex items-center gap-3 sm:gap-4">
-                      <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg bg-purple-500/10 flex items-center justify-center flex-shrink-0">
-                        <Bath className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600" />
-                      </div>
-                      <div>
-                        <p className="text-xs sm:text-sm text-muted-foreground">Baños</p>
-                        <p className="text-lg sm:text-2xl font-bold">{property.banos}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {property.planta !== null && property.planta !== undefined && (
-                    <div className="flex items-center gap-3 sm:gap-4">
-                      <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg bg-orange-500/10 flex items-center justify-center flex-shrink-0">
-                        <Building2 className="h-5 w-5 sm:h-6 sm:w-6 text-orange-600" />
-                      </div>
-                      <div>
-                        <p className="text-xs sm:text-sm text-muted-foreground">Planta</p>
-                        <p className="text-lg sm:text-2xl font-bold">{property.planta}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {property.orientacion && (
-                    <div className="flex items-center gap-3 sm:gap-4">
-                      <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg bg-yellow-500/10 flex items-center justify-center flex-shrink-0">
-                        <MapPin className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-600" />
-                      </div>
-                      <div>
-                        <p className="text-xs sm:text-sm text-muted-foreground">Orientación</p>
-                        <p className="text-lg sm:text-2xl font-bold">{property.orientacion}</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Características Adicionales */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Equipamiento y Comodidades</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                  {[
-                    { label: 'Aire Acond.', value: property.aireAcondicionado },
-                    { label: 'Calefacción', value: property.calefaccion },
-                    { label: 'Terraza', value: property.terraza },
-                    { label: 'Balcón', value: property.balcon },
-                    { label: 'Amueblado', value: property.amueblado },
-                  ].map((item) => (
-                    <div
-                      key={item.label}
-                      className="flex items-center gap-2 p-2 rounded bg-muted/50"
-                    >
-                      <span
-                        className={cn(
-                          'text-sm',
-                          item.value
-                            ? 'text-green-700 font-medium'
-                            : 'text-muted-foreground line-through'
-                        )}
-                      >
-                        {item.value ? '✓ ' : ''}
-                        {item.label}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+                <EditableMainCharacteristics
+                  unitId={property.id}
+                  initialData={{
+                    superficie: property.superficie,
+                    superficieUtil: property.superficieUtil,
+                    habitaciones: property.habitaciones,
+                    banos: property.banos,
+                    planta: property.planta,
+                    orientacion: property.orientacion,
+                    aireAcondicionado: property.aireAcondicionado,
+                    calefaccion: property.calefaccion,
+                    terraza: property.terraza,
+                    balcon: property.balcon,
+                    amueblado: property.amueblado,
+                    rentaMensual: property.rentaMensual,
+                    gastosComunidad: property.gastosComunidad,
+                    ibiAnual: property.ibiAnual,
+                  }}
+                />
               </CardContent>
             </Card>
 
