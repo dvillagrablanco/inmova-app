@@ -63,10 +63,26 @@ export function ValuationCard({ propertyId }: ValuationCardProps) {
 
     try {
       // Cache: 'no-store' para evitar que el Service Worker intercepte
-      // (la valoración puede tardar 30-60s con scraping + IA).
+      // (la valoración puede tardar 30-90s con scraping + IA).
       const response = await fetch(`/api/properties/${propertyId}/valuation`, {
         cache: 'no-store',
       });
+
+      // Cloudflare 524 (gateway timeout >100s)
+      if (response.status === 524) {
+        throw new Error(
+          'La valoración tardó más de 100 segundos y el servidor cortó la respuesta. ' +
+            'Esto suele pasar cuando los portales (Idealista, Fotocasa) están lentos. ' +
+            'Vuelve a intentarlo en unos segundos: las consultas se cachean y la próxima debería ser mucho más rápida.'
+        );
+      }
+
+      // 502/503/504 = errores temporales de gateway/upstream
+      if (response.status >= 502 && response.status <= 504) {
+        throw new Error(
+          `El servidor de valoración está temporalmente saturado (${response.status}). Reintenta en unos segundos.`
+        );
+      }
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));

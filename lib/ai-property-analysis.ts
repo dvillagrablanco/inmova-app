@@ -1123,9 +1123,14 @@ ${
   }
 }`;
 
+  // Para acelerar, usamos el modelo PRIMARY pero con max_tokens más ajustado.
+  // 4500 tokens son suficientes para JSON estructurado completo.
+  // Si Cloudflare devuelve 524 (>100s), bajaremos max_tokens más o
+  // pasaremos a modelo FAST para vivienda estándar.
+  const useFastModel = process.env.AI_VALUATION_USE_FAST_MODEL === 'true';
   const message = await anthropic.messages.create({
-    model: CLAUDE_MODEL_PRIMARY,
-    max_tokens: 6000, // Aumentado: el prompt RICS+ESG genera respuestas más largas
+    model: useFastModel ? CLAUDE_MODEL_FAST : CLAUDE_MODEL_PRIMARY,
+    max_tokens: 4500,
     temperature: 0.3,
     messages: [{ role: 'user', content: prompt }],
   });

@@ -714,20 +714,32 @@ async function fetchFromInternalDB(options: FetchOptions): Promise<PlatformMarke
 async function fetchFromIdealistaPlaywright(
   options: FetchOptions
 ): Promise<PlatformMarketDataPoint | null> {
+  // OPT-IN: Solo correr Playwright si IDEALISTA_PLAYWRIGHT_ENABLED=true.
+  // Por defecto está desactivado porque Cloudflare tiene timeout 100s y
+  // Playwright + login Idealista Data tarda 60-100s, lo cual hace que la
+  // valoración entera supere el límite y devuelva 524.
+  if (process.env.IDEALISTA_PLAYWRIGHT_ENABLED !== 'true') return null;
+
   try {
     const { getIdealistaPlaywrightReport, isPlaywrightConfigured } = await import(
       '@/lib/idealista-playwright-scraper'
     );
     if (!isPlaywrightConfigured()) return null;
 
-    const report = await getIdealistaPlaywrightReport({
-      city: options.city,
-      postalCode: options.postalCode,
-      address: options.address,
-      useAuthenticatedData: true,
-      maxListings: 30,
-      timeoutMs: 75_000, // 75s máx — Playwright puede ser lento con login
-    });
+    // Timeout duro de 25s: si Playwright no responde antes, abortamos para
+    // no bloquear el pipeline. Si DataDome bloquea, no merece la pena
+    // esperar 75s sabiendo que va a fallar.
+    const report = await Promise.race([
+      getIdealistaPlaywrightReport({
+        city: options.city,
+        postalCode: options.postalCode,
+        address: options.address,
+        useAuthenticatedData: true,
+        maxListings: 20,
+        timeoutMs: 25_000,
+      }),
+      new Promise<null>((resolve) => setTimeout(() => resolve(null), 30_000)),
+    ]);
 
     if (!report) return null;
 

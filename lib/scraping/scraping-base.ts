@@ -34,11 +34,11 @@ export function getRandomUserAgent(): string {
 
 const domainLastRequest = new Map<string, number>();
 const DOMAIN_MIN_DELAY_MS: Record<string, number> = {
-  'idealista.com': 3000,
-  'fotocasa.es': 3000,
-  'habitaclia.com': 3000,
-  'pisos.com': 3000,
-  default: 2000,
+  'idealista.com': 1500,
+  'fotocasa.es': 1500,
+  'habitaclia.com': 1500,
+  'pisos.com': 1500,
+  default: 800,
 };
 
 function getDomain(url: string): string {
@@ -140,7 +140,7 @@ export async function fetchWithRetry(
   url: string,
   options: FetchOptions = {},
 ): Promise<string> {
-  const { maxRetries = 2, timeoutMs = 15000, extraHeaders = {}, referer } = options;
+  const { maxRetries = 1, timeoutMs = 8000, extraHeaders = {}, referer } = options;
 
   await waitForRateLimit(url);
 
@@ -178,7 +178,10 @@ export async function fetchWithRetry(
       if (response.status === 403 || response.status === 429) {
         logger.warn(`[Scraping] ${response.status} en ${getDomain(url)}, reintento ${attempt + 1}`);
         if (attempt < maxRetries) {
-          await new Promise((r) => setTimeout(r, (attempt + 1) * 5000 + Math.random() * 3000));
+          // Delay suave: 1.5s + 1.5s = max 3s entre 2 reintentos. Con DataDome
+          // los portales devuelven 403 sistemáticamente: no merece la pena
+          // esperar más; el pipeline tiene fallbacks (datos estáticos, Notariado).
+          await new Promise((r) => setTimeout(r, (attempt + 1) * 1500 + Math.random() * 500));
           continue;
         }
         throw new Error(`Bloqueado (${response.status}) por ${getDomain(url)}`);
@@ -195,7 +198,7 @@ export async function fetchWithRetry(
         logger.warn(`[Scraping] Timeout en ${getDomain(url)}, intento ${attempt + 1}`);
       }
       if (attempt < maxRetries) {
-        await new Promise((r) => setTimeout(r, (attempt + 1) * 3000));
+        await new Promise((r) => setTimeout(r, (attempt + 1) * 1000));
       }
     }
   }
