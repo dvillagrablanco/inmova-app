@@ -203,11 +203,19 @@ function matchFincaToUnit(
 function parsePlanta(p: string | number): number | null {
   if (typeof p === 'number') return p;
   const s = String(p).toLowerCase().trim();
-  if (s === 'bajo' || s === 'pb' || s === '0') return 0;
+  if (s === 'bajo' || s === 'pb' || s === '0' || s === '00') return 0;
   if (s === 'sotano' || s === 'sótano' || s === '-1' || s === 'st') return -1;
+  if (s.startsWith('-')) {
+    const n = parseInt(s, 10);
+    return isNaN(n) ? null : n;
+  }
   if (s === 'entresuelo' || s === 'entreplanta') return 0;
   if (s === 'principal') return 1;
-  if (s === 'atico' || s === 'ático') return 99;
+  if (s === 'atico' || s === 'ático' || s === 'at') return 99;
+  // "+1", "+2": ático/sobreático sobre la última planta
+  if (s.startsWith('+')) {
+    return 99; // tratar como ático
+  }
   const num = parseInt(s, 10);
   return isNaN(num) ? null : num;
 }
@@ -277,6 +285,20 @@ async function findFromCatastroBuilding(unit: {
     const edificio = await consultarEdificioPorRC(buildingRc.substring(0, 14));
     if (!edificio || edificio.fincas.length === 0) return null;
 
+    // Detectar marcadores en el numero de la unit que indican planta especial
+    const numUpper = unit.numero.toUpperCase();
+    const isAtico = /[ÁA]TICO|ATIC/i.test(unit.numero);
+    const isSotano = /S[ÓO]TANO|SOT/i.test(unit.numero);
+    const isBajo = /\bBAJO\b|\bPB\b|PLANTA\s*BAJA/i.test(unit.numero);
+    // Letra de puerta (A, B, Dcha, Izda…)
+    const letraMatch = numUpper.match(/[ºª°]?\s*([A-Z]+|DCHA|DRA|IZDA|IZQ)\b/);
+    const letraGuess = letraMatch
+      ? letraMatch[1].replace(/^DCHA|DRA$/, 'A').replace(/^IZDA|IZQ$/, 'B')
+      : '';
+    // Número de planta literal "5º"
+    const plantaLitMatch = unit.numero.match(/(\d{1,2})\s*[ºª°]?/);
+    const plantaLit = plantaLitMatch ? parseInt(plantaLitMatch[1], 10) : null;
+
     // Score cada finca contra la unit
     let bestScore = 0;
     let bestFinca: any = null;
@@ -289,19 +311,34 @@ async function findFromCatastroBuilding(unit: {
       // Planta
       const fincaPl = parsePlanta(finca.planta);
       if (fincaPl !== null && unit.planta !== null && fincaPl === unit.planta) score += 4;
+      // Si la unit tiene planta literal en el numero (ej "5ºA")
+      if (plantaLit !== null && fincaPl !== null && fincaPl === plantaLit) score += 4;
+      // Ático: el catastro suele usar planta "+1" (sobre el último) o un valor alto
+      if (isAtico && finca.planta) {
+        const pStr = finca.planta.toString();
+        if (pStr.startsWith('+') || pStr.toUpperCase().includes('AT') || fincaPl === 99) {
+          score += 5;
+        }
+      }
+      if (isSotano && fincaPl !== null && fincaPl < 0) score += 4;
+      if (isBajo && fincaPl === 0) score += 4;
 
       // Puerta dentro del numero
       const numNorm = norm(unit.numero);
       const puertaNorm = norm(finca.puerta);
       if (puertaNorm && numNorm.includes(puertaNorm)) score += 5;
+      else if (puertaNorm && letraGuess && puertaNorm === letraGuess) score += 4;
 
       // Tipo / uso
       const usoLow = finca.uso.toLowerCase();
       if (
         (unit.tipo === 'vivienda' && (usoLow.includes('vivienda') || usoLow.includes('residencial'))) ||
         (unit.tipo === 'local' && (usoLow.includes('comercial') || usoLow.includes('local'))) ||
-        (unit.tipo === 'garaje' && (usoLow.includes('garaje') || usoLow.includes('aparcamiento'))) ||
-        (unit.tipo === 'trastero' && (usoLow.includes('almac') || usoLow.includes('trastero')))
+        (unit.tipo === 'garaje' &&
+          (usoLow.includes('garaje') || usoLow.includes('aparcamiento') ||
+            usoLow.includes('estacionamiento'))) ||
+        (unit.tipo === 'trastero' &&
+          (usoLow.includes('almac') || usoLow.includes('trastero')))
       ) {
         score += 2;
       }
@@ -309,6 +346,7 @@ async function findFromCatastroBuilding(unit: {
       // Superficie ±20%
       if (unit.superficie > 0 && finca.superficie > 0) {
         const ratio = unit.superficie / finca.superficie;
+        if (ratio > 0.6 && ratio < 1.4) score += 1;
         if (ratio > 0.8 && ratio < 1.2) score += 2;
         if (ratio > 0.95 && ratio < 1.05) score += 2;
       }
@@ -319,7 +357,7 @@ async function findFromCatastroBuilding(unit: {
       }
     }
 
-    if (bestScore >= 5 && bestFinca) {
+    if (bestScore >= 4 && bestFinca) {
       const fields: AutoFillCandidate = {
         referenciaCatastral: bestFinca.referenciaCatastral,
         uso: bestFinca.uso || undefined,
