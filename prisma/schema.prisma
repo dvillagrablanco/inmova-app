@@ -795,6 +795,11 @@ model Unit {
   id                  String     @id @default(cuid())
   numero              String
   buildingId          String
+  // Sociedad PROPIETARIA real de la unidad (puede diferir de Building.companyId
+  // cuando dentro de un mismo edificio físico hay activos de varias sociedades
+  // del mismo grupo: ej. grupo Vidaro tiene viviendas de Viroda, Vidaro y Rovida
+  // en el mismo edificio Reina 15). Si es null, se asume Building.companyId.
+  ownerCompanyId      String?
   tipo                UnitType
   estado              UnitStatus @default(disponible)
   superficie          Float
@@ -824,6 +829,7 @@ model Unit {
   updatedAt           DateTime   @updatedAt
 
   building             Building              @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  ownerCompany         Company?              @relation("UnitOwnerCompany", fields: [ownerCompanyId], references: [id], onDelete: SetNull)
   tenant               Tenant?               @relation(fields: [tenantId], references: [id], onDelete: SetNull)
   contracts            Contract[]
   maintenanceRequests  MaintenanceRequest[]
@@ -1975,6 +1981,7 @@ model Company {
 
   users               User[]
   buildings           Building[]
+  ownedUnits          Unit[]               @relation("UnitOwnerCompany")
   tenants             Tenant[]
   providers           Provider[]
   tasks               Task[]

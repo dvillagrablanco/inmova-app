@@ -16,6 +16,7 @@ import {
   selectContractMinimal,
 } from '@/lib/query-optimizer';
 import { resolveCompanyScope } from '@/lib/company-scope';
+import { buildUnitScopeFilter } from '@/lib/unit-scope';
 import * as Sentry from '@sentry/nextjs';
 
 export const dynamic = 'force-dynamic';
@@ -51,8 +52,12 @@ export async function GET(req: NextRequest) {
     const tipo = searchParams.get('tipo');
     const usePagination = searchParams.get('paginate') === 'true';
 
-    // Use scope: respects company selector (header/cookie/query)
-    const companyFilter = { building: { companyId: { in: scope.scopeCompanyIds } } };
+    // Use scope: respects company selector (header/cookie/query).
+    // IMPORTANTE: filtramos por Unit.ownerCompanyId (con fallback al
+    // building.companyId si la unit aún no tiene owner explícito) para
+    // soportar edificios físicos compartidos entre varias sociedades del
+    // mismo grupo.
+    const companyFilter = buildUnitScopeFilter(scope.scopeCompanyIds);
 
     // Si hay filtros o se solicita paginación, no usar caché
     const hasFilters = buildingId || estado || tipo;
@@ -87,6 +92,8 @@ export async function GET(req: NextRequest) {
               superficie: true,
               superficieUtil: true,
               referenciaCatastral: true,
+              ownerCompanyId: true,
+              ownerCompany: { select: { id: true, nombre: true } },
               habitaciones: true,
               banos: true,
               rentaMensual: true,
@@ -134,6 +141,8 @@ export async function GET(req: NextRequest) {
           estado: true,
           planta: true,
           superficie: true,
+          ownerCompanyId: true,
+          ownerCompany: { select: { id: true, nombre: true } },
           habitaciones: true,
           banos: true,
           rentaMensual: true,
@@ -178,6 +187,8 @@ export async function GET(req: NextRequest) {
           estado: true,
           planta: true,
           superficie: true,
+          ownerCompanyId: true,
+          ownerCompany: { select: { id: true, nombre: true } },
           habitaciones: true,
           banos: true,
           rentaMensual: true,
@@ -211,7 +222,7 @@ export async function GET(req: NextRequest) {
     }
 
     const units = await prisma.unit.findMany({
-      where: { building: { companyId: { in: scope.scopeCompanyIds } } },
+      where: companyFilter,
       select: {
         id: true,
         numero: true,
@@ -219,6 +230,8 @@ export async function GET(req: NextRequest) {
         estado: true,
         planta: true,
         superficie: true,
+        ownerCompanyId: true,
+        ownerCompany: { select: { id: true, nombre: true } },
         habitaciones: true,
         banos: true,
         rentaMensual: true,

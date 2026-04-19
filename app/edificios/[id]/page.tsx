@@ -72,6 +72,8 @@ interface Unit {
   estado: string;
   superficie: number;
   rentaMensual: number;
+  ownerCompanyId?: string | null;
+  ownerCompany?: { id: string; nombre: string } | null;
   tenant?: {
     id: string;
     nombreCompleto: string;
@@ -103,6 +105,8 @@ interface BuildingDetails {
   nombre: string;
   direccion: string;
   tipo: string;
+  companyId?: string;
+  company?: { id: string; nombre: string } | null;
   referenciaCatastral?: string;
   anoConstructor: number;
   numeroUnidades: number;
@@ -667,7 +671,18 @@ export default function EdificioDetallesPage() {
                 <div>
                   <CardTitle className="text-base sm:text-lg">Unidades del Edificio</CardTitle>
                   <CardDescription>
-                    {building.units?.length || 0} unidades registradas
+                    {(() => {
+                      const total = building.units?.length || 0;
+                      const owners = new Set<string>();
+                      for (const u of building.units || []) {
+                        const id = u.ownerCompanyId || building.companyId;
+                        if (id) owners.add(id);
+                      }
+                      if (owners.size > 1) {
+                        return `${total} unidades · ${owners.size} sociedades del grupo`;
+                      }
+                      return `${total} unidades registradas`;
+                    })()}
                   </CardDescription>
                 </div>
                 <Button
@@ -687,6 +702,7 @@ export default function EdificioDetallesPage() {
                           <TableRow>
                             <TableHead>Unidad</TableHead>
                             <TableHead className="hidden sm:table-cell">Tipo</TableHead>
+                            <TableHead className="hidden md:table-cell">Sociedad</TableHead>
                             <TableHead>Estado</TableHead>
                             <TableHead className="hidden md:table-cell">Superficie</TableHead>
                             <TableHead>Renta</TableHead>
@@ -711,6 +727,29 @@ export default function EdificioDetallesPage() {
                                 </TableCell>
                                 <TableCell className="hidden sm:table-cell">
                                   {formatUnitTipoLabel(unit.tipo)}
+                                </TableCell>
+                                <TableCell className="hidden md:table-cell">
+                                  {(() => {
+                                    const ownerName =
+                                      unit.ownerCompany?.nombre || building.company?.nombre || '-';
+                                    const shortName = ownerName
+                                      .replace(/(S\.?L\.?|S\.?A\.?|Inversiones)/gi, '')
+                                      .trim()
+                                      .split(' ')[0];
+                                    const isOwnedByOtherCompany =
+                                      unit.ownerCompanyId &&
+                                      building.companyId &&
+                                      unit.ownerCompanyId !== building.companyId;
+                                    return (
+                                      <Badge
+                                        variant={isOwnedByOtherCompany ? 'outline' : 'secondary'}
+                                        className="text-xs"
+                                        title={ownerName}
+                                      >
+                                        {shortName}
+                                      </Badge>
+                                    );
+                                  })()}
                                 </TableCell>
                                 <TableCell>
                                   <Badge variant={estadoBadge.variant} className="text-xs">

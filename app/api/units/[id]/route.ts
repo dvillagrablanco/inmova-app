@@ -9,6 +9,7 @@ import {
   invalidateUnitsCache,
 } from '@/lib/api-cache-helpers';
 import { resolveCompanyScope } from '@/lib/company-scope';
+import { buildUnitScopeFilter } from '@/lib/unit-scope';
 import * as Sentry from '@sentry/nextjs';
 
 export const dynamic = 'force-dynamic';
@@ -22,6 +23,10 @@ async function getPrisma() {
 
 const unitUpdateSchema = z.object({
   buildingId: z.string().cuid().optional(),
+  // Sociedad propietaria. Permite mover una unit entre sociedades del mismo
+  // grupo SIN cambiar el edificio físico. Validamos en el handler que el
+  // usuario tenga acceso a esa empresa y que esté en el scope.
+  ownerCompanyId: z.string().cuid().nullable().optional(),
   numero: z.string().min(1).max(50).optional(),
   tipo: z
     .enum([
@@ -76,9 +81,10 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     const unit = await prisma.unit.findFirst({
       where: {
         id: params.id,
-        building: { companyId: { in: scope.scopeCompanyIds } },
+        ...buildUnitScopeFilter(scope.scopeCompanyIds),
       },
       include: {
+        ownerCompany: { select: { id: true, nombre: true } },
         building: {
           select: {
             id: true,
@@ -94,6 +100,8 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
             jardin: true,
             latitud: true,
             longitud: true,
+            companyId: true,
+            company: { select: { id: true, nombre: true } },
           },
         },
         tenant: {
@@ -162,7 +170,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     const existing = await prisma.unit.findFirst({
       where: {
         id: params.id,
-        building: { companyId: { in: scope.scopeCompanyIds } },
+        ...buildUnitScopeFilter(scope.scopeCompanyIds),
       },
       select: {
         id: true,
@@ -185,6 +193,16 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
       if (!targetBuilding) {
         return NextResponse.json({ error: 'Edificio no encontrado o sin acceso' }, { status: 403 });
+      }
+    }
+
+    // Validar que la sociedad propietaria nueva está en el scope (mismo grupo)
+    if (parsed.data.ownerCompanyId !== undefined && parsed.data.ownerCompanyId !== null) {
+      if (!scope.scopeCompanyIds.includes(parsed.data.ownerCompanyId)) {
+        return NextResponse.json(
+          { error: 'No tienes acceso a la sociedad propietaria indicada' },
+          { status: 403 }
+        );
       }
     }
 
@@ -297,7 +315,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     const existing = await prisma.unit.findFirst({
       where: {
         id: params.id,
-        building: { companyId: { in: scope.scopeCompanyIds } },
+        ...buildUnitScopeFilter(scope.scopeCompanyIds),
       },
       select: { id: true, building: { select: { companyId: true } } },
     });

@@ -17,6 +17,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { resolveCompanyScope } from '@/lib/company-scope';
+import { buildUnitScopeFilter } from '@/lib/unit-scope';
 import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -54,7 +55,7 @@ export async function POST(
     const unit = await prisma.unit.findFirst({
       where: {
         id: params.id,
-        building: { companyId: { in: scope.scopeCompanyIds } },
+        ...buildUnitScopeFilter(scope.scopeCompanyIds),
       },
       include: {
         building: {

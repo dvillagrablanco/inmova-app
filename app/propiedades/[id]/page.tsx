@@ -44,6 +44,7 @@ import { InsuranceCoverageCard } from '@/components/property/InsuranceCoverageCa
 import { CatastroPlanoViewer } from '@/components/property/CatastroPlanoViewer';
 import { AutoFillDimensionsButton } from '@/components/property/AutoFillDimensionsButton';
 import { EditableMainCharacteristics } from '@/components/property/EditableMainCharacteristics';
+import { OwnerCompanyEditor } from '@/components/property/OwnerCompanyEditor';
 import { PhotoGallery } from '@/components/ui/photo-gallery';
 import { EntityDocuments } from '@/components/ui/entity-documents';
 import { cn } from '@/lib/utils';
@@ -372,6 +373,15 @@ export default function PropiedadDetallesPage() {
                 />
               </CardContent>
             </Card>
+
+            {/* Sociedad propietaria (relevante en grupos de empresas) */}
+            <OwnerCompanyEditor
+              unitId={property.id}
+              initialOwnerCompanyId={(property as any).ownerCompanyId || null}
+              initialOwnerCompanyName={(property as any).ownerCompany?.nombre || null}
+              buildingCompanyId={(property as any).building?.companyId || null}
+              buildingCompanyName={(property as any).building?.company?.nombre || null}
+            />
 
             {/* Tour Virtual */}
             {property.tourVirtual && (

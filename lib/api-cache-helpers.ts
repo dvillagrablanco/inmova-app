@@ -239,14 +239,28 @@ export async function cachedUnits(companyId: string) {
     cacheKey,
     async () => {
       const prisma = getPrismaSync();
+      // Soporta unidades cuyo ownerCompanyId es companyId aunque el building
+      // pertenezca a otra empresa del grupo (ver lib/unit-scope.ts)
       const units = await prisma.unit.findMany({
-        where: { building: { companyId } },
+        where: {
+          OR: [
+            { ownerCompanyId: companyId },
+            {
+              AND: [
+                { ownerCompanyId: null },
+                { building: { companyId } },
+              ],
+            },
+          ],
+        },
         include: {
+          ownerCompany: { select: { id: true, nombre: true } },
           building: {
             select: {
               id: true,
               nombre: true,
               direccion: true,
+              companyId: true,
             },
           },
           contracts: {
@@ -266,7 +280,6 @@ export async function cachedUnits(companyId: string) {
         orderBy: { createdAt: 'desc' },
       });
 
-      // Transformar la estructura para que sea compatible con el frontend
       return units.map((unit) => ({
         id: unit.id,
         numero: unit.numero,
@@ -277,6 +290,8 @@ export async function cachedUnits(companyId: string) {
         habitaciones: unit.habitaciones,
         banos: unit.banos,
         rentaMensual: Number(unit.rentaMensual || 0),
+        ownerCompanyId: unit.ownerCompanyId,
+        ownerCompany: unit.ownerCompany,
         building: unit.building,
         tenant: unit.contracts?.[0]?.tenant || null,
         createdAt: unit.createdAt,

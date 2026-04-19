@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import logger, { logError } from '@/lib/logger';
 import { invalidateBuildingsCache, invalidateDashboardCache } from '@/lib/api-cache-helpers';
+import { resolveCompanyScope } from '@/lib/company-scope';
 import { z } from 'zod';
 import * as Sentry from '@sentry/nextjs';
 
@@ -45,11 +46,45 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const building = await prisma.building.findUnique({
-      where: { id: params.id },
+    const scope = await resolveCompanyScope({
+      userId: session.user.id as string,
+      role: session.user.role as any,
+      primaryCompanyId: session.user?.companyId,
+      request: req,
+    });
+
+    const building = await prisma.building.findFirst({
+      where: {
+        id: params.id,
+        // El edificio físico es accesible si:
+        //  a) Su companyId está en el scope (caso normal), o
+        //  b) Tiene al menos una unidad cuyo ownerCompanyId está en el scope
+        //     (caso edificio compartido entre sociedades del grupo).
+        OR: [
+          { companyId: { in: scope.scopeCompanyIds } },
+          { units: { some: { ownerCompanyId: { in: scope.scopeCompanyIds } } } },
+        ],
+      },
       include: {
+        company: { select: { id: true, nombre: true } },
         units: {
+          // Solo devolver las unidades a las que tiene acceso el usuario.
+          // Los privilegiados (administrador/gestor con scope amplio) verán
+          // todas las unidades del edificio físico (todas las sociedades del
+          // grupo en su scope).
+          where: {
+            OR: [
+              { ownerCompanyId: { in: scope.scopeCompanyIds } },
+              {
+                AND: [
+                  { ownerCompanyId: null },
+                  { building: { companyId: { in: scope.scopeCompanyIds } } },
+                ],
+              },
+            ],
+          },
           include: {
+            ownerCompany: { select: { id: true, nombre: true } },
             tenant: true,
             contracts: true,
           },

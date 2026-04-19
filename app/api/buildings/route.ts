@@ -55,18 +55,41 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50');
     const skip = (page - 1) * limit;
 
-    const whereClause = { companyId: { in: scope.scopeCompanyIds } };
+    // Mostramos también edificios "ajenos al scope" si contienen al menos
+    // una unidad cuyo ownerCompanyId sí está en el scope. Esto es necesario
+    // para edificios físicos compartidos entre sociedades del mismo grupo
+    // (caso real grupo Vidaro).
+    const whereClause = {
+      OR: [
+        { companyId: { in: scope.scopeCompanyIds } },
+        { units: { some: { ownerCompanyId: { in: scope.scopeCompanyIds } } } },
+      ],
+    } as const;
 
     const buildingQuery: any = {
       where: whereClause,
       include: {
         units: {
+          // Solo contabilizamos las unidades que pertenecen al scope para
+          // que las métricas (ocupación, ingresos) sean coherentes.
+          where: {
+            OR: [
+              { ownerCompanyId: { in: scope.scopeCompanyIds } },
+              {
+                AND: [
+                  { ownerCompanyId: null },
+                  { building: { companyId: { in: scope.scopeCompanyIds } } },
+                ],
+              },
+            ],
+          },
           select: {
             id: true,
             estado: true,
             rentaMensual: true,
             valorMercado: true,
             precioCompra: true,
+            ownerCompanyId: true,
           },
         },
         company: {

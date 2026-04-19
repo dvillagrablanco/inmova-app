@@ -67,7 +67,9 @@ export async function GET(request: NextRequest) {
         direccion: true,
         referenciaCatastral: true,
         companyId: true,
+        company: { select: { id: true, nombre: true } },
         _count: { select: { units: true } },
+        units: { select: { ownerCompanyId: true, tipo: true } },
       },
       orderBy: { direccion: 'asc' },
     });
@@ -100,17 +102,29 @@ export async function GET(request: NextRequest) {
 
     for (const [rc, bs] of byRc.entries()) {
       if (bs.length > 1) {
-        // Sugerir mantener el que más unidades tenga
         const sorted = [...bs].sort((a, b) => b._count.units - a._count.units);
+        // Detectar si hay sociedades propietarias distintas en el grupo
+        const allOwnerIds = new Set<string>();
+        for (const b of sorted) {
+          allOwnerIds.add(b.companyId);
+          for (const u of b.units) {
+            if (u.ownerCompanyId) allOwnerIds.add(u.ownerCompanyId);
+          }
+        }
         duplicateGroups.push({
           type: 'same_rc',
           key: rc,
+          crossCompany: allOwnerIds.size > 1,
+          ownerCompanies: Array.from(allOwnerIds),
           buildings: sorted.map((b) => ({
             id: b.id,
             nombre: b.nombre,
             direccion: b.direccion,
             referenciaCatastral: b.referenciaCatastral,
+            companyId: b.companyId,
+            companyName: b.company?.nombre,
             unidades: b._count.units,
+            tiposPresentes: Array.from(new Set(b.units.map((u: any) => u.tipo))),
           })),
           suggestedKeepId: sorted[0].id,
         });
@@ -192,17 +206,42 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Migrar todas las unidades
+    // Migrar todas las unidades.
+    //
+    // IMPORTANTE: solo cambiamos `buildingId` (referencia al edificio físico).
+    // El `ownerCompanyId` de la unit se preserva porque la propiedad real
+    // (sociedad propietaria) puede ser distinta de la del building destino,
+    // y eso es el caso normal en grupos de sociedades (ej: grupo Vidaro).
+    //
+    // Si la unit no tenía ownerCompanyId previo, lo seteamos al companyId
+    // del building origen para no perder información.
     let totalMigrated = 0;
     const details: any[] = [];
 
     for (const sourceId of mergeFromIds) {
+      const sourceBld = await prisma.building.findUnique({
+        where: { id: sourceId },
+        select: { companyId: true },
+      });
+
+      // Backfill ownerCompanyId si está vacío
+      if (sourceBld?.companyId) {
+        await prisma.unit.updateMany({
+          where: { buildingId: sourceId, ownerCompanyId: null },
+          data: { ownerCompanyId: sourceBld.companyId },
+        });
+      }
+
       const result = await prisma.unit.updateMany({
         where: { buildingId: sourceId },
         data: { buildingId: keepId },
       });
       totalMigrated += result.count;
-      details.push({ from: sourceId, migratedUnits: result.count });
+      details.push({
+        from: sourceId,
+        migratedUnits: result.count,
+        preservedOwnerCompanyId: sourceBld?.companyId || null,
+      });
 
       // También migrar otros recursos vinculados (gastos, documentos, seguros)
       const expenses = await prisma.expense.updateMany({
