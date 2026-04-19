@@ -56,7 +56,6 @@ export async function GET(
         nombre: true,
         direccion: true,
         companyId: true,
-        valorEstimado: true,
         ibiAnual: true,
         gastosComunidad: true,
         units: {
