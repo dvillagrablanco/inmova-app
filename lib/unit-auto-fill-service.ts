@@ -232,19 +232,21 @@ async function findFromCatastro(rc: string | null | undefined): Promise<AutoFill
       if (finca && finca.superficie > 0) {
         const fields: AutoFillCandidate = {
           referenciaCatastral: finca.referenciaCatastral,
-          superficie: finca.superficie,
+          superficie: finca.superficieTotal || finca.superficie, // m² construidos totales
+          superficieUtil: finca.superficie, // m² útiles del activo (sin comunes)
           uso: finca.uso || undefined,
         };
         const planta = parsePlanta(finca.planta);
         if (planta !== null) fields.planta = planta;
-        if (edificio.anoConstruccion > 0) fields.anoConstruccion = edificio.anoConstruccion;
+        const anoFinca = finca.anoConstruccion || edificio.anoConstruccion;
+        if (anoFinca && anoFinca > 0) fields.anoConstruccion = anoFinca;
 
         return {
           source: 'catastro_unidad',
           confidence: 'high',
           fields,
           fincaCatastral: finca,
-          rawNote: `Catastro: ${finca.uso || 'unidad'} pta=${finca.puerta || '?'} pl=${finca.planta || '?'}`,
+          rawNote: `Catastro: ${finca.uso || 'unidad'} pta=${finca.puerta || '?'} pl=${finca.planta || '?'} sup=${finca.superficie}m² ${finca.superficieTotal ? `(total ${finca.superficieTotal})` : ''}`,
         };
       }
     }
@@ -322,17 +324,23 @@ async function findFromCatastroBuilding(unit: {
         referenciaCatastral: bestFinca.referenciaCatastral,
         uso: bestFinca.uso || undefined,
       };
-      if (bestFinca.superficie > 0) fields.superficie = bestFinca.superficie;
+      if (bestFinca.superficie > 0) {
+        fields.superficie = bestFinca.superficieTotal || bestFinca.superficie;
+        if (bestFinca.superficieTotal && bestFinca.superficie < bestFinca.superficieTotal) {
+          fields.superficieUtil = bestFinca.superficie;
+        }
+      }
       const planta = parsePlanta(bestFinca.planta);
       if (planta !== null) fields.planta = planta;
-      if (edificio.anoConstruccion > 0) fields.anoConstruccion = edificio.anoConstruccion;
+      const anoFinca = bestFinca.anoConstruccion || edificio.anoConstruccion;
+      if (anoFinca && anoFinca > 0) fields.anoConstruccion = anoFinca;
 
       return {
         source: 'catastro_edificio_matching',
         confidence: bestScore >= 8 ? 'high' : 'medium',
         fields,
         fincaCatastral: bestFinca,
-        rawNote: `Catastro (matching score=${bestScore}): pta=${bestFinca.puerta || '?'} pl=${bestFinca.planta || '?'}`,
+        rawNote: `Catastro (score=${bestScore}): pta=${bestFinca.puerta || '?'} pl=${bestFinca.planta || '?'} sup=${bestFinca.superficie}m²${bestFinca.superficieTotal ? ` (total ${bestFinca.superficieTotal})` : ''}`,
       };
     }
 

@@ -15,8 +15,10 @@ export interface CatastroFinca {
   referenciaCatastral: string; // 20 chars: PC1(7)+PC2(7)+CAR(4)+CC1(1)+CC2(1)
   planta: string;
   puerta: string;
-  uso: string;             // VIVIENDA, LOCAL, GARAJE, ALMACEN, etc.
-  superficie: number;
+  uso: string; // Residencial, Industrial, Almacén, etc.
+  superficie: number; // m² útiles del activo principal (sin zonas comunes)
+  superficieTotal?: number; // m² construidos totales (incluye comunes)
+  anoConstruccion?: number;
   coefParticipacion: number;
 }
 
@@ -75,6 +77,8 @@ export async function consultarEdificioPorRC(rc14: string): Promise<CatastroEdif
       const puerta = block.match(/<pu>([^<]*)<\/pu>/)?.[1] || '';
 
       // Consultar detalle de cada finca individual para superficie y uso
+      // (rate-limit suave para no saturar Catastro: ~250ms entre llamadas)
+      await new Promise((r) => setTimeout(r, 250));
       const detalle = await consultarFincaIndividual(refCompleta);
 
       fincas.push({
@@ -83,6 +87,8 @@ export async function consultarEdificioPorRC(rc14: string): Promise<CatastroEdif
         puerta: puerta || detalle?.puerta || '',
         uso: detalle?.uso || '',
         superficie: detalle?.superficie || 0,
+        superficieTotal: detalle?.superficieTotal || 0,
+        anoConstruccion: detalle?.anoConstruccion || 0,
         coefParticipacion: detalle?.coefParticipacion || 0,
       });
     }
@@ -109,7 +115,18 @@ export async function consultarEdificioPorRC(rc14: string): Promise<CatastroEdif
       }
     }
 
-    const superficieTotal = fincas.reduce((s, f) => s + f.superficie, 0);
+    const superficieTotal = fincas.reduce(
+      (s, f) => s + (f.superficieTotal || f.superficie),
+      0
+    );
+    // Año de construcción: si en el bico no estaba, intentar de las fincas
+    const anoFinal =
+      ano > 0
+        ? ano
+        : fincas
+            .map((f) => f.anoConstruccion || 0)
+            .filter((a) => a > 0)
+            .sort((a, b) => a - b)[0] || 0;
 
     return {
       referenciaCatastralEdificio: rc14,
@@ -117,7 +134,7 @@ export async function consultarEdificioPorRC(rc14: string): Promise<CatastroEdif
       municipio,
       provincia,
       codigoPostal: cp,
-      anoConstruccion: ano,
+      anoConstruccion: anoFinal,
       superficieTotal,
       fincas,
     };
@@ -127,38 +144,76 @@ export async function consultarEdificioPorRC(rc14: string): Promise<CatastroEdif
   }
 }
 
+/**
+ * Consulta los datos completos de UNA finca individual por su RC20.
+ * El endpoint Consulta_DNPRC con RC20 devuelve un bloque <bico><bi> con:
+ *   <luso>Residencial|Industrial|...</luso>
+ *   <sfc>{superficie_total}</sfc>  ← suele incluir comunes
+ *   <ant>{año}</ant>
+ *   <pt>{planta}</pt> <pu>{puerta}</pu>
+ *   Y bloques <cons> con el desglose:
+ *     <lcd>VIVIENDA|ELEMENTOS COMUNES|GARAJE|TRASTERO</lcd> <stl>{m²}</stl>
+ *
+ * Devuelve la superficie ÚTIL real del activo principal (vivienda/local/etc.)
+ * y la superficie construida total (incluye comunes).
+ */
 async function consultarFincaIndividual(rc20: string): Promise<{
-  uso: string; planta: string; puerta: string; superficie: number; coefParticipacion: number;
+  uso: string;
+  planta: string;
+  puerta: string;
+  superficie: number; // útil del activo principal (vivienda/local/etc.)
+  superficieTotal: number; // construida total (incluye comunes)
+  anoConstruccion: number;
+  coefParticipacion: number;
 } | null> {
   try {
     const rc1 = rc20.substring(0, 7);
     const rc2 = rc20.substring(7, 14);
+    const car = rc20.substring(14, 18);
+    const cc1 = rc20.substring(18, 19) || '';
+    const cc2 = rc20.substring(19, 20) || '';
 
-    const url = `${CATASTRO_BASE}/Consulta_DNPRC?Provincia=&Municipio=&RC=${rc1}${rc2}`;
+    // Endpoint con RC20 completa devuelve bico de UNA finca
+    const url = `${CATASTRO_BASE}/Consulta_DNPRC?Provincia=&Municipio=&RC=${rc1}${rc2}${car}${cc1}${cc2}`;
     const resp = await fetch(url, { signal: AbortSignal.timeout(10000) });
     if (!resp.ok) return null;
 
     const xml = await resp.text();
 
-    // Find the specific unit matching our full ref
-    const rcdnpBlocks = xml.match(/<rcdnp>[\s\S]*?<\/rcdnp>/g) || [];
-    for (const block of rcdnpBlocks) {
-      const car = block.match(/<car>([^<]+)<\/car>/)?.[1] || '';
-      const cc1 = block.match(/<cc1>([^<]*)<\/cc1>/)?.[1] || '';
-      const cc2 = block.match(/<cc2>([^<]*)<\/cc2>/)?.[1] || '';
-      const blockRef = `${rc1}${rc2}${car}${cc1}${cc2}`.trim();
+    // Datos globales del bico
+    const uso = xml.match(/<luso>([^<]*)<\/luso>/)?.[1]?.trim() || '';
+    const planta = xml.match(/<pt>([^<]*)<\/pt>/)?.[1]?.trim() || '';
+    const puerta = xml.match(/<pu>([^<]*)<\/pu>/)?.[1]?.trim() || '';
+    const superficieTotal = parseInt(xml.match(/<sfc>(\d+)<\/sfc>/)?.[1] || '0', 10);
+    const anoConstruccion = parseInt(xml.match(/<ant>(\d+)<\/ant>/)?.[1] || '0', 10);
 
-      if (blockRef === rc20) {
-        const planta = block.match(/<pt>([^<]*)<\/pt>/)?.[1] || '';
-        const puerta = block.match(/<pu>([^<]*)<\/pu>/)?.[1] || '';
-        const uso = block.match(/<luso>([^<]*)<\/luso>/)?.[1] || '';
-        const sup = parseInt(block.match(/<sfc>(\d+)<\/sfc>/)?.[1] || '0');
-
-        return { uso, planta, puerta, superficie: sup, coefParticipacion: 0 };
-      }
+    // Desglose por construcciones <cons>: extraer la superficie útil del
+    // activo principal (sin elementos comunes)
+    const consBlocks = xml.match(/<cons>[\s\S]*?<\/cons>/g) || [];
+    let superficieUtilActivo = 0;
+    let usosEncontrados: string[] = [];
+    for (const block of consBlocks) {
+      const lcd = (block.match(/<lcd>([^<]*)<\/lcd>/)?.[1] || '').toUpperCase().trim();
+      const stl = parseInt(block.match(/<stl>(\d+)<\/stl>/)?.[1] || '0', 10);
+      if (!lcd || stl === 0) continue;
+      usosEncontrados.push(lcd);
+      // Sumar todo lo que NO sea zona común
+      if (lcd.includes('COMUN')) continue;
+      superficieUtilActivo += stl;
     }
 
-    return null;
+    // Si no hay desglose, asumimos que sfc = superficie útil
+    const superficie = superficieUtilActivo > 0 ? superficieUtilActivo : superficieTotal;
+
+    return {
+      uso,
+      planta,
+      puerta,
+      superficie,
+      superficieTotal,
+      anoConstruccion,
+      coefParticipacion: 0,
+    };
   } catch {
     return null;
   }
