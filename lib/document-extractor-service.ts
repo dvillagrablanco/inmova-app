@@ -172,16 +172,15 @@ function pdfToText(localPath: string): string {
   }
 
   // Intento 2: OCR con Tesseract (PDF escaneado)
-  // Usar pdftoppm para convertir a PNG y luego tesseract en cada página
+  // Convertir solo PRIMERAS 3 PÁGINAS a 150 DPI para velocidad
   try {
     const tmpBase = localPath.replace(/\.pdf$/i, '_ocr');
-    // Convertir hasta 5 páginas a PNG (resolución 200 DPI)
     execSync(
-      `pdftoppm -png -r 200 -l 5 "${localPath}" "${tmpBase}" 2>/dev/null`,
-      { timeout: 120_000 }
+      `pdftoppm -png -r 150 -l 3 "${localPath}" "${tmpBase}" 2>/dev/null`,
+      { timeout: 60_000 }
     );
     let allText = '';
-    for (let i = 1; i <= 5; i++) {
+    for (let i = 1; i <= 3; i++) {
       const pageImg = `${tmpBase}-${i.toString().padStart(2, '0')}.png`;
       const pageImgAlt = `${tmpBase}-${i}.png`;
       const imgPath = require('fs').existsSync(pageImg)
@@ -191,19 +190,23 @@ function pdfToText(localPath: string): string {
           : null;
       if (!imgPath) break;
       try {
-        const ocrOut = execSync(`tesseract "${imgPath}" - -l spa+eng 2>/dev/null`, {
+        const ocrOut = execSync(`tesseract "${imgPath}" - -l spa 2>/dev/null`, {
           encoding: 'utf-8',
-          maxBuffer: 50 * 1024 * 1024,
-          timeout: 60_000,
+          maxBuffer: 30 * 1024 * 1024,
+          timeout: 45_000,
         });
         allText += ocrOut + '\n\n';
-        // Limpiar
         require('fs').unlinkSync(imgPath);
       } catch {
         // skip page
+        try {
+          require('fs').unlinkSync(imgPath);
+        } catch {
+          // ignore
+        }
       }
     }
-    return allText.substring(0, 100_000);
+    return allText.substring(0, 50_000);
   } catch (e: any) {
     logger.warn(`[DocExtractor] OCR also failed: ${e?.message}`);
     return '';

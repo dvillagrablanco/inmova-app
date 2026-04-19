@@ -137,7 +137,13 @@ export async function POST(request: NextRequest) {
         const docType = detectDocType(doc.nombre);
         r.docType = docType;
 
-        const result = await processS3Document(doc.cloudStoragePath, docType);
+        // Hard timeout por documento: 120 segundos
+        const result = await Promise.race([
+          processS3Document(doc.cloudStoragePath, docType),
+          new Promise<null>((resolve) =>
+            setTimeout(() => resolve(null), 120_000)
+          ),
+        ]);
         if (!result || !result.data) {
           r.status = 'skipped';
           r.error = 'No se pudo extraer';
