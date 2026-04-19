@@ -334,22 +334,36 @@ export async function syncZucchettiFull(options: FullSyncOptions): Promise<FullS
       }
     }
 
-    // ============ 2. TERCEROS ============
+    // ============ 2. TERCEROS (modelados como Subcuentas 4xxxxxx) ============
+    // En el schema real Zucchetti, los terceros son subcuentas que empiezan
+    // por 41 (proveedores) o 43 (clientes). La info está en Subcuentas.Titulo.
     try {
       const tercerosResult = await pool.request().query(`
-        SELECT Codigo, Nombre, Nif, Direccion, Telefono, Email
-        FROM Terceros
+        SELECT Codigo, Titulo, Bloqueada
+        FROM Subcuentas
+        WHERE Codigo LIKE '41%' OR Codigo LIKE '43%' OR Codigo LIKE '410%' OR Codigo LIKE '430%'
       `);
       result.terceros.read = tercerosResult.recordset.length;
+
+      // Intentar enriquecer con NIF desde la tabla Terceros (si tiene join)
+      const nifMap = new Map<string, string>();
+      try {
+        const tercExt = await pool.request().query(`
+          SELECT t.Codigo, t.Nif FROM Terceros t WHERE t.Nif IS NOT NULL
+        `);
+        for (const t of tercExt.recordset) {
+          const c = String(t.Codigo || '').trim();
+          if (c && t.Nif) nifMap.set(c, String(t.Nif).trim());
+        }
+      } catch {
+        // Tabla Terceros sin NIF accesible — continuar
+      }
 
       for (const t of tercerosResult.recordset) {
         const codigo = String(t.Codigo || '').trim();
         if (!codigo) continue;
-        // Determinar tipo por subcuenta asociada (heurística por código)
-        // Códigos suelen ser 4xxxx (cliente) o 41xxx (proveedor)
-        let tipo: 'cliente' | 'proveedor' | 'otro' = 'otro';
-        if (codigo.startsWith('43') || codigo.startsWith('44')) tipo = 'cliente';
-        else if (codigo.startsWith('41') || codigo.startsWith('40')) tipo = 'proveedor';
+        const tipo = codigo.startsWith('43') ? 'cliente' : 'proveedor';
+        const nif = nifMap.get(codigo) || null;
 
         try {
           await prisma.zucchettiTercero.upsert({
@@ -357,20 +371,14 @@ export async function syncZucchettiFull(options: FullSyncOptions): Promise<FullS
             create: {
               companyId,
               zucchettiCodigo: codigo,
-              nif: (t.Nif || '').trim() || null,
-              nombre: (t.Nombre || '').trim() || `Tercero ${codigo}`,
+              nif,
+              nombre: (t.Titulo || '').trim() || `Tercero ${codigo}`,
               tipo,
-              direccion: t.Direccion || null,
-              telefono: t.Telefono || null,
-              email: t.Email || null,
             },
             update: {
-              nif: (t.Nif || '').trim() || null,
-              nombre: (t.Nombre || '').trim() || `Tercero ${codigo}`,
+              nif,
+              nombre: (t.Titulo || '').trim() || `Tercero ${codigo}`,
               tipo,
-              direccion: t.Direccion || null,
-              telefono: t.Telefono || null,
-              email: t.Email || null,
               ultimaSync: new Date(),
             },
           });
@@ -397,25 +405,38 @@ export async function syncZucchettiFull(options: FullSyncOptions): Promise<FullS
 
       for (const ej of ejResult.recordset) {
         const ejercicio = ej.Codigo;
+        // Schema real Zucchetti:
+        //   - importes en EUROS directos (no centésimas)
+        //   - compras_ventas: smallint (-1 = compras, 1 = ventas, 0 = otro)
+        //   - tipo_operacion: int
+        //   - tercero_nombre puede no existir → JOIN con Subcuentas
         const ivaResult = await pool.request().query(`
           SELECT
-            compras_ventas, factura_numero, factura_fecha,
-            tercero_nif, tercero_nombre,
-            factura_base / 100.0 as base,
-            factura_cuota / 100.0 as cuota,
-            factura_total / 100.0 as total,
-            impuesto_porcentaje, retencion_porcentaje,
-            retencion_importe / 100.0 as retencion,
-            tipo_operacion, criterio_de_caja
-          FROM Registro_IVA_IGIC
-          WHERE codigo_ejercicio = ${ejercicio}
+            r.compras_ventas, r.factura_numero, r.factura_fecha,
+            r.tercero_nif, r.tercero_subcuenta,
+            r.factura_base, r.factura_cuota, r.factura_total,
+            r.impuesto_porcentaje, r.retencion_porcentaje,
+            r.retencion_importe,
+            r.tipo_operacion, r.criterio_de_caja,
+            s.Titulo AS tercero_nombre_sub
+          FROM Registro_IVA_IGIC r
+          LEFT JOIN Subcuentas s ON r.tercero_subcuenta = s.Codigo
+          WHERE r.codigo_ejercicio = ${ejercicio}
         `);
         result.iva.read += ivaResult.recordset.length;
 
         for (const r of ivaResult.recordset) {
           if (!r.factura_numero || !r.factura_fecha) continue;
-          const cv = (r.compras_ventas || '').toString().toUpperCase().substring(0, 1);
-          if (!cv) continue;
+          // Normalizar factura_numero (eliminar espacios)
+          const facturaNumero = String(r.factura_numero).trim();
+          if (!facturaNumero) continue;
+
+          // Mapear compras_ventas
+          const cvVal = parseInt(String(r.compras_ventas ?? 0), 10);
+          let cv: string;
+          if (cvVal === -1) cv = 'C'; // compras
+          else if (cvVal === 1) cv = 'V'; // ventas
+          else cv = 'O'; // otro
 
           try {
             await prisma.zucchettiIvaRecord.upsert({
@@ -423,7 +444,7 @@ export async function syncZucchettiFull(options: FullSyncOptions): Promise<FullS
                 companyId_zucchettiCodEjercicio_facturaNumero_comprasVentas: {
                   companyId,
                   zucchettiCodEjercicio: parseInt(String(ejercicio), 10),
-                  facturaNumero: String(r.factura_numero),
+                  facturaNumero,
                   comprasVentas: cv,
                 },
               },
@@ -431,25 +452,26 @@ export async function syncZucchettiFull(options: FullSyncOptions): Promise<FullS
                 companyId,
                 zucchettiCodEjercicio: parseInt(String(ejercicio), 10),
                 comprasVentas: cv,
-                facturaNumero: String(r.factura_numero),
+                facturaNumero,
                 facturaFecha: new Date(r.factura_fecha),
-                terceroNif: r.tercero_nif || null,
-                terceroNombre: r.tercero_nombre || null,
-                base: parseFloat(r.base) || 0,
-                cuota: parseFloat(r.cuota) || 0,
-                total: parseFloat(r.total) || 0,
+                terceroNif: r.tercero_nif?.trim() || null,
+                terceroNombre: r.tercero_nombre_sub?.trim() || null,
+                base: parseFloat(r.factura_base) || 0,
+                cuota: parseFloat(r.factura_cuota) || 0,
+                total: parseFloat(r.factura_total) || 0,
                 impuestoPorcentaje: r.impuesto_porcentaje ? parseFloat(r.impuesto_porcentaje) : null,
                 retencionPorcentaje: r.retencion_porcentaje ? parseFloat(r.retencion_porcentaje) : null,
-                retencionImporte: r.retencion ? parseFloat(r.retencion) : null,
-                tipoOperacion: r.tipo_operacion || null,
+                retencionImporte: r.retencion_importe ? parseFloat(r.retencion_importe) : null,
+                // tipo_operacion es int en SQL → guardamos como string
+                tipoOperacion: r.tipo_operacion != null ? String(r.tipo_operacion) : null,
                 criterioCaja: !!r.criterio_de_caja,
               },
               update: {
-                terceroNif: r.tercero_nif || null,
-                terceroNombre: r.tercero_nombre || null,
-                base: parseFloat(r.base) || 0,
-                cuota: parseFloat(r.cuota) || 0,
-                total: parseFloat(r.total) || 0,
+                terceroNif: r.tercero_nif?.trim() || null,
+                terceroNombre: r.tercero_nombre_sub?.trim() || null,
+                base: parseFloat(r.factura_base) || 0,
+                cuota: parseFloat(r.factura_cuota) || 0,
+                total: parseFloat(r.factura_total) || 0,
                 ultimaSync: new Date(),
               },
             });
