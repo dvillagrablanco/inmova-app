@@ -52,6 +52,36 @@ async function getPrisma() {
   return getPrismaClient();
 }
 
+// Categorías que son SIEMPRE corporativas (no asignables a edificio)
+const CORPORATE_CATEGORIES = new Set([
+  'ingreso_intereses',
+  'ingreso_beneficio_inversiones',
+  'ingreso_dividendos',
+  'ingreso_servicios_intragrupo',
+  'gasto_personal',
+  'gasto_consejeros',
+  'gasto_perdida_inversiones',
+  'gasto_intragrupo',
+  'gasto_vehiculos',
+  'gasto_bancario',
+  'gasto_impuesto_sociedades',
+]);
+
+// Detector heurístico por concepto (para apuntes corporativos sin categoría clara)
+function isCorporateByConcept(concepto: string): boolean {
+  const norm = (concepto || '').toLowerCase();
+  return (
+    /pictet|caceis|isin|abante|vanguard|unicredit|bnp|vontobel|schroder|blackrock|bono|cupon/i.test(norm) ||
+    /gestefin|family partner|consultor|mdef|mdf/i.test(norm) ||
+    /asignacion consejero|consejero/i.test(norm) ||
+    /seg\.\s*social|seguridad social|nomina|sueldo|salario/i.test(norm) ||
+    /altai financial|idealista.*market navigator/i.test(norm) ||
+    /aumento capital|prima|notar.*capital|registro mercantil/i.test(norm) ||
+    /honorarios admin|liq is|intereses ccc/i.test(norm) ||
+    /arc|intragrupo/i.test(norm)
+  );
+}
+
 // Clasificador PGC (compartido con refresh-from-source)
 function classifySubcuenta(
   sub: string,
@@ -341,6 +371,11 @@ export async function syncZucchettiFull(options: FullSyncOptions): Promise<FullS
           select: { id: true },
         });
 
+        // Determinar si es CORPORATIVO (no asignable a edificio)
+        const isCorporate =
+          CORPORATE_CATEGORIES.has(classification.categoria) ||
+          isCorporateByConcept(`${row.ConceptoTexto || ''} ${titulo}`);
+
         const data = {
           companyId,
           tipo: classification.tipo as any,
@@ -362,7 +397,9 @@ export async function syncZucchettiFull(options: FullSyncOptions): Promise<FullS
           apunte: String(row.Apunte || ''),
           terceroNif: row.NifTercero || null,
           terceroNombre: row.NombreTercero || null,
-          ...(matchedBuildingId && { buildingId: matchedBuildingId }),
+          esCorporativo: isCorporate,
+          // Si es corporativo NUNCA se asigna a edificio (aunque match texto)
+          ...(matchedBuildingId && !isCorporate && { buildingId: matchedBuildingId }),
         };
 
         if (existing) {

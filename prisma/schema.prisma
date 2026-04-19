@@ -3112,6 +3112,11 @@ model AccountingTransaction {
   apunte        String? // Apunte (línea dentro del asiento)
   terceroNif    String? // NIF/CIF del tercero
   terceroNombre String? // Razón social
+  // Flag para apuntes que son gastos/ingresos CORPORATIVOS no asignables a
+  // un edificio/propiedad (inversiones financieras, sueldos, consejeros,
+  // honorarios profesionales, vehículos, intereses bancarios, etc.). Se
+  // separan en los reportes para no distorsionar el NOI por edificio.
+  esCorporativo Boolean            @default(false)
   createdAt     DateTime           @default(now())
   updatedAt     DateTime           @updatedAt
 
@@ -3123,6 +3128,7 @@ model AccountingTransaction {
   @@index([subcuenta])
   @@index([centroCoste])
   @@index([terceroNif])
+  @@index([esCorporativo])
   @@map("accounting_transactions")
 }
 

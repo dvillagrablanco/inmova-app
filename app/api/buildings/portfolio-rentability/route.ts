@@ -90,13 +90,14 @@ export async function GET(request: NextRequest) {
     // Para evitar N+1, agregamos en bulk para todos los buildings + units del scope
     const allUnitIds = buildings.flatMap((b) => b.units.map((u) => u.id));
 
-    // Apuntes año actual: agrupados por building y categoría
-    const [atCurrent, atPrev] = await Promise.all([
+    // Apuntes año actual: agrupados por building y categoría (sólo OPERATIVO)
+    const [atCurrent, atPrev, atCorporativeCurrent, atCorporativePrev] = await Promise.all([
       prisma.accountingTransaction.groupBy({
         by: ['buildingId', 'tipo'],
         where: {
           companyId: { in: scopeIds },
           fecha: { gte: yearStart, lt: yearEnd },
+          esCorporativo: false,
         },
         _sum: { monto: true },
         _count: true,
@@ -106,10 +107,48 @@ export async function GET(request: NextRequest) {
         where: {
           companyId: { in: scopeIds },
           fecha: { gte: prevStart, lt: prevEnd },
+          esCorporativo: false,
+        },
+        _sum: { monto: true },
+      }),
+      // Agregado de apuntes CORPORATIVOS (no asignados a edificio)
+      prisma.accountingTransaction.groupBy({
+        by: ['tipo'],
+        where: {
+          companyId: { in: scopeIds },
+          fecha: { gte: yearStart, lt: yearEnd },
+          esCorporativo: true,
+        },
+        _sum: { monto: true },
+        _count: true,
+      }),
+      prisma.accountingTransaction.groupBy({
+        by: ['tipo'],
+        where: {
+          companyId: { in: scopeIds },
+          fecha: { gte: prevStart, lt: prevEnd },
+          esCorporativo: true,
         },
         _sum: { monto: true },
       }),
     ]);
+
+    // Calcular P&L corporativo
+    const corporativo = {
+      ingresos: atCorporativeCurrent
+        .filter((t: any) => t.tipo === 'ingreso')
+        .reduce((s: number, t: any) => s + (t._sum.monto || 0), 0),
+      gastos: atCorporativeCurrent
+        .filter((t: any) => t.tipo === 'gasto')
+        .reduce((s: number, t: any) => s + (t._sum.monto || 0), 0),
+      apuntes: atCorporativeCurrent.reduce((s: number, t: any) => s + (t._count || 0), 0),
+      ingresosPrev: atCorporativePrev
+        .filter((t: any) => t.tipo === 'ingreso')
+        .reduce((s: number, t: any) => s + (t._sum.monto || 0), 0),
+      gastosPrev: atCorporativePrev
+        .filter((t: any) => t.tipo === 'gasto')
+        .reduce((s: number, t: any) => s + (t._sum.monto || 0), 0),
+    };
 
     // Construir mapa por building
     const byBuilding: Record<string, any> = {};
@@ -232,6 +271,9 @@ export async function GET(request: NextRequest) {
       .slice(-5)
       .reverse();
 
+    const noiCorporativo = corporativo.ingresos - corporativo.gastos;
+    const noiTotal = totales.noi + noiCorporativo;
+
     return NextResponse.json({
       success: true,
       year,
@@ -251,6 +293,22 @@ export async function GET(request: NextRequest) {
         totalUnits: totales.totalUnits,
         occupiedUnits: totales.occupied,
         apuntes: totales.apuntes,
+      },
+      // P&L corporativo (gastos generales no asignables a edificio: nóminas,
+      // consejeros, gestión patrimonial, inversiones financieras, etc.)
+      corporativo: {
+        ingresos: Math.round(corporativo.ingresos * 100) / 100,
+        gastos: Math.round(corporativo.gastos * 100) / 100,
+        noi: Math.round(noiCorporativo * 100) / 100,
+        apuntes: corporativo.apuntes,
+        ingresosPrev: Math.round(corporativo.ingresosPrev * 100) / 100,
+        gastosPrev: Math.round(corporativo.gastosPrev * 100) / 100,
+      },
+      // P&L total (operativo + corporativo) — visión consolidada
+      pnlTotal: {
+        ingresos: Math.round((totales.ingresos + corporativo.ingresos) * 100) / 100,
+        gastos: Math.round((totales.gastos + corporativo.gastos) * 100) / 100,
+        beneficio: Math.round(noiTotal * 100) / 100,
       },
       buildings: items,
       top5,

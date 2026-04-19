@@ -58,6 +58,17 @@ interface Data {
     occupiedUnits: number;
     apuntes: number;
   };
+  corporativo: {
+    ingresos: number;
+    gastos: number;
+    noi: number;
+    apuntes: number;
+  };
+  pnlTotal: {
+    ingresos: number;
+    gastos: number;
+    beneficio: number;
+  };
   buildings: BuildingItem[];
   top5: BuildingItem[];
   bottom5: BuildingItem[];
@@ -188,6 +199,78 @@ export default function PortfolioRentabilityPage() {
           <CardContent className="text-xs text-muted-foreground">/año</CardContent>
         </Card>
       </div>
+
+      {/* P&L Operativo vs Corporativo (consolidado) */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg">P&L Consolidado Grupo Vidaro {data.year}</CardTitle>
+          <CardDescription>
+            Separación entre rentabilidad de edificios (operativa) y gastos/ingresos
+            corporativos (gestión patrimonial, inversiones financieras, RRHH, etc.)
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="p-4 border rounded-lg">
+              <div className="text-xs uppercase text-muted-foreground mb-1">Operativo (edificios)</div>
+              <div className="text-sm space-y-1">
+                <div className="flex justify-between">
+                  <span>Ingresos</span>
+                  <span className="font-semibold text-green-600">{formatEuro(data.totales.ingresos)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Gastos</span>
+                  <span className="font-semibold text-red-600">{formatEuro(data.totales.gastos)}</span>
+                </div>
+                <div className="flex justify-between border-t pt-1 mt-1">
+                  <span className="font-bold">NOI</span>
+                  <span className={`font-bold ${data.totales.noi >= 0 ? 'text-green-700' : 'text-red-700'}`}>
+                    {formatEuro(data.totales.noi)}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="p-4 border rounded-lg bg-amber-50">
+              <div className="text-xs uppercase text-muted-foreground mb-1">Corporativo</div>
+              <div className="text-sm space-y-1">
+                <div className="flex justify-between">
+                  <span>Ingresos financieros</span>
+                  <span className="font-semibold text-green-600">{formatEuro(data.corporativo.ingresos)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Gastos generales</span>
+                  <span className="font-semibold text-red-600">{formatEuro(data.corporativo.gastos)}</span>
+                </div>
+                <div className="flex justify-between border-t pt-1 mt-1">
+                  <span className="font-bold">Resultado</span>
+                  <span className={`font-bold ${data.corporativo.noi >= 0 ? 'text-green-700' : 'text-red-700'}`}>
+                    {formatEuro(data.corporativo.noi)}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="p-4 border-2 border-primary/30 rounded-lg bg-primary/5">
+              <div className="text-xs uppercase text-primary mb-1 font-semibold">Total Grupo</div>
+              <div className="text-sm space-y-1">
+                <div className="flex justify-between">
+                  <span>Ingresos totales</span>
+                  <span className="font-semibold text-green-600">{formatEuro(data.pnlTotal.ingresos)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Gastos totales</span>
+                  <span className="font-semibold text-red-600">{formatEuro(data.pnlTotal.gastos)}</span>
+                </div>
+                <div className="flex justify-between border-t pt-1 mt-1">
+                  <span className="font-bold">Beneficio</span>
+                  <span className={`text-lg font-bold ${data.pnlTotal.beneficio >= 0 ? 'text-green-700' : 'text-red-700'}`}>
+                    {formatEuro(data.pnlTotal.beneficio)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <Tabs defaultValue="all" className="space-y-4">
         <TabsList>

@@ -99,7 +99,11 @@ export async function GET(
       expensesCurrentYear,
     ] = await Promise.all([
       prisma.accountingTransaction.findMany({
-        where: { ...atFilter, fecha: { gte: yearStart, lt: yearEnd } },
+        where: {
+          ...atFilter,
+          fecha: { gte: yearStart, lt: yearEnd },
+          esCorporativo: false, // Excluir apuntes corporativos
+        },
         select: {
           id: true,
           tipo: true,
@@ -111,7 +115,11 @@ export async function GET(
         },
       }),
       prisma.accountingTransaction.findMany({
-        where: { ...atFilter, fecha: { gte: prevStart, lt: prevEnd } },
+        where: {
+          ...atFilter,
+          fecha: { gte: prevStart, lt: prevEnd },
+          esCorporativo: false,
+        },
         select: { tipo: true, monto: true },
       }),
       // Pagos cobrados del año (de inquilinos directos en Inmova)
