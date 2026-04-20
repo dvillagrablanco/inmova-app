@@ -190,14 +190,21 @@ function pdfToText(localPath: string, forceOcr = false): string {
       timeout: 20_000,
       killSignal: 'SIGKILL',
     });
-    const pageImg = `${tmpBase}-01.png`;
-    const pageImgAlt = `${tmpBase}-1.png`;
-    const imgPath = existsSync(pageImg)
-      ? pageImg
-      : existsSync(pageImgAlt)
-        ? pageImgAlt
-        : null;
-    if (!imgPath) return '';
+
+    // pdftoppm puede generar nombres con 0-padding (ej: file-01.png) o sin
+    // (ej: file-1.png) según la versión. Buscamos ambos.
+    const candidates = [
+      `${tmpBase}-1.png`,
+      `${tmpBase}-01.png`,
+      `${tmpBase}-001.png`,
+    ];
+    const imgPath = candidates.find((p) => existsSync(p));
+
+    if (!imgPath) {
+      logger.warn(`[DocExtractor] No OCR image found for ${localPath}, candidates: ${candidates.join(', ')}`);
+      return '';
+    }
+
     let text = '';
     try {
       text = execSync(`tesseract "${imgPath}" - -l spa --psm 6 2>/dev/null`, {
@@ -206,10 +213,14 @@ function pdfToText(localPath: string, forceOcr = false): string {
         timeout: 30_000,
         killSignal: 'SIGKILL',
       });
-    } catch {
-      // skip
+    } catch (e: any) {
+      logger.warn(`[DocExtractor] tesseract failed: ${e?.message}`);
     }
     try { unlinkSync(imgPath); } catch {}
+
+    if (text.trim().length > 30) {
+      logger.info(`[DocExtractor] OCR success ${imgPath}: ${text.length} chars`);
+    }
     return text.substring(0, 30_000);
   } catch (e: any) {
     logger.warn(`[DocExtractor] OCR also failed: ${e?.message}`);
