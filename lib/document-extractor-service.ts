@@ -154,15 +154,20 @@ async function downloadFromS3(key: string, localPath: string): Promise<void> {
 
 /**
  * Convierte PDF a texto. Primero intenta pdftotext (PDF nativo); si devuelve
- * vacío (PDF escaneado), hace OCR con Tesseract sobre las páginas convertidas
- * a imagen con pdftoppm.
+ * vacío (PDF escaneado), hace OCR con Tesseract sobre la primera página.
+ *
+ * IMPORTANTE: el OCR es muy costoso. Limitamos a 1 página a 100 DPI para
+ * que sea viable procesar cientos de PDFs en un tiempo razonable. Para
+ * extracción de datos clave (renta, fianza, NIF, IBAN) la primera página
+ * suele ser suficiente.
  */
 function pdfToText(localPath: string): string {
-  // Intento 1: pdftotext directo
+  // Intento 1: pdftotext directo (solo PDFs nativos)
   try {
     const out = execSync(`pdftotext -layout -nopgbrk "${localPath}" -`, {
       encoding: 'utf-8',
       maxBuffer: 50 * 1024 * 1024,
+      timeout: 15_000,
     });
     if (out.trim().length > 100) {
       return out.substring(0, 100_000);
@@ -171,37 +176,33 @@ function pdfToText(localPath: string): string {
     logger.warn(`[DocExtractor] pdftotext failed for ${localPath}`);
   }
 
-  // Intento 2: OCR con Tesseract (PDF escaneado)
-  // Convertir solo PRIMERAS 3 PÁGINAS a 150 DPI para velocidad
+  // Intento 2: OCR con Tesseract — solo 1 página, 100 DPI (rápido)
   try {
     const tmpBase = localPath.replace(/\.pdf$/i, '_ocr');
-    execSync(
-      `pdftoppm -png -r 150 -l 3 "${localPath}" "${tmpBase}" 2>/dev/null`,
-      { timeout: 60_000 }
-    );
-    let allText = '';
-    for (let i = 1; i <= 3; i++) {
-      const pageImg = `${tmpBase}-${i.toString().padStart(2, '0')}.png`;
-      const pageImgAlt = `${tmpBase}-${i}.png`;
-      const imgPath = existsSync(pageImg)
-        ? pageImg
-        : existsSync(pageImgAlt)
-          ? pageImgAlt
-          : null;
-      if (!imgPath) break;
-      try {
-        const ocrOut = execSync(`tesseract "${imgPath}" - -l spa 2>/dev/null`, {
-          encoding: 'utf-8',
-          maxBuffer: 30 * 1024 * 1024,
-          timeout: 45_000,
-        });
-        allText += ocrOut + '\n\n';
-        try { unlinkSync(imgPath); } catch {}
-      } catch {
-        try { unlinkSync(imgPath); } catch {}
-      }
+    execSync(`pdftoppm -png -r 100 -f 1 -l 1 "${localPath}" "${tmpBase}" 2>/dev/null`, {
+      timeout: 20_000,
+    });
+    const pageImg = `${tmpBase}-01.png`;
+    const pageImgAlt = `${tmpBase}-1.png`;
+    const imgPath = existsSync(pageImg)
+      ? pageImg
+      : existsSync(pageImgAlt)
+        ? pageImgAlt
+        : null;
+    if (!imgPath) return '';
+
+    let text = '';
+    try {
+      text = execSync(`tesseract "${imgPath}" - -l spa --psm 6 2>/dev/null`, {
+        encoding: 'utf-8',
+        maxBuffer: 20 * 1024 * 1024,
+        timeout: 30_000,
+      });
+    } catch {
+      // OCR timeout o fallo — devolver vacío
     }
-    return allText.substring(0, 50_000);
+    try { unlinkSync(imgPath); } catch {}
+    return text.substring(0, 30_000);
   } catch (e: any) {
     logger.warn(`[DocExtractor] OCR also failed: ${e?.message}`);
     return '';

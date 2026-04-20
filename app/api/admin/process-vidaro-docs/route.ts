@@ -137,11 +137,11 @@ export async function POST(request: NextRequest) {
         const docType = detectDocType(doc.nombre);
         r.docType = docType;
 
-        // Hard timeout por documento: 120 segundos
+        // Hard timeout por documento: 75 segundos (OCR 1 página + Claude)
         const result = await Promise.race([
           processS3Document(doc.cloudStoragePath, docType),
           new Promise<null>((resolve) =>
-            setTimeout(() => resolve(null), 120_000)
+            setTimeout(() => resolve(null), 75_000)
           ),
         ]);
         if (!result || !result.data) {
