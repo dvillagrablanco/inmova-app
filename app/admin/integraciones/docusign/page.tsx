@@ -8,12 +8,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
-  Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList,
-  BreadcrumbPage, BreadcrumbSeparator,
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import {
-  Home, ArrowLeft, FileSignature, CheckCircle, AlertTriangle,
-  ExternalLink, Loader2, Shield, XCircle, Building2,
+  Home,
+  ArrowLeft,
+  FileSignature,
+  CheckCircle,
+  AlertTriangle,
+  ExternalLink,
+  Loader2,
+  Shield,
+  XCircle,
+  Building2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -38,13 +50,15 @@ export default function DocuSignConfigPage() {
   const callbackStatus = searchParams?.get('docusign');
 
   // Producción: account.docusign.com (no account-d)
-  const CONSENT_BASE = docusignStatus?.environment === 'demo'
-    ? 'https://account-d.docusign.com'
-    : 'https://account.docusign.com';
-  
-  const REDIRECT_URI = typeof window !== 'undefined'
-    ? `${window.location.origin}/api/integrations/docusign/callback`
-    : 'https://inmovaapp.com/api/integrations/docusign/callback';
+  const CONSENT_BASE =
+    docusignStatus?.environment === 'demo'
+      ? 'https://account-d.docusign.com'
+      : 'https://account.docusign.com';
+
+  const REDIRECT_URI =
+    typeof window !== 'undefined'
+      ? `${window.location.origin}/api/integrations/docusign/callback`
+      : 'https://inmovaapp.com/api/integrations/docusign/callback';
 
   // Cargar estado real desde API
   useEffect(() => {
@@ -70,14 +84,24 @@ export default function DocuSignConfigPage() {
   const testConnection = async () => {
     setTesting(true);
     try {
-      const res = await fetch('/api/admin/integraciones/status');
+      const res = await fetch('/api/admin/integraciones/docusign/test');
       if (res.ok) {
         const data = await res.json();
-        const ds = data.firma?.docusign || data.integrations?.firma?.docusign;
-        setDocusignStatus(ds);
-        if (ds?.configured) {
-          toast.success('DocuSign configurado correctamente');
+        if (data.success) {
+          toast.success(
+            `DocuSign conectado (${data.environment}). Cuenta: ${data.accountName || data.accountId}`
+          );
+        } else if (data.error === 'consent_required') {
+          toast.error('Falta conceder consentimiento. Haz click en "Autorizar DocuSign".');
         } else {
+          toast.error(`Error: ${data.error}`);
+        }
+      } else {
+        const statusRes = await fetch('/api/admin/integraciones/status');
+        if (statusRes.ok) {
+          const data = await statusRes.json();
+          const ds = data.firma?.docusign || data.integrations?.firma?.docusign;
+          setDocusignStatus(ds);
           toast.error('DocuSign no está completamente configurado');
         }
       }
@@ -107,11 +131,19 @@ export default function DocuSignConfigPage() {
           </Button>
           <Breadcrumb>
             <BreadcrumbList>
-              <BreadcrumbItem><BreadcrumbLink href="/dashboard"><Home className="h-4 w-4" /></BreadcrumbLink></BreadcrumbItem>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/dashboard">
+                  <Home className="h-4 w-4" />
+                </BreadcrumbLink>
+              </BreadcrumbItem>
               <BreadcrumbSeparator />
-              <BreadcrumbItem><BreadcrumbLink href="/admin/integraciones">Integraciones</BreadcrumbLink></BreadcrumbItem>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/admin/integraciones">Integraciones</BreadcrumbLink>
+              </BreadcrumbItem>
               <BreadcrumbSeparator />
-              <BreadcrumbItem><BreadcrumbPage>DocuSign</BreadcrumbPage></BreadcrumbItem>
+              <BreadcrumbItem>
+                <BreadcrumbPage>DocuSign</BreadcrumbPage>
+              </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         </div>
@@ -122,11 +154,20 @@ export default function DocuSignConfigPage() {
           </div>
           <div>
             <h1 className="text-2xl font-bold">DocuSign — Grupo Vidaro</h1>
-            <p className="text-muted-foreground">Firma digital de contratos para todas las sociedades del grupo</p>
+            <p className="text-muted-foreground">
+              Firma digital de contratos para todas las sociedades del grupo
+            </p>
+            <p className="text-xs text-muted-foreground font-mono mt-0.5">
+              Integration Key: 5cb4a15f-658d-4fa0-ae53-6aabb10749d7
+            </p>
           </div>
           {!loading && (
             <Badge variant={docusignStatus?.configured ? 'default' : 'outline'} className="ml-auto">
-              {docusignStatus?.configured ? '✅ Producción' : '⚠️ No configurado'}
+              {docusignStatus?.configured
+                ? docusignStatus.environment === 'demo'
+                  ? '🟡 Demo (sandbox)'
+                  : '✅ Producción'
+                : '⚠️ No configurado'}
             </Badge>
           )}
         </div>
@@ -139,7 +180,9 @@ export default function DocuSignConfigPage() {
                 <CheckCircle className="h-6 w-6 text-green-600" />
                 <div>
                   <p className="font-semibold text-green-800">Consentimiento concedido</p>
-                  <p className="text-sm text-green-700">DocuSign ha sido autorizado correctamente. La firma digital está activa.</p>
+                  <p className="text-sm text-green-700">
+                    DocuSign ha sido autorizado correctamente. La firma digital está activa.
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -153,7 +196,9 @@ export default function DocuSignConfigPage() {
                 <AlertTriangle className="h-6 w-6 text-red-600" />
                 <div>
                   <p className="font-semibold text-red-800">Error en autorización</p>
-                  <p className="text-sm text-red-700">Hubo un problema al autorizar DocuSign. Intenta de nuevo.</p>
+                  <p className="text-sm text-red-700">
+                    Hubo un problema al autorizar DocuSign. Intenta de nuevo.
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -178,9 +223,11 @@ export default function DocuSignConfigPage() {
                   <div className="p-3 bg-muted/50 rounded-lg">
                     <p className="text-xs text-muted-foreground">Integration Key</p>
                     <div className="flex items-center gap-2 mt-1">
-                      {docusignStatus?.hasIntegrationKey
-                        ? <CheckCircle className="h-4 w-4 text-green-500" />
-                        : <XCircle className="h-4 w-4 text-red-500" />}
+                      {docusignStatus?.hasIntegrationKey ? (
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                      ) : (
+                        <XCircle className="h-4 w-4 text-red-500" />
+                      )}
                       <p className="text-sm font-mono">
                         {docusignStatus?.hasIntegrationKey ? 'Configurada' : 'No configurada'}
                       </p>
@@ -189,9 +236,11 @@ export default function DocuSignConfigPage() {
                   <div className="p-3 bg-muted/50 rounded-lg">
                     <p className="text-xs text-muted-foreground">Account ID</p>
                     <div className="flex items-center gap-2 mt-1">
-                      {docusignStatus?.hasAccountId
-                        ? <CheckCircle className="h-4 w-4 text-green-500" />
-                        : <XCircle className="h-4 w-4 text-red-500" />}
+                      {docusignStatus?.hasAccountId ? (
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                      ) : (
+                        <XCircle className="h-4 w-4 text-red-500" />
+                      )}
                       <p className="text-sm font-mono">
                         {docusignStatus?.hasAccountId ? 'Configurado' : 'No configurado'}
                       </p>
@@ -200,9 +249,11 @@ export default function DocuSignConfigPage() {
                   <div className="p-3 bg-muted/50 rounded-lg">
                     <p className="text-xs text-muted-foreground">User ID</p>
                     <div className="flex items-center gap-2 mt-1">
-                      {docusignStatus?.hasUserId
-                        ? <CheckCircle className="h-4 w-4 text-green-500" />
-                        : <XCircle className="h-4 w-4 text-red-500" />}
+                      {docusignStatus?.hasUserId ? (
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                      ) : (
+                        <XCircle className="h-4 w-4 text-red-500" />
+                      )}
                       <p className="text-sm font-mono">
                         {docusignStatus?.hasUserId ? 'Configurado' : 'No configurado'}
                       </p>
@@ -211,9 +262,11 @@ export default function DocuSignConfigPage() {
                   <div className="p-3 bg-muted/50 rounded-lg">
                     <p className="text-xs text-muted-foreground">Private Key RSA</p>
                     <div className="flex items-center gap-2 mt-1">
-                      {docusignStatus?.hasPrivateKey
-                        ? <CheckCircle className="h-4 w-4 text-green-500" />
-                        : <XCircle className="h-4 w-4 text-red-500" />}
+                      {docusignStatus?.hasPrivateKey ? (
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                      ) : (
+                        <XCircle className="h-4 w-4 text-red-500" />
+                      )}
                       <p className="text-sm font-mono">
                         {docusignStatus?.hasPrivateKey ? 'Configurada' : 'No configurada'}
                       </p>
@@ -223,14 +276,20 @@ export default function DocuSignConfigPage() {
 
                 <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
                   <p className="text-xs text-muted-foreground">Entorno:</p>
-                  <Badge variant={docusignStatus?.environment === 'production' ? 'default' : 'secondary'}>
+                  <Badge
+                    variant={docusignStatus?.environment === 'production' ? 'default' : 'secondary'}
+                  >
                     {docusignStatus?.environment === 'production' ? '🟢 Producción' : '🟡 Demo'}
                   </Badge>
                 </div>
 
                 <div className="flex gap-2">
                   <Button onClick={testConnection} disabled={testing} variant="outline">
-                    {testing ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Shield className="h-4 w-4 mr-2" />}
+                    {testing ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Shield className="h-4 w-4 mr-2" />
+                    )}
                     Verificar conexión
                   </Button>
                 </div>
@@ -244,8 +303,8 @@ export default function DocuSignConfigPage() {
           <CardHeader>
             <CardTitle>Autorización JWT (una sola vez)</CardTitle>
             <CardDescription>
-              Concede permiso a Inmova para firmar documentos en nombre de la cuenta DocuSign del Grupo Vidaro.
-              Este paso se hace una sola vez por cuenta.
+              Concede permiso a Inmova para firmar documentos en nombre de la cuenta DocuSign del
+              Grupo Vidaro. Este paso se hace una sola vez por cuenta.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -253,7 +312,9 @@ export default function DocuSignConfigPage() {
               <p className="text-sm font-medium text-amber-800">Instrucciones:</p>
               <ol className="text-sm text-amber-700 space-y-1 list-decimal ml-4">
                 <li>Haz clic en el botón de abajo</li>
-                <li>Inicia sesión con la <strong>cuenta DocuSign de Vidaro</strong></li>
+                <li>
+                  Inicia sesión con la <strong>cuenta DocuSign de Vidaro</strong>
+                </li>
                 <li>Acepta los permisos solicitados</li>
                 <li>Serás redirigido de vuelta a esta página</li>
               </ol>
@@ -287,7 +348,9 @@ export default function DocuSignConfigPage() {
               <div className="flex items-center justify-between p-3 border rounded-lg">
                 <div>
                   <p className="font-medium">Viroda Inversiones S.L.</p>
-                  <p className="text-xs text-muted-foreground">Firma de contratos de arrendamiento y media estancia</p>
+                  <p className="text-xs text-muted-foreground">
+                    Firma de contratos de arrendamiento y media estancia
+                  </p>
                 </div>
                 <Badge variant={docusignStatus?.configured ? 'default' : 'outline'}>
                   {docusignStatus?.configured ? 'Activa' : 'Pendiente'}
@@ -296,7 +359,9 @@ export default function DocuSignConfigPage() {
               <div className="flex items-center justify-between p-3 border rounded-lg">
                 <div>
                   <p className="font-medium">Rovida S.L.</p>
-                  <p className="text-xs text-muted-foreground">Firma de contratos de arrendamiento y media estancia</p>
+                  <p className="text-xs text-muted-foreground">
+                    Firma de contratos de arrendamiento y media estancia
+                  </p>
                 </div>
                 <Badge variant={docusignStatus?.configured ? 'default' : 'outline'}>
                   {docusignStatus?.configured ? 'Activa' : 'Pendiente'}
@@ -311,12 +376,15 @@ export default function DocuSignConfigPage() {
           <CardHeader>
             <CardTitle>Operadores de media estancia</CardTitle>
             <CardDescription>
-              Contratos recibidos de operadores como Álamo se firman a través de la misma cuenta DocuSign del grupo
+              Contratos recibidos de operadores como Álamo se firman a través de la misma cuenta
+              DocuSign del grupo
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800 space-y-2">
-              <p><strong>Flujo de firma con operadores:</strong></p>
+              <p>
+                <strong>Flujo de firma con operadores:</strong>
+              </p>
               <ol className="list-decimal ml-4 space-y-1">
                 <li>El operador (ej: Álamo) envía el contrato a firmar</li>
                 <li>Se sube el PDF del contrato al sistema</li>
@@ -337,6 +405,29 @@ export default function DocuSignConfigPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Setup rápido */}
+        {!loading && !docusignStatus?.configured && (
+          <Card className="border-blue-200 bg-blue-50/50">
+            <CardHeader>
+              <CardTitle className="text-blue-800">Setup rápido</CardTitle>
+              <CardDescription className="text-blue-700">
+                Ejecuta este comando en el servidor para configurar DocuSign automáticamente
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="p-3 bg-white/80 rounded-lg border border-blue-200">
+                <code className="text-sm font-mono text-blue-900 break-all">
+                  node scripts/setup-docusign.mjs
+                </code>
+              </div>
+              <p className="text-xs text-blue-600 mt-3">
+                El script genera las RSA keys, te guía para subir la public key a DocuSign, y
+                configura las variables de entorno automáticamente.
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Webhook config */}
         <Card>
