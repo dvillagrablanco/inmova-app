@@ -153,15 +153,66 @@ async function downloadFromS3(key: string, localPath: string): Promise<void> {
 }
 
 /**
+ * Pre-procesa una imagen para mejor OCR:
+ * - convierte a escala de grises
+ * - aumenta contraste (-normalize -level 10%,90%)
+ * - binariza (-threshold 50%)
+ * - elimina ruido pequeño (-despeckle)
+ *
+ * Devuelve el path de la imagen procesada (sustituye la original).
+ */
+function preprocessImageForOcr(imgPath: string): string {
+  try {
+    const out = imgPath.replace(/\.png$/i, '_pp.png');
+    execSync(
+      `convert "${imgPath}" -density 300 -depth 8 -strip -background white -alpha off -colorspace Gray -normalize -level 10%,90% -despeckle "${out}" 2>/dev/null`,
+      { timeout: 30_000, killSignal: 'SIGKILL' }
+    );
+    if (existsSync(out)) {
+      try { unlinkSync(imgPath); } catch {}
+      return out;
+    }
+  } catch {
+    // Si pre-procesamiento falla, usar imagen original
+  }
+  return imgPath;
+}
+
+/**
+ * Convierte un DOCX a texto plano usando LibreOffice headless.
+ * Convertimos a PDF y luego a text con pdftotext (más fiable que parser puro).
+ */
+function docxToText(localPath: string): string {
+  try {
+    const tmpDir = path.dirname(localPath);
+    // LibreOffice convierte DOCX → PDF
+    execSync(
+      `libreoffice --headless --convert-to pdf --outdir "${tmpDir}" "${localPath}" 2>/dev/null`,
+      { timeout: 60_000, killSignal: 'SIGKILL' }
+    );
+    const pdfPath = localPath.replace(/\.docx?$/i, '.pdf');
+    if (!existsSync(pdfPath)) return '';
+    const text = execSync(`pdftotext -layout "${pdfPath}" -`, {
+      encoding: 'utf-8',
+      maxBuffer: 50 * 1024 * 1024,
+      timeout: 15_000,
+    });
+    try { unlinkSync(pdfPath); } catch {}
+    return text.substring(0, 100_000);
+  } catch (e: any) {
+    logger.warn(`[DocExtractor] DOCX conversion failed: ${e?.message}`);
+    return '';
+  }
+}
+
+/**
  * Convierte PDF a texto.
  *
- * Solo intenta `pdftotext` (PDF nativo). Si devuelve vacío (PDF escaneado),
- * NO hace OCR (demasiado costoso para procesar masivamente).
+ * 1. pdftotext (PDF nativo) — rápido, perfecto si tiene texto embebido.
+ * 2. Si vacío y forceOcr=true: pdftoppm (1 página) → preprocess → tesseract.
  *
- * Los PDFs escaneados que requieren OCR se devolverán como '' y deben
- * procesarse aparte con un job dedicado más lento.
- *
- * Para forzar OCR en un PDF concreto, usar processS3DocumentWithOCR().
+ * El pre-procesamiento de imagen mejora dramáticamente el OCR:
+ * conversión a gris + contraste + despeckle.
  */
 function pdfToText(localPath: string, forceOcr = false): string {
   // Intento 1: pdftotext directo (solo PDFs nativos)
@@ -186,42 +237,49 @@ function pdfToText(localPath: string, forceOcr = false): string {
   // Intento 2: OCR con Tesseract (solo si forceOcr=true)
   try {
     const tmpBase = localPath.replace(/\.pdf$/i, '_ocr');
-    execSync(`pdftoppm -png -r 100 -f 1 -l 1 "${localPath}" "${tmpBase}" 2>/dev/null`, {
-      timeout: 20_000,
+    // Pre-OCR: convertir a 200 DPI (calidad mejor para preprocess)
+    execSync(`pdftoppm -png -r 200 -f 1 -l 2 "${localPath}" "${tmpBase}" 2>/dev/null`, {
+      timeout: 30_000,
       killSignal: 'SIGKILL',
     });
 
-    // pdftoppm puede generar nombres con 0-padding (ej: file-01.png) o sin
-    // (ej: file-1.png) según la versión. Buscamos ambos.
     const candidates = [
       `${tmpBase}-1.png`,
       `${tmpBase}-01.png`,
       `${tmpBase}-001.png`,
+      `${tmpBase}-2.png`,
+      `${tmpBase}-02.png`,
     ];
-    const imgPath = candidates.find((p) => existsSync(p));
+    const pages = candidates.filter((p) => existsSync(p));
 
-    if (!imgPath) {
-      logger.warn(`[DocExtractor] No OCR image found for ${localPath}, candidates: ${candidates.join(', ')}`);
+    if (pages.length === 0) {
+      logger.warn(`[DocExtractor] No OCR image found for ${localPath}`);
       return '';
     }
 
-    let text = '';
-    try {
-      text = execSync(`tesseract "${imgPath}" - -l spa --psm 6 2>/dev/null`, {
-        encoding: 'utf-8',
-        maxBuffer: 20 * 1024 * 1024,
-        timeout: 30_000,
-        killSignal: 'SIGKILL',
-      });
-    } catch (e: any) {
-      logger.warn(`[DocExtractor] tesseract failed: ${e?.message}`);
+    let allText = '';
+    for (const imgPath of pages.slice(0, 2)) {
+      try {
+        // Pre-procesar imagen para mejor OCR
+        const ppImg = preprocessImageForOcr(imgPath);
+        const text = execSync(`tesseract "${ppImg}" - -l spa --psm 6 -c tessedit_create_pdf=0 2>/dev/null`, {
+          encoding: 'utf-8',
+          maxBuffer: 20 * 1024 * 1024,
+          timeout: 90_000, // 90s por página
+          killSignal: 'SIGKILL',
+        });
+        allText += text + '\n\n';
+        try { unlinkSync(ppImg); } catch {}
+      } catch (e: any) {
+        logger.warn(`[DocExtractor] tesseract failed on ${imgPath}: ${e?.message}`);
+        try { unlinkSync(imgPath); } catch {}
+      }
     }
-    try { unlinkSync(imgPath); } catch {}
 
-    if (text.trim().length > 30) {
-      logger.info(`[DocExtractor] OCR success ${imgPath}: ${text.length} chars`);
+    if (allText.trim().length > 30) {
+      logger.info(`[DocExtractor] OCR success ${localPath}: ${allText.length} chars`);
     }
-    return text.substring(0, 30_000);
+    return allText.substring(0, 50_000);
   } catch (e: any) {
     logger.warn(`[DocExtractor] OCR also failed: ${e?.message}`);
     return '';
@@ -359,6 +417,8 @@ export async function extractDataFromText(
 /**
  * Procesa un documento de S3 (key) y devuelve datos extraídos.
  *
+ * Soporta: .pdf, .docx, .doc
+ *
  * @param forceOcr Si true, fuerza OCR para PDFs escaneados (lento)
  */
 export async function processS3Document(
@@ -366,7 +426,10 @@ export async function processS3Document(
   docType?: DocType,
   forceOcr = false
 ): Promise<{ docType: DocType; text: string; data: ExtractedData | null } | null> {
-  if (!s3Key.toLowerCase().endsWith('.pdf')) {
+  const lower = s3Key.toLowerCase();
+  const isPdf = lower.endsWith('.pdf');
+  const isDocx = lower.endsWith('.docx') || lower.endsWith('.doc');
+  if (!isPdf && !isDocx) {
     return null;
   }
 
@@ -376,7 +439,7 @@ export async function processS3Document(
 
   try {
     await downloadFromS3(s3Key, localPath);
-    const text = pdfToText(localPath, forceOcr);
+    const text = isDocx ? docxToText(localPath) : pdfToText(localPath, forceOcr);
     if (!text) {
       return { docType: docType || 'otro', text: '', data: null };
     }

@@ -23,7 +23,7 @@ import logger from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
-export const maxDuration = 600; // 10 min
+export const maxDuration = 900; // 15 min
 
 const VIDARO_GROUP = [
   'cef19f55f7b6ce0637d5ffb53',
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
 
     const prisma = await getPrisma();
 
-    // Buscar documents Vidaro con PDF en S3 (no Drive)
+    // Buscar documents Vidaro con PDF/DOCX en S3 (no Drive)
     const where: any = onlyDocId
       ? { id: onlyDocId }
       : {
@@ -80,10 +80,16 @@ export async function POST(request: NextRequest) {
                 { tenant: { companyId: { in: VIDARO_GROUP } } },
               ],
             },
-            // Solo PDFs en S3 (no Google Drive ni docx)
+            // Solo PDFs/DOCX en S3 (no Google Drive)
             { cloudStoragePath: { not: { contains: 'drive.google' } } },
-            { cloudStoragePath: { contains: '.pdf' } },
-            // No procesados todavía (sin JSON en descripción)
+            {
+              OR: [
+                { cloudStoragePath: { contains: '.pdf' } },
+                { cloudStoragePath: { contains: '.docx' } },
+                { cloudStoragePath: { contains: '.doc' } },
+              ],
+            },
+            // No procesados todavía
             {
               OR: [
                 { descripcion: null },
@@ -138,8 +144,9 @@ export async function POST(request: NextRequest) {
         const docType = detectDocType(doc.nombre);
         r.docType = docType;
 
-        // Hard timeout por documento: 60s sin OCR, 90s con OCR
-        const docTimeout = forceOcr ? 90_000 : 60_000;
+        // Hard timeout por documento: 60s sin OCR, 240s con OCR
+        // (OCR 2 páginas a 200 DPI con preprocess + tesseract puede tardar)
+        const docTimeout = forceOcr ? 240_000 : 60_000;
         const result = await Promise.race([
           processS3Document(doc.cloudStoragePath, docType, forceOcr),
           new Promise<null>((resolve) =>
