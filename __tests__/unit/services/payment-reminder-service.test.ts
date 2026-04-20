@@ -16,9 +16,16 @@ vi.mock('@/lib/db', () => ({
     },
     notification: {
       create: vi.fn(),
+      findFirst: vi.fn(),
+    },
+    company: {
+      findUnique: vi.fn(),
+    },
+    user: {
+      findMany: vi.fn(),
     },
   },
-  getPrismaClient: () => ({ prisma: {
+  getPrismaClient: () => ({
     payment: {
       findMany: vi.fn(),
       findUnique: vi.fn(),
@@ -26,8 +33,15 @@ vi.mock('@/lib/db', () => ({
     },
     notification: {
       create: vi.fn(),
+      findFirst: vi.fn(),
     },
-  } }),
+    company: {
+      findUnique: vi.fn(),
+    },
+    user: {
+      findMany: vi.fn(),
+    },
+  }),
 }));
 
 vi.mock('@/lib/email-config', () => ({
@@ -162,11 +176,11 @@ describe('💰 Payment Reminder Service', () => {
       expect(prisma.payment.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
-            contract: {
+            contract: expect.objectContaining({
               tenant: {
                 companyId: 'company-123',
               },
-            },
+            }),
           }),
         })
       );
@@ -242,7 +256,16 @@ describe('💰 Payment Reminder Service', () => {
   // ========================================
 
   describe('processPaymentReminders', () => {
+    const mockCompanyConfig = {
+      paymentRemindersEnabled: true,
+      paymentRemindersOverdueEnabled: true,
+      paymentRemindersSendToTenant: true,
+      paymentRemindersSendToAdmin: true,
+      paymentRemindersMinDaysOverdue: 3,
+    };
+
     test('✅ Debe procesar recordatorios detectados', async () => {
+      (prisma.company.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(mockCompanyConfig);
       (prisma.payment.findMany as ReturnType<typeof vi.fn>).mockResolvedValue(mockPayments(5));
       (prisma.payment.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(mockPayments(5)[0]);
       (sendEmail as ReturnType<typeof vi.fn>).mockResolvedValue({ messageId: 'email-123' });
@@ -252,17 +275,28 @@ describe('💰 Payment Reminder Service', () => {
 
       await processPaymentReminders('company-123');
 
-      // Debe detectar y procesar al menos 1 recordatorio
       expect(prisma.payment.findMany).toHaveBeenCalled();
     });
 
     test('⚠️ Debe manejar caso sin pagos atrasados', async () => {
+      (prisma.company.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(mockCompanyConfig);
       (prisma.payment.findMany as ReturnType<typeof vi.fn>).mockResolvedValue([]);
 
       await processPaymentReminders('company-123');
 
-      // No debe fallar con lista vacía
       expect(prisma.payment.findMany).toHaveBeenCalled();
+    });
+
+    test('✅ Debe respetar configuración deshabilitada', async () => {
+      (prisma.company.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue({
+        ...mockCompanyConfig,
+        paymentRemindersEnabled: false,
+      });
+      (prisma.payment.findMany as ReturnType<typeof vi.fn>).mockResolvedValue(mockPayments(5));
+
+      await processPaymentReminders('company-123');
+
+      expect(prisma.payment.findMany).not.toHaveBeenCalled();
     });
 
     test('❌ Debe manejar error en base de datos', async () => {

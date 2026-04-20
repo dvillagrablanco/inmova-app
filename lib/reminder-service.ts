@@ -18,15 +18,21 @@ import { prisma } from './db';
 // ============================================
 export const sendPaymentReminders = async (companyId: string) => {
   const today = startOfDay(new Date());
-  const in7Days = addDays(today, 7);
-  const in3Days = addDays(today, 3);
-  const tomorrow = addDays(today, 1);
 
   try {
-    // Obtener datos de la empresa
     const company = await prisma.company.findUnique({
       where: { id: companyId },
-      select: { nombre: true, email: true, telefono: true },
+      select: {
+        nombre: true,
+        email: true,
+        telefono: true,
+        logoUrl: true,
+        direccion: true,
+        cif: true,
+        paymentRemindersEnabled: true,
+        paymentRemindersPreventiveEnabled: true,
+        paymentRemindersPreventiveDays: true,
+      },
     });
 
     if (!company) {
@@ -34,15 +40,31 @@ export const sendPaymentReminders = async (companyId: string) => {
       return { success: false, error: 'Empresa no encontrada' };
     }
 
-    // Buscar pagos pendientes que vencen en 7, 3 o 1 días
+    if (!company.paymentRemindersEnabled || !company.paymentRemindersPreventiveEnabled) {
+      logger.info(`Recordatorios preventivos deshabilitados para empresa ${companyId}`);
+      return {
+        success: true,
+        emailsSent: 0,
+        errors: 0,
+        message: 'Recordatorios preventivos deshabilitados',
+      };
+    }
+
+    const preventiveDays = company.paymentRemindersPreventiveDays?.length
+      ? company.paymentRemindersPreventiveDays
+      : [7, 3, 1];
+    const maxDays = Math.max(...preventiveDays);
+    const inMaxDays = addDays(today, maxDays);
+
     const pendingPayments = await prisma.payment.findMany({
       where: {
         estado: 'pendiente',
         fechaVencimiento: {
           gte: today,
-          lte: in7Days,
+          lte: inMaxDays,
         },
         contract: {
+          metodoPago: { notIn: ['domiciliacion', 'domiciliación'] },
           unit: {
             building: {
               companyId,
@@ -56,22 +78,28 @@ export const sendPaymentReminders = async (companyId: string) => {
             tenant: true,
             unit: {
               include: {
-                building: true,
+                building: {
+                  include: {
+                    company: { select: { nombre: true, email: true, telefono: true } },
+                  },
+                },
               },
             },
           },
         },
+        sepaPayments: { take: 1 },
       },
     });
+
+    const nonSepaPayments = pendingPayments.filter(p => (p as any).sepaPayments?.length === 0);
 
     let emailsSent = 0;
     let errors = 0;
 
-    for (const payment of pendingPayments) {
+    for (const payment of nonSepaPayments) {
       const daysUntilDue = differenceInDays(payment.fechaVencimiento, today);
 
-      // Solo enviar recordatorios en días específicos (7, 3, 1)
-      if (![7, 3, 1, 0].includes(daysUntilDue)) {
+      if (!preventiveDays.includes(daysUntilDue) && daysUntilDue !== 0) {
         continue;
       }
 
@@ -103,6 +131,9 @@ export const sendPaymentReminders = async (companyId: string) => {
           nombre: company.nombre,
           email: company.email || undefined,
           telefono: company.telefono || undefined,
+          logoUrl: company.logoUrl || undefined,
+          direccion: company.direccion || undefined,
+          cif: company.cif || undefined,
         },
       });
 
@@ -132,7 +163,10 @@ export const sendPaymentReminders = async (companyId: string) => {
         });
       } else {
         errors++;
-        logger.error(`Error enviando recordatorio a ${payment.contract.tenant.email}:`, result.error);
+        logger.error(
+          `Error enviando recordatorio a ${payment.contract.tenant.email}:`,
+          result.error
+        );
       }
     }
 
@@ -159,7 +193,7 @@ export const sendContractExpirationAlerts = async (companyId: string) => {
   try {
     const company = await prisma.company.findUnique({
       where: { id: companyId },
-      select: { nombre: true, email: true, telefono: true },
+      select: { nombre: true, email: true, telefono: true, logoUrl: true, direccion: true, cif: true },
     });
 
     if (!company) {
@@ -229,6 +263,9 @@ export const sendContractExpirationAlerts = async (companyId: string) => {
           nombre: company.nombre,
           email: company.email || undefined,
           telefono: company.telefono || undefined,
+          logoUrl: company.logoUrl || undefined,
+          direccion: company.direccion || undefined,
+          cif: company.cif || undefined,
         },
       });
 
@@ -283,7 +320,7 @@ export const sendMaintenanceNotifications = async (companyId: string) => {
   try {
     const company = await prisma.company.findUnique({
       where: { id: companyId },
-      select: { nombre: true, email: true, telefono: true },
+      select: { nombre: true, email: true, telefono: true, logoUrl: true, direccion: true, cif: true },
     });
 
     if (!company) {
@@ -359,6 +396,9 @@ export const sendMaintenanceNotifications = async (companyId: string) => {
           nombre: company.nombre,
           email: company.email || undefined,
           telefono: company.telefono || undefined,
+          logoUrl: company.logoUrl || undefined,
+          direccion: company.direccion || undefined,
+          cif: company.cif || undefined,
         },
       });
 
@@ -387,7 +427,10 @@ export const sendMaintenanceNotifications = async (companyId: string) => {
         });
       } else {
         errors++;
-        logger.error(`Error enviando notificación a ${maintenance.unit.tenant.email}:`, result.error);
+        logger.error(
+          `Error enviando notificación a ${maintenance.unit.tenant.email}:`,
+          result.error
+        );
       }
     }
 
@@ -408,7 +451,7 @@ export const sendMaintenanceNotifications = async (companyId: string) => {
 // ============================================
 export const runAllReminders = async (companyId: string) => {
   logger.info(`\n🔔 Ejecutando recordatorios automáticos para empresa: ${companyId}`);
-  
+
   const results = {
     paymentReminders: await sendPaymentReminders(companyId),
     contractAlerts: await sendContractExpirationAlerts(companyId),

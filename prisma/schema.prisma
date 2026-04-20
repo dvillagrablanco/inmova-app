@@ -1976,6 +1976,15 @@ model Company {
   // Configuración de alertas de contratos
   contractExpirationAlertDays Int @default(30) // Días antes de expiración para alertar
 
+  // Configuración de recordatorios de pago (desactivados por defecto, el usuario activa desde /configuracion/recordatorios-pago)
+  paymentRemindersEnabled          Boolean @default(false)
+  paymentRemindersOverdueEnabled   Boolean @default(true)
+  paymentRemindersPreventiveEnabled Boolean @default(true)
+  paymentRemindersSendToTenant     Boolean @default(true)
+  paymentRemindersSendToAdmin      Boolean @default(true)
+  paymentRemindersMinDaysOverdue   Int     @default(3)
+  paymentRemindersPreventiveDays   Int[]   @default([7, 3, 1])
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
