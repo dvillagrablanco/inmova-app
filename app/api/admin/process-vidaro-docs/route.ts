@@ -64,6 +64,7 @@ export async function POST(request: NextRequest) {
     const limit = Math.min(Math.max(Number(body?.limit) || 30, 1), 200);
     const dryRun = body?.dryRun === true;
     const onlyDocId = body?.docId;
+    const forceOcr = body?.forceOcr === true;
 
     const prisma = await getPrisma();
 
@@ -137,11 +138,12 @@ export async function POST(request: NextRequest) {
         const docType = detectDocType(doc.nombre);
         r.docType = docType;
 
-        // Hard timeout por documento: 75 segundos (OCR 1 página + Claude)
+        // Hard timeout por documento: 60s sin OCR, 90s con OCR
+        const docTimeout = forceOcr ? 90_000 : 60_000;
         const result = await Promise.race([
-          processS3Document(doc.cloudStoragePath, docType),
+          processS3Document(doc.cloudStoragePath, docType, forceOcr),
           new Promise<null>((resolve) =>
-            setTimeout(() => resolve(null), 75_000)
+            setTimeout(() => resolve(null), docTimeout)
           ),
         ]);
         if (!result || !result.data) {

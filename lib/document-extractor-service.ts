@@ -153,15 +153,17 @@ async function downloadFromS3(key: string, localPath: string): Promise<void> {
 }
 
 /**
- * Convierte PDF a texto. Primero intenta pdftotext (PDF nativo); si devuelve
- * vacío (PDF escaneado), hace OCR con Tesseract sobre la primera página.
+ * Convierte PDF a texto.
  *
- * IMPORTANTE: el OCR es muy costoso. Limitamos a 1 página a 100 DPI para
- * que sea viable procesar cientos de PDFs en un tiempo razonable. Para
- * extracción de datos clave (renta, fianza, NIF, IBAN) la primera página
- * suele ser suficiente.
+ * Solo intenta `pdftotext` (PDF nativo). Si devuelve vacío (PDF escaneado),
+ * NO hace OCR (demasiado costoso para procesar masivamente).
+ *
+ * Los PDFs escaneados que requieren OCR se devolverán como '' y deben
+ * procesarse aparte con un job dedicado más lento.
+ *
+ * Para forzar OCR en un PDF concreto, usar processS3DocumentWithOCR().
  */
-function pdfToText(localPath: string): string {
+function pdfToText(localPath: string, forceOcr = false): string {
   // Intento 1: pdftotext directo (solo PDFs nativos)
   try {
     const out = execSync(`pdftotext -layout -nopgbrk "${localPath}" -`, {
@@ -176,11 +178,17 @@ function pdfToText(localPath: string): string {
     logger.warn(`[DocExtractor] pdftotext failed for ${localPath}`);
   }
 
-  // Intento 2: OCR con Tesseract — solo 1 página, 100 DPI (rápido)
+  if (!forceOcr) {
+    // Skip OCR para procesamiento masivo
+    return '';
+  }
+
+  // Intento 2: OCR con Tesseract (solo si forceOcr=true)
   try {
     const tmpBase = localPath.replace(/\.pdf$/i, '_ocr');
     execSync(`pdftoppm -png -r 100 -f 1 -l 1 "${localPath}" "${tmpBase}" 2>/dev/null`, {
       timeout: 20_000,
+      killSignal: 'SIGKILL',
     });
     const pageImg = `${tmpBase}-01.png`;
     const pageImgAlt = `${tmpBase}-1.png`;
@@ -190,16 +198,16 @@ function pdfToText(localPath: string): string {
         ? pageImgAlt
         : null;
     if (!imgPath) return '';
-
     let text = '';
     try {
       text = execSync(`tesseract "${imgPath}" - -l spa --psm 6 2>/dev/null`, {
         encoding: 'utf-8',
         maxBuffer: 20 * 1024 * 1024,
         timeout: 30_000,
+        killSignal: 'SIGKILL',
       });
     } catch {
-      // OCR timeout o fallo — devolver vacío
+      // skip
     }
     try { unlinkSync(imgPath); } catch {}
     return text.substring(0, 30_000);
@@ -339,12 +347,14 @@ export async function extractDataFromText(
 
 /**
  * Procesa un documento de S3 (key) y devuelve datos extraídos.
+ *
+ * @param forceOcr Si true, fuerza OCR para PDFs escaneados (lento)
  */
 export async function processS3Document(
   s3Key: string,
-  docType?: DocType
+  docType?: DocType,
+  forceOcr = false
 ): Promise<{ docType: DocType; text: string; data: ExtractedData | null } | null> {
-  // Solo procesar PDFs
   if (!s3Key.toLowerCase().endsWith('.pdf')) {
     return null;
   }
@@ -355,7 +365,7 @@ export async function processS3Document(
 
   try {
     await downloadFromS3(s3Key, localPath);
-    const text = pdfToText(localPath);
+    const text = pdfToText(localPath, forceOcr);
     if (!text) {
       return { docType: docType || 'otro', text: '', data: null };
     }
