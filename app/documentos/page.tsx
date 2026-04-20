@@ -686,22 +686,6 @@ export default function DocumentosPage() {
                               {doc.nombre}
                             </h3>
                             <div className="flex gap-1 flex-wrap">
-                              {doc.cloudStoragePath?.startsWith('https://drive.google.com') && (
-                                <Badge
-                                  variant="outline"
-                                  className="text-blue-600 border-blue-300 bg-blue-50"
-                                >
-                                  Google Drive
-                                </Badge>
-                              )}
-                              {doc.cloudStoragePath?.startsWith('https://docs.google.com') && (
-                                <Badge
-                                  variant="outline"
-                                  className="text-green-600 border-green-300 bg-green-50"
-                                >
-                                  Google Docs
-                                </Badge>
-                              )}
                               <Badge className={getTipoBadgeColor(doc.tipo)}>
                                 {getTipoLabel(doc.tipo)}
                               </Badge>
