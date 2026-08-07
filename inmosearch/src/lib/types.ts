@@ -178,6 +178,7 @@ export interface MarketValuation {
   marketRentMonthly: number | null; // renta de mercado usada en el análisis
   source: "PROVIDED" | "MARKET_DATA" | "MIXED" | "NONE";
   confidence: "alta" | "media" | "baja";
+  touristic?: boolean; // zona de playa/turística (mejor alquiler de temporada)
   hedonicFactor?: number; // ajuste por características (1 = neutro)
   hedonicAdjustments?: { label: string; pct: number }[];
   notes: string[];

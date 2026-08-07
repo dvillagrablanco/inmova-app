@@ -16,6 +16,8 @@ interface StrInputs {
   monthlyRentLT: number; // renta tradicional de referencia
   longTermNoi: number | null; // NOI del alquiler tradicional (para comparar)
   assumptions: InvestorAssumptions;
+  /** Zona turística/playa: sube el ADR y ajusta la ocupación (estacional). */
+  touristic?: boolean;
 }
 
 export function analyzeStr({
@@ -26,9 +28,14 @@ export function analyzeStr({
   monthlyRentLT,
   longTermNoi,
   assumptions: a,
+  touristic = false,
 }: StrInputs): StrResult {
-  const adr = Math.round((monthlyRentLT / 30) * a.strDailyPremium);
-  const occupancy = a.strOccupancy;
+  // En zona turística el ADR de temporada es bastante mayor que la diaria
+  // prorrateada del alquiler tradicional; la ocupación anual, algo menor por
+  // estacionalidad.
+  const dailyPremium = touristic ? a.strDailyPremium * 1.5 : a.strDailyPremium;
+  const occupancy = touristic ? Math.min(a.strOccupancy, 0.55) : a.strOccupancy;
+  const adr = Math.round((monthlyRentLT / 30) * dailyPremium);
   const grossAnnual = adr * occupancy * 365;
 
   const furnishingCapex = area ? Math.round(a.strFurnishingPerSqm * area) : 6000;

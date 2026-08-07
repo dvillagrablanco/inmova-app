@@ -140,6 +140,7 @@ export function analyzeOpportunity(
         monthlyRentLT: monthlyRent,
         longTermNoi: rental?.noi ?? null,
         assumptions: a,
+        touristic: valuation.touristic,
       })
     : null;
 

@@ -52,6 +52,7 @@ export function estimateMarket(input: ValuationInput): MarketValuation {
   let dataConfidence: MarketValuation["confidence"] = "media";
   let zoneName: string | null = null;
   let granularity: Granularity = "provincia";
+  let touristic = false;
 
   // 2) Intento fino: barrio/distrito/municipio (por CP o por nombre).
   const fine = finerMarket(input.postalCode, input.city, provinceGuess, input.address);
@@ -59,6 +60,7 @@ export function estimateMarket(input: ValuationInput): MarketValuation {
     market = { saleEurSqm: fine.saleEurSqm, rentEurSqmMonth: fine.rentEurSqmMonth };
     zoneName = fine.zoneName;
     granularity = fine.granularity;
+    touristic = fine.touristic;
     dataConfidence = "alta";
     notes.push(`Comparables de zona (${fine.zoneName}, ${labelGranularity(fine.granularity)}): venta ${fine.saleEurSqm} €/m², renta ${fine.rentEurSqmMonth} €/m²/mes.`);
   }
@@ -142,6 +144,7 @@ export function estimateMarket(input: ValuationInput): MarketValuation {
     marketRentMonthly,
     source,
     confidence: dataConfidence,
+    touristic,
     hedonicFactor: usingProvidedArv ? 1 : hedonic.factor,
     hedonicAdjustments: usingProvidedArv ? [] : hedonic.adjustments,
     notes,

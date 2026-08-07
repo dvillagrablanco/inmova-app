@@ -19,6 +19,7 @@ export interface ZoneMarket {
   name: string; // nombre legible
   level: "distrito" | "municipio";
   province: string; // provincia a la que pertenece (clave normalizada)
+  touristic?: boolean; // zona de playa/turística: el alquiler de temporada (STR) rinde más
 }
 
 // --- Distritos y municipios con mercado propio -------------------------------
@@ -65,14 +66,21 @@ export const ZONE_MARKET: Record<string, ZoneMarket> = {
   // Rías Baixas (Pontevedra) — municipios costeros que se desvían de la media provincial
   VIGO: { saleEurSqm: 2000, rentEurSqmMonth: 9, name: "Vigo", level: "municipio", province: "PONTEVEDRA" },
   PONTEVEDRA_CIUDAD: { saleEurSqm: 2000, rentEurSqmMonth: 9, name: "Pontevedra", level: "municipio", province: "PONTEVEDRA" },
-  SANXENXO: { saleEurSqm: 2900, rentEurSqmMonth: 10, name: "Sanxenxo", level: "municipio", province: "PONTEVEDRA" },
-  PORTONOVO: { saleEurSqm: 2600, rentEurSqmMonth: 10, name: "Portonovo", level: "municipio", province: "PONTEVEDRA" },
-  O_GROVE: { saleEurSqm: 2100, rentEurSqmMonth: 9, name: "O Grove", level: "municipio", province: "PONTEVEDRA" },
+  SANXENXO: { saleEurSqm: 2900, rentEurSqmMonth: 10, name: "Sanxenxo", level: "municipio", province: "PONTEVEDRA", touristic: true },
+  PORTONOVO: { saleEurSqm: 2600, rentEurSqmMonth: 10, name: "Portonovo", level: "municipio", province: "PONTEVEDRA", touristic: true },
+  O_GROVE: { saleEurSqm: 2100, rentEurSqmMonth: 9, name: "O Grove", level: "municipio", province: "PONTEVEDRA", touristic: true },
   POIO: { saleEurSqm: 1900, rentEurSqmMonth: 8, name: "Poio", level: "municipio", province: "PONTEVEDRA" },
   MARIN: { saleEurSqm: 1500, rentEurSqmMonth: 8, name: "Marín", level: "municipio", province: "PONTEVEDRA" },
   CANGAS: { saleEurSqm: 1800, rentEurSqmMonth: 8, name: "Cangas", level: "municipio", province: "PONTEVEDRA" },
-  BAIONA: { saleEurSqm: 2700, rentEurSqmMonth: 9, name: "Baiona", level: "municipio", province: "PONTEVEDRA" },
-  NIGRAN: { saleEurSqm: 2300, rentEurSqmMonth: 9, name: "Nigrán", level: "municipio", province: "PONTEVEDRA" },
+  BAIONA: { saleEurSqm: 2700, rentEurSqmMonth: 9, name: "Baiona", level: "municipio", province: "PONTEVEDRA", touristic: true },
+  NIGRAN: { saleEurSqm: 2300, rentEurSqmMonth: 9, name: "Nigrán", level: "municipio", province: "PONTEVEDRA", touristic: true },
+  // Comarca do Salnés / Arousa (Pontevedra) — costa y zona vinícola
+  CAMBADOS: { saleEurSqm: 1900, rentEurSqmMonth: 8, name: "Cambados", level: "municipio", province: "PONTEVEDRA", touristic: true },
+  VILAGARCIA_DE_AROUSA: { saleEurSqm: 1600, rentEurSqmMonth: 8, name: "Vilagarcía de Arousa", level: "municipio", province: "PONTEVEDRA" },
+  VILANOVA_DE_AROUSA: { saleEurSqm: 1700, rentEurSqmMonth: 8, name: "Vilanova de Arousa", level: "municipio", province: "PONTEVEDRA", touristic: true },
+  A_ILLA_DE_AROUSA: { saleEurSqm: 2000, rentEurSqmMonth: 8, name: "A Illa de Arousa", level: "municipio", province: "PONTEVEDRA", touristic: true },
+  // Palencia capital (por encima de la media provincial rural)
+  PALENCIA_CIUDAD: { saleEurSqm: 1400, rentEurSqmMonth: 7, name: "Palencia", level: "municipio", province: "PALENCIA" },
 };
 
 // --- Resolución por código postal → clave de zona ----------------------------
@@ -130,12 +138,20 @@ export const POSTAL_TO_ZONE: Record<string, string> = {
   "36940": "CANGAS", "36948": "CANGAS",
   "36300": "BAIONA",
   "36350": "NIGRAN", "36340": "NIGRAN",
+  // Comarca do Salnés / Arousa
+  "36630": "CAMBADOS", "36637": "CAMBADOS",
+  "36600": "VILAGARCIA_DE_AROUSA", "36611": "VILAGARCIA_DE_AROUSA", "36612": "VILAGARCIA_DE_AROUSA",
+  "36620": "VILANOVA_DE_AROUSA",
+  "36626": "A_ILLA_DE_AROUSA",
+  // Palencia
+  "34001": "PALENCIA_CIUDAD", "34002": "PALENCIA_CIUDAD", "34003": "PALENCIA_CIUDAD", "34004": "PALENCIA_CIUDAD", "34005": "PALENCIA_CIUDAD",
 };
 
 export interface FinerMarketHit {
   saleEurSqm: number;
   rentEurSqmMonth: number;
   zoneName: string;
+  touristic: boolean;
   granularity: Granularity; // "codigo_postal" (vía CP) | "distrito" | "municipio"
 }
 
@@ -153,7 +169,7 @@ export function finerMarket(
     const zoneKey = POSTAL_TO_ZONE[cp];
     if (zoneKey && ZONE_MARKET[zoneKey]) {
       const z = ZONE_MARKET[zoneKey];
-      return { saleEurSqm: z.saleEurSqm, rentEurSqmMonth: z.rentEurSqmMonth, zoneName: z.name, granularity: "codigo_postal" };
+      return { saleEurSqm: z.saleEurSqm, rentEurSqmMonth: z.rentEurSqmMonth, zoneName: z.name, touristic: Boolean(z.touristic), granularity: "codigo_postal" };
     }
   }
 
@@ -164,7 +180,7 @@ export function finerMarket(
   for (const [key, z] of Object.entries(ZONE_MARKET)) {
     if (z.level !== "municipio") continue;
     if (text.includes(key) || text.includes(normalizeKey(z.name))) {
-      return { saleEurSqm: z.saleEurSqm, rentEurSqmMonth: z.rentEurSqmMonth, zoneName: z.name, granularity: "municipio" };
+      return { saleEurSqm: z.saleEurSqm, rentEurSqmMonth: z.rentEurSqmMonth, zoneName: z.name, touristic: Boolean(z.touristic), granularity: "municipio" };
     }
   }
 
@@ -175,7 +191,7 @@ export function finerMarket(
     if (prov && prov !== z.province) continue;
     const districtName = normalizeKey(z.name.split("·")[1] ?? z.name);
     if (districtName && text.includes(districtName)) {
-      return { saleEurSqm: z.saleEurSqm, rentEurSqmMonth: z.rentEurSqmMonth, zoneName: z.name, granularity: "distrito" };
+      return { saleEurSqm: z.saleEurSqm, rentEurSqmMonth: z.rentEurSqmMonth, zoneName: z.name, touristic: Boolean(z.touristic), granularity: "distrito" };
     }
   }
 
