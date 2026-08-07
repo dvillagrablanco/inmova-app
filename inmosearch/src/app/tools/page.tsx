@@ -15,8 +15,8 @@ export default function ToolsPage() {
         <Link href="/" className="text-sm text-brand-700 hover:underline">
           ← Radar
         </Link>
-        <h1 className="mt-2 text-2xl font-bold text-slate-900">Conectar con Idealista y Fotocasa</h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <h1 className="mt-2 text-2xl font-bold text-ink-900">Conectar con Idealista y Fotocasa</h1>
+        <p className="mt-1 text-sm text-ink-500">
           INMOSEARCH no raspa los portales (lo prohíben sus Términos y tienen anti-bot). En su lugar, usa tu propia
           navegación o tus búsquedas guardadas — legal y sin bloqueos. Aquí tienes todas las vías.
         </p>
@@ -27,10 +27,10 @@ export default function ToolsPage() {
 
       {/* Método 2: alertas por email (pegar) */}
       <div>
-        <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">
+        <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-ink-500">
           Alertas por email (búsquedas guardadas)
         </h2>
-        <p className="mb-2 text-sm text-slate-600">
+        <p className="mb-2 text-sm text-ink-600">
           Crea <b>búsquedas guardadas / alertas</b> en Idealista y Fotocasa con tus criterios (zona, precio, tipo). Cuando
           te lleguen los emails con anuncios nuevos, pégalos aquí y se importan todos.
         </p>
@@ -39,10 +39,10 @@ export default function ToolsPage() {
 
       {/* Métodos automáticos */}
       <section className="card p-5">
-        <h2 className="font-semibold text-slate-900">Conexiones automáticas (opcionales)</h2>
-        <p className="mt-1 text-sm text-slate-500">
+        <h2 className="font-semibold text-ink-900">Conexiones automáticas (opcionales)</h2>
+        <p className="mt-1 text-sm text-ink-500">
           Para que entren solas, sin pegar nada. Se configuran con variables de entorno (ver{" "}
-          <code className="rounded bg-slate-100 px-1">docs/CONEXION_PORTALES.md</code>).
+          <code className="rounded bg-ink-100 px-1">docs/CONEXION_PORTALES.md</code>).
         </p>
         <div className="mt-3 space-y-3 text-sm">
           <Method
@@ -72,7 +72,7 @@ export default function ToolsPage() {
         </div>
       </section>
 
-      <p className="text-xs text-slate-400">
+      <p className="text-xs text-ink-400">
         Fotocasa no ofrece API pública de búsqueda; su vía práctica es el bookmarklet y las alertas por email. Idealista sí
         tiene API oficial (con aprobación). Ninguna vía raspa los portales.
       </p>
@@ -82,14 +82,14 @@ export default function ToolsPage() {
 
 function Method({ active, title, desc, cfg }: { active: boolean; title: string; desc: string; cfg: string }) {
   return (
-    <div className="flex items-start gap-2 rounded-lg border border-slate-100 p-3">
-      <span className={"mt-1 inline-block h-2 w-2 shrink-0 rounded-full " + (active ? "bg-emerald-500" : "bg-slate-300")} />
+    <div className="flex items-start gap-2 rounded-lg border border-ink-100 p-3">
+      <span className={"mt-1 inline-block h-2 w-2 shrink-0 rounded-full " + (active ? "bg-emerald-500" : "bg-ink-300")} />
       <div>
-        <div className="font-medium text-slate-800">
-          {title} <span className={active ? "text-xs text-emerald-600" : "text-xs text-slate-400"}>· {active ? "configurado" : "sin configurar"}</span>
+        <div className="font-medium text-ink-800">
+          {title} <span className={active ? "text-xs text-emerald-600" : "text-xs text-ink-400"}>· {active ? "configurado" : "sin configurar"}</span>
         </div>
-        <div className="text-slate-600">{desc}</div>
-        <div className="mt-0.5 text-xs text-slate-400">{cfg}</div>
+        <div className="text-ink-600">{desc}</div>
+        <div className="mt-0.5 text-xs text-ink-400">{cfg}</div>
       </div>
     </div>
   );

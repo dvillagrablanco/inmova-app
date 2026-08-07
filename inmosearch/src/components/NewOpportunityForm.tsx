@@ -152,7 +152,7 @@ export function NewOpportunityForm() {
             <input name="marketRentMonthly" type="number" step="0.1" className="input" placeholder="1250" />
           </Field>
         </Grid>
-        <p className="mt-2 text-xs text-slate-400">
+        <p className="mt-2 text-xs text-ink-400">
           Opcional: si lo dejas en blanco, INMOSEARCH estima el ARV y la renta con datos de mercado de la provincia. Rellénalos
           solo si tienes comparables propios (mayor precisión). El CapEx también se estima automáticamente.
         </p>
@@ -168,7 +168,7 @@ export function NewOpportunityForm() {
             placeholder="https://…/foto1.jpg&#10;https://…/foto2.jpg"
           />
         </Field>
-        <label className="mt-2 flex items-center gap-2 text-sm text-slate-600">
+        <label className="mt-2 flex items-center gap-2 text-sm text-ink-600">
           <input type="checkbox" checked={useVision} onChange={(e) => setUseVision(e.target.checked)} />
           Estimar el CapEx analizando las imágenes con IA (requiere ANTHROPIC_API_KEY)
         </label>
@@ -177,29 +177,10 @@ export function NewOpportunityForm() {
       {error && <p className="rounded-md bg-rose-50 p-3 text-sm text-rose-700">{error}</p>}
 
       <div className="flex items-center gap-3">
-        <button
-          type="submit"
-          disabled={busy}
-          className="rounded-md bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
-        >
+        <button type="submit" disabled={busy} className="btn-primary">
           {busy ? "Analizando…" : "Crear y analizar"}
         </button>
       </div>
-
-      <style jsx global>{`
-        .input {
-          width: 100%;
-          border-radius: 0.5rem;
-          border: 1px solid rgb(226 232 240);
-          padding: 0.45rem 0.65rem;
-          font-size: 0.875rem;
-          background: white;
-        }
-        .input:focus {
-          outline: 2px solid rgb(27 112 245 / 0.35);
-          border-color: rgb(27 112 245);
-        }
-      `}</style>
     </form>
   );
 }
@@ -207,7 +188,7 @@ export function NewOpportunityForm() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="card p-5">
-      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">{title}</h2>
+      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-ink-500">{title}</h2>
       {children}
     </div>
   );
@@ -220,7 +201,7 @@ function Grid({ children }: { children: React.ReactNode }) {
 function Field({ label, children, span }: { label: string; children: React.ReactNode; span?: number }) {
   return (
     <label className={span === 2 ? "block sm:col-span-2" : "block"}>
-      <span className="mb-1 block text-xs font-medium text-slate-500">{label}</span>
+      <span className="mb-1 block text-xs font-medium text-ink-500">{label}</span>
       {children}
     </label>
   );

@@ -31,11 +31,11 @@ export function AlertTestButton() {
       <button
         onClick={test}
         disabled={busy}
-        className="rounded-md bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-200 disabled:opacity-50"
+        className="rounded-md bg-ink-100 px-3 py-1.5 text-xs font-medium text-ink-700 hover:bg-ink-200 disabled:opacity-50"
       >
         {busy ? "Enviando…" : "Enviar alerta de prueba"}
       </button>
-      {msg && <span className="text-xs text-slate-500">{msg}</span>}
+      {msg && <span className="text-xs text-ink-500">{msg}</span>}
     </div>
   );
 }

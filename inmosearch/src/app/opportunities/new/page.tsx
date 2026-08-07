@@ -8,8 +8,8 @@ export default function NewOpportunityPage() {
         <Link href="/" className="text-sm text-brand-700 hover:underline">
           ← Volver
         </Link>
-        <h1 className="mt-2 text-2xl font-bold text-slate-900">Nueva oportunidad</h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <h1 className="mt-2 text-2xl font-bold text-ink-900">Nueva oportunidad</h1>
+        <p className="mt-1 text-sm text-ink-500">
           Introduce los datos del activo. INMOSEARCH estima el CapEx y calcula los escenarios de flip y alquiler.
         </p>
       </div>

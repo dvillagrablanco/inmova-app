@@ -60,11 +60,11 @@ export function ImportPanel() {
         onClick={() => setOpen((o) => !o)}
         className="flex w-full items-center justify-between px-4 py-3 text-left"
       >
-        <span className="text-sm font-semibold text-slate-800">Importar desde conectores</span>
-        <span className="text-slate-400">{open ? "−" : "+"}</span>
+        <span className="text-sm font-semibold text-ink-800">Importar desde conectores</span>
+        <span className="text-ink-400">{open ? "−" : "+"}</span>
       </button>
       {open && (
-        <div className="space-y-4 border-t border-slate-100 p-4">
+        <div className="space-y-4 border-t border-ink-100 p-4">
           <div className="space-y-2">
             {connectors.map((c) => (
               <label key={c.id} className="flex items-start gap-2 text-sm">
@@ -75,15 +75,15 @@ export function ImportPanel() {
                   onChange={() => toggle(c.id)}
                 />
                 <span>
-                  <span className="font-medium text-slate-800">{c.name}</span>{" "}
+                  <span className="font-medium text-ink-800">{c.name}</span>{" "}
                   <span className={c.configured ? "text-emerald-600" : "text-amber-600"}>
                     {c.configured ? "· configurado" : "· no configurado"}
                   </span>
-                  <span className="block text-xs text-slate-400">{c.status}</span>
+                  <span className="block text-xs text-ink-400">{c.status}</span>
                 </span>
               </label>
             ))}
-            {connectors.length === 0 && <p className="text-sm text-slate-400">Cargando conectores…</p>}
+            {connectors.length === 0 && <p className="text-sm text-ink-400">Cargando conectores…</p>}
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3">
@@ -104,7 +104,7 @@ export function ImportPanel() {
               />
             </Field>
             <Field label="CapEx con IA">
-              <label className="flex h-9 items-center gap-2 text-sm text-slate-600">
+              <label className="flex h-9 items-center gap-2 text-sm text-ink-600">
                 <input type="checkbox" checked={useVision} onChange={(e) => setUseVision(e.target.checked)} />
                 Analizar imágenes
               </label>
@@ -112,27 +112,13 @@ export function ImportPanel() {
           </div>
 
           <div className="flex items-center gap-3">
-            <button
-              onClick={runImport}
-              disabled={busy || selected.length === 0}
-              className="rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50"
-            >
+            <button onClick={runImport} disabled={busy || selected.length === 0} className="btn-primary">
               {busy ? "Importando…" : "Importar y analizar"}
             </button>
-            {msg && <span className="text-sm text-slate-500">{msg}</span>}
+            {msg && <span className="text-sm text-ink-500">{msg}</span>}
           </div>
         </div>
       )}
-
-      <style jsx>{`
-        .input {
-          width: 100%;
-          border-radius: 0.5rem;
-          border: 1px solid rgb(226 232 240);
-          padding: 0.4rem 0.6rem;
-          font-size: 0.875rem;
-        }
-      `}</style>
     </div>
   );
 }
@@ -140,7 +126,7 @@ export function ImportPanel() {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-xs font-medium text-slate-500">{label}</span>
+      <span className="mb-1 block text-xs font-medium text-ink-500">{label}</span>
       {children}
     </label>
   );

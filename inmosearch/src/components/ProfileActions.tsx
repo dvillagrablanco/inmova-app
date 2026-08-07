@@ -58,7 +58,7 @@ export function ProfileActions({ id }: { id: string }) {
         </button>
         <Link
           href={`/?profileId=${id}&matched=1`}
-          className="rounded-md bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-200"
+          className="rounded-md bg-ink-100 px-3 py-1.5 text-xs font-medium text-ink-700 hover:bg-ink-200"
         >
           Ver oportunidades
         </Link>
@@ -72,8 +72,8 @@ export function ProfileActions({ id }: { id: string }) {
       </div>
       {error && <p className="text-xs text-rose-600">{error}</p>}
       {outcome && (
-        <div className="rounded-lg bg-slate-50 p-2 text-xs text-slate-600">
-          <span className="font-semibold text-slate-800">{outcome.imported}</span> nuevas ·{" "}
+        <div className="rounded-lg bg-ink-50 p-2 text-xs text-ink-600">
+          <span className="font-semibold text-ink-800">{outcome.imported}</span> nuevas ·{" "}
           <span className="font-semibold text-emerald-700">{outcome.matched}</span> encajan ·{" "}
           {outcome.duplicates} duplicadas
           {outcome.updated ? ` · ${outcome.updated} actualizadas` : ""}

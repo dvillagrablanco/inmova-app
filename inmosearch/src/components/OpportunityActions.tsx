@@ -41,7 +41,7 @@ export function OpportunityActions({ id, status }: { id: string; status: string 
   return (
     <div className="card space-y-3 p-4">
       <div>
-        <div className="mb-1 text-xs font-medium text-slate-500">Estado</div>
+        <div className="mb-1 text-xs font-medium text-ink-500">Estado</div>
         <div className="flex flex-wrap gap-1.5">
           {STATUSES.map((s) => (
             <button
@@ -52,7 +52,7 @@ export function OpportunityActions({ id, status }: { id: string; status: string 
                 "rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset disabled:opacity-50 " +
                 (status === s
                   ? "bg-brand-600 text-white ring-brand-600"
-                  : "bg-white text-slate-600 ring-slate-200 hover:bg-slate-100")
+                  : "bg-white text-ink-600 ring-ink-200 hover:bg-ink-100")
               }
             >
               {label(s)}
@@ -60,11 +60,11 @@ export function OpportunityActions({ id, status }: { id: string; status: string 
           ))}
         </div>
       </div>
-      <div className="flex flex-wrap gap-2 border-t border-slate-100 pt-3">
+      <div className="flex flex-wrap gap-2 border-t border-ink-100 pt-3">
         <button
           onClick={() => reanalyze(false)}
           disabled={busy !== null}
-          className="rounded-md bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-200 disabled:opacity-50"
+          className="rounded-md bg-ink-100 px-3 py-1.5 text-xs font-medium text-ink-700 hover:bg-ink-200 disabled:opacity-50"
         >
           {busy === "reanalyze" ? "Reanalizando…" : "Reanalizar"}
         </button>

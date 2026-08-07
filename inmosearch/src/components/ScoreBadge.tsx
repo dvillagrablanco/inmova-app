@@ -1,37 +1,45 @@
 import { cn } from "@/lib/cn";
 import type { Rating } from "@/lib/types";
 
-const RATING_STYLES: Record<Rating, string> = {
-  A: "bg-emerald-100 text-emerald-800 ring-emerald-600/20",
-  B: "bg-lime-100 text-lime-800 ring-lime-600/20",
-  C: "bg-amber-100 text-amber-800 ring-amber-600/20",
-  D: "bg-rose-100 text-rose-800 ring-rose-600/20",
-};
+const RATING = {
+  A: { stroke: "#059669", text: "text-emerald-700", ring: "text-emerald-500" },
+  B: { stroke: "#65a30d", text: "text-lime-700", ring: "text-lime-500" },
+  C: { stroke: "#d97706", text: "text-amber-700", ring: "text-amber-500" },
+  D: { stroke: "#e11d48", text: "text-rose-700", ring: "text-rose-500" },
+} as const;
 
+/** Puntuación como anillo de progreso circular. */
 export function ScoreBadge({ score, rating, size = "md" }: { score: number; rating: Rating; size?: "sm" | "md" | "lg" }) {
-  const sizes = {
-    sm: "h-9 w-9 text-sm",
-    md: "h-12 w-12 text-lg",
-    lg: "h-16 w-16 text-2xl",
-  }[size];
+  const px = { sm: 40, md: 52, lg: 68 }[size];
+  const stroke = { sm: 4, md: 5, lg: 6 }[size];
+  const r = (px - stroke) / 2;
+  const c = 2 * Math.PI * r;
+  const pct = Math.max(0, Math.min(100, score));
+  const dash = (pct / 100) * c;
+  const conf = RATING[rating] ?? RATING.D;
+  const font = { sm: "text-sm", md: "text-base", lg: "text-xl" }[size];
+
   return (
-    <div
-      className={cn(
-        "grid shrink-0 place-items-center rounded-full font-bold ring-1 ring-inset",
-        RATING_STYLES[rating],
-        sizes
-      )}
-      title={`Score ${score}/100 · Rating ${rating}`}
-    >
-      {score}
+    <div className="relative shrink-0" style={{ width: px, height: px }} title={`Score ${score}/100 · ${rating}`}>
+      <svg width={px} height={px} className="-rotate-90">
+        <circle cx={px / 2} cy={px / 2} r={r} fill="none" stroke="currentColor" strokeWidth={stroke} className="text-ink-100" />
+        <circle
+          cx={px / 2}
+          cy={px / 2}
+          r={r}
+          fill="none"
+          stroke={conf.stroke}
+          strokeWidth={stroke}
+          strokeLinecap="round"
+          strokeDasharray={`${dash} ${c}`}
+        />
+      </svg>
+      <div className={cn("absolute inset-0 grid place-items-center font-extrabold", font, conf.text)}>{score}</div>
     </div>
   );
 }
 
 export function RatingPill({ rating }: { rating: Rating }) {
-  return (
-    <span className={cn("rounded-full px-2 py-0.5 text-xs font-semibold ring-1 ring-inset", RATING_STYLES[rating])}>
-      {rating}
-    </span>
-  );
+  const conf = RATING[rating] ?? RATING.D;
+  return <span className={cn("chip bg-white ring-ink-200", conf.text)}>{rating}</span>;
 }

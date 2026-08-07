@@ -24,8 +24,8 @@ export function BookmarkletCard() {
 
   return (
     <div className="card p-5">
-      <h2 className="font-semibold text-slate-900">Botón «Enviar a INMOSEARCH» (bookmarklet)</h2>
-      <p className="mt-1 text-sm text-slate-500">
+      <h2 className="font-semibold text-ink-900">Botón «Enviar a INMOSEARCH» (bookmarklet)</h2>
+      <p className="mt-1 text-sm text-ink-500">
         Un botón para tu navegador. Cuando estés viendo una ficha (o un listado) en <b>Idealista</b> o <b>Fotocasa</b>,
         púlsalo y el anuncio se manda a INMOSEARCH, se valora y se analiza. Es tu propia navegación: sin bots, sin
         raspado, sin saltarse nada.
@@ -41,18 +41,18 @@ export function BookmarkletCard() {
         >
           📌 Enviar a INMOSEARCH
         </a>
-        <span className="text-xs text-slate-500">← arrástralo a tu barra de marcadores</span>
-        <button onClick={copy} className="rounded-md bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-200">
+        <span className="text-xs text-ink-500">← arrástralo a tu barra de marcadores</span>
+        <button onClick={copy} className="rounded-md bg-ink-100 px-3 py-1.5 text-xs font-medium text-ink-700 hover:bg-ink-200">
           {copied ? "¡Copiado!" : "Copiar código"}
         </button>
       </div>
 
-      <ol className="mt-4 list-decimal space-y-1 pl-5 text-sm text-slate-600">
+      <ol className="mt-4 list-decimal space-y-1 pl-5 text-sm text-ink-600">
         <li>Muestra la barra de marcadores del navegador (Ctrl/Cmd+Shift+B).</li>
         <li>Arrastra el botón azul de arriba a la barra (o crea un marcador nuevo y pega el código copiado como URL).</li>
         <li>Entra en un anuncio de Idealista/Fotocasa y pulsa el marcador. Se abrirá INMOSEARCH con el análisis.</li>
       </ol>
-      <p className="mt-3 text-xs text-slate-400">
+      <p className="mt-3 text-xs text-ink-400">
         Consejo: en una <b>ficha</b> importa ese inmueble; en una <b>página de resultados</b> importa todos los de la
         página. Uso personal.
       </p>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Plus } from "lucide-react";
 import { CONDITIONS, PROPERTY_TYPES, SWEEP_SCHEDULES, SWEEP_SOURCES } from "@/lib/types";
 import { label } from "@/lib/format";
 
@@ -83,11 +84,8 @@ export function ProfileForm({ onCreated }: { onCreated?: () => void }) {
 
   if (!open) {
     return (
-      <button
-        onClick={() => setOpen(true)}
-        className="rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
-      >
-        + Nuevo perfil de búsqueda
+      <button onClick={() => setOpen(true)} className="btn-primary">
+        <Plus size={16} /> Nuevo perfil de búsqueda
       </button>
     );
   }
@@ -96,10 +94,10 @@ export function ProfileForm({ onCreated }: { onCreated?: () => void }) {
     <form onSubmit={submit} className="card space-y-4 p-5">
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Nombre del perfil *" span>
-          <input name="name" required className="in" placeholder="Ej.: Flip Madrid a reformar < 130k" />
+          <input name="name" required className="input" placeholder="Ej.: Flip Madrid a reformar < 130k" />
         </Field>
         <Field label="Zonas (provincias / municipios / CP, separadas por coma)" span>
-          <input name="zones" className="in" placeholder="Madrid, Vigo, 28020" />
+          <input name="zones" className="input" placeholder="Madrid, Vigo, 28020" />
         </Field>
       </div>
 
@@ -127,22 +125,22 @@ export function ProfileForm({ onCreated }: { onCreated?: () => void }) {
 
       <div className="grid gap-4 sm:grid-cols-3">
         <Field label="Precio mín. (€)">
-          <input name="minPrice" type="number" className="in" />
+          <input name="minPrice" type="number" className="input" />
         </Field>
         <Field label="Precio máx. (€)">
-          <input name="maxPrice" type="number" className="in" placeholder="130000" />
+          <input name="maxPrice" type="number" className="input" placeholder="130000" />
         </Field>
         <Field label="Superficie mín. (m²)">
-          <input name="minArea" type="number" className="in" />
+          <input name="minArea" type="number" className="input" />
         </Field>
         <Field label="€/m² máximo">
-          <input name="maxPricePerSqm" type="number" className="in" />
+          <input name="maxPricePerSqm" type="number" className="input" />
         </Field>
         <Field label="Habitaciones mín.">
-          <input name="minRooms" type="number" className="in" />
+          <input name="minRooms" type="number" className="input" />
         </Field>
         <Field label="Programación">
-          <select name="schedule" className="in" defaultValue="weekly">
+          <select name="schedule" className="input" defaultValue="weekly">
             {SWEEP_SCHEDULES.map((s) => (
               <option key={s} value={s}>
                 {SCHEDULE_LABELS[s]}
@@ -165,45 +163,30 @@ export function ProfileForm({ onCreated }: { onCreated?: () => void }) {
 
       <div className="grid gap-4 sm:grid-cols-3">
         <Field label="Rent. neta mín. (%)">
-          <input name="minNetYield" type="number" step="0.1" className="in" placeholder="6" />
+          <input name="minNetYield" type="number" step="0.1" className="input" placeholder="6" />
         </Field>
         <Field label="Margen flip mín. (%)">
-          <input name="minFlipMargin" type="number" step="0.1" className="in" placeholder="15" />
+          <input name="minFlipMargin" type="number" step="0.1" className="input" placeholder="15" />
         </Field>
         <Field label="Descuento mín. vs mercado (%)">
-          <input name="minDiscountToMarket" type="number" step="0.1" className="in" placeholder="10" />
+          <input name="minDiscountToMarket" type="number" step="0.1" className="input" placeholder="10" />
         </Field>
       </div>
 
       <Field label="Palabras clave (opcional, coma-separadas)" span>
-        <input name="keywords" className="in" placeholder="ascensor, terraza, exterior" />
+        <input name="keywords" className="input" placeholder="ascensor, terraza, exterior" />
       </Field>
 
       {error && <p className="rounded-md bg-rose-50 p-2 text-sm text-rose-700">{error}</p>}
 
       <div className="flex items-center gap-3">
-        <button
-          type="submit"
-          disabled={busy}
-          className="rounded-md bg-brand-600 px-5 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
-        >
+        <button type="submit" disabled={busy} className="btn-primary">
           {busy ? "Guardando…" : "Guardar perfil"}
         </button>
-        <button type="button" onClick={() => setOpen(false)} className="text-sm text-slate-500 hover:underline">
+        <button type="button" onClick={() => setOpen(false)} className="text-sm text-ink-500 hover:underline">
           Cancelar
         </button>
       </div>
-
-      <style jsx global>{`
-        .in {
-          width: 100%;
-          border-radius: 0.5rem;
-          border: 1px solid rgb(226 232 240);
-          padding: 0.4rem 0.6rem;
-          font-size: 0.875rem;
-          background: white;
-        }
-      `}</style>
     </form>
   );
 }
@@ -211,14 +194,14 @@ export function ProfileForm({ onCreated }: { onCreated?: () => void }) {
 function Field({ label, children, span }: { label: string; children: React.ReactNode; span?: boolean }) {
   return (
     <label className={span ? "block sm:col-span-2" : "block"}>
-      <span className="mb-1 block text-xs font-medium text-slate-500">{label}</span>
+      <span className="mb-1 block text-xs font-medium text-ink-500">{label}</span>
       {children}
     </label>
   );
 }
 
 function Lbl({ children }: { children: React.ReactNode }) {
-  return <div className="mb-1.5 text-xs font-medium text-slate-500">{children}</div>;
+  return <div className="mb-1.5 text-xs font-medium text-ink-500">{children}</div>;
 }
 
 function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
@@ -228,7 +211,7 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
       onClick={onClick}
       className={
         "rounded-full px-3 py-1 text-xs font-medium ring-1 ring-inset " +
-        (active ? "bg-brand-600 text-white ring-brand-600" : "bg-white text-slate-600 ring-slate-200 hover:bg-slate-100")
+        (active ? "bg-brand-600 text-white ring-brand-600" : "bg-white text-ink-600 ring-ink-200 hover:bg-ink-100")
       }
     >
       {children}
