@@ -23,7 +23,7 @@ const profile = (over: Record<string, unknown> = {}) =>
   searchProfileInputSchema.parse({
     name: "Test",
     zones: ["Madrid"],
-    sources: ["mock"],
+    sources: ["boe"],
     propertyTypes: ["PISO"],
     maxPrice: 130000,
     maxPricePerSqm: 2000,
@@ -66,7 +66,7 @@ describe("matchProfile", () => {
   });
 
   it("sin criterios, todo encaja", () => {
-    const empty = searchProfileInputSchema.parse({ name: "Vacío", sources: ["mock"] });
+    const empty = searchProfileInputSchema.parse({ name: "Vacío", sources: ["boe"] });
     const r = matchProfile(candidate(), empty);
     expect(r.matched).toBe(true);
     expect(r.matchScore).toBe(100);

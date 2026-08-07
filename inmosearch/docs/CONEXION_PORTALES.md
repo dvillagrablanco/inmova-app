@@ -16,6 +16,7 @@ Página en la app: **`/tools`** ("Conectar").
 | **4. Alertas por email → pegar** | Idealista + Fotocasa | Manual | Ninguno | ✅ Implementado |
 | **5. Idealista API oficial** | Idealista | Total | Credenciales aprobadas | ✅ Conector listo |
 | **6. Feed de datos autorizado** | Agregado | Total | Contrato (Casafari/uDA…) | ✅ Adaptador listo |
+| **7. Datos de mercado (Idealista Data)** | Valoración | Total | API/contrato de datos | ✅ Adaptador listo |
 
 > **Fotocasa** no ofrece API pública de búsqueda (solo API para que las agencias *publiquen*). Su vía práctica es el **bookmarklet** y las **alertas por email**.
 
@@ -80,6 +81,26 @@ Empresas como **Casafari**, **urbanData Analytics** o proveedores de carteras RE
 HTTP_SOURCE_FEED_URL=https://tu-proveedor/feed.json
 HTTP_SOURCE_AUTH=Bearer xxxxx   # si lo requiere
 ```
+
+## 7. Datos de mercado para MEJORES valoraciones (Idealista Data / feed)
+
+Para que el **ARV**, la **renta estimada** y el **descuento frente a mercado** se calculen con **€/m² reales de la zona** (y no con las tablas de referencia internas), conecta un proveedor de datos de mercado por **API**.
+
+**Idealista Data** (idealista/data) es una **suscripción de datos de mercado**. Su acceso programático es **por API/exportación bajo contrato** — **no** se usa el login web de la cuenta (eso sería raspado y va contra sus términos). Cuando dispongas del endpoint y la clave de tu proveedor, configúralo:
+
+```
+MARKET_DATA_API_URL=https://tu-proveedor/valoracion?zona={location}
+MARKET_DATA_API_KEY=...
+# Opcionales:
+MARKET_DATA_PROVIDER=Idealista Data
+MARKET_DATA_AUTH_HEADER=X-Api-Key        # si la clave no va como "Bearer"
+MARKET_DATA_SALE_FIELD=data.saleEurSqm   # ruta al €/m² de venta en la respuesta
+MARKET_DATA_RENT_FIELD=data.rentEurSqm   # ruta al €/m²/mes de alquiler
+```
+
+La plantilla de URL admite `{location}`, `{province}`, `{city}` y `{postalCode}` (se sustituyen y se URL-encodean; también se añaden como *query params*). Si no defines `*_FIELD`, el adaptador **autodetecta** los campos de venta y renta en la respuesta JSON. Es **genérico**: sirve para Idealista Data o cualquier feed autorizado que devuelva €/m². Sin configurar, la app sigue funcionando con sus tablas internas.
+
+El análisis usa estos datos con **máxima prioridad** en cuanto están disponibles, y lo indica en las notas de la valoración: _"Datos de mercado reales (Idealista Data, …)"_.
 
 ---
 

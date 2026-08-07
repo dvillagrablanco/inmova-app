@@ -2,6 +2,7 @@
 import type { Opportunity, Prisma } from "@prisma/client";
 import { prisma } from "./db";
 import { analyzeOpportunity } from "./underwriting";
+import { fetchMarketData } from "./valuation";
 import { estimateCapex, type CapexEstimate } from "./capex";
 import { matchProfile, type MatchCandidate } from "./profiles/match";
 import { catastroEnabled, enrichFromCatastro } from "./enrichment/catastro";
@@ -64,6 +65,16 @@ async function buildAnalyzedPayload(
     useVision: opts.useVision,
   });
 
+  // Datos de mercado reales de proveedor externo (Idealista Data / feed
+  // autorizado) si está configurado; si no, null y se usan las tablas internas.
+  const marketOverride = await fetchMarketData({
+    province: input.province,
+    city: input.city,
+    postalCode: input.postalCode,
+    address: input.address,
+    propertyType: input.propertyType,
+  });
+
   const analysis = analyzeOpportunity({
     askingPrice: input.askingPrice,
     ccaa: input.ccaa,
@@ -86,6 +97,7 @@ async function buildAnalyzedPayload(
     text: `${input.title} ${input.description ?? ""}`,
     capex: capex.total,
     capexLevel: capex.level,
+    marketOverride,
   });
 
   return { capex, analysis };

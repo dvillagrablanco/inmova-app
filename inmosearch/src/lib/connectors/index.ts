@@ -1,6 +1,5 @@
 // INMOSEARCH — Registro de conectores y búsqueda agregada
 import type { ConnectorSearchParams, PortalConnector, RawListing } from "./types";
-import { mockConnector } from "./mock";
 import { idealistaConnector } from "./idealista";
 import { reoBanksConnector } from "./reo-banks";
 import { boeConnector } from "./boe";
@@ -9,12 +8,13 @@ import { httpSourceConnector } from "./http-source";
 export type { PortalConnector, RawListing, ConnectorSearchParams } from "./types";
 export { normalizeToInput } from "./types";
 
+// Solo fuentes REALES. No hay conector de demostración: la app se llena
+// únicamente con activos reales detectados por estas fuentes.
 export const CONNECTORS: PortalConnector[] = [
-  boeConnector,
   idealistaConnector,
+  boeConnector,
   reoBanksConnector,
   httpSourceConnector,
-  mockConnector,
 ];
 
 export function getConnector(id: string): PortalConnector | undefined {

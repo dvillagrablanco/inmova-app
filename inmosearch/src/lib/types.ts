@@ -52,7 +52,7 @@ export const opportunityInputSchema = z.object({
 export type OpportunityInput = z.infer<typeof opportunityInputSchema>;
 
 // --- Perfil de activos (buy-box) + zonas + fuentes ---------------------------
-export const SWEEP_SOURCES = ["boe", "idealista", "reo-banks", "http", "mock"] as const;
+export const SWEEP_SOURCES = ["idealista", "boe", "reo-banks", "http"] as const;
 export const SWEEP_SCHEDULES = ["weekly", "daily", "6h", "manual"] as const;
 export type SweepSchedule = (typeof SWEEP_SCHEDULES)[number];
 
@@ -60,7 +60,7 @@ export const searchProfileInputSchema = z.object({
   name: z.string().min(2, "Nombre demasiado corto"),
   active: z.boolean().default(true),
   zones: z.array(z.string().min(1)).default([]),
-  sources: z.array(z.enum(SWEEP_SOURCES)).default(["mock"]),
+  sources: z.array(z.enum(SWEEP_SOURCES)).default(["idealista", "boe"]),
   propertyTypes: z.array(z.enum(PROPERTY_TYPES)).default([]),
   minPrice: z.number().int().nonnegative().optional(),
   maxPrice: z.number().int().positive().optional(),

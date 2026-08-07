@@ -10,7 +10,11 @@ import {
 } from "@/lib/data/market";
 import { finerMarket, type Granularity } from "@/lib/data/zones";
 import { hedonicAdjust } from "./hedonic";
+import type { MarketOverride } from "./idealista-data";
 import type { Condition, MarketValuation, PropertyType } from "@/lib/types";
+
+export { fetchMarketData, marketDataConfigured, marketDataStatus } from "./idealista-data";
+export type { MarketOverride } from "./idealista-data";
 
 /** Prima del precio objetivo tras reforma frente al precio medio de mercado.
  * Prudente: una vivienda bien reformada se vende en torno a la media o algo por
@@ -33,6 +37,9 @@ export interface ValuationInput {
   propertyType?: PropertyType | string | null;
   providedArvPerSqm?: number | null;
   providedRentMonthly?: number | null;
+  /** Datos de mercado reales de un proveedor externo (Idealista Data / feed
+   * autorizado). Si se aportan, prevalecen sobre las tablas internas. */
+  marketOverride?: MarketOverride | null;
 }
 
 /** Estima ARV y renta de mercado. Prioridad de comparables: aportados por el
@@ -54,8 +61,21 @@ export function estimateMarket(input: ValuationInput): MarketValuation {
   let granularity: Granularity = "provincia";
   let touristic = false;
 
+  // 1.bis) Datos de mercado REALES de proveedor externo (Idealista Data / feed
+  // autorizado). Máxima prioridad: reflejan la zona concreta con datos actuales.
+  if (input.marketOverride) {
+    const ov = input.marketOverride;
+    market = { saleEurSqm: ov.saleEurSqm, rentEurSqmMonth: ov.rentEurSqmMonth };
+    zoneName = ov.zoneName;
+    granularity = "municipio";
+    dataConfidence = "alta";
+    notes.push(
+      `Datos de mercado reales (${ov.provider}${ov.zoneName ? `, ${ov.zoneName}` : ""}): venta ${ov.saleEurSqm} €/m², renta ${ov.rentEurSqmMonth} €/m²/mes.`
+    );
+  }
+
   // 2) Intento fino: barrio/distrito/municipio (por CP o por nombre).
-  const fine = finerMarket(input.postalCode, input.city, provinceGuess, input.address);
+  const fine = !market ? finerMarket(input.postalCode, input.city, provinceGuess, input.address) : null;
   if (fine) {
     market = { saleEurSqm: fine.saleEurSqm, rentEurSqmMonth: fine.rentEurSqmMonth };
     zoneName = fine.zoneName;

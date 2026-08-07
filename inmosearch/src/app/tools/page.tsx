@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { BookmarkletCard } from "@/components/BookmarkletCard";
 import { EmailImport } from "@/components/EmailImport";
+import { marketDataStatus } from "@/lib/valuation";
 
 export const dynamic = "force-dynamic";
 
@@ -8,6 +9,7 @@ export default function ToolsPage() {
   const idealista = Boolean(process.env.IDEALISTA_API_KEY && process.env.IDEALISTA_API_SECRET);
   const imap = Boolean(process.env.IMAP_HOST && process.env.IMAP_USER && process.env.IMAP_PASSWORD);
   const webhook = Boolean(process.env.ALERTS_WEBHOOK_URL);
+  const marketData = marketDataStatus();
 
   return (
     <div className="space-y-6">
@@ -68,6 +70,24 @@ export default function ToolsPage() {
             title="Feed de datos autorizado (Casafari, uDA, partner REO…)"
             desc="Si contratas un proveedor de datos agregados (legal), su feed JSON entra por el adaptador http."
             cfg="HTTP_SOURCE_FEED_URL"
+          />
+        </div>
+      </section>
+
+      {/* Valoración con datos reales (Idealista Data) */}
+      <section className="card p-5">
+        <h2 className="font-semibold text-ink-900">Mejores valoraciones — Idealista Data / feed de mercado</h2>
+        <p className="mt-1 text-sm text-ink-500">
+          Conecta un proveedor de datos de mercado por API para que el ARV, la renta estimada y el descuento se calculen
+          con <b>€/m² reales de la zona</b> en lugar de con las tablas de referencia internas. El análisis los usa con
+          máxima prioridad en cuanto están disponibles.
+        </p>
+        <div className="mt-3">
+          <Method
+            active={marketData.configured}
+            title={marketData.provider}
+            desc="Consulta el precio medio de venta y de alquiler (€/m²) de la zona y afina toda la valoración. Idealista Data es una suscripción de datos: requiere acceso por API (no se usa el login web). El adaptador es genérico y admite cualquier feed autorizado que devuelva €/m²."
+            cfg="MARKET_DATA_API_URL · MARKET_DATA_API_KEY (opcionales: MARKET_DATA_PROVIDER, MARKET_DATA_SALE_FIELD, MARKET_DATA_RENT_FIELD)"
           />
         </div>
       </section>

@@ -9,7 +9,7 @@ import { computeSignals, computeVerdict } from "./signals";
 import { computeMao } from "./mao";
 import { resolveAssumptions } from "./assumptions";
 import { estimateCapexRuleBased } from "@/lib/capex/estimator";
-import { estimateMarket } from "@/lib/valuation";
+import { estimateMarket, type MarketOverride } from "@/lib/valuation";
 import { detectMotivation } from "@/lib/intake/distress";
 import { itpForCcaa } from "@/lib/data/regions";
 
@@ -47,6 +47,8 @@ export interface AnalyzeInput {
   /** CapEx ya estimado (p.ej. por IA). Si no se pasa, se calcula por reglas. */
   capex?: number | null;
   capexLevel?: string | null;
+  /** Datos de mercado reales de proveedor externo (Idealista Data / feed). */
+  marketOverride?: MarketOverride | null;
 }
 
 /** Analiza una oportunidad de principio a fin: costes, escenarios flip y
@@ -92,6 +94,7 @@ export function analyzeOpportunity(
     propertyType: input.propertyType,
     providedArvPerSqm: input.arvPricePerSqm,
     providedRentMonthly: input.marketRentMonthly,
+    marketOverride: input.marketOverride,
   });
 
   // --- Derivados ------------------------------------------------------------

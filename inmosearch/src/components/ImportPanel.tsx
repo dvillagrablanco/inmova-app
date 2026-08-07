@@ -14,7 +14,7 @@ export function ImportPanel() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [connectors, setConnectors] = useState<ConnectorStatus[]>([]);
-  const [selected, setSelected] = useState<string[]>(["mock"]);
+  const [selected, setSelected] = useState<string[]>(["idealista"]);
   const [location, setLocation] = useState("");
   const [maxResults, setMaxResults] = useState(10);
   const [useVision, setUseVision] = useState(false);

@@ -7,11 +7,10 @@ import { CONDITIONS, PROPERTY_TYPES, SWEEP_SCHEDULES, SWEEP_SOURCES } from "@/li
 import { label } from "@/lib/format";
 
 const SOURCE_LABELS: Record<string, string> = {
-  boe: "Subastas BOE",
   idealista: "Idealista API",
+  boe: "Subastas BOE",
   "reo-banks": "Banca/REO",
   http: "Fuente autorizada",
-  mock: "Demo (mock)",
 };
 
 const SCHEDULE_LABELS: Record<string, string> = {
@@ -26,7 +25,7 @@ export function ProfileForm({ onCreated }: { onCreated?: () => void }) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [sources, setSources] = useState<string[]>(["boe", "mock"]);
+  const [sources, setSources] = useState<string[]>(["idealista", "boe"]);
   const [types, setTypes] = useState<string[]>([]);
   const [conditions, setConditions] = useState<string[]>([]);
 

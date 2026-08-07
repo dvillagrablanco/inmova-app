@@ -35,7 +35,7 @@ const MAX_PER_SOURCE_ZONE = 25;
 export async function runSweepForProfile(profile: ProfileDTO): Promise<SweepOutcome> {
   const input = profileToInput(profile);
   const zones = profile.zones.length > 0 ? profile.zones : [""]; // "" = sin filtro de zona
-  const sources = profile.sources.length > 0 ? profile.sources : ["mock"];
+  const sources = profile.sources.length > 0 ? profile.sources : ["idealista", "boe"];
 
   const bySource = new Map<string, BySourceStat>();
   const newMatched: OpportunityDTO[] = [];

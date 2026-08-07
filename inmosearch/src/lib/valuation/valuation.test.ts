@@ -35,6 +35,21 @@ describe("Valoración automática", () => {
     expect(v.confidence).toBe("baja");
     expect(v.arvPricePerSqm).toBeGreaterThan(0);
   });
+  it("los datos de mercado externos (Idealista Data) prevalecen sobre las tablas internas", () => {
+    const base = estimateMarket({ province: "Madrid", city: "Madrid", area: 80 });
+    const withData = estimateMarket({
+      province: "Madrid",
+      city: "Madrid",
+      area: 80,
+      marketOverride: { saleEurSqm: 1234, rentEurSqmMonth: 5, zoneName: "Madrid", provider: "Idealista Data" },
+    });
+    // El precio de venta de mercado usado debe ser el del proveedor externo.
+    expect(withData.saleEurSqm).toBe(1234);
+    expect(withData.rentEurSqmMonth).toBe(5);
+    expect(withData.confidence).toBe("alta");
+    expect(withData.saleEurSqm).not.toBe(base.saleEurSqm);
+    expect(withData.notes.join(" ")).toContain("Idealista Data");
+  });
 });
 
 describe("Análisis con valoración automática y descuento", () => {
