@@ -15,7 +15,7 @@ INMOSEARCH capta oportunidades de varias fuentes, las **analiza automáticamente
 - **Ingestión de alertas por email** (`src/lib/intake/email.ts` + `/api/ingest/email`): la **vía legal para Idealista/Fotocasa** — crea alertas en el portal, y INMOSEARCH parsea el email (varios anuncios) o recibe un webhook de email. Sin scraping.
 - **MAO — máximo precio de compra recomendado** (`src/lib/underwriting/mao.ts`): cuánto puedes ofrecer como máximo para cumplir tu margen flip / rentabilidad objetivo, y su comparación con el precio pedido.
 - **Motivación del vendedor** (`src/lib/intake/distress.ts`): detecta en el texto señales de urgencia/negociación (herencia, divorcio, embargo, rebajado, negociable, ocupado…) → puntuación 0-100 y señal.
-- **Valoración automática de mercado** (`src/lib/valuation` + `data/market.ts`): con solo **precio + m² + ubicación**, estima el **ARV** (venta objetivo) y la **renta de mercado** a partir de datos por provincia, y calcula el **descuento frente a mercado** — la señal clave de una oportunidad. No necesitas meter comparables a mano.
+- **Valoración automática de mercado** (`src/lib/valuation` + `data/market.ts` + `data/zones.ts`): con solo **precio + m² + ubicación**, estima el **ARV** (venta objetivo) y la **renta de mercado**, y calcula el **descuento frente a mercado** — la señal clave. Usa comparables al nivel más fino disponible: **código postal / distrito / municipio** (Madrid y Barcelona por distrito; municipios que se desvían de su provincia) y cae a **provincia** cuando no hay dato fino. No necesitas meter comparables a mano.
 - **Veredicto claro y señales** (`src/lib/underwriting/signals.ts`): cada oportunidad recibe un veredicto **INVERTIR / VIGILAR / DESCARTAR** y banderas de un vistazo ("bajo mercado", "flip rentable", "cashflow positivo"…).
 - **Ingesta multi-fuente** mediante conectores enchufables:
   - **Idealista** (API oficial OAuth2 — requiere credenciales aprobadas).
@@ -139,7 +139,7 @@ Los parámetros (LTV, tipo de interés, comisiones, umbrales…) están en `src/
 - [x] Conector Subastas BOE + enriquecimiento Catastro + adaptador de feed autorizado.
 - [x] Ingestión de alertas por email (vía legal Idealista/Fotocasa) + webhook.
 - [x] MAO (máximo precio de compra recomendado) y motivación del vendedor.
-- [ ] Comparables a nivel de barrio / código postal (mayor precisión que provincia).
+- [x] Comparables por código postal / distrito / municipio (mayor precisión que provincia).
 - [ ] Verificación en producción del formato de BOE y del emparejamiento por dirección en Catastro.
 - [ ] Alertas por email de las nuevas oportunidades que encajan (resumen del barrido).
 - [ ] Parser de anuncios reforzado con IA (extracción de campos con Claude).

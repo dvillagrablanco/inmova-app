@@ -148,8 +148,10 @@ export default async function OpportunityDetailPage({ params }: { params: { id: 
           <div className="mb-3 flex items-center justify-between">
             <h2 className="font-semibold text-slate-900">Valoración de mercado</h2>
             <span className="text-xs text-slate-500">
-              {a.valuation.province ? a.valuation.province.replace(/_/g, " ") : "Zona no identificada"} · fuente:{" "}
-              {label(a.valuation.source)} · confianza: {a.valuation.confidence}
+              {a.valuation.zoneName ??
+                (a.valuation.province ? a.valuation.province.replace(/_/g, " ") : "Zona no identificada")}{" "}
+              · {granularityLabel(a.valuation.granularity)} · fuente: {label(a.valuation.source)} · confianza:{" "}
+              {a.valuation.confidence}
             </span>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -281,6 +283,23 @@ export default async function OpportunityDetailPage({ params }: { params: { id: 
       )}
     </div>
   );
+}
+
+function granularityLabel(g?: string): string {
+  switch (g) {
+    case "codigo_postal":
+      return "por código postal";
+    case "distrito":
+      return "por distrito";
+    case "municipio":
+      return "por municipio";
+    case "provincia":
+      return "por provincia";
+    case "nacional":
+      return "media nacional";
+    default:
+      return "por zona";
+  }
 }
 
 function Pill({ children }: { children: React.ReactNode }) {

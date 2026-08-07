@@ -8,6 +8,7 @@ import {
   marketForProvince,
   type ProvinceMarket,
 } from "@/lib/data/market";
+import { finerMarket, type Granularity } from "@/lib/data/zones";
 import type { Condition, MarketValuation } from "@/lib/types";
 
 /** Prima del precio objetivo tras reforma frente al precio medio de mercado.
@@ -21,32 +22,53 @@ export interface ValuationInput {
   province?: string | null;
   city?: string | null;
   ccaa?: string | null;
+  postalCode?: string | null;
+  address?: string | null;
   area?: number | null;
   condition?: Condition | null;
   providedArvPerSqm?: number | null;
   providedRentMonthly?: number | null;
 }
 
-/** Estima ARV y renta de mercado. Los valores aportados por el usuario siempre
- * prevalecen; el resto se completa con los datos de mercado por provincia. */
+/** Estima ARV y renta de mercado. Prioridad de comparables: aportados por el
+ * usuario > barrio/distrito/municipio (por CP o nombre) > provincia > nacional. */
 export function estimateMarket(input: ValuationInput): MarketValuation {
   const notes: string[] = [];
 
-  // 1) Identificar provincia y datos de mercado.
+  // 1) Identificar provincia (para respaldo y para desambiguar distritos).
   const provinceGuess =
     input.province ||
     detectProvince(input.city) ||
     detectProvince(input.province) ||
     null;
-  let market: ProvinceMarket | null = marketForProvince(provinceGuess) ?? marketForProvince(input.city);
+
+  let market: ProvinceMarket | null = null;
   let resolvedProvince = provinceGuess;
   let dataConfidence: MarketValuation["confidence"] = "media";
+  let zoneName: string | null = null;
+  let granularity: Granularity = "provincia";
+
+  // 2) Intento fino: barrio/distrito/municipio (por CP o por nombre).
+  const fine = finerMarket(input.postalCode, input.city, provinceGuess, input.address);
+  if (fine) {
+    market = { saleEurSqm: fine.saleEurSqm, rentEurSqmMonth: fine.rentEurSqmMonth };
+    zoneName = fine.zoneName;
+    granularity = fine.granularity;
+    dataConfidence = "alta";
+    notes.push(`Comparables de zona (${fine.zoneName}, ${labelGranularity(fine.granularity)}): venta ${fine.saleEurSqm} €/m², renta ${fine.rentEurSqmMonth} €/m²/mes.`);
+  }
+
+  // 3) Respaldo por provincia.
+  if (!market) {
+    market = marketForProvince(provinceGuess) ?? marketForProvince(input.city);
+  }
 
   if (!market) {
     market = NATIONAL_AVERAGE;
     resolvedProvince = resolvedProvince || null;
+    granularity = "nacional";
     dataConfidence = "baja";
-    notes.push("Sin provincia identificada: se usa la media nacional. Ajusta la ubicación o los comparables.");
+    notes.push("Sin zona/provincia identificada: se usa la media nacional. Ajusta la ubicación o los comparables.");
   }
 
   const area = input.area && input.area > 0 ? input.area : null;
@@ -81,15 +103,20 @@ export function estimateMarket(input: ValuationInput): MarketValuation {
     source = "MIXED";
   }
 
-  if (source !== "PROVIDED" && resolvedProvince && dataConfidence !== "baja") {
+  if (source !== "PROVIDED" && granularity === "provincia" && resolvedProvince) {
     notes.push(
       `Valoración de mercado por provincia (${resolvedProvince.replace(/_/g, " ")}): venta ${market.saleEurSqm} €/m², renta ${market.rentEurSqmMonth} €/m²/mes.`
     );
   }
   if (!usingProvidedArv) notes.push(`ARV objetivo estimado: ${arvPricePerSqm} €/m² (prima reforma ${premium}).`);
 
+  // Si el usuario aporta ambos comparables, la fuente prevalece sobre la zona.
+  const finalGranularity: MarketValuation["granularity"] = source === "PROVIDED" ? "provincia" : granularity;
+
   return {
     province: resolvedProvince,
+    zoneName: source === "PROVIDED" ? null : zoneName,
+    granularity: finalGranularity,
     saleEurSqm: market.saleEurSqm,
     rentEurSqmMonth: market.rentEurSqmMonth,
     arvPricePerSqm,
@@ -98,4 +125,19 @@ export function estimateMarket(input: ValuationInput): MarketValuation {
     confidence: dataConfidence,
     notes,
   };
+}
+
+function labelGranularity(g: Granularity): string {
+  switch (g) {
+    case "codigo_postal":
+      return "código postal";
+    case "distrito":
+      return "distrito";
+    case "municipio":
+      return "municipio";
+    case "provincia":
+      return "provincia";
+    default:
+      return "nacional";
+  }
 }

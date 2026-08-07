@@ -155,8 +155,12 @@ export interface RentalResult {
 }
 
 // --- Valoración de mercado ---------------------------------------------------
+export type MarketGranularity = "codigo_postal" | "distrito" | "municipio" | "provincia" | "nacional";
+
 export interface MarketValuation {
   province: string | null;
+  zoneName: string | null; // barrio/distrito/municipio si se resolvió fino
+  granularity: MarketGranularity; // nivel de los comparables usados
   saleEurSqm: number | null; // precio medio de venta de mercado (as-is)
   rentEurSqmMonth: number | null; // renta media de mercado
   arvPricePerSqm: number | null; // €/m² objetivo de venta usado en el análisis

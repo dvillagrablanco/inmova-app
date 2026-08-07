@@ -45,9 +45,11 @@ Análisis de las principales plataformas de *deal-sourcing* y analítica inmobil
 - ✅ **Motivación del vendedor** (PropStream distress): detección en el texto de urgencia, herencia, divorcio, embargo, precio rebajado/negociable, ocupado… → puntuación 0-100 y señal.
 - ✅ **Ingestión de alertas por email** (modelo Casafari, legal): parser multi-anuncio de emails de Idealista/Fotocasa/Habitaclia + endpoint para webhook de email.
 
+### Implementadas (cont.)
+- ✅ **Comparables por código postal / distrito / municipio** (uDA/Casafari): valoración al nivel más fino disponible (distritos de Madrid/Barcelona, municipios que se desvían de su provincia), con respaldo a provincia. Reporta la granularidad y la confianza.
+
 ### Roadmap prioritario
-1. **Comparables por barrio / código postal** (uDA/Casafari) — mayor precisión que la media provincial.
-2. **Días en mercado (DOM) + histórico de precio** y **alerta de bajada** (Zillow/Casafari).
+1. **Días en mercado (DOM) + histórico de precio** y **alerta de bajada** (Zillow/Casafari).
 3. **Escenario alquiler de temporada / turístico** con ADR y ocupación (Mashvisor/AirDNA).
 4. **Alertas por email/push** de nuevas oportunidades que encajan (resumen del barrido).
 5. **Mapa/heatmap** de rentabilidad y descuento por zona (Mashvisor).

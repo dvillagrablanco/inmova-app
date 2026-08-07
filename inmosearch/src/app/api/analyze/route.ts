@@ -17,6 +17,8 @@ export async function POST(req: NextRequest) {
         ccaa: b.ccaa ?? null,
         province: b.province ?? null,
         city: b.city ?? null,
+        postalCode: b.postalCode ?? null,
+        address: b.address ?? null,
         propertyType: b.propertyType ?? null,
         builtArea: b.builtArea ? Number(b.builtArea) : null,
         usableArea: b.usableArea ? Number(b.usableArea) : null,

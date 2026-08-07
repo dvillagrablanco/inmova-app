@@ -24,6 +24,8 @@ export interface AnalyzeInput {
   ccaa?: string | null;
   province?: string | null;
   city?: string | null;
+  postalCode?: string | null;
+  address?: string | null;
   propertyType?: string | null;
   builtArea?: number | null;
   usableArea?: number | null;
@@ -71,6 +73,8 @@ export function analyzeOpportunity(
     province: input.province,
     city: input.city,
     ccaa: input.ccaa,
+    postalCode: input.postalCode,
+    address: input.address,
     area,
     condition: input.condition ?? null,
     providedArvPerSqm: input.arvPricePerSqm,

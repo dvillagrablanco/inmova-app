@@ -64,6 +64,8 @@ async function buildAnalyzedPayload(
     ccaa: input.ccaa,
     province: input.province,
     city: input.city,
+    postalCode: input.postalCode,
+    address: input.address,
     propertyType: input.propertyType,
     builtArea: input.builtArea,
     usableArea: input.usableArea,
