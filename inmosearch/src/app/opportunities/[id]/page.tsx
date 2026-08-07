@@ -36,6 +36,17 @@ export default async function OpportunityDetailPage({ params }: { params: { id: 
               )}
             </div>
             <h1 className="text-xl font-bold text-slate-900">{o.title}</h1>
+            {(o.priceDropPct != null || o.daysOnMarket > 0) && (
+              <p className="mt-0.5 text-xs text-slate-500">
+                {o.daysOnMarket > 0 && <span>{o.daysOnMarket} días en mercado</span>}
+                {o.priceDropPct != null && o.priceDropPct > 0 && (
+                  <span className="text-emerald-700">
+                    {o.daysOnMarket > 0 ? " · " : ""}bajó {o.priceDropPct.toFixed(0)}%
+                    {o.initialPrice ? ` (antes ${formatEur(o.initialPrice)})` : ""}
+                  </span>
+                )}
+              </p>
+            )}
             <p className="text-sm text-slate-500">
               {[o.address, o.city, o.province].filter(Boolean).join(", ") || "Ubicación no indicada"} · {label(o.propertyType)}
               {o.builtArea ? ` · ${o.builtArea} m²` : ""}

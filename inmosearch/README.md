@@ -15,6 +15,7 @@ INMOSEARCH capta oportunidades de varias fuentes, las **analiza automáticamente
 - **Ingestión de alertas por email** (`src/lib/intake/email.ts` + `/api/ingest/email`): la **vía legal para Idealista/Fotocasa** — crea alertas en el portal, y INMOSEARCH parsea el email (varios anuncios) o recibe un webhook de email. Sin scraping.
 - **MAO — máximo precio de compra recomendado** (`src/lib/underwriting/mao.ts`): cuánto puedes ofrecer como máximo para cumplir tu margen flip / rentabilidad objetivo, y su comparación con el precio pedido.
 - **Motivación del vendedor** (`src/lib/intake/distress.ts`): detecta en el texto señales de urgencia/negociación (herencia, divorcio, embargo, rebajado, negociable, ocupado…) → puntuación 0-100 y señal.
+- **Días en mercado + histórico de precio**: cada barrido que reencuentra un anuncio con **precio distinto** actualiza la oportunidad, guarda el **historial de precios** y calcula la **bajada** — señal fuerte de vendedor motivado. Muestra los días en mercado. El parser también capta rebajas del texto ("antes X, ahora Y").
 - **Valoración automática de mercado** (`src/lib/valuation` + `data/market.ts` + `data/zones.ts`): con solo **precio + m² + ubicación**, estima el **ARV** (venta objetivo) y la **renta de mercado**, y calcula el **descuento frente a mercado** — la señal clave. Usa comparables al nivel más fino disponible: **código postal / distrito / municipio** (Madrid y Barcelona por distrito; municipios que se desvían de su provincia) y cae a **provincia** cuando no hay dato fino. No necesitas meter comparables a mano.
 - **Veredicto claro y señales** (`src/lib/underwriting/signals.ts`): cada oportunidad recibe un veredicto **INVERTIR / VIGILAR / DESCARTAR** y banderas de un vistazo ("bajo mercado", "flip rentable", "cashflow positivo"…).
 - **Ingesta multi-fuente** mediante conectores enchufables:
@@ -143,6 +144,8 @@ Los parámetros (LTV, tipo de interés, comisiones, umbrales…) están en `src/
 - [x] MAO (máximo precio de compra recomendado) y motivación del vendedor.
 - [x] Comparables por código postal / distrito / municipio (mayor precisión que provincia).
 - [x] Alertas (webhook + email) de las nuevas oportunidades que encajan tras cada barrido.
+- [x] Días en mercado (DOM) + histórico de precio con detección de bajadas.
+- [ ] Escenario de alquiler de temporada / turístico (ADR + ocupación).
 - [ ] Verificación en producción del formato de BOE y del emparejamiento por dirección en Catastro.
 - [ ] Parser de anuncios reforzado con IA (extracción de campos con Claude).
 - [ ] Importación CSV con mapeo de columnas por proveedor REO.

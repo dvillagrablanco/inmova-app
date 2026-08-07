@@ -9,6 +9,8 @@ interface Outcome {
   imported: number;
   matched: number;
   duplicates: number;
+  updated?: number;
+  priceDrops?: number;
   status: string;
   bySource: { source: string; found: number; error?: string }[];
 }
@@ -73,7 +75,9 @@ export function ProfileActions({ id }: { id: string }) {
         <div className="rounded-lg bg-slate-50 p-2 text-xs text-slate-600">
           <span className="font-semibold text-slate-800">{outcome.imported}</span> nuevas ·{" "}
           <span className="font-semibold text-emerald-700">{outcome.matched}</span> encajan ·{" "}
-          {outcome.duplicates} duplicadas · {outcome.found} vistas
+          {outcome.duplicates} duplicadas
+          {outcome.updated ? ` · ${outcome.updated} actualizadas` : ""}
+          {outcome.priceDrops ? ` · ${outcome.priceDrops} bajadas` : ""} · {outcome.found} vistas
           {outcome.bySource.some((s) => s.error) && (
             <div className="mt-1 text-amber-600">
               {outcome.bySource

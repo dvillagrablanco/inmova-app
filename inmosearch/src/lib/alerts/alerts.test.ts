@@ -14,7 +14,7 @@ function dto(over: Partial<OpportunityDTO>): OpportunityDTO {
     verdict: "VIGILAR",
     sourceUrl: null,
     analysis: null,
-    ...(over as OpportunityDTO),
+    ...over,
   } as OpportunityDTO;
 }
 

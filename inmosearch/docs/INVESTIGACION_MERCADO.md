@@ -48,13 +48,12 @@ Análisis de las principales plataformas de *deal-sourcing* y analítica inmobil
 ### Implementadas (cont.)
 - ✅ **Comparables por código postal / distrito / municipio** (uDA/Casafari): valoración al nivel más fino disponible (distritos de Madrid/Barcelona, municipios que se desvían de su provincia), con respaldo a provincia. Reporta la granularidad y la confianza.
 - ✅ **Alertas de nuevas oportunidades que encajan** (Casafari/Mashvisor): tras cada barrido, digest por webhook (Slack/Make/Zapier/n8n) y/o email (Resend).
+- ✅ **Días en mercado (DOM) + histórico de precio + detección de bajadas** (Zillow/Casafari): los barridos sucesivos actualizan el precio, guardan el historial y marcan la bajada como señal de vendedor motivado.
 
 ### Roadmap prioritario
-1. **Días en mercado (DOM) + histórico de precio** y **alerta de bajada** (Zillow/Casafari).
-3. **Escenario alquiler de temporada / turístico** con ADR y ocupación (Mashvisor/AirDNA).
-4. **Alertas por email/push** de nuevas oportunidades que encajan (resumen del barrido).
-5. **Mapa/heatmap** de rentabilidad y descuento por zona (Mashvisor).
-6. **AVM hedónico** (m², habitaciones, año, planta, ascensor, estado) como valoración fina (Tinsa/uDA/Zestimate).
+1. **Escenario alquiler de temporada / turístico** con ADR y ocupación (Mashvisor/AirDNA).
+2. **Mapa/heatmap** de rentabilidad y descuento por zona (Mashvisor).
+3. **AVM hedónico** (m², habitaciones, año, planta, ascensor, estado) como valoración fina (Tinsa/uDA/Zestimate).
 7. **Score de barrio** (transporte, servicios, demanda de alquiler, demografía INE) (Roofstock/Mashvisor).
 
 ## 5. Principio rector: legalidad de las fuentes

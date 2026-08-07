@@ -14,10 +14,12 @@ import {
   type SearchProfileInput,
 } from "./types";
 
-export interface OpportunityDTO extends Omit<Opportunity, "images" | "capexBreakdown" | "analysis"> {
+export interface OpportunityDTO extends Omit<Opportunity, "images" | "capexBreakdown" | "analysis" | "priceHistory"> {
   images: string[];
   capexBreakdown: { label: string; amount: number }[];
   analysis: AnalysisResult | null;
+  priceHistory: { date: string; price: number }[];
+  daysOnMarket: number; // días desde publicación/primera detección (calculado)
 }
 
 /** Convierte un registro de Prisma en un DTO con los campos JSON parseados. */
@@ -27,6 +29,8 @@ export function toDTO(o: Opportunity): OpportunityDTO {
     images: safeParse<string[]>(o.images, []),
     capexBreakdown: safeParse<{ label: string; amount: number }[]>(o.capexBreakdown, []),
     analysis: o.analysis ? safeParse<AnalysisResult | null>(o.analysis, null) : null,
+    priceHistory: safeParse<{ date: string; price: number }[]>(o.priceHistory, []),
+    daysOnMarket: daysOnMarket(o.firstListedAt, o.createdAt),
   };
 }
 
@@ -46,7 +50,8 @@ interface AnalyzeOptions {
 /** Calcula CapEx + análisis para un input y devuelve el payload a persistir. */
 async function buildAnalyzedPayload(
   input: OpportunityInput,
-  opts: AnalyzeOptions = {}
+  opts: AnalyzeOptions = {},
+  meta: { initialPrice?: number | null; daysOnMarket?: number | null } = {}
 ): Promise<{ capex: CapexEstimate; analysis: AnalysisResult }> {
   const area = input.builtArea ?? input.usableArea ?? null;
   const capex = await estimateCapex({
@@ -73,6 +78,8 @@ async function buildAnalyzedPayload(
     condition: input.condition as Condition | undefined,
     arvPricePerSqm: input.arvPricePerSqm,
     marketRentMonthly: input.marketRentMonthly,
+    initialPrice: meta.initialPrice ?? input.initialPrice ?? null,
+    daysOnMarket: meta.daysOnMarket ?? null,
     text: `${input.title} ${input.description ?? ""}`,
     capex: capex.total,
     capexLevel: capex.level,
@@ -81,7 +88,18 @@ async function buildAnalyzedPayload(
   return { capex, analysis };
 }
 
-function toDbData(input: OpportunityInput, capex: CapexEstimate, analysis: AnalysisResult) {
+/** Días desde la publicación (o primera detección). */
+export function daysOnMarket(firstListedAt: Date | null, createdAt: Date, now = new Date()): number {
+  const from = firstListedAt ?? createdAt;
+  return Math.max(0, Math.floor((now.getTime() - new Date(from).getTime()) / 86_400_000));
+}
+
+function toDbData(
+  input: OpportunityInput,
+  capex: CapexEstimate,
+  analysis: AnalysisResult,
+  priceMeta: { initialPrice: number; priceHistory: string; firstListedAt: Date | null }
+) {
   const area = input.builtArea ?? input.usableArea ?? null;
   return {
     source: input.source,
@@ -97,6 +115,10 @@ function toDbData(input: OpportunityInput, capex: CapexEstimate, analysis: Analy
     lng: input.lng ?? null,
     propertyType: input.propertyType,
     askingPrice: input.askingPrice,
+    firstListedAt: priceMeta.firstListedAt,
+    initialPrice: priceMeta.initialPrice,
+    priceHistory: priceMeta.priceHistory,
+    priceDropPct: analysis.priceDropPct,
     builtArea: input.builtArea ?? null,
     usableArea: input.usableArea ?? null,
     rooms: input.rooms ?? null,
@@ -128,8 +150,15 @@ export async function createOpportunity(
   opts: AnalyzeOptions = {}
 ): Promise<OpportunityDTO> {
   const input = opportunityInputSchema.parse(rawInput);
-  const { capex, analysis } = await buildAnalyzedPayload(input, opts);
-  const record = await prisma.opportunity.create({ data: toDbData(input, capex, analysis) });
+  const now = new Date();
+  const firstListedAt = input.firstListedAt ? new Date(input.firstListedAt) : null;
+  const initialPrice = input.initialPrice ?? input.askingPrice;
+  const dom = daysOnMarket(firstListedAt, now, now);
+  const { capex, analysis } = await buildAnalyzedPayload(input, opts, { initialPrice, daysOnMarket: dom });
+  const priceHistory = JSON.stringify([{ date: now.toISOString(), price: input.askingPrice }]);
+  const record = await prisma.opportunity.create({
+    data: toDbData(input, capex, analysis, { initialPrice, priceHistory, firstListedAt }),
+  });
   return toDTO(record);
 }
 
@@ -157,18 +186,58 @@ export interface IngestOptions extends AnalyzeOptions {
 
 export interface IngestResult {
   dto: OpportunityDTO | null;
-  status: "created" | "duplicate";
+  status: "created" | "duplicate" | "updated";
+  priceDropped?: boolean;
 }
 
 /** Ingesta desde un barrido: deduplica, enriquece con Catastro, analiza,
- * calcula el encaje con el perfil y persiste. */
+ * calcula el encaje con el perfil y persiste. En duplicados, si el precio ha
+ * cambiado, actualiza la oportunidad (historial + bajada + reanálisis). */
 export async function ingestOpportunity(rawInput: unknown, opts: IngestOptions = {}): Promise<IngestResult> {
   const input = opportunityInputSchema.parse(rawInput);
+  const now = new Date();
 
   // 1) Deduplicación por clave estable.
   if (opts.dedupKey) {
     const existing = await prisma.opportunity.findUnique({ where: { dedupKey: opts.dedupKey } });
-    if (existing) return { dto: toDTO(existing), status: "duplicate" };
+    if (existing) {
+      if (input.askingPrice === existing.askingPrice) return { dto: toDTO(existing), status: "duplicate" };
+      // El precio ha cambiado: actualiza historial y reanaliza.
+      const initialPrice = existing.initialPrice ?? existing.askingPrice;
+      const history = safeParse<{ date: string; price: number }[]>(existing.priceHistory, []);
+      history.push({ date: now.toISOString(), price: input.askingPrice });
+      const dom = daysOnMarket(existing.firstListedAt, existing.createdAt, now);
+      const { capex, analysis } = await buildAnalyzedPayload(input, opts, { initialPrice, daysOnMarket: dom });
+      let matched = existing.matched;
+      let matchScore = existing.matchScore;
+      if (opts.profileInput) {
+        const r = matchProfile(toMatchCandidate(input, analysis), opts.profileInput);
+        matched = r.matched;
+        matchScore = r.matchScore;
+      }
+      const updated = await prisma.opportunity.update({
+        where: { id: existing.id },
+        data: {
+          askingPrice: input.askingPrice,
+          initialPrice,
+          priceHistory: JSON.stringify(history),
+          priceDropPct: analysis.priceDropPct,
+          capexLevel: capex.level,
+          capexEstimate: capex.total,
+          capexPerSqm: capex.perSqm,
+          capexBreakdown: JSON.stringify(capex.breakdown),
+          capexSource: capex.source,
+          analysis: JSON.stringify(analysis),
+          score: analysis.score,
+          rating: analysis.rating,
+          verdict: analysis.verdict,
+          bestStrategy: analysis.bestStrategy,
+          matched,
+          matchScore,
+        },
+      });
+      return { dto: toDTO(updated), status: "updated", priceDropped: input.askingPrice < existing.askingPrice };
+    }
   }
 
   // 2) Enriquecimiento con Catastro (superficie/año reales) si está activo.
@@ -183,7 +252,10 @@ export async function ingestOpportunity(rawInput: unknown, opts: IngestOptions =
   }
 
   // 3) Análisis.
-  const { capex, analysis } = await buildAnalyzedPayload(input, opts);
+  const firstListedAt = input.firstListedAt ? new Date(input.firstListedAt) : null;
+  const initialPrice = input.initialPrice ?? input.askingPrice;
+  const dom = daysOnMarket(firstListedAt, now, now);
+  const { capex, analysis } = await buildAnalyzedPayload(input, opts, { initialPrice, daysOnMarket: dom });
 
   // 4) Encaje con el perfil (buy-box).
   let matched = false;
@@ -195,9 +267,10 @@ export async function ingestOpportunity(rawInput: unknown, opts: IngestOptions =
   }
 
   // 5) Persistencia.
+  const priceHistory = JSON.stringify([{ date: now.toISOString(), price: input.askingPrice }]);
   const record = await prisma.opportunity.create({
     data: {
-      ...toDbData(input, capex, analysis),
+      ...toDbData(input, capex, analysis, { initialPrice, priceHistory, firstListedAt }),
       dedupKey: opts.dedupKey ?? null,
       profileId: opts.profileId ?? null,
       matched,
@@ -240,8 +313,11 @@ export async function reanalyzeOpportunity(id: string, opts: AnalyzeOptions = {}
     images: dto.images,
     arvPricePerSqm: existing.arvPricePerSqm ?? undefined,
     marketRentMonthly: existing.marketRentMonthly ?? undefined,
+    initialPrice: existing.initialPrice ?? undefined,
   };
-  const { capex, analysis } = await buildAnalyzedPayload(input, opts);
+  const dom = daysOnMarket(existing.firstListedAt, existing.createdAt);
+  const initialPrice = existing.initialPrice ?? existing.askingPrice;
+  const { capex, analysis } = await buildAnalyzedPayload(input, opts, { initialPrice, daysOnMarket: dom });
   const record = await prisma.opportunity.update({
     where: { id },
     data: {
@@ -255,6 +331,7 @@ export async function reanalyzeOpportunity(id: string, opts: AnalyzeOptions = {}
       rating: analysis.rating,
       verdict: analysis.verdict,
       bestStrategy: analysis.bestStrategy,
+      priceDropPct: analysis.priceDropPct,
     },
   });
   return toDTO(record);

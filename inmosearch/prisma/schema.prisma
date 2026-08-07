@@ -46,7 +46,13 @@ model Opportunity {
 
   // --- Características del activo -------------------------------------------
   propertyType String  @default("PISO") // PISO | CASA | ATICO | DUPLEX | ESTUDIO | LOCAL | OTRO
-  askingPrice  Int // precio de oferta (€)
+  askingPrice  Int // precio de oferta (€) actual
+
+  // --- Tiempo en mercado e histórico de precio ------------------------------
+  firstListedAt DateTime? // fecha de publicación en la fuente (si se conoce)
+  initialPrice  Int? // primer precio observado
+  priceHistory  String @default("[]") // JSON: [{date, price}]
+  priceDropPct  Float? // % de bajada desde el precio inicial
   builtArea    Float? // m² construidos
   usableArea   Float? // m² útiles
   rooms        Int?
@@ -86,6 +92,7 @@ model Opportunity {
   @@index([verdict])
   @@index([profileId])
   @@index([matched])
+  @@index([priceDropPct])
 }
 
 // -----------------------------------------------------------------------------

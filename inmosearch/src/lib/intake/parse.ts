@@ -7,6 +7,7 @@ import type { Condition, OpportunityInput, PropertyType } from "@/lib/types";
 export interface ParsedListing {
   title: string;
   askingPrice: number | null;
+  initialPrice: number | null; // precio anterior si el anuncio indica una rebaja
   builtArea: number | null;
   rooms: number | null;
   baths: number | null;
@@ -40,6 +41,51 @@ function extractPrice(text: string): number | null {
   // 3) Cualquier número plausible (se asume que el precio es el mayor).
   const all = [...text.matchAll(/\b\d[\d.\s]{3,}\d\b/g)].map((m) => normNum(m[0])).filter(inRange);
   return all.length ? Math.max(...all) : null;
+}
+
+const inPriceRange = (n: number) => Number.isFinite(n) && n >= 10000 && n <= 5_000_000;
+
+/** Todas las cifras en euros del texto, dentro de rango de precio. */
+function euroFigures(text: string): number[] {
+  const out: number[] = [];
+  for (const m of text.matchAll(/(\d[\d.\s]{2,})\s*(?:€|eur\b|euros)/gi)) {
+    const n = normNum(m[1]);
+    if (inPriceRange(n)) out.push(n);
+  }
+  return out;
+}
+
+/** Precio anterior (antes de la rebaja). */
+function extractInitialPrice(text: string): number | null {
+  const patterns = [
+    /(?:antes|precio anterior|antiguo precio)[:\s]*(\d[\d.\s]{3,})/i,
+    /rebajad[oa]?\s+(?:de|desde)\s+(\d[\d.\s]{3,})/i,
+    /(\d[\d.\s]{3,})\s*€?\s*(?:➜|->|→)/,
+  ];
+  for (const re of patterns) {
+    const m = text.match(re);
+    if (m) {
+      const n = normNum(m[1]);
+      if (inPriceRange(n)) return n;
+    }
+  }
+  return null;
+}
+
+/** Precio actual explícito ("ahora X", "→ X", "rebajado a X"). */
+function extractCurrentPrice(text: string): number | null {
+  const patterns = [
+    /(?:ahora(?:\s+por)?|precio actual|actualmente|rebajado a)[:\s]*(\d[\d.\s]{3,})/i,
+    /(?:➜|->|→)\s*(\d[\d.\s]{3,})/,
+  ];
+  for (const re of patterns) {
+    const m = text.match(re);
+    if (m) {
+      const n = normNum(m[1]);
+      if (inPriceRange(n)) return n;
+    }
+  }
+  return null;
 }
 
 function extractArea(text: string): number | null {
@@ -103,7 +149,19 @@ function buildTitle(text: string, type: PropertyType, city: string | null): stri
 
 /** Extrae los datos de un anuncio pegado como texto libre. */
 export function parseListing(text: string): ParsedListing {
-  const askingPrice = extractPrice(text);
+  // Precio: si hay rebaja, el actual es el "ahora"/menor y el inicial el "antes".
+  const initial0 = extractInitialPrice(text);
+  const current = extractCurrentPrice(text);
+  let askingPrice: number | null;
+  if (current) {
+    askingPrice = current;
+  } else if (initial0 != null) {
+    const others = euroFigures(text).filter((n) => n !== initial0);
+    askingPrice = others.length ? Math.max(...others) : extractPrice(text);
+  } else {
+    askingPrice = extractPrice(text);
+  }
+  const initialPrice = initial0 != null && askingPrice != null && initial0 > askingPrice ? initial0 : null;
   const builtArea = extractArea(text);
   const rooms = extractInt(text, /(\d{1,2})\s*(?:hab\b|habitaci|dormitor|dorm\b)/i, 15);
   const baths = extractInt(text, /(\d{1,2})\s*(?:baño|banos|aseo)/i, 10);
@@ -126,6 +184,7 @@ export function parseListing(text: string): ParsedListing {
   return {
     title,
     askingPrice,
+    initialPrice,
     builtArea,
     rooms,
     baths,
@@ -152,6 +211,7 @@ export function parsedToInput(p: ParsedListing): OpportunityInput | null {
     propertyType: p.propertyType,
     condition: p.condition ?? undefined,
     askingPrice: p.askingPrice,
+    initialPrice: p.initialPrice ?? undefined,
     builtArea: p.builtArea ?? undefined,
     rooms: p.rooms ?? undefined,
     baths: p.baths ?? undefined,

@@ -45,6 +45,8 @@ export const opportunityInputSchema = z.object({
   images: z.array(z.string().url()).default([]),
   arvPricePerSqm: z.number().positive().optional(),
   marketRentMonthly: z.number().positive().optional(),
+  initialPrice: z.number().int().positive().optional(), // primer precio observado (si se conoce)
+  firstListedAt: z.string().optional(), // ISO date de publicación (si se conoce)
 });
 
 export type OpportunityInput = z.infer<typeof opportunityInputSchema>;
@@ -199,6 +201,8 @@ export interface AnalysisResult {
   arv: number | null;
   discountToArv: number | null; // % descuento del all-in frente al ARV
   discountToMarket: number | null; // % que el precio de compra está por debajo del mercado as-is
+  priceDropPct: number | null; // % de bajada desde el precio inicial observado
+  daysOnMarket: number | null; // días desde la publicación/primera detección
   capex: number;
   valuation: MarketValuation;
   // Escenarios

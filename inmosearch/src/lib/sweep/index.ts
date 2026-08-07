@@ -23,6 +23,8 @@ export interface SweepOutcome {
   imported: number;
   matched: number;
   duplicates: number;
+  updated: number; // duplicados con cambio de precio (actualizados)
+  priceDrops: number; // de los actualizados, cuántos bajaron de precio
   bySource: BySourceStat[];
   alertStatus?: string; // resumen de la entrega de alertas
 }
@@ -41,6 +43,8 @@ export async function runSweepForProfile(profile: ProfileDTO): Promise<SweepOutc
   let imported = 0;
   let matched = 0;
   let duplicates = 0;
+  let updated = 0;
+  let priceDrops = 0;
 
   for (const zone of zones) {
     const results = await searchConnectors(
@@ -67,8 +71,14 @@ export async function runSweepForProfile(profile: ProfileDTO): Promise<SweepOutc
             profileInput: input,
             dedupKey: dedupKeyFor(r.connectorId, listing),
           });
-          if (res.status === "duplicate") duplicates++;
-          else {
+          if (res.status === "duplicate") {
+            duplicates++;
+          } else if (res.status === "updated") {
+            updated++;
+            if (res.priceDropped) priceDrops++;
+            // Una bajada de precio que ahora encaja es alertable.
+            if (res.priceDropped && res.dto?.matched) newMatched.push(res.dto);
+          } else {
             imported++;
             if (res.dto?.matched) {
               matched++;
@@ -97,6 +107,7 @@ export async function runSweepForProfile(profile: ProfileDTO): Promise<SweepOutc
       duplicates,
       bySource: JSON.stringify(bySourceArr),
       newMatchedIds: JSON.stringify(newMatched.map((d) => d.id)),
+      notes: updated > 0 ? `${updated} actualizadas · ${priceDrops} bajadas de precio` : null,
     },
   });
   await prisma.searchProfile.update({ where: { id: profile.id }, data: { lastRunAt: new Date() } });
@@ -110,7 +121,7 @@ export async function runSweepForProfile(profile: ProfileDTO): Promise<SweepOutc
     await prisma.sweepRun.update({ where: { id: run.id }, data: { alertStatus } });
   }
 
-  return { runId: run.id, profileId: profile.id, profileName: profile.name, status, found, imported, matched, duplicates, bySource: bySourceArr, alertStatus };
+  return { runId: run.id, profileId: profile.id, profileName: profile.name, status, found, imported, matched, duplicates, updated, priceDrops, bySource: bySourceArr, alertStatus };
 }
 
 /** Ejecuta todos los perfiles activos que tocan según su programación. */

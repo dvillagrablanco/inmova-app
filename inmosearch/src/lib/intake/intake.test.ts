@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { detectMotivation } from "@/lib/intake/distress";
 import { parseEmailListings } from "@/lib/intake/email";
+import { parseListing } from "@/lib/intake/parse";
 
 describe("Motivación del vendedor", () => {
   it("puntúa alto con varias señales de urgencia", () => {
@@ -13,6 +14,18 @@ describe("Motivación del vendedor", () => {
     const r = detectMotivation("Bonito piso reformado, muy luminoso y bien comunicado.");
     expect(r.score).toBe(0);
     expect(r.cues).toHaveLength(0);
+  });
+});
+
+describe("Parser — precio anterior (rebaja)", () => {
+  it("detecta 'antes X' y precio actual", () => {
+    const p = parseListing("Piso en Getafe, 80 m2. Antes 150.000 €. Ahora 128.000 €");
+    expect(p.askingPrice).toBe(128000);
+    expect(p.initialPrice).toBe(150000);
+  });
+  it("no fija precio anterior si no hay rebaja indicada", () => {
+    const p = parseListing("Piso en Getafe, 80 m2. 128.000 €");
+    expect(p.initialPrice).toBeNull();
   });
 });
 

@@ -33,6 +33,10 @@ export interface AnalyzeInput {
   condition?: Condition | null;
   arvPricePerSqm?: number | null;
   marketRentMonthly?: number | null;
+  /** Precio inicial observado (para calcular la bajada). */
+  initialPrice?: number | null;
+  /** Días en mercado (calculado por el llamador desde la fecha de publicación). */
+  daysOnMarket?: number | null;
   /** Texto del anuncio (título + descripción) para detectar motivación. */
   text?: string | null;
   /** CapEx ya estimado (p.ej. por IA). Si no se pasa, se calcula por reglas. */
@@ -121,6 +125,13 @@ export function analyzeOpportunity(
   const itpRate = itpForCcaa(input.ccaa);
   const mao = computeMao({ askingPrice: price, arv, capex, monthlyRent, itpRate, assumptions: a });
 
+  // --- Tiempo en mercado y bajada de precio ---------------------------------
+  const priceDropPct =
+    input.initialPrice && input.initialPrice > price
+      ? Math.round(((input.initialPrice - price) / input.initialPrice) * 100 * 100) / 100
+      : null;
+  const daysOnMarket = input.daysOnMarket ?? null;
+
   // --- Motivación del vendedor ----------------------------------------------
   const motivation = detectMotivation(input.text);
 
@@ -138,6 +149,14 @@ export function analyzeOpportunity(
   // Señales adicionales: MAO y motivación del vendedor.
   if (mao.recommended != null && mao.recommended >= price)
     signals.unshift({ key: "bajo_mao", label: "Por debajo de tu precio máximo", tone: "positive" });
+  if (priceDropPct != null && priceDropPct >= 5) {
+    signals.unshift({ key: "bajada", label: `Bajó ${priceDropPct.toFixed(0)}% de precio`, tone: "positive" });
+    reasons.push(`El precio ha bajado ${priceDropPct.toFixed(1)}% desde ${input.initialPrice}€.`);
+  }
+  if (daysOnMarket != null && daysOnMarket >= 90) {
+    signals.push({ key: "dom", label: `${daysOnMarket}+ días en mercado`, tone: "neutral" });
+    reasons.push(`${daysOnMarket} días en mercado: margen de negociación.`);
+  }
   if (motivation.score >= 40)
     signals.push({ key: "motivado", label: "Vendedor motivado", tone: "positive" });
   if (motivation.cues.length > 0) reasons.push(`Motivación del vendedor: ${motivation.cues.join(", ")}.`);
@@ -149,6 +168,8 @@ export function analyzeOpportunity(
     arv,
     discountToArv,
     discountToMarket,
+    priceDropPct,
+    daysOnMarket,
     capex,
     valuation,
     flip,

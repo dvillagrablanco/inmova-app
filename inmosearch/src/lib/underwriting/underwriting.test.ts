@@ -81,6 +81,31 @@ describe("analyzeOpportunity — alquiler", () => {
   });
 });
 
+describe("analyzeOpportunity — bajada de precio y días en mercado", () => {
+  const r = analyzeOpportunity({
+    askingPrice: 128000,
+    province: "Madrid",
+    builtArea: 80,
+    initialPrice: 150000,
+    daysOnMarket: 120,
+    text: "Piso rebajado",
+  });
+  it("calcula el % de bajada desde el precio inicial", () => {
+    // (150000-128000)/150000 = 14,67%
+    expect(r.priceDropPct).toBeGreaterThan(14);
+    expect(r.priceDropPct).toBeLessThan(15);
+  });
+  it("expone días en mercado y añade señales", () => {
+    expect(r.daysOnMarket).toBe(120);
+    expect(r.signals.some((s) => s.key === "bajada")).toBe(true);
+    expect(r.signals.some((s) => s.key === "dom")).toBe(true);
+  });
+  it("sin precio inicial no hay bajada", () => {
+    const r2 = analyzeOpportunity({ askingPrice: 128000, province: "Madrid", builtArea: 80 });
+    expect(r2.priceDropPct).toBeNull();
+  });
+});
+
 describe("analyzeOpportunity — sin datos suficientes", () => {
   it("avisa cuando faltan ARV y renta", () => {
     const r = analyzeOpportunity({ askingPrice: 100000, capex: 10000 });
