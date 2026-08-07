@@ -1,0 +1,25 @@
+# Barrido semanal de INMOSEARCH mediante GitHub Actions.
+# Alternativa (o complemento) al Vercel Cron. Configura los secrets:
+#   SWEEP_URL     = https://TU-DOMINIO/api/sweep/run
+#   SWEEP_SECRET  = el mismo valor que la variable de entorno SWEEP_SECRET del despliegue
+name: inmosearch-weekly-sweep
+
+on:
+  schedule:
+    # Lunes a las 06:00 UTC (semanal). Ajusta si lo quieres a otra hora.
+    - cron: "0 6 * * 1"
+  workflow_dispatch: {} # permite lanzarlo a mano desde la pestaña Actions
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger sweep endpoint
+        run: |
+          curl -fsS -X POST "$SWEEP_URL" \
+            -H "Authorization: Bearer $SWEEP_SECRET" \
+            -H "Content-Type: application/json" \
+            --max-time 300
+        env:
+          SWEEP_URL: ${{ secrets.SWEEP_URL }}
+          SWEEP_SECRET: ${{ secrets.SWEEP_SECRET }}

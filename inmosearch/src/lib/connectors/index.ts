@@ -3,11 +3,19 @@ import type { ConnectorSearchParams, PortalConnector, RawListing } from "./types
 import { mockConnector } from "./mock";
 import { idealistaConnector } from "./idealista";
 import { reoBanksConnector } from "./reo-banks";
+import { boeConnector } from "./boe";
+import { httpSourceConnector } from "./http-source";
 
 export type { PortalConnector, RawListing, ConnectorSearchParams } from "./types";
 export { normalizeToInput } from "./types";
 
-export const CONNECTORS: PortalConnector[] = [idealistaConnector, reoBanksConnector, mockConnector];
+export const CONNECTORS: PortalConnector[] = [
+  boeConnector,
+  idealistaConnector,
+  reoBanksConnector,
+  httpSourceConnector,
+  mockConnector,
+];
 
 export function getConnector(id: string): PortalConnector | undefined {
   return CONNECTORS.find((c) => c.id === id);

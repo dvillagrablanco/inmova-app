@@ -25,7 +25,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </Link>
             <nav className="flex items-center gap-2 text-sm">
               <Link href="/" className="rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100">
-                Oportunidades
+                Radar
+              </Link>
+              <Link href="/profiles" className="rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100">
+                Perfiles
               </Link>
               <Link
                 href="/opportunities/new"

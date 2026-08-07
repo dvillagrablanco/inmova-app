@@ -10,6 +10,9 @@ export async function GET(req: NextRequest) {
     status: sp.get("status") ?? undefined,
     ccaa: sp.get("ccaa") ?? undefined,
     strategy: sp.get("strategy") ?? undefined,
+    verdict: sp.get("verdict") ?? undefined,
+    profileId: sp.get("profileId") ?? undefined,
+    matchedOnly: sp.get("matched") === "1",
     minScore: sp.get("minScore") ? Number(sp.get("minScore")) : undefined,
   });
   return NextResponse.json({ opportunities });

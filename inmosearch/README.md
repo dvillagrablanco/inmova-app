@@ -10,6 +10,7 @@ INMOSEARCH capta oportunidades de varias fuentes, las **analiza automáticamente
 
 ## ¿Qué hace?
 
+- **Barridos automáticos por perfil de activos** (`src/lib/sweep` + `src/lib/profiles`): defines un **buy-box** (tipo, precio, m², €/m², rentabilidad/margen/descuento mínimos, palabras clave) y **zonas**; el sistema barre las fuentes en la frecuencia elegida (p.ej. **semanal**), **deduplica**, **enriquece**, **analiza** y marca las que **encajan**.
 - **Alta ultrarrápida** (`src/lib/intake`): pega el **texto o la URL de un anuncio** y extrae precio, m², habitaciones, baños, estado y ubicación automáticamente. Un paso: pegar → veredicto.
 - **Valoración automática de mercado** (`src/lib/valuation` + `data/market.ts`): con solo **precio + m² + ubicación**, estima el **ARV** (venta objetivo) y la **renta de mercado** a partir de datos por provincia, y calcula el **descuento frente a mercado** — la señal clave de una oportunidad. No necesitas meter comparables a mano.
 - **Veredicto claro y señales** (`src/lib/underwriting/signals.ts`): cada oportunidad recibe un veredicto **INVERTIR / VIGILAR / DESCARTAR** y banderas de un vistazo ("bajo mercado", "flip rentable", "cashflow positivo"…).
@@ -22,9 +23,38 @@ INMOSEARCH capta oportunidades de varias fuentes, las **analiza automáticamente
 - **Scoring y criba** (`src/lib/underwriting/score.ts`): puntuación 0-100 y rating A/B/C/D según la mejor estrategia y el descuento vs mercado, con explicación legible.
 - **Dashboard "Radar"**: destaca arriba las mejores oportunidades (veredicto INVERTIR), con filtros por veredicto y ficha de detalle con todo el desglose y la valoración de mercado.
 
+## Barridos automáticos y perfiles de búsqueda
+
+1. **Perfil de activos (buy-box)** — en `/profiles` defines qué buscas: tipo, precio min/max, m² mín, €/m² máx, habitaciones, estado, **rent. neta mín.**, **margen flip mín.**, **descuento mín. vs mercado**, palabras clave — y las **zonas** (provincias/municipios/CP) y **fuentes**.
+2. **Barrido** — por cada zona×fuente: busca → normaliza → **deduplica** (clave estable) → **enriquece** (Catastro) → **analiza** → **comprueba el encaje** con el buy-box → guarda con `matched`/`matchScore`. Cada ejecución queda registrada (`SweepRun`).
+3. **Programación** — cada perfil tiene su frecuencia (`weekly`/`daily`/`6h`/`manual`). Un cron externo llama a `POST /api/sweep/run` (protegido) y ejecuta los perfiles que toquen. También puedes lanzar un barrido a mano con «Barrer ahora».
+
+### Fuentes integradas
+
+| Fuente | Estado | Notas |
+| --- | --- | --- |
+| **Subastas BOE** (`boe`) | Activa (beta) | Datos **públicos** de `subastas.boe.es`. Las mayores oportunidades. Verifica el formato del portal en producción. |
+| **Catastro** (valoración) | Opcional (`CATASTRO_ENABLED=true`) | Enriquecimiento oficial: m² construidos reales, año, uso → mejora €/m², CapEx y ARV. |
+| **Idealista API** (`idealista`) | Requiere credenciales | API oficial OAuth2 (`IDEALISTA_API_KEY/SECRET`), aprobada por Idealista. |
+| **Banca/REO** (`reo-banks`) | Stub documentado | Haya, Aliseda, Servihabitat, Solvia… vía feed/canal colaborador autorizado. |
+| **Fuente autorizada** (`http`) | Opcional (`HTTP_SOURCE_FEED_URL`) | Adaptador de **feed JSON** para fuentes que estés **autorizado** a consumir. Respeta `robots.txt`. |
+| **Demo** (`mock`) | Activa | Datos de ejemplo para probar el flujo. |
+
 ## Nota legal sobre las fuentes
 
-El *scraping* directo de portales como Idealista o Fotocasa **viola sus Términos de Uso** y cuentan con protección anti-bot. INMOSEARCH está diseñado para integrarse con **fuentes legales**: APIs oficiales, feeds de partner, exportaciones que los propios tenedores facilitan e importación manual/CSV. Cada conector declara si está operativo o es un *stub* documentado.
+El *scraping* directo de portales como Idealista o Fotocasa **viola sus Términos de Uso** y cuentan con protección anti-bot. INMOSEARCH **no** incluye un crawler contra esos portales. Se integra con **fuentes legales**: datos públicos (BOE, Catastro), APIs oficiales (Idealista), feeds de partner e importación/alta manual. El adaptador `http` es para fuentes que **tú** estés autorizado a consumir y respeta `robots.txt`; no lo apuntes a portales que prohíban el acceso automatizado.
+
+## Programación del barrido (cron)
+
+El endpoint `POST /api/sweep/run` ejecuta los barridos pendientes. Protégelo con `SWEEP_SECRET` (o `CRON_SECRET` en Vercel). Dos formas de programarlo semanalmente:
+
+- **Vercel Cron** — `vercel.json` ya incluye un cron semanal (lunes 06:00). Define `CRON_SECRET` en el proyecto.
+- **GitHub Actions** — `.github/workflows/sweep.yml` llama al endpoint cada semana. Configura los secrets `SWEEP_URL` y `SWEEP_SECRET`.
+
+```bash
+# Lanzar un barrido manualmente (todos los perfiles que toquen):
+curl -X POST https://TU-DOMINIO/api/sweep/run -H "Authorization: Bearer $SWEEP_SECRET"
+```
 
 ---
 
@@ -76,9 +106,12 @@ src/
 │   ├── valuation/                  # Valoración automática de mercado (ARV, renta, descuento)
 │   ├── capex/                      # Estimación de reforma (reglas + IA de imágenes)
 │   ├── intake/                     # Parser de anuncios (alta rápida por texto/URL)
-│   ├── connectors/                 # Fuentes de oportunidades (Idealista, REO, mock)
+│   ├── profiles/                   # Perfiles de activos (buy-box) + matching
+│   ├── sweep/                      # Motor de barridos (fuentes → dedup → análisis → match)
+│   ├── enrichment/                 # Enriquecimiento (Catastro)
+│   ├── connectors/                 # Fuentes (BOE, Idealista, REO, feed autorizado, mock)
 │   ├── data/                       # ITP por CCAA, bandas de reforma y mercado por provincia
-│   ├── opportunity.ts              # Capa de servicio (persistencia + análisis)
+│   ├── opportunity.ts              # Capa de servicio (persistencia + análisis + ingesta)
 │   └── types.ts                    # Tipos de dominio + validación
 └── components/                     # UI (tarjetas, desgloses, formularios)
 ```
@@ -97,7 +130,11 @@ Los parámetros (LTV, tipo de interés, comisiones, umbrales…) están en `src/
 - [x] Valoración automática (€/m² venta y renta) por provincia + descuento vs mercado.
 - [x] Alta rápida por texto/URL pegada.
 - [x] Veredicto INVERTIR/VIGILAR/DESCARTAR y señales de oportunidad.
+- [x] Barridos automáticos por perfil (buy-box) + zonas + fuentes + dedup + programación.
+- [x] Conector Subastas BOE + enriquecimiento Catastro + adaptador de feed autorizado.
 - [ ] Comparables a nivel de barrio / código postal (mayor precisión que provincia).
+- [ ] Verificación en producción del formato de BOE y del emparejamiento por dirección en Catastro.
+- [ ] Alertas por email de las nuevas oportunidades que encajan (resumen del barrido).
 - [ ] Parser de anuncios reforzado con IA (extracción de campos con Claude).
 - [ ] Importación CSV con mapeo de columnas por proveedor REO.
 - [ ] Conector del Portal de Subastas del BOE.

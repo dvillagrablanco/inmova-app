@@ -2,7 +2,7 @@
 import { z } from "zod";
 
 // --- Enumeraciones (validadas a nivel de app; SQLite no soporta enums) -------
-export const SOURCES = ["MANUAL", "IDEALISTA", "REO_BANK", "AUCTION", "CSV", "MOCK"] as const;
+export const SOURCES = ["MANUAL", "IDEALISTA", "REO_BANK", "AUCTION", "CSV", "MOCK", "BOE", "HTTP"] as const;
 export const PROPERTY_TYPES = ["PISO", "CASA", "ATICO", "DUPLEX", "ESTUDIO", "LOCAL", "OTRO"] as const;
 export const CONDITIONS = ["A_REFORMAR", "REFORMA_PARCIAL", "BUEN_ESTADO", "REFORMADO", "OBRA_NUEVA"] as const;
 export const CAPEX_LEVELS = ["LAVADO_CARA", "REFORMA_MEDIA", "REFORMA_INTEGRAL"] as const;
@@ -48,6 +48,40 @@ export const opportunityInputSchema = z.object({
 });
 
 export type OpportunityInput = z.infer<typeof opportunityInputSchema>;
+
+// --- Perfil de activos (buy-box) + zonas + fuentes ---------------------------
+export const SWEEP_SOURCES = ["boe", "idealista", "reo-banks", "http", "mock"] as const;
+export const SWEEP_SCHEDULES = ["weekly", "daily", "6h", "manual"] as const;
+export type SweepSchedule = (typeof SWEEP_SCHEDULES)[number];
+
+export const searchProfileInputSchema = z.object({
+  name: z.string().min(2, "Nombre demasiado corto"),
+  active: z.boolean().default(true),
+  zones: z.array(z.string().min(1)).default([]),
+  sources: z.array(z.enum(SWEEP_SOURCES)).default(["mock"]),
+  propertyTypes: z.array(z.enum(PROPERTY_TYPES)).default([]),
+  minPrice: z.number().int().nonnegative().optional(),
+  maxPrice: z.number().int().positive().optional(),
+  minArea: z.number().positive().optional(),
+  maxPricePerSqm: z.number().positive().optional(),
+  minRooms: z.number().int().nonnegative().optional(),
+  conditions: z.array(z.enum(CONDITIONS)).default([]),
+  minNetYield: z.number().optional(),
+  minFlipMargin: z.number().optional(),
+  minDiscountToMarket: z.number().optional(),
+  keywords: z.string().optional(),
+  schedule: z.enum(SWEEP_SCHEDULES).default("weekly"),
+});
+
+export type SearchProfileInput = z.infer<typeof searchProfileInputSchema>;
+
+/** Resultado de comprobar una oportunidad contra un perfil de activos. */
+export interface MatchResult {
+  matched: boolean;
+  matchScore: number; // 0-100 de encaje
+  passed: string[]; // criterios cumplidos
+  failed: string[]; // criterios no cumplidos
+}
 
 // --- Supuestos del inversor (parámetros de underwriting) ---------------------
 export interface InvestorAssumptions {

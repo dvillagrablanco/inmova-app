@@ -60,6 +60,10 @@ export function sourceFromConnector(id: string): OpportunityInput["source"] {
       return "IDEALISTA";
     case "reo-banks":
       return "REO_BANK";
+    case "boe":
+      return "BOE";
+    case "http":
+      return "HTTP";
     case "mock":
       return "MOCK";
     default:

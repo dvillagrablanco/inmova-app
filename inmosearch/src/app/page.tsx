@@ -17,13 +17,15 @@ const VERDICT_TABS = [
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: { verdict?: string; status?: string };
+  searchParams: { verdict?: string; status?: string; profileId?: string; matched?: string };
 }) {
   const verdict = searchParams.verdict || undefined;
   const status = searchParams.status || undefined;
+  const profileId = searchParams.profileId || undefined;
+  const matchedOnly = searchParams.matched === "1";
 
   const all = await listOpportunities({});
-  const opportunities = await listOpportunities({ verdict, status });
+  const opportunities = await listOpportunities({ verdict, status, profileId, matchedOnly });
 
   const radar = all.filter((o) => o.verdict === "INVERTIR").slice(0, 3);
   const stats = {
@@ -52,8 +54,17 @@ export default async function DashboardPage({
 
       <QuickAdd />
 
+      {profileId && (
+        <div className="flex items-center justify-between rounded-lg bg-brand-50 px-4 py-2 text-sm text-brand-800 ring-1 ring-inset ring-brand-600/20">
+          <span>Mostrando oportunidades {matchedOnly ? "que encajan con" : "de"} un perfil de búsqueda.</span>
+          <Link href="/" className="font-medium hover:underline">
+            Quitar filtro
+          </Link>
+        </div>
+      )}
+
       {/* Radar: mejores oportunidades */}
-      {radar.length > 0 && !verdict && !status && (
+      {radar.length > 0 && !verdict && !status && !profileId && (
         <section>
           <div className="mb-2 flex items-center gap-2">
             <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-emerald-500" />

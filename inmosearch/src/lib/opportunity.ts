@@ -3,12 +3,15 @@ import type { Opportunity, Prisma } from "@prisma/client";
 import { prisma } from "./db";
 import { analyzeOpportunity } from "./underwriting";
 import { estimateCapex, type CapexEstimate } from "./capex";
+import { matchProfile, type MatchCandidate } from "./profiles/match";
+import { catastroEnabled, enrichFromCatastro } from "./enrichment/catastro";
 import {
   opportunityInputSchema,
   type AnalysisResult,
   type CapexLevel,
   type Condition,
   type OpportunityInput,
+  type SearchProfileInput,
 } from "./types";
 
 export interface OpportunityDTO extends Omit<Opportunity, "images" | "capexBreakdown" | "analysis"> {
@@ -127,6 +130,81 @@ export async function createOpportunity(
   return toDTO(record);
 }
 
+function toMatchCandidate(input: OpportunityInput, analysis: AnalysisResult): MatchCandidate {
+  return {
+    propertyType: input.propertyType,
+    askingPrice: input.askingPrice,
+    area: input.builtArea ?? input.usableArea ?? null,
+    pricePerSqm: analysis.pricePerSqm,
+    rooms: input.rooms ?? null,
+    condition: input.condition ?? null,
+    netYield: analysis.rental?.netYield ?? null,
+    flipMargin: analysis.flip?.marginOnCost ?? null,
+    discountToMarket: analysis.discountToMarket,
+    text: `${input.title} ${input.description ?? ""}`,
+    zoneText: [input.city, input.province, input.postalCode].filter(Boolean).join(" "),
+  };
+}
+
+export interface IngestOptions extends AnalyzeOptions {
+  profileId?: string;
+  profileInput?: SearchProfileInput; // para calcular el match con el buy-box
+  dedupKey?: string;
+}
+
+export interface IngestResult {
+  dto: OpportunityDTO | null;
+  status: "created" | "duplicate";
+}
+
+/** Ingesta desde un barrido: deduplica, enriquece con Catastro, analiza,
+ * calcula el encaje con el perfil y persiste. */
+export async function ingestOpportunity(rawInput: unknown, opts: IngestOptions = {}): Promise<IngestResult> {
+  const input = opportunityInputSchema.parse(rawInput);
+
+  // 1) Deduplicación por clave estable.
+  if (opts.dedupKey) {
+    const existing = await prisma.opportunity.findUnique({ where: { dedupKey: opts.dedupKey } });
+    if (existing) return { dto: toDTO(existing), status: "duplicate" };
+  }
+
+  // 2) Enriquecimiento con Catastro (superficie/año reales) si está activo.
+  let enriched = false;
+  if (catastroEnabled()) {
+    const cat = await enrichFromCatastro({ province: input.province, city: input.city, address: input.address });
+    if (cat) {
+      enriched = true;
+      if (cat.builtArea && !input.builtArea) input.builtArea = cat.builtArea;
+      if (cat.yearBuilt && !input.yearBuilt) input.yearBuilt = cat.yearBuilt;
+    }
+  }
+
+  // 3) Análisis.
+  const { capex, analysis } = await buildAnalyzedPayload(input, opts);
+
+  // 4) Encaje con el perfil (buy-box).
+  let matched = false;
+  let matchScore: number | null = null;
+  if (opts.profileInput) {
+    const r = matchProfile(toMatchCandidate(input, analysis), opts.profileInput);
+    matched = r.matched;
+    matchScore = r.matchScore;
+  }
+
+  // 5) Persistencia.
+  const record = await prisma.opportunity.create({
+    data: {
+      ...toDbData(input, capex, analysis),
+      dedupKey: opts.dedupKey ?? null,
+      profileId: opts.profileId ?? null,
+      matched,
+      matchScore,
+      enriched,
+    },
+  });
+  return { dto: toDTO(record), status: "created" };
+}
+
 /** Vuelve a analizar una oportunidad existente (p.ej. tras activar la IA de
  * imágenes o cambiar comparables). */
 export async function reanalyzeOpportunity(id: string, opts: AnalyzeOptions = {}): Promise<OpportunityDTO> {
@@ -185,6 +263,8 @@ export interface ListFilters {
   ccaa?: string;
   strategy?: string;
   verdict?: string;
+  profileId?: string;
+  matchedOnly?: boolean;
 }
 
 export async function listOpportunities(filters: ListFilters = {}): Promise<OpportunityDTO[]> {
@@ -193,6 +273,8 @@ export async function listOpportunities(filters: ListFilters = {}): Promise<Oppo
   if (filters.ccaa) where.ccaa = filters.ccaa;
   if (filters.strategy) where.bestStrategy = filters.strategy;
   if (filters.verdict) where.verdict = filters.verdict;
+  if (filters.profileId) where.profileId = filters.profileId;
+  if (filters.matchedOnly) where.matched = true;
   if (typeof filters.minScore === "number") where.score = { gte: filters.minScore };
 
   const records = await prisma.opportunity.findMany({
