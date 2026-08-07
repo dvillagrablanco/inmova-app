@@ -95,6 +95,53 @@ export default async function OpportunityDetailPage({ params }: { params: { id: 
         <KeyValue label="CapEx €/m²" value={o.capexPerSqm ? formatEur(o.capexPerSqm) : "—"} />
       </section>
 
+      {/* MAO — precio máximo recomendado */}
+      {a?.mao && a.mao.recommended != null && (
+        <section className="card border-brand-200 bg-brand-50/40 p-5">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <div className="text-xs font-medium uppercase tracking-wide text-brand-700">Precio máximo recomendado (MAO)</div>
+              <div className="mt-1 text-3xl font-bold text-slate-900">{formatEur(a.mao.recommended)}</div>
+              <div className="mt-1 text-sm text-slate-600">
+                Para cumplir tus objetivos (flip ≥ {a.mao.targetFlipMargin}%, rent. ≥ {a.mao.targetNetYield}%).
+              </div>
+            </div>
+            <div className="text-right">
+              {a.mao.vsAsking != null && (
+                <div className={"text-lg font-bold " + (a.mao.vsAsking >= 0 ? "text-emerald-700" : "text-rose-600")}>
+                  {a.mao.vsAsking >= 0 ? "+" : ""}
+                  {a.mao.vsAsking.toFixed(0)}% vs pedido
+                </div>
+              )}
+              <div className="mt-1 text-xs text-slate-500">
+                {a.mao.vsAsking != null && a.mao.vsAsking >= 0
+                  ? "El precio pedido está dentro de tu límite."
+                  : "Tendrías que negociar por debajo del precio pedido."}
+              </div>
+            </div>
+          </div>
+          <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 border-t border-brand-100 pt-3 text-sm text-slate-600">
+            {a.mao.flipMao != null && (
+              <span>
+                MAO flip: <b className="text-slate-800">{formatEur(a.mao.flipMao)}</b>
+              </span>
+            )}
+            {a.mao.rentMao != null && (
+              <span>
+                MAO alquiler: <b className="text-slate-800">{formatEur(a.mao.rentMao)}</b>
+              </span>
+            )}
+            {a.motivation && a.motivation.score > 0 && (
+              <span>
+                Motivación vendedor:{" "}
+                <b className={a.motivation.score >= 40 ? "text-emerald-700" : "text-slate-700"}>{a.motivation.score}/100</b>
+                {a.motivation.cues.length > 0 && <span className="text-slate-400"> ({a.motivation.cues.join(", ")})</span>}
+              </span>
+            )}
+          </div>
+        </section>
+      )}
+
       {/* Valoración de mercado */}
       {a?.valuation && (
         <section className="card p-5">

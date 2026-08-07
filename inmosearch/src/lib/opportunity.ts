@@ -71,6 +71,7 @@ async function buildAnalyzedPayload(
     condition: input.condition as Condition | undefined,
     arvPricePerSqm: input.arvPricePerSqm,
     marketRentMonthly: input.marketRentMonthly,
+    text: `${input.title} ${input.description ?? ""}`,
     capex: capex.total,
     capexLevel: capex.level,
   });

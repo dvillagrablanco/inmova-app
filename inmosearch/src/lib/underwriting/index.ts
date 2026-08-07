@@ -5,9 +5,12 @@ import { analyzeFlip } from "./flip";
 import { analyzeRental } from "./rental";
 import { scoreOpportunity } from "./score";
 import { computeSignals, computeVerdict } from "./signals";
+import { computeMao } from "./mao";
 import { resolveAssumptions } from "./assumptions";
 import { estimateCapexRuleBased } from "@/lib/capex/estimator";
 import { estimateMarket } from "@/lib/valuation";
+import { detectMotivation } from "@/lib/intake/distress";
+import { itpForCcaa } from "@/lib/data/regions";
 
 export { resolveAssumptions, DEFAULT_ASSUMPTIONS } from "./assumptions";
 export { analyzeFlip } from "./flip";
@@ -28,6 +31,8 @@ export interface AnalyzeInput {
   condition?: Condition | null;
   arvPricePerSqm?: number | null;
   marketRentMonthly?: number | null;
+  /** Texto del anuncio (título + descripción) para detectar motivación. */
+  text?: string | null;
   /** CapEx ya estimado (p.ej. por IA). Si no se pasa, se calcula por reglas. */
   capex?: number | null;
   capexLevel?: string | null;
@@ -108,6 +113,13 @@ export function analyzeOpportunity(
       })
     : null;
 
+  // --- MAO (máximo precio de compra recomendado) ----------------------------
+  const itpRate = itpForCcaa(input.ccaa);
+  const mao = computeMao({ askingPrice: price, arv, capex, monthlyRent, itpRate, assumptions: a });
+
+  // --- Motivación del vendedor ----------------------------------------------
+  const motivation = detectMotivation(input.text);
+
   // --- Scoring, señales y veredicto -----------------------------------------
   const { score, rating, bestStrategy, reasons } = scoreOpportunity(flip, rental, a, discountToMarket);
   const signals = computeSignals({
@@ -119,6 +131,13 @@ export function analyzeOpportunity(
     valuation,
     assumptions: a,
   });
+  // Señales adicionales: MAO y motivación del vendedor.
+  if (mao.recommended != null && mao.recommended >= price)
+    signals.unshift({ key: "bajo_mao", label: "Por debajo de tu precio máximo", tone: "positive" });
+  if (motivation.score >= 40)
+    signals.push({ key: "motivado", label: "Vendedor motivado", tone: "positive" });
+  if (motivation.cues.length > 0) reasons.push(`Motivación del vendedor: ${motivation.cues.join(", ")}.`);
+
   const verdict = computeVerdict(score, flip?.meetsThreshold ?? false, rental?.meetsThreshold ?? false);
 
   return {
@@ -135,6 +154,8 @@ export function analyzeOpportunity(
     verdict,
     bestStrategy,
     signals,
+    mao,
+    motivation,
     reasons,
     assumptions: a,
     warnings,

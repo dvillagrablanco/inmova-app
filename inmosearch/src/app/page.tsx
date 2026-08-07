@@ -2,6 +2,7 @@ import Link from "next/link";
 import { listOpportunities } from "@/lib/opportunity";
 import { OpportunityCard } from "@/components/OpportunityCard";
 import { ImportPanel } from "@/components/ImportPanel";
+import { EmailImport } from "@/components/EmailImport";
 import { QuickAdd } from "@/components/QuickAdd";
 import { formatEur } from "@/lib/format";
 
@@ -83,6 +84,7 @@ export default async function DashboardPage({
       )}
 
       <ImportPanel />
+      <EmailImport />
 
       <section className="flex flex-wrap items-center gap-2">
         {VERDICT_TABS.map((t) => {

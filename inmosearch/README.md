@@ -12,6 +12,9 @@ INMOSEARCH capta oportunidades de varias fuentes, las **analiza automáticamente
 
 - **Barridos automáticos por perfil de activos** (`src/lib/sweep` + `src/lib/profiles`): defines un **buy-box** (tipo, precio, m², €/m², rentabilidad/margen/descuento mínimos, palabras clave) y **zonas**; el sistema barre las fuentes en la frecuencia elegida (p.ej. **semanal**), **deduplica**, **enriquece**, **analiza** y marca las que **encajan**.
 - **Alta ultrarrápida** (`src/lib/intake`): pega el **texto o la URL de un anuncio** y extrae precio, m², habitaciones, baños, estado y ubicación automáticamente. Un paso: pegar → veredicto.
+- **Ingestión de alertas por email** (`src/lib/intake/email.ts` + `/api/ingest/email`): la **vía legal para Idealista/Fotocasa** — crea alertas en el portal, y INMOSEARCH parsea el email (varios anuncios) o recibe un webhook de email. Sin scraping.
+- **MAO — máximo precio de compra recomendado** (`src/lib/underwriting/mao.ts`): cuánto puedes ofrecer como máximo para cumplir tu margen flip / rentabilidad objetivo, y su comparación con el precio pedido.
+- **Motivación del vendedor** (`src/lib/intake/distress.ts`): detecta en el texto señales de urgencia/negociación (herencia, divorcio, embargo, rebajado, negociable, ocupado…) → puntuación 0-100 y señal.
 - **Valoración automática de mercado** (`src/lib/valuation` + `data/market.ts`): con solo **precio + m² + ubicación**, estima el **ARV** (venta objetivo) y la **renta de mercado** a partir de datos por provincia, y calcula el **descuento frente a mercado** — la señal clave de una oportunidad. No necesitas meter comparables a mano.
 - **Veredicto claro y señales** (`src/lib/underwriting/signals.ts`): cada oportunidad recibe un veredicto **INVERTIR / VIGILAR / DESCARTAR** y banderas de un vistazo ("bajo mercado", "flip rentable", "cashflow positivo"…).
 - **Ingesta multi-fuente** mediante conectores enchufables:
@@ -22,6 +25,8 @@ INMOSEARCH capta oportunidades de varias fuentes, las **analiza automáticamente
 - **Estimación de CapEx** (`src/lib/capex`): modelo por reglas (€/m² por nivel de reforma) **+ análisis de imágenes con Claude Vision** para evaluar el estado real de cocina, baños, suelos e instalaciones.
 - **Scoring y criba** (`src/lib/underwriting/score.ts`): puntuación 0-100 y rating A/B/C/D según la mejor estrategia y el descuento vs mercado, con explicación legible.
 - **Dashboard "Radar"**: destaca arriba las mejores oportunidades (veredicto INVERTIR), con filtros por veredicto y ficha de detalle con todo el desglose y la valoración de mercado.
+
+> 📊 **Investigación de mercado**: en [`docs/INVESTIGACION_MERCADO.md`](docs/INVESTIGACION_MERCADO.md) hay un análisis de las mejores webs de detección de oportunidades (PropStream, Mashvisor, Casafari, BiggerPockets, uDA…) y qué funcionalidad se ha traído a INMOSEARCH.
 
 ## Barridos automáticos y perfiles de búsqueda
 
@@ -132,6 +137,8 @@ Los parámetros (LTV, tipo de interés, comisiones, umbrales…) están en `src/
 - [x] Veredicto INVERTIR/VIGILAR/DESCARTAR y señales de oportunidad.
 - [x] Barridos automáticos por perfil (buy-box) + zonas + fuentes + dedup + programación.
 - [x] Conector Subastas BOE + enriquecimiento Catastro + adaptador de feed autorizado.
+- [x] Ingestión de alertas por email (vía legal Idealista/Fotocasa) + webhook.
+- [x] MAO (máximo precio de compra recomendado) y motivación del vendedor.
 - [ ] Comparables a nivel de barrio / código postal (mayor precisión que provincia).
 - [ ] Verificación en producción del formato de BOE y del emparejamiento por dirección en Catastro.
 - [ ] Alertas por email de las nuevas oportunidades que encajan (resumen del barrido).

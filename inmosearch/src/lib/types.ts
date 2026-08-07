@@ -173,6 +173,22 @@ export interface DealSignal {
   tone: "positive" | "neutral" | "negative";
 }
 
+// --- Máximo precio de compra recomendado (MAO) -------------------------------
+export interface MaoResult {
+  flipMao: number | null; // precio máx. para cumplir el margen flip objetivo
+  rentMao: number | null; // precio máx. para cumplir la rent. neta objetivo
+  recommended: number | null; // recomendado según la mejor estrategia viable
+  targetFlipMargin: number; // % objetivo usado
+  targetNetYield: number; // % objetivo usado
+  vsAsking: number | null; // % del MAO recomendado frente al precio pedido
+}
+
+// --- Motivación del vendedor / señales de urgencia ---------------------------
+export interface MotivationResult {
+  score: number; // 0-100 (probabilidad de venta motivada/urgente)
+  cues: string[]; // pistas detectadas en el texto
+}
+
 export interface AnalysisResult {
   // Entradas derivadas
   pricePerSqm: number | null;
@@ -190,6 +206,8 @@ export interface AnalysisResult {
   verdict: Verdict; // INVERTIR | VIGILAR | DESCARTAR
   bestStrategy: Strategy;
   signals: DealSignal[]; // banderas de oportunidad
+  mao: MaoResult; // máximo precio de compra recomendado
+  motivation: MotivationResult; // señales de venta motivada/urgente
   reasons: string[]; // explicación legible de la puntuación
   assumptions: InvestorAssumptions;
   warnings: string[];

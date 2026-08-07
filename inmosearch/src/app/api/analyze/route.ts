@@ -24,6 +24,7 @@ export async function POST(req: NextRequest) {
         condition: (b.condition as Condition) ?? null,
         arvPricePerSqm: b.arvPricePerSqm ? Number(b.arvPricePerSqm) : null,
         marketRentMonthly: b.marketRentMonthly ? Number(b.marketRentMonthly) : null,
+        text: b.text ?? b.description ?? null,
         capex: b.capex ? Number(b.capex) : null,
       },
       b.assumptions
