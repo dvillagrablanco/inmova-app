@@ -4,6 +4,10 @@ const nextConfig = {
   images: {
     remotePatterns: [{ protocol: "https", hostname: "**" }],
   },
+  // Prisma como paquete externo del servidor (recomendado en Vercel/Next).
+  experimental: {
+    serverComponentsExternalPackages: ["@prisma/client", "prisma"],
+  },
 };
 
 export default nextConfig;
