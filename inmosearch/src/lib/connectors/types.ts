@@ -40,6 +40,14 @@ export interface ConnectorSearchParams {
   maxPrice?: number;
   propertyType?: string;
   maxResults?: number;
+  /** Centro geográfico para la búsqueda por radio (API Idealista: `center`). */
+  center?: { lat: number; lng: number };
+  /** Radio en metros desde `center` (API Idealista: `distance`). */
+  distance?: number;
+  /** Código de localización interno de Idealista (`locationId`, p.ej. "0-EU-ES-36-..."). */
+  locationId?: string;
+  /** País del índice de Idealista: "es" | "it" | "pt". Por defecto "es". */
+  country?: string;
 }
 
 export interface PortalConnector {
