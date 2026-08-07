@@ -6,7 +6,7 @@ const nextConfig = {
   },
   // Prisma como paquete externo del servidor (recomendado en Vercel/Next).
   experimental: {
-    serverComponentsExternalPackages: ["@prisma/client", "prisma"],
+    serverComponentsExternalPackages: ["@prisma/client", "prisma", "imapflow", "mailparser"],
   },
 };
 

@@ -4,6 +4,10 @@
     {
       "path": "/api/sweep/run",
       "schedule": "0 6 * * 1"
+    },
+    {
+      "path": "/api/ingest/email/poll",
+      "schedule": "0 * * * *"
     }
   ]
 }

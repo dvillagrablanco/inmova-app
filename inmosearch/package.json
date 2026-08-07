@@ -23,6 +23,8 @@
     "@anthropic-ai/sdk": "^0.32.1",
     "@prisma/client": "^5.22.0",
     "clsx": "^2.1.1",
+    "imapflow": "^1.6.6",
+    "mailparser": "^3.9.15",
     "next": "^14.2.35",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -30,6 +32,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/mailparser": "^3.4.6",
     "@types/node": "^20.14.0",
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.0",

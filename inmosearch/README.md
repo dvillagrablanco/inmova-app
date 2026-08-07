@@ -12,7 +12,10 @@ INMOSEARCH capta oportunidades de varias fuentes, las **analiza automáticamente
 
 - **Barridos automáticos por perfil de activos** (`src/lib/sweep` + `src/lib/profiles`): defines un **buy-box** (tipo, precio, m², €/m², rentabilidad/margen/descuento mínimos, palabras clave) y **zonas**; el sistema barre las fuentes en la frecuencia elegida (p.ej. **semanal**), **deduplica**, **enriquece**, **analiza** y marca las que **encajan**.
 - **Alta ultrarrápida** (`src/lib/intake`): pega el **texto o la URL de un anuncio** y extrae precio, m², habitaciones, baños, estado y ubicación automáticamente. Un paso: pegar → veredicto.
-- **Ingestión de alertas por email** (`src/lib/intake/email.ts` + `/api/ingest/email`): la **vía legal para Idealista/Fotocasa** — crea alertas en el portal, y INMOSEARCH parsea el email (varios anuncios) o recibe un webhook de email. Sin scraping.
+- **Conexión con Idealista/Fotocasa** (legal, sin scraping) — todas las vías en `/tools` y [`docs/CONEXION_PORTALES.md`](docs/CONEXION_PORTALES.md):
+  - **Bookmarklet** "Enviar a INMOSEARCH": 1 clic desde una ficha/listado que estés viendo (`/api/ingest/bookmarklet`).
+  - **Alertas por email** (búsquedas guardadas): pegar, **webhook** (Zapier/Make → `/api/ingest/email`) o **IMAP automático** (`src/lib/intake/imap.ts` + `/api/ingest/email/poll`, por cron).
+  - **Idealista API oficial** (conector listo) y **feeds autorizados** (adaptador `http`).
 - **MAO — máximo precio de compra recomendado** (`src/lib/underwriting/mao.ts`): cuánto puedes ofrecer como máximo para cumplir tu margen flip / rentabilidad objetivo, y su comparación con el precio pedido.
 - **Motivación del vendedor** (`src/lib/intake/distress.ts`): detecta en el texto señales de urgencia/negociación (herencia, divorcio, embargo, rebajado, negociable, ocupado…) → puntuación 0-100 y señal.
 - **Días en mercado + histórico de precio**: cada barrido que reencuentra un anuncio con **precio distinto** actualiza la oportunidad, guarda el **historial de precios** y calcula la **bajada** — señal fuerte de vendedor motivado. Muestra los días en mercado. El parser también capta rebajas del texto ("antes X, ahora Y").
