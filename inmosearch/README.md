@@ -22,7 +22,9 @@ INMOSEARCH capta oportunidades de varias fuentes, las **analiza automáticamente
   - **Idealista** (API oficial OAuth2 — requiere credenciales aprobadas).
   - **Banca / REO** (Haya, Aliseda, Servihabitat, Solvia, subastas BOE…) — punto de extensión para feeds autorizados / CSV.
   - **Alta manual** y **fuente de demostración** con datos de ejemplo.
-- **Motor de underwriting** (`src/lib/underwriting`): costes de adquisición con **ITP por Comunidad Autónoma**, notaría, registro, gestoría; escenarios **Flip** (beneficio, margen, ROI, ROI anualizado) y **Alquiler** (rentabilidad bruta/neta, NOI, cashflow, cash-on-cash, con hipoteca).
+- **Motor de underwriting** (`src/lib/underwriting`): costes de adquisición con **ITP por Comunidad Autónoma**, notaría, registro, gestoría; escenarios **Flip** (beneficio, margen, ROI, ROI anualizado), **Alquiler** (rentabilidad bruta/neta, NOI, cashflow, cash-on-cash, con hipoteca) y **Alquiler turístico/STR** (ADR × ocupación, costes de plataforma/gestión/limpieza, amueblado, comparado con el tradicional).
+- **AVM hedónico** (`src/lib/valuation/hedonic.ts`): ajusta el ARV €/m² por características que persisten tras la reforma (planta, ascensor, antigüedad, tamaño) — un 5º sin ascensor vale menos que un 2º con ascensor en la misma calle.
+- **Mapa de calor por zona** (`/map`): agrega las oportunidades por zona y colorea según el descuento medio, rentabilidad y nº de «Invertir».
 - **Estimación de CapEx** (`src/lib/capex`): modelo por reglas (€/m² por nivel de reforma) **+ análisis de imágenes con Claude Vision** para evaluar el estado real de cocina, baños, suelos e instalaciones.
 - **Scoring y criba** (`src/lib/underwriting/score.ts`): puntuación 0-100 y rating A/B/C/D según la mejor estrategia y el descuento vs mercado, con explicación legible.
 - **Dashboard "Radar"**: destaca arriba las mejores oportunidades (veredicto INVERTIR), con filtros por veredicto y ficha de detalle con todo el desglose y la valoración de mercado.
@@ -145,8 +147,11 @@ Los parámetros (LTV, tipo de interés, comisiones, umbrales…) están en `src/
 - [x] Comparables por código postal / distrito / municipio (mayor precisión que provincia).
 - [x] Alertas (webhook + email) de las nuevas oportunidades que encajan tras cada barrido.
 - [x] Días en mercado (DOM) + histórico de precio con detección de bajadas.
-- [ ] Escenario de alquiler de temporada / turístico (ADR + ocupación).
-- [ ] Verificación en producción del formato de BOE y del emparejamiento por dirección en Catastro.
+- [x] Escenario de alquiler de temporada / turístico (ADR + ocupación).
+- [x] AVM hedónico (ajuste del ARV por planta/ascensor/antigüedad/tamaño).
+- [x] Mapa de calor de rentabilidad y descuento por zona.
+- [ ] Verificación en producción del formato de BOE y del emparejamiento por dirección en Catastro (requiere red directa).
+- [ ] AVM avanzado con más variables y datos de transacciones reales.
 - [ ] Parser de anuncios reforzado con IA (extracción de campos con Claude).
 - [ ] Importación CSV con mapeo de columnas por proveedor REO.
 - [ ] Conector del Portal de Subastas del BOE.

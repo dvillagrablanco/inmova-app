@@ -36,6 +36,16 @@ export const DEFAULT_ASSUMPTIONS: InvestorAssumptions = {
   nonPaymentReservePct: 0.02, // 2% reserva por impago
   landlordInsuranceAnnual: 350, // seguro hogar + impago
 
+  // --- Alquiler turístico (STR) ---
+  strDailyPremium: 2.2, // la noche STR ≈ 2,2× la diaria prorrateada del alquiler tradicional
+  strOccupancy: 0.65, // 65% de ocupación media
+  strPlatformPct: 0.15, // 15% comisiones de plataforma
+  strMgmtPct: 0.2, // 20% gestión (check-in, incidencias)
+  strCleaningPct: 0.08, // 8% limpieza sobre ingresos
+  strUtilitiesMonthly: 120, // suministros incluidos
+  strInsuranceAnnual: 400,
+  strFurnishingPerSqm: 180, // amueblar y equipar
+
   // --- Umbrales de decisión ---
   minNetYield: envNumber("DEFAULT_MIN_NET_YIELD", 6), // %
   minFlipMargin: envNumber("DEFAULT_MIN_FLIP_MARGIN", 15), // %

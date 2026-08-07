@@ -175,6 +175,23 @@ export default async function OpportunityDetailPage({ params }: { params: { id: 
             <KeyValue label="Renta mercado" value={a.valuation.rentEurSqmMonth ? `${a.valuation.rentEurSqmMonth} €/m²/mes` : "—"} />
             <KeyValue label="ARV objetivo usado" value={a.valuation.arvPricePerSqm ? `${formatEur(a.valuation.arvPricePerSqm)}/m²` : "—"} />
           </div>
+          {a.valuation.hedonicAdjustments && a.valuation.hedonicAdjustments.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-1.5 border-t border-slate-100 pt-3">
+              <span className="text-xs text-slate-500">Ajuste hedónico:</span>
+              {a.valuation.hedonicAdjustments.map((adj, i) => (
+                <span
+                  key={i}
+                  className={
+                    "rounded px-1.5 py-0.5 text-[11px] " +
+                    (adj.pct >= 0 ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700")
+                  }
+                >
+                  {adj.label} {adj.pct >= 0 ? "+" : ""}
+                  {adj.pct}%
+                </span>
+              ))}
+            </div>
+          )}
           {a.valuation.notes.length > 0 && (
             <ul className="mt-3 space-y-0.5 text-xs text-slate-400">
               {a.valuation.notes.map((n, i) => (
@@ -251,6 +268,34 @@ export default async function OpportunityDetailPage({ params }: { params: { id: 
           )}
         </div>
       </section>
+
+      {/* Alquiler turístico (STR) */}
+      {a?.str && (
+        <section className="card p-5">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="font-semibold text-slate-900">Escenario Alquiler turístico</h2>
+            {a.str.vsLongTerm != null && (
+              <span className={a.str.vsLongTerm > 0 ? "text-sm font-semibold text-emerald-700" : "text-sm text-slate-500"}>
+                {a.str.vsLongTerm > 0 ? "+" : ""}
+                {a.str.vsLongTerm}% NOI vs tradicional
+              </span>
+            )}
+          </div>
+          <div className="mb-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <KeyValue label="ADR (€/noche)" value={formatEur(a.str.adr)} />
+            <KeyValue label="Ocupación" value={formatPct(a.str.occupancy * 100, 0)} />
+            <KeyValue label="Rent. neta" value={formatPct(a.str.netYield)} tone={a.str.netYield >= 6 ? "good" : "neutral"} />
+            <KeyValue label="Cashflow mensual" value={formatEur(a.str.monthlyCashflow)} tone={a.str.monthlyCashflow >= 0 ? "good" : "bad"} />
+          </div>
+          <Breakdown lines={a.str.breakdown} total={a.str.noi} totalLabel="NOI anual" />
+          <p className="mt-2 text-xs text-slate-400">Amueblar (one-time): {formatEur(a.str.furnishingCapex)}.</p>
+          <div className="mt-2 rounded-md bg-amber-50 p-2 text-xs text-amber-800">
+            {a.str.warnings.map((w, i) => (
+              <div key={i}>• {w}</div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* CapEx */}
       <section className="card p-5">

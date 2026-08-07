@@ -113,6 +113,15 @@ export interface InvestorAssumptions {
   maintenancePct: number; // mantenimiento sobre renta
   nonPaymentReservePct: number; // reserva por impago
   landlordInsuranceAnnual: number; // seguro de impago/hogar €/año
+  // Alquiler turístico (STR)
+  strDailyPremium: number; // ADR ≈ (renta mensual/30) × premium
+  strOccupancy: number; // ocupación media (0-1)
+  strPlatformPct: number; // comisiones de plataforma (Airbnb/Booking)
+  strMgmtPct: number; // gestión STR (mayor que la tradicional)
+  strCleaningPct: number; // limpieza sobre ingresos
+  strUtilitiesMonthly: number; // suministros €/mes (los paga el propietario)
+  strInsuranceAnnual: number; // seguro específico STR €/año
+  strFurnishingPerSqm: number; // coste de amueblar €/m² (one-time)
   // Umbrales de decisión
   minNetYield: number; // % rentabilidad neta mínima (alquiler)
   minFlipMargin: number; // % margen mínimo (flip)
@@ -169,6 +178,8 @@ export interface MarketValuation {
   marketRentMonthly: number | null; // renta de mercado usada en el análisis
   source: "PROVIDED" | "MARKET_DATA" | "MIXED" | "NONE";
   confidence: "alta" | "media" | "baja";
+  hedonicFactor?: number; // ajuste por características (1 = neutro)
+  hedonicAdjustments?: { label: string; pct: number }[];
   notes: string[];
 }
 
@@ -195,6 +206,21 @@ export interface MotivationResult {
   cues: string[]; // pistas detectadas en el texto
 }
 
+// --- Escenario de alquiler turístico / temporada (STR) -----------------------
+export interface StrResult {
+  adr: number; // tarifa media por noche (€)
+  occupancy: number; // ocupación (0-1)
+  grossAnnual: number; // ingresos brutos anuales
+  operatingExpenses: number; // gastos de explotación anuales
+  noi: number; // net operating income anual
+  netYield: number; // % NOI / inversión total (incluye amueblado)
+  monthlyCashflow: number;
+  furnishingCapex: number; // coste de amueblar (one-time)
+  vsLongTerm: number | null; // % de mejora del NOI frente al alquiler tradicional
+  breakdown: CostLine[];
+  warnings: string[];
+}
+
 export interface AnalysisResult {
   // Entradas derivadas
   pricePerSqm: number | null;
@@ -208,6 +234,7 @@ export interface AnalysisResult {
   // Escenarios
   flip: FlipResult | null;
   rental: RentalResult | null;
+  str: StrResult | null; // escenario turístico (informativo)
   // Síntesis
   score: number; // 0-100
   rating: Rating;

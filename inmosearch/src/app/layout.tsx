@@ -30,6 +30,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Link href="/profiles" className="rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100">
                 Perfiles
               </Link>
+              <Link href="/map" className="rounded-md px-3 py-1.5 text-slate-600 hover:bg-slate-100">
+                Mapa
+              </Link>
               <Link
                 href="/opportunities/new"
                 className="rounded-md bg-brand-600 px-3 py-1.5 font-medium text-white hover:bg-brand-700"

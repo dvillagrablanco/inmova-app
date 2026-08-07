@@ -9,7 +9,8 @@ import {
   type ProvinceMarket,
 } from "@/lib/data/market";
 import { finerMarket, type Granularity } from "@/lib/data/zones";
-import type { Condition, MarketValuation } from "@/lib/types";
+import { hedonicAdjust } from "./hedonic";
+import type { Condition, MarketValuation, PropertyType } from "@/lib/types";
 
 /** Prima del precio objetivo tras reforma frente al precio medio de mercado.
  * Prudente: una vivienda bien reformada se vende en torno a la media o algo por
@@ -26,6 +27,10 @@ export interface ValuationInput {
   address?: string | null;
   area?: number | null;
   condition?: Condition | null;
+  floor?: string | null;
+  hasElevator?: boolean | null;
+  yearBuilt?: number | null;
+  propertyType?: PropertyType | string | null;
   providedArvPerSqm?: number | null;
   providedRentMonthly?: number | null;
 }
@@ -78,7 +83,16 @@ export function estimateMarket(input: ValuationInput): MarketValuation {
     input.condition === "REFORMADO" || input.condition === "OBRA_NUEVA"
       ? GOOD_CONDITION_PREMIUM
       : REFORMED_TARGET_PREMIUM;
-  const marketArvPerSqm = Math.round(market.saleEurSqm * premium);
+
+  // Ajuste hedónico (AVM): características que persisten tras la reforma.
+  const hedonic = hedonicAdjust({
+    area,
+    floor: input.floor,
+    hasElevator: input.hasElevator,
+    yearBuilt: input.yearBuilt,
+    propertyType: input.propertyType,
+  });
+  const marketArvPerSqm = Math.round(market.saleEurSqm * premium * hedonic.factor);
 
   const usingProvidedArv = input.providedArvPerSqm != null && input.providedArvPerSqm > 0;
   const usingProvidedRent = input.providedRentMonthly != null && input.providedRentMonthly > 0;
@@ -108,7 +122,12 @@ export function estimateMarket(input: ValuationInput): MarketValuation {
       `Valoración de mercado por provincia (${resolvedProvince.replace(/_/g, " ")}): venta ${market.saleEurSqm} €/m², renta ${market.rentEurSqmMonth} €/m²/mes.`
     );
   }
-  if (!usingProvidedArv) notes.push(`ARV objetivo estimado: ${arvPricePerSqm} €/m² (prima reforma ${premium}).`);
+  if (!usingProvidedArv) {
+    const hedTxt = hedonic.adjustments.length
+      ? ` · ajuste hedónico ${(hedonic.factor >= 1 ? "+" : "")}${Math.round((hedonic.factor - 1) * 100)}% (${hedonic.adjustments.map((a) => a.label).join(", ")})`
+      : "";
+    notes.push(`ARV objetivo estimado: ${arvPricePerSqm} €/m² (prima reforma ${premium}${hedTxt}).`);
+  }
 
   // Si el usuario aporta ambos comparables, la fuente prevalece sobre la zona.
   const finalGranularity: MarketValuation["granularity"] = source === "PROVIDED" ? "provincia" : granularity;
@@ -123,6 +142,8 @@ export function estimateMarket(input: ValuationInput): MarketValuation {
     marketRentMonthly,
     source,
     confidence: dataConfidence,
+    hedonicFactor: usingProvidedArv ? 1 : hedonic.factor,
+    hedonicAdjustments: usingProvidedArv ? [] : hedonic.adjustments,
     notes,
   };
 }

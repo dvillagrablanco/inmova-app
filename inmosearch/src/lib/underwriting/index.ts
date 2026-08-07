@@ -3,6 +3,7 @@ import type { AnalysisResult, Condition, InvestorAssumptions } from "@/lib/types
 import { computeAcquisitionCosts } from "./acquisition";
 import { analyzeFlip } from "./flip";
 import { analyzeRental } from "./rental";
+import { analyzeStr } from "./str";
 import { scoreOpportunity } from "./score";
 import { computeSignals, computeVerdict } from "./signals";
 import { computeMao } from "./mao";
@@ -15,6 +16,7 @@ import { itpForCcaa } from "@/lib/data/regions";
 export { resolveAssumptions, DEFAULT_ASSUMPTIONS } from "./assumptions";
 export { analyzeFlip } from "./flip";
 export { analyzeRental } from "./rental";
+export { analyzeStr } from "./str";
 export { scoreOpportunity } from "./score";
 export { computeSignals, computeVerdict } from "./signals";
 export { computeAcquisitionCosts } from "./acquisition";
@@ -30,6 +32,9 @@ export interface AnalyzeInput {
   builtArea?: number | null;
   usableArea?: number | null;
   baths?: number | null;
+  floor?: string | null;
+  hasElevator?: boolean | null;
+  yearBuilt?: number | null;
   condition?: Condition | null;
   arvPricePerSqm?: number | null;
   marketRentMonthly?: number | null;
@@ -81,6 +86,10 @@ export function analyzeOpportunity(
     address: input.address,
     area,
     condition: input.condition ?? null,
+    floor: input.floor,
+    hasElevator: input.hasElevator,
+    yearBuilt: input.yearBuilt,
+    propertyType: input.propertyType,
     providedArvPerSqm: input.arvPricePerSqm,
     providedRentMonthly: input.marketRentMonthly,
   });
@@ -121,6 +130,19 @@ export function analyzeOpportunity(
       })
     : null;
 
+  // Escenario turístico (informativo).
+  const str = monthlyRent
+    ? analyzeStr({
+        price,
+        acquisitionCosts: acquisition.total,
+        capex,
+        area,
+        monthlyRentLT: monthlyRent,
+        longTermNoi: rental?.noi ?? null,
+        assumptions: a,
+      })
+    : null;
+
   // --- MAO (máximo precio de compra recomendado) ----------------------------
   const itpRate = itpForCcaa(input.ccaa);
   const mao = computeMao({ askingPrice: price, arv, capex, monthlyRent, itpRate, assumptions: a });
@@ -157,6 +179,8 @@ export function analyzeOpportunity(
     signals.push({ key: "dom", label: `${daysOnMarket}+ días en mercado`, tone: "neutral" });
     reasons.push(`${daysOnMarket} días en mercado: margen de negociación.`);
   }
+  if (str && rental && str.netYield >= rental.netYield + 3 && str.netYield >= a.minNetYield + 2)
+    signals.push({ key: "str", label: `Turístico ${str.netYield.toFixed(0)}% rent.`, tone: "positive" });
   if (motivation.score >= 40)
     signals.push({ key: "motivado", label: "Vendedor motivado", tone: "positive" });
   if (motivation.cues.length > 0) reasons.push(`Motivación del vendedor: ${motivation.cues.join(", ")}.`);
@@ -174,6 +198,7 @@ export function analyzeOpportunity(
     valuation,
     flip,
     rental,
+    str,
     score,
     rating,
     verdict,
