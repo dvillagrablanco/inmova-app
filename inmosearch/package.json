@@ -13,7 +13,8 @@
     "db:generate": "prisma generate",
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
-    "test": "vitest run"
+    "test": "vitest run",
+    "verify:sources": "tsx scripts/verify-sources.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
