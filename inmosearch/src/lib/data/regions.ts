@@ -80,8 +80,13 @@ export const CAPEX_BANDS: Record<string, { perSqm: number; label: string; descri
 };
 
 /** Mapea el estado declarado del inmueble a un nivel de reforma sugerido. */
+// "A reformar" en los anuncios españoles suele significar reforma MEDIA (cocina,
+// baños, suelos, algo de instalaciones), no una integral. Los inmuebles que
+// requieren reforma integral se anuncian como "para rehabilitar/integral/ruina".
+// Por eso A_REFORMAR mapea a REFORMA_MEDIA por defecto (ajustable con el nivel
+// manual, el CapEx aportado o el análisis de imágenes con IA).
 export const CONDITION_TO_CAPEX_LEVEL: Record<string, keyof typeof CAPEX_BANDS | null> = {
-  A_REFORMAR: "REFORMA_INTEGRAL",
+  A_REFORMAR: "REFORMA_MEDIA",
   REFORMA_PARCIAL: "REFORMA_MEDIA",
   BUEN_ESTADO: "LAVADO_CARA",
   REFORMADO: null,

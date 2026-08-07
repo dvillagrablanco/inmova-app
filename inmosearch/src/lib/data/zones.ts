@@ -62,6 +62,17 @@ export const ZONE_MARKET: Record<string, ZoneMarket> = {
   LHOSPITALET_DE_LLOBREGAT: { saleEurSqm: 3200, rentEurSqmMonth: 16, name: "L'Hospitalet de Llobregat", level: "municipio", province: "BARCELONA" },
   BADALONA: { saleEurSqm: 2700, rentEurSqmMonth: 14, name: "Badalona", level: "municipio", province: "BARCELONA" },
   GETXO: { saleEurSqm: 3500, rentEurSqmMonth: 13, name: "Getxo", level: "municipio", province: "BIZKAIA" },
+  // Rías Baixas (Pontevedra) — municipios costeros que se desvían de la media provincial
+  VIGO: { saleEurSqm: 2000, rentEurSqmMonth: 9, name: "Vigo", level: "municipio", province: "PONTEVEDRA" },
+  PONTEVEDRA_CIUDAD: { saleEurSqm: 2000, rentEurSqmMonth: 9, name: "Pontevedra", level: "municipio", province: "PONTEVEDRA" },
+  SANXENXO: { saleEurSqm: 2900, rentEurSqmMonth: 10, name: "Sanxenxo", level: "municipio", province: "PONTEVEDRA" },
+  PORTONOVO: { saleEurSqm: 2600, rentEurSqmMonth: 10, name: "Portonovo", level: "municipio", province: "PONTEVEDRA" },
+  O_GROVE: { saleEurSqm: 2100, rentEurSqmMonth: 9, name: "O Grove", level: "municipio", province: "PONTEVEDRA" },
+  POIO: { saleEurSqm: 1900, rentEurSqmMonth: 8, name: "Poio", level: "municipio", province: "PONTEVEDRA" },
+  MARIN: { saleEurSqm: 1500, rentEurSqmMonth: 8, name: "Marín", level: "municipio", province: "PONTEVEDRA" },
+  CANGAS: { saleEurSqm: 1800, rentEurSqmMonth: 8, name: "Cangas", level: "municipio", province: "PONTEVEDRA" },
+  BAIONA: { saleEurSqm: 2700, rentEurSqmMonth: 9, name: "Baiona", level: "municipio", province: "PONTEVEDRA" },
+  NIGRAN: { saleEurSqm: 2300, rentEurSqmMonth: 9, name: "Nigrán", level: "municipio", province: "PONTEVEDRA" },
 };
 
 // --- Resolución por código postal → clave de zona ----------------------------
@@ -107,6 +118,18 @@ export const POSTAL_TO_ZONE: Record<string, string> = {
   "29680": "ESTEPONA", "29688": "ESTEPONA",
   // País Vasco
   "48930": "GETXO", "48991": "GETXO", "48992": "GETXO",
+  // Rías Baixas (Pontevedra)
+  "36201": "VIGO", "36202": "VIGO", "36203": "VIGO", "36204": "VIGO", "36205": "VIGO", "36206": "VIGO",
+  "36207": "VIGO", "36208": "VIGO", "36209": "VIGO", "36210": "VIGO", "36211": "VIGO", "36212": "VIGO",
+  "36213": "VIGO", "36214": "VIGO", "36215": "VIGO", "36216": "VIGO",
+  "36001": "PONTEVEDRA_CIUDAD", "36002": "PONTEVEDRA_CIUDAD", "36003": "PONTEVEDRA_CIUDAD", "36004": "PONTEVEDRA_CIUDAD",
+  "36960": "SANXENXO", "36966": "SANXENXO", "36970": "PORTONOVO",
+  "36980": "O_GROVE", "36988": "O_GROVE",
+  "36005": "POIO", "36994": "POIO", "36995": "POIO",
+  "36900": "MARIN", "36910": "MARIN",
+  "36940": "CANGAS", "36948": "CANGAS",
+  "36300": "BAIONA",
+  "36350": "NIGRAN", "36340": "NIGRAN",
 };
 
 export interface FinerMarketHit {
