@@ -4,8 +4,9 @@
 // cada ejecución en SweepRun.
 import { prisma } from "@/lib/db";
 import { normalizeToInput, searchConnectors, type RawListing } from "@/lib/connectors";
-import { ingestOpportunity } from "@/lib/opportunity";
+import { ingestOpportunity, type OpportunityDTO } from "@/lib/opportunity";
 import { profileToInput, profilesDue, type ProfileDTO } from "@/lib/profiles";
+import { alertsConfigured, buildDigest, deliverDigest } from "@/lib/alerts";
 
 export interface BySourceStat {
   source: string;
@@ -23,6 +24,7 @@ export interface SweepOutcome {
   matched: number;
   duplicates: number;
   bySource: BySourceStat[];
+  alertStatus?: string; // resumen de la entrega de alertas
 }
 
 const MAX_PER_SOURCE_ZONE = 25;
@@ -34,6 +36,7 @@ export async function runSweepForProfile(profile: ProfileDTO): Promise<SweepOutc
   const sources = profile.sources.length > 0 ? profile.sources : ["mock"];
 
   const bySource = new Map<string, BySourceStat>();
+  const newMatched: OpportunityDTO[] = [];
   let found = 0;
   let imported = 0;
   let matched = 0;
@@ -67,7 +70,10 @@ export async function runSweepForProfile(profile: ProfileDTO): Promise<SweepOutc
           if (res.status === "duplicate") duplicates++;
           else {
             imported++;
-            if (res.dto?.matched) matched++;
+            if (res.dto?.matched) {
+              matched++;
+              if (res.dto) newMatched.push(res.dto);
+            }
           }
         } catch (e) {
           const cur = bySource.get(r.connectorId)!;
@@ -90,11 +96,21 @@ export async function runSweepForProfile(profile: ProfileDTO): Promise<SweepOutc
       matched,
       duplicates,
       bySource: JSON.stringify(bySourceArr),
+      newMatchedIds: JSON.stringify(newMatched.map((d) => d.id)),
     },
   });
   await prisma.searchProfile.update({ where: { id: profile.id }, data: { lastRunAt: new Date() } });
 
-  return { runId: run.id, profileId: profile.id, profileName: profile.name, status, found, imported, matched, duplicates, bySource: bySourceArr };
+  // --- Alertas: entrega el digest de las nuevas oportunidades que encajan ---
+  let alertStatus: string | undefined;
+  if (newMatched.length > 0 && alertsConfigured()) {
+    const digest = buildDigest(profile.name, run.id, newMatched);
+    const delivery = await deliverDigest(digest);
+    alertStatus = delivery.channels.map((c) => `${c.name}:${c.ok ? "ok" : c.error}`).join(", ") || "sin canales";
+    await prisma.sweepRun.update({ where: { id: run.id }, data: { alertStatus } });
+  }
+
+  return { runId: run.id, profileId: profile.id, profileName: profile.name, status, found, imported, matched, duplicates, bySource: bySourceArr, alertStatus };
 }
 
 /** Ejecuta todos los perfiles activos que tocan según su programación. */

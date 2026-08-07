@@ -33,6 +33,7 @@ INMOSEARCH capta oportunidades de varias fuentes, las **analiza automáticamente
 1. **Perfil de activos (buy-box)** — en `/profiles` defines qué buscas: tipo, precio min/max, m² mín, €/m² máx, habitaciones, estado, **rent. neta mín.**, **margen flip mín.**, **descuento mín. vs mercado**, palabras clave — y las **zonas** (provincias/municipios/CP) y **fuentes**.
 2. **Barrido** — por cada zona×fuente: busca → normaliza → **deduplica** (clave estable) → **enriquece** (Catastro) → **analiza** → **comprueba el encaje** con el buy-box → guarda con `matched`/`matchScore`. Cada ejecución queda registrada (`SweepRun`).
 3. **Programación** — cada perfil tiene su frecuencia (`weekly`/`daily`/`6h`/`manual`). Un cron externo llama a `POST /api/sweep/run` (protegido) y ejecuta los perfiles que toquen. También puedes lanzar un barrido a mano con «Barrer ahora».
+4. **Alertas** — al terminar un barrido, si aparecen **nuevas oportunidades que encajan**, se envía un resumen (digest) por los canales configurados: **webhook** (Slack/Make/Zapier/n8n) y/o **email** (Resend, sin SMTP). Configurable en `.env`; botón «Enviar alerta de prueba» en `/profiles`. Sin canales → no se envía nada.
 
 ### Fuentes integradas
 
@@ -113,6 +114,7 @@ src/
 │   ├── intake/                     # Parser de anuncios (alta rápida por texto/URL)
 │   ├── profiles/                   # Perfiles de activos (buy-box) + matching
 │   ├── sweep/                      # Motor de barridos (fuentes → dedup → análisis → match)
+│   ├── alerts/                     # Alertas (digest + entrega webhook/email)
 │   ├── enrichment/                 # Enriquecimiento (Catastro)
 │   ├── connectors/                 # Fuentes (BOE, Idealista, REO, feed autorizado, mock)
 │   ├── data/                       # ITP por CCAA, bandas de reforma y mercado por provincia
@@ -140,8 +142,8 @@ Los parámetros (LTV, tipo de interés, comisiones, umbrales…) están en `src/
 - [x] Ingestión de alertas por email (vía legal Idealista/Fotocasa) + webhook.
 - [x] MAO (máximo precio de compra recomendado) y motivación del vendedor.
 - [x] Comparables por código postal / distrito / municipio (mayor precisión que provincia).
+- [x] Alertas (webhook + email) de las nuevas oportunidades que encajan tras cada barrido.
 - [ ] Verificación en producción del formato de BOE y del emparejamiento por dirección en Catastro.
-- [ ] Alertas por email de las nuevas oportunidades que encajan (resumen del barrido).
 - [ ] Parser de anuncios reforzado con IA (extracción de campos con Claude).
 - [ ] Importación CSV con mapeo de columnas por proveedor REO.
 - [ ] Conector del Portal de Subastas del BOE.

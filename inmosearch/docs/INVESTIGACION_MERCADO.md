@@ -47,6 +47,7 @@ Análisis de las principales plataformas de *deal-sourcing* y analítica inmobil
 
 ### Implementadas (cont.)
 - ✅ **Comparables por código postal / distrito / municipio** (uDA/Casafari): valoración al nivel más fino disponible (distritos de Madrid/Barcelona, municipios que se desvían de su provincia), con respaldo a provincia. Reporta la granularidad y la confianza.
+- ✅ **Alertas de nuevas oportunidades que encajan** (Casafari/Mashvisor): tras cada barrido, digest por webhook (Slack/Make/Zapier/n8n) y/o email (Resend).
 
 ### Roadmap prioritario
 1. **Días en mercado (DOM) + histórico de precio** y **alerta de bajada** (Zillow/Casafari).

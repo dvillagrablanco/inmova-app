@@ -138,13 +138,15 @@ model SweepRun {
   profileId String?
   profile   SearchProfile? @relation(fields: [profileId], references: [id], onDelete: SetNull)
 
-  status     String @default("OK") // OK | PARTIAL | ERROR
-  found      Int    @default(0) // anuncios encontrados
-  imported   Int    @default(0) // nuevos importados
-  matched    Int    @default(0) // que cumplen el buy-box
-  duplicates Int    @default(0) // descartados por duplicado
-  bySource   String @default("[]") // JSON: [{source, found, error}]
-  notes      String?
+  status        String @default("OK") // OK | PARTIAL | ERROR
+  found         Int    @default(0) // anuncios encontrados
+  imported      Int    @default(0) // nuevos importados
+  matched       Int    @default(0) // que cumplen el buy-box
+  duplicates    Int    @default(0) // descartados por duplicado
+  bySource      String @default("[]") // JSON: [{source, found, error}]
+  newMatchedIds String @default("[]") // JSON: ids de oportunidades nuevas que encajan
+  alertStatus   String? // resumen de la entrega de alertas (canales/errores)
+  notes         String?
 
   @@index([profileId])
   @@index([createdAt])

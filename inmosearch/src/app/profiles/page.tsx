@@ -4,6 +4,8 @@ import { connectorStatuses } from "@/lib/connectors";
 import { recentSweepRuns } from "@/lib/sweep";
 import { ProfileForm } from "@/components/ProfileForm";
 import { ProfileActions } from "@/components/ProfileActions";
+import { AlertTestButton } from "@/components/AlertTestButton";
+import { alertsConfigured } from "@/lib/alerts";
 import { formatEur, label } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -53,6 +55,27 @@ export default async function ProfilesPage() {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* Alertas */}
+      <section className="card p-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-slate-800">Alertas de nuevas oportunidades</h2>
+          <span
+            className={
+              "rounded-full px-2 py-0.5 text-[11px] font-medium " +
+              (alertsConfigured() ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700")
+            }
+          >
+            {alertsConfigured() ? "configuradas" : "sin configurar"}
+          </span>
+        </div>
+        <p className="mb-2 mt-1 text-xs text-slate-500">
+          Tras cada barrido, INMOSEARCH te envía las nuevas oportunidades que <b>encajan</b> con tu perfil por{" "}
+          <b>webhook</b> (Slack/Make/Zapier/n8n) y/o <b>email</b> (Resend). Configura los canales en el{" "}
+          <code className="rounded bg-slate-100 px-1">.env</code> (ver README).
+        </p>
+        <AlertTestButton />
       </section>
 
       {/* Perfiles */}
@@ -109,6 +132,7 @@ export default async function ProfilesPage() {
                   <b className="text-slate-800">{r.imported}</b> nuevas · <b className="text-emerald-700">{r.matched}</b> encajan ·{" "}
                   {r.duplicates} dup · {r.found} vistas
                 </span>
+                {r.alertStatus && <span className="text-slate-400">· alerta: {r.alertStatus}</span>}
               </div>
             ))}
           </div>
