@@ -9,12 +9,14 @@ export const CAPEX_LEVELS = ["LAVADO_CARA", "REFORMA_MEDIA", "REFORMA_INTEGRAL"]
 export const STRATEGIES = ["FLIP", "RENT", "BOTH", "NONE"] as const;
 export const STATUSES = ["NEW", "SHORTLISTED", "PURSUING", "DISCARDED", "CLOSED"] as const;
 export const RATINGS = ["A", "B", "C", "D"] as const;
+export const VERDICTS = ["INVERTIR", "VIGILAR", "DESCARTAR"] as const;
 
 export type PropertyType = (typeof PROPERTY_TYPES)[number];
 export type Condition = (typeof CONDITIONS)[number];
 export type CapexLevel = (typeof CAPEX_LEVELS)[number];
 export type Strategy = (typeof STRATEGIES)[number];
 export type Rating = (typeof RATINGS)[number];
+export type Verdict = (typeof VERDICTS)[number];
 
 // --- Input de una oportunidad (creación/edición) -----------------------------
 export const opportunityInputSchema = z.object({
@@ -118,19 +120,42 @@ export interface RentalResult {
   meetsThreshold: boolean;
 }
 
+// --- Valoración de mercado ---------------------------------------------------
+export interface MarketValuation {
+  province: string | null;
+  saleEurSqm: number | null; // precio medio de venta de mercado (as-is)
+  rentEurSqmMonth: number | null; // renta media de mercado
+  arvPricePerSqm: number | null; // €/m² objetivo de venta usado en el análisis
+  marketRentMonthly: number | null; // renta de mercado usada en el análisis
+  source: "PROVIDED" | "MARKET_DATA" | "MIXED" | "NONE";
+  confidence: "alta" | "media" | "baja";
+  notes: string[];
+}
+
+// --- Señales de oportunidad --------------------------------------------------
+export interface DealSignal {
+  key: string;
+  label: string;
+  tone: "positive" | "neutral" | "negative";
+}
+
 export interface AnalysisResult {
   // Entradas derivadas
   pricePerSqm: number | null;
   arv: number | null;
-  discountToArv: number | null; // % descuento del precio+capex frente al ARV
+  discountToArv: number | null; // % descuento del all-in frente al ARV
+  discountToMarket: number | null; // % que el precio de compra está por debajo del mercado as-is
   capex: number;
+  valuation: MarketValuation;
   // Escenarios
   flip: FlipResult | null;
   rental: RentalResult | null;
   // Síntesis
   score: number; // 0-100
   rating: Rating;
+  verdict: Verdict; // INVERTIR | VIGILAR | DESCARTAR
   bestStrategy: Strategy;
+  signals: DealSignal[]; // banderas de oportunidad
   reasons: string[]; // explicación legible de la puntuación
   assumptions: InvestorAssumptions;
   warnings: string[];

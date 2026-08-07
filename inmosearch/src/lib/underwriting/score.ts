@@ -14,7 +14,8 @@ export interface ScoreOutput {
 export function scoreOpportunity(
   flip: FlipResult | null,
   rental: RentalResult | null,
-  a: InvestorAssumptions
+  a: InvestorAssumptions,
+  discountToMarket?: number | null
 ): ScoreOutput {
   const reasons: string[] = [];
 
@@ -53,7 +54,19 @@ export function scoreOpportunity(
     score = Math.min(100, score + 8); // versatilidad: sirve para flip y alquiler
     reasons.push("Bonus de versatilidad: rentable tanto en flip como en alquiler.");
   }
-  score = Math.round(score);
+
+  // Ajuste por descuento frente a mercado (señal de oportunidad):
+  // hasta +12 si está muy por debajo de mercado; penaliza si está por encima.
+  if (discountToMarket != null) {
+    const adj = clamp2(discountToMarket * 0.6, -10, 12);
+    score += adj;
+    if (discountToMarket >= 8)
+      reasons.push(`Precio ${discountToMarket.toFixed(0)}% por debajo del mercado de la zona.`);
+    else if (discountToMarket <= -5)
+      reasons.push(`Precio ${Math.abs(discountToMarket).toFixed(0)}% por encima del mercado de la zona.`);
+  }
+
+  score = Math.round(Math.max(0, Math.min(100, score)));
 
   return { score, rating: ratingFromScore(score), bestStrategy, reasons };
 }
@@ -92,6 +105,10 @@ function piecewise(x: number, pts: { x: number; y: number }[]): number {
 
 function clamp(n: number): number {
   return Math.max(0, Math.min(100, n));
+}
+
+function clamp2(n: number, lo: number, hi: number): number {
+  return Math.max(lo, Math.min(hi, n));
 }
 
 export function ratingFromScore(score: number): Rating {

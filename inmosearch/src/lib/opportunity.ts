@@ -59,6 +59,9 @@ async function buildAnalyzedPayload(
   const analysis = analyzeOpportunity({
     askingPrice: input.askingPrice,
     ccaa: input.ccaa,
+    province: input.province,
+    city: input.city,
+    propertyType: input.propertyType,
     builtArea: input.builtArea,
     usableArea: input.usableArea,
     baths: input.baths,
@@ -108,6 +111,7 @@ function toDbData(input: OpportunityInput, capex: CapexEstimate, analysis: Analy
     analysis: JSON.stringify(analysis),
     score: analysis.score,
     rating: analysis.rating,
+    verdict: analysis.verdict,
     bestStrategy: analysis.bestStrategy,
   } satisfies Prisma.OpportunityUncheckedCreateInput;
 }
@@ -168,6 +172,7 @@ export async function reanalyzeOpportunity(id: string, opts: AnalyzeOptions = {}
       analysis: JSON.stringify(analysis),
       score: analysis.score,
       rating: analysis.rating,
+      verdict: analysis.verdict,
       bestStrategy: analysis.bestStrategy,
     },
   });
@@ -179,6 +184,7 @@ export interface ListFilters {
   minScore?: number;
   ccaa?: string;
   strategy?: string;
+  verdict?: string;
 }
 
 export async function listOpportunities(filters: ListFilters = {}): Promise<OpportunityDTO[]> {
@@ -186,6 +192,7 @@ export async function listOpportunities(filters: ListFilters = {}): Promise<Oppo
   if (filters.status) where.status = filters.status;
   if (filters.ccaa) where.ccaa = filters.ccaa;
   if (filters.strategy) where.bestStrategy = filters.strategy;
+  if (filters.verdict) where.verdict = filters.verdict;
   if (typeof filters.minScore === "number") where.score = { gte: filters.minScore };
 
   const records = await prisma.opportunity.findMany({

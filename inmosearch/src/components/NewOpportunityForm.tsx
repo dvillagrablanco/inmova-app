@@ -153,8 +153,8 @@ export function NewOpportunityForm() {
           </Field>
         </Grid>
         <p className="mt-2 text-xs text-slate-400">
-          El ARV (€/m²) permite analizar el flip; la renta de mercado permite analizar el alquiler. El CapEx se estima
-          automáticamente si no lo indicas.
+          Opcional: si lo dejas en blanco, INMOSEARCH estima el ARV y la renta con datos de mercado de la provincia. Rellénalos
+          solo si tienes comparables propios (mayor precisión). El CapEx también se estima automáticamente.
         </p>
       </Section>
 

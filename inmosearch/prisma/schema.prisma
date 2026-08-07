@@ -65,6 +65,7 @@ model Opportunity {
   analysis   String? // JSON: resultado completo del underwriting
   score      Int? // 0-100
   rating     String? // A | B | C | D
+  verdict    String? // INVERTIR | VIGILAR | DESCARTAR
   bestStrategy String? // FLIP | RENT | BOTH | NONE
 
   // --- Gestión --------------------------------------------------------------
@@ -74,4 +75,5 @@ model Opportunity {
   @@index([status])
   @@index([score])
   @@index([ccaa])
+  @@index([verdict])
 }

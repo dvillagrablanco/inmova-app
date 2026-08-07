@@ -10,14 +10,17 @@ INMOSEARCH capta oportunidades de varias fuentes, las **analiza automáticamente
 
 ## ¿Qué hace?
 
+- **Alta ultrarrápida** (`src/lib/intake`): pega el **texto o la URL de un anuncio** y extrae precio, m², habitaciones, baños, estado y ubicación automáticamente. Un paso: pegar → veredicto.
+- **Valoración automática de mercado** (`src/lib/valuation` + `data/market.ts`): con solo **precio + m² + ubicación**, estima el **ARV** (venta objetivo) y la **renta de mercado** a partir de datos por provincia, y calcula el **descuento frente a mercado** — la señal clave de una oportunidad. No necesitas meter comparables a mano.
+- **Veredicto claro y señales** (`src/lib/underwriting/signals.ts`): cada oportunidad recibe un veredicto **INVERTIR / VIGILAR / DESCARTAR** y banderas de un vistazo ("bajo mercado", "flip rentable", "cashflow positivo"…).
 - **Ingesta multi-fuente** mediante conectores enchufables:
   - **Idealista** (API oficial OAuth2 — requiere credenciales aprobadas).
   - **Banca / REO** (Haya, Aliseda, Servihabitat, Solvia, subastas BOE…) — punto de extensión para feeds autorizados / CSV.
   - **Alta manual** y **fuente de demostración** con datos de ejemplo.
 - **Motor de underwriting** (`src/lib/underwriting`): costes de adquisición con **ITP por Comunidad Autónoma**, notaría, registro, gestoría; escenarios **Flip** (beneficio, margen, ROI, ROI anualizado) y **Alquiler** (rentabilidad bruta/neta, NOI, cashflow, cash-on-cash, con hipoteca).
 - **Estimación de CapEx** (`src/lib/capex`): modelo por reglas (€/m² por nivel de reforma) **+ análisis de imágenes con Claude Vision** para evaluar el estado real de cocina, baños, suelos e instalaciones.
-- **Scoring y criba** (`src/lib/underwriting/score.ts`): puntuación 0-100 y rating A/B/C/D según la mejor estrategia, con explicación legible.
-- **Dashboard** con ranking, filtros por estado y ficha de detalle con todo el desglose.
+- **Scoring y criba** (`src/lib/underwriting/score.ts`): puntuación 0-100 y rating A/B/C/D según la mejor estrategia y el descuento vs mercado, con explicación legible.
+- **Dashboard "Radar"**: destaca arriba las mejores oportunidades (veredicto INVERTIR), con filtros por veredicto y ficha de detalle con todo el desglose y la valoración de mercado.
 
 ## Nota legal sobre las fuentes
 
@@ -69,10 +72,12 @@ src/
 │   ├── opportunities/[id]          # Ficha de detalle con análisis
 │   └── api/                        # Rutas API (opportunities, analyze, connectors)
 ├── lib/
-│   ├── underwriting/               # Motor financiero (flip, alquiler, scoring)
+│   ├── underwriting/               # Motor financiero (flip, alquiler, scoring, señales)
+│   ├── valuation/                  # Valoración automática de mercado (ARV, renta, descuento)
 │   ├── capex/                      # Estimación de reforma (reglas + IA de imágenes)
+│   ├── intake/                     # Parser de anuncios (alta rápida por texto/URL)
 │   ├── connectors/                 # Fuentes de oportunidades (Idealista, REO, mock)
-│   ├── data/regions.ts             # ITP por CCAA + bandas de coste de reforma
+│   ├── data/                       # ITP por CCAA, bandas de reforma y mercado por provincia
 │   ├── opportunity.ts              # Capa de servicio (persistencia + análisis)
 │   └── types.ts                    # Tipos de dominio + validación
 └── components/                     # UI (tarjetas, desgloses, formularios)
@@ -89,7 +94,11 @@ Los parámetros (LTV, tipo de interés, comisiones, umbrales…) están en `src/
 
 ## Roadmap
 
-- [ ] Comparables automáticos (€/m² de venta y renta) por zona/código postal.
+- [x] Valoración automática (€/m² venta y renta) por provincia + descuento vs mercado.
+- [x] Alta rápida por texto/URL pegada.
+- [x] Veredicto INVERTIR/VIGILAR/DESCARTAR y señales de oportunidad.
+- [ ] Comparables a nivel de barrio / código postal (mayor precisión que provincia).
+- [ ] Parser de anuncios reforzado con IA (extracción de campos con Claude).
 - [ ] Importación CSV con mapeo de columnas por proveedor REO.
 - [ ] Conector del Portal de Subastas del BOE.
 - [ ] Impuesto de Sociedades y análisis post-impuestos a nivel de sociedad (Enxames).

@@ -4,8 +4,9 @@ import { getOpportunity } from "@/lib/opportunity";
 import { ScoreBadge } from "@/components/ScoreBadge";
 import { OpportunityActions } from "@/components/OpportunityActions";
 import { Breakdown, KeyValue } from "@/components/Breakdown";
+import { DealFlags, VerdictBadge } from "@/components/Signals";
 import { formatEur, formatPct, label } from "@/lib/format";
-import type { Rating } from "@/lib/types";
+import type { Rating, Verdict } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +27,14 @@ export default async function OpportunityDetailPage({ params }: { params: { id: 
         <div className="flex items-start gap-4">
           <ScoreBadge score={o.score ?? 0} rating={(o.rating as Rating) ?? "D"} size="lg" />
           <div className="min-w-0 flex-1">
+            <div className="mb-1 flex items-center gap-2">
+              {o.verdict && <VerdictBadge verdict={o.verdict as Verdict} />}
+              {a?.discountToMarket != null && a.discountToMarket > 0 && (
+                <span className="text-sm font-semibold text-emerald-700">
+                  −{a.discountToMarket.toFixed(0)}% vs mercado
+                </span>
+              )}
+            </div>
             <h1 className="text-xl font-bold text-slate-900">{o.title}</h1>
             <p className="text-sm text-slate-500">
               {[o.address, o.city, o.province].filter(Boolean).join(", ") || "Ubicación no indicada"} · {label(o.propertyType)}
@@ -47,6 +56,11 @@ export default async function OpportunityDetailPage({ params }: { params: { id: 
             </div>
           </div>
         </div>
+        {a?.signals && a.signals.length > 0 && (
+          <div className="mt-3">
+            <DealFlags signals={a.signals} />
+          </div>
+        )}
         {a?.reasons && a.reasons.length > 0 && (
           <ul className="mt-4 space-y-1 border-t border-slate-100 pt-3 text-sm text-slate-600">
             {a.reasons.map((r, i) => (
@@ -80,6 +94,40 @@ export default async function OpportunityDetailPage({ params }: { params: { id: 
         <KeyValue label="CapEx estimado" value={formatEur(o.capexEstimate)} />
         <KeyValue label="CapEx €/m²" value={o.capexPerSqm ? formatEur(o.capexPerSqm) : "—"} />
       </section>
+
+      {/* Valoración de mercado */}
+      {a?.valuation && (
+        <section className="card p-5">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="font-semibold text-slate-900">Valoración de mercado</h2>
+            <span className="text-xs text-slate-500">
+              {a.valuation.province ? a.valuation.province.replace(/_/g, " ") : "Zona no identificada"} · fuente:{" "}
+              {label(a.valuation.source)} · confianza: {a.valuation.confidence}
+            </span>
+          </div>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <KeyValue label="Mercado venta" value={a.valuation.saleEurSqm ? `${formatEur(a.valuation.saleEurSqm)}/m²` : "—"} />
+            <KeyValue
+              label="Tu precio"
+              value={a.pricePerSqm ? `${formatEur(a.pricePerSqm)}/m²` : "—"}
+              tone={a.discountToMarket != null ? (a.discountToMarket > 0 ? "good" : "bad") : "neutral"}
+            />
+            <KeyValue label="Renta mercado" value={a.valuation.rentEurSqmMonth ? `${a.valuation.rentEurSqmMonth} €/m²/mes` : "—"} />
+            <KeyValue label="ARV objetivo usado" value={a.valuation.arvPricePerSqm ? `${formatEur(a.valuation.arvPricePerSqm)}/m²` : "—"} />
+          </div>
+          {a.valuation.notes.length > 0 && (
+            <ul className="mt-3 space-y-0.5 text-xs text-slate-400">
+              {a.valuation.notes.map((n, i) => (
+                <li key={i}>• {n}</li>
+              ))}
+            </ul>
+          )}
+          <p className="mt-2 text-xs text-slate-400">
+            El descuento frente al mercado es la señal principal de una oportunidad. Introduce comparables propios (€/m²
+            de venta y renta) en el alta manual para máxima precisión.
+          </p>
+        </section>
+      )}
 
       {/* Escenarios */}
       <section className="grid gap-4 lg:grid-cols-2">

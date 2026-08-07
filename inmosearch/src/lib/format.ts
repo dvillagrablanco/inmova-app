@@ -62,6 +62,12 @@ const LABELS: Record<string, string> = {
   RULE_BASED: "Reglas",
   AI_VISION: "IA (imágenes)",
   NONE_SRC: "—",
+  INVERTIR: "Invertir",
+  VIGILAR: "Vigilar",
+  DESCARTAR: "Descartar",
+  PROVIDED: "Comparables propios",
+  MARKET_DATA: "Datos de mercado",
+  MIXED: "Mixto",
 };
 
 export function label(key: string | null | undefined): string {
